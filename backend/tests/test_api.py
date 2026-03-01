@@ -40,3 +40,23 @@ def test_get_task_artifacts():
     resp = client.get(f"/api/tasks/{task['id']}/artifacts")
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
+
+def test_approve_and_advance_task():
+    proj = client.post("/api/projects", json={"name": "pipeline-test", "repo_url": ""}).json()
+    task = client.post(f"/api/projects/{proj['id']}/tasks",
+                       json={"title": "流水线测试", "description": "测试审批推进"}).json()
+    # 先设置状态为 approved（模拟 analysis 阶段完成）
+    # 修改 stage 为 analysis，status 为 waiting_review
+    # 然后审批，再推进
+    # 这里直接测试 approve endpoint
+    approved = client.post(f"/api/tasks/{task['id']}/approve",
+                           json={"action": "approve"}).json()
+    assert approved["status"] == "approved"
+
+def test_reject_task():
+    proj = client.post("/api/projects", json={"name": "reject-test", "repo_url": ""}).json()
+    task = client.post(f"/api/projects/{proj['id']}/tasks",
+                       json={"title": "驳回测试", "description": "测试驳回"}).json()
+    rejected = client.post(f"/api/tasks/{task['id']}/approve",
+                           json={"action": "reject", "reason": "方向不对"}).json()
+    assert rejected["status"] == "rejected"
