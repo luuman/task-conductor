@@ -234,7 +234,10 @@ function Modal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
         <h2 className="text-lg font-semibold text-white">{title}</h2>
         {children}
