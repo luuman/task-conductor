@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import Base
@@ -25,3 +25,14 @@ app.include_router(tasks.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+from .ws.manager import manager
+
+@app.websocket("/ws/task/{task_id}")
+async def task_ws(websocket: WebSocket, task_id: str):
+    await manager.connect(websocket, f"task:{task_id}")
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, f"task:{task_id}")
