@@ -8,3 +8,10 @@ __pycache__/
 dist/
 build/
 .cache/
+
+.DS_Store
+.idea/
+.vscode/
+*.swp
+.coverage
+htmlcov/
