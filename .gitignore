@@ -1,0 +1,10 @@
+backend/.venv/
+backend/*.egg-info/
+frontend/node_modules/
+*.pyc
+__pycache__/
+.env
+*.db
+dist/
+build/
+.cache/
