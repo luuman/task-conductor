@@ -60,3 +60,11 @@ def test_reject_task():
     rejected = client.post(f"/api/tasks/{task['id']}/approve",
                            json={"action": "reject", "reason": "方向不对"}).json()
     assert rejected["status"] == "rejected"
+
+def test_run_analysis_returns_started():
+    proj = client.post("/api/projects", json={"name": "analysis-test", "repo_url": ""}).json()
+    task = client.post(f"/api/projects/{proj['id']}/tasks",
+                       json={"title": "实现 OAuth2 登录", "description": "支持 Google 登录"}).json()
+    resp = client.post(f"/api/pipeline/{task['id']}/run-analysis")
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "started"

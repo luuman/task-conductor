@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import Base
 from .routers import projects, tasks
+from .routers import pipeline as pipeline_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +22,7 @@ app.add_middleware(
 
 app.include_router(projects.router)
 app.include_router(tasks.router)
+app.include_router(pipeline_router.router)
 
 @app.get("/health")
 def health():
