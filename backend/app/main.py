@@ -86,3 +86,27 @@ def agent_info():
         "tunnel_url": get_tunnel_url(),
         "version": "2.0.0",
     }
+
+from .hooks import parse_hook_event
+from .tmux_manager import list_sessions, create_session, send_command, kill_session
+
+@app.post("/hooks/claude")
+async def receive_claude_hook(payload: dict):
+    """接收 Claude Code hook 事件并广播给所有连接的 WebSocket 客户端"""
+    event = parse_hook_event(payload)
+    await manager.broadcast("global", "claude_hook", event)
+    return {"ok": True}
+
+@app.get("/sessions")
+def get_sessions():
+    return {"sessions": list_sessions()}
+
+@app.post("/sessions/{name}")
+def post_session(name: str, cwd: str = "/tmp"):
+    ok = create_session(name, cwd)
+    return {"created": ok, "name": name}
+
+@app.post("/sessions/{name}/send")
+async def post_send(name: str, payload: dict):
+    ok = send_command(name, payload.get("command", ""))
+    return {"sent": ok}
