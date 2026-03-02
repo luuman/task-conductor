@@ -1,290 +1,243 @@
-import { useEffect, useState } from "react";
-import { api, type Task, type StageArtifact, type AnalysisOption } from "../lib/api";
-import { StageProgress } from "../components/StageProgress";
-import { OptionCards } from "../components/OptionCards";
-import { LogStream } from "../components/LogStream";
-import { useTaskWs } from "../hooks/useTaskWs";
+// frontend/src/pages/TaskPipeline.tsx
+import { useEffect, useState, useRef } from "react";
+import { api, type Task, type StageArtifact, type AnalysisOption, getWsUrl } from "../lib/api";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { cn } from "../lib/utils";
 
-export default function TaskPipeline({
-  taskId,
-  onBack,
-}: {
+interface TaskPipelineProps {
   taskId: number;
   onBack: () => void;
-}) {
+}
+
+const STAGES = ["input", "analysis", "prd", "ui", "plan", "dev", "test", "deploy", "monitor"];
+const STAGE_LABEL: Record<string, string> = {
+  input: "需求", analysis: "分析", prd: "PRD", ui: "UI设计",
+  plan: "技术方案", dev: "开发", test: "测试", deploy: "发布", monitor: "监控",
+};
+const STAGE_COLORS: Record<string, "default" | "success" | "warning" | "danger" | "info" | "accent"> = {
+  input: "default", analysis: "warning", prd: "warning", ui: "accent",
+  plan: "accent", dev: "info", test: "warning", deploy: "success", monitor: "success",
+};
+
+export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
   const [task, setTask] = useState<Task | null>(null);
   const [artifacts, setArtifacts] = useState<StageArtifact[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
   const [options, setOptions] = useState<AnalysisOption[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useTaskWs(taskId, (msg) => {
-    if (msg.type === "log" && msg.data?.content) {
-      setLogs((prev) => [...prev, String(msg.data.content)]);
-    }
-    if (msg.type === "stage_update") {
-      setTask((prev) =>
-        prev
-          ? { ...prev, stage: msg.data.stage, status: msg.data.status }
-          : prev
-      );
-      if (msg.data.options?.length) {
-        setOptions(msg.data.options);
-      }
-      // 刷新 artifacts
-      api.tasks.artifacts(taskId).then(setArtifacts).catch(() => {});
-    }
-  });
+  const [rejectReason, setRejectReason] = useState("");
+  const [showReject, setShowReject] = useState(false);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    api.tasks.get(taskId).then(setTask).catch(() => {});
-    api.tasks.artifacts(taskId).then(setArtifacts).catch(() => {});
+    api.tasks.get(taskId).then(setTask).catch(console.error);
+    api.tasks.artifacts(taskId).then(setArtifacts).catch(console.error);
   }, [taskId]);
 
-  // 从已有 artifact 中恢复 options
   useEffect(() => {
-    const analysisArtifact = artifacts.find((a) => a.stage === "analysis");
-    if (analysisArtifact && options.length === 0) {
+    const ws = new WebSocket(getWsUrl(`/ws/task/${taskId}`));
+    wsRef.current = ws;
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "log") setLogs((prev) => [...prev, msg.data]);
+        if (msg.type === "task_updated") {
+          setTask(msg.data);
+          api.tasks.artifacts(taskId).then(setArtifacts).catch(console.error);
+        }
+      } catch {}
+    };
+    return () => ws.close();
+  }, [taskId]);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+
+  // Parse options from artifacts
+  useEffect(() => {
+    const analysisArtifact = artifacts.find(a => a.stage === "analysis");
+    if (analysisArtifact) {
       try {
         const parsed = JSON.parse(analysisArtifact.content);
-        if (parsed.options?.length) setOptions(parsed.options);
+        if (Array.isArray(parsed)) setOptions(parsed);
       } catch {}
     }
   }, [artifacts]);
 
-  const handleStartAnalysis = async () => {
-    setLoading(true);
-    setLogs([]);
-    try {
-      await api.pipeline.runAnalysis(taskId);
-      setTask((prev) => prev ? { ...prev, status: "running" } : prev);
-    } finally {
-      setLoading(false);
-    }
+  const handleApprove = async () => {
+    if (!task) return;
+    await api.tasks.approve(taskId, "approve");
+    setTask(t => t ? { ...t, status: "approved" } : t);
   };
 
-  const handleApprove = async (action: "approve" | "reject") => {
-    let reason = "";
-    if (action === "reject") {
-      reason = window.prompt("请输入驳回原因：") || "";
-      if (!reason) return;
-    }
-    setLoading(true);
-    try {
-      await api.tasks.approve(taskId, action, reason);
-      if (action === "approve") {
-        const advanced = await api.tasks.advance(taskId);
-        setTask(advanced);
-      } else {
-        setTask((prev) => prev ? { ...prev, status: "rejected" } : prev);
-      }
-    } finally {
-      setLoading(false);
-    }
+  const handleReject = async () => {
+    if (!task || !rejectReason.trim()) return;
+    await api.tasks.approve(taskId, "reject", rejectReason);
+    setTask(t => t ? { ...t, status: "rejected" } : t);
+    setShowReject(false);
+    setRejectReason("");
   };
 
-  const handleSelectOption = async (_label: string) => {
-    setLoading(true);
-    try {
-      await api.tasks.approve(taskId, "approve");
-      const advanced = await api.tasks.advance(taskId);
-      setTask(advanced);
-      setOptions([]);
-    } finally {
-      setLoading(false);
-    }
+  const handleRunAnalysis = async () => {
+    await api.pipeline.runAnalysis(taskId);
+    setTask(t => t ? { ...t, status: "running" } : t);
   };
 
-  if (!task) {
-    return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">加载中...</div>
-      </div>
-    );
-  }
+  const stageIdx = task ? STAGES.indexOf(task.stage) : -1;
 
-  const showOptions =
-    task.status === "waiting_review" && options.length > 0;
-  const showApprovalButtons =
-    task.status === "waiting_review" && options.length === 0;
-  const showStartAnalysis =
-    task.stage === "input" && task.status === "pending";
-  const showLog = task.status === "running" || logs.length > 0;
+  if (!task) return (
+    <div className="flex-1 flex items-center justify-center">
+      <p className="text-app-tertiary text-xs animate-pulse">Loading task...</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* 顶部导航 */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="text-gray-400 hover:text-white transition text-sm"
-        >
-          ← 返回
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="px-5 py-3 border-b border-app flex items-center gap-3 shrink-0">
+        <button onClick={onBack} className="text-app-tertiary hover:text-app text-xs flex items-center gap-1">
+          &larr; Back
         </button>
-        <span className="text-gray-700">|</span>
-        <h1 className="text-lg font-semibold truncate flex-1">{task.title}</h1>
-        <StatusBadge status={task.status} />
+        <div className="w-px h-4 bg-border" />
+        <h1 className="text-sm font-semibold text-app flex-1 truncate">{task.title}</h1>
+        <Badge variant={STAGE_COLORS[task.stage] ?? "default"}>{STAGE_LABEL[task.stage]}</Badge>
+        <Badge variant={
+          task.status === "done" ? "success" :
+          task.status === "running" ? "info" :
+          task.status === "waiting_review" ? "warning" :
+          task.status === "failed" || task.status === "rejected" ? "danger" : "default"
+        }>
+          {task.status}
+        </Badge>
       </div>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* 流水线进度 */}
-        <section className="bg-gray-900 rounded-2xl p-5">
-          <StageProgress currentStage={task.stage} status={task.status} />
-        </section>
+      {/* Stage Progress */}
+      <div className="px-5 py-3 border-b border-app shrink-0">
+        <div className="flex items-center gap-1">
+          {STAGES.map((s, i) => (
+            <div key={s} className="flex items-center gap-1 flex-1">
+              <div className={cn(
+                "flex-1 flex flex-col items-center gap-1 cursor-default",
+              )}>
+                <div className={cn(
+                  "w-full h-1 rounded-full transition-colors",
+                  i < stageIdx ? "bg-accent" :
+                  i === stageIdx ? "bg-accent-subtle" :
+                  "bg-app-tertiary"
+                )} />
+                <span className={cn(
+                  "text-[9px] font-medium",
+                  i === stageIdx ? "text-accent" :
+                  i < stageIdx ? "text-app-secondary" :
+                  "text-app-tertiary"
+                )}>
+                  {STAGE_LABEL[s]}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* 当前阶段操作区 */}
-        <section className="bg-gray-900 rounded-2xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-200">
-              当前阶段：
-              <span className="text-white ml-1">{stageLabel(task.stage)}</span>
-            </h2>
-            {loading && (
-              <span className="text-xs text-gray-500 animate-pulse">处理中...</span>
-            )}
-          </div>
-
-          {/* input 阶段：启动分析按钮 */}
-          {showStartAnalysis && (
-            <button
-              onClick={handleStartAnalysis}
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-6 py-3 rounded-xl font-medium transition"
-            >
-              开始 AI 需求分析
-            </button>
-          )}
-
-          {/* 运行中：日志流 */}
-          {showLog && <LogStream lines={logs} />}
-
-          {/* 有方案可选：选择卡片 */}
-          {showOptions && (
-            <div className="space-y-4">
-              <p className="text-gray-400 text-sm">AI 生成了以下方案，请选择：</p>
-              <OptionCards
-                options={options}
-                onSelect={handleSelectOption}
-                recommended="A"
-              />
-              <button
-                onClick={() => handleApprove("reject")}
-                disabled={loading}
-                className="text-sm text-red-400 hover:text-red-300 transition"
-              >
-                驳回，重新生成
-              </button>
+      {/* Content */}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Main content */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* Action buttons */}
+          {task.status === "pending" && task.stage === "analysis" && (
+            <div className="flex gap-2">
+              <Button onClick={handleRunAnalysis}>开始需求分析</Button>
             </div>
           )}
 
-          {/* 等待纯文本审批（PRD、测试报告等） */}
-          {showApprovalButtons && (
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleApprove("approve")}
-                disabled={loading}
-                className="px-6 py-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-50 rounded-xl font-medium transition"
-              >
-                确认通过
-              </button>
-              <button
-                onClick={() => handleApprove("reject")}
-                disabled={loading}
-                className="px-4 py-2.5 bg-red-900 hover:bg-red-800 disabled:opacity-50 rounded-xl text-sm transition"
-              >
-                驳回
-              </button>
+          {task.status === "waiting_review" && (
+            <div className="bg-yellow-900/10 border border-yellow-800/30 rounded-lg p-3 flex items-center justify-between">
+              <p className="text-xs text-yellow-400">等待审批：请查看分析结果并确认或驳回</p>
+              <div className="flex gap-2">
+                {!showReject ? (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => setShowReject(true)}>驳回</Button>
+                    <Button size="sm" onClick={handleApprove}>批准</Button>
+                  </>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder="驳回原因（必填）"
+                      className="bg-app-tertiary border border-app rounded px-2 py-1 text-xs text-app outline-none focus:border-accent w-40"
+                    />
+                    <Button variant="danger" size="sm" disabled={!rejectReason.trim()} onClick={handleReject}>确认驳回</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setShowReject(false)}>取消</Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
-          {/* 已驳回 */}
-          {task.status === "rejected" && (
-            <div className="bg-red-950 border border-red-800 rounded-xl p-4 text-sm text-red-300">
-              已驳回，等待 AI 重新生成...
+          {/* Options (if available) */}
+          {options.length > 0 && task.status === "waiting_review" && (
+            <div>
+              <h3 className="text-xs font-semibold text-app mb-2">方案选择</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {options.map((opt, i) => (
+                  <div key={i} className="bg-app-secondary border border-app rounded-lg p-3 space-y-2 hover:border-accent/40 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-app">{opt.label}</span>
+                      <span className="text-[10px] text-app-tertiary">工作量: {opt.effort}</span>
+                    </div>
+                    <p className="text-[11px] font-medium text-app-secondary">{opt.title}</p>
+                    <p className="text-[10px] text-app-tertiary">{opt.description}</p>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-app-tertiary">风险: {opt.risk}</span>
+                      <Button size="sm" variant="outline" onClick={async () => {
+                        await api.tasks.approve(taskId, "approve", `选择方案: ${opt.label}`);
+                        setTask(t => t ? { ...t, status: "approved" } : t);
+                      }}>选择</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-        </section>
 
-        {/* 成果物历史 */}
-        {artifacts.length > 0 && (
-          <section className="bg-gray-900 rounded-2xl p-5 space-y-3">
-            <h2 className="font-semibold text-gray-200">成果物历史</h2>
-            <div className="space-y-2">
-              {artifacts.map((a) => (
-                <ArtifactItem key={a.id} artifact={a} />
-              ))}
+          {/* Artifacts */}
+          {artifacts.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-app mb-2">成果物</h3>
+              <div className="space-y-2">
+                {artifacts.map((a) => (
+                  <div key={a.id} className="bg-app-secondary border border-app rounded-lg">
+                    <div className="px-3 py-2 border-b border-app flex items-center gap-2">
+                      <Badge variant={STAGE_COLORS[a.stage] ?? "default"}>{STAGE_LABEL[a.stage]}</Badge>
+                      <span className="text-[10px] text-app-tertiary">{a.artifact_type}</span>
+                      <span className="text-[10px] text-app-tertiary ml-auto">{new Date(a.created_at).toLocaleTimeString()}</span>
+                    </div>
+                    <pre className="p-3 text-[11px] text-app-secondary overflow-x-auto whitespace-pre-wrap max-h-40 overflow-y-auto">
+                      {a.content.slice(0, 1000)}{a.content.length > 1000 ? "..." : ""}
+                    </pre>
+                  </div>
+                ))}
+              </div>
             </div>
-          </section>
-        )}
+          )}
+
+          {/* Logs */}
+          {logs.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-app mb-2">实时日志</h3>
+              <div className="bg-app-secondary border border-app rounded-lg p-3 font-mono text-[11px] text-app-secondary max-h-60 overflow-y-auto space-y-0.5">
+                {logs.map((l, i) => (
+                  <div key={i}>{l}</div>
+                ))}
+                <div ref={logsEndRef} />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-}
-
-function ArtifactItem({ artifact }: { artifact: StageArtifact }) {
-  const [open, setOpen] = useState(false);
-  const content =
-    artifact.artifact_type === "json"
-      ? (() => {
-          try {
-            return JSON.stringify(JSON.parse(artifact.content), null, 2);
-          } catch {
-            return artifact.content;
-          }
-        })()
-      : artifact.content;
-
-  return (
-    <div className="bg-gray-800 rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex justify-between items-center px-4 py-3 text-sm text-gray-300 hover:text-white transition"
-      >
-        <span>
-          <span className="text-green-400 mr-2">✓</span>
-          {stageLabel(artifact.stage)}
-          <span className="text-gray-600 ml-2 text-xs">{artifact.artifact_type}</span>
-        </span>
-        <span className="text-gray-600">{open ? "▲" : "▼"}</span>
-      </button>
-      {open && (
-        <pre className="px-4 pb-4 text-xs text-gray-400 whitespace-pre-wrap overflow-auto max-h-72 border-t border-gray-700 pt-3">
-          {content}
-        </pre>
-      )}
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    pending: "bg-gray-700 text-gray-300",
-    running: "bg-blue-700 text-blue-100 animate-pulse",
-    waiting_review: "bg-yellow-800 text-yellow-200",
-    approved: "bg-green-700 text-green-100",
-    rejected: "bg-red-800 text-red-200",
-    done: "bg-green-500 text-white",
-    failed: "bg-red-700 text-red-100",
-  };
-  return (
-    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${map[status] ?? "bg-gray-700"}`}>
-      {status}
-    </span>
-  );
-}
-
-function stageLabel(stage: string): string {
-  const map: Record<string, string> = {
-    input: "需求输入",
-    analysis: "需求分析",
-    prd: "PRD 生成",
-    ui: "UI 设计",
-    plan: "技术方案",
-    dev: "并行开发",
-    test: "自动测试",
-    deploy: "部署发布",
-    monitor: "监控告警",
-    done: "已完成",
-  };
-  return map[stage] ?? stage;
 }

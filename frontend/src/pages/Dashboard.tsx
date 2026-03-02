@@ -1,276 +1,237 @@
+// frontend/src/pages/Dashboard.tsx
 import { useEffect, useState } from "react";
 import { api, type Project, type Task } from "../lib/api";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { cn } from "../lib/utils";
 
-export default function Dashboard({
-  onOpenTask,
-}: {
+interface DashboardProps {
+  projectId: number | null;
   onOpenTask: (id: number) => void;
-}) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [showNewProject, setShowNewProject] = useState(false);
-
-  const loadProjects = () => api.projects.list().then(setProjects).catch(() => {});
-
-  useEffect(() => { loadProjects(); }, []);
-
-  return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">TaskConductor</h1>
-          <p className="text-gray-500 text-sm mt-0.5">AI 开发流水线</p>
-        </div>
-        <button
-          onClick={() => setShowNewProject(true)}
-          className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition"
-        >
-          + 新建项目
-        </button>
-      </div>
-
-      {projects.length === 0 ? (
-        <div className="text-center text-gray-600 mt-20">
-          <p className="text-lg">还没有项目</p>
-          <p className="text-sm mt-1">点击"新建项目"开始</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} onOpenTask={onOpenTask} />
-          ))}
-        </div>
-      )}
-
-      {showNewProject && (
-        <NewProjectModal
-          onClose={() => setShowNewProject(false)}
-          onCreate={() => { loadProjects(); setShowNewProject(false); }}
-        />
-      )}
-    </div>
-  );
+  onSelectProject: (id: number) => void;
 }
 
-function ProjectCard({
-  project,
-  onOpenTask,
-}: {
-  project: Project;
-  onOpenTask: (id: number) => void;
-}) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [showNewTask, setShowNewTask] = useState(false);
+const STAGE_COLORS: Record<string, "default" | "success" | "warning" | "danger" | "info" | "accent"> = {
+  input: "default",
+  analysis: "warning",
+  prd: "warning",
+  ui: "accent",
+  plan: "accent",
+  dev: "info",
+  test: "warning",
+  deploy: "success",
+  monitor: "success",
+  done: "success",
+};
 
-  useEffect(() => {
-    api.projects.tasks(project.id).then(setTasks).catch(() => {});
-  }, [project.id]);
+const STAGE_LABEL: Record<string, string> = {
+  input: "需求", analysis: "分析", prd: "PRD", ui: "UI",
+  plan: "方案", dev: "开发", test: "测试", deploy: "发布", monitor: "监控", done: "完成",
+};
 
-  return (
-    <div className="bg-gray-900 rounded-xl p-5 space-y-3 border border-gray-800">
-      <div className="flex justify-between items-start">
-        <h2 className="font-semibold text-lg">{project.name}</h2>
-        <span className="text-xs text-gray-500">{tasks.length} 任务</span>
-      </div>
+const STATUS_COLORS: Record<string, "default" | "success" | "warning" | "danger" | "info" | "accent"> = {
+  pending: "default",
+  running: "info",
+  waiting_review: "warning",
+  approved: "accent",
+  rejected: "danger",
+  done: "success",
+  failed: "danger",
+};
 
-      <div className="space-y-2">
-        {tasks.slice(0, 4).map((t) => (
-          <div
-            key={t.id}
-            onClick={() => onOpenTask(t.id)}
-            className="bg-gray-800 rounded-lg p-2.5 cursor-pointer hover:bg-gray-700 flex justify-between items-center text-sm transition"
-          >
-            <span className="truncate flex-1 mr-2">{t.title}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${stageColor(t.stage)}`}>
-              {t.stage}
-            </span>
-          </div>
-        ))}
-        {tasks.length > 4 && (
-          <p className="text-xs text-gray-500 text-center">+{tasks.length - 4} 更多</p>
-        )}
-      </div>
-
-      <button
-        onClick={() => setShowNewTask(true)}
-        className="text-blue-400 text-sm hover:text-blue-300 transition"
-      >
-        + 新建任务
-      </button>
-
-      {showNewTask && (
-        <NewTaskModal
-          projectId={project.id}
-          onClose={() => setShowNewTask(false)}
-          onCreate={(t) => {
-            setTasks((prev) => [t, ...prev]);
-            setShowNewTask(false);
-            onOpenTask(t.id);
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-function stageColor(stage: string): string {
-  const map: Record<string, string> = {
-    input: "bg-gray-700 text-gray-300",
-    analysis: "bg-yellow-900 text-yellow-300",
-    prd: "bg-yellow-800 text-yellow-200",
-    ui: "bg-purple-900 text-purple-300",
-    plan: "bg-blue-900 text-blue-300",
-    dev: "bg-blue-700 text-blue-100",
-    test: "bg-orange-900 text-orange-300",
-    deploy: "bg-green-900 text-green-300",
-    monitor: "bg-green-700 text-green-100",
-    done: "bg-green-500 text-white",
+function StatusDot({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    pending: "bg-gray-500",
+    running: "bg-blue-400 animate-pulse",
+    waiting_review: "bg-yellow-400",
+    approved: "bg-accent",
+    rejected: "bg-red-400",
+    done: "bg-green-400",
+    failed: "bg-red-400",
   };
-  return map[stage] ?? "bg-gray-700 text-gray-300";
+  return <span className={cn("w-2 h-2 rounded-full shrink-0", colors[status] || "bg-gray-500")} />;
 }
 
-function NewProjectModal({
-  onClose,
-  onCreate,
-}: {
-  onClose: () => void;
-  onCreate: () => void;
-}) {
-  const [name, setName] = useState("");
-  const [repoUrl, setRepoUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const submit = async () => {
-    if (!name.trim()) return;
-    setLoading(true);
-    try {
-      await api.projects.create({ name: name.trim(), repo_url: repoUrl });
-      onCreate();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Modal title="新建项目" onClose={onClose}>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="项目名称（如：my-app）"
-        className="input"
-        autoFocus
-      />
-      <input
-        value={repoUrl}
-        onChange={(e) => setRepoUrl(e.target.value)}
-        placeholder="Git 仓库 URL（可选）"
-        className="input"
-      />
-      <ModalActions onClose={onClose} onConfirm={submit} loading={loading} disabled={!name.trim()} />
-    </Modal>
-  );
-}
-
-export function NewTaskModal({
-  projectId,
-  onClose,
-  onCreate,
-}: {
-  projectId: number;
-  onClose: () => void;
-  onCreate: (t: Task) => void;
-}) {
+function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated: (t: Task) => void }) {
+  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = async () => {
+  const handleCreate = async () => {
     if (!title.trim()) return;
     setLoading(true);
     try {
-      const t = await api.tasks.create(projectId, {
-        title: title.trim(),
-        description: desc,
-      });
-      onCreate(t);
+      const task = await api.tasks.create(projectId, { title: title.trim(), description: desc.trim() });
+      onCreated(task);
+      setTitle(""); setDesc(""); setOpen(false);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal title="新建任务" onClose={onClose}>
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="任务标题（如：实现用户登录功能）"
-        className="input"
-        autoFocus
-      />
-      <textarea
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-        placeholder="任务描述（背景、约束、期望结果）"
-        rows={4}
-        className="input resize-none"
-      />
-      <ModalActions
-        onClose={onClose}
-        onConfirm={submit}
-        loading={loading}
-        disabled={!title.trim()}
-        confirmLabel="创建并开始"
-      />
-    </Modal>
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>+ New Task</Button>
+      {open && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-app-secondary border border-app rounded-xl p-5 w-96 space-y-3 shadow-2xl">
+            <h2 className="text-sm font-semibold text-app">新建任务</h2>
+            <input
+              autoFocus
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="任务标题"
+              className="w-full bg-app-tertiary border border-app rounded-md px-3 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent"
+            />
+            <textarea
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              placeholder="需求描述（可选）"
+              rows={3}
+              className="w-full bg-app-tertiary border border-app rounded-md px-3 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent resize-none"
+            />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setOpen(false)} className="text-xs text-app-tertiary hover:text-app px-3 py-1.5">取消</button>
+              <button onClick={handleCreate} disabled={!title.trim() || loading}
+                className="text-xs bg-accent hover:bg-accent-hover text-white px-3 py-1.5 rounded-md disabled:opacity-40">
+                {loading ? "创建中..." : "创建"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
-function Modal({
-  title,
-  children,
-  onClose,
-}: {
-  title: string;
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
+function ProjectCard({ project, onSelect, onOpenTask }: { project: Project; onSelect: () => void; onOpenTask: (id: number) => void }) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  useEffect(() => {
+    api.projects.tasks(project.id).then(setTasks).catch(() => {});
+  }, [project.id]);
+
+  const runningCount = tasks.filter(t => t.status === "running").length;
+
   return (
     <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={onSelect}
+      className="bg-app-secondary border border-app rounded-lg p-4 cursor-pointer hover:border-accent/30 transition-colors space-y-2"
     >
-      <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        {children}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center text-accent text-[10px] font-bold">
+            {project.name[0].toUpperCase()}
+          </div>
+          <span className="text-xs font-semibold text-app">{project.name}</span>
+        </div>
+        {runningCount > 0 && (
+          <Badge variant="info">{runningCount} running</Badge>
+        )}
+      </div>
+      <p className="text-app-tertiary text-[10px]">{tasks.length} tasks</p>
+      <div className="flex flex-wrap gap-1 pt-1">
+        {tasks.slice(0, 3).map(t => (
+          <button
+            key={t.id}
+            onClick={(e) => { e.stopPropagation(); onOpenTask(t.id); }}
+            className="text-[10px] text-app-secondary bg-app-tertiary hover:bg-app-secondary px-1.5 py-0.5 rounded transition-colors"
+          >
+            {t.title.slice(0, 20)}{t.title.length > 20 ? "..." : ""}
+          </button>
+        ))}
       </div>
     </div>
   );
 }
 
-function ModalActions({
-  onClose,
-  onConfirm,
-  loading,
-  disabled,
-  confirmLabel = "确认",
-}: {
-  onClose: () => void;
-  onConfirm: () => void;
-  loading: boolean;
-  disabled?: boolean;
-  confirmLabel?: string;
-}) {
+export default function Dashboard({ projectId, onOpenTask, onSelectProject }: DashboardProps) {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.projects.list().then((p) => { setProjects(p); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (projectId) {
+      api.projects.tasks(projectId).then(setTasks).catch(() => {});
+    } else {
+      setTasks([]);
+    }
+  }, [projectId]);
+
+  const activeProject = projects.find((p) => p.id === projectId);
+
+  if (loading) return (
+    <div className="flex-1 flex items-center justify-center">
+      <p className="text-app-tertiary text-xs animate-pulse">Loading...</p>
+    </div>
+  );
+
+  // No project selected → overview
+  if (!projectId) return (
+    <div className="flex-1 p-6 overflow-y-auto">
+      <div className="mb-6">
+        <h1 className="text-base font-semibold text-app">Overview</h1>
+        <p className="text-app-tertiary text-xs mt-0.5">{projects.length} projects</p>
+      </div>
+      {projects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-40 space-y-2">
+          <p className="text-app-tertiary text-sm">No projects yet</p>
+          <p className="text-app-tertiary text-xs">Use + in sidebar to create one</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {projects.map((p) => (
+            <ProjectCard key={p.id} project={p} onSelect={() => onSelectProject(p.id)} onOpenTask={onOpenTask} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // Project selected → task list
   return (
-    <div className="flex gap-2 justify-end pt-1">
-      <button onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white text-sm transition">
-        取消
-      </button>
-      <button
-        onClick={onConfirm}
-        disabled={disabled || loading}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition"
-      >
-        {loading ? "处理中..." : confirmLabel}
-      </button>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Project header */}
+      <div className="px-5 py-3 border-b border-app flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center text-accent text-[10px] font-bold">
+            {activeProject?.name[0].toUpperCase()}
+          </div>
+          <h1 className="text-sm font-semibold text-app">{activeProject?.name}</h1>
+          <Badge variant="default">{tasks.length} tasks</Badge>
+        </div>
+        <NewTaskButton projectId={projectId} onCreated={(t) => { setTasks((p) => [t, ...p]); onOpenTask(t.id); }} />
+      </div>
+
+      {/* Task list */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-1">
+        {tasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-32 space-y-2">
+            <p className="text-app-tertiary text-xs">No tasks yet</p>
+          </div>
+        ) : (
+          tasks.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => onOpenTask(t.id)}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-app-secondary transition-colors text-left group"
+            >
+              <StatusDot status={t.status} />
+              <span className="flex-1 text-xs text-app truncate">{t.title}</span>
+              <Badge variant={STAGE_COLORS[t.stage] ?? "default"}>
+                {STAGE_LABEL[t.stage] ?? t.stage}
+              </Badge>
+              <Badge variant={STATUS_COLORS[t.status] ?? "default"}>
+                {t.status}
+              </Badge>
+            </button>
+          ))
+        )}
+      </div>
     </div>
   );
 }
