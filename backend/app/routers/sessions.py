@@ -162,3 +162,113 @@ def upsert_session_note(session_id: str, body: NoteIn, db: Session = Depends(get
     db.commit()
     db.refresh(note)
     return _note_to_dict(note)
+
+
+# ── Transcript 接口 ───────────────────────────────────────────
+
+import os as _os
+import json as _json_mod
+
+
+class TranscriptBlock(BaseModel):
+    type: str
+    text: Optional[str] = None
+    tool_name: Optional[str] = None
+    tool_input: Optional[dict] = None
+
+
+class TranscriptMessage(BaseModel):
+    role: str
+    ts: Optional[str] = None
+    blocks: list[TranscriptBlock] = []
+    model: Optional[str] = None
+
+
+class TranscriptResponse(BaseModel):
+    messages: list[TranscriptMessage] = []
+    file_found: bool = True
+
+
+@router.get("/{session_id}/transcript", response_model=TranscriptResponse, summary="读取会话对话记录")
+def get_transcript(session_id: str, db: Session = Depends(get_db)):
+    """
+    从本地 ~/.claude/projects/{project_path}/{session_id}.jsonl 读取完整对话记录。
+    返回 user/assistant 消息列表，过滤掉纯 tool_result 的用户消息（自动生成的）。
+    """
+    s = db.query(ClaudeSession).filter_by(session_id=session_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    # 构建文件路径
+    cwd = s.cwd or ""
+    project_path = cwd.replace("/", "-")
+    home = _os.path.expanduser("~")
+    transcript_path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
+
+    if not _os.path.exists(transcript_path):
+        return TranscriptResponse(messages=[], file_found=False)
+
+    messages: list[TranscriptMessage] = []
+
+    with open(transcript_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = _json_mod.loads(line)
+            except Exception:
+                continue
+
+            entry_type = entry.get("type", "")
+            msg = entry.get("message", {})
+            role = msg.get("role", "")
+            content = msg.get("content", [])
+            ts = entry.get("timestamp")
+
+            # ── 用户消息 ──
+            if entry_type == "user" or role == "user":
+                if isinstance(content, str):
+                    if content.strip():
+                        messages.append(TranscriptMessage(
+                            role="user",
+                            ts=ts,
+                            blocks=[TranscriptBlock(type="text", text=content)],
+                        ))
+                elif isinstance(content, list):
+                    text_blocks = [c for c in content if c.get("type") == "text" and c.get("text", "").strip()]
+                    if text_blocks:
+                        messages.append(TranscriptMessage(
+                            role="user",
+                            ts=ts,
+                            blocks=[TranscriptBlock(type="text", text=b["text"]) for b in text_blocks],
+                        ))
+                continue
+
+            # ── 助手消息 ──
+            if role == "assistant" or entry_type == "assistant":
+                if not isinstance(content, list):
+                    continue
+                blocks: list[TranscriptBlock] = []
+                for block in content:
+                    btype = block.get("type")
+                    if btype == "text":
+                        text = block.get("text", "").strip()
+                        if text:
+                            blocks.append(TranscriptBlock(type="text", text=text))
+                    elif btype == "tool_use":
+                        blocks.append(TranscriptBlock(
+                            type="tool_use",
+                            tool_name=block.get("name"),
+                            tool_input=block.get("input") or {},
+                        ))
+                    # 忽略 thinking 块
+                if blocks:
+                    messages.append(TranscriptMessage(
+                        role="assistant",
+                        ts=ts,
+                        blocks=blocks,
+                        model=msg.get("model"),
+                    ))
+
+    return TranscriptResponse(messages=messages)
