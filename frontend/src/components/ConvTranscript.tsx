@@ -120,7 +120,7 @@ function UserBubble({ msg }: { msg: TranscriptMessage }) {
   return (
     <div className="flex justify-end px-4 py-1">
       <div className="max-w-[72%] rounded-2xl rounded-tr-sm px-3 py-2 text-[12px]"
-           style={{ background: "var(--accent)", color: "white" }}>
+           style={{ background: "#1e2540", color: "#c8d4f0", border: "1px solid #2a3560" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
           {text}
         </ReactMarkdown>
