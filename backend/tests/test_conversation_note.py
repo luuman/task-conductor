@@ -28,7 +28,8 @@ def _create_session(session_id: str = "test-session-abc") -> int:
         return s.id
 
 
-def test_get_note_not_found_returns_empty():
+def test_get_note_session_exists_no_note_returns_empty():
+    """会话存在但尚未写入 note 时，GET 应返回 200 空结构。"""
     _create_session("note-test-1")
     resp = client.get("/api/sessions/note-test-1/note")
     assert resp.status_code == 200
@@ -39,9 +40,15 @@ def test_get_note_not_found_returns_empty():
     assert data["linked_task_id"] is None
 
 
-def test_put_note_creates_and_returns():
+def test_get_note_session_not_found_returns_404():
+    """会话不存在时，GET note 应返回 404。"""
+    resp = client.get("/api/sessions/nonexistent-session-xyz/note")
+    assert resp.status_code == 404
+
+
+def test_patch_note_creates_and_returns():
     _create_session("note-test-2")
-    resp = client.put("/api/sessions/note-test-2/note", json={
+    resp = client.patch("/api/sessions/note-test-2/note", json={
         "alias": "我的测试会话",
         "tags": ["bug", "重要"],
         "notes": "这是一条备注",
@@ -54,17 +61,17 @@ def test_put_note_creates_and_returns():
     assert data["notes"] == "这是一条备注"
 
 
-def test_put_note_updates_existing():
+def test_patch_note_updates_existing():
     _create_session("note-test-3")
-    client.put("/api/sessions/note-test-3/note", json={"alias": "旧名字"})
-    resp = client.put("/api/sessions/note-test-3/note", json={"alias": "新名字"})
+    client.patch("/api/sessions/note-test-3/note", json={"alias": "旧名字"})
+    resp = client.patch("/api/sessions/note-test-3/note", json={"alias": "新名字"})
     assert resp.status_code == 200
     assert resp.json()["alias"] == "新名字"
 
 
 def test_sessions_list_includes_note_field():
     _create_session("note-test-4")
-    client.put("/api/sessions/note-test-4/note", json={"alias": "列表中的别名"})
+    client.patch("/api/sessions/note-test-4/note", json={"alias": "列表中的别名"})
     resp = client.get("/api/sessions")
     assert resp.status_code == 200
     sessions = resp.json()

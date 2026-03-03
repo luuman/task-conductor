@@ -122,15 +122,15 @@ def _note_to_dict(note) -> dict:
 
 @router.get("/{session_id}/note", summary="获取会话备注")
 def get_session_note(session_id: str, db: Session = Depends(get_db)):
-    """获取会话的用户备注。若尚未创建，返回空结构。"""
+    """获取会话的用户备注。若尚未创建，返回空结构；会话不存在则返回 404。"""
     s = db.query(ClaudeSession).filter_by(session_id=session_id).first()
     if not s:
-        return {"alias": None, "notes": None, "tags": [], "linked_task_id": None}
+        raise HTTPException(404, "会话不存在")
     note = db.query(ConversationNote).filter_by(claude_session_id=s.id).first()
     return _note_to_dict(note)
 
 
-@router.put("/{session_id}/note", summary="创建或更新会话备注")
+@router.patch("/{session_id}/note", summary="创建或更新会话备注")
 def upsert_session_note(session_id: str, body: NoteIn, db: Session = Depends(get_db)):
     """Upsert 会话备注。不存在则创建，存在则更新。"""
     s = db.query(ClaudeSession).filter_by(session_id=session_id).first()

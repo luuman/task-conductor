@@ -94,9 +94,9 @@ GET  /api/sessions/{session_id}/events  返回最近 200 条事件
 GET  /api/sessions/{session_id}/note
   → 返回该会话的 ConversationNote，若不存在返回空结构 {alias:null, notes:null, tags:[], linked_task_id:null}
 
-PUT  /api/sessions/{session_id}/note
+PATCH  /api/sessions/{session_id}/note
   Body: { alias?, notes?, tags?, linked_task_id? }
-  → Upsert：不存在则 INSERT，存在则 UPDATE
+  → Upsert：不存在则 INSERT，存在则 UPDATE（部分更新语义）
   → 返回更新后的 ConversationNote
 ```
 
@@ -178,7 +178,7 @@ components/
 
 - 会话列表：`GET /api/sessions`，含 `note` 字段，组件内 useState
 - 事件列表：点击会话触发 `GET /api/sessions/{id}/events`，按需加载
-- Note 编辑：本地 draft state → 点击「保存」调用 `PUT /api/sessions/{id}/note` → 更新列表缓存
+- Note 编辑：本地 draft state → 点击「保存」调用 `PATCH /api/sessions/{id}/note` → 更新列表缓存
 
 ---
 
