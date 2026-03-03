@@ -37,8 +37,13 @@ function eventsToBubbles(events: ClaudeEvent[]): Bubble[] {
         sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-purple-400" });
       i++; continue;
     }
-    if (e.event_type === "SessionEnd" || e.event_type === "Stop") {
-      bubbles.push({ kind: "banner", icon: "■", text: "会话结束",
+    if (e.event_type === "SessionEnd") {
+      bubbles.push({ kind: "banner", icon: "◀", text: "会话结束",
+        sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-purple-300" });
+      i++; continue;
+    }
+    if (e.event_type === "Stop") {
+      bubbles.push({ kind: "banner", icon: "■", text: "回合结束",
         sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-gray-400" });
       i++; continue;
     }
