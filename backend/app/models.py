@@ -127,7 +127,7 @@ class ConversationNote(Base):
     """用户对 Claude 会话添加的元数据（别名/标签/备注/关联任务）"""
     __tablename__ = "conversation_notes"
     id: Mapped[int] = mapped_column(primary_key=True)
-    session_id: Mapped[int] = mapped_column(
+    claude_session_id: Mapped[int] = mapped_column(
         ForeignKey("claude_sessions.id"), unique=True, index=True
     )
     alias: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -140,5 +140,5 @@ class ConversationNote(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    session: Mapped["ClaudeSession"] = relationship()
-    linked_task: Mapped[Optional["Task"]] = relationship()
+    session: Mapped["ClaudeSession"] = relationship(viewonly=True)
+    linked_task: Mapped[Optional["Task"]] = relationship(viewonly=True)
