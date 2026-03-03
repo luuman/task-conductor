@@ -1,8 +1,8 @@
 // frontend/src/pages/ConversationHistory.tsx
 import { useEffect, useState, useCallback } from "react";
-import { api, type ClaudeSession, type ClaudeEvent, type ConversationNote, type Project } from "../lib/api";
+import { api, type ClaudeSession, type TranscriptMessage, type ConversationNote, type Project } from "../lib/api";
 import { ConvSessionList } from "../components/ConvSessionList";
-import { ConvBubbles } from "../components/ConvBubbles";
+import { ConvTranscript } from "../components/ConvTranscript";
 import { ConvEditPanel } from "../components/ConvEditPanel";
 
 interface Props {
@@ -14,8 +14,9 @@ export default function ConversationHistory({ projects }: Props) {
   const [sessionsLoading, setSessionsLoading] = useState(true);
 
   const [selectedSession, setSelectedSession] = useState<ClaudeSession | null>(null);
-  const [events, setEvents] = useState<ClaudeEvent[]>([]);
-  const [eventsLoading, setEventsLoading] = useState(false);
+  const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const [fileFound, setFileFound] = useState(true);
 
   // 加载会话列表（5s 轮询刷新状态）
   const loadSessions = useCallback(() => {
@@ -30,13 +31,13 @@ export default function ConversationHistory({ projects }: Props) {
     return () => clearInterval(id);
   }, [loadSessions]);
 
-  // 选中会话时加载事件
+  // 选中会话时加载 transcript
   const handleSelect = (s: ClaudeSession) => {
     setSelectedSession(s);
-    setEventsLoading(true);
-    api.sessions.events(s.session_id)
-      .then(evs => { setEvents(evs); setEventsLoading(false); })
-      .catch(() => setEventsLoading(false));
+    setTranscriptLoading(true);
+    api.sessions.transcript(s.session_id)
+      .then(r => { setTranscript(r.messages); setFileFound(r.file_found); setTranscriptLoading(false); })
+      .catch(() => { setTranscript([]); setFileFound(false); setTranscriptLoading(false); });
   };
 
   // note 保存后更新会话列表中的 note 字段
@@ -92,7 +93,7 @@ export default function ConversationHistory({ projects }: Props) {
 
         {/* 气泡区（可滚动） */}
         <div className="flex-1 overflow-y-auto">
-          <ConvBubbles events={events} loading={eventsLoading} />
+          <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} />
         </div>
 
         {/* 编辑面板（固定底部） */}

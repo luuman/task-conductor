@@ -171,6 +171,25 @@ export interface ConversationNote {
   linked_task_id: number | null;
 }
 
+export interface TranscriptBlock {
+  type: "text" | "tool_use";
+  text?: string;
+  tool_name?: string | null;
+  tool_input?: Record<string, unknown> | null;
+}
+
+export interface TranscriptMessage {
+  role: "user" | "assistant";
+  ts: string | null;
+  blocks: TranscriptBlock[];
+  model?: string | null;
+}
+
+export interface TranscriptResponse {
+  messages: TranscriptMessage[];
+  file_found: boolean;
+}
+
 export interface ClaudeSession {
   id: number;
   session_id: string;
@@ -346,6 +365,7 @@ export const api = {
   sessions: {
     list: () => request<ClaudeSession[]>("/api/sessions"),
     events: (sessionId: string) => request<ClaudeEvent[]>(`/api/sessions/${sessionId}/events`),
+    transcript: (sessionId: string) => request<TranscriptResponse>(`/api/sessions/${sessionId}/transcript`),
     getNote: (sessionId: string) =>
       request<ConversationNote>(`/api/sessions/${sessionId}/note`),
     upsertNote: (sessionId: string, body: Partial<ConversationNote>) =>
