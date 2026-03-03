@@ -30,6 +30,14 @@ export function clearConfig() {
 }
 
 function getBaseUrl(): string {
+  // 本地访问（localhost/127.0.0.1）时直连后端，绕过 tunnel URL 和系统代理
+  const isLocal =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1");
+  if (isLocal) {
+    return import.meta.env.VITE_API_URL || "http://localhost:8765";
+  }
   const config = getConfig();
   if (config?.type === "tunnel" && config.tunnelUrl) {
     return config.tunnelUrl.replace(/\/$/, "");
@@ -37,7 +45,7 @@ function getBaseUrl(): string {
   if (config?.type === "ssh" && config.tunnelUrl) {
     return config.tunnelUrl.replace(/\/$/, "");
   }
-  return import.meta.env.VITE_API_URL || "http://localhost:8000";
+  return import.meta.env.VITE_API_URL || "http://localhost:8765";
 }
 
 function getToken(): string {
@@ -59,17 +67,43 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   return resp.json();
 }
 
+// 本地免 PIN 认证（仅 localhost 可用）
+export async function authLocal(): Promise<string> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 3000);
+  try {
+    const resp = await fetch("http://localhost:8765/auth/local", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!resp.ok) throw new Error("local auth failed");
+    const data = await resp.json();
+    return data.token;
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
 // PIN auth
 export async function authWithPin(tunnelUrl: string, pin: string): Promise<string> {
   const base = tunnelUrl.replace(/\/$/, "");
-  const resp = await fetch(`${base}/auth/pin`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pin }),
-  });
-  if (!resp.ok) throw new Error("Invalid PIN");
-  const data = await resp.json();
-  return data.token;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const resp = await fetch(`${base}/auth/pin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    if (!resp.ok) throw new Error("PIN 错误");
+    const data = await resp.json();
+    return data.token;
+  } catch (err) {
+    clearTimeout(timer);
+    if (err instanceof Error && err.name === "AbortError") throw new Error("连接超时，请检查后端是否启动");
+    throw err;
+  }
 }
 
 export async function checkAuth(): Promise<boolean> {
@@ -81,23 +115,210 @@ export async function checkAuth(): Promise<boolean> {
   }
 }
 
-export interface Project { id: number; name: string; repo_url: string; created_at: string; }
-export interface Task { id: number; project_id: number; title: string; description: string; stage: string; status: string; created_at: string; updated_at: string; }
-export interface StageArtifact { id: number; task_id: number; stage: string; artifact_type: string; content: string; created_at: string; }
+export interface Project {
+  id: number;
+  name: string;
+  repo_url: string;
+  max_parallel: number;
+  execution_mode: string;
+  created_at: string;
+}
+export interface Task {
+  id: number;
+  project_id: number;
+  title: string;
+  description: string;
+  stage: string;
+  status: string;
+  depends_on: string | null;       // JSON list[int]
+  worktree_path: string | null;
+  branch_name: string | null;
+  queued_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export interface StageArtifact {
+  id: number;
+  task_id: number;
+  stage: string;
+  artifact_type: string;
+  content: string;
+  confidence: number | null;
+  assumptions: string | null;      // JSON list[str]
+  critic_notes: string | null;
+  retry_count: number;
+  error_log: string | null;
+  created_at: string;
+}
 export interface AnalysisOption { label: string; title: string; effort: string; risk: string; description: string; }
+
+export interface ProjectKnowledge {
+  id: number;
+  stage: string;
+  category: string;
+  title: string;
+  content: string;
+  source_task_id: number | null;
+  created_at: string;
+}
+
+export interface ConversationNote {
+  alias: string | null;
+  notes: string | null;
+  tags: string[];
+  linked_task_id: number | null;
+}
+
+export interface ClaudeSession {
+  id: number;
+  session_id: string;
+  cwd: string;
+  status: "active" | "idle" | "stopped";
+  linked_task_id: number | null;
+  started_at: string;
+  last_seen_at: string;
+  event_count: number;
+  note: ConversationNote;
+}
+
+export interface ClaudeEvent {
+  id: number;
+  session_id: string;
+  event_type: string;
+  tool_name: string | null;
+  tool_input: Record<string, unknown> | null;
+  tool_result: Record<string, unknown> | null;
+  extra: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface Metrics {
+  tasks: {
+    total: number;
+    by_status: Record<string, number>;
+    avg_duration_s: number | null;
+    approval_rate: number | null;
+  };
+  claude: {
+    call_count: number;
+    avg_ttft_ms: number | null;
+    avg_duration_s: number | null;
+    avg_chars_per_sec: number | null;
+    recent_ttfts_ms: number[];
+    active_processes: number;
+  };
+  kpi: {
+    ai_rating: number;
+    interactions: number;
+    avg_response_time_s: number | null;
+    uptime_pct: number;
+  };
+  gauge: {
+    availability_pct: number;
+  };
+  weekly: Array<{
+    day: string;
+    count: number;
+    success_rate: number;
+    is_today: boolean;
+  }>;
+}
+
+export interface SystemMetrics {
+  cpu: {
+    percent: number;
+    user_pct: number | null;
+    system_pct: number | null;
+    iowait_pct: number | null;
+    count_logical: number;
+    count_physical: number | null;
+    freq_mhz: number | null;
+    freq_max_mhz: number | null;
+    ctx_switches_per_sec: number | null;
+    load_avg: { "1m": number; "5m": number; "15m": number } | null;
+    per_core: number[];
+  };
+  memory: { total_gb: number; used_gb: number; avail_gb: number; free_gb: number; buffers_gb: number; cached_gb: number; percent: number };
+  swap:   { total_gb: number; used_gb: number; percent: number };
+  disk_space: { total_gb: number | null; used_gb: number | null; free_gb: number | null; percent: number | null };
+  disk_io: { read_mbps: number | null; write_mbps: number | null; read_iops: number | null; write_iops: number | null; util_pct: number | null };
+  network: {
+    in_kbps: number | null; out_kbps: number | null;
+    sent_mb: number | null; recv_mb: number | null;
+    tcp_states: Record<string, number>;
+    err_out: number | null; err_in: number | null;
+  };
+  uptime_hours: number;
+  hostname: string;
+  platform: string;
+  process_count: number | null;
+  sensors: {
+    temperatures: Array<{ sensor: string; label: string; current: number; high: number | null; critical: number | null }>;
+    fans: Array<{ sensor: string; label: string; rpm: number }>;
+  };
+  net_interfaces: Array<{ name: string; ip: string }>;
+  disk_device: string | null;
+}
+
+export interface ProcessInfo {
+  pid: number;
+  name: string;
+  cpu_pct: number;
+  mem_mb: number;
+}
+
+export interface ClaudeUsageMetrics {
+  tokens: {
+    total_input: number;
+    total_output: number;
+    total_cache_write: number;
+    total_cache_read: number;
+    total_cost_usd: number;
+    session_count: number;
+    by_model: Array<{ model: string; input: number; output: number; cost: number; calls: number }>;
+    hourly: Array<{ hour: number; input: number; output: number; cost: number }>;
+  };
+  tools: Array<{ tool: string; count: number; pct: number }>;
+  recent_tools: Array<{ tool: string; session: string; ts: number }>;
+  sessions: { total: number; active: number };
+  performance: {
+    call_count: number;
+    avg_ttft_ms: number | null;
+    avg_duration_s: number | null;
+    avg_chars_per_sec: number | null;
+    recent_ttfts_ms: number[];
+    active_processes: number;
+  };
+}
+
+export interface InboxItem { id: string; title: string; description: string; }
+export interface ItemAnalysis {
+  id: string;
+  priority: number;
+  understanding: string;
+  complexity: "S" | "M" | "L" | "XL";
+  approach: string;
+  tags: string[];
+}
 
 export const api = {
   health: () => request<{ status: string }>("/health"),
   agentInfo: () => request<{ tunnel_url: string | null; version: string }>("/agent/info"),
   projects: {
     list: () => request<Project[]>("/api/projects"),
-    create: (body: { name: string; repo_url: string }) =>
+    create: (body: { name: string; repo_url: string; max_parallel?: number; execution_mode?: string }) =>
       request<Project>("/api/projects", { method: "POST", body: JSON.stringify(body) }),
     tasks: (projectId: number) => request<Task[]>(`/api/projects/${projectId}/tasks`),
+    knowledge: (projectId: number) =>
+      request<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`),
+    deleteKnowledge: (projectId: number, knowledgeId: number) =>
+      request<{ ok: boolean }>(`/api/projects/${projectId}/knowledge/${knowledgeId}`, { method: "DELETE" }),
   },
   tasks: {
     get: (id: number) => request<Task>(`/api/tasks/${id}`),
-    create: (projectId: number, body: { title: string; description: string }) =>
+    create: (projectId: number, body: { title: string; description: string; depends_on?: number[] }) =>
       request<Task>(`/api/projects/${projectId}/tasks`, { method: "POST", body: JSON.stringify(body) }),
     approve: (id: number, action: "approve" | "reject", reason = "") =>
       request<Task>(`/api/tasks/${id}/approve`, { method: "POST", body: JSON.stringify({ action, reason }) }),
@@ -108,6 +329,38 @@ export const api = {
   pipeline: {
     runAnalysis: (taskId: number) =>
       request<{ status: string }>(`/api/pipeline/${taskId}/run-analysis`, { method: "POST" }),
+    runStage: (taskId: number, stage: string) =>
+      request<{ status: string; task_id: number; stage: string }>(`/api/pipeline/${taskId}/run/${stage}`, { method: "POST" }),
+  },
+  metrics: () => request<Metrics>("/api/metrics"),
+  system: () => request<SystemMetrics>("/api/metrics/system"),
+  claudeUsage: () => request<ClaudeUsageMetrics>("/api/metrics/claude-usage"),
+  processes: () => request<{ by_cpu: ProcessInfo[]; by_mem: ProcessInfo[] }>("/api/metrics/processes"),
+  taskManager: {
+    analyze: (items: InboxItem[]) =>
+      request<{ results: ItemAnalysis[] }>("/api/task-manager/analyze", {
+        method: "POST",
+        body: JSON.stringify({ items }),
+      }),
+  },
+  sessions: {
+    list: () => request<ClaudeSession[]>("/api/sessions"),
+    events: (sessionId: string) => request<ClaudeEvent[]>(`/api/sessions/${sessionId}/events`),
+    getNote: (sessionId: string) =>
+      request<ConversationNote>(`/api/sessions/${sessionId}/note`),
+    upsertNote: (sessionId: string, body: Partial<ConversationNote>) =>
+      request<ConversationNote>(`/api/sessions/${sessionId}/note`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
+  },
+  settings: {
+    get: () => request<{ workspace_root: string }>("/api/settings"),
+    update: (workspace_root: string) =>
+      request<{ workspace_root: string }>("/api/settings", {
+        method: "PUT",
+        body: JSON.stringify({ workspace_root }),
+      }),
   },
 };
 
