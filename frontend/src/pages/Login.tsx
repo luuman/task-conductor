@@ -2,38 +2,32 @@
 import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { authWithPin, saveConfig, checkAuth } from "../lib/api";
+import { authWithPin, saveConfig } from "../lib/api";
 import { cn } from "../lib/utils";
 
-type Mode = "tunnel" | "ssh";
+type Mode = "local" | "tunnel" | "ssh";
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
-  const [mode, setMode] = useState<Mode>("tunnel");
+  const isLocal =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const [mode, setMode] = useState<Mode>(isLocal ? "local" : "tunnel");
 
-  // Tunnel mode
   const [tunnelUrl, setTunnelUrl] = useState("");
-  const [pin, setPin] = useState("");
-
-  // SSH mode
-  const [sshHost, setSshHost] = useState("");
-  const [sshPort, setSshPort] = useState("22");
-  const [sshUser, setSshUser] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [pin, setPin]             = useState("");
+  const [sshHost, setSshHost]     = useState("");
+  const [sshPort, setSshPort]     = useState("22");
+  const [sshUser, setSshUser]     = useState("");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
 
   const handleTunnelConnect = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const token = await authWithPin(tunnelUrl, pin);
       saveConfig({ type: "tunnel", tunnelUrl, token });
-      if (await checkAuth()) {
-        onLogin();
-      } else {
-        throw new Error("连接后验证失败");
-      }
+      onLogin();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "连接失败");
       setLoading(false);
@@ -42,17 +36,10 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
 
   const handleSshConnect = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
-      // SSH 模式：用 localhost:8000 访问（SSH tunnel 已由用户在本地建立）
-      const localUrl = "http://localhost:8000";
-      const token = await authWithPin(localUrl, pin);
-      saveConfig({
-        type: "ssh",
-        tunnelUrl: localUrl,
-        sshHost, sshPort: parseInt(sshPort), sshUser, token,
-      });
+      const token = await authWithPin("", pin);
+      saveConfig({ type: "ssh", tunnelUrl: "", sshHost, sshPort: parseInt(sshPort), sshUser, token });
       onLogin();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "SSH 连接失败，请先在终端建立 SSH 隧道");
@@ -60,104 +47,160 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     }
   };
 
+  const tabs = ([
+    { id: "local",  label: "本地",   localOnly: true  },
+    { id: "tunnel", label: "Tunnel", localOnly: false },
+    { id: "ssh",    label: "SSH",    localOnly: false },
+  ] as { id: Mode; label: string; localOnly: boolean }[]).filter(m => !m.localOnly || isLocal);
+
   return (
-    <div className="min-h-screen bg-app flex items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden"
+         style={{ background: "var(--background)" }}>
+
+      {/* ── Dot-grid background (Orion style) ─────────────── */}
+      <div className="absolute inset-0 pointer-events-none"
+           style={{
+             backgroundImage: `radial-gradient(circle, rgba(68,119,255,0.18) 1px, transparent 1px)`,
+             backgroundSize: "28px 28px",
+           }} />
+      {/* Radial vignette to soften edges */}
+      <div className="absolute inset-0 pointer-events-none"
+           style={{
+             background: "radial-gradient(ellipse 70% 70% at 50% 50%, transparent 40%, var(--background) 100%)",
+           }} />
+
+      {/* ── Card ─────────────────────────────────────────── */}
+      <div className="relative w-full max-w-sm space-y-6 rounded-2xl p-8"
+           style={{
+             background: "var(--background-secondary)",
+             border: "1px solid var(--border)",
+             boxShadow: "0 0 0 1px rgba(68,119,255,0.06), 0 24px 64px rgba(0,0,0,0.6)",
+           }}>
+
         {/* Logo */}
-        <div className="text-center space-y-1">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white text-sm font-bold">TC</div>
-            <span className="text-base font-semibold text-app">TaskConductor</span>
+        <div className="flex flex-col items-center gap-3 pb-2">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white text-sm font-bold"
+               style={{ background: "var(--accent)", boxShadow: "0 0 20px rgba(68,119,255,0.4)" }}>
+            TC
           </div>
-          <p className="text-app-tertiary text-xs">连接你的本地 AI 开发 Agent</p>
+          <div className="text-center">
+            <h1 className="text-[15px] font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+              TaskConductor
+            </h1>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-tertiary)" }}>
+              连接你的本地 AI 开发 Agent
+            </p>
+          </div>
         </div>
 
-        {/* Mode Tabs */}
-        <div className="flex bg-app-tertiary rounded-lg p-0.5 gap-0.5">
-          {(["tunnel", "ssh"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => { setMode(m); setError(""); }}
+        {/* Mode tabs */}
+        <div className="flex rounded-lg p-0.5 gap-0.5"
+             style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)" }}>
+          {tabs.map((m) => (
+            <button key={m.id} onClick={() => { setMode(m.id); setError(""); }}
               className={cn(
-                "flex-1 py-1.5 text-xs rounded-md transition-colors font-medium",
-                mode === m
-                  ? "bg-app-secondary text-app shadow-sm"
-                  : "text-app-tertiary hover:text-app-secondary"
+                "flex-1 py-1.5 text-[12px] rounded-md transition-all font-medium",
+                mode === m.id ? "text-white" : "hover:text-app-secondary"
               )}
+              style={{
+                background: mode === m.id ? "var(--accent)" : "transparent",
+                color: mode === m.id ? "#fff" : "var(--text-tertiary)",
+                boxShadow: mode === m.id ? "0 1px 8px rgba(68,119,255,0.35)" : undefined,
+              }}
             >
-              {m === "tunnel" ? "Tunnel" : "SSH"}
+              {m.label}
             </button>
           ))}
         </div>
 
-        {/* Tunnel Form */}
-        {mode === "tunnel" && (
-          <form onSubmit={handleTunnelConnect} className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-app-secondary text-xs">Agent URL</label>
-              <Input
-                value={tunnelUrl}
-                onChange={(e) => setTunnelUrl(e.target.value)}
-                placeholder="https://abc123.trycloudflare.com"
-                autoFocus
-              />
-              <p className="text-app-tertiary text-[10px]">
-                在服务器运行 <code className="bg-app-tertiary px-1 rounded">./start.sh</code> 获取此 URL
-              </p>
+        {/* ── 本地模式 ──────────────────────────────────── */}
+        {mode === "local" && (
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setLoading(true); setError("");
+            try {
+              const token = await authWithPin("", pin);
+              saveConfig({ type: "tunnel", tunnelUrl: "", token });
+              onLogin();
+            } catch {
+              setError("PIN 错误或后端未启动（请先运行 ./start.sh）");
+              setLoading(false);
+            }
+          }} className="space-y-4">
+            <div className="rounded-lg px-3 py-2 text-[11px]"
+                 style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)", color: "var(--text-tertiary)" }}>
+              后端地址：<span className="font-mono" style={{ color: "var(--accent)" }}>localhost:7070 → :8765</span>
             </div>
             <div className="space-y-1.5">
-              <label className="text-app-secondary text-xs">PIN 码</label>
-              <Input
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                placeholder="6位数字"
-                maxLength={6}
-                inputMode="numeric"
-              />
-              <p className="text-app-tertiary text-[10px]">
-                Agent 启动时终端显示的 6 位 PIN
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
+              <Input value={pin} onChange={(e) => setPin(e.target.value)}
+                placeholder="6 位数字" maxLength={6} inputMode="numeric" autoFocus />
+              <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                运行 <code className="px-1 rounded" style={{ background: "var(--background-tertiary)" }}>./start.sh</code> 后终端显示的 PIN
               </p>
             </div>
-            {error && <p className="text-red-400 text-xs">{error}</p>}
-            <Button
-              type="submit"
-              disabled={!tunnelUrl || pin.length !== 6 || loading}
-              className="w-full"
-              size="lg"
-            >
-              {loading ? "连接中..." : "连接 Agent"}
+            {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
+            <Button type="submit" disabled={pin.length !== 6 || loading} className="w-full" size="lg">
+              {loading ? "连接中…" : "本地连接"}
             </Button>
           </form>
         )}
 
-        {/* SSH Form */}
+        {/* ── Tunnel ────────────────────────────────────── */}
+        {mode === "tunnel" && (
+          <form onSubmit={handleTunnelConnect} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>Agent URL</label>
+              <Input value={tunnelUrl} onChange={(e) => setTunnelUrl(e.target.value)}
+                placeholder="https://abc123.trycloudflare.com" autoFocus />
+              <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                在服务器运行 <code className="px-1 rounded" style={{ background: "var(--background-tertiary)" }}>./start.sh</code> 获取此 URL
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
+              <Input value={pin} onChange={(e) => setPin(e.target.value)}
+                placeholder="6 位数字" maxLength={6} inputMode="numeric" />
+              <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>Agent 启动时终端显示的 6 位 PIN</p>
+            </div>
+            {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
+            <Button type="submit" disabled={!tunnelUrl || pin.length !== 6 || loading} className="w-full" size="lg">
+              {loading ? "连接中…" : "连接 Agent"}
+            </Button>
+          </form>
+        )}
+
+        {/* ── SSH ───────────────────────────────────────── */}
         {mode === "ssh" && (
-          <form onSubmit={handleSshConnect} className="space-y-3">
+          <form onSubmit={handleSshConnect} className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2 space-y-1.5">
-                <label className="text-app-secondary text-xs">主机</label>
+                <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>主机</label>
                 <Input value={sshHost} onChange={(e) => setSshHost(e.target.value)} placeholder="192.168.1.100" />
               </div>
               <div className="space-y-1.5">
-                <label className="text-app-secondary text-xs">端口</label>
+                <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>端口</label>
                 <Input value={sshPort} onChange={(e) => setSshPort(e.target.value)} placeholder="22" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-app-secondary text-xs">用户名</label>
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>用户名</label>
               <Input value={sshUser} onChange={(e) => setSshUser(e.target.value)} placeholder="user" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-app-secondary text-xs">PIN 码</label>
-              <Input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="Agent 显示的 6 位 PIN" maxLength={6} />
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
+              <Input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="6 位数字" maxLength={6} />
             </div>
-            <div className="bg-app-tertiary rounded-md p-2.5 text-app-secondary text-[10px] space-y-1">
-              <p className="font-medium text-app-secondary">使用前请在本地终端建立 SSH 隧道：</p>
-              <code className="block text-accent">ssh -L 8000:localhost:8000 {sshUser || "user"}@{sshHost || "server"} -p {sshPort}</code>
+            <div className="rounded-lg p-3 text-[10px] space-y-1.5"
+                 style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)" }}>
+              <p className="font-medium" style={{ color: "var(--text-secondary)" }}>使用前请在本地终端建立 SSH 隧道：</p>
+              <code className="block font-mono" style={{ color: "var(--accent)" }}>
+                ssh -L 8000:localhost:8765 {sshUser || "user"}@{sshHost || "server"} -p {sshPort}
+              </code>
             </div>
-            {error && <p className="text-red-400 text-xs">{error}</p>}
+            {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
             <Button type="submit" disabled={!sshHost || !sshUser || pin.length !== 6 || loading} className="w-full" size="lg">
-              {loading ? "连接中..." : "通过 SSH 连接"}
+              {loading ? "连接中…" : "通过 SSH 连接"}
             </Button>
           </form>
         )}
