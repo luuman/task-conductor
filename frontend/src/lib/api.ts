@@ -36,7 +36,8 @@ function getBaseUrl(): string {
     (window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1");
   if (isLocal) {
-    return import.meta.env.VITE_API_URL || "http://localhost:8765";
+    // 走 Vite proxy，不硬编码后端端口，macOS 只需转发 7070 即可
+    return import.meta.env.VITE_API_URL || "";
   }
   const config = getConfig();
   if (config?.type === "tunnel" && config.tunnelUrl) {
@@ -72,7 +73,7 @@ export async function authLocal(): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 3000);
   try {
-    const resp = await fetch("http://localhost:8765/auth/local", { signal: ctrl.signal });
+    const resp = await fetch("/auth/local", { signal: ctrl.signal });
     clearTimeout(timer);
     if (!resp.ok) throw new Error("local auth failed");
     const data = await resp.json();
@@ -385,5 +386,11 @@ export const api = {
 };
 
 export function getWsUrl(path: string): string {
-  return getBaseUrl().replace(/^http/, "ws") + path;
+  const base = getBaseUrl();
+  if (!base && typeof window !== "undefined") {
+    // Vite proxy 模式：从当前页面地址推导 WebSocket 地址
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${proto}//${window.location.host}${path}`;
+  }
+  return base.replace(/^http/, "ws") + path;
 }

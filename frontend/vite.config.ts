@@ -5,4 +5,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: process.env.NODE_ENV === 'production' ? '/task-conductor/' : '/',
+  server: {
+    port: 7070,
+    strictPort: true,
+    proxy: {
+      "/api":   { target: "http://localhost:8765", changeOrigin: true },
+      "/auth":  { target: "http://localhost:8765", changeOrigin: true },
+      "/hooks": { target: "http://localhost:8765", changeOrigin: true },
+      "/ws":    { target: "ws://localhost:8765",   ws: true, changeOrigin: true },
+    },
+  },
 })
