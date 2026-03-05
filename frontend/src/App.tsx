@@ -10,9 +10,10 @@ import Sessions from "./pages/Sessions";
 import TaskManager from "./pages/TaskManager";
 import ConversationHistory from "./pages/ConversationHistory";
 import ProjectsCanvas from "./pages/ProjectsCanvas";
+import ClaudeConfig from "./pages/ClaudeConfig";
 import { useClaudeMonitor, type ClaudeHookEvent, type WsStatus } from "./hooks/useClaudeMonitor";
 
-type Page = "dashboard" | "project" | "task" | "sessions" | "settings" | "tasks" | "conversations" | "canvas";
+type Page = "dashboard" | "project" | "task" | "sessions" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config";
 
 const MAX_LIVE_EVENTS = 500;
 
@@ -105,6 +106,13 @@ export default function App() {
     setProjects((prev) => [...prev, p]);
   };
 
+  const refreshProjects = async () => {
+    try {
+      const p = await api.projects.list();
+      setProjects(p);
+    } catch { /* ignore */ }
+  };
+
   const renderContent = () => {
     if (page === "task" && activeTaskId) {
       return (
@@ -131,6 +139,9 @@ export default function App() {
     }
     if (page === "conversations") {
       return <ConversationHistory projects={projects} />;
+    }
+    if (page === "claude-config") {
+      return <ClaudeConfig />;
     }
     if (page === "canvas") {
       return (
