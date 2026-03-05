@@ -26,6 +26,7 @@ export function AppShell({
   activeProjectId,
   projects,
   onProjectCreated,
+  onRefreshProjects,
   connectionStatus,
 }: AppShellProps) {
   const [showNewProject, setShowNewProject] = useState(false);
