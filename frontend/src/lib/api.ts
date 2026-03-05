@@ -122,6 +122,8 @@ export interface Project {
   repo_url: string;
   max_parallel: number;
   execution_mode: string;
+  is_test: boolean;
+  sort_order: number;
   created_at: string;
 }
 export interface Task {
@@ -313,6 +315,50 @@ export interface ClaudeUsageMetrics {
   };
 }
 
+// Claude Config types
+export interface HookEntry { type: string; command: string; timeout: number; }
+export interface HookRule { matcher: string; hooks: HookEntry[]; }
+export interface ClaudeConfig {
+  hooks: Record<string, HookRule[]>;
+  enabled_plugins: Record<string, boolean>;
+  permissions: Record<string, unknown>;
+  other: Record<string, unknown>;
+  raw: Record<string, unknown>;
+}
+export interface InstalledPlugin {
+  plugin_id: string; name: string; publisher: string;
+  scope: string; version: string; install_path: string;
+  installed_at: string; last_updated: string; git_commit: string | null;
+}
+export interface DailyActivity {
+  date: string; message_count: number; session_count: number; tool_call_count: number;
+}
+export interface SkillInfo { name: string; path: string; }
+export interface HookScriptInfo { name: string; path: string; size_bytes: number; }
+export interface ProjectRef { dir_name: string; has_memory: boolean; has_claude_md: boolean; }
+export interface McpServer {
+  name: string; url: string | null; command: string | null;
+  args: string[] | null; transport: string; status: string; scope: string;
+}
+export interface ClaudeOverview {
+  cli_version: string; home_path: string;
+  total_messages: number; total_tool_calls: number; total_sessions: number;
+  first_active_day: string | null; last_active_day: string | null;
+  active_days: number;
+  daily_activity: DailyActivity[];
+  installed_plugins: InstalledPlugin[];
+  skills: SkillInfo[];
+  hook_scripts: HookScriptInfo[];
+  projects: ProjectRef[];
+  mcp_servers: McpServer[];
+}
+
+export interface McpMarketServer {
+  id: string; name: string; description: string; icon: string;
+  type: string; url?: string; auth_type: "none" | "token" | "oauth";
+  auth_note?: string; auth_env?: string; category: string; installed: boolean;
+}
+
 export interface InboxItem { id: string; title: string; description: string; }
 export interface ItemAnalysis {
   id: string;
@@ -325,6 +371,7 @@ export interface ItemAnalysis {
 
 export const api = {
   health: () => request<{ status: string }>("/health"),
+  shutdown: () => request<{ status: string }>("/api/shutdown", { method: "POST" }),
   agentInfo: () => request<{ tunnel_url: string | null; version: string }>("/agent/info"),
   projects: {
     list: () => request<Project[]>("/api/projects"),
@@ -382,6 +429,57 @@ export const api = {
         method: "PUT",
         body: JSON.stringify({ workspace_root }),
       }),
+  },
+  claudeConfig: {
+    get: () => request<ClaudeConfig>("/api/claude-config"),
+    overview: () => request<ClaudeOverview>("/api/claude-config/overview"),
+    hookEvents: () => request<string[]>("/api/claude-config/hook-events"),
+    updateHooks: (event: string, rules: HookRule[]) =>
+      request<ClaudeConfig>("/api/claude-config/hooks", {
+        method: "PUT",
+        body: JSON.stringify({ event, rules }),
+      }),
+    deleteHookEvent: (event: string) =>
+      request<ClaudeConfig>(`/api/claude-config/hooks/${event}`, { method: "DELETE" }),
+    togglePlugin: (plugin_id: string, enabled: boolean) =>
+      request<ClaudeConfig>("/api/claude-config/plugins", {
+        method: "PUT",
+        body: JSON.stringify({ plugin_id, enabled }),
+      }),
+    removePlugin: (plugin_id: string) =>
+      request<ClaudeConfig>(`/api/claude-config/plugins/${encodeURIComponent(plugin_id)}`, { method: "DELETE" }),
+    updateOther: (key: string, value: unknown) =>
+      request<ClaudeConfig>(`/api/claude-config/other/${key}`, {
+        method: "PUT",
+        body: JSON.stringify({ value }),
+      }),
+    deleteOther: (key: string) =>
+      request<ClaudeConfig>(`/api/claude-config/other/${key}`, { method: "DELETE" }),
+    updatePermissions: (permissions: Record<string, unknown>) =>
+      request<ClaudeConfig>("/api/claude-config/permissions", {
+        method: "PUT",
+        body: JSON.stringify({ permissions }),
+      }),
+    listMcp: () => request<McpServer[]>("/api/claude-config/mcp"),
+    addMcp: (body: { name: string; url?: string; command?: string; args?: string[]; transport?: string; scope?: string; env?: Record<string, string>; headers?: Record<string, string> }) =>
+      request<{ ok: boolean; output: string; servers: McpServer[] }>("/api/claude-config/mcp", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    removeMcp: (name: string, scope = "user") =>
+      request<{ ok: boolean; servers: McpServer[] }>(`/api/claude-config/mcp/${encodeURIComponent(name)}?scope=${scope}`, {
+        method: "DELETE",
+      }),
+  },
+  mcp: {
+    list: () => request<McpMarketServer[]>("/api/mcp/servers"),
+    install: (id: string, token?: string) =>
+      request<{ ok: boolean }>(`/api/mcp/servers/${id}/install`, {
+        method: "POST",
+        body: JSON.stringify(token ? { token } : {}),
+      }),
+    uninstall: (id: string) =>
+      request<{ ok: boolean }>(`/api/mcp/servers/${id}/uninstall`, { method: "DELETE" }),
   },
 };
 
