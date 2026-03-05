@@ -159,6 +159,7 @@ export default function App() {
         projectsLoaded={projectsLoaded}
         onOpenTask={handleOpenTask}
         onSelectProject={handleSelectProject}
+        onRefreshProjects={refreshProjects}
       />
     );
   };
