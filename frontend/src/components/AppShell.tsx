@@ -61,6 +61,10 @@ export function AppShell({
         onSelectProject={onSelectProject}
         onSelectPage={setPage}
         onNewProject={() => setShowNewProject(true)}
+        onScanProjects={async () => {
+          await api.projects.scan();
+          onRefreshProjects?.();
+        }}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(c => !c)}
       />
