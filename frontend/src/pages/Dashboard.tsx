@@ -630,7 +630,13 @@ function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated:
   );
 }
 
-function ProjectCard({ project, onSelect, onOpenTask }: { project: Project; onSelect: () => void; onOpenTask: (id: number) => void }) {
+function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: {
+  project: Project;
+  onSelect: () => void;
+  onOpenTask: (id: number) => void;
+  onDelete?: (id: number) => void;
+  onToggleTest?: (id: number, isTest: boolean) => void;
+}) {
   const [tasks, setTasks] = useState<Task[]>([]);
   useEffect(() => {
     api.projects.tasks(project.id).then(setTasks).catch(() => {});
@@ -644,24 +650,52 @@ function ProjectCard({ project, onSelect, onOpenTask }: { project: Project; onSe
       className="rounded-xl p-4 cursor-pointer transition-all space-y-2 relative overflow-hidden group"
       style={{
         background: "var(--background-secondary)",
-        border: "1px solid var(--border)",
+        border: project.is_test ? "1px solid rgba(168,85,247,0.3)" : "1px solid var(--border)",
         boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
       }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(68,119,255,0.4)")}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = project.is_test ? "rgba(168,85,247,0.5)" : "rgba(68,119,255,0.4)")}
+      onMouseLeave={e => (e.currentTarget.style.borderColor = project.is_test ? "rgba(168,85,247,0.3)" : "var(--border)")}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center text-accent text-[10px] font-bold">
-            {project.name[0].toUpperCase()}
+          <div className={cn("w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold",
+            project.is_test ? "bg-purple-500/20 text-purple-400" : "bg-accent/20 text-accent")}>
+            {project.is_test ? <FlaskConical size={12} /> : project.name[0].toUpperCase()}
           </div>
           <span className="text-xs font-semibold text-app">{project.name}</span>
+          {project.is_test && (
+            <span className="text-[8px] font-mono text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded">TEST</span>
+          )}
         </div>
-        {runningCount > 0 && (
-          <Badge variant="info">{runningCount} 运行中</Badge>
-        )}
+        <div className="flex items-center gap-1">
+          {runningCount > 0 && (
+            <Badge variant="info">{runningCount} 运行中</Badge>
+          )}
+          {/* 操作按钮 - hover 时显示 */}
+          <div className="hidden group-hover:flex items-center gap-0.5">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleTest?.(project.id, !project.is_test); }}
+              className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-white/10"
+              style={{ color: project.is_test ? "#a855f7" : "var(--text-tertiary)" }}
+              title={project.is_test ? "取消测试标记" : "标记为测试项目"}
+            >
+              <FlaskConical size={10} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete?.(project.id); }}
+              className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-red-500/20"
+              style={{ color: "var(--text-tertiary)" }}
+              title="删除项目"
+            >
+              <Trash2 size={10} />
+            </button>
+          </div>
+        </div>
       </div>
-      <p className="text-app-tertiary text-[10px]">{tasks.length} 个任务</p>
+      <p className="text-app-tertiary text-[10px]">
+        {tasks.length} 个任务
+        {project.repo_url && <span className="ml-2 font-mono opacity-60">{project.repo_url.split("/").pop()}</span>}
+      </p>
       <div className="flex flex-wrap gap-1 pt-1">
         {tasks.slice(0, 3).map(t => (
           <button
