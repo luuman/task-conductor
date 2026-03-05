@@ -1,14 +1,16 @@
 // frontend/src/components/Sidebar.tsx
-import { LayoutDashboard, CheckSquare, Settings, Radio, MessageSquare, Plus, ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Settings, Radio, MessageSquare, Plus, ChevronLeft, ChevronRight, Layers, Cpu, FolderSearch, FlaskConical } from "lucide-react";
 import { cn } from "../lib/utils";
+import type { Project } from "../lib/api";
 
 interface SidebarProps {
-  projects: Array<{ id: number; name: string }>;
+  projects: Project[];
   activeProjectId: number | null;
   activePage: string;
   onSelectProject: (id: number) => void;
   onSelectPage: (page: string) => void;
   onNewProject: () => void;
+  onScanProjects?: () => void;
   collapsed: boolean;
   onToggle: () => void;
 }
@@ -18,6 +20,7 @@ const NAV_ITEMS = [
   { id: "canvas",        label: "项目视图", Icon: Layers          },
   { id: "tasks",         label: "任务管理", Icon: CheckSquare     },
   { id: "conversations", label: "对话历史", Icon: MessageSquare   },
+  { id: "claude-config", label: "Claude 配置", Icon: Cpu        },
   { id: "settings",      label: "设置",    Icon: Settings        },
 ];
 
@@ -28,9 +31,45 @@ export function Sidebar({
   onSelectProject,
   onSelectPage,
   onNewProject,
+  onScanProjects,
   collapsed,
   onToggle,
 }: SidebarProps) {
+  const realProjects = projects.filter(p => !p.is_test);
+  const testProjects = projects.filter(p => p.is_test);
+
+  const renderProjectItem = (p: Project) => {
+    const active = activeProjectId === p.id && activePage === "project";
+    return (
+      <button key={p.id}
+        onClick={() => { onSelectProject(p.id); onSelectPage("project"); }}
+        title={collapsed ? p.name : undefined}
+        className={cn(
+          "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left",
+          collapsed ? "justify-center py-1.5 px-0" : "gap-2.5 px-3 py-1.5",
+          active ? "font-medium" : "hover:bg-white/[0.03]"
+        )}
+        style={{
+          background: active ? "var(--accent-subtle)" : undefined,
+          color: active ? "var(--accent)" : "var(--text-secondary)",
+        }}
+      >
+        {active && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
+                style={{ background: "var(--accent)" }} />
+        )}
+        <span className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0"
+              style={{
+                background: active ? "var(--accent)" : p.is_test ? "rgba(168,85,247,0.15)" : "var(--background-tertiary)",
+                color: active ? "#fff" : p.is_test ? "#a855f7" : "var(--text-secondary)",
+              }}>
+          {p.is_test ? <FlaskConical size={10} /> : p.name[0].toUpperCase()}
+        </span>
+        {!collapsed && <span className="truncate">{p.name}</span>}
+      </button>
+    );
+  };
+
   return (
     <div
       className={cn(
@@ -46,7 +85,6 @@ export function Sidebar({
       )}
            style={{ borderBottom: "1px solid var(--border)" }}>
         {collapsed ? (
-          /* Collapsed: center the expand chevron */
           <button
             onClick={onToggle}
             className="w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:bg-white/[0.06]"
@@ -57,7 +95,6 @@ export function Sidebar({
           </button>
         ) : (
           <>
-            {/* Icon badge */}
             <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-white text-[10px] font-bold"
                  style={{ background: "var(--accent)" }}>
               TC
@@ -66,7 +103,6 @@ export function Sidebar({
                   style={{ color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
               TaskConductor
             </span>
-            {/* Collapse button (top right when expanded) */}
             <button
               onClick={onToggle}
               className="w-6 h-6 flex items-center justify-center rounded-md transition-colors hover:bg-white/[0.06]"
@@ -96,7 +132,6 @@ export function Sidebar({
                 color: active ? "var(--accent)" : "var(--text-secondary)",
               }}
             >
-              {/* Left accent bar */}
               {active && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
                       style={{ background: "var(--accent)" }} />
@@ -162,49 +197,42 @@ export function Sidebar({
                   style={{ color: "var(--text-tertiary)" }}>
               项目
             </span>
-            <button onClick={onNewProject}
-              className="w-4 h-4 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
-              style={{ color: "var(--text-tertiary)" }}
-              title="新建项目"
-            >
-              <Plus size={11} strokeWidth={2.5} />
-            </button>
+            <div className="flex items-center gap-1">
+              {onScanProjects && (
+                <button onClick={onScanProjects}
+                  className="w-4 h-4 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
+                  style={{ color: "var(--text-tertiary)" }}
+                  title="扫描本地项目"
+                >
+                  <FolderSearch size={11} strokeWidth={2} />
+                </button>
+              )}
+              <button onClick={onNewProject}
+                className="w-4 h-4 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
+                style={{ color: "var(--text-tertiary)" }}
+                title="新建项目"
+              >
+                <Plus size={11} strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
         )}
 
         <div className={cn("space-y-0.5", !collapsed && "mt-0.5")}>
-          {projects.map((p) => {
-            const active = activeProjectId === p.id && activePage === "project";
-            return (
-              <button key={p.id}
-                onClick={() => { onSelectProject(p.id); onSelectPage("project"); }}
-                title={collapsed ? p.name : undefined}
-                className={cn(
-                  "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left",
-                  collapsed ? "justify-center py-1.5 px-0" : "gap-2.5 px-3 py-1.5",
-                  active ? "font-medium" : "hover:bg-white/[0.03]"
-                )}
-                style={{
-                  background: active ? "var(--accent-subtle)" : undefined,
-                  color: active ? "var(--accent)" : "var(--text-secondary)",
-                }}
-              >
-                {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
-                        style={{ background: "var(--accent)" }} />
-                )}
-                {/* Avatar */}
-                <span className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0"
-                      style={{
-                        background: active ? "var(--accent)" : "var(--background-tertiary)",
-                        color: active ? "#fff" : "var(--text-secondary)",
-                      }}>
-                  {p.name[0].toUpperCase()}
-                </span>
-                {!collapsed && <span className="truncate">{p.name}</span>}
-              </button>
-            );
-          })}
+          {/* 正式项目 */}
+          {realProjects.map(renderProjectItem)}
+
+          {/* 测试项目分隔 */}
+          {testProjects.length > 0 && !collapsed && (
+            <div className="flex items-center gap-2 px-3 pt-2 pb-1">
+              <span className="text-[9px] font-semibold uppercase tracking-[0.08em]"
+                    style={{ color: "var(--text-tertiary)" }}>
+                测试
+              </span>
+              <div className="flex-1 h-px" style={{ background: "var(--border-subtle)" }} />
+            </div>
+          )}
+          {testProjects.map(renderProjectItem)}
 
           {projects.length === 0 && !collapsed && (
             <button onClick={onNewProject}
@@ -215,7 +243,6 @@ export function Sidebar({
             </button>
           )}
 
-          {/* collapsed 时的新建按钮 */}
           {collapsed && (
             <button onClick={onNewProject}
               title="新建项目"
