@@ -43,6 +43,8 @@ class Project(Base):
     max_parallel: Mapped[int] = mapped_column(Integer, default=2)
     execution_mode: Mapped[str] = mapped_column(String(20), default="smart")
     # smart=自动（有依赖串行/无依赖并行）| queue=全部串行 | parallel=全部并行
+    is_test: Mapped[bool] = mapped_column(Boolean, default=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)  # 越小越靠前
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     tasks: Mapped[list["Task"]] = relationship(back_populates="project")
 
