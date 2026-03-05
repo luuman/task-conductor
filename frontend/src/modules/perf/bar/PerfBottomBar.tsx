@@ -16,22 +16,11 @@ function barKbps(k: number | null | undefined) {
   if (k >= 1024)        return `${Math.round(k / 1024)} MB/s`;
   return `${Math.round(k)} KB/s`;
 }
-function barMbps(m: number | null | undefined) {
-  if (m == null) return "—";
-  if (m >= 1024) return `${Math.round(m / 1024)} GB/s`;
-  return `${Math.round(m)} MB/s`;
-}
-
 interface PerfBottomBarProps {
   connectionStatus?: "connected" | "disconnected" | "connecting";
-  onDisconnect?: () => void;
 }
 
 const BAR_H = 34; // px — 两行文字的底栏高度
-
-function Sep() {
-  return <div className="w-px self-stretch shrink-0 my-2" style={{ background: "#232323" }} />;
-}
 
 /** 每个 tile 的两行内容 */
 function TileLines({ id, sys }: {
@@ -58,7 +47,7 @@ function TileLines({ id, sys }: {
     case "net":
       return row(`↑ ${barKbps(sys?.network.out_kbps)}`, `↓ ${barKbps(sys?.network.in_kbps)}`);
     case "disk":
-      return row("DISK", sys ? `${Math.round(sys.disk_space.percent)}%` : "—");
+      return row("DISK", sys?.disk_space.percent != null ? `${Math.round(sys.disk_space.percent)}%` : "—");
     case "sensors":
       return row("TEMP", cpuTemp ? `${cpuTemp.current}°` : "—");
     default:
@@ -66,7 +55,7 @@ function TileLines({ id, sys }: {
   }
 }
 
-export function PerfBottomBar({ connectionStatus, onDisconnect }: PerfBottomBarProps) {
+export function PerfBottomBar({ connectionStatus }: PerfBottomBarProps) {
   const { sys, hist, procs } = usePerfData();
   const { config } = usePerfConfig();
   const [activeMetric, setActiveMetric] = useState<MetricId | null>(null);
@@ -132,7 +121,7 @@ export function PerfBottomBar({ connectionStatus, onDisconnect }: PerfBottomBarP
         className="flex items-center px-2 select-none"
         style={{ height: BAR_H, background: "#080808", borderTop: "1px solid #1e1e1e" }}
       >
-        {enabledMetrics.map((m, idx) => {
+        {enabledMetrics.map((m) => {
           const isActive = activeMetric === m.id;
           return (
             <div key={m.id} className="flex items-center">

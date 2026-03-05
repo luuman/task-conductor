@@ -1,5 +1,5 @@
 // frontend/src/pages/ProjectsCanvas.tsx
-// Packed-bubble chart — close to the Dribbble reference design
+// Packed-bubble chart — Dribbble reference + Orion dark theme
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { api, type Project, type Task } from "../lib/api";
 
@@ -16,33 +16,33 @@ type ProjectStats = {
 
 type BubbleData = { x: number; y: number; r: number; stats: ProjectStats };
 
-// ── Status → color palette (matches reference: green/red/blue groups) ──
-const STATE_FILL: Record<VisualState, { fill: string; text: string; label: string }> = {
-  running: { fill: "#4caf7a", text: "#fff",     label: "运行中" },
-  failed:  { fill: "#e05a5a", text: "#fff",     label: "异常"   },
-  review:  { fill: "#f0a030", text: "#fff",     label: "待审批" },
-  queued:  { fill: "#7b9ed9", text: "#fff",     label: "排队中" },
-  done:    { fill: "#5b9bd5", text: "#fff",     label: "已完成" },
-  idle:    { fill: "#b0bcd8", text: "#5a6a8a",  label: "空项目" },
+// ── Status palette ─────────────────────────────────────────────────
+const STATE_META: Record<VisualState, { base: string; glow: string; text: string; label: string }> = {
+  running: { base: "#22c55e", glow: "#22c55e60", text: "#fff", label: "运行中" },
+  failed:  { base: "#ef4444", glow: "#ef444460", text: "#fff", label: "异常"   },
+  review:  { base: "#f59e0b", glow: "#f59e0b40", text: "#fff", label: "待审批" },
+  queued:  { base: "#7b9ed9", glow: "#7b9ed940", text: "#fff", label: "排队中" },
+  done:    { base: "#4477ff", glow: "#4477ff40", text: "#fff", label: "已完成" },
+  idle:    { base: "#3c3c5c", glow: "#3c3c5c20", text: "#7878a8", label: "空闲" },
 };
 
-// Within a status group, vary brightness by index so adjacent bubbles differ
-const STATUS_VARIANTS: Record<VisualState, string[]> = {
-  running: ["#4caf7a","#3d9e6b","#5dbf89","#6acf96","#2d8e5a"],
-  failed:  ["#e05a5a","#d04a4a","#ea6a6a","#c83e3e","#f07070"],
-  review:  ["#f0a030","#e09020","#f5b040","#d88015","#f8c060"],
-  queued:  ["#7b9ed9","#6b8ec9","#8baeea","#5b7ec0","#9bc0f0"],
-  done:    ["#5b9bd5","#4b8bc5","#6babd5","#3b7ab5","#7bbae0"],
-  idle:    ["#b0bcd8","#a0acc8","#c0cce8","#909cb8","#d0dcea"],
+// Color variants within each state group
+const STATE_VARIANTS: Record<VisualState, string[]> = {
+  running: ["#22c55e","#16a34a","#4ade80","#15803d","#86efac"],
+  failed:  ["#ef4444","#dc2626","#f87171","#b91c1c","#fca5a5"],
+  review:  ["#f59e0b","#d97706","#fbbf24","#b45309","#fcd34d"],
+  queued:  ["#7b9ed9","#6b8ec9","#93b5ea","#5b7ec0","#a5c4f0"],
+  done:    ["#4477ff","#3366ee","#5588ff","#2255dd","#6699ff"],
+  idle:    ["#3c3c5c","#32324c","#4a4a6c","#28283c","#56567c"],
 };
 
 const STAGE_LABEL: Record<string, string> = {
-  input:"需求输入", analysis:"需求分析", prd:"PRD",
-  ui:"UI设计", plan:"技术方案", dev:"开发实现",
-  test:"测试", deploy:"部署", monitor:"监控", done:"完成",
+  input:"需求", analysis:"分析", prd:"PRD", ui:"UI",
+  plan:"方案", dev:"开发", test:"测试", deploy:"部署",
+  monitor:"监控", done:"完成",
 };
 
-const MIN_R = 28, MAX_R = 86;
+const MIN_R = 30, MAX_R = 90;
 
 // ── Helpers ────────────────────────────────────────────────────────
 function resolveState(s: ProjectStats): VisualState {
@@ -59,9 +59,8 @@ function bubbleRadius(weight: number, maxW: number): number {
   return MIN_R + Math.sqrt(weight / maxW) * (MAX_R - MIN_R);
 }
 
-// Assign a variant color within the group so neighboring bubbles differ
 function bubbleColor(state: VisualState, idx: number): string {
-  const v = STATUS_VARIANTS[state];
+  const v = STATE_VARIANTS[state];
   return v[idx % v.length];
 }
 
@@ -73,8 +72,8 @@ function packBubbles(stats: ProjectStats[]): BubbleData[] {
 
   const items = sorted.map((s, i) => {
     const r     = bubbleRadius(s.weight, maxW);
-    const angle = i * 2.39996;
-    const dist  = Math.sqrt(i) * r * 1.3;
+    const angle = i * 2.39996; // golden angle
+    const dist  = Math.sqrt(i) * r * 1.2;
     return {
       x: i === 0 ? 0 : Math.cos(angle) * dist,
       y: i === 0 ? 0 : Math.sin(angle) * dist,
@@ -82,9 +81,10 @@ function packBubbles(stats: ProjectStats[]): BubbleData[] {
     };
   });
 
-  const GAP = 2; // very tight packing
-  for (let iter = 0; iter < 150; iter++) {
-    const damp = 0.7 + 0.3 * (1 - iter / 150);
+  // Iterative collision resolution
+  const GAP = 3;
+  for (let iter = 0; iter < 180; iter++) {
+    const damp = 0.7 + 0.3 * (1 - iter / 180);
     for (let i = 0; i < items.length; i++) {
       for (let j = i + 1; j < items.length; j++) {
         const dx   = items[j].x - items[i].x;
@@ -97,75 +97,254 @@ function packBubbles(stats: ProjectStats[]): BubbleData[] {
           items[j].x += dx * f; items[j].y += dy * f;
         }
       }
-      items[i].x *= 1 - 0.007 * damp;
-      items[i].y *= 1 - 0.007 * damp;
+      // Gravity toward center
+      items[i].x *= 1 - 0.008 * damp;
+      items[i].y *= 1 - 0.008 * damp;
     }
   }
   return items;
 }
 
+// ── Statistics Panel (left side) ───────────────────────────────────
+function StatsPanel({ allStats, colorMap, onSelect }: {
+  allStats: ProjectStats[];
+  colorMap: Record<number, string>;
+  onSelect: (id: number) => void;
+}) {
+  const totalTasks = allStats.reduce((a, s) => a + s.total, 0);
+  const totalRunning = allStats.reduce((a, s) => a + s.running, 0);
+  const totalDone = allStats.reduce((a, s) => a + s.done, 0);
+  const totalFailed = allStats.reduce((a, s) => a + s.failed, 0);
+
+  // Donut chart data
+  const segments = [
+    { label: "运行中", count: totalRunning, color: "#22c55e" },
+    { label: "已完成", count: totalDone, color: "#4477ff" },
+    { label: "异常", count: totalFailed, color: "#ef4444" },
+    { label: "其他", count: Math.max(0, totalTasks - totalRunning - totalDone - totalFailed), color: "#3c3c5c" },
+  ].filter(s => s.count > 0);
+  const total = Math.max(1, segments.reduce((a, s) => a + s.count, 0));
+
+  // SVG donut
+  const donutR = 36, donutW = 7;
+  let cumAngle = -Math.PI / 2;
+  const arcs = segments.map(seg => {
+    const frac = seg.count / total;
+    const startAngle = cumAngle;
+    cumAngle += frac * 2 * Math.PI;
+    const endAngle = cumAngle;
+    const gap = 0.03;
+    const sa = startAngle + gap;
+    const ea = endAngle - gap;
+    const largeArc = ea - sa > Math.PI ? 1 : 0;
+    return {
+      ...seg,
+      d: `M ${50 + donutR * Math.cos(sa)} ${50 + donutR * Math.sin(sa)} A ${donutR} ${donutR} 0 ${largeArc} 1 ${50 + donutR * Math.cos(ea)} ${50 + donutR * Math.sin(ea)}`,
+    };
+  });
+
+  // Sort projects by weight descending
+  const sorted = [...allStats].sort((a, b) => b.weight - a.weight);
+
+  return (
+    <div style={{
+      width: 220, flexShrink: 0, display: "flex", flexDirection: "column",
+      borderRight: "1px solid var(--border)",
+      background: "var(--background-secondary)",
+      overflow: "hidden",
+    }}>
+      {/* Title */}
+      <div style={{
+        padding: "14px 16px 10px", borderBottom: "1px solid var(--border)",
+        fontSize: 14, fontWeight: 700, color: "var(--text-primary)",
+        letterSpacing: "-0.01em",
+      }}>
+        Statistics
+      </div>
+
+      {/* Donut chart */}
+      <div style={{ padding: "16px 16px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <svg viewBox="0 0 100 100" width={100} height={100}>
+          {arcs.map((arc, i) => (
+            <path key={i} d={arc.d} fill="none" stroke={arc.color}
+              strokeWidth={donutW} strokeLinecap="round" />
+          ))}
+          <text x={50} y={47} textAnchor="middle" fill="var(--text-primary)"
+            fontSize={18} fontWeight={800} fontFamily="system-ui">
+            {totalTasks}
+          </text>
+          <text x={50} y={62} textAnchor="middle" fill="var(--text-tertiary)"
+            fontSize={8} fontFamily="system-ui">
+            Total Tasks
+          </text>
+        </svg>
+
+        {/* Legend */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 12px", marginTop: 10, justifyContent: "center" }}>
+          {segments.map(seg => (
+            <div key={seg.label} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: seg.color, flexShrink: 0 }} />
+              <span style={{ color: "var(--text-secondary)" }}>{seg.label}</span>
+              <span style={{ color: "var(--text-tertiary)", fontWeight: 600, fontFamily: "monospace" }}>{seg.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div style={{ margin: "6px 16px", borderTop: "1px solid var(--border-subtle)" }} />
+
+      {/* Project list */}
+      <div style={{
+        padding: "4px 8px", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em",
+        textTransform: "uppercase", color: "var(--text-tertiary)",
+        marginBottom: 2,
+      }}>
+        项目排名
+      </div>
+
+      <div style={{ flex: 1, overflow: "auto", padding: "0 8px 12px" }}>
+        {sorted.map((s, i) => {
+          const state = resolveState(s);
+          const meta = STATE_META[state];
+          const color = colorMap[s.project.id] ?? meta.base;
+          const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+          return (
+            <button key={s.project.id} onClick={() => onSelect(s.project.id)}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", gap: 8,
+                padding: "7px 8px", borderRadius: 8, border: "none", cursor: "pointer",
+                background: "transparent", textAlign: "left",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--background-tertiary)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+            >
+              {/* Rank */}
+              <span style={{
+                width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 9, fontWeight: 700, fontFamily: "monospace",
+                background: i < 3 ? `${color}22` : "var(--background-tertiary)",
+                color: i < 3 ? color : "var(--text-tertiary)",
+              }}>
+                {i + 1}
+              </span>
+
+              {/* Color dot */}
+              <div style={{
+                width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+                background: color,
+                boxShadow: state === "running" ? `0 0 6px ${color}80` : undefined,
+              }} />
+
+              {/* Name + progress */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 600, color: "var(--text-primary)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {s.project.name}
+                </div>
+                {s.total > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                    <div style={{
+                      flex: 1, height: 2, background: "var(--border)",
+                      borderRadius: 1, overflow: "hidden",
+                    }}>
+                      <div style={{
+                        height: "100%", width: `${pct}%`,
+                        background: color, borderRadius: 1,
+                        transition: "width 0.3s",
+                      }} />
+                    </div>
+                    <span style={{ fontSize: 9, fontFamily: "monospace", color: "var(--text-tertiary)", flexShrink: 0 }}>
+                      {pct}%
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Task count */}
+              <span style={{ fontSize: 10, fontWeight: 600, fontFamily: "monospace", color: "var(--text-tertiary)", flexShrink: 0 }}>
+                {s.total}
+              </span>
+            </button>
+          );
+        })}
+
+        {sorted.length === 0 && (
+          <div style={{ padding: "20px 0", textAlign: "center", fontSize: 11, color: "var(--text-tertiary)" }}>
+            暂无项目
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Tooltip ────────────────────────────────────────────────────────
 function Tooltip({ stats, state, color, mouse }: {
-  stats: ProjectStats; state: VisualState; color: string; mouse: { x:number; y:number };
+  stats: ProjectStats; state: VisualState; color: string; mouse: { x: number; y: number };
 }) {
-  const sf  = STATE_FILL[state];
+  const meta = STATE_META[state];
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+
   return (
     <div style={{
       position: "fixed", left: mouse.x + 16, top: mouse.y - 12,
-      width: 220, zIndex: 1000, pointerEvents: "none",
-      background: "#fff",
-      borderRadius: 12,
-      padding: "12px 14px",
-      boxShadow: "0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06)",
-      border: "1px solid rgba(0,0,0,0.06)",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      width: 200, zIndex: 1000, pointerEvents: "none",
+      background: "var(--background-secondary)",
+      borderRadius: 10,
+      padding: "10px 12px",
+      boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border), 0 0 20px ${color}15`,
+      fontFamily: "system-ui, -apple-system, sans-serif",
     }}>
       {/* Header */}
-      <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
         <div style={{
-          width:28, height:28, borderRadius:"50%", background:color, flexShrink:0,
-          display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:11, fontWeight:800, color:"#fff",
+          width: 24, height: 24, borderRadius: "50%", background: color, flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 10, fontWeight: 800, color: "#fff",
+          boxShadow: `0 0 10px ${color}40`,
         }}>
           {stats.project.name[0].toUpperCase()}
         </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:13, fontWeight:700, color:"#1a2030", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {stats.project.name}
-          </div>
-          <div style={{ fontSize:10, color:"#8090a8", marginTop:1 }}>
-            {stats.project.execution_mode || "smart"} 模式
           </div>
         </div>
         <span style={{
-          fontSize:10, fontWeight:700, color:sf.fill,
-          background:`${sf.fill}18`, borderRadius:5, padding:"2px 7px", flexShrink:0,
+          fontSize: 9, fontWeight: 700, color: meta.base,
+          background: `${meta.base}18`, borderRadius: 4, padding: "2px 6px",
         }}>
-          {sf.label}
+          {meta.label}
         </span>
       </div>
 
-      {/* Stats row */}
-      <div style={{ display:"flex", gap:10, marginBottom:10 }}>
+      {/* Mini stats */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
         {([
-          ["任务", stats.total,  "#546080"],
-          ["运行", stats.running, "#4caf7a"],
-          ["完成", stats.done,    "#5b9bd5"],
-          ["异常", stats.failed,  "#e05a5a"],
-        ] as [string,number,string][]).map(([k,v,c]) => (
-          <div key={k} style={{ flex:1, textAlign:"center",
-            background:"#f5f7fc", borderRadius:7, padding:"5px 2px" }}>
-            <div style={{ fontSize:15, fontWeight:700, color: v>0 ? c : "#c0ccdc" }}>{v}</div>
-            <div style={{ fontSize:8, color:"#9aacbe", letterSpacing:"0.04em" }}>{k}</div>
+          ["任务", stats.total, "var(--text-secondary)"],
+          ["运行", stats.running, "#22c55e"],
+          ["完成", stats.done, "#4477ff"],
+          ["异常", stats.failed, "#ef4444"],
+        ] as [string, number, string][]).map(([k, v, c]) => (
+          <div key={k} style={{
+            flex: 1, textAlign: "center",
+            background: "var(--background-tertiary)", borderRadius: 6, padding: "4px 2px",
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: v > 0 ? c : "var(--text-tertiary)" }}>{v}</div>
+            <div style={{ fontSize: 7, color: "var(--text-tertiary)", letterSpacing: "0.04em" }}>{k}</div>
           </div>
         ))}
       </div>
 
       {/* Active stage */}
       {stats.activeStage && (
-        <div style={{ fontSize:10, color:"#8090a8", marginBottom:8 }}>
-          当前阶段：<span style={{ color:sf.fill, fontWeight:600 }}>
+        <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 6 }}>
+          当前阶段：<span style={{ color: meta.base, fontWeight: 600 }}>
             {STAGE_LABEL[stats.activeStage] ?? stats.activeStage}
           </span>
         </div>
@@ -174,15 +353,14 @@ function Tooltip({ stats, state, color, mouse }: {
       {/* Progress */}
       {stats.total > 0 && (
         <>
-          <div style={{ height:4, background:"#edf0f6", borderRadius:2, overflow:"hidden" }}>
+          <div style={{ height: 3, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
             <div style={{
-              height:"100%", width:`${pct}%`, borderRadius:2,
-              background:`linear-gradient(90deg, ${color}99, ${color})`,
-              transition:"width 0.4s",
+              height: "100%", width: `${pct}%`, borderRadius: 2,
+              background: `linear-gradient(90deg, ${color}99, ${color})`,
             }} />
           </div>
-          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, marginTop:4, color:"#9aacbe" }}>
-            <span>完成进度</span><span style={{ color:sf.fill, fontWeight:600 }}>{pct}%</span>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, marginTop: 3, color: "var(--text-tertiary)" }}>
+            <span>完成进度</span><span style={{ color: meta.base, fontWeight: 600 }}>{pct}%</span>
           </div>
         </>
       )}
@@ -190,89 +368,48 @@ function Tooltip({ stats, state, color, mouse }: {
   );
 }
 
-// ── Action button (below bubble on click) ─────────────────────────
-function ActionBtn({ x, y, label, icon, bg, onClick }: {
-  x:number; y:number; label:string; icon:string; bg:string; onClick:()=>void;
-}) {
-  const [hov, setHov] = useState(false);
-  return (
-    <button style={{
-      position:"absolute", left: x-30, top: y-18,
-      width:60, height:36, borderRadius:8,
-      background: hov ? bg : `${bg}dd`,
-      border:"none", cursor:"pointer", pointerEvents:"auto",
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:1,
-      boxShadow: hov ? `0 4px 16px ${bg}55` : `0 2px 8px ${bg}33`,
-      transition:"all 0.15s",
-      transform: hov ? "translateY(-2px)" : "none",
-    }}
-    onMouseEnter={() => setHov(true)}
-    onMouseLeave={() => setHov(false)}
-    onClick={(e) => { e.stopPropagation(); onClick(); }}
-    >
-      <span style={{ fontSize:13, color:"#fff", lineHeight:1 }}>{icon}</span>
-      <span style={{ fontSize:7.5, color:"rgba(255,255,255,0.85)", fontFamily:"system-ui", letterSpacing:"0.02em" }}>{label}</span>
-    </button>
-  );
-}
+// ── Bottom Metrics Bar ─────────────────────────────────────────────
+function BottomMetrics({ allStats }: { allStats: ProjectStats[] }) {
+  const totalProjects = allStats.length;
+  const totalTasks = allStats.reduce((a, s) => a + s.total, 0);
+  const totalRunning = allStats.reduce((a, s) => a + s.running, 0);
+  const totalDone = allStats.reduce((a, s) => a + s.done, 0);
+  const totalFailed = allStats.reduce((a, s) => a + s.failed, 0);
 
-// ── Quick Actions ──────────────────────────────────────────────────
-function QuickActions({ stats, state, bp, scale, offset, svgRect, onSelect, onClose }: {
-  stats:ProjectStats; state:VisualState; bp:BubbleData;
-  scale:number; offset:{x:number;y:number}; svgRect:DOMRect|null;
-  onSelect:(id:number)=>void; onClose:()=>void;
-}) {
-  const ox = svgRect?.left ?? 0, oy = svgRect?.top ?? 0;
-  const sx = bp.x * scale + offset.x + ox;
-  const sy = bp.y * scale + offset.y + oy;
-  const sr = bp.r * scale;
-  const sf = STATE_FILL[state];
-
-  const actions = [
-    { label:"进入项目", icon:"→", bg:"#5b9bd5", onAct:() => { onSelect(stats.project.id); onClose(); } },
-    { label:"新建任务", icon:"+", bg:"#4caf7a", onAct:() => onClose() },
-    { label:"任务列表", icon:"≡", bg:"#f0a030", onAct:() => onClose() },
-    { label:"运行分析", icon:"▶", bg:"#9b7bd5", onAct:() => onClose() },
+  const items = [
+    { label: "PROJECTS", value: totalProjects, color: "var(--accent)" },
+    { label: "TOTAL TASKS", value: totalTasks, color: "var(--text-primary)" },
+    { label: "RUNNING", value: totalRunning, color: "#22c55e" },
+    { label: "COMPLETED", value: totalDone, color: "#4477ff" },
+    { label: "FAILED", value: totalFailed, color: "#ef4444" },
   ];
-  const arcR = sr + 50;
-  const a0 = -Math.PI * 1.1, a1 = -Math.PI * 0.1;
 
   return (
-    <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:500 }}>
-      {/* Name badge */}
-      <div style={{
-        position:"absolute", left:sx, top: sy - sr - 50,
-        transform:"translateX(-50%)", whiteSpace:"nowrap",
-        background:"#fff", borderRadius:8,
-        border:`1.5px solid ${sf.fill}`,
-        padding:"4px 12px",
-        fontFamily:"system-ui", fontSize:12, fontWeight:700, color:"#1a2030",
-        pointerEvents:"auto",
-        boxShadow:`0 3px 14px ${sf.fill}30`,
-      }}>
-        <span style={{ color:sf.fill, marginRight:6 }}>●</span>
-        {stats.project.name}
-      </div>
-
-      {/* SVG lines */}
-      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none" }}>
-        {actions.map((_, i) => {
-          const a  = a0 + (i / (actions.length-1)) * (a1 - a0);
-          return <line key={i}
-            x1={sx + Math.cos(a)*(sr+2)} y1={sy + Math.sin(a)*(sr+2)}
-            x2={sx + Math.cos(a)*arcR}   y2={sy + Math.sin(a)*arcR}
-            stroke={actions[i].bg} strokeWidth="1" strokeOpacity="0.35" strokeDasharray="3 3"
-          />;
-        })}
-      </svg>
-
-      {/* Buttons */}
-      {actions.map(({ label, icon, bg, onAct }, i) => {
-        const a  = a0 + (i / (actions.length-1)) * (a1 - a0);
-        const bx = sx + Math.cos(a) * arcR;
-        const by = sy + Math.sin(a) * arcR;
-        return <ActionBtn key={label} x={bx} y={by} label={label} icon={icon} bg={bg} onClick={onAct} />;
-      })}
+    <div style={{
+      display: "flex", justifyContent: "center", gap: 48,
+      padding: "12px 24px",
+      borderTop: "1px solid var(--border)",
+      background: "var(--background-secondary)",
+      flexShrink: 0,
+    }}>
+      {items.map(item => (
+        <div key={item.label} style={{ textAlign: "center" }}>
+          <div style={{
+            fontSize: 24, fontWeight: 800, color: item.color,
+            fontFamily: "system-ui", letterSpacing: "-0.02em",
+            lineHeight: 1,
+          }}>
+            {item.value.toLocaleString()}
+          </div>
+          <div style={{
+            fontSize: 8, fontWeight: 600, letterSpacing: "0.12em",
+            color: "var(--text-tertiary)", marginTop: 4,
+            textTransform: "uppercase",
+          }}>
+            {item.label}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -289,59 +426,55 @@ export default function ProjectsCanvas({
 }: ProjectsCanvasProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef  = useRef<SVGSVGElement>(null);
-  const [tasksMap, setTasksMap] = useState<Record<number,Task[]>>({});
-  const [loading,  setLoading]  = useState(true);
+  const [tasksMap, setTasksMap] = useState<Record<number, Task[]>>({});
+  const [loading, setLoading]   = useState(true);
 
-  const [scale,  setScale]  = useState(1);
+  const [scale, setScale]   = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const dragging = useRef(false);
   const lastPt   = useRef({ x: 0, y: 0 });
 
-  const [hoveredId,  setHoveredId]  = useState<number|null>(null);
-  const [selectedId, setSelectedId] = useState<number|null>(null);
-  const [mousePos,   setMousePos]   = useState({ x: 0, y: 0 });
-  const [svgRect,    setSvgRect]    = useState<DOMRect|null>(null);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [mousePos, setMousePos]   = useState({ x: 0, y: 0 });
 
   // Fetch tasks
   useEffect(() => {
     if (projects.length === 0) { setLoading(false); return; }
     let dead = false; setLoading(true);
     Promise.all(projects.map(p =>
-      api.projects.tasks(p.id).then(t => ({ id:p.id, tasks:t }))
-        .catch(() => ({ id:p.id, tasks:[] as Task[] }))
+      api.projects.tasks(p.id).then(t => ({ id: p.id, tasks: t }))
+        .catch(() => ({ id: p.id, tasks: [] as Task[] }))
     )).then(res => {
       if (dead) return;
-      const m: Record<number,Task[]> = {};
+      const m: Record<number, Task[]> = {};
       res.forEach(({ id, tasks }) => { m[id] = tasks; });
       setTasksMap(m); setLoading(false);
     });
     return () => { dead = true; };
   }, [projects]);
 
-  // Build stats + assign bubble colors
+  // Build stats + assign colors
   const { allStats, colorMap } = useMemo(() => {
     const stagePri = ["deploy","monitor","dev","test","plan","ui","prd","analysis","input"];
-    // count per state to assign variant index
     const stateCount: Record<string, number> = {};
     const cmap: Record<number, string> = {};
 
-    const stats = projects.map((p, _i) => {
+    const stats = projects.map(p => {
       const tasks = tasksMap[p.id] ?? [];
-      const running = tasks.filter(t => t.status==="running").length;
-      const done    = tasks.filter(t => t.status==="done").length;
-      const failed  = tasks.filter(t => t.status==="failed").length;
-      const queued  = tasks.filter(t => t.status==="queued").length;
-      const pendingReview = tasks.filter(t => t.status==="waiting_review").length;
-      const weight  = running*10 + failed*8 + pendingReview*6 + queued*5 + done + tasks.length*0.5;
-      const active  = tasks.filter(t => t.status==="running"||t.status==="waiting_review");
-      let activeStage: string|null = null;
+      const running = tasks.filter(t => t.status === "running").length;
+      const done    = tasks.filter(t => t.status === "done").length;
+      const failed  = tasks.filter(t => t.status === "failed").length;
+      const queued  = tasks.filter(t => t.status === "queued").length;
+      const pendingReview = tasks.filter(t => t.status === "waiting_review").length;
+      const weight  = running * 10 + failed * 8 + pendingReview * 6 + queued * 5 + done + tasks.length * 0.5;
+      const active  = tasks.filter(t => t.status === "running" || t.status === "waiting_review");
+      let activeStage: string | null = null;
       for (const stage of stagePri)
-        if (active.some(t => t.stage===stage)) { activeStage = stage; break; }
-      return { project:p, total:tasks.length, running, done, failed, queued,
+        if (active.some(t => t.stage === stage)) { activeStage = stage; break; }
+      return { project: p, total: tasks.length, running, done, failed, queued,
                pendingReview, activeStage, weight };
     });
 
-    // Assign colors after resolving states (so similar states get varied colors)
     stats.forEach(s => {
       const state = resolveState(s);
       const idx = stateCount[state] ?? 0;
@@ -358,267 +491,264 @@ export default function ProjectsCanvas({
   useEffect(() => {
     if (loading || !wrapRef.current) return;
     const { width, height } = wrapRef.current.getBoundingClientRect();
-    setOffset({ x: width/2, y: height/2 });
+    setOffset({ x: width / 2, y: height / 2 });
   }, [loading]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    dragging.current = true; lastPt.current = { x:e.clientX, y:e.clientY };
+    dragging.current = true; lastPt.current = { x: e.clientX, y: e.clientY };
   }, []);
   const onMouseMove = useCallback((e: React.MouseEvent) => {
-    setMousePos({ x:e.clientX, y:e.clientY });
+    setMousePos({ x: e.clientX, y: e.clientY });
     if (!dragging.current) return;
     const dx = e.clientX - lastPt.current.x, dy = e.clientY - lastPt.current.y;
-    lastPt.current = { x:e.clientX, y:e.clientY };
-    setOffset(o => ({ x:o.x+dx, y:o.y+dy }));
+    lastPt.current = { x: e.clientX, y: e.clientY };
+    setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
   }, []);
-  const onMouseUp   = useCallback(() => { dragging.current = false; }, []);
-  const onWheel     = useCallback((e: React.WheelEvent) => {
+  const onMouseUp = useCallback(() => { dragging.current = false; }, []);
+  const onWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
-    setScale(s => Math.min(4, Math.max(0.15, s * (e.deltaY>0 ? 0.92 : 1.09))));
+    setScale(s => Math.min(4, Math.max(0.15, s * (e.deltaY > 0 ? 0.92 : 1.09))));
   }, []);
   const resetView = () => {
     setScale(1);
     if (wrapRef.current) {
       const { width, height } = wrapRef.current.getBoundingClientRect();
-      setOffset({ x:width/2, y:height/2 });
+      setOffset({ x: width / 2, y: height / 2 });
     }
   };
 
-  const hoveredStats  = allStats.find(s => s.project.id === hoveredId);
-  const selectedStats = allStats.find(s => s.project.id === selectedId);
-  const selectedBubble= bubbles.find(b => b.stats.project.id === selectedId);
-  const totalRunning  = allStats.reduce((a,s) => a+s.running, 0);
-  const totalTasks    = allStats.reduce((a,s) => a+s.total,   0);
+  const hoveredStats = allStats.find(s => s.project.id === hoveredId);
 
   return (
     <div style={{
-      display:"flex", flexDirection:"column", height:"100%",
-      background:"#edf0f7",
-      fontFamily:"-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      display: "flex", height: "100%",
+      background: "var(--background)",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     }}>
-      {/* ── Header ─────────────────────────────────────────────── */}
-      <div style={{
-        display:"flex", alignItems:"center", gap:14, flexShrink:0,
-        padding:"10px 20px",
-        borderBottom:"1px solid #dde2ee",
-        background:"#fff",
-      }}>
-        <span style={{ fontSize:13, fontWeight:700, color:"#1a2030", letterSpacing:"-0.02em" }}>
-          项目总览
-        </span>
-        <span style={{
-          fontSize:9, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase",
-          color:"#8a9ab8", background:"#f0f3fa", borderRadius:4, padding:"3px 8px",
+      {/* Left statistics panel */}
+      <StatsPanel allStats={allStats} colorMap={colorMap} onSelect={onSelectProject} />
+
+      {/* Main chart area */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 12, flexShrink: 0,
+          padding: "8px 20px",
+          borderBottom: "1px solid var(--border)",
+          background: "var(--background-secondary)",
         }}>
-          Bubble Chart
-        </span>
-        <span style={{ fontSize:11, color:"#9aacbe" }}>
-          {loading ? "加载中…" : `${projects.length} 项目 · ${totalTasks} 任务 · ${totalRunning} 运行中`}
-        </span>
+          <span style={{
+            fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            color: "var(--accent)", background: "var(--accent-subtle)",
+            borderRadius: 4, padding: "3px 8px",
+          }}>
+            Bubble Chart
+          </span>
+          <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
+            {loading ? "加载中..." : `${projects.length} 项目 · 滚轮缩放 · 拖拽平移 · 双击进入`}
+          </span>
 
-        <div style={{ flex:1 }} />
+          <div style={{ flex: 1 }} />
 
-        {/* Legend */}
-        {(Object.entries(STATE_FILL) as [VisualState, typeof STATE_FILL[VisualState]][])
-          .filter(([k]) => k !== "idle")
-          .map(([k, v]) => (
-          <div key={k} style={{ display:"flex", alignItems:"center", gap:5, fontSize:11, color:"#6a7a90" }}>
-            <div style={{ width:8, height:8, borderRadius:"50%", background:v.fill, flexShrink:0 }} />
-            {v.label}
-          </div>
-        ))}
-
-        <button onClick={resetView} style={{
-          marginLeft:8, fontSize:11, color:"#6a7a90", background:"#f0f3fa",
-          border:"1px solid #dde2ee", borderRadius:6, padding:"4px 10px", cursor:"pointer",
-        }}>复位</button>
-      </div>
-
-      {/* ── Canvas ─────────────────────────────────────────────── */}
-      <div ref={wrapRef} style={{ flex:1, position:"relative", overflow:"hidden", cursor:"grab" }}
-        onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}    onMouseLeave={onMouseUp}
-        onWheel={onWheel}        onClick={() => setSelectedId(null)}
-      >
-        <svg ref={svgRef} width="100%" height="100%" style={{ display:"block" }}
-          onMouseEnter={() => setSvgRect(svgRef.current?.getBoundingClientRect() ?? null)}
-        >
-          <defs>
-            {/* Shared highlight gradient (top-left shimmer) */}
-            <radialGradient id="bhl" cx="35%" cy="28%" r="65%">
-              <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.35"/>
-              <stop offset="100%" stopColor="#000000" stopOpacity="0.08"/>
-            </radialGradient>
-            {/* Running pulse filter */}
-            <filter id="glow-run" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="4" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="glow-fail" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="5" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <rect width="100%" height="100%" fill="#edf0f7"/>
-
-          <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
-            {!loading && bubbles.map(({ x, y, r, stats }) => {
-              const state  = resolveState(stats);
-              const color  = colorMap[stats.project.id] ?? STATE_FILL[state].fill;
-              const sf     = STATE_FILL[state];
-              const isHov  = hoveredId  === stats.project.id;
-              const isSel  = selectedId === stats.project.id;
-              const focusOn = hoveredId !== null || selectedId !== null;
-              const isFocus = isHov || isSel;
-              const groupOp = focusOn && !isFocus ? 0.13 : 1;
-
-              // Name truncation by bubble size
-              const maxChars = Math.max(3, Math.floor(r / 8));
-              const label = stats.project.name.length <= maxChars
-                ? stats.project.name
-                : stats.project.name.substring(0, maxChars - 1) + "…";
-              const pct = stats.total > 0 ? stats.done / stats.total : 0;
-
-              return (
-                <g key={stats.project.id}
-                  style={{ opacity:groupOp, transition:"opacity 0.28s ease" }}
-                >
-                  {/* Pulsing halo — running */}
-                  {state === "running" && (
-                    <circle cx={x} cy={y} r={r+6}
-                      fill={color} fillOpacity={0.18}
-                      style={{ animation:"glowBreathGreen 2s ease-in-out infinite" }}
-                    />
-                  )}
-                  {/* Alert halo — failed */}
-                  {state === "failed" && (
-                    <circle cx={x} cy={y} r={r+6}
-                      fill={color} fillOpacity={0.22}
-                      style={{ animation:"glowBreathRed 1s ease-in-out infinite" }}
-                    />
-                  )}
-
-                  {/* Base fill */}
-                  <circle cx={x} cy={y} r={r} fill={color}
-                    filter={state==="running" ? "url(#glow-run)" : state==="failed" ? "url(#glow-fail)" : undefined}
-                  />
-
-                  {/* Shared highlight overlay (gives every bubble a 3D sheen) */}
-                  <circle cx={x} cy={y} r={r} fill="url(#bhl)"/>
-
-                  {/* Selected ring */}
-                  {isFocus && (
-                    <circle cx={x} cy={y} r={r+3}
-                      fill="none" stroke={color} strokeWidth="2.5" strokeOpacity="0.5"
-                    />
-                  )}
-
-                  {/* Progress arc (thin, inside) */}
-                  {stats.total > 0 && pct > 0 && (
-                    <circle cx={x} cy={y} r={r-4}
-                      fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2"
-                      strokeDasharray={`${2*Math.PI*(r-4)*pct} ${2*Math.PI*(r-4)*(1-pct)}`}
-                      strokeDashoffset={2*Math.PI*(r-4)*0.25}
-                      strokeLinecap="round"
-                    />
-                  )}
-
-                  {/* Project name */}
-                  {r >= 30 && (
-                    <text x={x} y={stats.total > 0 && r >= 48 ? y-2 : y+4}
-                      textAnchor="middle" dominantBaseline="middle"
-                      fill={sf.text} fillOpacity={isFocus ? 1 : 0.92}
-                      fontSize={r>=70 ? 14 : r>=50 ? 12 : r>=36 ? 10 : 8}
-                      fontWeight={700}
-                      fontFamily="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
-                      style={{ userSelect:"none", pointerEvents:"none" }}
-                    >
-                      {label}
-                    </text>
-                  )}
-                  {/* Task count (only in larger bubbles) */}
-                  {r >= 48 && stats.total > 0 && (
-                    <text x={x} y={y+14}
-                      textAnchor="middle" dominantBaseline="middle"
-                      fill={sf.text} fillOpacity={0.65}
-                      fontSize={r>=60 ? 10 : 8}
-                      fontFamily="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
-                      style={{ userSelect:"none", pointerEvents:"none" }}
-                    >
-                      {stats.running>0 ? `▶${stats.running} ` : ""}{stats.total}T
-                    </text>
-                  )}
-
-                  {/* Hit area */}
-                  <circle cx={x} cy={y} r={r} fill="transparent" style={{ cursor:"pointer" }}
-                    onMouseEnter={() => { if (!selectedId) setHoveredId(stats.project.id); }}
-                    onMouseLeave={() => setHoveredId(null)}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSvgRect(svgRef.current?.getBoundingClientRect() ?? null);
-                      setSelectedId(prev => prev===stats.project.id ? null : stats.project.id);
-                      setHoveredId(null);
-                    }}
-                    onDoubleClick={(e) => { e.stopPropagation(); onSelectProject(stats.project.id); }}
-                  />
-                </g>
-              );
-            })}
-          </g>
-        </svg>
-
-        {/* Empty */}
-        {!loading && projects.length === 0 && (
-          <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <div style={{ textAlign:"center", color:"#9aacbe" }}>
-              <div style={{ fontSize:48, marginBottom:10, opacity:0.3 }}>◉</div>
-              <div style={{ fontSize:13 }}>暂无项目，请先创建项目</div>
+          {/* Legend */}
+          {(Object.entries(STATE_META) as [VisualState, typeof STATE_META[VisualState]][])
+            .filter(([k]) => k !== "idle")
+            .map(([k, v]) => (
+            <div key={k} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, color: "var(--text-tertiary)" }}>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: v.base, flexShrink: 0 }} />
+              {v.label}
             </div>
-          </div>
-        )}
-        {/* Loading */}
-        {loading && (
-          <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <div style={{ display:"flex", gap:7 }}>
-              {[0,1,2].map(i => (
-                <div key={i} style={{
-                  width:8, height:8, borderRadius:"50%", background:"#5b9bd5",
-                  animation:`dotPulse 1.2s ease-in-out ${i*0.22}s infinite`,
-                }} />
-              ))}
-            </div>
-          </div>
-        )}
+          ))}
 
-        {/* Tooltip */}
-        {!selectedId && hoveredId && hoveredStats && (
-          <Tooltip
-            stats={hoveredStats}
-            state={resolveState(hoveredStats)}
-            color={colorMap[hoveredStats.project.id] ?? "#5b9bd5"}
-            mouse={mousePos}
-          />
-        )}
-
-        {/* Quick actions */}
-        {selectedId && selectedStats && selectedBubble && (
-          <QuickActions
-            stats={selectedStats}
-            state={resolveState(selectedStats)}
-            bp={selectedBubble}
-            scale={scale} offset={offset} svgRect={svgRect}
-            onSelect={onSelectProject} onClose={() => setSelectedId(null)}
-          />
-        )}
-
-        {/* Zoom badge */}
-        <div style={{ position:"absolute", bottom:12, right:12, fontSize:10, color:"#9aacbe",
-          background:"rgba(255,255,255,0.7)", borderRadius:5, padding:"3px 8px",
-          backdropFilter:"blur(4px)", border:"1px solid #dde2ee" }}>
-          {Math.round(scale*100)}%
+          <button onClick={resetView} style={{
+            marginLeft: 6, fontSize: 10, color: "var(--text-secondary)",
+            background: "var(--background-tertiary)",
+            border: "1px solid var(--border)", borderRadius: 6,
+            padding: "4px 10px", cursor: "pointer",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--border)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "var(--background-tertiary)")}
+          >
+            复位
+          </button>
         </div>
+
+        {/* Canvas */}
+        <div ref={wrapRef} style={{ flex: 1, position: "relative", overflow: "hidden", cursor: "grab" }}
+          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+          onWheel={onWheel}
+        >
+          <svg ref={svgRef} width="100%" height="100%" style={{ display: "block" }}>
+            <defs>
+              {/* 3D sheen gradient */}
+              <radialGradient id="bubble-sheen" cx="38%" cy="30%" r="60%">
+                <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.18"/>
+                <stop offset="100%" stopColor="#000000" stopOpacity="0.12"/>
+              </radialGradient>
+              {/* Glow filters */}
+              <filter id="glow-active" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <rect width="100%" height="100%" fill="var(--background)" />
+
+            {/* Subtle grid dots */}
+            <pattern id="grid-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="20" cy="20" r="0.5" fill="var(--border-subtle)" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#grid-dots)" opacity="0.5" />
+
+            <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
+              {!loading && bubbles.map(({ x, y, r, stats }) => {
+                const state = resolveState(stats);
+                const color = colorMap[stats.project.id] ?? STATE_META[state].base;
+                const meta  = STATE_META[state];
+                const isHov = hoveredId === stats.project.id;
+                const hasFocus = hoveredId !== null;
+                const groupOp = hasFocus && !isHov ? 0.25 : 1;
+
+                // Name truncation
+                const maxChars = Math.max(3, Math.floor(r / 7));
+                const label = stats.project.name.length <= maxChars
+                  ? stats.project.name
+                  : stats.project.name.substring(0, maxChars - 1) + "...";
+                const pct = stats.total > 0 ? stats.done / stats.total : 0;
+                const isActive = state === "running" || state === "failed";
+
+                return (
+                  <g key={stats.project.id}
+                    style={{ opacity: groupOp, transition: "opacity 0.25s ease" }}
+                  >
+                    {/* Outer glow for active states */}
+                    {isActive && (
+                      <circle cx={x} cy={y} r={r + 8}
+                        fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.2"
+                        style={{ animation: state === "running"
+                          ? "glowBreathGreen 2.5s ease-in-out infinite"
+                          : "glowBreathRed 1.5s ease-in-out infinite" }}
+                      />
+                    )}
+
+                    {/* Soft shadow */}
+                    <circle cx={x} cy={y + 3} r={r} fill="rgba(0,0,0,0.25)"
+                      filter="url(#glow-active)" style={{ opacity: 0.15 }} />
+
+                    {/* Base circle */}
+                    <circle cx={x} cy={y} r={r} fill={color}
+                      style={{ transition: "r 0.3s" }}
+                    />
+
+                    {/* 3D sheen overlay */}
+                    <circle cx={x} cy={y} r={r} fill="url(#bubble-sheen)" />
+
+                    {/* Hover ring */}
+                    {isHov && (
+                      <circle cx={x} cy={y} r={r + 3}
+                        fill="none" stroke={color} strokeWidth="2" strokeOpacity="0.6"
+                      />
+                    )}
+
+                    {/* Progress arc */}
+                    {stats.total > 0 && pct > 0 && (
+                      <circle cx={x} cy={y} r={r - 4}
+                        fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2"
+                        strokeDasharray={`${2 * Math.PI * (r - 4) * pct} ${2 * Math.PI * (r - 4) * (1 - pct)}`}
+                        strokeDashoffset={2 * Math.PI * (r - 4) * 0.25}
+                        strokeLinecap="round"
+                      />
+                    )}
+
+                    {/* Project name */}
+                    {r >= 28 && (
+                      <text x={x} y={stats.total > 0 && r >= 48 ? y - 3 : y + 4}
+                        textAnchor="middle" dominantBaseline="middle"
+                        fill={meta.text} fillOpacity={isHov ? 1 : 0.9}
+                        fontSize={r >= 70 ? 13 : r >= 50 ? 11 : r >= 36 ? 9 : 7.5}
+                        fontWeight={700}
+                        fontFamily="system-ui, -apple-system, sans-serif"
+                        style={{ userSelect: "none", pointerEvents: "none" }}
+                      >
+                        {label}
+                      </text>
+                    )}
+                    {/* Task count */}
+                    {r >= 48 && stats.total > 0 && (
+                      <text x={x} y={y + 13}
+                        textAnchor="middle" dominantBaseline="middle"
+                        fill={meta.text} fillOpacity={0.55}
+                        fontSize={r >= 60 ? 9 : 7.5}
+                        fontFamily="monospace"
+                        style={{ userSelect: "none", pointerEvents: "none" }}
+                      >
+                        {stats.running > 0 ? `${stats.running} running` : `${stats.total} tasks`}
+                      </text>
+                    )}
+
+                    {/* Hit area */}
+                    <circle cx={x} cy={y} r={r} fill="transparent" style={{ cursor: "pointer" }}
+                      onMouseEnter={() => setHoveredId(stats.project.id)}
+                      onMouseLeave={() => setHoveredId(null)}
+                      onDoubleClick={(e) => { e.stopPropagation(); onSelectProject(stats.project.id); }}
+                    />
+                  </g>
+                );
+              })}
+            </g>
+          </svg>
+
+          {/* Empty state */}
+          {!loading && projects.length === 0 && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ textAlign: "center", color: "var(--text-tertiary)" }}>
+                <div style={{ fontSize: 48, marginBottom: 10, opacity: 0.15 }}>◉</div>
+                <div style={{ fontSize: 13 }}>暂无项目，请先创建项目</div>
+              </div>
+            </div>
+          )}
+
+          {/* Loading */}
+          {loading && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ display: "flex", gap: 7 }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{
+                    width: 8, height: 8, borderRadius: "50%", background: "var(--accent)",
+                    animation: `dotPulse 1.2s ease-in-out ${i * 0.22}s infinite`,
+                  }} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tooltip */}
+          {hoveredId && hoveredStats && (
+            <Tooltip
+              stats={hoveredStats}
+              state={resolveState(hoveredStats)}
+              color={colorMap[hoveredStats.project.id] ?? "#4477ff"}
+              mouse={mousePos}
+            />
+          )}
+
+          {/* Zoom badge */}
+          <div style={{
+            position: "absolute", bottom: 12, right: 12, fontSize: 10,
+            color: "var(--text-tertiary)",
+            background: "var(--background-secondary)",
+            borderRadius: 5, padding: "3px 8px",
+            border: "1px solid var(--border)",
+          }}>
+            {Math.round(scale * 100)}%
+          </div>
+        </div>
+
+        {/* Bottom metrics bar */}
+        <BottomMetrics allStats={allStats} />
       </div>
     </div>
   );

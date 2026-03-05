@@ -87,18 +87,12 @@ function BarTile({ id, sys }: { id: MetricId; sys: SystemMetrics | null }) {
     if (v >= 1024)        return `${Math.round(v / 1024)} MB/s`;
     return `${Math.round(v)} KB/s`;
   }
-  function fmtM(v: number | null | undefined) {
-    if (v == null) return "—";
-    if (v >= 1024) return `${Math.round(v / 1024)} GB/s`;
-    return `${Math.round(v)} MB/s`;
-  }
-
   const lines: [string, string] = (() => {
     switch (id) {
       case "cpu":     return ["CPU",             sys ? `${Math.round(sys.cpu.percent)}%` : "—"];
       case "mem":     return ["MEM",             sys ? `${Math.round(sys.memory.percent)}%` : "—"];
       case "net":     return [`↑ ${fmtK(sys?.network.out_kbps)}`, `↓ ${fmtK(sys?.network.in_kbps)}`];
-      case "disk":    return ["DISK",            sys ? `${Math.round(sys.disk_space.percent)}%` : "—"];
+      case "disk":    return ["DISK",            sys?.disk_space.percent != null ? `${Math.round(sys.disk_space.percent)}%` : "—"];
       case "sensors": return ["TEMP",            cpuTemp ? `${cpuTemp.current}°` : "—"];
     }
   })();

@@ -48,8 +48,6 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
     t.sensor.toLowerCase().includes("nvme") && t.label.toLowerCase() === "composite"
   ) ?? temps.find(t => t.sensor.toLowerCase().includes("nvme")) ?? null;
 
-  const fanInfo   = fans[0] ?? null;
-
   // display name: prefer label when it differs from sensor (more descriptive)
   function displayName(t: { sensor: string; label: string }) {
     if (!t.label || t.label === t.sensor) return t.sensor;

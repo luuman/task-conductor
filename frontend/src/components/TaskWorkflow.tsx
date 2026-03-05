@@ -296,13 +296,11 @@ interface StageDetailPanelProps {
   artifacts: StageArtifact[];
   onClose: () => void;
   onRunStage: (stage: string) => void;
-  onApprove: () => void;
-  onAdvance: () => void;
   onRefresh: () => void;
 }
 
 function StageDetailPanel({
-  stage, task, artifacts, onClose, onRunStage, onApprove, onAdvance, onRefresh
+  stage, task, artifacts, onClose, onRunStage, onRefresh
 }: StageDetailPanelProps) {
   const currentIdx = STAGE_ORDER.indexOf(task.stage);
   const stageIdx   = STAGE_ORDER.indexOf(stage);
@@ -318,7 +316,7 @@ function StageDetailPanel({
   const [showReject, setShowReject] = useState(false);
   const [acting, setActing] = useState(false);
 
-  const act = async (fn: () => Promise<void>) => {
+  const act = async (fn: () => void | Promise<void>) => {
     setActing(true);
     try { await fn(); onRefresh(); } catch (e) { console.error(e); } finally { setActing(false); }
   };
@@ -531,7 +529,7 @@ export interface TaskWorkflowProps {
   onRefresh?: () => void;
 }
 
-export function TaskWorkflow({ task, artifacts = [], onRunStage, onRefresh }: TaskWorkflowProps) {
+export function TaskWorkflow({ task, artifacts = [], onRefresh }: TaskWorkflowProps) {
   const [selectedStage, setSelectedStage] = useState<string | null>(task.stage);
 
   const handleClickStage = useCallback((stage: string) => {
@@ -545,16 +543,6 @@ export function TaskWorkflow({ task, artifacts = [], onRunStage, onRefresh }: Ta
 
   const handleRunStage = async (stage: string) => {
     await api.pipeline.runStage(task.id, stage);
-    onRefresh?.();
-  };
-
-  const handleApprove = async () => {
-    await api.tasks.approve(task.id, "approve");
-    onRefresh?.();
-  };
-
-  const handleAdvance = async () => {
-    await api.tasks.advance(task.id);
     onRefresh?.();
   };
 
@@ -594,8 +582,6 @@ export function TaskWorkflow({ task, artifacts = [], onRunStage, onRefresh }: Ta
           artifacts={artifacts}
           onClose={() => setSelectedStage(null)}
           onRunStage={handleRunStage}
-          onApprove={handleApprove}
-          onAdvance={handleAdvance}
           onRefresh={onRefresh ?? (() => {})}
         />
       )}

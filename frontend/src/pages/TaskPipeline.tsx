@@ -11,7 +11,6 @@ interface TaskPipelineProps {
   onBack: () => void;
 }
 
-const STAGES = ["input", "analysis", "prd", "ui", "plan", "dev", "test", "deploy", "monitor"];
 const STAGE_LABEL: Record<string, string> = {
   input: "需求", analysis: "分析", prd: "PRD", ui: "UI设计",
   plan: "技术方案", dev: "开发", test: "测试", deploy: "发布", monitor: "监控",
@@ -110,25 +109,10 @@ function CriticNotes({ notes }: { notes: string }) {
 }
 
 // ── ArtifactCard ─────────────────────────────────────────────────
-function ArtifactCard({ artifact, taskId, onApprove }: {
+function ArtifactCard({ artifact }: {
   artifact: StageArtifact;
-  taskId: number;
-  onApprove?: () => void;
 }) {
   const [expanded, setExpanded] = useState(true);
-  const [rejectReason, setRejectReason] = useState("");
-  const [showReject, setShowReject] = useState(false);
-
-  const handleApprove = async () => {
-    await api.tasks.approve(taskId, "approve");
-    onApprove?.();
-  };
-  const handleReject = async () => {
-    if (!rejectReason.trim()) return;
-    await api.tasks.approve(taskId, "reject", rejectReason);
-    setShowReject(false);
-    onApprove?.();
-  };
 
   // Try to pretty-print JSON content
   let displayContent = artifact.content;
@@ -240,8 +224,6 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
-
-  const stageIdx = task ? STAGES.indexOf(task.stage) : -1;
 
   const refreshTask = () => {
     api.tasks.get(taskId).then(setTask).catch(console.error);
@@ -382,8 +364,6 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
                   <ArtifactCard
                     key={a.id}
                     artifact={a}
-                    taskId={taskId}
-                    onApprove={refreshTask}
                   />
                 ))}
               </div>

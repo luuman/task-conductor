@@ -148,8 +148,6 @@ export default function App() {
         projectsLoaded={projectsLoaded}
         onOpenTask={handleOpenTask}
         onSelectProject={handleSelectProject}
-        liveEvents={liveEvents}
-        wsStatus={monitorStatus}
       />
     );
   };
@@ -163,7 +161,6 @@ export default function App() {
       projects={projects}
       onProjectCreated={handleProjectCreated}
       connectionStatus={connectionStatus}
-      onDisconnect={() => setAuthed(false)}
     >
       {renderContent()}
     </AppShell>

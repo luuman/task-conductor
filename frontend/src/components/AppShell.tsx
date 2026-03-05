@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { PerfBottomBar } from "../modules/perf/bar/PerfBottomBar";
-import { api, clearConfig, type Project } from "../lib/api";
+import { api, type Project } from "../lib/api";
 
 interface AppShellProps {
   onPage: string;
@@ -14,7 +14,6 @@ interface AppShellProps {
   projects: Project[];
   onProjectCreated: (p: Project) => void;
   connectionStatus: "connected" | "disconnected" | "connecting";
-  onDisconnect: () => void;
 }
 
 export function AppShell({
@@ -27,7 +26,6 @@ export function AppShell({
   projects,
   onProjectCreated,
   connectionStatus,
-  onDisconnect,
 }: AppShellProps) {
   const [showNewProject, setShowNewProject] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -70,7 +68,6 @@ export function AppShell({
         {children}
         <PerfBottomBar
           connectionStatus={connectionStatus}
-          onDisconnect={() => { clearConfig(); onDisconnect(); }}
         />
       </div>
 
