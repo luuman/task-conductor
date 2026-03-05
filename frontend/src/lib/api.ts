@@ -375,8 +375,13 @@ export const api = {
   agentInfo: () => request<{ tunnel_url: string | null; version: string }>("/agent/info"),
   projects: {
     list: () => request<Project[]>("/api/projects"),
-    create: (body: { name: string; repo_url: string; max_parallel?: number; execution_mode?: string }) =>
+    create: (body: { name: string; repo_url: string; max_parallel?: number; execution_mode?: string; is_test?: boolean }) =>
       request<Project>("/api/projects", { method: "POST", body: JSON.stringify(body) }),
+    delete: (projectId: number) =>
+      request<{ ok: boolean }>(`/api/projects/${projectId}`, { method: "DELETE" }),
+    scan: () => request<Project[]>("/api/projects/scan", { method: "POST" }),
+    updateSort: (projectId: number, body: { sort_order?: number; is_test?: boolean }) =>
+      request<Project>(`/api/projects/${projectId}/sort`, { method: "PUT", body: JSON.stringify(body) }),
     tasks: (projectId: number) => request<Task[]>(`/api/projects/${projectId}/tasks`),
     knowledge: (projectId: number) =>
       request<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`),
