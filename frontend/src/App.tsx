@@ -172,6 +172,7 @@ export default function App() {
       activeProjectId={activeProjectId}
       projects={projects}
       onProjectCreated={handleProjectCreated}
+      onRefreshProjects={refreshProjects}
       connectionStatus={connectionStatus}
     >
       {renderContent()}
