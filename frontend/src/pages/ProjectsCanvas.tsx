@@ -603,10 +603,7 @@ export default function ProjectsCanvas({
             <pattern id="grid-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
               <circle cx="20" cy="20" r="0.5" fill="var(--border-subtle)" />
             </pattern>
-            <rect width="100%" height="100%" fill="url(#grid-dots)" opacity="0.5" />
-
-            {/* Click background to deselect */}
-            <rect width="100%" height="100%" fill="transparent"
+            <rect width="100%" height="100%" fill="url(#grid-dots)" opacity="0.5"
               onClick={() => setSelectedId(null)} />
 
             <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
