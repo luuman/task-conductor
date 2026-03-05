@@ -604,98 +604,163 @@ export default function ProjectsCanvas({
             </pattern>
             <rect width="100%" height="100%" fill="url(#grid-dots)" opacity="0.5" />
 
+            {/* Click background to deselect */}
+            <rect width="100%" height="100%" fill="transparent"
+              onClick={() => setSelectedId(null)} />
+
             <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
               {!loading && bubbles.map(({ x, y, r, stats }) => {
                 const state = resolveState(stats);
                 const color = colorMap[stats.project.id] ?? STATE_META[state].base;
                 const meta  = STATE_META[state];
                 const isHov = hoveredId === stats.project.id;
-                const hasFocus = hoveredId !== null;
-                const groupOp = hasFocus && !isHov ? 0.25 : 1;
+                const isSel = selectedId === stats.project.id;
+                const hasFocus = hoveredId !== null || selectedId !== null;
+                const groupOp = hasFocus && !isHov && !isSel ? 0.3 : 1;
 
                 // Name truncation
-                const maxChars = Math.max(3, Math.floor(r / 7));
+                const maxChars = Math.max(3, Math.floor(r / 6.5));
                 const label = stats.project.name.length <= maxChars
                   ? stats.project.name
-                  : stats.project.name.substring(0, maxChars - 1) + "...";
-                const pct = stats.total > 0 ? stats.done / stats.total : 0;
-                const isActive = state === "running" || state === "failed";
+                  : stats.project.name.substring(0, maxChars - 1) + "…";
+
+                // Stage / status summary
+                const statusLine = stats.running > 0
+                  ? `${stats.running} 运行中`
+                  : stats.pendingReview > 0
+                  ? `${stats.pendingReview} 待审批`
+                  : stats.failed > 0
+                  ? `${stats.failed} 异常`
+                  : stats.total > 0
+                  ? `${stats.done}/${stats.total} 完成`
+                  : "空闲";
+
+                const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+
+                // Action button positions (around the bubble when selected)
+                const actionBtns = [
+                  { label: "进入", angle: -90, action: () => onSelectProject(stats.project.id) },
+                  { label: "任务", angle: 0, action: () => onSelectProject(stats.project.id) },
+                  { label: "详情", angle: 180, action: () => onSelectProject(stats.project.id) },
+                ];
 
                 return (
                   <g key={stats.project.id}
                     style={{ opacity: groupOp, transition: "opacity 0.25s ease" }}
                   >
-                    {/* Outer glow for active states */}
-                    {isActive && (
-                      <circle cx={x} cy={y} r={r + 8}
-                        fill="none" stroke={color} strokeWidth="1" strokeOpacity="0.2"
-                        style={{ animation: state === "running"
-                          ? "glowBreathGreen 2.5s ease-in-out infinite"
-                          : "glowBreathRed 1.5s ease-in-out infinite" }}
-                      />
-                    )}
-
                     {/* Soft shadow */}
-                    <circle cx={x} cy={y + 3} r={r} fill="rgba(0,0,0,0.25)"
-                      filter="url(#glow-active)" style={{ opacity: 0.15 }} />
+                    <circle cx={x} cy={y + 2} r={r * 0.95} fill="rgba(0,0,0,0.3)"
+                      filter="url(#glow-active)" style={{ opacity: 0.12 }} />
 
                     {/* Base circle */}
                     <circle cx={x} cy={y} r={r} fill={color}
-                      style={{ transition: "r 0.3s" }}
+                      style={{ transition: "r 0.3s, fill 0.3s" }}
                     />
 
                     {/* 3D sheen overlay */}
                     <circle cx={x} cy={y} r={r} fill="url(#bubble-sheen)" />
 
-                    {/* Hover ring */}
-                    {isHov && (
-                      <circle cx={x} cy={y} r={r + 3}
-                        fill="none" stroke={color} strokeWidth="2" strokeOpacity="0.6"
-                      />
-                    )}
+                    {/* ── Bubble content ── */}
+                    {r >= 32 && (
+                      <>
+                        {/* Project name */}
+                        <text x={x} y={r >= 55 ? y - r * 0.18 : y - 1}
+                          textAnchor="middle" dominantBaseline="middle"
+                          fill={meta.text} fillOpacity={0.95}
+                          fontSize={r >= 80 ? 14 : r >= 60 ? 12 : r >= 45 ? 10 : 8}
+                          fontWeight={700}
+                          fontFamily="system-ui, -apple-system, sans-serif"
+                          style={{ userSelect: "none", pointerEvents: "none" }}
+                        >
+                          {label}
+                        </text>
 
-                    {/* Progress arc */}
-                    {stats.total > 0 && pct > 0 && (
-                      <circle cx={x} cy={y} r={r - 4}
-                        fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2"
-                        strokeDasharray={`${2 * Math.PI * (r - 4) * pct} ${2 * Math.PI * (r - 4) * (1 - pct)}`}
-                        strokeDashoffset={2 * Math.PI * (r - 4) * 0.25}
-                        strokeLinecap="round"
-                      />
-                    )}
+                        {/* Status line */}
+                        {r >= 55 && (
+                          <text x={x} y={y + r * 0.08}
+                            textAnchor="middle" dominantBaseline="middle"
+                            fill={meta.text} fillOpacity={0.5}
+                            fontSize={r >= 70 ? 9.5 : 8}
+                            fontFamily="system-ui"
+                            style={{ userSelect: "none", pointerEvents: "none" }}
+                          >
+                            {statusLine}
+                          </text>
+                        )}
 
-                    {/* Project name */}
-                    {r >= 28 && (
-                      <text x={x} y={stats.total > 0 && r >= 48 ? y - 3 : y + 4}
-                        textAnchor="middle" dominantBaseline="middle"
-                        fill={meta.text} fillOpacity={isHov ? 1 : 0.9}
-                        fontSize={r >= 70 ? 13 : r >= 50 ? 11 : r >= 36 ? 9 : 7.5}
-                        fontWeight={700}
-                        fontFamily="system-ui, -apple-system, sans-serif"
-                        style={{ userSelect: "none", pointerEvents: "none" }}
-                      >
-                        {label}
-                      </text>
-                    )}
-                    {/* Task count */}
-                    {r >= 48 && stats.total > 0 && (
-                      <text x={x} y={y + 13}
-                        textAnchor="middle" dominantBaseline="middle"
-                        fill={meta.text} fillOpacity={0.55}
-                        fontSize={r >= 60 ? 9 : 7.5}
-                        fontFamily="monospace"
-                        style={{ userSelect: "none", pointerEvents: "none" }}
-                      >
-                        {stats.running > 0 ? `${stats.running} running` : `${stats.total} tasks`}
-                      </text>
+                        {/* Progress bar (horizontal, inside bubble) */}
+                        {r >= 55 && stats.total > 0 && (
+                          <g style={{ pointerEvents: "none" }}>
+                            <rect x={x - r * 0.45} y={y + r * 0.28} width={r * 0.9} height={3}
+                              rx={1.5} fill="rgba(255,255,255,0.15)" />
+                            <rect x={x - r * 0.45} y={y + r * 0.28}
+                              width={r * 0.9 * (pct / 100)} height={3}
+                              rx={1.5} fill="rgba(255,255,255,0.5)" />
+                            <text x={x + r * 0.45 + 4} y={y + r * 0.3 + 1}
+                              fontSize={7} fill={meta.text} fillOpacity={0.4}
+                              fontFamily="monospace" dominantBaseline="middle"
+                              style={{ userSelect: "none" }}
+                            >
+                              {pct}%
+                            </text>
+                          </g>
+                        )}
+
+                        {/* Active stage tag */}
+                        {r >= 65 && stats.activeStage && (
+                          <g style={{ pointerEvents: "none" }}>
+                            <rect x={x - 18} y={y + r * 0.44} width={36} height={14}
+                              rx={7} fill="rgba(255,255,255,0.15)" />
+                            <text x={x} y={y + r * 0.44 + 7.5}
+                              textAnchor="middle" dominantBaseline="middle"
+                              fill={meta.text} fillOpacity={0.7}
+                              fontSize={7.5} fontWeight={600}
+                              fontFamily="system-ui"
+                              style={{ userSelect: "none" }}
+                            >
+                              {STAGE_LABEL[stats.activeStage] ?? stats.activeStage}
+                            </text>
+                          </g>
+                        )}
+                      </>
                     )}
 
                     {/* Hit area */}
-                    <circle cx={x} cy={y} r={r} fill="transparent" style={{ cursor: "pointer" }}
+                    <circle cx={x} cy={y} r={r} fill="transparent"
+                      style={{ cursor: "pointer" }}
                       onMouseEnter={() => setHoveredId(stats.project.id)}
                       onMouseLeave={() => setHoveredId(null)}
-                      onDoubleClick={(e) => { e.stopPropagation(); onSelectProject(stats.project.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedId(prev => prev === stats.project.id ? null : stats.project.id);
+                      }}
                     />
+
+                    {/* ── Action buttons (on click) ── */}
+                    {isSel && actionBtns.map((btn, bi) => {
+                      const rad = (btn.angle * Math.PI) / 180;
+                      const dist = r + 28;
+                      const bx = x + Math.cos(rad) * dist;
+                      const by = y + Math.sin(rad) * dist;
+                      return (
+                        <g key={bi} style={{ cursor: "pointer" }}
+                          onClick={(e) => { e.stopPropagation(); btn.action(); }}
+                        >
+                          <circle cx={bx} cy={by} r={16}
+                            fill="var(--background-secondary)"
+                            stroke={color} strokeWidth={1.5} strokeOpacity={0.6}
+                          />
+                          <text x={bx} y={by + 0.5}
+                            textAnchor="middle" dominantBaseline="middle"
+                            fill={color} fontSize={8} fontWeight={600}
+                            fontFamily="system-ui"
+                            style={{ userSelect: "none" }}
+                          >
+                            {btn.label}
+                          </text>
+                        </g>
+                      );
+                    })}
                   </g>
                 );
               })}
