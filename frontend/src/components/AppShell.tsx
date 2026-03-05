@@ -13,6 +13,7 @@ interface AppShellProps {
   activeProjectId: number | null;
   projects: Project[];
   onProjectCreated: (p: Project) => void;
+  onRefreshProjects?: () => void;
   connectionStatus: "connected" | "disconnected" | "connecting";
 }
 
