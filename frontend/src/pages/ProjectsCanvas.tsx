@@ -435,6 +435,7 @@ export default function ProjectsCanvas({
   const lastPt   = useRef({ x: 0, y: 0 });
 
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [mousePos, setMousePos]   = useState({ x: 0, y: 0 });
 
   // Fetch tasks
