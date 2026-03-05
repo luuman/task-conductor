@@ -1,5 +1,5 @@
 // frontend/src/pages/ConversationHistory.tsx
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { api, type ClaudeSession, type TranscriptMessage, type ConversationNote, type Project } from "../lib/api";
 import { ConvSessionList } from "../components/ConvSessionList";
 import { ConvTranscript } from "../components/ConvTranscript";
@@ -18,6 +18,9 @@ export default function ConversationHistory({ projects }: Props) {
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [fileFound, setFileFound] = useState(true);
 
+  // 缓存已加载的 transcript，避免重复请求
+  const transcriptCache = useRef<Map<string, { messages: TranscriptMessage[]; fileFound: boolean }>>(new Map());
+
   // 加载会话列表（5s 轮询刷新状态）
   const loadSessions = useCallback(() => {
     api.sessions.list()
@@ -31,12 +34,24 @@ export default function ConversationHistory({ projects }: Props) {
     return () => clearInterval(id);
   }, [loadSessions]);
 
-  // 选中会话时加载 transcript
+  // 选中会话时加载 transcript（命中缓存则直接渲染，无需等待）
   const handleSelect = (s: ClaudeSession) => {
     setSelectedSession(s);
+    const cached = transcriptCache.current.get(s.session_id);
+    if (cached) {
+      setTranscript(cached.messages);
+      setFileFound(cached.fileFound);
+      setTranscriptLoading(false);
+      return;
+    }
     setTranscriptLoading(true);
     api.sessions.transcript(s.session_id)
-      .then(r => { setTranscript(r.messages); setFileFound(r.file_found); setTranscriptLoading(false); })
+      .then(r => {
+        transcriptCache.current.set(s.session_id, { messages: r.messages, fileFound: r.file_found });
+        setTranscript(r.messages);
+        setFileFound(r.file_found);
+        setTranscriptLoading(false);
+      })
       .catch(() => { setTranscript([]); setFileFound(false); setTranscriptLoading(false); });
   };
 

@@ -12,6 +12,7 @@ dependencies = [
     "websockets>=13",
     "python-jose[cryptography]>=3.3",
     "passlib[bcrypt]>=1.7",
+    "psutil>=5.9",
 ]
 
 [project.optional-dependencies]

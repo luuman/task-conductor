@@ -1,5 +1,5 @@
 // frontend/src/components/Sidebar.tsx
-import { LayoutDashboard, CheckSquare, Settings, Radio, MessageSquare, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Settings, Radio, MessageSquare, Plus, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface SidebarProps {
@@ -14,10 +14,11 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: "dashboard", label: "仪表盘",  Icon: LayoutDashboard },
-  { id: "tasks",         label: "任务管理", Icon: CheckSquare    },
-  { id: "conversations", label: "对话历史", Icon: MessageSquare },
-  { id: "settings",      label: "设置",    Icon: Settings       },
+  { id: "dashboard",     label: "仪表盘",  Icon: LayoutDashboard },
+  { id: "canvas",        label: "项目视图", Icon: Layers          },
+  { id: "tasks",         label: "任务管理", Icon: CheckSquare     },
+  { id: "conversations", label: "对话历史", Icon: MessageSquare   },
+  { id: "settings",      label: "设置",    Icon: Settings        },
 ];
 
 export function Sidebar({

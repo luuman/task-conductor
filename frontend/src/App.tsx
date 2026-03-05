@@ -132,6 +132,15 @@ export default function App() {
     if (page === "conversations") {
       return <ConversationHistory projects={projects} />;
     }
+    if (page === "canvas") {
+      return (
+        <ProjectsCanvas
+          projects={projects}
+          onSelectProject={handleSelectProject}
+          onOpenTask={handleOpenTask}  // kept for interface compatibility
+        />
+      );
+    }
     return (
       <Dashboard
         projectId={activeProjectId}

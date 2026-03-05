@@ -23,20 +23,27 @@ def list_sessions(db: Session = Depends(get_db)):
 
     每条记录包含：会话 ID、工作目录、状态（active/idle/stopped）、事件总数。
     """
+    # 一次查询拿到事件数（避免 N+1）
+    event_count_sq = (
+        db.query(
+            ClaudeEvent.claude_session_id,
+            func.count(ClaudeEvent.id).label("event_count"),
+        )
+        .group_by(ClaudeEvent.claude_session_id)
+        .subquery()
+    )
+
     rows = (
-        db.query(ClaudeSession)
+        db.query(ClaudeSession, event_count_sq.c.event_count, ConversationNote)
+        .outerjoin(event_count_sq, ClaudeSession.id == event_count_sq.c.claude_session_id)
+        .outerjoin(ConversationNote, ClaudeSession.id == ConversationNote.claude_session_id)
         .order_by(ClaudeSession.last_seen_at.desc())
         .limit(50)
         .all()
     )
 
-    result = []
-    for s in rows:
-        event_count = db.query(func.count(ClaudeEvent.id)).filter(
-            ClaudeEvent.claude_session_id == s.id
-        ).scalar()
-        note = db.query(ConversationNote).filter_by(claude_session_id=s.id).first()
-        result.append({
+    return [
+        {
             "id": s.id,
             "session_id": s.session_id,
             "cwd": s.cwd,
@@ -44,10 +51,11 @@ def list_sessions(db: Session = Depends(get_db)):
             "linked_task_id": s.linked_task_id,
             "started_at": s.started_at.isoformat(),
             "last_seen_at": s.last_seen_at.isoformat(),
-            "event_count": event_count,
+            "event_count": event_count or 0,
             "note": _note_to_dict(note),
-        })
-    return result
+        }
+        for s, event_count, note in rows
+    ]
 
 
 @router.get("/{session_id}/events", summary="获取会话事件历史")

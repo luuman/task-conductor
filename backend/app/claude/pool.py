@@ -1,6 +1,9 @@
 import asyncio
 import os
+import time
 from typing import Optional, AsyncIterator
+from .metrics_store import metrics_store
+
 
 class ClaudePool:
     _instance: Optional["ClaudePool"] = None
@@ -31,6 +34,10 @@ class ClaudePool:
 
         cmd = self.build_command(prompt, worktree_path)
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        # 确保 worktree 目录存在（scheduler 只分配路径，不实际创建）
+        os.makedirs(worktree_path, exist_ok=True)
+
+        metric = metrics_store.start_call(task_id)
 
         proc = await asyncio.create_subprocess_exec(
             *cmd,
@@ -40,16 +47,27 @@ class ClaudePool:
         )
         self._processes[task_id] = proc
 
-        with open(log_file, "w") as f:
-            async for line in proc.stdout:
-                raw = line.decode("utf-8", errors="replace")
-                f.write(raw)
-                event = parse_line(raw)
-                if event:
-                    yield event
-
-        await proc.wait()
-        self._processes.pop(task_id, None)
+        try:
+            with open(log_file, "w") as f:
+                async for line in proc.stdout:
+                    raw = line.decode("utf-8", errors="replace")
+                    f.write(raw)
+                    event = parse_line(raw)
+                    if event:
+                        content = event.get("content") or event.get("result", "")
+                        if content:
+                            if metric.ttft is None:
+                                metric.ttft = time.time() - metric.started_at
+                            metric.char_count += len(str(content))
+                        yield event
+            await proc.wait()
+            metric.success = (proc.returncode == 0)
+        except Exception:
+            metric.success = False
+            raise
+        finally:
+            metrics_store.finish_call(metric)
+            self._processes.pop(task_id, None)
 
     def kill(self, task_id: int):
         proc = self._processes.get(task_id)

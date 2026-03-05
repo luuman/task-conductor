@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # TaskConductor Claude Code Hooks 安装脚本
 # 用法：bash scripts/install-hooks.sh [agent-url]
-#   默认 agent-url: http://localhost:8000
+#   默认 agent-url: http://localhost:8765
 
 set -euo pipefail
 
-AGENT_URL="${1:-http://localhost:8000}"
+AGENT_URL="${1:-http://localhost:8765}"
 HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 
@@ -21,14 +21,16 @@ cat > "$HOOKS_DIR/tc-hook.sh" << 'HOOK_SCRIPT'
 # TaskConductor Claude Code Hook 上报脚本
 # Claude Code 通过 stdin 传入 JSON payload，本脚本转发给 TaskConductor Agent
 
-AGENT_URL="${TC_AGENT_URL:-http://localhost:8000}"
+AGENT_URL="${TC_AGENT_URL:-http://localhost:8765}"
 
 PAYLOAD=$(cat)
 
 # 非阻塞 POST，失败不影响 Claude Code 主流程
+# --noproxy "*" 跳过系统代理，确保 localhost 请求直连
 curl -s -X POST "$AGENT_URL/hooks/claude" \
   -H "Content-Type: application/json" \
   -d "$PAYLOAD" \
+  --noproxy "*" \
   --max-time 2 \
   2>/dev/null || true
 
