@@ -731,26 +731,87 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
     </div>
   );
 
+  const [scanning, setScanning] = useState(false);
+
+  const handleScan = async () => {
+    setScanning(true);
+    try {
+      await api.projects.scan();
+      onRefreshProjects?.();
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("确定删除此项目及其所有任务？")) return;
+    await api.projects.delete(id);
+    onRefreshProjects?.();
+  };
+
+  const handleToggleTest = async (id: number, isTest: boolean) => {
+    await api.projects.updateSort(id, { is_test: isTest });
+    onRefreshProjects?.();
+  };
+
+  const realProjects = projects.filter(p => !p.is_test);
+  const testProjects = projects.filter(p => p.is_test);
+
   // No project selected → overview
   if (!projectId) return (
     <div className="flex-1 p-6 overflow-y-auto">
-      <div className="mb-4">
-        <h1 className="text-base font-semibold text-app">概览</h1>
-        <p className="text-app-tertiary text-xs mt-0.5">{projects.length} 个项目</p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-base font-semibold text-app">概览</h1>
+          <p className="text-app-tertiary text-xs mt-0.5">{projects.length} 个项目</p>
+        </div>
+        <button
+          onClick={handleScan}
+          disabled={scanning}
+          className="flex items-center gap-1.5 text-[11px] text-app-tertiary hover:text-app px-3 py-1.5 rounded-lg border border-app hover:border-accent/40 transition-all disabled:opacity-40"
+        >
+          <FolderSearch size={13} className={scanning ? "animate-spin" : ""} />
+          {scanning ? "扫描中..." : "扫描本地项目"}
+        </button>
       </div>
       <ClaudeMetricsPanel />
       <MetricsPanel />
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-40 space-y-2">
           <p className="text-app-tertiary text-sm">暂无项目</p>
-          <p className="text-app-tertiary text-xs">点击侧边栏的 + 创建项目</p>
+          <p className="text-app-tertiary text-xs">点击「扫描本地项目」自动发现 git 仓库，或侧边栏 + 手动创建</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} onSelect={() => onSelectProject(p.id)} onOpenTask={onOpenTask} />
-          ))}
-        </div>
+        <>
+          {/* 正式项目 */}
+          {realProjects.length > 0 && (
+            <>
+              <h2 className="text-[11px] font-semibold uppercase tracking-wider text-app-tertiary mb-2">
+                项目 ({realProjects.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                {realProjects.map((p) => (
+                  <ProjectCard key={p.id} project={p} onSelect={() => onSelectProject(p.id)} onOpenTask={onOpenTask}
+                    onDelete={handleDelete} onToggleTest={handleToggleTest} />
+                ))}
+              </div>
+            </>
+          )}
+          {/* 测试项目 */}
+          {testProjects.length > 0 && (
+            <>
+              <h2 className="text-[11px] font-semibold uppercase tracking-wider text-purple-400/70 mb-2 flex items-center gap-1.5">
+                <FlaskConical size={11} /> 测试项目 ({testProjects.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {testProjects.map((p) => (
+                  <ProjectCard key={p.id} project={p} onSelect={() => onSelectProject(p.id)} onOpenTask={onOpenTask}
+                    onDelete={handleDelete} onToggleTest={handleToggleTest} />
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
     </div>
   );
