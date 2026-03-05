@@ -13,6 +13,7 @@ interface DashboardProps {
   projectsLoaded: boolean;
   onOpenTask: (id: number) => void;
   onSelectProject: (id: number) => void;
+  onRefreshProjects?: () => void;
 }
 
 // ── 工具函数 ─────────────────────────────────────────────────────
