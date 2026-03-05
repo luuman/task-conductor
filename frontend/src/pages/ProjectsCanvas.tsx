@@ -596,7 +596,8 @@ export default function ProjectsCanvas({
               </filter>
             </defs>
 
-            <rect width="100%" height="100%" fill="var(--background)" />
+            <rect width="100%" height="100%" fill="var(--background)"
+              onClick={() => setSelectedId(null)} />
 
             {/* Subtle grid dots */}
             <pattern id="grid-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
