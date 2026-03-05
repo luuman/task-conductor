@@ -1,8 +1,9 @@
 import os
-from fastapi import APIRouter, Depends
+from pathlib import Path
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import engine
-from ..models import Project, Task
+from ..models import Project, Task, StageArtifact, ProjectKnowledge, ClaudeInstance, Notification
 from ..schemas import ProjectCreate, ProjectOut, TaskCreate, TaskOut
 from .settings_router import _load as _load_settings
 
@@ -14,43 +15,96 @@ def get_db():
 
 @router.post("", response_model=ProjectOut, summary="创建项目")
 def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
-    """
-    新建一个项目。
-
-    - 若未指定 `repo_url`，自动使用工作区根目录（`/api/settings` 中配置）拼接项目名作为路径
-    - 自动在文件系统创建项目目录（`os.makedirs`）
-    """
     data = body.model_dump()
-    # 自动计算项目目录
     if not data.get("repo_url"):
         workspace_root = _load_settings().get("workspace_root", "")
         if workspace_root:
             safe_name = body.name.strip().replace(" ", "-")
             data["repo_url"] = f"{workspace_root}/{safe_name}"
-    # 在文件系统创建目录
     if data.get("repo_url"):
         try:
             os.makedirs(data["repo_url"], exist_ok=True)
         except OSError:
-            pass  # 路径无效时静默忽略，不阻断创建
-
+            pass
     p = Project(**data)
     db.add(p); db.commit(); db.refresh(p)
     return p
 
 @router.get("", response_model=list[ProjectOut], summary="项目列表")
 def list_projects(db: Session = Depends(get_db)):
-    """获取所有项目列表。"""
-    return db.query(Project).all()
+    """按 sort_order 升序、is_test 后排、创建时间排序"""
+    return db.query(Project).order_by(
+        Project.is_test,        # False (0) 在前
+        Project.sort_order,     # 越小越靠前
+        Project.created_at,
+    ).all()
+
+@router.delete("/{project_id}", summary="删除项目")
+def delete_project(project_id: int, db: Session = Depends(get_db)):
+    """删除项目及其所有关联数据（任务、产物、知识、实例、通知）"""
+    p = db.get(Project, project_id)
+    if not p:
+        raise HTTPException(404, "项目不存在")
+    task_ids = [t.id for t in db.query(Task).filter(Task.project_id == project_id).all()]
+    if task_ids:
+        db.query(StageArtifact).filter(StageArtifact.task_id.in_(task_ids)).delete(synchronize_session=False)
+        db.query(ClaudeInstance).filter(ClaudeInstance.task_id.in_(task_ids)).delete(synchronize_session=False)
+        db.query(Notification).filter(Notification.task_id.in_(task_ids)).delete(synchronize_session=False)
+    db.query(ProjectKnowledge).filter(ProjectKnowledge.project_id == project_id).delete(synchronize_session=False)
+    db.query(Task).filter(Task.project_id == project_id).delete(synchronize_session=False)
+    db.delete(p)
+    db.commit()
+    return {"ok": True}
+
+@router.post("/scan", response_model=list[ProjectOut], summary="扫描本地项目")
+def scan_projects(db: Session = Depends(get_db)):
+    """扫描 workspace_root 下的 git 仓库，自动导入未注册的项目"""
+    workspace_root = _load_settings().get("workspace_root", "")
+    if not workspace_root or not os.path.isdir(workspace_root):
+        raise HTTPException(400, "workspace_root 未配置或目录不存在")
+
+    existing_paths = {p.repo_url for p in db.query(Project).all() if p.repo_url}
+    imported = []
+
+    for entry in sorted(Path(workspace_root).iterdir()):
+        if not entry.is_dir() or entry.name.startswith("."):
+            continue
+        repo_path = str(entry)
+        if repo_path in existing_paths:
+            continue
+        # 检测是否为 git 仓库
+        is_git = (entry / ".git").exists()
+        if not is_git:
+            continue
+        p = Project(name=entry.name, repo_url=repo_path)
+        db.add(p)
+        imported.append(p)
+
+    if imported:
+        db.commit()
+        for p in imported:
+            db.refresh(p)
+    return imported
+
+@router.put("/{project_id}/sort", summary="更新项目排序")
+def update_sort(project_id: int, body: dict, db: Session = Depends(get_db)):
+    p = db.get(Project, project_id)
+    if not p:
+        raise HTTPException(404, "项目不存在")
+    if "sort_order" in body:
+        p.sort_order = body["sort_order"]
+    if "is_test" in body:
+        p.is_test = body["is_test"]
+    db.commit()
+    db.refresh(p)
+    return ProjectOut.model_validate(p)
 
 @router.post("/{project_id}/tasks", response_model=TaskOut, summary="在项目下创建任务")
 def create_task(project_id: int, body: TaskCreate, db: Session = Depends(get_db)):
-    """在指定项目下新建任务，任务初始阶段为 `input`，状态为 `pending`。"""
     t = Task(project_id=project_id, **body.model_dump())
     db.add(t); db.commit(); db.refresh(t)
     return t
 
 @router.get("/{project_id}/tasks", response_model=list[TaskOut], summary="项目任务列表")
 def list_tasks(project_id: int, db: Session = Depends(get_db)):
-    """获取指定项目下的所有任务。"""
     return db.query(Task).filter(Task.project_id == project_id).all()
