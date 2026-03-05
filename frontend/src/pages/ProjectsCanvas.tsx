@@ -42,7 +42,7 @@ const STAGE_LABEL: Record<string, string> = {
   monitor:"监控", done:"完成",
 };
 
-const MIN_R = 30, MAX_R = 90;
+const MIN_R = 36, MAX_R = 100;
 
 // ── Helpers ────────────────────────────────────────────────────────
 function resolveState(s: ProjectStats): VisualState {
