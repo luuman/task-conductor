@@ -1,5 +1,5 @@
 // frontend/src/pages/ProjectsCanvas.tsx
-// Packed-bubble chart — Dribbble reference + Orion dark theme
+// Packed-bubble chart — Dribbble reference (flat, tight-packed, color-clustered)
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { api, type Project, type Task } from "../lib/api";
 
@@ -14,26 +14,26 @@ type ProjectStats = {
   weight: number;
 };
 
-type BubbleData = { x: number; y: number; r: number; stats: ProjectStats };
+type BubbleData = { x: number; y: number; r: number; stats: ProjectStats; decorative?: boolean };
 
 // ── Status palette ─────────────────────────────────────────────────
-const STATE_META: Record<VisualState, { base: string; glow: string; text: string; label: string }> = {
-  running: { base: "#22c55e", glow: "#22c55e60", text: "#fff", label: "运行中" },
-  failed:  { base: "#ef4444", glow: "#ef444460", text: "#fff", label: "异常"   },
-  review:  { base: "#f59e0b", glow: "#f59e0b40", text: "#fff", label: "待审批" },
-  queued:  { base: "#7b9ed9", glow: "#7b9ed940", text: "#fff", label: "排队中" },
-  done:    { base: "#4477ff", glow: "#4477ff40", text: "#fff", label: "已完成" },
-  idle:    { base: "#3c3c5c", glow: "#3c3c5c20", text: "#7878a8", label: "空闲" },
+const STATE_META: Record<VisualState, { base: string; text: string; label: string }> = {
+  running: { base: "#22c55e", text: "#fff", label: "运行中" },
+  failed:  { base: "#ef4444", text: "#fff", label: "异常"   },
+  review:  { base: "#f59e0b", text: "#fff", label: "待审批" },
+  queued:  { base: "#7b9ed9", text: "#fff", label: "排队中" },
+  done:    { base: "#4477ff", text: "#fff", label: "已完成" },
+  idle:    { base: "#3c3c5c", text: "#7878a8", label: "空闲" },
 };
 
-// Color variants within each state group
+// Softer color variants for visual richness
 const STATE_VARIANTS: Record<VisualState, string[]> = {
-  running: ["#22c55e","#16a34a","#4ade80","#15803d","#86efac"],
-  failed:  ["#ef4444","#dc2626","#f87171","#b91c1c","#fca5a5"],
-  review:  ["#f59e0b","#d97706","#fbbf24","#b45309","#fcd34d"],
-  queued:  ["#7b9ed9","#6b8ec9","#93b5ea","#5b7ec0","#a5c4f0"],
-  done:    ["#4477ff","#3366ee","#5588ff","#2255dd","#6699ff"],
-  idle:    ["#3c3c5c","#32324c","#4a4a6c","#28283c","#56567c"],
+  running: ["#4ade80","#22c55e","#86efac","#16a34a","#a7f3d0"],
+  failed:  ["#f87171","#ef4444","#fca5a5","#dc2626","#fecaca"],
+  review:  ["#fbbf24","#f59e0b","#fcd34d","#d97706","#fde68a"],
+  queued:  ["#93b5ea","#7b9ed9","#a5c4f0","#6b8ec9","#bfdbfe"],
+  done:    ["#5588ff","#4477ff","#6699ff","#3366ee","#93b5ff"],
+  idle:    ["#4a4a6c","#3c3c5c","#56567c","#32324c","#5e5e80"],
 };
 
 const STAGE_LABEL: Record<string, string> = {
@@ -42,7 +42,10 @@ const STAGE_LABEL: Record<string, string> = {
   monitor:"监控", done:"完成",
 };
 
-const MIN_R = 36, MAX_R = 100;
+// State ordering for spatial clustering (same state → same region)
+const STATE_ORDER: VisualState[] = ["failed", "review", "running", "queued", "done", "idle"];
+
+const MIN_R = 12, MAX_R = 80;
 
 // ── Helpers ────────────────────────────────────────────────────────
 function resolveState(s: ProjectStats): VisualState {
@@ -64,45 +67,103 @@ function bubbleColor(state: VisualState, idx: number): string {
   return v[idx % v.length];
 }
 
-// ── Force-directed packing ─────────────────────────────────────────
+// ── Force-directed packing with color clustering ──────────────────
 function packBubbles(stats: ProjectStats[]): BubbleData[] {
   if (stats.length === 0) return [];
-  const sorted = [...stats].sort((a, b) => b.weight - a.weight);
-  const maxW = sorted[0].weight;
 
-  const items = sorted.map((s, i) => {
-    const r     = bubbleRadius(s.weight, maxW);
-    const angle = i * 2.39996; // golden angle
-    const dist  = Math.sqrt(i) * r * 1.2;
+  // Sort by state group first, then by weight within group
+  const sorted = [...stats].sort((a, b) => {
+    const sa = STATE_ORDER.indexOf(resolveState(a));
+    const sb = STATE_ORDER.indexOf(resolveState(b));
+    if (sa !== sb) return sa - sb;
+    return b.weight - a.weight;
+  });
+  const maxW = Math.max(...sorted.map(s => s.weight));
+
+  // Place items using golden angle, with state-based angular offset
+  const stateAngles: Record<string, number> = {};
+  let angleIdx = 0;
+  const sectorSize = (2 * Math.PI) / STATE_ORDER.length;
+
+  const items: BubbleData[] = sorted.map((s, i) => {
+    const state = resolveState(s);
+    if (!(state in stateAngles)) {
+      stateAngles[state] = angleIdx * sectorSize;
+      angleIdx++;
+    }
+    const r = bubbleRadius(s.weight, maxW);
+    const baseAngle = stateAngles[state];
+    const jitter = (i * 2.39996) * 0.35; // golden angle, dampened
+    const angle = baseAngle + jitter;
+    const dist = Math.sqrt(i + 1) * r * 0.9;
     return {
-      x: i === 0 ? 0 : Math.cos(angle) * dist,
-      y: i === 0 ? 0 : Math.sin(angle) * dist,
+      x: Math.cos(angle) * dist,
+      y: Math.sin(angle) * dist,
       r, stats: s,
     };
   });
 
-  // Iterative collision resolution
-  const GAP = 14;
-  for (let iter = 0; iter < 180; iter++) {
-    const damp = 0.7 + 0.3 * (1 - iter / 180);
-    for (let i = 0; i < items.length; i++) {
-      for (let j = i + 1; j < items.length; j++) {
-        const dx   = items[j].x - items[i].x;
-        const dy   = items[j].y - items[i].y;
+  // Add decorative small dots around each state cluster
+  const decorDots: BubbleData[] = [];
+  const dummyStats: ProjectStats = {
+    project: { id: -1, name: "" } as Project,
+    total: 0, running: 0, done: 0, failed: 0, queued: 0, pendingReview: 0,
+    activeStage: null, weight: 0,
+  };
+
+  // For each state group, add 2-4 tiny dots nearby
+  const stateItems: Record<string, BubbleData[]> = {};
+  items.forEach(item => {
+    const st = resolveState(item.stats);
+    if (!stateItems[st]) stateItems[st] = [];
+    stateItems[st].push(item);
+  });
+
+  Object.entries(stateItems).forEach(([_state, group]) => {
+    if (group.length === 0) return;
+    // Find centroid of group
+    const cx = group.reduce((a, b) => a + b.x, 0) / group.length;
+    const cy = group.reduce((a, b) => a + b.y, 0) / group.length;
+    const maxR = Math.max(...group.map(g => g.r));
+    const dotCount = Math.min(4, Math.max(2, group.length));
+    for (let d = 0; d < dotCount; d++) {
+      const angle = (d / dotCount) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = maxR * 1.8 + Math.random() * maxR * 0.8;
+      const dotR = 3 + Math.random() * 6;
+      decorDots.push({
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        r: dotR,
+        stats: { ...dummyStats, project: { ...dummyStats.project, id: -(decorDots.length + 100) } },
+        decorative: true,
+      });
+    }
+  });
+
+  const all = [...items, ...decorDots];
+
+  // Collision resolution — tight packing
+  const GAP = 3;
+  for (let iter = 0; iter < 250; iter++) {
+    const damp = 0.7 + 0.3 * (1 - iter / 250);
+    for (let i = 0; i < all.length; i++) {
+      for (let j = i + 1; j < all.length; j++) {
+        const dx   = all[j].x - all[i].x;
+        const dy   = all[j].y - all[i].y;
         const dist = Math.hypot(dx, dy) || 0.001;
-        const min  = items[i].r + items[j].r + GAP;
+        const min  = all[i].r + all[j].r + GAP;
         if (dist < min) {
           const f = (min - dist) / dist * 0.5 * damp;
-          items[i].x -= dx * f; items[i].y -= dy * f;
-          items[j].x += dx * f; items[j].y += dy * f;
+          all[i].x -= dx * f; all[i].y -= dy * f;
+          all[j].x += dx * f; all[j].y += dy * f;
         }
       }
-      // Gravity toward center
-      items[i].x *= 1 - 0.008 * damp;
-      items[i].y *= 1 - 0.008 * damp;
+      // Stronger gravity toward center for compact cluster
+      all[i].x *= 1 - 0.012 * damp;
+      all[i].y *= 1 - 0.012 * damp;
     }
   }
-  return items;
+  return all;
 }
 
 // ── Statistics Panel (left side) ───────────────────────────────────
@@ -116,7 +177,7 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
   const totalDone = allStats.reduce((a, s) => a + s.done, 0);
   const totalFailed = allStats.reduce((a, s) => a + s.failed, 0);
 
-  // Donut chart data
+  // Donut chart
   const segments = [
     { label: "运行中", count: totalRunning, color: "#22c55e" },
     { label: "已完成", count: totalDone, color: "#4477ff" },
@@ -125,7 +186,6 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
   ].filter(s => s.count > 0);
   const total = Math.max(1, segments.reduce((a, s) => a + s.count, 0));
 
-  // SVG donut
   const donutR = 36, donutW = 7;
   let cumAngle = -Math.PI / 2;
   const arcs = segments.map(seg => {
@@ -143,7 +203,6 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
     };
   });
 
-  // Sort projects by weight descending
   const sorted = [...allStats].sort((a, b) => b.weight - a.weight);
 
   return (
@@ -153,7 +212,6 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
       background: "var(--background-secondary)",
       overflow: "hidden",
     }}>
-      {/* Title */}
       <div style={{
         padding: "14px 16px 10px", borderBottom: "1px solid var(--border)",
         fontSize: 14, fontWeight: 700, color: "var(--text-primary)",
@@ -162,7 +220,6 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
         Statistics
       </div>
 
-      {/* Donut chart */}
       <div style={{ padding: "16px 16px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
         <svg viewBox="0 0 100 100" width={100} height={100}>
           {arcs.map((arc, i) => (
@@ -178,8 +235,6 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
             Total Tasks
           </text>
         </svg>
-
-        {/* Legend */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 12px", marginTop: 10, justifyContent: "center" }}>
           {segments.map(seg => (
             <div key={seg.label} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10 }}>
@@ -191,10 +246,8 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
         </div>
       </div>
 
-      {/* Divider */}
       <div style={{ margin: "6px 16px", borderTop: "1px solid var(--border-subtle)" }} />
 
-      {/* Project list */}
       <div style={{
         padding: "4px 8px", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em",
         textTransform: "uppercase", color: "var(--text-tertiary)",
@@ -220,7 +273,6 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
               onMouseEnter={e => (e.currentTarget.style.background = "var(--background-tertiary)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              {/* Rank */}
               <span style={{
                 width: 16, height: 16, borderRadius: 4, flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -230,15 +282,10 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
               }}>
                 {i + 1}
               </span>
-
-              {/* Color dot */}
               <div style={{
                 width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
                 background: color,
-                boxShadow: state === "running" ? `0 0 6px ${color}80` : undefined,
               }} />
-
-              {/* Name + progress */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontSize: 11, fontWeight: 600, color: "var(--text-primary)",
@@ -264,15 +311,12 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
                   </div>
                 )}
               </div>
-
-              {/* Task count */}
               <span style={{ fontSize: 10, fontWeight: 600, fontFamily: "monospace", color: "var(--text-tertiary)", flexShrink: 0 }}>
                 {s.total}
               </span>
             </button>
           );
         })}
-
         {sorted.length === 0 && (
           <div style={{ padding: "20px 0", textAlign: "center", fontSize: 11, color: "var(--text-tertiary)" }}>
             暂无项目
@@ -297,16 +341,14 @@ function Tooltip({ stats, state, color, mouse }: {
       background: "var(--background-secondary)",
       borderRadius: 10,
       padding: "10px 12px",
-      boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border), 0 0 20px ${color}15`,
+      boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border)`,
       fontFamily: "system-ui, -apple-system, sans-serif",
     }}>
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
         <div style={{
           width: 24, height: 24, borderRadius: "50%", background: color, flexShrink: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 10, fontWeight: 800, color: "#fff",
-          boxShadow: `0 0 10px ${color}40`,
         }}>
           {stats.project.name[0].toUpperCase()}
         </div>
@@ -323,7 +365,6 @@ function Tooltip({ stats, state, color, mouse }: {
         </span>
       </div>
 
-      {/* Mini stats */}
       <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
         {([
           ["任务", stats.total, "var(--text-secondary)"],
@@ -341,7 +382,6 @@ function Tooltip({ stats, state, color, mouse }: {
         ))}
       </div>
 
-      {/* Active stage */}
       {stats.activeStage && (
         <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 6 }}>
           当前阶段：<span style={{ color: meta.base, fontWeight: 600 }}>
@@ -350,13 +390,12 @@ function Tooltip({ stats, state, color, mouse }: {
         </div>
       )}
 
-      {/* Progress */}
       {stats.total > 0 && (
         <>
           <div style={{ height: 3, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
             <div style={{
               height: "100%", width: `${pct}%`, borderRadius: 2,
-              background: `linear-gradient(90deg, ${color}99, ${color})`,
+              background: color,
             }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, marginTop: 3, color: "var(--text-tertiary)" }}>
@@ -488,6 +527,31 @@ export default function ProjectsCanvas({
 
   const bubbles = useMemo(() => packBubbles(allStats), [allStats]);
 
+  // Assign colors for decorative dots (inherit from nearest state group)
+  const decorColorMap = useMemo(() => {
+    const dmap: Record<number, string> = {};
+    bubbles.forEach(b => {
+      if (b.decorative && b.stats.project.id < 0) {
+        // Find nearest real bubble
+        let nearest: BubbleData | null = null;
+        let minDist = Infinity;
+        bubbles.forEach(other => {
+          if (other.decorative) return;
+          const d = Math.hypot(b.x - other.x, b.y - other.y);
+          if (d < minDist) { minDist = d; nearest = other; }
+        });
+        if (nearest) {
+          const state = resolveState((nearest as BubbleData).stats);
+          const v = STATE_VARIANTS[state];
+          dmap[b.stats.project.id] = v[Math.abs(b.stats.project.id) % v.length];
+        } else {
+          dmap[b.stats.project.id] = "#3c3c5c";
+        }
+      }
+    });
+    return dmap;
+  }, [bubbles]);
+
   // Center view on load
   useEffect(() => {
     if (loading || !wrapRef.current) return;
@@ -527,10 +591,8 @@ export default function ProjectsCanvas({
       background: "var(--background)",
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     }}>
-      {/* Left statistics panel */}
       <StatsPanel allStats={allStats} colorMap={colorMap} onSelect={onSelectProject} />
 
-      {/* Main chart area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         {/* Header */}
         <div style={{
@@ -547,12 +609,11 @@ export default function ProjectsCanvas({
             Bubble Chart
           </span>
           <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-            {loading ? "加载中..." : `${projects.length} 项目 · 滚轮缩放 · 拖拽平移 · 双击进入`}
+            {loading ? "加载中..." : `${projects.length} 项目 · 滚轮缩放 · 拖拽平移 · 点击操作`}
           </span>
 
           <div style={{ flex: 1 }} />
 
-          {/* Legend */}
           {(Object.entries(STATE_META) as [VisualState, typeof STATE_META[VisualState]][])
             .filter(([k]) => k !== "idle")
             .map(([k, v]) => (
@@ -583,46 +644,34 @@ export default function ProjectsCanvas({
           onWheel={onWheel}
         >
           <svg ref={svgRef} width="100%" height="100%" style={{ display: "block" }}>
-            <defs>
-              {/* 3D sheen gradient */}
-              <radialGradient id="bubble-sheen" cx="38%" cy="30%" r="60%">
-                <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.18"/>
-                <stop offset="100%" stopColor="#000000" stopOpacity="0.12"/>
-              </radialGradient>
-              {/* Glow filters */}
-              <filter id="glow-active" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="6" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-
             <rect width="100%" height="100%" fill="var(--background)"
               onClick={() => setSelectedId(null)} />
 
-            {/* Subtle grid dots */}
-            <pattern id="grid-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <circle cx="20" cy="20" r="0.5" fill="var(--border-subtle)" />
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#grid-dots)" opacity="0.5"
-              onClick={() => setSelectedId(null)} />
-
             <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
-              {!loading && bubbles.map(({ x, y, r, stats }) => {
+              {!loading && bubbles.map(({ x, y, r, stats, decorative }) => {
+                if (decorative) {
+                  const dColor = decorColorMap[stats.project.id] ?? "#3c3c5c";
+                  return (
+                    <circle key={stats.project.id} cx={x} cy={y} r={r}
+                      fill={dColor} opacity={0.5} />
+                  );
+                }
+
                 const state = resolveState(stats);
                 const color = colorMap[stats.project.id] ?? STATE_META[state].base;
                 const meta  = STATE_META[state];
                 const isHov = hoveredId === stats.project.id;
                 const isSel = selectedId === stats.project.id;
                 const hasFocus = hoveredId !== null || selectedId !== null;
-                const groupOp = hasFocus && !isHov && !isSel ? 0.3 : 1;
+                const groupOp = hasFocus && !isHov && !isSel ? 0.35 : 1;
 
                 // Name truncation
-                const maxChars = Math.max(3, Math.floor(r / 6.5));
+                const maxChars = Math.max(3, Math.floor(r / 6));
                 const label = stats.project.name.length <= maxChars
                   ? stats.project.name
                   : stats.project.name.substring(0, maxChars - 1) + "…";
 
-                // Stage / status summary
+                // Status summary
                 const statusLine = stats.running > 0
                   ? `${stats.running} 运行中`
                   : stats.pendingReview > 0
@@ -633,39 +682,29 @@ export default function ProjectsCanvas({
                   ? `${stats.done}/${stats.total} 完成`
                   : "空闲";
 
-                const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
-
-                // Action button positions (around the bubble when selected)
+                // Action buttons
                 const actionBtns = [
-                  { label: "进入", angle: -90, action: () => onSelectProject(stats.project.id) },
-                  { label: "任务", angle: 0, action: () => onSelectProject(stats.project.id) },
-                  { label: "详情", angle: 180, action: () => onSelectProject(stats.project.id) },
+                  { label: "进入项目", angle: -60, action: () => onSelectProject(stats.project.id) },
+                  { label: "查看任务", angle: 0, action: () => onSelectProject(stats.project.id) },
+                  { label: "运行流水线", angle: 60, action: () => onSelectProject(stats.project.id) },
                 ];
 
                 return (
                   <g key={stats.project.id}
                     style={{ opacity: groupOp, transition: "opacity 0.25s ease" }}
                   >
-                    {/* Soft shadow */}
-                    <circle cx={x} cy={y + 2} r={r * 0.95} fill="rgba(0,0,0,0.3)"
-                      filter="url(#glow-active)" style={{ opacity: 0.12 }} />
-
-                    {/* Base circle */}
-                    <circle cx={x} cy={y} r={r} fill={color}
-                      style={{ transition: "r 0.3s, fill 0.3s" }}
+                    {/* Flat circle — no shadow, no sheen */}
+                    <circle cx={x} cy={y} r={isSel ? r + 2 : r} fill={color}
+                      style={{ transition: "r 0.2s" }}
                     />
 
-                    {/* 3D sheen overlay */}
-                    <circle cx={x} cy={y} r={r} fill="url(#bubble-sheen)" />
-
-                    {/* ── Bubble content ── */}
-                    {r >= 32 && (
+                    {/* ── Content inside bubble ── */}
+                    {r >= 28 && (
                       <>
-                        {/* Project name */}
-                        <text x={x} y={r >= 55 ? y - r * 0.18 : y - 1}
+                        <text x={x} y={r >= 50 ? y - r * 0.15 : y + 1}
                           textAnchor="middle" dominantBaseline="middle"
                           fill={meta.text} fillOpacity={0.95}
-                          fontSize={r >= 80 ? 14 : r >= 60 ? 12 : r >= 45 ? 10 : 8}
+                          fontSize={r >= 70 ? 13 : r >= 50 ? 11 : r >= 38 ? 9 : 7.5}
                           fontWeight={700}
                           fontFamily="system-ui, -apple-system, sans-serif"
                           style={{ userSelect: "none", pointerEvents: "none" }}
@@ -673,52 +712,16 @@ export default function ProjectsCanvas({
                           {label}
                         </text>
 
-                        {/* Status line */}
-                        {r >= 55 && (
-                          <text x={x} y={y + r * 0.08}
+                        {r >= 50 && (
+                          <text x={x} y={y + r * 0.15}
                             textAnchor="middle" dominantBaseline="middle"
-                            fill={meta.text} fillOpacity={0.5}
-                            fontSize={r >= 70 ? 9.5 : 8}
+                            fill={meta.text} fillOpacity={0.45}
+                            fontSize={r >= 60 ? 9 : 7.5}
                             fontFamily="system-ui"
                             style={{ userSelect: "none", pointerEvents: "none" }}
                           >
                             {statusLine}
                           </text>
-                        )}
-
-                        {/* Progress bar (horizontal, inside bubble) */}
-                        {r >= 55 && stats.total > 0 && (
-                          <g style={{ pointerEvents: "none" }}>
-                            <rect x={x - r * 0.45} y={y + r * 0.28} width={r * 0.9} height={3}
-                              rx={1.5} fill="rgba(255,255,255,0.15)" />
-                            <rect x={x - r * 0.45} y={y + r * 0.28}
-                              width={r * 0.9 * (pct / 100)} height={3}
-                              rx={1.5} fill="rgba(255,255,255,0.5)" />
-                            <text x={x + r * 0.45 + 4} y={y + r * 0.3 + 1}
-                              fontSize={7} fill={meta.text} fillOpacity={0.4}
-                              fontFamily="monospace" dominantBaseline="middle"
-                              style={{ userSelect: "none" }}
-                            >
-                              {pct}%
-                            </text>
-                          </g>
-                        )}
-
-                        {/* Active stage tag */}
-                        {r >= 65 && stats.activeStage && (
-                          <g style={{ pointerEvents: "none" }}>
-                            <rect x={x - 18} y={y + r * 0.44} width={36} height={14}
-                              rx={7} fill="rgba(255,255,255,0.15)" />
-                            <text x={x} y={y + r * 0.44 + 7.5}
-                              textAnchor="middle" dominantBaseline="middle"
-                              fill={meta.text} fillOpacity={0.7}
-                              fontSize={7.5} fontWeight={600}
-                              fontFamily="system-ui"
-                              style={{ userSelect: "none" }}
-                            >
-                              {STAGE_LABEL[stats.activeStage] ?? stats.activeStage}
-                            </text>
-                          </g>
                         )}
                       </>
                     )}
@@ -734,19 +737,21 @@ export default function ProjectsCanvas({
                       }}
                     />
 
-                    {/* ── Action buttons (on click) ── */}
+                    {/* ── Action buttons (radiate out on click) ── */}
                     {isSel && actionBtns.map((btn, bi) => {
                       const rad = (btn.angle * Math.PI) / 180;
-                      const dist = r + 28;
+                      const dist = r + 32;
                       const bx = x + Math.cos(rad) * dist;
                       const by = y + Math.sin(rad) * dist;
+                      const btnW = 56, btnH = 20;
                       return (
                         <g key={bi} style={{ cursor: "pointer" }}
                           onClick={(e) => { e.stopPropagation(); btn.action(); }}
                         >
-                          <circle cx={bx} cy={by} r={16}
+                          <rect x={bx - btnW / 2} y={by - btnH / 2}
+                            width={btnW} height={btnH} rx={10}
                             fill="var(--background-secondary)"
-                            stroke={color} strokeWidth={1.5} strokeOpacity={0.6}
+                            stroke={color} strokeWidth={1.2} strokeOpacity={0.5}
                           />
                           <text x={bx} y={by + 0.5}
                             textAnchor="middle" dominantBaseline="middle"
@@ -790,7 +795,7 @@ export default function ProjectsCanvas({
           )}
 
           {/* Tooltip */}
-          {hoveredId && hoveredStats && (
+          {hoveredId && hoveredStats && !selectedId && (
             <Tooltip
               stats={hoveredStats}
               state={resolveState(hoveredStats)}
@@ -811,7 +816,6 @@ export default function ProjectsCanvas({
           </div>
         </div>
 
-        {/* Bottom metrics bar */}
         <BottomMetrics allStats={allStats} />
       </div>
     </div>
