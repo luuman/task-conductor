@@ -9,6 +9,7 @@ class ProjectCreate(BaseModel):
     worktree_base: str = ""
     max_parallel: int = 2
     execution_mode: str = "smart"
+    is_test: bool = False
 
 
 class ProjectOut(BaseModel):
@@ -17,6 +18,8 @@ class ProjectOut(BaseModel):
     repo_url: Optional[str]
     max_parallel: int
     execution_mode: str
+    is_test: bool
+    sort_order: int
     created_at: datetime
     model_config = {"from_attributes": True}
 
