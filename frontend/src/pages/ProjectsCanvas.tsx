@@ -82,7 +82,7 @@ function packBubbles(stats: ProjectStats[]): BubbleData[] {
   });
 
   // Iterative collision resolution
-  const GAP = 3;
+  const GAP = 14;
   for (let iter = 0; iter < 180; iter++) {
     const damp = 0.7 + 0.3 * (1 - iter / 180);
     for (let i = 0; i < items.length; i++) {
