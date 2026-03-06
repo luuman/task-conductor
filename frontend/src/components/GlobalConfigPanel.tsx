@@ -19,8 +19,6 @@ import {
   Activity,
   GitBranch,
   Palette,
-  ChevronDown,
-  ChevronRight,
   Eye,
   EyeOff,
   Plus,
