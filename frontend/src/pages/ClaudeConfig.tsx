@@ -443,11 +443,6 @@ export default function ClaudeConfigPage() {
               <SecMcp overview={overview} onOverviewUpdate={setOverview} />
             </div>
           )}
-          {visibleSections.has("mcp-market") && (
-            <div ref={ref("mcp-market")} data-section="mcp-market">
-              <McpMarketEmbed />
-            </div>
-          )}
 
           {/* ── 安全与控制 ── */}
           {visibleSections.has("hooks") && config && (
