@@ -343,7 +343,10 @@ export default function ClaudeConfigPage() {
 
           {/* Rules */}
           <div ref={el => { sectionRefs.current["rules"] = el; }} data-section="rules">
-            <SectionRules rules={rules} />
+            <SectionRules rules={rules} onToggle={async (name, enabled) => {
+              await api.claudeConfig.toggleRule(name, enabled);
+              setRules(prev => prev.map(r => r.name === name ? { ...r, enabled } : r));
+            }} />
           </div>
 
           {/* 权限 */}
