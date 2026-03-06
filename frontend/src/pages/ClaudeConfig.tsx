@@ -777,14 +777,24 @@ function SectionSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: 
 // ═══════════════════════════════════════════════════════════════════
 // Section: Commands
 // ═══════════════════════════════════════════════════════════════════
-function SectionCommands({ commands }: { commands: CommandInfo[] }) {
+function SectionCommands({ commands, onToggle }: { commands: CommandInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
   const detail = commands.find(c => c.name === selected);
+
+  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setToggling(name);
+    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  };
 
   return (
     <div className="space-y-4">
       <SectionTitle icon={Terminal} color="#22c55e" label="自定义命令" desc="~/.claude/commands/ 目录下的 slash 命令" />
-      <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{commands.length} 个命令</span>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{commands.length} 个命令</span>
+        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{commands.filter(c => c.enabled).length} 启用</span>
+      </div>
 
       {commands.length === 0 ? (
         <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义命令</div>
@@ -794,9 +804,17 @@ function SectionCommands({ commands }: { commands: CommandInfo[] }) {
             {commands.map(c => (
               <button key={c.name} onClick={() => setSelected(c.name)}
                 className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
-                  selected === c.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary")}>
-                <p className="text-xs font-semibold text-app font-mono">/{c.name}</p>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{c.scope}</span>
+                  selected === c.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary",
+                  !c.enabled && "opacity-50")}>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-app font-mono">/{c.name}</p>
+                  <ToggleSwitch enabled={c.enabled} loading={toggling === c.name}
+                    onClick={(e) => handleToggle(c.name, !c.enabled, e)} />
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{c.scope}</span>
+                  {!c.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
+                </div>
               </button>
             ))}
           </div>
