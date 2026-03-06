@@ -306,6 +306,33 @@ export default function ClaudeConfigPage() {
     await api.claudeConfig.toggleRule(name, enabled);
     setRules(prev => prev.map(r => r.name === name ? { ...r, enabled } : r));
   };
+  const createAgent = async (name: string, content?: string) => {
+    await api.claudeConfig.createAgent(name, content);
+    const list = await api.claudeConfig.listAgents();
+    setAgents(list);
+  };
+  const deleteAgent = async (name: string) => {
+    await api.claudeConfig.deleteAgent(name);
+    setAgents(prev => prev.filter(a => a.name !== name));
+  };
+  const createCommand = async (name: string, content?: string) => {
+    await api.claudeConfig.createCommand(name, content);
+    const list = await api.claudeConfig.listCommands();
+    setCommands(list);
+  };
+  const deleteCommand = async (name: string) => {
+    await api.claudeConfig.deleteCommand(name);
+    setCommands(prev => prev.filter(c => c.name !== name));
+  };
+  const createRule = async (name: string, content?: string) => {
+    await api.claudeConfig.createRule(name, content);
+    const list = await api.claudeConfig.listRules();
+    setRules(list);
+  };
+  const deleteRule = async (name: string) => {
+    await api.claudeConfig.deleteRule(name);
+    setRules(prev => prev.filter(r => r.name !== name));
+  };
 
   const ref = (id: SectionId) => (el: HTMLDivElement | null) => { sectionRefs.current[id] = el; };
 
