@@ -1516,24 +1516,54 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
 // Sec: 关于
 // ═══════════════════════════════════════════════════════════════════
 function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
+  const [checking, setChecking] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<string | null>(null);
+  const checkUpdate = async () => {
+    setChecking(true); setUpdateInfo(null);
+    try {
+      const res = await fetch("https://registry.npmjs.org/@anthropic-ai/claude-code/latest");
+      const data = await res.json();
+      const latest = data.version as string;
+      const current = overview?.cli_version || systemInfo?.cli_version || "";
+      if (latest === current) { setUpdateInfo("已是最新版本"); }
+      else { setUpdateInfo(`最新版本: ${latest}，运行 npm update -g @anthropic-ai/claude-code 更新`); }
+    } catch { setUpdateInfo("检查失败，请手动运行 claude --version"); }
+    finally { setChecking(false); }
+  };
+  const infoItems = [
+    { label: "配置目录", value: systemInfo?.home_path || overview?.home_path || "~/.claude" },
+    { label: "配置文件", value: systemInfo?.config_path || "~/.claude/settings.json" },
+    { label: "缓存目录", value: systemInfo?.cache_dir || "~/.claude/cache" },
+    { label: "缓存大小", value: systemInfo ? `${systemInfo.cache_size_mb.toFixed(1)} MB` : "..." },
+    { label: "历史大小", value: systemInfo ? `${systemInfo.history_size_mb.toFixed(1)} MB` : "..." },
+    { label: "平台", value: systemInfo?.platform || "..." },
+    { label: "Python", value: systemInfo?.python_version || "..." },
+    { label: "会话数", value: systemInfo ? String(systemInfo.session_count) : "..." },
+    { label: "项目数", value: systemInfo ? String(systemInfo.project_count) : "..." },
+    { label: "技能数", value: systemInfo ? String(systemInfo.skill_count) : "..." },
+    { label: "MCP 服务器", value: systemInfo ? String(systemInfo.mcp_server_count) : "..." },
+  ];
   return (
     <div className="space-y-4">
       <SectionHeader icon={Info} color="#3b82f6" label="关于 Claude Code" desc="系统信息与诊断" />
+      {/* CLI 版本 - 特殊行，带更新按钮 */}
+      <div className="bg-app-secondary border border-app rounded-xl px-4 py-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] text-app-tertiary">CLI 版本</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-app">{overview?.cli_version || systemInfo?.cli_version || "..."}</span>
+            <button onClick={checkUpdate} disabled={checking}
+              className="text-[9px] px-2 py-1 rounded bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-50 transition-colors">
+              {checking ? "检查中..." : "检查更新"}
+            </button>
+          </div>
+        </div>
+        {updateInfo && (
+          <p className={cn("text-[10px] mt-2", updateInfo.startsWith("已是") ? "text-green-400" : "text-yellow-400")}>{updateInfo}</p>
+        )}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {[
-          { label: "CLI 版本", value: overview?.cli_version || systemInfo?.cli_version || "..." },
-          { label: "配置目录", value: systemInfo?.home_path || overview?.home_path || "~/.claude" },
-          { label: "配置文件", value: systemInfo?.config_path || "~/.claude/settings.json" },
-          { label: "缓存目录", value: systemInfo?.cache_dir || "~/.claude/cache" },
-          { label: "缓存大小", value: systemInfo ? `${systemInfo.cache_size_mb.toFixed(1)} MB` : "..." },
-          { label: "历史大小", value: systemInfo ? `${systemInfo.history_size_mb.toFixed(1)} MB` : "..." },
-          { label: "平台", value: systemInfo?.platform || "..." },
-          { label: "Python", value: systemInfo?.python_version || "..." },
-          { label: "会话数", value: systemInfo ? String(systemInfo.session_count) : "..." },
-          { label: "项目数", value: systemInfo ? String(systemInfo.project_count) : "..." },
-          { label: "技能数", value: systemInfo ? String(systemInfo.skill_count) : "..." },
-          { label: "MCP 服务器", value: systemInfo ? String(systemInfo.mcp_server_count) : "..." },
-        ].map(({ label, value }) => (
+        {infoItems.map(({ label, value }) => (
           <div key={label} className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center justify-between">
             <span className="text-[11px] text-app-tertiary">{label}</span>
             <span className="text-[11px] font-mono text-app truncate ml-4 text-right">{value}</span>
