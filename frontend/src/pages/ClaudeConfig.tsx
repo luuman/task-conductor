@@ -1006,13 +1006,24 @@ function SectionHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; 
 // ═══════════════════════════════════════════════════════════════════
 // Section: Rules
 // ═══════════════════════════════════════════════════════════════════
-function SectionRules({ rules }: { rules: RuleInfo[] }) {
+function SectionRules({ rules, onToggle }: { rules: RuleInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
   const detail = rules.find(r => r.name === selected);
+
+  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setToggling(name);
+    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  };
+
   return (
     <div className="space-y-4">
       <SectionTitle icon={BookOpen} color="#06b6d4" label="Rules 规则" desc="~/.claude/rules/ 目录下的规则文件" />
-      <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{rules.length} 个规则</span>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{rules.length} 个规则</span>
+        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{rules.filter(r => r.enabled).length} 启用</span>
+      </div>
       {rules.length === 0 ? (
         <div className="text-center py-12 text-app-tertiary text-xs">暂无规则文件</div>
       ) : (
@@ -1021,9 +1032,17 @@ function SectionRules({ rules }: { rules: RuleInfo[] }) {
             {rules.map(r => (
               <button key={r.name} onClick={() => setSelected(r.name)}
                 className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
-                  selected === r.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary")}>
-                <p className="text-xs font-semibold text-app">{r.name}</p>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{r.scope}</span>
+                  selected === r.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary",
+                  !r.enabled && "opacity-50")}>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-app">{r.name}</p>
+                  <ToggleSwitch enabled={r.enabled} loading={toggling === r.name}
+                    onClick={(e) => handleToggle(r.name, !r.enabled, e)} />
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{r.scope}</span>
+                  {!r.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
+                </div>
               </button>
             ))}
           </div>
