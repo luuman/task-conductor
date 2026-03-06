@@ -63,45 +63,49 @@ const COMMON_SETTINGS: {
   type: "string" | "boolean" | "number" | "select";
   options?: { value: string; label: string }[];
   placeholder?: string;
+  group?: string;
 }[] = [
+  // ── 模型 ──
   {
     key: "model",
     label: "默认模型",
-    desc: "覆盖 Claude Code 使用的默认模型",
+    desc: "别名（opus/sonnet/haiku/opusplan）或完整模型名。opusplan = 计划用 Opus、执行用 Sonnet",
     type: "select",
     options: [
-      { value: "", label: "默认（不覆盖）" },
-      { value: "claude-opus-4-6", label: "Claude Opus 4.6" },
-      { value: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
-      { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5" },
+      { value: "",               label: "default（按订阅层级）" },
+      { value: "opus",           label: "opus — Opus 4.6（复杂推理）" },
+      { value: "sonnet",         label: "sonnet — Sonnet 4.6（日常编码）" },
+      { value: "haiku",          label: "haiku — Haiku 4.5（轻量快速）" },
+      { value: "opusplan",       label: "opusplan — 计划 Opus + 执行 Sonnet" },
+      { value: "sonnet[1m]",     label: "sonnet[1m] — Sonnet + 100万上下文" },
+      { value: "claude-opus-4-6",           label: "claude-opus-4-6（固定版本）" },
+      { value: "claude-sonnet-4-6",         label: "claude-sonnet-4-6（固定版本）" },
+      { value: "claude-haiku-4-5-20251001", label: "claude-haiku-4-5（固定版本）" },
     ],
-    placeholder: "claude-sonnet-4-6",
+    placeholder: "opus / sonnet / claude-sonnet-4-6",
+    group: "model",
   },
+  {
+    key: "effortLevel",
+    label: "努力级别",
+    desc: "自适应推理深度：low（快速低成本）、medium（默认）、high（深度推理）。Opus/Sonnet 4.6 支持",
+    type: "select",
+    options: [
+      { value: "",       label: "默认（不覆盖）" },
+      { value: "low",    label: "low — 简单任务，快速低成本" },
+      { value: "medium", label: "medium — 平衡（Opus 默认）" },
+      { value: "high",   label: "high — 复杂问题，深度推理" },
+    ],
+    group: "model",
+  },
+  // ── 行为 ──
   {
     key: "language",
     label: "响应语言",
     desc: "Claude 默认使用的响应语言",
     type: "string",
     placeholder: "例：chinese、english、japanese",
-  },
-  {
-    key: "alwaysThinkingEnabled",
-    label: "始终启用扩展思考",
-    desc: "为所有会话默认启用扩展思考（Extended Thinking）",
-    type: "boolean",
-  },
-  {
-    key: "showTurnDuration",
-    label: "显示轮次耗时",
-    desc: "响应后显示耗时消息（如 \"Cooked for 1m 6s\"）",
-    type: "boolean",
-  },
-  {
-    key: "cleanupPeriodDays",
-    label: "会话清理周期（天）",
-    desc: "非活跃超过此天数的会话在启动时删除（默认 30）",
-    type: "number",
-    placeholder: "30",
+    group: "behavior",
   },
   {
     key: "outputStyle",
@@ -109,6 +113,30 @@ const COMMON_SETTINGS: {
     desc: "调整系统提示的输出样式",
     type: "string",
     placeholder: "例：Explanatory、Concise",
+    group: "behavior",
+  },
+  {
+    key: "alwaysThinkingEnabled",
+    label: "始终启用扩展思考",
+    desc: "为所有会话默认启用扩展思考（Extended Thinking）",
+    type: "boolean",
+    group: "behavior",
+  },
+  {
+    key: "showTurnDuration",
+    label: "显示轮次耗时",
+    desc: "响应后显示耗时消息（如 \"Cooked for 1m 6s\"）",
+    type: "boolean",
+    group: "behavior",
+  },
+  // ── 会话 ──
+  {
+    key: "cleanupPeriodDays",
+    label: "会话清理周期（天）",
+    desc: "非活跃超过此天数的会话在启动时删除（默认 30，设为 0 立即清理）",
+    type: "number",
+    placeholder: "30",
+    group: "session",
   },
 ];
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
