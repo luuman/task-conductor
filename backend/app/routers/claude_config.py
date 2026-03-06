@@ -695,10 +695,40 @@ def list_skills_detail() -> list[SkillDetail]:
     for entry in sorted(skills_dir.iterdir()):
         if not entry.is_dir() or entry.name.startswith("."):
             continue
-        detail = _read_skill_detail(entry)
+        # Check if disabled (SKILL.md.disabled exists but SKILL.md doesn't)
+        is_disabled = (entry / "SKILL.md.disabled").exists() and not (entry / "SKILL.md").exists()
+        if is_disabled:
+            # Read from disabled file
+            detail = _read_skill_detail(entry, disabled=True)
+        else:
+            detail = _read_skill_detail(entry)
         if detail:
+            detail.enabled = not is_disabled
             result.append(detail)
     return result
+
+
+class ToggleRequest(BaseModel):
+    name: str
+    enabled: bool
+
+
+@router.post("/skills/toggle", summary="启用/禁用技能")
+def toggle_skill(body: ToggleRequest):
+    skills_dir = CLAUDE_HOME / "skills" / body.name
+    if not skills_dir.is_dir():
+        raise HTTPException(404, f"技能 {body.name} 不存在")
+    skill_md = skills_dir / "SKILL.md"
+    skill_md_disabled = skills_dir / "SKILL.md.disabled"
+    if body.enabled:
+        # Enable: rename .disabled back
+        if skill_md_disabled.exists() and not skill_md.exists():
+            skill_md_disabled.rename(skill_md)
+    else:
+        # Disable: rename to .disabled
+        if skill_md.exists():
+            skill_md.rename(skill_md_disabled)
+    return {"ok": True, "name": body.name, "enabled": body.enabled}
 
 
 # ── 自定义命令 ────────────────────────────────────────────────────
