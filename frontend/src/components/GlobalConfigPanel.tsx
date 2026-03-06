@@ -905,7 +905,6 @@ export default function GlobalConfigPanel() {
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "ok" | "error">("idle");
   const [lastSaved, setLastSaved] = useState<string | null>(null);
-  const [expandedSection, setExpandedSection] = useState<string | null>("project");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
