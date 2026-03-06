@@ -606,6 +606,7 @@ class SkillDetail(BaseModel):
     content: str  # full SKILL.md content
     has_auxiliary: bool  # has other files besides SKILL.md
     auxiliary_files: list[str]  # other file names
+    enabled: bool = True  # whether the skill is enabled
 
 
 def _parse_yaml_frontmatter(text: str) -> tuple[dict[str, Any], str]:
