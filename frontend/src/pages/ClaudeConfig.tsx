@@ -458,7 +458,7 @@ export default function ClaudeConfigPage() {
           )}
           {visibleSections.has("rules") && (
             <div ref={ref("rules")} data-section="rules">
-              <SecRules rules={rules} onToggle={toggleRule} />
+              <SecRules rules={rules} onToggle={toggleRule} onCreate={createRule} onDelete={deleteRule} />
             </div>
           )}
           {visibleSections.has("permissions") && config && (
