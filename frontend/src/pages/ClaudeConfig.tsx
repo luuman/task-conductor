@@ -499,9 +499,15 @@ export default function ClaudeConfig() {
               <PermissionsEditor config={config} onUpdate={setConfig} />
             </div>
 
+            {/* 常用设置 */}
+            <div id="section-settings">
+              <SectionHeader icon={SlidersHorizontal} title="常用设置" desc="模型、语言、思考模式等常用配置" />
+              <CommonSettingsEditor config={config} onUpdate={setConfig} />
+            </div>
+
             {/* 其他 */}
             <div id="section-other">
-              <SectionHeader icon={Settings2} title="其他配置" desc="settings.json 中的其他字段" />
+              <SectionHeader icon={Settings2} title="其他配置" desc="settings.json 中的其他字段（不含常用设置项）" />
               <OtherEditor config={config} onUpdate={setConfig} />
             </div>
           </>
