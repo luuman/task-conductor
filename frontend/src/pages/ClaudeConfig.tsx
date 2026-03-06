@@ -1,5 +1,5 @@
 // frontend/src/pages/ClaudeConfig.tsx
-// Claude Code 配置中心 —— 侧边栏导航 + 右侧滚动内容区（scroll-spy）
+// Claude Code 配置中心 —— 分组侧边栏 + 搜索 + scroll-spy
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import {
   api,
@@ -52,7 +52,7 @@ import {
   Bot,
 } from "lucide-react";
 
-// ── Hook 事件中文标签 ──────────────────────────────────────────────
+// ── Hook 事件标签 ────────────────────────────────────────────────
 const EVENT_LABELS: Record<string, { label: string; desc: string }> = {
   PreToolUse:         { label: "工具调用前",   desc: "Claude 调用工具之前触发" },
   PostToolUse:        { label: "工具调用后",   desc: "工具调用成功完成后触发" },
@@ -66,7 +66,7 @@ const EVENT_LABELS: Record<string, { label: string; desc: string }> = {
   Notification:       { label: "通知",         desc: "Claude 发出通知时触发" },
 };
 
-// ── 常用设置项定义 ──────────────────────────────────────────────────
+// ── settings.json 常用设置 ──────────────────────────────────────
 const COMMON_SETTINGS: {
   key: string; label: string; desc: string;
   type: "string" | "boolean" | "number" | "select";
@@ -112,25 +112,50 @@ const COMMON_SETTINGS: {
 ];
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
 
-// ── Section 定义 ─────────────────────────────────────────────────────
-type SectionId = "global" | "model" | "skills" | "agents" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
+// ── 分组侧边栏定义 ──────────────────────────────────────────────
+type SectionId = "overview" | "settings" | "skills" | "agents" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
 
-const SECTIONS: { id: SectionId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { id: "global", label: "全局", icon: Settings2 },
-  { id: "model", label: "模型", icon: Cpu },
-  { id: "skills", label: "Skills", icon: Sparkles },
-  { id: "agents", label: "Agents", icon: Bot },
-  { id: "commands", label: "Commands", icon: Terminal },
-  { id: "mcp", label: "MCP", icon: Globe },
-  { id: "mcp-market", label: "MCP 市场", icon: Link },
-  { id: "hooks", label: "Hooks", icon: Webhook },
-  { id: "rules", label: "Rules", icon: BookOpen },
-  { id: "permissions", label: "权限", icon: Shield },
-  { id: "env", label: "环境变量", icon: Variable },
-  { id: "plugins", label: "插件", icon: Plug },
-  { id: "monitoring", label: "监控", icon: Activity },
-  { id: "about", label: "关于", icon: Info },
+interface NavItem { id: SectionId; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; keywords: string[] }
+interface NavGroup { label: string; items: NavItem[] }
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "核心配置",
+    items: [
+      { id: "overview", label: "总览", icon: Settings2, keywords: ["全局", "overview", "概览", "CLAUDE.md", "版本", "统计"] },
+      { id: "settings", label: "模型与参数", icon: Cpu, keywords: ["模型", "model", "温度", "token", "API", "参数"] },
+    ],
+  },
+  {
+    label: "扩展能力",
+    items: [
+      { id: "skills", label: "Skills", icon: Sparkles, keywords: ["技能", "skill", "SKILL.md"] },
+      { id: "agents", label: "Agents", icon: Bot, keywords: ["代理", "agent", "persona"] },
+      { id: "commands", label: "Commands", icon: Terminal, keywords: ["命令", "command", "slash"] },
+      { id: "mcp", label: "MCP 服务器", icon: Globe, keywords: ["mcp", "model context", "服务器", "stdio", "http"] },
+      { id: "mcp-market", label: "MCP 市场", icon: Link, keywords: ["市场", "market", "安装", "install"] },
+    ],
+  },
+  {
+    label: "安全与控制",
+    items: [
+      { id: "hooks", label: "Hooks", icon: Webhook, keywords: ["hook", "钩子", "生命周期", "PreToolUse", "PostToolUse"] },
+      { id: "rules", label: "Rules", icon: BookOpen, keywords: ["规则", "rule", "CLAUDE.md"] },
+      { id: "permissions", label: "权限", icon: Shield, keywords: ["权限", "permission", "allow", "deny", "白名单", "黑名单"] },
+      { id: "env", label: "环境变量", icon: Variable, keywords: ["环境", "env", "ANTHROPIC", "proxy", "变量"] },
+    ],
+  },
+  {
+    label: "系统管理",
+    items: [
+      { id: "plugins", label: "插件", icon: Plug, keywords: ["插件", "plugin", "扩展", "marketplace"] },
+      { id: "monitoring", label: "监控", icon: Activity, keywords: ["监控", "统计", "活动", "消息", "工具调用"] },
+      { id: "about", label: "关于", icon: Info, keywords: ["关于", "about", "版本", "系统", "缓存"] },
+    ],
+  },
 ];
+
+const ALL_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -138,27 +163,26 @@ function fmtNum(n: number): string {
   return String(n);
 }
 
-// ── localStorage cache ──────────────────────────────────────────────
-const CACHE_KEY_CONFIG = "tc_claude_config_cache";
-const CACHE_KEY_OVERVIEW = "tc_claude_overview_cache";
+// ── localStorage cache ──────────────────────────────────────────
+const CK_CFG = "tc_claude_config_cache";
+const CK_OV = "tc_claude_overview_cache";
 function readCache<T>(key: string): T | null {
-  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch { return null; }
 }
 function writeCache(key: string, data: unknown) {
   try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* quota */ }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
+// MAIN
 // ═══════════════════════════════════════════════════════════════════
 export default function ClaudeConfigPage() {
-  const [config, setConfig] = useState<ClaudeConfig | null>(() => readCache(CACHE_KEY_CONFIG));
-  const [overview, setOverview] = useState<ClaudeOverview | null>(() => readCache(CACHE_KEY_OVERVIEW));
+  const [config, setConfig] = useState<ClaudeConfig | null>(() => readCache(CK_CFG));
+  const [overview, setOverview] = useState<ClaudeOverview | null>(() => readCache(CK_OV));
   const [hookEvents, setHookEvents] = useState<string[]>([]);
-  const [loading, setLoading] = useState(!readCache(CACHE_KEY_CONFIG));
+  const [loading, setLoading] = useState(!readCache(CK_CFG));
   const [error, setError] = useState("");
 
-  // Extra data
   const [skills, setSkills] = useState<SkillDetail[]>([]);
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [commands, setCommands] = useState<CommandInfo[]>([]);
@@ -166,26 +190,24 @@ export default function ClaudeConfigPage() {
   const [systemInfo, setSystemInfo] = useState<ClaudeSystemInfo | null>(null);
   const [claudeMd, setClaudeMd] = useState("");
 
-  // Scroll-spy
-  const [activeSection, setActiveSection] = useState<SectionId>("global");
+  const [activeSection, setActiveSection] = useState<SectionId>("overview");
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     if (!config) setLoading(true);
     setError("");
     try {
       const [cfg, events, ov] = await Promise.all([
-        api.claudeConfig.get(),
-        api.claudeConfig.hookEvents(),
-        api.claudeConfig.overview(),
+        api.claudeConfig.get(), api.claudeConfig.hookEvents(), api.claudeConfig.overview(),
       ]);
       setConfig(cfg); setHookEvents(events); setOverview(ov);
-      writeCache(CACHE_KEY_CONFIG, cfg); writeCache(CACHE_KEY_OVERVIEW, ov);
+      writeCache(CK_CFG, cfg); writeCache(CK_OV, ov);
     } catch (e) {
       if (!config) setError(e instanceof Error ? e.message : "加载失败");
     } finally { setLoading(false); }
-    // Non-blocking extras
     api.claudeConfig.listSkills().then(setSkills).catch(() => {});
     api.claudeConfig.listAgents().then(setAgents).catch(() => {});
     api.claudeConfig.listCommands().then(setCommands).catch(() => {});
@@ -196,19 +218,30 @@ export default function ClaudeConfigPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Scroll-spy observer
+  // Keyboard shortcut: Ctrl+F → focus search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // Scroll-spy
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the topmost visible section
         let topId: SectionId | null = null;
         let topY = Infinity;
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const rect = entry.boundingClientRect;
-            if (rect.top < topY) { topY = rect.top; topId = entry.target.getAttribute("data-section") as SectionId; }
+          if (entry.isIntersecting && entry.boundingClientRect.top < topY) {
+            topY = entry.boundingClientRect.top;
+            topId = entry.target.getAttribute("data-section") as SectionId;
           }
         }
         if (topId) setActiveSection(topId);
@@ -217,69 +250,128 @@ export default function ClaudeConfigPage() {
     );
     for (const el of Object.values(sectionRefs.current)) { if (el) observer.observe(el); }
     return () => observer.disconnect();
-  }, [config, overview]); // re-observe when data loads
+  }, [config, overview, skills, agents, commands, rules]);
 
   const scrollToSection = (id: SectionId) => {
     const el = sectionRefs.current[id];
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Section badge counts
-  const sectionCounts: Partial<Record<SectionId, number>> = useMemo(() => ({
+  // Search filtering
+  const q = searchQuery.toLowerCase().trim();
+  const matchesSearch = useCallback((item: NavItem): boolean => {
+    if (!q) return true;
+    return item.label.toLowerCase().includes(q)
+      || item.keywords.some(k => k.toLowerCase().includes(q));
+  }, [q]);
+
+  const filteredGroups = useMemo(() => {
+    if (!q) return NAV_GROUPS;
+    return NAV_GROUPS.map(g => ({
+      ...g,
+      items: g.items.filter(matchesSearch),
+    })).filter(g => g.items.length > 0);
+  }, [q, matchesSearch]);
+
+  const visibleSections = useMemo(() => {
+    if (!q) return new Set(ALL_ITEMS.map(i => i.id));
+    return new Set(filteredGroups.flatMap(g => g.items.map(i => i.id)));
+  }, [q, filteredGroups]);
+
+  // Counts
+  const counts: Partial<Record<SectionId, number>> = useMemo(() => ({
     skills: skills.length,
     agents: agents.length,
     commands: commands.length,
     mcp: overview?.mcp_servers.length,
-    hooks: config ? Object.keys(config.hooks).length : undefined,
+    hooks: config ? Object.keys(config.hooks).filter(k => (config.hooks[k]?.length ?? 0) > 0).length : undefined,
     rules: rules.length,
     plugins: config ? Object.keys(config.enabled_plugins).length : undefined,
   }), [skills, agents, commands, overview, config, rules]);
 
+  // Toggle helpers
+  const toggleSkill = async (name: string, enabled: boolean) => {
+    await api.claudeConfig.toggleSkill(name, enabled);
+    setSkills(prev => prev.map(s => s.name === name ? { ...s, enabled } : s));
+  };
+  const toggleAgent = async (name: string, enabled: boolean) => {
+    await api.claudeConfig.toggleAgent(name, enabled);
+    setAgents(prev => prev.map(a => a.name === name ? { ...a, enabled } : a));
+  };
+  const toggleCommand = async (name: string, enabled: boolean) => {
+    await api.claudeConfig.toggleCommand(name, enabled);
+    setCommands(prev => prev.map(c => c.name === name ? { ...c, enabled } : c));
+  };
+  const toggleRule = async (name: string, enabled: boolean) => {
+    await api.claudeConfig.toggleRule(name, enabled);
+    setRules(prev => prev.map(r => r.name === name ? { ...r, enabled } : r));
+  };
+
+  const ref = (id: SectionId) => (el: HTMLDivElement | null) => { sectionRefs.current[id] = el; };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* 顶栏 */}
-      <div className="shrink-0 px-6 pt-4 pb-2 flex items-center gap-4" style={{ borderBottom: "1px solid var(--border)" }}>
-        <div className="flex-1">
-          <h1 className="text-[15px] font-bold text-app">Claude Code 配置中心</h1>
-          <p className="text-[10px] text-app-tertiary font-mono">
+      {/* ── 顶栏 ── */}
+      <div className="shrink-0 px-5 pt-3 pb-2 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[14px] font-bold text-app">Claude Code 配置中心</h1>
+          <p className="text-[10px] text-app-tertiary font-mono truncate">
             {overview?.home_path || "~/.claude"} · {overview?.cli_version || "..."}
           </p>
         </div>
+        {/* 搜索 */}
+        <div className="relative">
+          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-app-tertiary pointer-events-none" />
+          <input ref={searchRef} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            placeholder="搜索配置... (Ctrl+F)" spellCheck={false}
+            className="pl-7 pr-3 py-1.5 text-[11px] bg-app-secondary border border-app rounded-lg w-52 outline-none focus:border-accent/60 text-app placeholder:text-app-tertiary" />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-app-tertiary hover:text-app">
+              <X size={11} />
+            </button>
+          )}
+        </div>
         <button onClick={load}
-          className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg border border-app text-app-tertiary hover:text-app transition-colors">
+          className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg border border-app text-app-tertiary hover:text-app transition-colors shrink-0">
           <RotateCcw size={11} /> 刷新
         </button>
       </div>
 
-      {/* 主区域：侧边栏 + 内容 */}
+      {/* ── 主区域 ── */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 侧边栏 */}
-        <div className="w-44 shrink-0 overflow-y-auto py-3 px-2 space-y-0.5" style={{ borderRight: "1px solid var(--border)" }}>
-          {SECTIONS.map(sec => {
-            const Icon = sec.icon;
-            const count = sectionCounts[sec.id];
-            const active = activeSection === sec.id;
-            return (
-              <button key={sec.id} onClick={() => scrollToSection(sec.id)}
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] transition-all text-left",
-                  active
-                    ? "bg-accent/10 text-accent font-medium"
-                    : "text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03]"
-                )}>
-                <Icon size={13} />
-                <span className="flex-1">{sec.label}</span>
-                {count !== undefined && count > 0 && (
-                  <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded-full",
-                    active ? "bg-accent/20 text-accent" : "bg-app-tertiary/20 text-app-tertiary")}>{count}</span>
-                )}
-              </button>
-            );
-          })}
+        {/* 分组侧边栏 */}
+        <div className="w-[168px] shrink-0 overflow-y-auto py-2 px-1.5" style={{ borderRight: "1px solid var(--border)" }}>
+          {filteredGroups.map(group => (
+            <div key={group.label} className="mb-3">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-app-tertiary/60 px-2.5 py-1.5">{group.label}</p>
+              {group.items.map(item => {
+                const Icon = item.icon;
+                const count = counts[item.id];
+                const active = activeSection === item.id;
+                return (
+                  <button key={item.id} onClick={() => scrollToSection(item.id)}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[11px] transition-all text-left",
+                      active ? "bg-accent/10 text-accent font-medium" : "text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03]"
+                    )}>
+                    <Icon size={13} className="shrink-0" />
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {count !== undefined && count > 0 && (
+                      <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded-full shrink-0",
+                        active ? "bg-accent/20 text-accent" : "bg-app-tertiary/15 text-app-tertiary")}>{count}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+          {filteredGroups.length === 0 && (
+            <p className="text-[10px] text-app-tertiary text-center py-8">无匹配结果</p>
+          )}
         </div>
 
         {/* 内容区 */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-10">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-12">
           {error && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-xs text-red-400">
               <AlertTriangle size={14} /> {error}
@@ -291,90 +383,85 @@ export default function ClaudeConfigPage() {
             </div>
           )}
 
-          {/* 全局 */}
-          <div ref={el => { sectionRefs.current["global"] = el; }} data-section="global">
-            <SectionGlobal config={config} overview={overview} onUpdate={setConfig}
-              claudeMd={claudeMd} onClaudeMdChange={setClaudeMd} />
-          </div>
+          {/* ── 核心配置 ── */}
+          {visibleSections.has("overview") && (
+            <div ref={ref("overview")} data-section="overview">
+              <SecOverview config={config} overview={overview} onUpdate={setConfig}
+                claudeMd={claudeMd} onClaudeMdChange={setClaudeMd} searchQuery={q} />
+            </div>
+          )}
+          {visibleSections.has("settings") && (
+            <div ref={ref("settings")} data-section="settings">
+              <SecSettings />
+            </div>
+          )}
 
-          {/* 模型 */}
-          <div ref={el => { sectionRefs.current["model"] = el; }} data-section="model">
-            <SectionModel />
-          </div>
+          {/* ── 扩展能力 ── */}
+          {visibleSections.has("skills") && (
+            <div ref={ref("skills")} data-section="skills">
+              <SecSkills skills={skills} onToggle={toggleSkill} />
+            </div>
+          )}
+          {visibleSections.has("agents") && (
+            <div ref={ref("agents")} data-section="agents">
+              <SecAgents agents={agents} onToggle={toggleAgent} />
+            </div>
+          )}
+          {visibleSections.has("commands") && (
+            <div ref={ref("commands")} data-section="commands">
+              <SecCommands commands={commands} onToggle={toggleCommand} />
+            </div>
+          )}
+          {visibleSections.has("mcp") && (
+            <div ref={ref("mcp")} data-section="mcp">
+              <SecMcp overview={overview} onOverviewUpdate={setOverview} />
+            </div>
+          )}
+          {visibleSections.has("mcp-market") && (
+            <div ref={ref("mcp-market")} data-section="mcp-market">
+              <McpMarketEmbed />
+            </div>
+          )}
 
-          {/* Skills */}
-          <div ref={el => { sectionRefs.current["skills"] = el; }} data-section="skills">
-            <SectionSkills skills={skills} onToggle={async (name, enabled) => {
-              await api.claudeConfig.toggleSkill(name, enabled);
-              setSkills(prev => prev.map(s => s.name === name ? { ...s, enabled } : s));
-            }} />
-          </div>
+          {/* ── 安全与控制 ── */}
+          {visibleSections.has("hooks") && config && (
+            <div ref={ref("hooks")} data-section="hooks">
+              <SecHooks config={config} hookEvents={hookEvents} onUpdate={setConfig} />
+            </div>
+          )}
+          {visibleSections.has("rules") && (
+            <div ref={ref("rules")} data-section="rules">
+              <SecRules rules={rules} onToggle={toggleRule} />
+            </div>
+          )}
+          {visibleSections.has("permissions") && config && (
+            <div ref={ref("permissions")} data-section="permissions">
+              <SecPermissions config={config} onUpdate={setConfig} />
+            </div>
+          )}
+          {visibleSections.has("env") && (
+            <div ref={ref("env")} data-section="env">
+              <SecEnvVars />
+            </div>
+          )}
 
-          {/* Agents */}
-          <div ref={el => { sectionRefs.current["agents"] = el; }} data-section="agents">
-            <SectionAgents agents={agents} onToggle={async (name, enabled) => {
-              await api.claudeConfig.toggleAgent(name, enabled);
-              setAgents(prev => prev.map(a => a.name === name ? { ...a, enabled } : a));
-            }} />
-          </div>
+          {/* ── 系统管理 ── */}
+          {visibleSections.has("plugins") && config && (
+            <div ref={ref("plugins")} data-section="plugins">
+              <SecPlugins config={config} overview={overview} onUpdate={setConfig} />
+            </div>
+          )}
+          {visibleSections.has("monitoring") && overview && (
+            <div ref={ref("monitoring")} data-section="monitoring">
+              <SecMonitoring overview={overview} />
+            </div>
+          )}
+          {visibleSections.has("about") && (
+            <div ref={ref("about")} data-section="about">
+              <SecAbout systemInfo={systemInfo} overview={overview} />
+            </div>
+          )}
 
-          {/* Commands */}
-          <div ref={el => { sectionRefs.current["commands"] = el; }} data-section="commands">
-            <SectionCommands commands={commands} onToggle={async (name, enabled) => {
-              await api.claudeConfig.toggleCommand(name, enabled);
-              setCommands(prev => prev.map(c => c.name === name ? { ...c, enabled } : c));
-            }} />
-          </div>
-
-          {/* MCP */}
-          <div ref={el => { sectionRefs.current["mcp"] = el; }} data-section="mcp">
-            <SectionMcp overview={overview} onOverviewUpdate={setOverview} />
-          </div>
-
-          {/* MCP 市场 */}
-          <div ref={el => { sectionRefs.current["mcp-market"] = el; }} data-section="mcp-market">
-            <McpMarketEmbed />
-          </div>
-
-          {/* Hooks */}
-          <div ref={el => { sectionRefs.current["hooks"] = el; }} data-section="hooks">
-            {config && <SectionHooks config={config} hookEvents={hookEvents} onUpdate={setConfig} />}
-          </div>
-
-          {/* Rules */}
-          <div ref={el => { sectionRefs.current["rules"] = el; }} data-section="rules">
-            <SectionRules rules={rules} onToggle={async (name, enabled) => {
-              await api.claudeConfig.toggleRule(name, enabled);
-              setRules(prev => prev.map(r => r.name === name ? { ...r, enabled } : r));
-            }} />
-          </div>
-
-          {/* 权限 */}
-          <div ref={el => { sectionRefs.current["permissions"] = el; }} data-section="permissions">
-            {config && <SectionPermissions config={config} onUpdate={setConfig} />}
-          </div>
-
-          {/* 环境变量 */}
-          <div ref={el => { sectionRefs.current["env"] = el; }} data-section="env">
-            <SectionEnvVars />
-          </div>
-
-          {/* 插件 */}
-          <div ref={el => { sectionRefs.current["plugins"] = el; }} data-section="plugins">
-            {config && <SectionPlugins config={config} overview={overview} onUpdate={setConfig} />}
-          </div>
-
-          {/* 监控 */}
-          <div ref={el => { sectionRefs.current["monitoring"] = el; }} data-section="monitoring">
-            {overview && <SectionMonitoring overview={overview} />}
-          </div>
-
-          {/* 关于 */}
-          <div ref={el => { sectionRefs.current["about"] = el; }} data-section="about">
-            <SectionAbout systemInfo={systemInfo} overview={overview} />
-          </div>
-
-          {/* 底部留白 */}
           <div className="h-40" />
         </div>
       </div>
@@ -383,29 +470,73 @@ export default function ClaudeConfigPage() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: 全局配置
+// Shared components
 // ═══════════════════════════════════════════════════════════════════
-function SectionGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange }: {
+function ToggleSwitch({ enabled, loading, onClick }: {
+  enabled: boolean; loading?: boolean; onClick: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <button onClick={onClick} disabled={loading}
+      className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", enabled ? "bg-accent" : "bg-app-tertiary/40", loading && "opacity-50")}>
+      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", enabled ? "translate-x-[18px]" : "translate-x-0.5")} />
+    </button>
+  );
+}
+
+function SectionHeader({ icon: Icon, color, label, desc, right }: {
+  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  color: string; label: string; desc: string; right?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 mb-4">
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+        style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+        <Icon size={14} style={{ color }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h2 className="text-[13px] font-bold text-app leading-tight">{label}</h2>
+        <p className="text-[10px] text-app-tertiary">{desc}</p>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+function CountBadges({ items }: { items: { label: string; count: number; color?: string }[] }) {
+  return (
+    <div className="flex items-center gap-2">
+      {items.map(b => (
+        <span key={b.label} className="text-[10px] font-mono px-2 py-0.5 rounded-full"
+          style={{ background: `${b.color || "var(--accent)"}15`, color: b.color || "var(--accent)" }}>
+          {b.count} {b.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sec: 总览
+// ═══════════════════════════════════════════════════════════════════
+function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, searchQuery }: {
   config: ClaudeConfig | null; overview: ClaudeOverview | null;
   onUpdate: (c: ClaudeConfig) => void;
   claudeMd: string; onClaudeMdChange: (s: string) => void;
+  searchQuery: string;
 }) {
   const [mdSaving, setMdSaving] = useState(false);
   const [mdSaved, setMdSaved] = useState(false);
-
   const handleSaveMd = async () => {
     setMdSaving(true);
-    try {
-      await api.claudeConfig.updateClaudeMd(claudeMd);
-      setMdSaved(true); setTimeout(() => setMdSaved(false), 2000);
-    } finally { setMdSaving(false); }
+    try { await api.claudeConfig.updateClaudeMd(claudeMd); setMdSaved(true); setTimeout(() => setMdSaved(false), 2000); }
+    finally { setMdSaving(false); }
   };
 
   return (
     <div className="space-y-6">
-      <SectionTitle icon={Settings2} color="var(--accent)" label="全局配置" desc="概览与常用设置" />
+      <SectionHeader icon={Settings2} color="var(--accent)" label="总览" desc="Claude Code 全局信息与常用配置" />
 
-      {/* Overview stats */}
+      {/* Stats cards */}
       {overview && (
         <div className="grid grid-cols-5 gap-3">
           {[
@@ -441,7 +572,7 @@ function SectionGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange 
         </div>
       )}
 
-      {/* 全局 CLAUDE.md */}
+      {/* CLAUDE.md */}
       <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -460,54 +591,19 @@ function SectionGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange 
           className="w-full bg-app border border-app rounded-lg px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed focus:border-accent/60" />
       </div>
 
-      {/* 常用设置 */}
-      {config && <CommonSettingsGrid config={config} onUpdate={onUpdate} />}
-
-      {/* 其他配置字段 */}
+      {/* Common settings */}
+      {config && <CommonSettingsGrid config={config} onUpdate={onUpdate} searchQuery={searchQuery} />}
       {config && <OtherFieldsGrid config={config} onUpdate={onUpdate} />}
     </div>
   );
 }
 
-// ── 通用 Toggle 开关 ────────────────────────────────────────────────
-function ToggleSwitch({ enabled, loading, onClick }: {
-  enabled: boolean; loading?: boolean; onClick: (e: React.MouseEvent) => void;
-}) {
-  return (
-    <button onClick={onClick} disabled={loading}
-      className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", enabled ? "bg-accent" : "bg-app-tertiary/40", loading && "opacity-50")}>
-      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", enabled ? "translate-x-[18px]" : "translate-x-0.5")} />
-    </button>
-  );
-}
-
-// ── Section 标题组件 ─────────────────────────────────────────────────
-function SectionTitle({ icon: Icon, color, label, desc }: {
-  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
-  color: string; label: string; desc: string;
-}) {
-  return (
-    <div className="flex items-center gap-2.5 mb-1">
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-        <Icon size={14} style={{ color }} />
-      </div>
-      <div>
-        <h2 className="text-sm font-bold text-app">{label}</h2>
-        <p className="text-[10px] text-app-tertiary">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-// ── Activity Chart ──────────────────────────────────────────────────
 function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
   const recent = useMemo(() => data.slice(-60), [data]);
   const maxMsg = useMemo(() => Math.max(1, ...recent.map(d => d.message_count)), [recent]);
   const maxTool = useMemo(() => Math.max(1, ...recent.map(d => d.tool_call_count)), [recent]);
-  if (recent.length === 0) return <div className="text-[10px] text-app-tertiary text-center py-6">暂无</div>;
-  const H = 80;
-  const barW = Math.max(3, Math.min(8, (600 - recent.length) / recent.length));
-  const gap = 1;
+  if (!recent.length) return <div className="text-[10px] text-app-tertiary text-center py-6">暂无</div>;
+  const H = 80, barW = Math.max(3, Math.min(8, (600 - recent.length) / recent.length)), gap = 1;
   const W = recent.length * (barW + gap);
   return (
     <div className="overflow-x-auto">
@@ -516,12 +612,12 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
           const x = i * (barW + gap);
           const msgH = Math.max(1, (d.message_count / maxMsg) * H * 0.9);
           const toolH = Math.max(1, (d.tool_call_count / maxTool) * H * 0.5);
-          const isToday = i === recent.length - 1;
+          const last = i === recent.length - 1;
           return (
             <g key={d.date}>
               <title>{`${d.date}\n消息: ${d.message_count}\n工具: ${d.tool_call_count}\n会话: ${d.session_count}`}</title>
-              <rect x={x} y={H - msgH} width={barW} height={msgH} rx={1} fill={isToday ? "#22c55e" : "#4477ff"} opacity={0.7} />
-              <rect x={x} y={H - toolH} width={barW} height={toolH} rx={1} fill={isToday ? "#86efac" : "#f59e0b"} opacity={0.5} />
+              <rect x={x} y={H - msgH} width={barW} height={msgH} rx={1} fill={last ? "#22c55e" : "#4477ff"} opacity={0.7} />
+              <rect x={x} y={H - toolH} width={barW} height={toolH} rx={1} fill={last ? "#86efac" : "#f59e0b"} opacity={0.5} />
               {i % 7 === 0 && <text x={x + barW / 2} y={H + 12} textAnchor="middle" fill="var(--text-tertiary)" fontSize="6" fontFamily="monospace">{d.date.slice(5)}</text>}
             </g>
           );
@@ -535,11 +631,9 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
   );
 }
 
-// ── 常用设置网格（展开，不折叠） ─────────────────────────────────────
-function CommonSettingsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+function CommonSettingsGrid({ config, onUpdate, searchQuery }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void; searchQuery: string }) {
   const [saving, setSaving] = useState<string | null>(null);
   const getValue = (key: string): unknown => config.other[key];
-
   const handleChange = async (key: string, value: unknown) => {
     setSaving(key);
     try {
@@ -547,54 +641,57 @@ function CommonSettingsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpda
       else onUpdate(await api.claudeConfig.updateOther(key, value));
     } finally { setSaving(null); }
   };
-
-  const GROUP_LABELS: Record<string, string> = {
+  const GLABELS: Record<string, string> = {
     model: "模型配置", behavior: "行为与输出", session: "会话管理",
     security: "登录与安全", ui: "界面与体验", advanced: "高级选项",
   };
-
   const groups = useMemo(() => {
     const map = new Map<string, typeof COMMON_SETTINGS>();
-    for (const s of COMMON_SETTINGS) { const g = s.group || "other"; if (!map.has(g)) map.set(g, []); map.get(g)!.push(s); }
+    for (const s of COMMON_SETTINGS) {
+      // Filter by search
+      if (searchQuery && !s.label.toLowerCase().includes(searchQuery) && !s.key.toLowerCase().includes(searchQuery) && !s.desc.toLowerCase().includes(searchQuery)) continue;
+      const g = s.group || "other";
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(s);
+    }
     return map;
-  }, []);
+  }, [searchQuery]);
 
+  if (groups.size === 0) return null;
   return (
     <div className="space-y-6">
-      {[...groups.entries()].map(([groupId, settings]) => (
-        <div key={groupId}>
-          <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">{GROUP_LABELS[groupId] || groupId}</p>
+      {[...groups.entries()].map(([gid, settings]) => (
+        <div key={gid}>
+          <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">{GLABELS[gid] || gid}</p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {settings.map(setting => {
-              const current = getValue(setting.key);
+            {settings.map(s => {
+              const cur = getValue(s.key);
               return (
-                <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
+                <div key={s.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
                   <div className="flex items-center justify-between mb-2">
-                    <div><p className="text-xs font-medium text-app">{setting.label}</p><p className="text-[10px] text-app-tertiary">{setting.desc}</p></div>
-                    {setting.type === "boolean" && (
-                      <button onClick={() => handleChange(setting.key, !(current === true))} disabled={saving === setting.key}
-                        className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", current === true ? "bg-accent" : "bg-app-tertiary/40")}>
-                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", current === true ? "translate-x-[18px]" : "translate-x-0.5")} />
-                      </button>
+                    <div><p className="text-xs font-medium text-app">{s.label}</p><p className="text-[10px] text-app-tertiary">{s.desc}</p></div>
+                    {s.type === "boolean" && (
+                      <ToggleSwitch enabled={cur === true} loading={saving === s.key}
+                        onClick={() => handleChange(s.key, !(cur === true))} />
                     )}
                   </div>
-                  {setting.type === "select" && (
-                    <select value={typeof current === "string" ? current : ""} onChange={e => handleChange(setting.key, e.target.value || undefined)} disabled={saving === setting.key}
+                  {s.type === "select" && (
+                    <select value={typeof cur === "string" ? cur : ""} onChange={e => handleChange(s.key, e.target.value || undefined)} disabled={saving === s.key}
                       className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60 cursor-pointer">
-                      {setting.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      {s.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   )}
-                  {setting.type === "string" && (
-                    <input value={typeof current === "string" ? current : ""} onChange={e => handleChange(setting.key, e.target.value || undefined)}
-                      placeholder={setting.placeholder} disabled={saving === setting.key} spellCheck={false}
+                  {s.type === "string" && (
+                    <input value={typeof cur === "string" ? cur : ""} onChange={e => handleChange(s.key, e.target.value || undefined)}
+                      placeholder={s.placeholder} disabled={saving === s.key} spellCheck={false}
                       className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
                   )}
-                  {setting.type === "number" && (
-                    <input type="number" value={typeof current === "number" ? current : ""} onChange={e => handleChange(setting.key, e.target.value ? Number(e.target.value) : undefined)}
-                      placeholder={setting.placeholder} disabled={saving === setting.key}
+                  {s.type === "number" && (
+                    <input type="number" value={typeof cur === "number" ? cur : ""} onChange={e => handleChange(s.key, e.target.value ? Number(e.target.value) : undefined)}
+                      placeholder={s.placeholder} disabled={saving === s.key}
                       className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
                   )}
-                  <p className="text-[9px] font-mono text-app-tertiary/60 mt-1.5">settings.json → <span className="text-accent/60">{setting.key}</span></p>
+                  <p className="text-[9px] font-mono text-app-tertiary/60 mt-1.5">settings.json → <span className="text-accent/60">{s.key}</span></p>
                 </div>
               );
             })}
@@ -605,36 +702,32 @@ function CommonSettingsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpda
   );
 }
 
-// ── 其他配置字段 ─────────────────────────────────────────────────────
 function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
-  const entries = Object.entries(config.other).filter(([key]) => !COMMON_SETTING_KEYS.has(key));
+  const entries = Object.entries(config.other).filter(([k]) => !COMMON_SETTING_KEYS.has(k));
   const [saving, setSaving] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
-
-  const handleSave = async (key: string, rawValue: string) => {
-    let value: unknown; try { value = JSON.parse(rawValue); } catch { value = rawValue; }
+  const handleSave = async (key: string, raw: string) => {
+    let v: unknown; try { v = JSON.parse(raw); } catch { v = raw; }
     setSaving(key);
-    try { onUpdate(await api.claudeConfig.updateOther(key, value)); setEditValues(prev => { const n = { ...prev }; delete n[key]; return n; }); }
-    finally { setSaving(null); }
+    try { onUpdate(await api.claudeConfig.updateOther(key, v)); setEditValues(p => { const n = { ...p }; delete n[key]; return n; }); } finally { setSaving(null); }
   };
-  const handleDelete = async (key: string) => { setSaving(key); try { onUpdate(await api.claudeConfig.deleteOther(key)); } finally { setSaving(null); } };
+  const handleDel = async (key: string) => { setSaving(key); try { onUpdate(await api.claudeConfig.deleteOther(key)); } finally { setSaving(null); } };
   const handleAdd = async () => {
     if (!newKey.trim()) return;
-    let value: unknown; try { value = JSON.parse(newValue); } catch { value = newValue; }
-    setSaving(newKey); try { onUpdate(await api.claudeConfig.updateOther(newKey.trim(), value)); setNewKey(""); setNewValue(""); } finally { setSaving(null); }
+    let v: unknown; try { v = JSON.parse(newValue); } catch { v = newValue; }
+    setSaving(newKey); try { onUpdate(await api.claudeConfig.updateOther(newKey.trim(), v)); setNewKey(""); setNewValue(""); } finally { setSaving(null); }
   };
-  const formatValue = (v: unknown): string => typeof v === "string" ? v : JSON.stringify(v, null, 2);
-
-  if (entries.length === 0 && !newKey) return null;
+  const fmt = (v: unknown): string => typeof v === "string" ? v : JSON.stringify(v, null, 2);
+  if (!entries.length && !newKey) return null;
   return (
     <div>
       <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">其他配置字段</p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {entries.map(([key, value]) => {
-          const displayValue = editValues[key] ?? formatValue(value);
-          const isDirty = editValues[key] !== undefined && editValues[key] !== formatValue(value);
+          const disp = editValues[key] ?? fmt(value);
+          const dirty = editValues[key] !== undefined && editValues[key] !== fmt(value);
           const isBool = typeof value === "boolean";
           return (
             <div key={key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
@@ -642,23 +735,18 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
                 <span className="text-xs font-semibold font-mono text-app">{key}</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] text-app-tertiary font-mono">{typeof value}</span>
-                  <button onClick={() => handleDelete(key)} disabled={saving === key} className="text-app-tertiary hover:text-red-400 transition-colors p-1"><Trash2 size={12} /></button>
+                  <button onClick={() => handleDel(key)} disabled={saving === key} className="text-app-tertiary hover:text-red-400 transition-colors p-1"><Trash2 size={12} /></button>
                 </div>
               </div>
               {isBool ? (
-                <button onClick={() => handleSave(key, String(!value))} disabled={saving === key}
-                  className={cn("w-9 h-5 rounded-full transition-colors relative", value ? "bg-accent" : "bg-app-tertiary/40")}>
-                  <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", value ? "translate-x-[18px]" : "translate-x-0.5")} />
-                </button>
+                <ToggleSwitch enabled={value as boolean} loading={saving === key} onClick={() => handleSave(key, String(!value))} />
               ) : (
                 <>
-                  <textarea value={displayValue} onChange={e => setEditValues(prev => ({ ...prev, [key]: e.target.value }))} spellCheck={false}
-                    rows={Math.min(4, displayValue.split("\n").length + 1)}
+                  <textarea value={disp} onChange={e => setEditValues(p => ({ ...p, [key]: e.target.value }))} spellCheck={false}
+                    rows={Math.min(4, disp.split("\n").length + 1)}
                     className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none resize-y focus:border-accent/60" />
-                  {isDirty && (
-                    <button onClick={() => handleSave(key, displayValue)} disabled={saving === key}
-                      className="flex items-center gap-1 text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"><Save size={10} /> 保存</button>
-                  )}
+                  {dirty && <button onClick={() => handleSave(key, disp)} disabled={saving === key}
+                    className="flex items-center gap-1 text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"><Save size={10} /> 保存</button>}
                 </>
               )}
             </div>
@@ -668,8 +756,8 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
       <div className="border border-dashed border-app rounded-xl px-4 py-3 space-y-2 mt-3">
         <p className="text-[10px] text-app-tertiary font-medium">添加新配置项</p>
         <div className="flex gap-2">
-          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="配置键名" spellCheck={false}
-            className="w-40 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
+          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="键名" spellCheck={false}
+            className="w-36 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
           <input value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder="值（JSON 或字符串）" spellCheck={false}
             className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
           <button onClick={handleAdd} disabled={!newKey.trim()}
@@ -683,42 +771,32 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: 模型 + 全局配置面板
+// Sec: 模型与参数
 // ═══════════════════════════════════════════════════════════════════
-function SectionModel() {
+function SecSettings() {
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Cpu} color="#8b5cf6" label="模型与参数" desc="模型选择、API 与高级参数配置" />
+      <SectionHeader icon={Cpu} color="#8b5cf6" label="模型与参数配置" desc="API 参数、模型选择、功能开关与高级配置 (tc_global_config.json)" />
       <GlobalConfigPanel />
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Skills
+// Sec: Skills
 // ═══════════════════════════════════════════════════════════════════
-function SectionSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
+function SecSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (n: string, e: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const detail = skills.find(s => s.name === selected);
-
-  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setToggling(name);
-    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
+    ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
-
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Sparkles} color="#eab308" label="Skills 技能库" desc="~/.claude/skills/ 目录下的自定义技能" />
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{skills.length} 个技能</span>
-        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{skills.filter(s => s.enabled).length} 启用</span>
-      </div>
-
-      {skills.length === 0 ? (
-        <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义 Skill</div>
-      ) : (
+      <SectionHeader icon={Sparkles} color="#eab308" label="Skills 技能库" desc="~/.claude/skills/"
+        right={<CountBadges items={[{ label: "总计", count: skills.length }, { label: "启用", count: skills.filter(s => s.enabled).length, color: "#22c55e" }]} />} />
+      {!skills.length ? <Empty text="暂无自定义 Skill" /> : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {skills.map(s => (
@@ -728,57 +806,21 @@ function SectionSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: 
                   !s.enabled && "opacity-50")}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-app">{s.name}</p>
-                  <ToggleSwitch enabled={s.enabled} loading={toggling === s.name}
-                    onClick={(e) => handleToggle(s.name, !s.enabled, e)} />
+                  <ToggleSwitch enabled={s.enabled} loading={toggling === s.name} onClick={e => toggle(s.name, !s.enabled, e)} />
                 </div>
                 <p className="text-[10px] text-app-tertiary mt-0.5 line-clamp-2">{s.description || "无描述"}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  {!s.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
-                  {s.has_auxiliary && <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">有辅助文件</span>}
-                  {Object.keys(s.metadata).length > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">有元数据</span>}
+                  {!s.enabled && <StatusTag label="已禁用" color="#ef4444" />}
+                  {s.has_auxiliary && <StatusTag label="辅助文件" color="#3b82f6" />}
+                  {Object.keys(s.metadata).length > 0 && <StatusTag label="元数据" color="#a855f7" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
-            {detail ? (
-              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-app">{detail.name}</h3>
-                  <span className="text-[9px] font-mono text-app-tertiary">{detail.path}</span>
-                </div>
-                {Object.keys(detail.metadata).length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">元数据</p>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(detail.metadata).map(([k, v]) => (
-                        <span key={k} className="text-[10px] px-2 py-1 rounded-md bg-app border border-app font-mono">
-                          <span className="text-accent">{k}</span>: <span className="text-app-secondary">{String(v)}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {detail.auxiliary_files.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">辅助文件</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {detail.auxiliary_files.map(f => (
-                        <span key={f} className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-mono">{f}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider mb-2">SKILL.md 内容</p>
-                  <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">
-                    {detail.content}
-                  </pre>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧技能查看详情</div>
-            )}
+            {detail ? <DetailPanel title={detail.name} path={detail.path} metadata={detail.metadata}
+              auxiliaryFiles={detail.auxiliary_files} content={detail.content} contentLabel="SKILL.md 内容" />
+              : <EmptyDetail text="选择左侧技能查看详情" />}
           </div>
         </div>
       )}
@@ -787,30 +829,20 @@ function SectionSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: 
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Agents
+// Sec: Agents
 // ═══════════════════════════════════════════════════════════════════
-function SectionAgents({ agents, onToggle }: { agents: AgentInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
+function SecAgents({ agents, onToggle }: { agents: AgentInfo[]; onToggle: (n: string, e: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const detail = agents.find(a => a.name === selected);
-
-  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setToggling(name);
-    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
+    ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
-
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Bot} color="#f472b6" label="Agents 代理" desc="~/.claude/agents/ 目录下的自定义 AI 代理" />
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{agents.length} 个代理</span>
-        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{agents.filter(a => a.enabled).length} 启用</span>
-      </div>
-
-      {agents.length === 0 ? (
-        <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义 Agent（~/.claude/agents/）</div>
-      ) : (
+      <SectionHeader icon={Bot} color="#f472b6" label="Agents 代理" desc="~/.claude/agents/"
+        right={<CountBadges items={[{ label: "总计", count: agents.length }, { label: "启用", count: agents.filter(a => a.enabled).length, color: "#22c55e" }]} />} />
+      {!agents.length ? <Empty text="暂无自定义 Agent" /> : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {agents.map(a => (
@@ -820,46 +852,19 @@ function SectionAgents({ agents, onToggle }: { agents: AgentInfo[]; onToggle: (n
                   !a.enabled && "opacity-50")}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-app">{a.name}</p>
-                  <ToggleSwitch enabled={a.enabled} loading={toggling === a.name}
-                    onClick={(e) => handleToggle(a.name, !a.enabled, e)} />
+                  <ToggleSwitch enabled={a.enabled} loading={toggling === a.name} onClick={e => toggle(a.name, !a.enabled, e)} />
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{a.scope}</span>
-                  {!a.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
-                  {Object.keys(a.metadata).length > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">有元数据</span>}
+                  <StatusTag label={a.scope} color="#7878a8" />
+                  {!a.enabled && <StatusTag label="已禁用" color="#ef4444" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
-            {detail ? (
-              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-app">{detail.name}</h3>
-                  <span className="text-[9px] font-mono text-app-tertiary">{detail.path}</span>
-                </div>
-                {Object.keys(detail.metadata).length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">元数据</p>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(detail.metadata).map(([k, v]) => (
-                        <span key={k} className="text-[10px] px-2 py-1 rounded-md bg-app border border-app font-mono">
-                          <span className="text-accent">{k}</span>: <span className="text-app-secondary">{String(v)}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider mb-2">Agent 内容</p>
-                  <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">
-                    {detail.content}
-                  </pre>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧代理查看详情</div>
-            )}
+            {detail ? <DetailPanel title={detail.name} path={detail.path} metadata={detail.metadata}
+              content={detail.content} contentLabel="Agent 内容" />
+              : <EmptyDetail text="选择左侧代理查看详情" />}
           </div>
         </div>
       )}
@@ -868,30 +873,20 @@ function SectionAgents({ agents, onToggle }: { agents: AgentInfo[]; onToggle: (n
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Commands
+// Sec: Commands
 // ═══════════════════════════════════════════════════════════════════
-function SectionCommands({ commands, onToggle }: { commands: CommandInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
+function SecCommands({ commands, onToggle }: { commands: CommandInfo[]; onToggle: (n: string, e: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const detail = commands.find(c => c.name === selected);
-
-  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setToggling(name);
-    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
+    ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
-
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Terminal} color="#22c55e" label="自定义命令" desc="~/.claude/commands/ 目录下的 slash 命令" />
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{commands.length} 个命令</span>
-        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{commands.filter(c => c.enabled).length} 启用</span>
-      </div>
-
-      {commands.length === 0 ? (
-        <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义命令</div>
-      ) : (
+      <SectionHeader icon={Terminal} color="#22c55e" label="自定义命令" desc="~/.claude/commands/"
+        right={<CountBadges items={[{ label: "总计", count: commands.length }, { label: "启用", count: commands.filter(c => c.enabled).length, color: "#22c55e" }]} />} />
+      {!commands.length ? <Empty text="暂无自定义命令" /> : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {commands.map(c => (
@@ -901,30 +896,18 @@ function SectionCommands({ commands, onToggle }: { commands: CommandInfo[]; onTo
                   !c.enabled && "opacity-50")}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-app font-mono">/{c.name}</p>
-                  <ToggleSwitch enabled={c.enabled} loading={toggling === c.name}
-                    onClick={(e) => handleToggle(c.name, !c.enabled, e)} />
+                  <ToggleSwitch enabled={c.enabled} loading={toggling === c.name} onClick={e => toggle(c.name, !c.enabled, e)} />
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{c.scope}</span>
-                  {!c.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
+                  <StatusTag label={c.scope} color="#7878a8" />
+                  {!c.enabled && <StatusTag label="已禁用" color="#ef4444" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
-            {detail ? (
-              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold font-mono text-app">/{detail.name}</h3>
-                  <span className="text-[9px] font-mono text-app-tertiary">{detail.path}</span>
-                </div>
-                <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">
-                  {detail.content}
-                </pre>
-              </div>
-            ) : (
-              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧命令查看详情</div>
-            )}
+            {detail ? <DetailPanel title={`/${detail.name}`} path={detail.path} content={detail.content} contentLabel="命令内容" />
+              : <EmptyDetail text="选择左侧命令查看详情" />}
           </div>
         </div>
       )}
@@ -933,9 +916,9 @@ function SectionCommands({ commands, onToggle }: { commands: CommandInfo[]; onTo
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: MCP
+// Sec: MCP
 // ═══════════════════════════════════════════════════════════════════
-function SectionMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | null; onOverviewUpdate: (o: ClaudeOverview) => void }) {
+function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | null; onOverviewUpdate: (o: ClaudeOverview) => void }) {
   const [servers, setServers] = useState<McpServer[]>(overview?.mcp_servers ?? []);
   const [refreshing, setRefreshing] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -944,31 +927,32 @@ function SectionMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview |
   const [addError, setAddError] = useState("");
   const [adding, setAdding] = useState(false);
   useEffect(() => { if (overview) setServers(overview.mcp_servers); }, [overview]);
-
-  const refresh = async () => { setRefreshing(true); try { const list = await api.claudeConfig.listMcp(); setServers(list); if (overview) onOverviewUpdate({ ...overview, mcp_servers: list }); } finally { setRefreshing(false); } };
-  const handleRemove = async (name: string) => { setRemoving(name); try { const res = await api.claudeConfig.removeMcp(name); setServers(res.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: res.servers }); } finally { setRemoving(null); } };
+  const refresh = async () => { setRefreshing(true); try { const l = await api.claudeConfig.listMcp(); setServers(l); if (overview) onOverviewUpdate({ ...overview, mcp_servers: l }); } finally { setRefreshing(false); } };
+  const handleRemove = async (name: string) => { setRemoving(name); try { const r = await api.claudeConfig.removeMcp(name); setServers(r.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: r.servers }); } finally { setRemoving(null); } };
   const handleAdd = async () => {
     if (!addForm.name.trim() || !addForm.url.trim()) return;
     setAdding(true); setAddError("");
-    try { const res = await api.claudeConfig.addMcp({ name: addForm.name.trim(), url: addForm.url.trim(), transport: addForm.transport, scope: addForm.scope }); setServers(res.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: res.servers }); setAddForm({ name: "", url: "", transport: "http", scope: "user" }); setShowAdd(false); }
+    try { const r = await api.claudeConfig.addMcp({ name: addForm.name.trim(), url: addForm.url.trim(), transport: addForm.transport, scope: addForm.scope }); setServers(r.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: r.servers }); setAddForm({ name: "", url: "", transport: "http", scope: "user" }); setShowAdd(false); }
     catch (e) { setAddError(e instanceof Error ? e.message : "添加失败"); } finally { setAdding(false); }
   };
-  const SM: Record<string, { label: string; color: string; bg: string }> = { connected: { label: "已连接", color: "#22c55e", bg: "bg-green-500/10" }, needs_auth: { label: "需认证", color: "#f59e0b", bg: "bg-yellow-500/10" }, error: { label: "错误", color: "#ef4444", bg: "bg-red-500/10" }, unknown: { label: "未知", color: "#7878a8", bg: "bg-app-tertiary/20" } };
-
+  const SM: Record<string, { label: string; color: string; bg: string }> = {
+    connected: { label: "已连接", color: "#22c55e", bg: "bg-green-500/10" },
+    needs_auth: { label: "需认证", color: "#f59e0b", bg: "bg-yellow-500/10" },
+    error: { label: "错误", color: "#ef4444", bg: "bg-red-500/10" },
+    unknown: { label: "未知", color: "#7878a8", bg: "bg-app-tertiary/20" },
+  };
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <SectionTitle icon={Globe} color="#3b82f6" label="MCP 服务器" desc="Model Context Protocol 服务器管理" />
-        <div className="flex gap-2">
+      <SectionHeader icon={Globe} color="#3b82f6" label="MCP 服务器" desc="Model Context Protocol 服务器管理"
+        right={<div className="flex gap-2">
           <button onClick={refresh} disabled={refreshing} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app"><RotateCcw size={10} className={refreshing ? "animate-spin" : ""} /> 刷新</button>
           <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 添加</button>
-        </div>
-      </div>
+        </div>} />
       {showAdd && (
         <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">名称</label><input value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} placeholder="my-server" spellCheck={false} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60" /></div>
-            <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">URL</label><input value={addForm.url} onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))} placeholder="https://mcp.example.com" spellCheck={false} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60" /></div>
+            <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">URL</label><input value={addForm.url} onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." spellCheck={false} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60" /></div>
             <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">协议</label><select value={addForm.transport} onChange={e => setAddForm(f => ({ ...f, transport: e.target.value }))} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] text-app outline-none"><option value="http">HTTP</option><option value="sse">SSE</option><option value="stdio">Stdio</option></select></div>
             <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">作用域</label><select value={addForm.scope} onChange={e => setAddForm(f => ({ ...f, scope: e.target.value }))} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] text-app outline-none"><option value="user">全局</option><option value="project">项目</option></select></div>
           </div>
@@ -979,19 +963,13 @@ function SectionMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview |
           </div>
         </div>
       )}
-      {servers.length === 0 ? (
-        <div className="text-center py-12 text-app-tertiary text-xs"><Unplug size={24} className="mx-auto mb-2 opacity-30" />暂无 MCP 服务器</div>
-      ) : (
+      {!servers.length ? <Empty text="暂无 MCP 服务器" /> : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           {servers.map(s => { const sm = SM[s.status] ?? SM.unknown; return (
             <div key={s.name} className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: sm.color, boxShadow: s.status === "connected" ? `0 0 6px ${sm.color}60` : undefined }} />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-app">{s.name}</span>
-                  <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full", sm.bg)} style={{ color: sm.color }}>{sm.label}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-app-tertiary/20 text-app-tertiary font-mono">{s.transport}</span>
-                </div>
+                <div className="flex items-center gap-2"><span className="text-xs font-semibold text-app">{s.name}</span><StatusTag label={sm.label} color={sm.color} /><StatusTag label={s.transport} color="#7878a8" /></div>
                 {s.url && <div className="flex items-center gap-1 mt-1"><Link size={9} className="text-app-tertiary shrink-0" /><span className="text-[10px] font-mono text-app-tertiary truncate">{s.url}</span></div>}
               </div>
               <button onClick={() => handleRemove(s.name)} disabled={removing === s.name} className="text-app-tertiary hover:text-red-400 transition-colors p-1.5 rounded-md hover:bg-red-500/10"><Trash2 size={13} /></button>
@@ -1004,87 +982,81 @@ function SectionMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview |
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Hooks
+// Sec: Hooks
 // ═══════════════════════════════════════════════════════════════════
-function SectionHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
-  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [editState, setEditState] = useState<Record<string, HookRule[]>>({});
+  const getRules = (ev: string): HookRule[] => editState[ev] ?? config.hooks[ev] ?? [];
+  const setRules = (ev: string, r: HookRule[]) => setEditState(p => ({ ...p, [ev]: r }));
+  const dirty = (ev: string) => { const e = editState[ev]; return e ? JSON.stringify(e) !== JSON.stringify(config.hooks[ev] ?? []) : false; };
+  const save = async (ev: string) => { setSaving(ev); try { const u = await api.claudeConfig.updateHooks(ev, getRules(ev)); onUpdate(u); setEditState(p => { const n = { ...p }; delete n[ev]; return n; }); } finally { setSaving(null); } };
+  const del = async (ev: string) => { setSaving(ev); try { onUpdate(await api.claudeConfig.deleteHookEvent(ev)); setEditState(p => { const n = { ...p }; delete n[ev]; return n; }); } finally { setSaving(null); } };
+  const addRule = (ev: string) => { setRules(ev, [...getRules(ev), { matcher: "", hooks: [{ type: "command", command: "", timeout: 5 }] }]); setExpanded(ev); };
+  const rmRule = (ev: string, i: number) => setRules(ev, getRules(ev).filter((_, j) => j !== i));
+  const updRule = (ev: string, i: number, f: "matcher", v: string) => { const r = [...getRules(ev)]; r[i] = { ...r[i], [f]: v }; setRules(ev, r); };
+  const addHook = (ev: string, i: number) => { const r = [...getRules(ev)]; r[i] = { ...r[i], hooks: [...r[i].hooks, { type: "command", command: "", timeout: 5 }] }; setRules(ev, r); };
+  const rmHook = (ev: string, ri: number, hi: number) => { const r = [...getRules(ev)]; r[ri] = { ...r[ri], hooks: r[ri].hooks.filter((_, j) => j !== hi) }; setRules(ev, r); };
+  const updHook = (ev: string, ri: number, hi: number, u: Partial<HookEntry>) => { const r = [...getRules(ev)]; const h = [...r[ri].hooks]; h[hi] = { ...h[hi], ...u }; r[ri] = { ...r[ri], hooks: h }; setRules(ev, r); };
 
-  const getEditRules = (event: string): HookRule[] => editState[event] ?? config.hooks[event] ?? [];
-  const setEditRules = (event: string, rules: HookRule[]) => setEditState(prev => ({ ...prev, [event]: rules }));
-  const isDirty = (event: string) => { const e = editState[event]; if (!e) return false; return JSON.stringify(e) !== JSON.stringify(config.hooks[event] ?? []); };
-
-  const handleSave = async (event: string) => { setSaving(event); try { const u = await api.claudeConfig.updateHooks(event, getEditRules(event)); onUpdate(u); setEditState(prev => { const n = { ...prev }; delete n[event]; return n; }); } finally { setSaving(null); } };
-  const handleDelete = async (event: string) => { setSaving(event); try { onUpdate(await api.claudeConfig.deleteHookEvent(event)); setEditState(prev => { const n = { ...prev }; delete n[event]; return n; }); } finally { setSaving(null); } };
-  const addRule = (event: string) => { const r = [...getEditRules(event)]; r.push({ matcher: "", hooks: [{ type: "command", command: "", timeout: 5 }] }); setEditRules(event, r); setExpandedEvent(event); };
-  const removeRule = (event: string, idx: number) => setEditRules(event, getEditRules(event).filter((_, i) => i !== idx));
-  const updateRule = (event: string, idx: number, field: "matcher", value: string) => { const r = [...getEditRules(event)]; r[idx] = { ...r[idx], [field]: value }; setEditRules(event, r); };
-  const addHookEntry = (event: string, idx: number) => { const r = [...getEditRules(event)]; r[idx] = { ...r[idx], hooks: [...r[idx].hooks, { type: "command", command: "", timeout: 5 }] }; setEditRules(event, r); };
-  const removeHookEntry = (event: string, ri: number, hi: number) => { const r = [...getEditRules(event)]; r[ri] = { ...r[ri], hooks: r[ri].hooks.filter((_, i) => i !== hi) }; setEditRules(event, r); };
-  const updateHookEntry = (event: string, ri: number, hi: number, upd: Partial<HookEntry>) => { const r = [...getEditRules(event)]; const h = [...r[ri].hooks]; h[hi] = { ...h[hi], ...upd }; r[ri] = { ...r[ri], hooks: h }; setEditRules(event, r); };
-
+  const activeCount = hookEvents.filter(ev => (config.hooks[ev]?.length ?? 0) > 0).length;
   return (
     <div className="space-y-3">
-      <SectionTitle icon={Webhook} color="#f97316" label="Hooks 生命周期钩子" desc="Claude Code 事件触发时执行外部命令" />
-      {hookEvents.map(event => {
-        const meta = EVENT_LABELS[event] ?? { label: event, desc: "" };
-        const rules = getEditRules(event);
-        const hasRules = rules.length > 0;
-        const expanded = expandedEvent === event;
-        const dirty = isDirty(event);
+      <SectionHeader icon={Webhook} color="#f97316" label="Hooks 生命周期钩子" desc="Claude Code 事件触发时执行外部命令"
+        right={<CountBadges items={[{ label: "已配置", count: activeCount, color: "#f97316" }]} />} />
+      {hookEvents.map(ev => {
+        const meta = EVENT_LABELS[ev] ?? { label: ev, desc: "" };
+        const rules = getRules(ev);
+        const has = rules.length > 0;
+        const exp = expanded === ev;
+        const isDirty = dirty(ev);
         return (
-          <div key={event} className={cn("rounded-xl border overflow-hidden", hasRules ? "border-app bg-app-secondary" : "border-app/50 bg-app-secondary/50")}>
-            <button onClick={() => setExpandedEvent(expanded ? null : event)} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02]">
-              {expanded ? <ChevronDown size={13} className="text-app-tertiary" /> : <ChevronRight size={13} className="text-app-tertiary" />}
+          <div key={ev} className={cn("rounded-xl border overflow-hidden", has ? "border-app bg-app-secondary" : "border-app/50 bg-app-secondary/50")}>
+            <button onClick={() => setExpanded(exp ? null : ev)} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02]">
+              {exp ? <ChevronDown size={13} className="text-app-tertiary" /> : <ChevronRight size={13} className="text-app-tertiary" />}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-app">{meta.label}</span>
-                  <span className="text-[9px] font-mono text-app-tertiary">{event}</span>
-                  {hasRules && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-mono">{rules.length} 规则</span>}
-                  {dirty && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">未保存</span>}
+                  <span className="text-[9px] font-mono text-app-tertiary">{ev}</span>
+                  {has && <StatusTag label={`${rules.length} 规则`} color="var(--accent)" />}
+                  {isDirty && <StatusTag label="未保存" color="#eab308" />}
                 </div>
                 <p className="text-[10px] text-app-tertiary mt-0.5">{meta.desc}</p>
               </div>
-              <button onClick={e => { e.stopPropagation(); addRule(event); }} className="text-app-tertiary hover:text-accent p-1"><Plus size={14} /></button>
+              <button onClick={e => { e.stopPropagation(); addRule(ev); }} className="text-app-tertiary hover:text-accent p-1"><Plus size={14} /></button>
             </button>
-            {expanded && (
+            {exp && (
               <div className="border-t border-app px-4 py-3 space-y-3">
-                {rules.length === 0 && <p className="text-[11px] text-app-tertiary text-center py-3">暂无规则</p>}
+                {!rules.length && <p className="text-[11px] text-app-tertiary text-center py-3">暂无规则</p>}
                 {rules.map((rule, ri) => (
                   <div key={ri} className="bg-app rounded-lg border border-app/50 p-3 space-y-2.5">
                     <div className="flex items-center gap-2">
                       <label className="text-[10px] text-app-tertiary shrink-0 w-14">Matcher</label>
-                      <input value={rule.matcher} onChange={e => updateRule(event, ri, "matcher", e.target.value)} placeholder="* 或留空匹配全部" spellCheck={false}
+                      <input value={rule.matcher} onChange={e => updRule(ev, ri, "matcher", e.target.value)} placeholder="* 或留空" spellCheck={false}
                         className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
-                      <button onClick={() => removeRule(event, ri)} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={12} /></button>
+                      <button onClick={() => rmRule(ev, ri)} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={12} /></button>
                     </div>
-                    {rule.hooks.map((hook, hi) => (
+                    {rule.hooks.map((h, hi) => (
                       <div key={hi} className="flex items-center gap-2 pl-[62px]">
-                        <input value={hook.command} onChange={e => updateHookEntry(event, ri, hi, { command: e.target.value })} placeholder="/path/to/script.sh" spellCheck={false}
+                        <input value={h.command} onChange={e => updHook(ev, ri, hi, { command: e.target.value })} placeholder="/path/to/script.sh" spellCheck={false}
                           className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
-                        <div className="flex items-center gap-1">
-                          <label className="text-[9px] text-app-tertiary">超时</label>
-                          <input type="number" value={hook.timeout} onChange={e => updateHookEntry(event, ri, hi, { timeout: parseInt(e.target.value) || 5 })}
-                            className="w-10 bg-app-secondary border border-app rounded px-1.5 py-1 text-[11px] font-mono text-app text-center outline-none" min={1} max={60} />
-                          <span className="text-[9px] text-app-tertiary">s</span>
-                        </div>
-                        <button onClick={() => removeHookEntry(event, ri, hi)} className="text-app-tertiary hover:text-red-400 p-1"><X size={11} /></button>
+                        <div className="flex items-center gap-1"><label className="text-[9px] text-app-tertiary">超时</label>
+                          <input type="number" value={h.timeout} onChange={e => updHook(ev, ri, hi, { timeout: parseInt(e.target.value) || 5 })}
+                            className="w-10 bg-app-secondary border border-app rounded px-1.5 py-1 text-[11px] font-mono text-app text-center outline-none" min={1} max={60} /><span className="text-[9px] text-app-tertiary">s</span></div>
+                        <button onClick={() => rmHook(ev, ri, hi)} className="text-app-tertiary hover:text-red-400 p-1"><X size={11} /></button>
                       </div>
                     ))}
-                    <button onClick={() => addHookEntry(event, ri)} className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent flex items-center gap-1"><Plus size={10} /> 添加命令</button>
+                    <button onClick={() => addHook(ev, ri)} className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent flex items-center gap-1"><Plus size={10} /> 添加命令</button>
                   </div>
                 ))}
-                {hasRules && (
+                {has && (
                   <div className="flex items-center gap-2 pt-1">
-                    <button onClick={() => handleSave(event)} disabled={!dirty || saving === event}
-                      className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", dirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-                      <Save size={11} />{saving === event ? "保存中..." : "保存"}
-                    </button>
-                    <button onClick={() => handleDelete(event)} disabled={saving === event}
-                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20">
-                      <Trash2 size={11} /> 清除全部
-                    </button>
+                    <button onClick={() => save(ev)} disabled={!isDirty || saving === ev}
+                      className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+                      <Save size={11} />{saving === ev ? "保存中..." : "保存"}</button>
+                    <button onClick={() => del(ev)} disabled={saving === ev}
+                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20"><Trash2 size={11} /> 清除</button>
                   </div>
                 )}
               </div>
@@ -1097,29 +1069,20 @@ function SectionHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; 
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Rules
+// Sec: Rules
 // ═══════════════════════════════════════════════════════════════════
-function SectionRules({ rules, onToggle }: { rules: RuleInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
+function SecRules({ rules, onToggle }: { rules: RuleInfo[]; onToggle: (n: string, e: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const detail = rules.find(r => r.name === selected);
-
-  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setToggling(name);
-    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
+    ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
-
   return (
     <div className="space-y-4">
-      <SectionTitle icon={BookOpen} color="#06b6d4" label="Rules 规则" desc="~/.claude/rules/ 目录下的规则文件" />
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{rules.length} 个规则</span>
-        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{rules.filter(r => r.enabled).length} 启用</span>
-      </div>
-      {rules.length === 0 ? (
-        <div className="text-center py-12 text-app-tertiary text-xs">暂无规则文件</div>
-      ) : (
+      <SectionHeader icon={BookOpen} color="#06b6d4" label="Rules 规则" desc="~/.claude/rules/"
+        right={<CountBadges items={[{ label: "总计", count: rules.length }, { label: "启用", count: rules.filter(r => r.enabled).length, color: "#22c55e" }]} />} />
+      {!rules.length ? <Empty text="暂无规则文件" /> : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {rules.map(r => (
@@ -1129,25 +1092,18 @@ function SectionRules({ rules, onToggle }: { rules: RuleInfo[]; onToggle: (name:
                   !r.enabled && "opacity-50")}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-app">{r.name}</p>
-                  <ToggleSwitch enabled={r.enabled} loading={toggling === r.name}
-                    onClick={(e) => handleToggle(r.name, !r.enabled, e)} />
+                  <ToggleSwitch enabled={r.enabled} loading={toggling === r.name} onClick={e => toggle(r.name, !r.enabled, e)} />
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{r.scope}</span>
-                  {!r.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
+                  <StatusTag label={r.scope} color="#7878a8" />
+                  {!r.enabled && <StatusTag label="已禁用" color="#ef4444" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
-            {detail ? (
-              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
-                <h3 className="text-sm font-bold text-app">{detail.name}</h3>
-                <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">{detail.content}</pre>
-              </div>
-            ) : (
-              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧规则查看详情</div>
-            )}
+            {detail ? <DetailPanel title={detail.name} path={detail.path} content={detail.content} contentLabel="规则内容" />
+              : <EmptyDetail text="选择左侧规则查看详情" />}
           </div>
         </div>
       )}
@@ -1156,9 +1112,9 @@ function SectionRules({ rules, onToggle }: { rules: RuleInfo[]; onToggle: (name:
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Permissions
+// Sec: Permissions
 // ═══════════════════════════════════════════════════════════════════
-function SectionPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
   const [jsonText, setJsonText] = useState(() => JSON.stringify(config.permissions, null, 2));
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
@@ -1173,7 +1129,7 @@ function SectionPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpda
   const isDirty = jsonText !== JSON.stringify(config.permissions, null, 2);
   return (
     <div className="space-y-3">
-      <SectionTitle icon={Shield} color="#ef4444" label="权限配置" desc="Claude Code 的工具调用权限" />
+      <SectionHeader icon={Shield} color="#ef4444" label="权限配置" desc="Claude Code 工具调用权限（allow / deny 列表）" />
       <textarea value={jsonText} onChange={e => { setJsonText(e.target.value); setStatus("idle"); setParseError(""); }} spellCheck={false}
         rows={Math.max(8, jsonText.split("\n").length + 1)}
         className={cn("w-full bg-app-secondary border rounded-xl px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed", status === "error" ? "border-red-500/40" : "border-app focus:border-accent/60")} />
@@ -1187,36 +1143,36 @@ function SectionPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpda
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: 环境变量
+// Sec: 环境变量
 // ═══════════════════════════════════════════════════════════════════
-function SectionEnvVars() {
-  const ENV_DEFS = [
-    { key: "ANTHROPIC_API_KEY", desc: "API 密钥", type: "password" as const },
-    { key: "ANTHROPIC_AUTH_TOKEN", desc: "认证令牌", type: "password" as const },
-    { key: "ANTHROPIC_BASE_URL", desc: "API 端点", type: "text" as const },
-    { key: "ANTHROPIC_MODEL", desc: "默认模型", type: "text" as const },
-    { key: "HTTPS_PROXY", desc: "HTTPS 代理", type: "text" as const },
-    { key: "HTTP_PROXY", desc: "HTTP 代理", type: "text" as const },
-    { key: "NO_PROXY", desc: "绕过代理", type: "text" as const },
-    { key: "CLAUDE_CONFIG_DIR", desc: "配置目录", type: "text" as const },
-    { key: "CLAUDE_CACHE_DIR", desc: "缓存目录", type: "text" as const },
-    { key: "CLAUDE_LOG_LEVEL", desc: "日志级别", type: "text" as const },
-    { key: "CLAUDE_NO_COLOR", desc: "禁用颜色", type: "text" as const },
-    { key: "CLAUDE_EDITOR", desc: "默认编辑器", type: "text" as const },
-    { key: "DEBUG", desc: "调试模式", type: "text" as const },
+function SecEnvVars() {
+  const DEFS = [
+    { key: "ANTHROPIC_API_KEY", desc: "API 密钥", pw: true },
+    { key: "ANTHROPIC_AUTH_TOKEN", desc: "认证令牌", pw: true },
+    { key: "ANTHROPIC_BASE_URL", desc: "API 端点" },
+    { key: "ANTHROPIC_MODEL", desc: "默认模型" },
+    { key: "HTTPS_PROXY", desc: "HTTPS 代理" },
+    { key: "HTTP_PROXY", desc: "HTTP 代理" },
+    { key: "NO_PROXY", desc: "绕过代理" },
+    { key: "CLAUDE_CONFIG_DIR", desc: "配置目录" },
+    { key: "CLAUDE_CACHE_DIR", desc: "缓存目录" },
+    { key: "CLAUDE_LOG_LEVEL", desc: "日志级别" },
+    { key: "CLAUDE_NO_COLOR", desc: "禁用颜色" },
+    { key: "CLAUDE_EDITOR", desc: "默认编辑器" },
+    { key: "DEBUG", desc: "调试模式" },
   ];
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Variable} color="#a855f7" label="环境变量" desc="Claude Code 相关的环境变量（只读，修改需在 shell 中设置）" />
+      <SectionHeader icon={Variable} color="#a855f7" label="环境变量" desc="Claude Code 相关环境变量（只读，修改需在 shell 中设置）" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {ENV_DEFS.map(env => (
+        {DEFS.map(env => (
           <div key={env.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold font-mono text-accent">{env.key}</span>
               <span className="text-[9px] text-app-tertiary">{env.desc}</span>
             </div>
             <div className="text-[11px] font-mono text-app-secondary bg-app border border-app rounded-lg px-3 py-2">
-              {env.type === "password" ? "••••••••" : <span className="text-app-tertiary">（未设置 / 从环境读取）</span>}
+              {env.pw ? "••••••••" : <span className="text-app-tertiary">（从环境读取）</span>}
             </div>
           </div>
         ))}
@@ -1226,37 +1182,33 @@ function SectionEnvVars() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: Plugins
+// Sec: Plugins
 // ═══════════════════════════════════════════════════════════════════
-function SectionPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; overview: ClaudeOverview | null; onUpdate: (c: ClaudeConfig) => void }) {
+function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; overview: ClaudeOverview | null; onUpdate: (c: ClaudeConfig) => void }) {
   const [saving, setSaving] = useState<string | null>(null);
-  const [newPluginId, setNewPluginId] = useState("");
-  const handleToggle = async (id: string, enabled: boolean) => { setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, enabled)); } finally { setSaving(null); } };
-  const handleRemove = async (id: string) => { setSaving(id); try { onUpdate(await api.claudeConfig.removePlugin(id)); } finally { setSaving(null); } };
-  const handleAdd = async () => { const id = newPluginId.trim(); if (!id) return; setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, true)); setNewPluginId(""); } finally { setSaving(null); } };
+  const [newId, setNewId] = useState("");
+  const toggle = async (id: string, en: boolean) => { setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, en)); } finally { setSaving(null); } };
+  const remove = async (id: string) => { setSaving(id); try { onUpdate(await api.claudeConfig.removePlugin(id)); } finally { setSaving(null); } };
+  const add = async () => { const id = newId.trim(); if (!id) return; setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, true)); setNewId(""); } finally { setSaving(null); } };
   const plugins = Object.entries(config.enabled_plugins);
-  const installMap = new Map((overview?.installed_plugins ?? []).map(p => [p.plugin_id, p]));
-
+  const instMap = new Map((overview?.installed_plugins ?? []).map(p => [p.plugin_id, p]));
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Plug} color="#22c55e" label="插件管理" desc="启用/禁用 Claude Code 插件" />
-      {plugins.length === 0 && <div className="text-center py-8 text-app-tertiary text-xs">暂无已配置的插件</div>}
+      <SectionHeader icon={Plug} color="#22c55e" label="插件管理" desc="启用/禁用 Claude Code 插件" />
+      {!plugins.length && <Empty text="暂无已配置的插件" />}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-        {plugins.map(([pluginId, enabled]) => {
-          const inst = installMap.get(pluginId);
-          const [name, publisher] = pluginId.includes("@") ? pluginId.split("@") : [pluginId, ""];
+        {plugins.map(([pid, enabled]) => {
+          const inst = instMap.get(pid);
+          const [name, pub] = pid.includes("@") ? pid.split("@") : [pid, ""];
           return (
-            <div key={pluginId} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
+            <div key={pid} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
               <div className="flex items-center gap-3">
-                <button onClick={() => handleToggle(pluginId, !enabled)} disabled={saving === pluginId}
-                  className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", enabled ? "bg-accent" : "bg-app-tertiary/40")}>
-                  <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", enabled ? "translate-x-[18px]" : "translate-x-0.5")} />
-                </button>
+                <ToggleSwitch enabled={enabled} loading={saving === pid} onClick={() => toggle(pid, !enabled)} />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2"><span className="text-xs font-semibold text-app">{name}</span>{publisher && <span className="text-[9px] text-app-tertiary font-mono">@{publisher}</span>}</div>
+                  <div className="flex items-center gap-2"><span className="text-xs font-semibold text-app">{name}</span>{pub && <span className="text-[9px] text-app-tertiary font-mono">@{pub}</span>}</div>
                 </div>
-                <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full", enabled ? "bg-green-500/10 text-green-400" : "bg-app-tertiary/20 text-app-tertiary")}>{enabled ? "已启用" : "已禁用"}</span>
-                <button onClick={() => handleRemove(pluginId)} disabled={saving === pluginId} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={13} /></button>
+                <StatusTag label={enabled ? "已启用" : "已禁用"} color={enabled ? "#22c55e" : "#7878a8"} />
+                <button onClick={() => remove(pid)} disabled={saving === pid} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={13} /></button>
               </div>
               {inst && (
                 <div className="flex flex-wrap gap-x-4 gap-y-1 pl-12 text-[9px] font-mono text-app-tertiary">
@@ -1269,25 +1221,24 @@ function SectionPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; 
         })}
       </div>
       <div className="flex gap-2 pt-2">
-        <input value={newPluginId} onChange={e => setNewPluginId(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()}
+        <input value={newId} onChange={e => setNewId(e.target.value)} onKeyDown={e => e.key === "Enter" && add()}
           placeholder="输入插件 ID" spellCheck={false}
           className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
-        <button onClick={handleAdd} disabled={!newPluginId.trim()}
-          className={cn("flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium", newPluginId.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-          <Plus size={12} /> 添加
-        </button>
+        <button onClick={add} disabled={!newId.trim()}
+          className={cn("flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium", newId.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+          <Plus size={12} /> 添加</button>
       </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: 监控
+// Sec: 监控
 // ═══════════════════════════════════════════════════════════════════
-function SectionMonitoring({ overview }: { overview: ClaudeOverview }) {
+function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Activity} color="#10b981" label="监控与统计" desc="Claude Code 使用统计与活动趋势" />
+      <SectionHeader icon={Activity} color="#10b981" label="监控与统计" desc="Claude Code 使用统计与活动趋势" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "总消息", value: fmtNum(overview.total_messages), color: "#22c55e" },
@@ -1329,12 +1280,12 @@ function SectionMonitoring({ overview }: { overview: ClaudeOverview }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Section: 关于
+// Sec: 关于
 // ═══════════════════════════════════════════════════════════════════
-function SectionAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
+function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
   return (
     <div className="space-y-4">
-      <SectionTitle icon={Info} color="#3b82f6" label="关于 Claude Code" desc="系统信息与诊断" />
+      <SectionHeader icon={Info} color="#3b82f6" label="关于 Claude Code" desc="系统信息与诊断" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {[
           { label: "CLI 版本", value: overview?.cli_version || systemInfo?.cli_version || "..." },
@@ -1352,9 +1303,62 @@ function SectionAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo |
         ].map(({ label, value }) => (
           <div key={label} className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center justify-between">
             <span className="text-[11px] text-app-tertiary">{label}</span>
-            <span className="text-[11px] font-mono text-app">{value}</span>
+            <span className="text-[11px] font-mono text-app truncate ml-4 text-right">{value}</span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Shared tiny components
+// ═══════════════════════════════════════════════════════════════════
+function StatusTag({ label, color }: { label: string; color: string }) {
+  return <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{label}</span>;
+}
+
+function Empty({ text }: { text: string }) {
+  return <div className="text-center py-12 text-app-tertiary text-xs">{text}</div>;
+}
+
+function EmptyDetail({ text }: { text: string }) {
+  return <div className="text-center py-20 text-app-tertiary text-xs">{text}</div>;
+}
+
+function DetailPanel({ title, path, metadata, auxiliaryFiles, content, contentLabel }: {
+  title: string; path: string; metadata?: Record<string, unknown>;
+  auxiliaryFiles?: string[]; content: string; contentLabel: string;
+}) {
+  return (
+    <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-app">{title}</h3>
+        <span className="text-[9px] font-mono text-app-tertiary">{path}</span>
+      </div>
+      {metadata && Object.keys(metadata).length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">元数据</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(metadata).map(([k, v]) => (
+              <span key={k} className="text-[10px] px-2 py-1 rounded-md bg-app border border-app font-mono">
+                <span className="text-accent">{k}</span>: <span className="text-app-secondary">{String(v)}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {auxiliaryFiles && auxiliaryFiles.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">辅助文件</p>
+          <div className="flex flex-wrap gap-1.5">
+            {auxiliaryFiles.map(f => <span key={f} className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-mono">{f}</span>)}
+          </div>
+        </div>
+      )}
+      <div>
+        <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider mb-2">{contentLabel}</p>
+        <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">{content}</pre>
       </div>
     </div>
   );
