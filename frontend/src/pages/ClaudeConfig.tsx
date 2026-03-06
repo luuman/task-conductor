@@ -11,6 +11,7 @@ import {
 } from "../lib/api";
 import { cn } from "../lib/utils";
 import McpMarketEmbed from "./McpMarket";
+import GlobalConfigPanel from "../components/GlobalConfigPanel";
 import {
   Webhook,
   Plug,
