@@ -787,6 +787,87 @@ function SectionSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: 
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Section: Agents
+// ═══════════════════════════════════════════════════════════════════
+function SectionAgents({ agents, onToggle }: { agents: AgentInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const detail = agents.find(a => a.name === selected);
+
+  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setToggling(name);
+    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <SectionTitle icon={Bot} color="#f472b6" label="Agents 代理" desc="~/.claude/agents/ 目录下的自定义 AI 代理" />
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{agents.length} 个代理</span>
+        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{agents.filter(a => a.enabled).length} 启用</span>
+      </div>
+
+      {agents.length === 0 ? (
+        <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义 Agent（~/.claude/agents/）</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-1 space-y-2">
+            {agents.map(a => (
+              <button key={a.name} onClick={() => setSelected(a.name)}
+                className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
+                  selected === a.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary",
+                  !a.enabled && "opacity-50")}>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-app">{a.name}</p>
+                  <ToggleSwitch enabled={a.enabled} loading={toggling === a.name}
+                    onClick={(e) => handleToggle(a.name, !a.enabled, e)} />
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{a.scope}</span>
+                  {!a.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
+                  {Object.keys(a.metadata).length > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">有元数据</span>}
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="lg:col-span-2">
+            {detail ? (
+              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-app">{detail.name}</h3>
+                  <span className="text-[9px] font-mono text-app-tertiary">{detail.path}</span>
+                </div>
+                {Object.keys(detail.metadata).length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">元数据</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(detail.metadata).map(([k, v]) => (
+                        <span key={k} className="text-[10px] px-2 py-1 rounded-md bg-app border border-app font-mono">
+                          <span className="text-accent">{k}</span>: <span className="text-app-secondary">{String(v)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider mb-2">Agent 内容</p>
+                  <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">
+                    {detail.content}
+                  </pre>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧代理查看详情</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Section: Commands
 // ═══════════════════════════════════════════════════════════════════
 function SectionCommands({ commands, onToggle }: { commands: CommandInfo[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
