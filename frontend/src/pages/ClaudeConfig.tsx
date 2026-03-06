@@ -304,7 +304,18 @@ export default function ClaudeConfigPage() {
 
           {/* Skills */}
           <div ref={el => { sectionRefs.current["skills"] = el; }} data-section="skills">
-            <SectionSkills skills={skills} />
+            <SectionSkills skills={skills} onToggle={async (name, enabled) => {
+              await api.claudeConfig.toggleSkill(name, enabled);
+              setSkills(prev => prev.map(s => s.name === name ? { ...s, enabled } : s));
+            }} />
+          </div>
+
+          {/* Agents */}
+          <div ref={el => { sectionRefs.current["agents"] = el; }} data-section="agents">
+            <SectionAgents agents={agents} onToggle={async (name, enabled) => {
+              await api.claudeConfig.toggleAgent(name, enabled);
+              setAgents(prev => prev.map(a => a.name === name ? { ...a, enabled } : a));
+            }} />
           </div>
 
           {/* Commands */}
