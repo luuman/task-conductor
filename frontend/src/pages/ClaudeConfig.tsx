@@ -292,7 +292,8 @@ export default function ClaudeConfigPage() {
     hooks: config ? Object.keys(config.hooks).filter(k => (config.hooks[k]?.length ?? 0) > 0).length : undefined,
     rules: rules.length,
     plugins: config ? Object.keys(config.enabled_plugins).length : undefined,
-  }), [skills, agents, commands, overview, config, rules]);
+    trash: disabledItems.length || undefined,
+  }), [skills, agents, commands, overview, config, rules, disabledItems]);
 
   // Toggle helpers
   const toggleSkill = async (name: string, enabled: boolean) => {
