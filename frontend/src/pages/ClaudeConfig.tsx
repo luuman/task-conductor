@@ -192,6 +192,7 @@ export default function ClaudeConfigPage() {
   const [rules, setRules] = useState<RuleInfo[]>([]);
   const [systemInfo, setSystemInfo] = useState<ClaudeSystemInfo | null>(null);
   const [claudeMd, setClaudeMd] = useState("");
+  const [disabledItems, setDisabledItems] = useState<DisabledItem[]>([]);
 
   const [activeSection, setActiveSection] = useState<SectionId>("overview");
   const [searchQuery, setSearchQuery] = useState("");
