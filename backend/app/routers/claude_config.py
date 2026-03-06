@@ -308,8 +308,10 @@ def _list_hook_scripts() -> list[HookScriptInfo]:
     return result
 
 
-def _list_mcp_servers() -> list[McpServer]:
+def _list_mcp_servers(use_cache: bool = True) -> list[McpServer]:
     """Parse `claude mcp list` output to get MCP server info."""
+    if use_cache:
+        return _cached("mcp_servers", 120, lambda: _list_mcp_servers(use_cache=False))  # 2min
     import re
 
     try:
