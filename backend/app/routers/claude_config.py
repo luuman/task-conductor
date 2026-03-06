@@ -643,9 +643,9 @@ def _parse_yaml_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     return metadata, body
 
 
-def _read_skill_detail(skill_dir: Path) -> SkillDetail | None:
+def _read_skill_detail(skill_dir: Path, disabled: bool = False) -> SkillDetail | None:
     """Parse SKILL.md with YAML frontmatter. Return None if not a valid skill dir."""
-    skill_md = skill_dir / "SKILL.md"
+    skill_md = skill_dir / ("SKILL.md.disabled" if disabled else "SKILL.md")
     if not skill_md.exists():
         return None
     try:
