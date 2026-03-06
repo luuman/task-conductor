@@ -14,6 +14,8 @@ import {
   type AgentInfo,
   type ClaudeSystemInfo,
   type PresetItem,
+  type DisabledItem,
+  type ProjectDetails,
 } from "../lib/api";
 import { cn } from "../lib/utils";
 import McpMarketEmbed from "./McpMarket";
