@@ -578,6 +578,80 @@ function PresetGallery({ presets, onInstall, itemLabel }: {
   );
 }
 
+function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
+  claudeMd: string; onChange: (s: string) => void;
+  onSave: () => void; saving: boolean; saved: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lines = claudeMd.split("\n");
+  const isEmpty = !claudeMd.trim();
+  const startEdit = () => { setEditing(true); setTimeout(() => textareaRef.current?.focus(), 50); };
+  const handleSave = () => { onSave(); };
+  const handleDone = () => { setEditing(false); if (claudeMd.trim()) handleSave(); };
+
+  return (
+    <div className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex items-center gap-2">
+          <FileText size={13} className="text-accent" />
+          <span className="text-xs font-semibold text-app">全局 CLAUDE.md</span>
+          <span className="text-[9px] text-app-tertiary font-mono">~/.claude/CLAUDE.md</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {editing ? (
+            <>
+              <button onClick={handleSave} disabled={saving}
+                className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white">
+                {saved ? <Check size={10} /> : <Save size={10} />}
+                {saving ? "保存中..." : saved ? "已保存" : "保存"}
+              </button>
+              <button onClick={handleDone}
+                className="text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app">
+                完成
+              </button>
+            </>
+          ) : (
+            <button onClick={startEdit}
+              className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app hover:border-accent/40 transition-colors">
+              <Wrench size={10} /> 编辑
+            </button>
+          )}
+        </div>
+      </div>
+
+      {editing ? (
+        <textarea ref={textareaRef} value={claudeMd} onChange={e => onChange(e.target.value)}
+          spellCheck={false} rows={12}
+          className="w-full bg-app px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed border-none" />
+      ) : (
+        <div className="px-4 py-3 cursor-pointer hover:bg-white/[0.02] transition-colors" onClick={startEdit}>
+          {isEmpty ? (
+            <p className="text-[11px] text-app-tertiary italic py-4 text-center">暂无内容，点击编辑...</p>
+          ) : (
+            <div className="space-y-1 max-h-[300px] overflow-y-auto">
+              {lines.map((line, i) => {
+                if (line.startsWith("# ")) return <p key={i} className="text-[13px] font-bold text-app mt-2">{line.slice(2)}</p>;
+                if (line.startsWith("## ")) return <p key={i} className="text-[12px] font-semibold text-app mt-2">{line.slice(3)}</p>;
+                if (line.startsWith("### ")) return <p key={i} className="text-[11px] font-semibold text-app/80 mt-1.5">{line.slice(4)}</p>;
+                if (line.startsWith("- ")) return (
+                  <div key={i} className="flex items-start gap-2 pl-1">
+                    <span className="text-accent mt-0.5 shrink-0">•</span>
+                    <span className="text-[11px] text-app leading-relaxed">{line.slice(2)}</span>
+                  </div>
+                );
+                if (line.startsWith("```")) return <div key={i} className="border-t border-app/30 my-1" />;
+                if (!line.trim()) return <div key={i} className="h-1.5" />;
+                return <p key={i} className="text-[11px] text-app/80 leading-relaxed">{line}</p>;
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Sec: 总览
 // ═══════════════════════════════════════════════════════════════════
