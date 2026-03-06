@@ -479,6 +479,14 @@ export const api = {
         method: "DELETE",
       }),
   },
+  tcConfig: {
+    get: () => request<Record<string, unknown>>("/api/tc-config"),
+    update: (config: Record<string, unknown>) =>
+      request<Record<string, unknown>>("/api/tc-config", { method: "PUT", body: JSON.stringify({ config }) }),
+    reset: () => request<Record<string, unknown>>("/api/tc-config/reset", { method: "POST" }),
+    import: (config: Record<string, unknown>) =>
+      request<Record<string, unknown>>("/api/tc-config/import", { method: "POST", body: JSON.stringify({ config }) }),
+  },
   mcp: {
     list: () => request<McpMarketServer[]>("/api/mcp/servers"),
     install: (id: string, token?: string) =>
