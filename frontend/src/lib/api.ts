@@ -499,8 +499,17 @@ export const api = {
         method: "DELETE",
       }),
     listSkills: () => request<SkillDetail[]>("/api/claude-config/skills"),
+    toggleSkill: (name: string, enabled: boolean) =>
+      request<{ ok: boolean }>("/api/claude-config/skills/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
     listCommands: () => request<CommandInfo[]>("/api/claude-config/commands"),
+    toggleCommand: (name: string, enabled: boolean) =>
+      request<{ ok: boolean }>("/api/claude-config/commands/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
     listRules: () => request<RuleInfo[]>("/api/claude-config/rules"),
+    toggleRule: (name: string, enabled: boolean) =>
+      request<{ ok: boolean }>("/api/claude-config/rules/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
+    listAgents: () => request<AgentInfo[]>("/api/claude-config/agents"),
+    toggleAgent: (name: string, enabled: boolean) =>
+      request<{ ok: boolean }>("/api/claude-config/agents/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
     systemInfo: () => request<ClaudeSystemInfo>("/api/claude-config/system-info"),
     getClaudeMd: () => request<{ content: string; path: string }>("/api/claude-config/claude-md"),
     updateClaudeMd: (content: string) =>
