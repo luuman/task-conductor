@@ -356,17 +356,33 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
 }
 
 // ── Main Component ─────────────────────────────────────────────────
+// localStorage 缓存 key
+const CACHE_KEY_CONFIG = "tc_claude_config_cache";
+const CACHE_KEY_OVERVIEW = "tc_claude_overview_cache";
+
+function readCache<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function writeCache(key: string, data: unknown) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* quota */ }
+}
+
 export default function ClaudeConfig() {
-  const [config, setConfig] = useState<ClaudeConfig | null>(null);
-  const [overview, setOverview] = useState<ClaudeOverview | null>(null);
+  // 优先从缓存初始化，避免白屏等待
+  const [config, setConfig] = useState<ClaudeConfig | null>(() => readCache(CACHE_KEY_CONFIG));
+  const [overview, setOverview] = useState<ClaudeOverview | null>(() => readCache(CACHE_KEY_OVERVIEW));
   const [hookEvents, setHookEvents] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!readCache(CACHE_KEY_CONFIG));
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState<Section>("mcp");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    // 仅在无缓存时显示 loading
+    if (!config) setLoading(true);
     setError("");
     try {
       const [cfg, events, ov] = await Promise.all([
@@ -377,12 +393,15 @@ export default function ClaudeConfig() {
       setConfig(cfg);
       setHookEvents(events);
       setOverview(ov);
+      writeCache(CACHE_KEY_CONFIG, cfg);
+      writeCache(CACHE_KEY_OVERVIEW, ov);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "加载失败");
+      // 有缓存时静默失败，无缓存时才显示错误
+      if (!config) setError(e instanceof Error ? e.message : "加载失败");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [config]);
 
   useEffect(() => { load(); }, [load]);
 
