@@ -504,12 +504,24 @@ export const api = {
     listCommands: () => request<CommandInfo[]>("/api/claude-config/commands"),
     toggleCommand: (name: string, enabled: boolean) =>
       request<{ ok: boolean }>("/api/claude-config/commands/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
+    createCommand: (name: string, content?: string) =>
+      request<{ ok: boolean }>("/api/claude-config/commands/create", { method: "POST", body: JSON.stringify({ name, content }) }),
+    deleteCommand: (name: string) =>
+      request<{ ok: boolean }>(`/api/claude-config/commands/${encodeURIComponent(name)}`, { method: "DELETE" }),
     listRules: () => request<RuleInfo[]>("/api/claude-config/rules"),
     toggleRule: (name: string, enabled: boolean) =>
       request<{ ok: boolean }>("/api/claude-config/rules/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
+    createRule: (name: string, content?: string) =>
+      request<{ ok: boolean }>("/api/claude-config/rules/create", { method: "POST", body: JSON.stringify({ name, content }) }),
+    deleteRule: (name: string) =>
+      request<{ ok: boolean }>(`/api/claude-config/rules/${encodeURIComponent(name)}`, { method: "DELETE" }),
     listAgents: () => request<AgentInfo[]>("/api/claude-config/agents"),
     toggleAgent: (name: string, enabled: boolean) =>
       request<{ ok: boolean }>("/api/claude-config/agents/toggle", { method: "POST", body: JSON.stringify({ name, enabled }) }),
+    createAgent: (name: string, content?: string) =>
+      request<{ ok: boolean }>("/api/claude-config/agents/create", { method: "POST", body: JSON.stringify({ name, content }) }),
+    deleteAgent: (name: string) =>
+      request<{ ok: boolean }>(`/api/claude-config/agents/${encodeURIComponent(name)}`, { method: "DELETE" }),
     systemInfo: () => request<ClaudeSystemInfo>("/api/claude-config/system-info"),
     getClaudeMd: () => request<{ content: string; path: string }>("/api/claude-config/claude-md"),
     updateClaudeMd: (content: string) =>
