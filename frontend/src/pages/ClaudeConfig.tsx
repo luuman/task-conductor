@@ -227,12 +227,13 @@ export default function ClaudeConfigPage() {
   // Section badge counts
   const sectionCounts: Partial<Record<SectionId, number>> = useMemo(() => ({
     skills: skills.length,
+    agents: agents.length,
     commands: commands.length,
     mcp: overview?.mcp_servers.length,
     hooks: config ? Object.keys(config.hooks).length : undefined,
     rules: rules.length,
     plugins: config ? Object.keys(config.enabled_plugins).length : undefined,
-  }), [skills, commands, overview, config, rules]);
+  }), [skills, agents, commands, overview, config, rules]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
