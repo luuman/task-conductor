@@ -1017,8 +1017,6 @@ export default function GlobalConfigPanel() {
             section={section}
             data={config?.[section.id] || {}}
             onChange={(key, value) => handleFieldChange(section.id, key, value)}
-            expanded={expandedSection === section.id}
-            onToggle={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
           />
         ))}
       </div>
