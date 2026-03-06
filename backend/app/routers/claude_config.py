@@ -922,6 +922,7 @@ class RuleInfo(BaseModel):
     path: str
     content: str
     scope: str
+    enabled: bool = True
 
 
 @router.get("/rules", summary="列出规则文件")
@@ -942,6 +943,98 @@ def list_rules() -> list[RuleInfo]:
                     path=str(entry),
                     content=content,
                     scope="global",
+                    enabled=True,
+                )
+            )
+        elif entry.is_file() and entry.name.endswith(".md.disabled"):
+            try:
+                content = entry.read_text(encoding="utf-8")
+            except Exception:
+                content = ""
+            name = entry.name.replace(".md.disabled", "")
+            result.append(
+                RuleInfo(
+                    name=name,
+                    path=str(entry),
+                    content=content,
+                    scope="global",
+                    enabled=False,
                 )
             )
     return result
+
+
+@router.post("/rules/toggle", summary="启用/禁用规则")
+def toggle_rule(body: ToggleRequest):
+    rules_dir = CLAUDE_HOME / "rules"
+    md_file = rules_dir / f"{body.name}.md"
+    disabled_file = rules_dir / f"{body.name}.md.disabled"
+    if body.enabled:
+        if disabled_file.exists() and not md_file.exists():
+            disabled_file.rename(md_file)
+    else:
+        if md_file.exists():
+            md_file.rename(disabled_file)
+    return {"ok": True, "name": body.name, "enabled": body.enabled}
+
+
+# ── Agents 模块 ──────────────────────────────────────────────────
+
+
+class AgentInfo(BaseModel):
+    name: str
+    path: str
+    content: str
+    scope: str  # "global" or "project"
+    enabled: bool = True
+    metadata: dict[str, Any] = {}
+
+
+def _parse_agent_file(filepath: Path, scope: str, enabled: bool = True) -> AgentInfo:
+    try:
+        content = filepath.read_text(encoding="utf-8")
+    except Exception:
+        content = ""
+    metadata, _ = _parse_yaml_frontmatter(content)
+    name = filepath.stem
+    if name.endswith(".disabled"):
+        name = name.replace(".md.disabled", "").replace(".disabled", "")
+    return AgentInfo(
+        name=name,
+        path=str(filepath),
+        content=content,
+        scope=scope,
+        enabled=enabled,
+        metadata=metadata,
+    )
+
+
+@router.get("/agents", summary="列出所有 Agent")
+def list_agents() -> list[AgentInfo]:
+    result: list[AgentInfo] = []
+    # Global agents: ~/.claude/agents/
+    global_dir = CLAUDE_HOME / "agents"
+    if global_dir.is_dir():
+        for entry in sorted(global_dir.iterdir()):
+            if entry.is_file() and entry.suffix == ".md":
+                result.append(_parse_agent_file(entry, "global", enabled=True))
+            elif entry.is_file() and entry.name.endswith(".md.disabled"):
+                name = entry.name.replace(".md.disabled", "")
+                agent = _parse_agent_file(entry, "global", enabled=False)
+                agent.name = name
+                result.append(agent)
+    return result
+
+
+@router.post("/agents/toggle", summary="启用/禁用 Agent")
+def toggle_agent(body: ToggleRequest):
+    agents_dir = CLAUDE_HOME / "agents"
+    md_file = agents_dir / f"{body.name}.md"
+    disabled_file = agents_dir / f"{body.name}.md.disabled"
+    if body.enabled:
+        if disabled_file.exists() and not md_file.exists():
+            disabled_file.rename(md_file)
+    else:
+        if md_file.exists():
+            md_file.rename(disabled_file)
+    return {"ok": True, "name": body.name, "enabled": body.enabled}
