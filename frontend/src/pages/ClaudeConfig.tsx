@@ -675,7 +675,6 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
 }) {
   const [editing, setEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const lines = claudeMd.split("\n");
   const isEmpty = !claudeMd.trim();
   const startEdit = () => { setEditing(true); setTimeout(() => textareaRef.current?.focus(), 50); };
   const handleSave = () => { onSave(); };
