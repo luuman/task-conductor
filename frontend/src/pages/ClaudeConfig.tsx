@@ -113,12 +113,13 @@ const COMMON_SETTINGS: {
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
 
 // ── Section 定义 ─────────────────────────────────────────────────────
-type SectionId = "global" | "model" | "skills" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
+type SectionId = "global" | "model" | "skills" | "agents" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
 
 const SECTIONS: { id: SectionId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
   { id: "global", label: "全局", icon: Settings2 },
   { id: "model", label: "模型", icon: Cpu },
   { id: "skills", label: "Skills", icon: Sparkles },
+  { id: "agents", label: "Agents", icon: Bot },
   { id: "commands", label: "Commands", icon: Terminal },
   { id: "mcp", label: "MCP", icon: Globe },
   { id: "mcp-market", label: "MCP 市场", icon: Link },
