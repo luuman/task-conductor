@@ -102,7 +102,10 @@ export async function authWithPin(tunnelUrl: string, pin: string): Promise<strin
     return data.token;
   } catch (err) {
     clearTimeout(timer);
-    if (err instanceof Error && err.name === "AbortError") throw new Error("连接超时，请检查后端是否启动");
+    if (err instanceof Error) {
+      if (err.name === "AbortError") throw new Error("连接超时（6s），请检查 Agent URL 是否正确、后端是否启动");
+      if (err.message === "Failed to fetch") throw new Error("无法连接到 Agent，请检查 URL 是否正确或网络是否可达");
+    }
     throw err;
   }
 }
