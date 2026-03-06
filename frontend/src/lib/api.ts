@@ -556,6 +556,18 @@ export const api = {
         method: "PUT",
         body: JSON.stringify({ content }),
       }),
+    disabledItems: () => request<DisabledItem[]>("/api/claude-config/disabled-items"),
+    restoreDisabledItem: (type: string, name: string) =>
+      request<{ ok: boolean }>("/api/claude-config/disabled-items/restore", {
+        method: "POST",
+        body: JSON.stringify({ type, name }),
+      }),
+    deleteDisabledItem: (type: string, name: string) =>
+      request<{ ok: boolean }>(`/api/claude-config/disabled-items/${type}/${encodeURIComponent(name)}`, { method: "DELETE" }),
+    projectComponents: (dirName: string) =>
+      request<ProjectComponents>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/components`),
+    projectDetails: (dirName: string) =>
+      request<ProjectDetails>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/details`),
   },
   tcConfig: {
     get: () => request<Record<string, unknown>>("/api/tc-config"),
