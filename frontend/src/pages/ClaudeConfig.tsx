@@ -685,14 +685,24 @@ function SectionModel() {
 // ═══════════════════════════════════════════════════════════════════
 // Section: Skills
 // ═══════════════════════════════════════════════════════════════════
-function SectionSkills({ skills }: { skills: SkillDetail[] }) {
+function SectionSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (name: string, enabled: boolean) => Promise<void> }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
   const detail = skills.find(s => s.name === selected);
+
+  const handleToggle = async (name: string, enabled: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setToggling(name);
+    try { await onToggle(name, enabled); } finally { setToggling(null); }
+  };
 
   return (
     <div className="space-y-4">
       <SectionTitle icon={Sparkles} color="#eab308" label="Skills 技能库" desc="~/.claude/skills/ 目录下的自定义技能" />
-      <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{skills.length} 个技能</span>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{skills.length} 个技能</span>
+        <span className="text-[10px] font-mono bg-green-500/10 px-2 py-0.5 rounded-full text-green-400">{skills.filter(s => s.enabled).length} 启用</span>
+      </div>
 
       {skills.length === 0 ? (
         <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义 Skill</div>
@@ -702,10 +712,16 @@ function SectionSkills({ skills }: { skills: SkillDetail[] }) {
             {skills.map(s => (
               <button key={s.name} onClick={() => setSelected(s.name)}
                 className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
-                  selected === s.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary")}>
-                <p className="text-xs font-semibold text-app">{s.name}</p>
+                  selected === s.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary",
+                  !s.enabled && "opacity-50")}>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-app">{s.name}</p>
+                  <ToggleSwitch enabled={s.enabled} loading={toggling === s.name}
+                    onClick={(e) => handleToggle(s.name, !s.enabled, e)} />
+                </div>
                 <p className="text-[10px] text-app-tertiary mt-0.5 line-clamp-2">{s.description || "无描述"}</p>
                 <div className="flex items-center gap-2 mt-2">
+                  {!s.enabled && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">已禁用</span>}
                   {s.has_auxiliary && <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">有辅助文件</span>}
                   {Object.keys(s.metadata).length > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">有元数据</span>}
                 </div>
