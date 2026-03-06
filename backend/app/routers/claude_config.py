@@ -739,6 +739,7 @@ class CommandInfo(BaseModel):
     path: str
     content: str
     scope: str  # "global" or "project"
+    enabled: bool = True
 
 
 @router.get("/commands", summary="列出自定义命令")
@@ -759,9 +760,40 @@ def list_commands() -> list[CommandInfo]:
                     path=str(entry),
                     content=content,
                     scope="global",
+                    enabled=True,
+                )
+            )
+        elif entry.is_file() and entry.name.endswith(".md.disabled"):
+            # Disabled command
+            try:
+                content = entry.read_text(encoding="utf-8")
+            except Exception:
+                content = ""
+            name = entry.name.replace(".md.disabled", "")
+            result.append(
+                CommandInfo(
+                    name=name,
+                    path=str(entry),
+                    content=content,
+                    scope="global",
+                    enabled=False,
                 )
             )
     return result
+
+
+@router.post("/commands/toggle", summary="启用/禁用命令")
+def toggle_command(body: ToggleRequest):
+    commands_dir = CLAUDE_HOME / "commands"
+    md_file = commands_dir / f"{body.name}.md"
+    disabled_file = commands_dir / f"{body.name}.md.disabled"
+    if body.enabled:
+        if disabled_file.exists() and not md_file.exists():
+            disabled_file.rename(md_file)
+    else:
+        if md_file.exists():
+            md_file.rename(disabled_file)
+    return {"ok": True, "name": body.name, "enabled": body.enabled}
 
 
 # ── 系统信息概览 ──────────────────────────────────────────────────
