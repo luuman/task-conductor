@@ -39,6 +39,7 @@ import {
   MessageSquare,
   Wrench,
   Users,
+  ArchiveRestore,
   Calendar,
   BarChart3,
   Link,
