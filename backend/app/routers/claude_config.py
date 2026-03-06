@@ -1500,3 +1500,197 @@ def delete_agent(name: str):
     target.unlink()
     _invalidate_cache()
     return {"ok": True, "name": name}
+
+
+# ── Disabled Items (Trash) ──────────────────────────────────────────
+
+
+class DisabledItem(BaseModel):
+    type: str          # "agent" | "command" | "rule" | "skill"
+    name: str
+    file_path: str
+    scope: str         # "global"
+
+
+class RestoreItemRequest(BaseModel):
+    type: str   # "agent" | "command" | "rule" | "skill"
+    name: str
+
+
+@router.get("/disabled-items")
+def list_disabled_items():
+    """列出所有已禁用的 agents、commands、rules、skills"""
+    items: list[dict] = []
+
+    # Disabled agents
+    agents_dir = CLAUDE_HOME / "agents"
+    if agents_dir.is_dir():
+        for f in agents_dir.iterdir():
+            if f.is_file() and f.name.endswith(".md.disabled"):
+                items.append({"type": "agent", "name": f.name.replace(".md.disabled", ""), "file_path": str(f), "scope": "global"})
+
+    # Disabled commands
+    commands_dir = CLAUDE_HOME / "commands"
+    if commands_dir.is_dir():
+        for f in commands_dir.iterdir():
+            if f.is_file() and f.name.endswith(".md.disabled"):
+                items.append({"type": "command", "name": f.name.replace(".md.disabled", ""), "file_path": str(f), "scope": "global"})
+
+    # Disabled rules
+    rules_dir = CLAUDE_HOME / "rules"
+    if rules_dir.is_dir():
+        for f in rules_dir.iterdir():
+            if f.is_file() and f.name.endswith(".md.disabled"):
+                items.append({"type": "rule", "name": f.name.replace(".md.disabled", ""), "file_path": str(f), "scope": "global"})
+
+    # Disabled skills
+    skills_dir = CLAUDE_HOME / "skills"
+    if skills_dir.is_dir():
+        for entry in skills_dir.iterdir():
+            if entry.is_dir() and (entry / "SKILL.md.disabled").exists() and not (entry / "SKILL.md").exists():
+                items.append({"type": "skill", "name": entry.name, "file_path": str(entry / "SKILL.md.disabled"), "scope": "global"})
+
+    return items
+
+
+@router.post("/disabled-items/restore")
+def restore_disabled_item(body: RestoreItemRequest):
+    """恢复（重新启用）一个已禁用的项"""
+    toggle_body = ToggleRequest(name=body.name, enabled=True)
+    if body.type == "agent":
+        return toggle_agent(toggle_body)
+    elif body.type == "command":
+        return toggle_command(toggle_body)
+    elif body.type == "rule":
+        return toggle_rule(toggle_body)
+    elif body.type == "skill":
+        return toggle_skill(toggle_body)
+    raise HTTPException(400, f"未知类型: {body.type}")
+
+
+@router.delete("/disabled-items/{item_type}/{name}")
+def permanently_delete_disabled_item(item_type: str, name: str):
+    """永久删除一个已禁用的项（删除 .disabled 文件）"""
+    if item_type == "agent":
+        return delete_agent(name)
+    elif item_type == "command":
+        return delete_command(name)
+    elif item_type == "rule":
+        return delete_rule(name)
+    elif item_type == "skill":
+        # Delete the skill dir's SKILL.md.disabled file
+        skills_dir = CLAUDE_HOME / "skills" / name
+        disabled_file = skills_dir / "SKILL.md.disabled"
+        if disabled_file.exists():
+            disabled_file.unlink()
+            _invalidate_cache()
+            return {"ok": True, "message": f"已永久删除 skill {name}"}
+        raise HTTPException(404, f"找不到已禁用的 skill: {name}")
+    raise HTTPException(400, f"未知类型: {item_type}")
+
+
+# ── Project-level endpoints ─────────────────────────────────────────
+
+
+@router.get("/projects/{dir_name}/components")
+def get_project_components(dir_name: str):
+    """扫描项目级别的 agents, commands, rules"""
+    # Convert dir_name back to path
+    project_path = "/" + dir_name.replace("-", "/").lstrip("/")
+    project_claude_dir = Path(project_path) / ".claude"
+
+    # Also check the projects dir
+    project_memory_dir = CLAUDE_HOME / "projects" / dir_name
+
+    result = {
+        "dir_name": dir_name,
+        "project_path": project_path,
+        "agents": [],
+        "commands": [],
+        "rules": [],
+        "has_settings": False,
+        "has_claude_md": False,
+    }
+
+    # Check for project-level CLAUDE.md
+    claude_md_path = Path(project_path) / "CLAUDE.md"
+    result["has_claude_md"] = claude_md_path.exists()
+
+    # Check project .claude/ dir
+    if project_claude_dir.is_dir():
+        # Settings
+        result["has_settings"] = (project_claude_dir / "settings.json").exists()
+
+        # Agents
+        agents_dir = project_claude_dir / "agents"
+        if agents_dir.is_dir():
+            for f in agents_dir.iterdir():
+                if f.is_file() and f.name.endswith(".md") and not f.name.endswith(".disabled"):
+                    result["agents"].append({"name": f.stem, "scope": "project", "enabled": True})
+                elif f.is_file() and f.name.endswith(".md.disabled"):
+                    result["agents"].append({"name": f.name.replace(".md.disabled", ""), "scope": "project", "enabled": False})
+
+        # Commands
+        commands_dir = project_claude_dir / "commands"
+        if commands_dir.is_dir():
+            for f in commands_dir.iterdir():
+                if f.is_file() and f.name.endswith(".md") and not f.name.endswith(".disabled"):
+                    result["commands"].append({"name": f.stem, "scope": "project", "enabled": True})
+                elif f.is_file() and f.name.endswith(".md.disabled"):
+                    result["commands"].append({"name": f.name.replace(".md.disabled", ""), "scope": "project", "enabled": False})
+
+        # Rules
+        rules_dir = project_claude_dir / "rules"
+        if rules_dir.is_dir():
+            for f in rules_dir.iterdir():
+                if f.is_file() and f.name.endswith(".md") and not f.name.endswith(".disabled"):
+                    result["rules"].append({"name": f.stem, "scope": "project", "enabled": True})
+                elif f.is_file() and f.name.endswith(".md.disabled"):
+                    result["rules"].append({"name": f.name.replace(".md.disabled", ""), "scope": "project", "enabled": False})
+
+    return result
+
+
+@router.get("/projects/{dir_name}/details")
+def get_project_details(dir_name: str):
+    """获取项目的增强详情：会话数、最后活跃时间、CLAUDE.md 简介"""
+    project_dir = CLAUDE_HOME / "projects" / dir_name
+
+    result = {
+        "dir_name": dir_name,
+        "session_count": 0,
+        "last_active": None,
+        "description": "",
+    }
+
+    if not project_dir.is_dir():
+        return result
+
+    # Count session JSONL files
+    jsonl_files = list(project_dir.glob("*.jsonl"))
+    result["session_count"] = len(jsonl_files)
+
+    # Get last modified time
+    if jsonl_files:
+        latest = max(f.stat().st_mtime for f in jsonl_files)
+        from datetime import datetime, timezone
+        result["last_active"] = datetime.fromtimestamp(latest, tz=timezone.utc).isoformat()
+
+    # Try to read project CLAUDE.md first line as description
+    project_path = "/" + dir_name.replace("-", "/").lstrip("/")
+    claude_md = Path(project_path) / "CLAUDE.md"
+    if not claude_md.exists():
+        claude_md = Path(project_path) / ".claude" / "CLAUDE.md"
+    if claude_md.exists():
+        try:
+            text = claude_md.read_text(encoding="utf-8")
+            # Find first non-empty non-heading line as description
+            for line in text.split("\n"):
+                line = line.strip()
+                if line and not line.startswith("#") and not line.startswith("```"):
+                    result["description"] = line[:200]
+                    break
+        except Exception:
+            pass
+
+    return result
