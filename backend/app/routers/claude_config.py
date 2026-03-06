@@ -17,6 +17,25 @@ router = APIRouter(prefix="/api/claude-config", tags=["Claude 配置"])
 CLAUDE_HOME = Path.home() / ".claude"
 SETTINGS_PATH = CLAUDE_HOME / "settings.json"
 
+# ── 简单 TTL 内存缓存 ─────────────────────────────────────────────
+_cache: dict[str, tuple[float, Any]] = {}  # key → (expire_ts, value)
+
+def _cached(key: str, ttl: int, fn):
+    """返回缓存值，过期则重新计算。ttl 单位秒。"""
+    now = time.time()
+    entry = _cache.get(key)
+    if entry and entry[0] > now:
+        return entry[1]
+    value = fn()
+    _cache[key] = (now + ttl, value)
+    return value
+
+def _invalidate_cache(key: str | None = None):
+    if key:
+        _cache.pop(key, None)
+    else:
+        _cache.clear()
+
 # ── 所有已知 Hook 事件类型 ─────────────────────────────────────────
 HOOK_EVENT_TYPES = [
     "PreToolUse",
