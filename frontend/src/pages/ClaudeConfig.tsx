@@ -116,7 +116,7 @@ const COMMON_SETTINGS: {
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
 
 // ── 分组侧边栏定义 ──────────────────────────────────────────────
-type SectionId = "overview" | "settings" | "skills" | "agents" | "commands" | "mcp" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
+type SectionId = "overview" | "settings" | "skills" | "agents" | "commands" | "mcp" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "trash" | "about";
 
 interface NavItem { id: SectionId; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; keywords: string[] }
 interface NavGroup { label: string; items: NavItem[] }
