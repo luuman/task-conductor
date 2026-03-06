@@ -614,6 +614,12 @@ export default function ClaudeConfig() {
         {/* Overview */}
         {overview && <OverviewPanel overview={overview} />}
 
+        {/* 全局配置（独立数据源，不依赖 config） */}
+        <div id="section-global-config">
+          <SectionHeader icon={Layers} title="全局配置" desc="API、模型、功能开关、权限、通知等可视化配置管理" />
+          <GlobalConfigPanel />
+        </div>
+
         {config && (
           <>
             {/* MCP 服务 */}
