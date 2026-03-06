@@ -138,6 +138,103 @@ const COMMON_SETTINGS: {
     placeholder: "30",
     group: "session",
   },
+  {
+    key: "plansDirectory",
+    label: "计划文件目录",
+    desc: "自定义计划文件的存储位置，相对于项目根目录（默认 ~/.claude/plans）",
+    type: "string",
+    placeholder: "./plans",
+    group: "session",
+  },
+  // ── 权限与安全 ──
+  {
+    key: "forceLoginMethod",
+    label: "强制登录方式",
+    desc: "限制登录方式：claudeai = Claude.ai 账户，console = API 控制台",
+    type: "select",
+    options: [
+      { value: "", label: "不限制" },
+      { value: "claudeai", label: "claudeai — 仅 Claude.ai 账户" },
+      { value: "console", label: "console — 仅 API 控制台" },
+    ],
+    group: "security",
+  },
+  // ── UI 与体验 ──
+  {
+    key: "autoUpdatesChannel",
+    label: "更新频道",
+    desc: "stable = 延迟约一周的稳定版，latest = 最新版本",
+    type: "select",
+    options: [
+      { value: "", label: "默认（latest）" },
+      { value: "latest", label: "latest — 最新版本" },
+      { value: "stable", label: "stable — 稳定版（延迟约一周）" },
+    ],
+    group: "ui",
+  },
+  {
+    key: "spinnerTipsEnabled",
+    label: "微调器提示",
+    desc: "Claude 工作时在微调器中显示操作提示",
+    type: "boolean",
+    group: "ui",
+  },
+  {
+    key: "terminalProgressBarEnabled",
+    label: "终端进度条",
+    desc: "在支持的终端（Windows Terminal、iTerm2）中显示进度条",
+    type: "boolean",
+    group: "ui",
+  },
+  {
+    key: "prefersReducedMotion",
+    label: "减少动画",
+    desc: "减少或禁用 UI 动画（微调器、闪烁效果），辅助功能友好",
+    type: "boolean",
+    group: "ui",
+  },
+  {
+    key: "respectGitignore",
+    label: "遵守 .gitignore",
+    desc: "@ 文件自动完成时排除 .gitignore 匹配的文件（默认 true）",
+    type: "boolean",
+    group: "ui",
+  },
+  {
+    key: "includeCoAuthoredBy",
+    label: "Git 署名",
+    desc: "在 git 提交和 PR 中包含 Co-authored-by Claude 署名（默认 true）",
+    type: "boolean",
+    group: "ui",
+  },
+  // ── 高级 ──
+  {
+    key: "enableAllProjectMcpServers",
+    label: "自动批准项目 MCP",
+    desc: "自动批准项目 .mcp.json 中定义的所有 MCP 服务器",
+    type: "boolean",
+    group: "advanced",
+  },
+  {
+    key: "fastModePerSessionOptIn",
+    label: "快速模式按会话启用",
+    desc: "每个会话需要手动 /fast 启用快速模式，不跨会话持续",
+    type: "boolean",
+    group: "advanced",
+  },
+  {
+    key: "teammateMode",
+    label: "Agent Teams 模式",
+    desc: "队友显示方式：auto、in-process、tmux",
+    type: "select",
+    options: [
+      { value: "", label: "默认（auto）" },
+      { value: "auto", label: "auto — tmux/iTerm2 分割，否则 in-process" },
+      { value: "in-process", label: "in-process — 进程内" },
+      { value: "tmux", label: "tmux — tmux 面板" },
+    ],
+    group: "advanced",
+  },
 ];
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
 
