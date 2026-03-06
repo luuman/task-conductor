@@ -371,6 +371,27 @@ export interface AgentInfo {
 export interface PresetItem {
   name: string; title: string; desc: string; icon: string; content: string; installed: boolean;
 }
+export interface DisabledItem {
+  type: "agent" | "command" | "rule" | "skill";
+  name: string;
+  file_path: string;
+  scope: string;
+}
+export interface ProjectComponents {
+  dir_name: string;
+  project_path: string;
+  agents: { name: string; scope: string; enabled: boolean }[];
+  commands: { name: string; scope: string; enabled: boolean }[];
+  rules: { name: string; scope: string; enabled: boolean }[];
+  has_settings: boolean;
+  has_claude_md: boolean;
+}
+export interface ProjectDetails {
+  dir_name: string;
+  session_count: number;
+  last_active: string | null;
+  description: string;
+}
 export interface ClaudeSystemInfo {
   cli_version: string; home_path: string; config_path: string;
   cache_dir: string; cache_size_mb: number; history_size_mb: number;
