@@ -1278,6 +1278,9 @@ function CommonSettingsEditor({ config, onUpdate }: {
     model: "模型配置",
     behavior: "行为与输出",
     session: "会话管理",
+    security: "登录与安全",
+    ui: "界面与体验",
+    advanced: "高级选项",
   };
 
   const groups = useMemo(() => {
