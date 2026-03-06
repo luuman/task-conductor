@@ -1093,3 +1093,40 @@ def toggle_agent(body: ToggleRequest):
         if md_file.exists():
             md_file.rename(disabled_file)
     return {"ok": True, "name": body.name, "enabled": body.enabled}
+
+
+AGENT_TEMPLATE = """---
+name: {name}
+description: ""
+model: claude-sonnet-4-6
+---
+
+# {name}
+
+在此编写 Agent 的系统提示词...
+"""
+
+
+@router.post("/agents/create", summary="新建 Agent")
+def create_agent(body: CreateItemRequest):
+    agents_dir = CLAUDE_HOME / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    md_file = agents_dir / f"{body.name}.md"
+    if md_file.exists() or (agents_dir / f"{body.name}.md.disabled").exists():
+        raise HTTPException(409, f"Agent {body.name} 已存在")
+    md_file.write_text(body.content or AGENT_TEMPLATE.format(name=body.name), encoding="utf-8")
+    _invalidate_cache()
+    return {"ok": True, "name": body.name}
+
+
+@router.delete("/agents/{name}", summary="删除 Agent")
+def delete_agent(name: str):
+    agents_dir = CLAUDE_HOME / "agents"
+    md_file = agents_dir / f"{name}.md"
+    disabled_file = agents_dir / f"{name}.md.disabled"
+    target = md_file if md_file.exists() else disabled_file if disabled_file.exists() else None
+    if not target:
+        raise HTTPException(404, f"Agent {name} 不存在")
+    target.unlink()
+    _invalidate_cache()
+    return {"ok": True, "name": name}
