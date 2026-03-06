@@ -320,7 +320,10 @@ export default function ClaudeConfigPage() {
 
           {/* Commands */}
           <div ref={el => { sectionRefs.current["commands"] = el; }} data-section="commands">
-            <SectionCommands commands={commands} />
+            <SectionCommands commands={commands} onToggle={async (name, enabled) => {
+              await api.claudeConfig.toggleCommand(name, enabled);
+              setCommands(prev => prev.map(c => c.name === name ? { ...c, enabled } : c));
+            }} />
           </div>
 
           {/* MCP */}
