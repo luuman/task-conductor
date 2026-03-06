@@ -147,6 +147,7 @@ app.include_router(knowledge_router.router)  # GET/DELETE /api/projects/{id}/kno
 app.include_router(settings_router.router)   # GET/PUT /api/settings
 app.include_router(claude_config_router.router)  # GET/PUT /api/claude-config
 app.include_router(mcp_router.router)            # GET/POST/DELETE /api/mcp/servers
+app.include_router(tc_config_router.router)      # GET/PUT /api/tc-config
 
 
 # ── 基础 endpoints ─────────────────────────────────────────────
