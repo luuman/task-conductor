@@ -713,6 +713,11 @@ class ToggleRequest(BaseModel):
     enabled: bool
 
 
+class CreateItemRequest(BaseModel):
+    name: str
+    content: str = ""
+
+
 @router.post("/skills/toggle", summary="启用/禁用技能")
 def toggle_skill(body: ToggleRequest):
     skills_dir = CLAUDE_HOME / "skills" / body.name
