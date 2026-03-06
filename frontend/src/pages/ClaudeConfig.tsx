@@ -133,7 +133,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "agents", label: "Agents", icon: Bot, keywords: ["代理", "agent", "persona"] },
       { id: "commands", label: "Commands", icon: Terminal, keywords: ["命令", "command", "slash"] },
       { id: "mcp", label: "MCP 服务器", icon: Globe, keywords: ["mcp", "model context", "服务器", "stdio", "http"] },
-      { id: "mcp-market", label: "MCP 市场", icon: Link, keywords: ["市场", "market", "安装", "install"] },
     ],
   },
   {
