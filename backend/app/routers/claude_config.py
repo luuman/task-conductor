@@ -801,6 +801,31 @@ def toggle_command(body: ToggleRequest):
     return {"ok": True, "name": body.name, "enabled": body.enabled}
 
 
+@router.post("/commands/create", summary="新建自定义命令")
+def create_command(body: CreateItemRequest):
+    commands_dir = CLAUDE_HOME / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
+    md_file = commands_dir / f"{body.name}.md"
+    if md_file.exists() or (commands_dir / f"{body.name}.md.disabled").exists():
+        raise HTTPException(409, f"命令 {body.name} 已存在")
+    md_file.write_text(body.content or f"# {body.name}\n\n在此编写命令内容...\n", encoding="utf-8")
+    _invalidate_cache()
+    return {"ok": True, "name": body.name}
+
+
+@router.delete("/commands/{name}", summary="删除自定义命令")
+def delete_command(name: str):
+    commands_dir = CLAUDE_HOME / "commands"
+    md_file = commands_dir / f"{name}.md"
+    disabled_file = commands_dir / f"{name}.md.disabled"
+    target = md_file if md_file.exists() else disabled_file if disabled_file.exists() else None
+    if not target:
+        raise HTTPException(404, f"命令 {name} 不存在")
+    target.unlink()
+    _invalidate_cache()
+    return {"ok": True, "name": name}
+
+
 # ── 系统信息概览 ──────────────────────────────────────────────────
 
 
