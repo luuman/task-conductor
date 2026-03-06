@@ -505,6 +505,7 @@ export default function ClaudeConfig() {
   useEffect(() => { load(); }, [load]);
 
   const sections: { id: Section; label: string; Icon: typeof Webhook; count?: number }[] = useMemo(() => [
+    { id: "global-config", label: "全局配置", Icon: Layers },
     { id: "mcp",         label: "MCP 服务", Icon: Globe,    count: overview?.mcp_servers.length },
     { id: "mcp-market",  label: "MCP 市场", Icon: Link },
     { id: "hooks",       label: "Hooks",    Icon: Webhook,  count: config ? Object.keys(config.hooks).length : undefined },
