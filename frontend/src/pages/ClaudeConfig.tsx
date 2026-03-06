@@ -951,18 +951,64 @@ function SecAgents({ agents, onToggle, onCreate, onDelete }: {
 // ═══════════════════════════════════════════════════════════════════
 // Sec: Commands
 // ═══════════════════════════════════════════════════════════════════
-function SecCommands({ commands, onToggle }: { commands: CommandInfo[]; onToggle: (n: string, e: boolean) => Promise<void> }) {
+function SecCommands({ commands, onToggle, onCreate, onDelete }: {
+  commands: CommandInfo[]; onToggle: (n: string, e: boolean) => Promise<void>;
+  onCreate: (name: string, content?: string) => Promise<void>; onDelete: (name: string) => Promise<void>;
+}) {
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createErr, setCreateErr] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
   const detail = commands.find(c => c.name === selected);
   const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
     ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
+  const handleCreate = async () => {
+    const n = newName.trim(); if (!n) return;
+    setCreating(true); setCreateErr("");
+    try { await onCreate(n); setNewName(""); setShowCreate(false); setSelected(n); }
+    catch (e) { setCreateErr(e instanceof Error ? e.message : "创建失败"); }
+    finally { setCreating(false); }
+  };
+  const handleDelete = async (name: string, ev: React.MouseEvent) => {
+    ev.stopPropagation();
+    if (!confirm(`确定删除命令 "/${name}"？此操作不可恢复。`)) return;
+    setDeleting(name);
+    try { await onDelete(name); if (selected === name) setSelected(null); }
+    finally { setDeleting(null); }
+  };
   return (
     <div className="space-y-4">
       <SectionHeader icon={Terminal} color="#22c55e" label="自定义命令" desc="~/.claude/commands/"
-        right={<CountBadges items={[{ label: "总计", count: commands.length }, { label: "启用", count: commands.filter(c => c.enabled).length, color: "#22c55e" }]} />} />
-      {!commands.length ? <Empty text="暂无自定义命令" /> : (
+        right={<div className="flex items-center gap-2">
+          <CountBadges items={[{ label: "总计", count: commands.length }, { label: "启用", count: commands.filter(c => c.enabled).length, color: "#22c55e" }]} />
+          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 新建</button>
+        </div>} />
+      {showCreate && (
+        <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
+          <p className="text-xs font-semibold text-app">新建自定义命令</p>
+          <div className="flex gap-2">
+            <div className="flex items-center flex-1 px-3 py-2 bg-app border border-app rounded-lg focus-within:border-accent/60">
+              <span className="text-xs text-app-tertiary font-mono">/</span>
+              <input value={newName} onChange={e => { setNewName(e.target.value); setCreateErr(""); }} placeholder="命令名称（如 review）"
+                className="flex-1 ml-1 text-xs bg-transparent outline-none text-app placeholder:text-app-tertiary font-mono"
+                onKeyDown={e => e.key === "Enter" && handleCreate()} />
+            </div>
+            <button onClick={handleCreate} disabled={creating || !newName.trim()}
+              className="px-4 py-2 text-xs rounded-lg bg-accent hover:bg-accent-hover text-white disabled:opacity-40">
+              {creating ? "创建中..." : "创建"}
+            </button>
+            <button onClick={() => { setShowCreate(false); setNewName(""); setCreateErr(""); }}
+              className="px-3 py-2 text-xs rounded-lg border border-app text-app-secondary hover:text-app"><X size={12} /></button>
+          </div>
+          {createErr && <p className="text-[10px] text-red-400">{createErr}</p>}
+          <p className="text-[10px] text-app-tertiary">将在 ~/.claude/commands/ 下创建 .md 文件，使用 /命令名 即可在 Claude Code 中调用</p>
+        </div>
+      )}
+      {!commands.length && !showCreate ? <Empty text="暂无自定义命令，点击「新建」创建" /> : commands.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {commands.map(c => (
@@ -972,7 +1018,13 @@ function SecCommands({ commands, onToggle }: { commands: CommandInfo[]; onToggle
                   !c.enabled && "opacity-50")}>
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-app font-mono">/{c.name}</p>
-                  <ToggleSwitch enabled={c.enabled} loading={toggling === c.name} onClick={e => toggle(c.name, !c.enabled, e)} />
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={e => handleDelete(c.name, e)} disabled={deleting === c.name}
+                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors" title="删除">
+                      <Trash2 size={11} />
+                    </button>
+                    <ToggleSwitch enabled={c.enabled} loading={toggling === c.name} onClick={e => toggle(c.name, !c.enabled, e)} />
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <StatusTag label={c.scope} color="#7878a8" />
