@@ -55,7 +55,7 @@ const EVENT_LABELS: Record<string, { label: string; desc: string }> = {
   Notification:       { label: "通知",         desc: "Claude 发出通知时触发" },
 };
 
-type Section = "mcp" | "mcp-market" | "hooks" | "plugins" | "permissions" | "settings" | "other";
+type Section = "global-config" | "mcp" | "mcp-market" | "hooks" | "plugins" | "permissions" | "settings" | "other";
 
 // ── 常用设置项定义 ──────────────────────────────────────────────────
 const COMMON_SETTINGS: {
