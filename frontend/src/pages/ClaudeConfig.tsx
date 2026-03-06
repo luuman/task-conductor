@@ -542,6 +542,48 @@ function CountBadges({ items }: { items: { label: string; count: number; color?:
   );
 }
 
+function PresetGallery({ presets, onInstall, itemLabel }: {
+  presets: PresetItem[]; onInstall: (name: string, content: string) => Promise<void>; itemLabel: string;
+}) {
+  const [installing, setInstalling] = useState<string | null>(null);
+  const install = async (p: PresetItem) => {
+    setInstalling(p.name);
+    try { await onInstall(p.name, p.content); } finally { setInstalling(null); }
+  };
+  const available = presets.filter(p => !p.installed);
+  const installed = presets.filter(p => p.installed);
+  if (!presets.length) return null;
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Download size={13} className="text-accent" />
+        <span className="text-xs font-semibold text-app">推荐{itemLabel}</span>
+        <span className="text-[9px] text-app-tertiary">已安装 {installed.length} / {presets.length}</span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+        {presets.map(p => (
+          <div key={p.name} className={cn("flex items-start gap-3 px-3 py-2.5 rounded-lg border transition-all",
+            p.installed ? "border-green-500/20 bg-green-500/5" : "border-app bg-app-secondary hover:border-accent/30")}>
+            <span className="text-lg shrink-0 mt-0.5">{p.icon}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-app truncate">{p.title}</p>
+              <p className="text-[9px] text-app-tertiary mt-0.5 line-clamp-2">{p.desc}</p>
+            </div>
+            {p.installed ? (
+              <span className="text-[9px] text-green-400 shrink-0 mt-1 flex items-center gap-0.5"><Check size={10} />已装</span>
+            ) : (
+              <button onClick={() => install(p)} disabled={installing === p.name}
+                className="shrink-0 mt-0.5 text-[9px] px-2 py-1 rounded bg-accent hover:bg-accent-hover text-white disabled:opacity-50">
+                {installing === p.name ? "..." : "安装"}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Sec: 总览
 // ═══════════════════════════════════════════════════════════════════
