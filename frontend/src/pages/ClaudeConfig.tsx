@@ -364,6 +364,7 @@ export default function ClaudeConfig() {
     { id: "hooks",       label: "Hooks",    Icon: Webhook,  count: config ? Object.keys(config.hooks).length : undefined },
     { id: "plugins",     label: "插件",     Icon: Plug,     count: config ? Object.keys(config.enabled_plugins).length : undefined },
     { id: "permissions", label: "权限",     Icon: Shield },
+    { id: "settings",    label: "常用设置", Icon: SlidersHorizontal },
     { id: "other",       label: "其他",     Icon: Settings2 },
   ], [overview, config]);
 
