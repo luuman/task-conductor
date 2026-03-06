@@ -1012,16 +1012,23 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
   const [creating, setCreating] = useState(false);
   const [createErr, setCreateErr] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [presets, setPresets] = useState<PresetItem[]>([]);
   const detail = commands.find(c => c.name === selected);
+  useEffect(() => { api.claudeConfig.presetCommands().then(setPresets).catch(() => {}); }, []);
+  useEffect(() => {
+    const names = new Set(commands.map(c => c.name));
+    setPresets(prev => prev.map(p => ({ ...p, installed: names.has(p.name) })));
+  }, [commands]);
   const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
     ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
-  const handleCreate = async () => {
-    const n = newName.trim(); if (!n) return;
-    setCreating(true); setCreateErr("");
-    try { await onCreate(n); setNewName(""); setShowCreate(false); setSelected(n); }
+  const handleCreate = async (name?: string, content?: string) => {
+    const n = (name ?? newName).trim(); if (!n) return;
+    if (!name) setCreating(true);
+    setCreateErr("");
+    try { await onCreate(n, content); setNewName(""); setShowCreate(false); setSelected(n); }
     catch (e) { setCreateErr(e instanceof Error ? e.message : "创建失败"); }
-    finally { setCreating(false); }
+    finally { if (!name) setCreating(false); }
   };
   const handleDelete = async (name: string, ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -1047,7 +1054,7 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
                 className="flex-1 ml-1 text-xs bg-transparent outline-none text-app placeholder:text-app-tertiary font-mono"
                 onKeyDown={e => e.key === "Enter" && handleCreate()} />
             </div>
-            <button onClick={handleCreate} disabled={creating || !newName.trim()}
+            <button onClick={() => handleCreate()} disabled={creating || !newName.trim()}
               className="px-4 py-2 text-xs rounded-lg bg-accent hover:bg-accent-hover text-white disabled:opacity-40">
               {creating ? "创建中..." : "创建"}
             </button>
@@ -1055,10 +1062,10 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
               className="px-3 py-2 text-xs rounded-lg border border-app text-app-secondary hover:text-app"><X size={12} /></button>
           </div>
           {createErr && <p className="text-[10px] text-red-400">{createErr}</p>}
-          <p className="text-[10px] text-app-tertiary">将在 ~/.claude/commands/ 下创建 .md 文件，使用 /命令名 即可在 Claude Code 中调用</p>
         </div>
       )}
-      {!commands.length && !showCreate ? <Empty text="暂无自定义命令，点击「新建」创建" /> : commands.length > 0 && (
+      <PresetGallery presets={presets} onInstall={(n, c) => handleCreate(n, c)} itemLabel="命令" />
+      {commands.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {commands.map(c => (
