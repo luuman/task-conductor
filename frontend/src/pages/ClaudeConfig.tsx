@@ -49,6 +49,7 @@ import {
   Search,
   Variable,
   Bot,
+  Download,
 } from "lucide-react";
 
 // ── Hook 事件标签 ────────────────────────────────────────────────
