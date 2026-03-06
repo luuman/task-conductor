@@ -38,6 +38,7 @@ import {
   Link,
   Unplug,
   SlidersHorizontal,
+  Layers,
 } from "lucide-react";
 
 // ── Hook 事件中文标签 ──────────────────────────────────────────────
