@@ -718,6 +718,376 @@ class CreateItemRequest(BaseModel):
     content: str = ""
 
 
+# ── 预置模板库 ────────────────────────────────────────────────────
+
+PRESET_AGENTS: list[dict[str, str]] = [
+    {
+        "name": "code-reviewer",
+        "title": "Code Reviewer",
+        "desc": "审查代码质量、潜在 Bug、性能问题和最佳实践",
+        "icon": "🔍",
+        "content": """---
+name: code-reviewer
+description: "审查代码质量、发现潜在 Bug 和改进机会"
+model: claude-sonnet-4-6
+---
+
+你是一位严谨的代码审查专家。
+
+## 职责
+- 审查代码变更的正确性、可读性和可维护性
+- 指出潜在的 Bug、安全漏洞和性能问题
+- 提出具体的改进建议（附代码示例）
+- 检查是否符合项目编码规范
+
+## 审查重点
+1. **正确性**：逻辑错误、边界条件、空值处理
+2. **安全性**：注入、XSS、敏感信息泄露
+3. **性能**：N+1 查询、不必要的计算、内存泄漏
+4. **可读性**：命名、注释、代码结构
+5. **测试**：是否缺少测试覆盖
+
+## 输出格式
+对每个问题：
+- 严重程度：🔴 严重 / 🟡 建议 / 🟢 优化
+- 位置：文件名:行号
+- 问题描述 + 修复建议
+""",
+    },
+    {
+        "name": "test-engineer",
+        "title": "Test Engineer",
+        "desc": "编写单元测试、集成测试，提高代码覆盖率",
+        "icon": "🧪",
+        "content": """---
+name: test-engineer
+description: "编写高质量测试用例，提高代码覆盖率"
+model: claude-sonnet-4-6
+---
+
+你是一位测试工程专家。
+
+## 职责
+- 分析代码逻辑，编写全面的测试用例
+- 覆盖正常路径、边界条件和异常情况
+- 使用项目已有的测试框架和工具
+- 优先测试核心业务逻辑和易出错的部分
+
+## 测试原则
+1. 每个测试只验证一个行为
+2. 测试名称清晰描述期望行为
+3. 使用 Arrange-Act-Assert 模式
+4. Mock 外部依赖，不 Mock 被测对象
+5. 边界值测试：空值、零值、极大值、特殊字符
+
+## 输出
+- 可直接运行的测试代码
+- 简要说明每组测试覆盖的场景
+""",
+    },
+    {
+        "name": "doc-writer",
+        "title": "Doc Writer",
+        "desc": "生成 README、API 文档和代码注释",
+        "icon": "📝",
+        "content": """---
+name: doc-writer
+description: "生成清晰、完整的技术文档"
+model: claude-sonnet-4-6
+---
+
+你是一位技术文档写作专家。
+
+## 职责
+- 为代码库生成 README、API 文档、架构说明
+- 为复杂函数和模块编写清晰的注释和 docstring
+- 生成 CHANGELOG 和迁移指南
+- 确保文档与代码保持一致
+
+## 写作原则
+1. 先写「为什么」，再写「怎么做」
+2. 提供可运行的代码示例
+3. 使用简洁直接的语言，避免模糊表述
+4. 按读者需求组织内容（快速上手 → 深入细节）
+""",
+    },
+    {
+        "name": "security-auditor",
+        "title": "Security Auditor",
+        "desc": "安全审计，发现漏洞和敏感信息泄露",
+        "icon": "🛡️",
+        "content": """---
+name: security-auditor
+description: "安全审计与漏洞扫描"
+model: claude-sonnet-4-6
+---
+
+你是一位应用安全审计专家。
+
+## 审计范围
+- OWASP Top 10 漏洞检测
+- 敏感信息泄露（API Key、密码、Token）
+- 权限控制和认证机制
+- 输入验证和输出编码
+- 依赖库已知漏洞
+
+## 输出格式
+对每个发现：
+- 风险等级：🔴 高危 / 🟠 中危 / 🟡 低危
+- 漏洞类型（CWE 编号）
+- 影响范围和利用方式
+- 修复建议（附代码）
+""",
+    },
+    {
+        "name": "refactor-expert",
+        "title": "Refactor Expert",
+        "desc": "重构代码，提升可读性和可维护性",
+        "icon": "♻️",
+        "content": """---
+name: refactor-expert
+description: "代码重构，提升质量和可维护性"
+model: claude-sonnet-4-6
+---
+
+你是一位代码重构专家。
+
+## 重构原则
+- 保持行为不变，只改善内部结构
+- 每次只做一种重构，小步前进
+- 确保有测试覆盖后再重构
+- 遵循 SOLID、DRY、KISS 原则
+
+## 常见重构
+1. 提取函数 / 提取类
+2. 消除重复代码
+3. 简化条件表达式
+4. 用多态替代条件分支
+5. 引入设计模式（适度）
+
+## 输出
+- 重构前后的对比
+- 每步重构的理由
+- 对现有功能的影响分析
+""",
+    },
+    {
+        "name": "git-assistant",
+        "title": "Git Assistant",
+        "desc": "生成 commit message、PR 描述和 changelog",
+        "icon": "📦",
+        "content": """---
+name: git-assistant
+description: "Git 工作流助手：commit、PR、changelog"
+model: claude-sonnet-4-6
+---
+
+你是一位 Git 工作流助手。
+
+## 职责
+- 根据代码变更生成规范的 commit message（Conventional Commits）
+- 撰写清晰的 PR 描述（摘要 + 变更列表 + 测试计划）
+- 生成 CHANGELOG 条目
+- 协助解决 merge conflict
+
+## Commit Message 格式
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+type: feat | fix | refactor | docs | test | chore | perf | ci
+""",
+    },
+    {
+        "name": "performance-optimizer",
+        "title": "Performance Optimizer",
+        "desc": "分析性能瓶颈，提出优化方案",
+        "icon": "⚡",
+        "content": """---
+name: performance-optimizer
+description: "性能分析与优化建议"
+model: claude-sonnet-4-6
+---
+
+你是一位性能优化专家。
+
+## 分析维度
+1. **时间复杂度**：算法效率、热路径优化
+2. **空间复杂度**：内存分配、缓存策略
+3. **I/O 瓶颈**：数据库查询、网络请求、文件操作
+4. **并发**：锁竞争、异步优化、批处理
+
+## 输出格式
+- 瓶颈定位（文件:函数:行号）
+- 当前性能特征
+- 优化方案（附代码）
+- 预期改进效果
+""",
+    },
+    {
+        "name": "architect",
+        "title": "Architect",
+        "desc": "架构设计、技术选型和系统设计评审",
+        "icon": "🏗️",
+        "content": """---
+name: architect
+description: "系统架构设计与评审"
+model: claude-sonnet-4-6
+---
+
+你是一位软件架构师。
+
+## 职责
+- 评审系统架构设计，识别潜在问题
+- 提出技术选型建议（对比优劣）
+- 设计模块划分、接口协议和数据流
+- 考虑可扩展性、可靠性和可维护性
+
+## 设计原则
+1. 关注点分离
+2. 依赖倒置
+3. 最小知识原则
+4. 为失败设计（容错、降级、重试）
+5. 避免过度设计
+""",
+    },
+]
+
+PRESET_COMMANDS: list[dict[str, str]] = [
+    {
+        "name": "review",
+        "title": "/review",
+        "desc": "审查当前变更或指定文件",
+        "icon": "🔍",
+        "content": "请审查当前工作目录中的代码变更。关注：\n1. 正确性和潜在 Bug\n2. 代码风格和可读性\n3. 性能问题\n4. 安全漏洞\n\n对每个问题给出严重程度和修复建议。",
+    },
+    {
+        "name": "test",
+        "title": "/test",
+        "desc": "为指定代码生成测试用例",
+        "icon": "🧪",
+        "content": "为 $ARGUMENTS 生成全面的测试用例。要求：\n1. 覆盖正常路径和边界条件\n2. 使用项目已有的测试框架\n3. 每个测试只验证一个行为\n4. 测试名称清晰描述期望行为",
+    },
+    {
+        "name": "explain",
+        "title": "/explain",
+        "desc": "解释代码实现逻辑",
+        "icon": "💡",
+        "content": "请详细解释 $ARGUMENTS 的实现逻辑：\n1. 整体功能和设计意图\n2. 关键算法和数据结构\n3. 与其他模块的交互关系\n4. 需要注意的边界情况",
+    },
+    {
+        "name": "fix",
+        "title": "/fix",
+        "desc": "分析并修复错误",
+        "icon": "🔧",
+        "content": "分析以下错误并提供修复方案：\n$ARGUMENTS\n\n请：\n1. 确定根本原因\n2. 提供修复代码\n3. 说明修复后如何验证\n4. 检查是否存在类似问题",
+    },
+    {
+        "name": "refactor",
+        "title": "/refactor",
+        "desc": "重构指定代码",
+        "icon": "♻️",
+        "content": "请重构 $ARGUMENTS：\n1. 保持现有行为不变\n2. 提升可读性和可维护性\n3. 消除代码异味\n4. 给出重构前后的对比说明",
+    },
+    {
+        "name": "commit",
+        "title": "/commit",
+        "desc": "生成规范的 commit message",
+        "icon": "📦",
+        "content": "查看当前 git 暂存区的变更，生成一条符合 Conventional Commits 规范的 commit message。\n格式：<type>(<scope>): <subject>\n\n包含简要的 body 说明变更原因。",
+    },
+    {
+        "name": "doc",
+        "title": "/doc",
+        "desc": "生成文档或注释",
+        "icon": "📝",
+        "content": "为 $ARGUMENTS 生成文档：\n1. 功能说明\n2. 参数/返回值描述\n3. 使用示例\n4. 注意事项",
+    },
+    {
+        "name": "optimize",
+        "title": "/optimize",
+        "desc": "分析并优化性能",
+        "icon": "⚡",
+        "content": "分析 $ARGUMENTS 的性能，找出瓶颈并提出优化方案：\n1. 时间/空间复杂度分析\n2. I/O 和数据库查询优化\n3. 缓存策略\n4. 给出优化前后的对比",
+    },
+]
+
+PRESET_RULES: list[dict[str, str]] = [
+    {
+        "name": "no-console-log",
+        "title": "No Console Log",
+        "desc": "禁止在生产代码中使用 console.log",
+        "icon": "🚫",
+        "content": "# No Console Log\n\n不要在生产代码中使用 `console.log`。\n- 调试用途请使用项目的 logger 工具\n- 测试代码中可以使用\n- 如确需保留，请加注释说明原因",
+    },
+    {
+        "name": "chinese-comments",
+        "title": "中文注释",
+        "desc": "使用中文编写注释和文档",
+        "icon": "🇨🇳",
+        "content": "# 中文注释\n\n所有代码注释、文档字符串和 commit message 使用中文编写。\n- 变量名和函数名保持英文\n- JSDoc / docstring 描述使用中文\n- README 和文档使用中文",
+    },
+    {
+        "name": "error-handling",
+        "title": "Error Handling",
+        "desc": "统一错误处理规范",
+        "icon": "⚠️",
+        "content": "# 错误处理规范\n\n1. 不要吞掉异常（空 catch 块）\n2. 使用自定义错误类型区分业务错误和系统错误\n3. 在系统边界（API、用户输入）做输入验证\n4. 内部函数可以假定输入已校验\n5. 错误日志包含上下文信息（参数、状态）",
+    },
+    {
+        "name": "code-style",
+        "title": "Code Style",
+        "desc": "代码风格和命名规范",
+        "icon": "🎨",
+        "content": "# 代码风格规范\n\n- 函数名：动词开头（getUserById, parseConfig）\n- 布尔变量：is/has/should 开头\n- 常量：UPPER_SNAKE_CASE\n- 文件名：kebab-case\n- 单个函数不超过 50 行\n- 嵌套不超过 3 层\n- 优先使用 early return 减少嵌套",
+    },
+    {
+        "name": "security-first",
+        "title": "Security First",
+        "desc": "安全优先编码规范",
+        "icon": "🔒",
+        "content": "# 安全优先\n\n1. 永远不要硬编码密钥、密码、Token\n2. 用户输入必须验证和转义\n3. SQL 查询使用参数化\n4. 文件路径操作防止目录遍历\n5. HTTP 响应设置安全头（CSP, X-Frame-Options）\n6. 敏感数据不写入日志\n7. 依赖定期更新，关注安全公告",
+    },
+    {
+        "name": "git-workflow",
+        "title": "Git Workflow",
+        "desc": "Git 提交和分支规范",
+        "icon": "📦",
+        "content": "# Git 工作流规范\n\n## Commit Message\n- 使用 Conventional Commits：feat/fix/refactor/docs/test/chore\n- 中文描述，简洁明了\n- 每个 commit 只做一件事\n\n## 分支\n- main：稳定版本\n- feat/*：新功能\n- fix/*：修复\n- 合并前必须通过 CI",
+    },
+]
+
+
+@router.get("/presets/agents", summary="获取预置 Agent 模板")
+def get_preset_agents():
+    installed = {a.name for a in list_agents()}
+    return [
+        {**p, "installed": p["name"] in installed}
+        for p in PRESET_AGENTS
+    ]
+
+
+@router.get("/presets/commands", summary="获取预置命令模板")
+def get_preset_commands():
+    installed = {c.name for c in list_commands()}
+    return [
+        {**p, "installed": p["name"] in installed}
+        for p in PRESET_COMMANDS
+    ]
+
+
+@router.get("/presets/rules", summary="获取预置规则模板")
+def get_preset_rules():
+    installed = {r.name for r in list_rules()}
+    return [
+        {**p, "installed": p["name"] in installed}
+        for p in PRESET_RULES
+    ]
+
+
 @router.post("/skills/toggle", summary="启用/禁用技能")
 def toggle_skill(body: ToggleRequest):
     skills_dir = CLAUDE_HOME / "skills" / body.name
