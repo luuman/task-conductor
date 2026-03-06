@@ -629,22 +629,7 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
           {isEmpty ? (
             <p className="text-[11px] text-app-tertiary italic py-4 text-center">暂无内容，点击编辑...</p>
           ) : (
-            <div className="space-y-1 max-h-[300px] overflow-y-auto">
-              {lines.map((line, i) => {
-                if (line.startsWith("# ")) return <p key={i} className="text-[13px] font-bold text-app mt-2">{line.slice(2)}</p>;
-                if (line.startsWith("## ")) return <p key={i} className="text-[12px] font-semibold text-app mt-2">{line.slice(3)}</p>;
-                if (line.startsWith("### ")) return <p key={i} className="text-[11px] font-semibold text-app/80 mt-1.5">{line.slice(4)}</p>;
-                if (line.startsWith("- ")) return (
-                  <div key={i} className="flex items-start gap-2 pl-1">
-                    <span className="text-accent mt-0.5 shrink-0">•</span>
-                    <span className="text-[11px] text-app leading-relaxed">{line.slice(2)}</span>
-                  </div>
-                );
-                if (line.startsWith("```")) return <div key={i} className="border-t border-app/30 my-1" />;
-                if (!line.trim()) return <div key={i} className="h-1.5" />;
-                return <p key={i} className="text-[11px] text-app/80 leading-relaxed">{line}</p>;
-              })}
-            </div>
+            <MdPreview content={claudeMd} />
           )}
         </div>
       )}
