@@ -1162,6 +1162,8 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
           ); })}
         </div>
       )}
+      {/* MCP 市场嵌入 */}
+      <McpMarketEmbed />
     </div>
   );
 }
