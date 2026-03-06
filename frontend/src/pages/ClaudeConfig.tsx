@@ -13,6 +13,7 @@ import {
   type RuleInfo,
   type AgentInfo,
   type ClaudeSystemInfo,
+  type PresetItem,
 } from "../lib/api";
 import { cn } from "../lib/utils";
 import McpMarketEmbed from "./McpMarket";
