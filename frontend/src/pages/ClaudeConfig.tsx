@@ -152,6 +152,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "plugins", label: "插件", icon: Plug, keywords: ["插件", "plugin", "扩展", "marketplace"] },
       { id: "monitoring", label: "监控", icon: Activity, keywords: ["监控", "统计", "活动", "消息", "工具调用"] },
+      { id: "trash", label: "回收站", icon: ArchiveRestore, keywords: ["回收", "trash", "禁用", "disabled", "恢复", "restore"] },
       { id: "about", label: "关于", icon: Info, keywords: ["关于", "about", "版本", "系统", "缓存"] },
     ],
   },
