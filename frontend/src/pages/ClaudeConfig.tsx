@@ -1602,6 +1602,37 @@ function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
 // Sec: 监控
 // ═══════════════════════════════════════════════════════════════════
 function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
+  const [projectDetails, setProjectDetails] = useState<Record<string, ProjectDetails>>({});
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    if (!overview?.projects.length) return;
+    setLoadingDetails(true);
+    Promise.allSettled(
+      overview.projects.map(p =>
+        api.claudeConfig.projectDetails(p.dir_name).then(d => ({ key: p.dir_name, data: d }))
+      )
+    ).then(results => {
+      const map: Record<string, ProjectDetails> = {};
+      for (const r of results) {
+        if (r.status === "fulfilled") map[r.value.key] = r.value.data;
+      }
+      setProjectDetails(map);
+      setLoadingDetails(false);
+    });
+  }, [overview]);
+
+  const fmtTime = (iso: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const now = Date.now();
+    const diffH = (now - d.getTime()) / 3600000;
+    if (diffH < 1) return `${Math.floor(diffH * 60)}分钟前`;
+    if (diffH < 24) return `${Math.floor(diffH)}小时前`;
+    if (diffH < 720) return `${Math.floor(diffH / 24)}天前`;
+    return d.toLocaleDateString();
+  };
+
   return (
     <div className="space-y-4">
       <SectionHeader icon={Activity} color="#10b981" label="监控与统计" desc="Claude Code 使用统计与活动趋势" />
@@ -1630,14 +1661,20 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
         </div>
       )}
       <div className="bg-app-secondary border border-app rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3"><FolderOpen size={13} className="text-green-400" /><span className="text-xs font-semibold text-app">项目记忆</span><span className="text-[9px] text-app-tertiary">{overview.projects.length} 个项目</span></div>
+        <div className="flex items-center gap-2 mb-3">
+          <FolderOpen size={13} className="text-green-400" />
+          <span className="text-xs font-semibold text-app">项目记忆</span>
+          <span className="text-[9px] text-app-tertiary">{overview.projects.length} 个项目</span>
+          {loadingDetails && <span className="text-[9px] text-app-tertiary animate-pulse">加载详情...</span>}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {overview.projects.map(p => {
             const fullPath = "/" + p.dir_name.replace(/^-/, "").replace(/-/g, "/");
             const parts = fullPath.split("/").filter(Boolean);
             const projectName = parts[parts.length - 1] || p.dir_name;
+            const details = projectDetails[p.dir_name];
             return (
-              <div key={p.dir_name} className="bg-app border border-app rounded-lg px-3 py-2.5 space-y-1">
+              <div key={p.dir_name} className="bg-app border border-app rounded-lg px-3 py-2.5 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-app truncate">{projectName}</span>
                   <div className="flex items-center gap-1 shrink-0 ml-2">
@@ -1646,6 +1683,21 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
                   </div>
                 </div>
                 <p className="text-[9px] text-app-tertiary font-mono truncate">{fullPath}</p>
+                {details && (
+                  <div className="flex items-center gap-3 pt-0.5">
+                    <span className="text-[9px] text-app-tertiary flex items-center gap-1">
+                      <MessageSquare size={9} /> {details.session_count} 会话
+                    </span>
+                    {details.last_active && (
+                      <span className="text-[9px] text-app-tertiary flex items-center gap-1">
+                        <Calendar size={9} /> {fmtTime(details.last_active)}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {details?.description && (
+                  <p className="text-[9px] text-app-tertiary/80 line-clamp-1">{details.description}</p>
+                )}
               </div>
             );
           })}
