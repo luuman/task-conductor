@@ -1,5 +1,5 @@
 // frontend/src/pages/ClaudeConfig.tsx
-// Visual editor for ~/.claude/ — overview + settings.json
+// Claude Code 全能配置中心 —— Tab 布局，全局配置可视化
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import {
   api,
@@ -8,11 +8,16 @@ import {
   type HookRule,
   type HookEntry,
   type McpServer,
+  type SkillDetail,
+  type CommandInfo,
+  type RuleInfo,
+  type ClaudeSystemInfo,
 } from "../lib/api";
 import { cn } from "../lib/utils";
 import McpMarketEmbed from "./McpMarket";
 import GlobalConfigPanel from "../components/GlobalConfigPanel";
 import {
+  Globe,
   Webhook,
   Plug,
   Shield,
@@ -34,11 +39,18 @@ import {
   Users,
   Calendar,
   BarChart3,
-  Globe,
   Link,
   Unplug,
   SlidersHorizontal,
   Layers,
+  Cpu,
+  Zap,
+  FileText,
+  BookOpen,
+  Activity,
+  Info,
+  Search,
+  Variable,
 } from "lucide-react";
 
 // ── Hook 事件中文标签 ──────────────────────────────────────────────
@@ -55,190 +67,70 @@ const EVENT_LABELS: Record<string, { label: string; desc: string }> = {
   Notification:       { label: "通知",         desc: "Claude 发出通知时触发" },
 };
 
-type Section = "global-config" | "mcp" | "mcp-market" | "hooks" | "plugins" | "permissions" | "settings" | "other";
-
 // ── 常用设置项定义 ──────────────────────────────────────────────────
 const COMMON_SETTINGS: {
-  key: string;
-  label: string;
-  desc: string;
+  key: string; label: string; desc: string;
   type: "string" | "boolean" | "number" | "select";
   options?: { value: string; label: string }[];
-  placeholder?: string;
-  group?: string;
+  placeholder?: string; group?: string;
 }[] = [
-  // ── 模型 ──
-  {
-    key: "model",
-    label: "默认模型",
-    desc: "别名（opus/sonnet/haiku/opusplan）或完整模型名。opusplan = 计划用 Opus、执行用 Sonnet",
-    type: "select",
-    options: [
-      { value: "",               label: "default（按订阅层级）" },
-      { value: "opus",           label: "opus — Opus 4.6（复杂推理）" },
-      { value: "sonnet",         label: "sonnet — Sonnet 4.6（日常编码）" },
-      { value: "haiku",          label: "haiku — Haiku 4.5（轻量快速）" },
-      { value: "opusplan",       label: "opusplan — 计划 Opus + 执行 Sonnet" },
-      { value: "sonnet[1m]",     label: "sonnet[1m] — Sonnet + 100万上下文" },
-      { value: "claude-opus-4-6",           label: "claude-opus-4-6（固定版本）" },
-      { value: "claude-sonnet-4-6",         label: "claude-sonnet-4-6（固定版本）" },
-      { value: "claude-haiku-4-5-20251001", label: "claude-haiku-4-5（固定版本）" },
-    ],
-    placeholder: "opus / sonnet / claude-sonnet-4-6",
-    group: "model",
-  },
-  {
-    key: "effortLevel",
-    label: "努力级别",
-    desc: "自适应推理深度：low（快速低成本）、medium（默认）、high（深度推理）。Opus/Sonnet 4.6 支持",
-    type: "select",
-    options: [
-      { value: "",       label: "默认（不覆盖）" },
-      { value: "low",    label: "low — 简单任务，快速低成本" },
-      { value: "medium", label: "medium — 平衡（Opus 默认）" },
-      { value: "high",   label: "high — 复杂问题，深度推理" },
-    ],
-    group: "model",
-  },
-  // ── 行为 ──
-  {
-    key: "language",
-    label: "响应语言",
-    desc: "Claude 默认使用的响应语言",
-    type: "string",
-    placeholder: "例：chinese、english、japanese",
-    group: "behavior",
-  },
-  {
-    key: "outputStyle",
-    label: "输出风格",
-    desc: "调整系统提示的输出样式",
-    type: "string",
-    placeholder: "例：Explanatory、Concise",
-    group: "behavior",
-  },
-  {
-    key: "alwaysThinkingEnabled",
-    label: "始终启用扩展思考",
-    desc: "为所有会话默认启用扩展思考（Extended Thinking）",
-    type: "boolean",
-    group: "behavior",
-  },
-  {
-    key: "showTurnDuration",
-    label: "显示轮次耗时",
-    desc: "响应后显示耗时消息（如 \"Cooked for 1m 6s\"）",
-    type: "boolean",
-    group: "behavior",
-  },
-  // ── 会话 ──
-  {
-    key: "cleanupPeriodDays",
-    label: "会话清理周期（天）",
-    desc: "非活跃超过此天数的会话在启动时删除（默认 30，设为 0 立即清理）",
-    type: "number",
-    placeholder: "30",
-    group: "session",
-  },
-  {
-    key: "plansDirectory",
-    label: "计划文件目录",
-    desc: "自定义计划文件的存储位置，相对于项目根目录（默认 ~/.claude/plans）",
-    type: "string",
-    placeholder: "./plans",
-    group: "session",
-  },
-  // ── 权限与安全 ──
-  {
-    key: "forceLoginMethod",
-    label: "强制登录方式",
-    desc: "限制登录方式：claudeai = Claude.ai 账户，console = API 控制台",
-    type: "select",
-    options: [
-      { value: "", label: "不限制" },
-      { value: "claudeai", label: "claudeai — 仅 Claude.ai 账户" },
-      { value: "console", label: "console — 仅 API 控制台" },
-    ],
-    group: "security",
-  },
-  // ── UI 与体验 ──
-  {
-    key: "autoUpdatesChannel",
-    label: "更新频道",
-    desc: "stable = 延迟约一周的稳定版，latest = 最新版本",
-    type: "select",
-    options: [
-      { value: "", label: "默认（latest）" },
-      { value: "latest", label: "latest — 最新版本" },
-      { value: "stable", label: "stable — 稳定版（延迟约一周）" },
-    ],
-    group: "ui",
-  },
-  {
-    key: "spinnerTipsEnabled",
-    label: "微调器提示",
-    desc: "Claude 工作时在微调器中显示操作提示",
-    type: "boolean",
-    group: "ui",
-  },
-  {
-    key: "terminalProgressBarEnabled",
-    label: "终端进度条",
-    desc: "在支持的终端（Windows Terminal、iTerm2）中显示进度条",
-    type: "boolean",
-    group: "ui",
-  },
-  {
-    key: "prefersReducedMotion",
-    label: "减少动画",
-    desc: "减少或禁用 UI 动画（微调器、闪烁效果），辅助功能友好",
-    type: "boolean",
-    group: "ui",
-  },
-  {
-    key: "respectGitignore",
-    label: "遵守 .gitignore",
-    desc: "@ 文件自动完成时排除 .gitignore 匹配的文件（默认 true）",
-    type: "boolean",
-    group: "ui",
-  },
-  {
-    key: "includeCoAuthoredBy",
-    label: "Git 署名",
-    desc: "在 git 提交和 PR 中包含 Co-authored-by Claude 署名（默认 true）",
-    type: "boolean",
-    group: "ui",
-  },
-  // ── 高级 ──
-  {
-    key: "enableAllProjectMcpServers",
-    label: "自动批准项目 MCP",
-    desc: "自动批准项目 .mcp.json 中定义的所有 MCP 服务器",
-    type: "boolean",
-    group: "advanced",
-  },
-  {
-    key: "fastModePerSessionOptIn",
-    label: "快速模式按会话启用",
-    desc: "每个会话需要手动 /fast 启用快速模式，不跨会话持续",
-    type: "boolean",
-    group: "advanced",
-  },
-  {
-    key: "teammateMode",
-    label: "Agent Teams 模式",
-    desc: "队友显示方式：auto、in-process、tmux",
-    type: "select",
-    options: [
-      { value: "", label: "默认（auto）" },
-      { value: "auto", label: "auto — tmux/iTerm2 分割，否则 in-process" },
-      { value: "in-process", label: "in-process — 进程内" },
-      { value: "tmux", label: "tmux — tmux 面板" },
-    ],
-    group: "advanced",
-  },
+  { key: "model", label: "默认模型", desc: "别名或完整模型名", type: "select", options: [
+    { value: "", label: "default（按订阅层级）" },
+    { value: "opus", label: "opus — Opus 4.6" },
+    { value: "sonnet", label: "sonnet — Sonnet 4.6" },
+    { value: "haiku", label: "haiku — Haiku 4.5" },
+    { value: "opusplan", label: "opusplan — 计划 Opus + 执行 Sonnet" },
+    { value: "sonnet[1m]", label: "sonnet[1m] — 100万上下文" },
+    { value: "claude-opus-4-6", label: "claude-opus-4-6（固定版本）" },
+    { value: "claude-sonnet-4-6", label: "claude-sonnet-4-6（固定版本）" },
+    { value: "claude-haiku-4-5-20251001", label: "claude-haiku-4-5（固定版本）" },
+  ], placeholder: "opus / sonnet", group: "model" },
+  { key: "effortLevel", label: "努力级别", desc: "low=快速, medium=默认, high=深度推理", type: "select", options: [
+    { value: "", label: "默认" }, { value: "low", label: "low" }, { value: "medium", label: "medium" }, { value: "high", label: "high" },
+  ], group: "model" },
+  { key: "language", label: "响应语言", desc: "Claude 响应语言", type: "string", placeholder: "chinese", group: "behavior" },
+  { key: "outputStyle", label: "输出风格", desc: "系统提示输出样式", type: "string", placeholder: "Concise", group: "behavior" },
+  { key: "alwaysThinkingEnabled", label: "始终扩展思考", desc: "默认启用 Extended Thinking", type: "boolean", group: "behavior" },
+  { key: "showTurnDuration", label: "显示轮次耗时", desc: "响应后显示耗时", type: "boolean", group: "behavior" },
+  { key: "cleanupPeriodDays", label: "会话清理（天）", desc: "非活跃会话清理周期", type: "number", placeholder: "30", group: "session" },
+  { key: "plansDirectory", label: "计划文件目录", desc: "计划文件存储位置", type: "string", placeholder: "./plans", group: "session" },
+  { key: "forceLoginMethod", label: "强制登录方式", desc: "限制登录方式", type: "select", options: [
+    { value: "", label: "不限制" }, { value: "claudeai", label: "claudeai" }, { value: "console", label: "console" },
+  ], group: "security" },
+  { key: "autoUpdatesChannel", label: "更新频道", desc: "stable / latest", type: "select", options: [
+    { value: "", label: "默认 (latest)" }, { value: "latest", label: "latest" }, { value: "stable", label: "stable" },
+  ], group: "ui" },
+  { key: "spinnerTipsEnabled", label: "微调器提示", desc: "工作时显示操作提示", type: "boolean", group: "ui" },
+  { key: "terminalProgressBarEnabled", label: "终端进度条", desc: "支持的终端显示进度条", type: "boolean", group: "ui" },
+  { key: "prefersReducedMotion", label: "减少动画", desc: "减少 UI 动画", type: "boolean", group: "ui" },
+  { key: "respectGitignore", label: "遵守 .gitignore", desc: "排除 .gitignore 匹配文件", type: "boolean", group: "ui" },
+  { key: "includeCoAuthoredBy", label: "Git 署名", desc: "提交中包含 Co-authored-by", type: "boolean", group: "ui" },
+  { key: "enableAllProjectMcpServers", label: "自动批准项目 MCP", desc: "自动批准 .mcp.json 中的 MCP", type: "boolean", group: "advanced" },
+  { key: "fastModePerSessionOptIn", label: "快速模式按会话", desc: "每会话手动 /fast 启用", type: "boolean", group: "advanced" },
+  { key: "teammateMode", label: "Agent Teams 模式", desc: "队友显示方式", type: "select", options: [
+    { value: "", label: "默认 (auto)" }, { value: "auto", label: "auto" }, { value: "in-process", label: "in-process" }, { value: "tmux", label: "tmux" },
+  ], group: "advanced" },
 ];
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
+
+// ── Tab 定义 ────────────────────────────────────────────────────────
+type TabId = "global" | "model" | "skills" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
+
+const TABS: { id: TabId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { id: "global", label: "全局", icon: Settings2 },
+  { id: "model", label: "模型", icon: Cpu },
+  { id: "skills", label: "Skills", icon: Sparkles },
+  { id: "commands", label: "Commands", icon: Terminal },
+  { id: "mcp", label: "MCP", icon: Globe },
+  { id: "mcp-market", label: "MCP 市场", icon: Link },
+  { id: "hooks", label: "Hooks", icon: Webhook },
+  { id: "rules", label: "Rules", icon: BookOpen },
+  { id: "permissions", label: "权限", icon: Shield },
+  { id: "env", label: "环境变量", icon: Variable },
+  { id: "plugins", label: "插件", icon: Plug },
+  { id: "monitoring", label: "监控", icon: Activity },
+  { id: "about", label: "关于", icon: Info },
+];
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -246,172 +138,255 @@ function fmtNum(n: number): string {
   return String(n);
 }
 
-// ── Overview Panel ─────────────────────────────────────────────────
-function OverviewPanel({ overview }: { overview: ClaudeOverview }) {
-  const stats = [
-    { label: "CLI 版本", value: overview.cli_version, Icon: Terminal, color: "var(--accent)" },
-    { label: "总消息", value: fmtNum(overview.total_messages), Icon: MessageSquare, color: "#22c55e" },
-    { label: "工具调用", value: fmtNum(overview.total_tool_calls), Icon: Wrench, color: "#f59e0b" },
-    { label: "会话数", value: fmtNum(overview.total_sessions), Icon: Users, color: "#38bdf8" },
-    { label: "活跃天数", value: String(overview.active_days), Icon: Calendar, color: "#a78bfa" },
-  ];
+// ── localStorage cache ──────────────────────────────────────────────
+const CACHE_KEY_CONFIG = "tc_claude_config_cache";
+const CACHE_KEY_OVERVIEW = "tc_claude_overview_cache";
+function readCache<T>(key: string): T | null {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
+}
+function writeCache(key: string, data: unknown) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* quota */ }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════
+export default function ClaudeConfigPage() {
+  const [config, setConfig] = useState<ClaudeConfig | null>(() => readCache(CACHE_KEY_CONFIG));
+  const [overview, setOverview] = useState<ClaudeOverview | null>(() => readCache(CACHE_KEY_OVERVIEW));
+  const [hookEvents, setHookEvents] = useState<string[]>([]);
+  const [loading, setLoading] = useState(!readCache(CACHE_KEY_CONFIG));
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<TabId>("global");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Extra data for new tabs
+  const [skills, setSkills] = useState<SkillDetail[]>([]);
+  const [commands, setCommands] = useState<CommandInfo[]>([]);
+  const [rules, setRules] = useState<RuleInfo[]>([]);
+  const [systemInfo, setSystemInfo] = useState<ClaudeSystemInfo | null>(null);
+  const [claudeMd, setClaudeMd] = useState("");
+
+  const load = useCallback(async () => {
+    if (!config) setLoading(true);
+    setError("");
+    try {
+      const [cfg, events, ov] = await Promise.all([
+        api.claudeConfig.get(),
+        api.claudeConfig.hookEvents(),
+        api.claudeConfig.overview(),
+      ]);
+      setConfig(cfg); setHookEvents(events); setOverview(ov);
+      writeCache(CACHE_KEY_CONFIG, cfg); writeCache(CACHE_KEY_OVERVIEW, ov);
+    } catch (e) {
+      if (!config) setError(e instanceof Error ? e.message : "加载失败");
+    } finally { setLoading(false); }
+    // Load extra data (non-blocking)
+    api.claudeConfig.listSkills().then(setSkills).catch(() => {});
+    api.claudeConfig.listCommands().then(setCommands).catch(() => {});
+    api.claudeConfig.listRules().then(setRules).catch(() => {});
+    api.claudeConfig.systemInfo().then(setSystemInfo).catch(() => {});
+    api.claudeConfig.getClaudeMd().then(r => setClaudeMd(r.content)).catch(() => {});
+  }, [config]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // ── Tab badge counts ──
+  const tabCounts: Partial<Record<TabId, number>> = useMemo(() => ({
+    skills: skills.length,
+    commands: commands.length,
+    mcp: overview?.mcp_servers.length,
+    hooks: config ? Object.keys(config.hooks).length : undefined,
+    rules: rules.length,
+    plugins: config ? Object.keys(config.enabled_plugins).length : undefined,
+  }), [skills, commands, overview, config, rules]);
 
   return (
-    <div className="space-y-4">
-      {/* Stats cards */}
-      <div className="grid grid-cols-5 gap-3">
-        {stats.map(({ label, value, Icon, color }) => (
-          <div key={label}
-            className="bg-app-secondary border border-app rounded-xl px-3 py-3 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[1px]"
-              style={{ background: `linear-gradient(90deg, ${color}, transparent 60%)` }} />
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[9px] uppercase tracking-widest font-semibold text-app-tertiary">{label}</span>
-              <div className="w-6 h-6 rounded-md flex items-center justify-center"
-                style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-                <Icon size={12} style={{ color }} />
-              </div>
-            </div>
-            <p className="text-lg font-bold tabular-nums text-app leading-none">{value}</p>
-          </div>
-        ))}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ── 顶栏 ── */}
+      <div className="shrink-0 px-6 pt-4 pb-2 flex items-center gap-4" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex-1">
+          <h1 className="text-[15px] font-bold text-app">Claude Code 配置中心</h1>
+          <p className="text-[10px] text-app-tertiary font-mono">
+            {overview?.home_path || "~/.claude"} · {overview?.cli_version || "..."}
+          </p>
+        </div>
+        {/* 搜索 */}
+        <div className="relative">
+          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-app-tertiary" />
+          <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            placeholder="搜索配置项..." spellCheck={false}
+            className="pl-7 pr-3 py-1.5 text-[11px] bg-app-secondary border border-app rounded-lg w-48 outline-none focus:border-accent/60 text-app placeholder:text-app-tertiary" />
+        </div>
+        <button onClick={load}
+          className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg border border-app text-app-tertiary hover:text-app transition-colors">
+          <RotateCcw size={11} /> 刷新
+        </button>
       </div>
 
-      {/* Activity chart + Side info */}
-      <div className="grid grid-cols-3 gap-3">
-        {/* Activity chart */}
-        <div className="col-span-2 bg-app-secondary border border-app rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={13} className="text-app-tertiary" />
-              <span className="text-xs font-semibold text-app">每日活动</span>
-            </div>
-            <span className="text-[9px] text-app-tertiary font-mono">
-              {overview.first_active_day} ~ {overview.last_active_day}
-            </span>
-          </div>
-          <ActivityChart data={overview.daily_activity} />
-        </div>
+      {/* ── Tab 栏 ── */}
+      <div className="shrink-0 px-6 flex items-center gap-1 overflow-x-auto py-2" style={{ borderBottom: "1px solid var(--border)" }}>
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const count = tabCounts[tab.id];
+          const active = activeTab === tab.id;
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all shrink-0 whitespace-nowrap",
+                active
+                  ? "bg-accent/10 text-accent font-medium"
+                  : "text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03]"
+              )}>
+              <Icon size={12} />
+              {tab.label}
+              {count !== undefined && count > 0 && (
+                <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded-full",
+                  active ? "bg-accent/20 text-accent" : "bg-app-tertiary/20")}>{count}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Right column: plugins + skills + scripts */}
-        <div className="space-y-3">
-          {/* Installed plugins */}
-          <div className="bg-app-secondary border border-app rounded-xl p-3">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Plug size={11} className="text-accent" />
-              <span className="text-[10px] font-semibold text-app">已安装插件</span>
-              <span className="text-[9px] font-mono text-app-tertiary ml-auto">{overview.installed_plugins.length}</span>
-            </div>
-            {overview.installed_plugins.length === 0 ? (
-              <p className="text-[10px] text-app-tertiary">暂无</p>
-            ) : (
-              <div className="space-y-1.5">
-                {overview.installed_plugins.map(p => (
-                  <div key={p.plugin_id} className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded bg-accent/10 flex items-center justify-center text-[8px] font-bold text-accent shrink-0">
-                      {p.name[0].toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-medium text-app truncate">{p.name}</div>
-                      <div className="text-[8px] text-app-tertiary font-mono">
-                        v{p.version} {p.publisher && `@${p.publisher}`}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* ── 内容区 ── */}
+      <div className="flex-1 overflow-y-auto p-6">
+        {error && (
+          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-xs text-red-400 mb-4">
+            <AlertTriangle size={14} /> {error}
           </div>
+        )}
+        {loading && !config && (
+          <div className="flex items-center justify-center h-40">
+            <p className="text-app-tertiary text-xs animate-pulse">加载配置信息...</p>
+          </div>
+        )}
 
-          {/* Skills */}
-          <div className="bg-app-secondary border border-app rounded-xl p-3">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles size={11} className="text-yellow-400" />
-              <span className="text-[10px] font-semibold text-app">Skills</span>
-              <span className="text-[9px] font-mono text-app-tertiary ml-auto">{overview.skills.length}</span>
-            </div>
-            {overview.skills.length === 0 ? (
-              <p className="text-[10px] text-app-tertiary">暂无自定义 skill</p>
-            ) : (
-              <div className="flex flex-wrap gap-1">
-                {overview.skills.map(s => (
-                  <span key={s.name}
-                    className="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-mono">
-                    {s.name}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* MCP Servers */}
-          <div className="bg-app-secondary border border-app rounded-xl p-3">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Globe size={11} className="text-blue-400" />
-              <span className="text-[10px] font-semibold text-app">MCP 服务器</span>
-              <span className="text-[9px] font-mono text-app-tertiary ml-auto">{overview.mcp_servers.length}</span>
-            </div>
-            {overview.mcp_servers.length === 0 ? (
-              <p className="text-[10px] text-app-tertiary">暂无 MCP 服务器</p>
-            ) : (
-              <div className="space-y-1.5">
-                {overview.mcp_servers.map(s => (
-                  <div key={s.name} className="flex items-center gap-2">
-                    <div className={cn("w-1.5 h-1.5 rounded-full shrink-0",
-                      s.status === "connected" ? "bg-green-400" :
-                      s.status === "needs_auth" ? "bg-yellow-400" : "bg-red-400")} />
-                    <span className="text-[10px] text-app truncate flex-1">{s.name}</span>
-                    <span className="text-[8px] text-app-tertiary font-mono">{s.transport}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Hook scripts + Projects */}
-          <div className="bg-app-secondary border border-app rounded-xl p-3">
-            <div className="flex items-center gap-1.5 mb-2">
-              <FolderOpen size={11} className="text-green-400" />
-              <span className="text-[10px] font-semibold text-app">项目记忆</span>
-              <span className="text-[9px] font-mono text-app-tertiary ml-auto">{overview.projects.length}</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {overview.hook_scripts.map(h => (
-                <span key={h.name}
-                  className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 font-mono">
-                  {h.name}
-                </span>
-              ))}
-            </div>
-            {overview.projects.length > 0 && (
-              <div className="mt-2 flex items-center gap-2 text-[9px] text-app-tertiary">
-                <span>{overview.projects.filter(p => p.has_memory).length} 个有记忆</span>
-                <span>{overview.projects.filter(p => p.has_claude_md).length} 个有 CLAUDE.md</span>
-              </div>
-            )}
-          </div>
-        </div>
+        {activeTab === "global" && (
+          <TabGlobal config={config} overview={overview} onUpdate={setConfig}
+            claudeMd={claudeMd} onClaudeMdChange={setClaudeMd} />
+        )}
+        {activeTab === "model" && config && (
+          <TabModel config={config} onUpdate={setConfig} />
+        )}
+        {activeTab === "skills" && <TabSkills skills={skills} />}
+        {activeTab === "commands" && <TabCommands commands={commands} />}
+        {activeTab === "mcp" && (
+          <TabMcp overview={overview} onOverviewUpdate={setOverview} />
+        )}
+        {activeTab === "mcp-market" && <McpMarketEmbed />}
+        {activeTab === "hooks" && config && (
+          <TabHooks config={config} hookEvents={hookEvents} onUpdate={setConfig} />
+        )}
+        {activeTab === "rules" && <TabRules rules={rules} />}
+        {activeTab === "permissions" && config && (
+          <TabPermissions config={config} onUpdate={setConfig} />
+        )}
+        {activeTab === "env" && <TabEnvVars />}
+        {activeTab === "plugins" && config && (
+          <TabPlugins config={config} overview={overview} onUpdate={setConfig} />
+        )}
+        {activeTab === "monitoring" && overview && <TabMonitoring overview={overview} />}
+        {activeTab === "about" && <TabAbout systemInfo={systemInfo} overview={overview} />}
       </div>
     </div>
   );
 }
 
-// ── Activity Chart (mini bar chart, last 60 days) ──────────────────
+// ═══════════════════════════════════════════════════════════════════
+// TAB: 全局配置
+// ═══════════════════════════════════════════════════════════════════
+function TabGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange }: {
+  config: ClaudeConfig | null; overview: ClaudeOverview | null;
+  onUpdate: (c: ClaudeConfig) => void;
+  claudeMd: string; onClaudeMdChange: (s: string) => void;
+}) {
+  const [mdSaving, setMdSaving] = useState(false);
+  const [mdSaved, setMdSaved] = useState(false);
+
+  const handleSaveMd = async () => {
+    setMdSaving(true);
+    try {
+      await api.claudeConfig.updateClaudeMd(claudeMd);
+      setMdSaved(true); setTimeout(() => setMdSaved(false), 2000);
+    } finally { setMdSaving(false); }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Overview stats */}
+      {overview && (
+        <div className="grid grid-cols-5 gap-3">
+          {[
+            { label: "CLI 版本", value: overview.cli_version, Icon: Terminal, color: "var(--accent)" },
+            { label: "总消息", value: fmtNum(overview.total_messages), Icon: MessageSquare, color: "#22c55e" },
+            { label: "工具调用", value: fmtNum(overview.total_tool_calls), Icon: Wrench, color: "#f59e0b" },
+            { label: "会话数", value: fmtNum(overview.total_sessions), Icon: Users, color: "#38bdf8" },
+            { label: "活跃天数", value: String(overview.active_days), Icon: Calendar, color: "#a78bfa" },
+          ].map(({ label, value, Icon, color }) => (
+            <div key={label} className="bg-app-secondary border border-app rounded-xl px-3 py-3 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, ${color}, transparent 60%)` }} />
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] uppercase tracking-widest font-semibold text-app-tertiary">{label}</span>
+                <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+                  <Icon size={12} style={{ color }} />
+                </div>
+              </div>
+              <p className="text-lg font-bold tabular-nums text-app leading-none">{value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Activity chart */}
+      {overview && overview.daily_activity.length > 0 && (
+        <div className="bg-app-secondary border border-app rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 size={13} className="text-app-tertiary" />
+            <span className="text-xs font-semibold text-app">每日活动</span>
+            <span className="text-[9px] text-app-tertiary font-mono ml-auto">{overview.first_active_day} ~ {overview.last_active_day}</span>
+          </div>
+          <ActivityChart data={overview.daily_activity} />
+        </div>
+      )}
+
+      {/* 全局 CLAUDE.md */}
+      <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText size={13} className="text-accent" />
+            <span className="text-xs font-semibold text-app">全局 CLAUDE.md</span>
+            <span className="text-[9px] text-app-tertiary font-mono">~/.claude/CLAUDE.md</span>
+          </div>
+          <button onClick={handleSaveMd} disabled={mdSaving}
+            className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white transition-colors">
+            {mdSaved ? <Check size={10} /> : <Save size={10} />}
+            {mdSaving ? "保存中..." : mdSaved ? "已保存" : "保存"}
+          </button>
+        </div>
+        <textarea value={claudeMd} onChange={e => onClaudeMdChange(e.target.value)}
+          spellCheck={false} rows={8}
+          className="w-full bg-app border border-app rounded-lg px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed focus:border-accent/60" />
+      </div>
+
+      {/* 常用设置 */}
+      {config && <CommonSettingsGrid config={config} onUpdate={onUpdate} />}
+
+      {/* 其他配置字段 */}
+      {config && <OtherFieldsGrid config={config} onUpdate={onUpdate} />}
+    </div>
+  );
+}
+
 function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
-  // Show last 60 entries
   const recent = useMemo(() => data.slice(-60), [data]);
   const maxMsg = useMemo(() => Math.max(1, ...recent.map(d => d.message_count)), [recent]);
   const maxTool = useMemo(() => Math.max(1, ...recent.map(d => d.tool_call_count)), [recent]);
-
-  if (recent.length === 0) {
-    return <div className="text-[10px] text-app-tertiary text-center py-6">暂无活动数据</div>;
-  }
-
+  if (recent.length === 0) return <div className="text-[10px] text-app-tertiary text-center py-6">暂无</div>;
   const H = 80;
   const barW = Math.max(3, Math.min(8, (600 - recent.length) / recent.length));
   const gap = 1;
   const W = recent.length * (barW + gap);
-
   return (
     <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${W} ${H + 18}`} width={W} height={H + 18} className="block">
@@ -423,1053 +398,84 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
           return (
             <g key={d.date}>
               <title>{`${d.date}\n消息: ${d.message_count}\n工具: ${d.tool_call_count}\n会话: ${d.session_count}`}</title>
-              {/* Messages bar */}
-              <rect x={x} y={H - msgH} width={barW} height={msgH}
-                rx={1} fill={isToday ? "#22c55e" : "#4477ff"} opacity={0.7} />
-              {/* Tool calls bar (overlaid, shorter) */}
-              <rect x={x} y={H - toolH} width={barW} height={toolH}
-                rx={1} fill={isToday ? "#86efac" : "#f59e0b"} opacity={0.5} />
-              {/* Date label (every 7th) */}
-              {i % 7 === 0 && (
-                <text x={x + barW / 2} y={H + 12} textAnchor="middle"
-                  fill="var(--text-tertiary)" fontSize="6" fontFamily="monospace">
-                  {d.date.slice(5)}
-                </text>
-              )}
+              <rect x={x} y={H - msgH} width={barW} height={msgH} rx={1} fill={isToday ? "#22c55e" : "#4477ff"} opacity={0.7} />
+              <rect x={x} y={H - toolH} width={barW} height={toolH} rx={1} fill={isToday ? "#86efac" : "#f59e0b"} opacity={0.5} />
+              {i % 7 === 0 && <text x={x + barW / 2} y={H + 12} textAnchor="middle" fill="var(--text-tertiary)" fontSize="6" fontFamily="monospace">{d.date.slice(5)}</text>}
             </g>
           );
         })}
       </svg>
       <div className="flex gap-4 mt-1.5">
-        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary">
-          <div className="w-2 h-2 rounded-sm" style={{ background: "#4477ff", opacity: 0.7 }} />
-          消息
-        </div>
-        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary">
-          <div className="w-2 h-2 rounded-sm" style={{ background: "#f59e0b", opacity: 0.5 }} />
-          工具调用
-        </div>
+        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary"><div className="w-2 h-2 rounded-sm" style={{ background: "#4477ff", opacity: 0.7 }} />消息</div>
+        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary"><div className="w-2 h-2 rounded-sm" style={{ background: "#f59e0b", opacity: 0.5 }} />工具调用</div>
       </div>
     </div>
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────────
-// localStorage 缓存 key
-const CACHE_KEY_CONFIG = "tc_claude_config_cache";
-const CACHE_KEY_OVERVIEW = "tc_claude_overview_cache";
-
-function readCache<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-function writeCache(key: string, data: unknown) {
-  try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* quota */ }
-}
-
-export default function ClaudeConfig() {
-  // 优先从缓存初始化，避免白屏等待
-  const [config, setConfig] = useState<ClaudeConfig | null>(() => readCache(CACHE_KEY_CONFIG));
-  const [overview, setOverview] = useState<ClaudeOverview | null>(() => readCache(CACHE_KEY_OVERVIEW));
-  const [hookEvents, setHookEvents] = useState<string[]>([]);
-  const [loading, setLoading] = useState(!readCache(CACHE_KEY_CONFIG));
-  const [error, setError] = useState("");
-  const [activeSection, setActiveSection] = useState<Section>("global-config");
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const load = useCallback(async () => {
-    // 仅在无缓存时显示 loading
-    if (!config) setLoading(true);
-    setError("");
-    try {
-      const [cfg, events, ov] = await Promise.all([
-        api.claudeConfig.get(),
-        api.claudeConfig.hookEvents(),
-        api.claudeConfig.overview(),
-      ]);
-      setConfig(cfg);
-      setHookEvents(events);
-      setOverview(ov);
-      writeCache(CACHE_KEY_CONFIG, cfg);
-      writeCache(CACHE_KEY_OVERVIEW, ov);
-    } catch (e) {
-      // 有缓存时静默失败，无缓存时才显示错误
-      if (!config) setError(e instanceof Error ? e.message : "加载失败");
-    } finally {
-      setLoading(false);
-    }
-  }, [config]);
-
-  useEffect(() => { load(); }, [load]);
-
-  const sections: { id: Section; label: string; Icon: typeof Webhook; count?: number }[] = useMemo(() => [
-    { id: "global-config", label: "全局配置", Icon: Layers },
-    { id: "mcp",         label: "MCP 服务", Icon: Globe,    count: overview?.mcp_servers.length },
-    { id: "mcp-market",  label: "MCP 市场", Icon: Link },
-    { id: "hooks",       label: "Hooks",    Icon: Webhook,  count: config ? Object.keys(config.hooks).length : undefined },
-    { id: "plugins",     label: "插件",     Icon: Plug,     count: config ? Object.keys(config.enabled_plugins).length : undefined },
-    { id: "permissions", label: "权限",     Icon: Shield },
-    { id: "settings",    label: "常用设置", Icon: SlidersHorizontal },
-    { id: "other",       label: "其他",     Icon: Settings2 },
-  ], [overview, config]);
-
-  // Scroll-spy: track which section is in view
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const handler = () => {
-      const sectionIds: Section[] = ["global-config", "mcp", "mcp-market", "hooks", "plugins", "permissions", "settings", "other"];
-      for (const id of sectionIds) {
-        const el = document.getElementById(`section-${id}`);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const containerRect = container.getBoundingClientRect();
-          if (rect.top <= containerRect.top + 120) {
-            setActiveSection(id);
-          }
-        }
-      }
-    };
-    container.addEventListener("scroll", handler, { passive: true });
-    return () => container.removeEventListener("scroll", handler);
-  }, []);
-
-  const scrollToSection = (id: Section) => {
-    const el = document.getElementById(`section-${id}`);
-    if (el && scrollRef.current) {
-      const containerTop = scrollRef.current.getBoundingClientRect().top;
-      const elTop = el.getBoundingClientRect().top;
-      scrollRef.current.scrollTop += elTop - containerTop - 16;
-    }
-    setActiveSection(id);
-  };
-
-  return (
-    <div className="flex-1 flex overflow-hidden">
-      {/* ── Left nav (fixed) ── */}
-      <div className="w-[180px] shrink-0 flex flex-col overflow-y-auto py-4 px-3 space-y-1"
-           style={{ borderRight: "1px solid var(--border)" }}>
-        {/* Title */}
-        <div className="px-2 pb-3">
-          <h1 className="text-[13px] font-semibold text-app">Claude Code</h1>
-          <p className="text-[10px] text-app-tertiary mt-0.5 font-mono truncate">
-            {overview ? overview.home_path : "..."}
-          </p>
-        </div>
-
-        {/* Nav items */}
-        {sections.map(({ id, label, Icon, count }) => (
-          <button
-            key={id}
-            onClick={() => scrollToSection(id)}
-            className={cn(
-              "flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11px] transition-all w-full text-left",
-              activeSection === id
-                ? "bg-accent/10 text-accent font-medium"
-                : "text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03]"
-            )}
-          >
-            <Icon size={13} className="shrink-0" />
-            <span className="flex-1 truncate">{label}</span>
-            {count !== undefined && (
-              <span className={cn(
-                "text-[9px] font-mono px-1.5 py-0.5 rounded-full",
-                activeSection === id ? "bg-accent/20 text-accent" : "bg-app-tertiary/20"
-              )}>
-                {count}
-              </span>
-            )}
-          </button>
-        ))}
-
-        <div className="flex-1" />
-
-        {/* Refresh */}
-        <button onClick={load}
-          className="flex items-center gap-1.5 px-2.5 py-2 text-[11px] rounded-lg text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03] transition-colors w-full">
-          <RotateCcw size={12} />
-          刷新配置
-        </button>
-      </div>
-
-      {/* ── Main content (scrollable, all sections) ── */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-8">
-        {/* Error */}
-        {error && (
-          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-xs text-red-400">
-            <AlertTriangle size={14} />
-            {error}
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading && !config && (
-          <div className="flex items-center justify-center h-40">
-            <p className="text-app-tertiary text-xs animate-pulse">加载 Claude 信息...</p>
-          </div>
-        )}
-
-        {/* Overview */}
-        {overview && <OverviewPanel overview={overview} />}
-
-        {/* 全局配置（独立数据源，不依赖 config） */}
-        <div id="section-global-config">
-          <SectionHeader icon={Layers} title="全局配置" desc="API、模型、功能开关、权限、通知等可视化配置管理" />
-          <GlobalConfigPanel />
-        </div>
-
-        {config && (
-          <>
-            {/* MCP 服务 */}
-            <div id="section-mcp">
-              <SectionHeader icon={Globe} title="MCP 服务" desc="已连接的 MCP 服务器" />
-              <McpEditor overview={overview} onOverviewUpdate={setOverview} />
-            </div>
-
-            {/* MCP 市场 */}
-            <div id="section-mcp-market">
-              <SectionHeader icon={Link} title="MCP 市场" desc="一键安装推荐的 MCP 服务" />
-              <McpMarketEmbed />
-            </div>
-
-            {/* Hooks */}
-            <div id="section-hooks">
-              <SectionHeader icon={Webhook} title="Hooks" desc="Claude Code 生命周期事件钩子" />
-              <HooksEditor config={config} hookEvents={hookEvents} onUpdate={setConfig} />
-            </div>
-
-            {/* 插件 */}
-            <div id="section-plugins">
-              <SectionHeader icon={Plug} title="插件" desc="已安装的 Claude Code 插件" />
-              <PluginsEditor config={config} overview={overview} onUpdate={setConfig} />
-            </div>
-
-            {/* 权限 */}
-            <div id="section-permissions">
-              <SectionHeader icon={Shield} title="权限" desc="工具和文件访问权限控制" />
-              <PermissionsEditor config={config} onUpdate={setConfig} />
-            </div>
-
-            {/* 常用设置 */}
-            <div id="section-settings">
-              <SectionHeader icon={SlidersHorizontal} title="常用设置" desc="模型、语言、思考模式等常用配置" />
-              <CommonSettingsEditor config={config} onUpdate={setConfig} />
-            </div>
-
-            {/* 其他 */}
-            <div id="section-other">
-              <SectionHeader icon={Settings2} title="其他配置" desc="settings.json 中的其他字段（不含常用设置项）" />
-              <OtherEditor config={config} onUpdate={setConfig} />
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SectionHeader({ icon: Icon, title, desc }: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="flex items-center gap-2.5 mb-4 pb-3" style={{ borderBottom: "1px solid var(--border)" }}>
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-           style={{ background: "var(--accent-subtle)" }}>
-        <Icon size={14} className="text-accent" />
-      </div>
-      <div>
-        <h2 className="text-sm font-semibold text-app">{title}</h2>
-        <p className="text-[10px] text-app-tertiary">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-// ── MCP Editor ─────────────────────────────────────────────────────
-function McpEditor({ overview, onOverviewUpdate }: {
-  overview: ClaudeOverview | null;
-  onOverviewUpdate: (o: ClaudeOverview) => void;
-}) {
-  const [servers, setServers] = useState<McpServer[]>(overview?.mcp_servers ?? []);
-  const [refreshing, setRefreshing] = useState(false);
-  const [removing, setRemoving] = useState<string | null>(null);
-  const [showAdd, setShowAdd] = useState(false);
-  const [addForm, setAddForm] = useState({ name: "", url: "", transport: "http", scope: "user" });
-  const [addError, setAddError] = useState("");
-  const [adding, setAdding] = useState(false);
-
-  useEffect(() => {
-    if (overview) setServers(overview.mcp_servers);
-  }, [overview]);
-
-  const refresh = async () => {
-    setRefreshing(true);
-    try {
-      const list = await api.claudeConfig.listMcp();
-      setServers(list);
-      if (overview) onOverviewUpdate({ ...overview, mcp_servers: list });
-    } finally { setRefreshing(false); }
-  };
-
-  const handleRemove = async (name: string) => {
-    setRemoving(name);
-    try {
-      const res = await api.claudeConfig.removeMcp(name);
-      setServers(res.servers);
-      if (overview) onOverviewUpdate({ ...overview, mcp_servers: res.servers });
-    } finally { setRemoving(null); }
-  };
-
-  const handleAdd = async () => {
-    if (!addForm.name.trim() || !addForm.url.trim()) return;
-    setAdding(true); setAddError("");
-    try {
-      const res = await api.claudeConfig.addMcp({
-        name: addForm.name.trim(),
-        url: addForm.url.trim(),
-        transport: addForm.transport,
-        scope: addForm.scope,
-      });
-      setServers(res.servers);
-      if (overview) onOverviewUpdate({ ...overview, mcp_servers: res.servers });
-      setAddForm({ name: "", url: "", transport: "http", scope: "user" });
-      setShowAdd(false);
-    } catch (e) {
-      setAddError(e instanceof Error ? e.message : "添加失败");
-    } finally { setAdding(false); }
-  };
-
-  const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-    connected:  { label: "已连接", color: "#22c55e", bg: "bg-green-500/10" },
-    needs_auth: { label: "需认证", color: "#f59e0b", bg: "bg-yellow-500/10" },
-    error:      { label: "错误",   color: "#ef4444", bg: "bg-red-500/10" },
-    unknown:    { label: "未知",   color: "#7878a8", bg: "bg-app-tertiary/20" },
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] text-app-tertiary">
-          MCP (Model Context Protocol) 服务器为 Claude 提供外部工具和数据源。通过 <code className="text-accent">claude mcp add</code> 管理。
-        </p>
-        <div className="flex gap-2">
-          <button onClick={refresh} disabled={refreshing}
-            className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app transition-colors">
-            <RotateCcw size={10} className={refreshing ? "animate-spin" : ""} />
-            刷新状态
-          </button>
-          <button onClick={() => setShowAdd(!showAdd)}
-            className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white transition-colors">
-            <Plus size={10} />
-            添加服务器
-          </button>
-        </div>
-      </div>
-
-      {/* Add form */}
-      {showAdd && (
-        <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
-          <h3 className="text-xs font-semibold text-app">添加 MCP 服务器</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[9px] text-app-tertiary uppercase tracking-wider block mb-1">名称</label>
-              <input value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="my-server" spellCheck={false}
-                className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
-            </div>
-            <div>
-              <label className="text-[9px] text-app-tertiary uppercase tracking-wider block mb-1">URL</label>
-              <input value={addForm.url} onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))}
-                placeholder="https://mcp.example.com/mcp" spellCheck={false}
-                className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
-            </div>
-            <div>
-              <label className="text-[9px] text-app-tertiary uppercase tracking-wider block mb-1">传输协议</label>
-              <select value={addForm.transport} onChange={e => setAddForm(f => ({ ...f, transport: e.target.value }))}
-                className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] text-app outline-none focus:border-accent/60">
-                <option value="http">HTTP</option>
-                <option value="sse">SSE</option>
-                <option value="stdio">Stdio</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-[9px] text-app-tertiary uppercase tracking-wider block mb-1">作用域</label>
-              <select value={addForm.scope} onChange={e => setAddForm(f => ({ ...f, scope: e.target.value }))}
-                className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] text-app outline-none focus:border-accent/60">
-                <option value="user">全局 (user)</option>
-                <option value="project">项目 (project)</option>
-              </select>
-            </div>
-          </div>
-          {addError && <p className="text-[11px] text-red-400">{addError}</p>}
-          <div className="flex gap-2">
-            <button onClick={handleAdd} disabled={adding || !addForm.name.trim() || !addForm.url.trim()}
-              className={cn("flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-md font-medium transition-all",
-                addForm.name.trim() && addForm.url.trim()
-                  ? "bg-accent hover:bg-accent-hover text-white"
-                  : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-              {adding ? "添加中..." : "添加"}
-            </button>
-            <button onClick={() => { setShowAdd(false); setAddError(""); }}
-              className="text-[11px] text-app-tertiary hover:text-app px-3 py-1.5">
-              取消
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Server list */}
-      {servers.length === 0 ? (
-        <div className="text-center py-8 text-app-tertiary text-xs">
-          <Unplug size={24} className="mx-auto mb-2 opacity-30" />
-          暂无 MCP 服务器
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-          {servers.map(s => {
-            const sm = STATUS_META[s.status] ?? STATUS_META.unknown;
-            return (
-              <div key={s.name}
-                className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center gap-3">
-                {/* Status dot */}
-                <div className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ background: sm.color, boxShadow: s.status === "connected" ? `0 0 6px ${sm.color}60` : undefined }} />
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-app">{s.name}</span>
-                    <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full", sm.bg)}
-                      style={{ color: sm.color }}>
-                      {sm.label}
-                    </span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-app-tertiary/20 text-app-tertiary font-mono">
-                      {s.transport}
-                    </span>
-                  </div>
-                  {s.url && (
-                    <div className="flex items-center gap-1 mt-1">
-                      <Link size={9} className="text-app-tertiary shrink-0" />
-                      <span className="text-[10px] font-mono text-app-tertiary truncate">{s.url}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Remove */}
-                <button onClick={() => handleRemove(s.name)} disabled={removing === s.name}
-                  className="text-app-tertiary hover:text-red-400 transition-colors p-1.5 rounded-md hover:bg-red-500/10"
-                  title="移除服务器">
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Hooks Editor ───────────────────────────────────────────────────
-function HooksEditor({ config, hookEvents, onUpdate }: {
-  config: ClaudeConfig;
-  hookEvents: string[];
-  onUpdate: (c: ClaudeConfig) => void;
-}) {
-  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+// ── 常用设置网格（展开，不折叠） ─────────────────────────────────────
+function CommonSettingsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
   const [saving, setSaving] = useState<string | null>(null);
-  const [editState, setEditState] = useState<Record<string, HookRule[]>>({});
-
-  const getEditRules = (event: string): HookRule[] =>
-    editState[event] ?? config.hooks[event] ?? [];
-
-  const setEditRules = (event: string, rules: HookRule[]) =>
-    setEditState(prev => ({ ...prev, [event]: rules }));
-
-  const isDirty = (event: string) => {
-    const edited = editState[event];
-    if (!edited) return false;
-    return JSON.stringify(edited) !== JSON.stringify(config.hooks[event] ?? []);
-  };
-
-  const handleSave = async (event: string) => {
-    setSaving(event);
-    try {
-      const updated = await api.claudeConfig.updateHooks(event, getEditRules(event));
-      onUpdate(updated);
-      setEditState(prev => { const n = { ...prev }; delete n[event]; return n; });
-    } finally { setSaving(null); }
-  };
-
-  const handleDelete = async (event: string) => {
-    setSaving(event);
-    try {
-      const updated = await api.claudeConfig.deleteHookEvent(event);
-      onUpdate(updated);
-      setEditState(prev => { const n = { ...prev }; delete n[event]; return n; });
-    } finally { setSaving(null); }
-  };
-
-  const addRule = (event: string) => {
-    const rules = [...getEditRules(event)];
-    rules.push({ matcher: "", hooks: [{ type: "command", command: "", timeout: 5 }] });
-    setEditRules(event, rules);
-    setExpandedEvent(event);
-  };
-
-  const removeRule = (event: string, ruleIdx: number) => {
-    setEditRules(event, getEditRules(event).filter((_, i) => i !== ruleIdx));
-  };
-
-  const updateRule = (event: string, ruleIdx: number, field: "matcher", value: string) => {
-    const rules = [...getEditRules(event)];
-    rules[ruleIdx] = { ...rules[ruleIdx], [field]: value };
-    setEditRules(event, rules);
-  };
-
-  const addHookEntry = (event: string, ruleIdx: number) => {
-    const rules = [...getEditRules(event)];
-    rules[ruleIdx] = {
-      ...rules[ruleIdx],
-      hooks: [...rules[ruleIdx].hooks, { type: "command", command: "", timeout: 5 }],
-    };
-    setEditRules(event, rules);
-  };
-
-  const removeHookEntry = (event: string, ruleIdx: number, hookIdx: number) => {
-    const rules = [...getEditRules(event)];
-    rules[ruleIdx] = {
-      ...rules[ruleIdx],
-      hooks: rules[ruleIdx].hooks.filter((_, i) => i !== hookIdx),
-    };
-    setEditRules(event, rules);
-  };
-
-  const updateHookEntry = (event: string, ruleIdx: number, hookIdx: number, updates: Partial<HookEntry>) => {
-    const rules = [...getEditRules(event)];
-    const hooksCopy = [...rules[ruleIdx].hooks];
-    hooksCopy[hookIdx] = { ...hooksCopy[hookIdx], ...updates };
-    rules[ruleIdx] = { ...rules[ruleIdx], hooks: hooksCopy };
-    setEditRules(event, rules);
-  };
-
-  return (
-    <div className="space-y-2">
-      <p className="text-[11px] text-app-tertiary mb-3">
-        Hook 在 Claude Code 事件触发时执行外部命令。每个事件可配置多个规则，每个规则可包含 matcher（工具名过滤）和多个命令。
-      </p>
-
-      {hookEvents.map(event => {
-        const meta = EVENT_LABELS[event] ?? { label: event, desc: "" };
-        const rules = getEditRules(event);
-        const hasRules = rules.length > 0;
-        const expanded = expandedEvent === event;
-        const dirty = isDirty(event);
-
-        return (
-          <div key={event}
-            className={cn(
-              "rounded-xl border overflow-hidden transition-colors",
-              hasRules ? "border-app bg-app-secondary" : "border-app/50 bg-app-secondary/50"
-            )}>
-            <button
-              onClick={() => setExpandedEvent(expanded ? null : event)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
-            >
-              {expanded
-                ? <ChevronDown size={13} className="text-app-tertiary shrink-0" />
-                : <ChevronRight size={13} className="text-app-tertiary shrink-0" />}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-app">{meta.label}</span>
-                  <span className="text-[9px] font-mono text-app-tertiary">{event}</span>
-                  {hasRules && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-mono">
-                      {rules.length} 规则
-                    </span>
-                  )}
-                  {dirty && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">
-                      未保存
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-app-tertiary mt-0.5">{meta.desc}</p>
-              </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); addRule(event); }}
-                className="text-app-tertiary hover:text-accent transition-colors p-1"
-                title="添加规则"
-              >
-                <Plus size={14} />
-              </button>
-            </button>
-
-            {expanded && (
-              <div className="border-t border-app px-4 py-3 space-y-3">
-                {rules.length === 0 && (
-                  <p className="text-[11px] text-app-tertiary text-center py-3">暂无规则，点击 + 添加</p>
-                )}
-
-                {rules.map((rule, ruleIdx) => (
-                  <div key={ruleIdx} className="bg-app rounded-lg border border-app/50 p-3 space-y-2.5">
-                    <div className="flex items-center gap-2">
-                      <label className="text-[10px] text-app-tertiary shrink-0 w-14">Matcher</label>
-                      <input
-                        value={rule.matcher}
-                        onChange={e => updateRule(event, ruleIdx, "matcher", e.target.value)}
-                        placeholder="* 或留空匹配全部"
-                        spellCheck={false}
-                        className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60"
-                      />
-                      <button onClick={() => removeRule(event, ruleIdx)}
-                        className="text-app-tertiary hover:text-red-400 transition-colors p-1" title="删除规则">
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-
-                    {rule.hooks.map((hook, hookIdx) => (
-                      <div key={hookIdx} className="flex items-center gap-2 pl-[62px]">
-                        <input
-                          value={hook.command}
-                          onChange={e => updateHookEntry(event, ruleIdx, hookIdx, { command: e.target.value })}
-                          placeholder="/path/to/script.sh"
-                          spellCheck={false}
-                          className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60"
-                        />
-                        <div className="flex items-center gap-1">
-                          <label className="text-[9px] text-app-tertiary">超时</label>
-                          <input
-                            type="number" value={hook.timeout}
-                            onChange={e => updateHookEntry(event, ruleIdx, hookIdx, { timeout: parseInt(e.target.value) || 5 })}
-                            className="w-10 bg-app-secondary border border-app rounded px-1.5 py-1 text-[11px] font-mono text-app text-center outline-none focus:border-accent/60"
-                            min={1} max={60}
-                          />
-                          <span className="text-[9px] text-app-tertiary">s</span>
-                        </div>
-                        <button onClick={() => removeHookEntry(event, ruleIdx, hookIdx)}
-                          className="text-app-tertiary hover:text-red-400 transition-colors p-1" title="删除命令">
-                          <X size={11} />
-                        </button>
-                      </div>
-                    ))}
-
-                    <button onClick={() => addHookEntry(event, ruleIdx)}
-                      className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent transition-colors flex items-center gap-1">
-                      <Plus size={10} /> 添加命令
-                    </button>
-                  </div>
-                ))}
-
-                {hasRules && (
-                  <div className="flex items-center gap-2 pt-1">
-                    <button onClick={() => handleSave(event)} disabled={!dirty || saving === event}
-                      className={cn(
-                        "flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium transition-all",
-                        dirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed"
-                      )}>
-                      <Save size={11} />
-                      {saving === event ? "保存中..." : "保存"}
-                    </button>
-                    <button onClick={() => handleDelete(event)} disabled={saving === event}
-                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20 transition-colors">
-                      <Trash2 size={11} />
-                      清除全部
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Plugins Editor ─────────────────────────────────────────────────
-function PluginsEditor({ config, overview, onUpdate }: {
-  config: ClaudeConfig;
-  overview: ClaudeOverview | null;
-  onUpdate: (c: ClaudeConfig) => void;
-}) {
-  const [saving, setSaving] = useState<string | null>(null);
-  const [newPluginId, setNewPluginId] = useState("");
-
-  const handleToggle = async (pluginId: string, enabled: boolean) => {
-    setSaving(pluginId);
-    try { onUpdate(await api.claudeConfig.togglePlugin(pluginId, enabled)); }
-    finally { setSaving(null); }
-  };
-
-  const handleRemove = async (pluginId: string) => {
-    setSaving(pluginId);
-    try { onUpdate(await api.claudeConfig.removePlugin(pluginId)); }
-    finally { setSaving(null); }
-  };
-
-  const handleAdd = async () => {
-    const id = newPluginId.trim();
-    if (!id) return;
-    setSaving(id);
-    try { onUpdate(await api.claudeConfig.togglePlugin(id, true)); setNewPluginId(""); }
-    finally { setSaving(null); }
-  };
-
-  const plugins = Object.entries(config.enabled_plugins);
-  // Merge install info from overview
-  const installMap = new Map(
-    (overview?.installed_plugins ?? []).map(p => [p.plugin_id, p])
-  );
-
-  return (
-    <div className="space-y-3">
-      <p className="text-[11px] text-app-tertiary mb-3">
-        管理 Claude Code 插件的启用状态。下方同时显示已安装插件的版本和路径信息。
-      </p>
-
-      {plugins.length === 0 && (
-        <div className="text-center py-6 text-app-tertiary text-xs">暂无已配置的插件</div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-      {plugins.map(([pluginId, enabled]) => {
-        const inst = installMap.get(pluginId);
-        const [name, publisher] = pluginId.includes("@") ? pluginId.split("@") : [pluginId, ""];
-        return (
-          <div key={pluginId}
-            className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-            <div className="flex items-center gap-3">
-              <button onClick={() => handleToggle(pluginId, !enabled)} disabled={saving === pluginId}
-                className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0",
-                  enabled ? "bg-accent" : "bg-app-tertiary/40")}>
-                <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform",
-                  enabled ? "translate-x-[18px]" : "translate-x-0.5")} />
-              </button>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-app">{name}</span>
-                  {publisher && <span className="text-[9px] text-app-tertiary font-mono">@{publisher}</span>}
-                </div>
-              </div>
-
-              <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full",
-                enabled ? "bg-green-500/10 text-green-400" : "bg-app-tertiary/20 text-app-tertiary")}>
-                {enabled ? "已启用" : "已禁用"}
-              </span>
-
-              <button onClick={() => handleRemove(pluginId)} disabled={saving === pluginId}
-                className="text-app-tertiary hover:text-red-400 transition-colors p-1">
-                <Trash2 size={13} />
-              </button>
-            </div>
-
-            {/* Install details */}
-            {inst && (
-              <div className="flex flex-wrap gap-x-4 gap-y-1 pl-12 text-[9px] font-mono text-app-tertiary">
-                <span>版本: <span className="text-app-secondary">{inst.version}</span></span>
-                <span>安装: <span className="text-app-secondary">{inst.installed_at.slice(0, 10)}</span></span>
-                <span>更新: <span className="text-app-secondary">{inst.last_updated.slice(0, 10)}</span></span>
-                {inst.git_commit && (
-                  <span>commit: <span className="text-app-secondary">{inst.git_commit.slice(0, 8)}</span></span>
-                )}
-                <span className="text-app-tertiary/60 truncate max-w-[300px]" title={inst.install_path}>
-                  {inst.install_path}
-                </span>
-              </div>
-            )}
-          </div>
-        );
-      })}
-      </div>
-
-      <div className="flex gap-2 pt-2">
-        <input value={newPluginId} onChange={e => setNewPluginId(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleAdd()}
-          placeholder="输入插件 ID，例如 my-skill@publisher" spellCheck={false}
-          className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60"
-        />
-        <button onClick={handleAdd} disabled={!newPluginId.trim()}
-          className={cn("flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium transition-all",
-            newPluginId.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-          <Plus size={12} /> 添加
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Permissions Editor ─────────────────────────────────────────────
-function PermissionsEditor({ config, onUpdate }: {
-  config: ClaudeConfig;
-  onUpdate: (c: ClaudeConfig) => void;
-}) {
-  const [jsonText, setJsonText] = useState(() => JSON.stringify(config.permissions, null, 2));
-  const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
-  const [parseError, setParseError] = useState("");
-
-  useEffect(() => {
-    setJsonText(JSON.stringify(config.permissions, null, 2));
-  }, [config.permissions]);
-
-  const handleSave = async () => {
-    let parsed;
-    try { parsed = JSON.parse(jsonText); }
-    catch { setParseError("JSON 格式错误"); setStatus("error"); return; }
-    setParseError(""); setSaving(true);
-    try {
-      onUpdate(await api.claudeConfig.updatePermissions(parsed));
-      setStatus("ok"); setTimeout(() => setStatus("idle"), 2000);
-    } catch (e) {
-      setParseError(e instanceof Error ? e.message : "保存失败"); setStatus("error");
-    } finally { setSaving(false); }
-  };
-
-  const isDirty = jsonText !== JSON.stringify(config.permissions, null, 2);
-
-  return (
-    <div className="space-y-3">
-      <p className="text-[11px] text-app-tertiary mb-3">
-        权限配置控制 Claude Code 的工具调用权限。直接编辑 JSON 格式。
-      </p>
-      <textarea value={jsonText}
-        onChange={e => { setJsonText(e.target.value); setStatus("idle"); setParseError(""); }}
-        spellCheck={false}
-        rows={Math.max(6, jsonText.split("\n").length + 1)}
-        className={cn(
-          "w-full bg-app-secondary border rounded-xl px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed",
-          status === "error" ? "border-red-500/40" : "border-app focus:border-accent/60"
-        )}
-      />
-      {parseError && <p className="text-[11px] text-red-400">{parseError}</p>}
-      <button onClick={handleSave} disabled={!isDirty || saving}
-        className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium transition-all",
-          isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-        {status === "ok" ? <Check size={11} /> : <Save size={11} />}
-        {saving ? "保存中..." : status === "ok" ? "已保存" : "保存权限"}
-      </button>
-    </div>
-  );
-}
-
-// ── Other Config Editor ────────────────────────────────────────────
-// ── 常用设置编辑器 ─────────────────────────────────────────────────
-function CommonSettingsEditor({ config, onUpdate }: {
-  config: ClaudeConfig;
-  onUpdate: (c: ClaudeConfig) => void;
-}) {
-  const [saving, setSaving] = useState<string | null>(null);
-  const [customModel, setCustomModel] = useState("");
-  const [showCustomInput, setShowCustomInput] = useState(false);
-
   const getValue = (key: string): unknown => config.other[key];
 
   const handleChange = async (key: string, value: unknown) => {
     setSaving(key);
     try {
-      if (value === "" || value === undefined) {
-        onUpdate(await api.claudeConfig.deleteOther(key));
-      } else {
-        onUpdate(await api.claudeConfig.updateOther(key, value));
-      }
-    } finally {
-      setSaving(null);
-    }
+      if (value === "" || value === undefined) onUpdate(await api.claudeConfig.deleteOther(key));
+      else onUpdate(await api.claudeConfig.updateOther(key, value));
+    } finally { setSaving(null); }
   };
 
   const GROUP_LABELS: Record<string, string> = {
-    model: "模型配置",
-    behavior: "行为与输出",
-    session: "会话管理",
-    security: "登录与安全",
-    ui: "界面与体验",
-    advanced: "高级选项",
+    model: "模型配置", behavior: "行为与输出", session: "会话管理",
+    security: "登录与安全", ui: "界面与体验", advanced: "高级选项",
   };
 
   const groups = useMemo(() => {
     const map = new Map<string, typeof COMMON_SETTINGS>();
-    for (const s of COMMON_SETTINGS) {
-      const g = s.group || "other";
-      if (!map.has(g)) map.set(g, []);
-      map.get(g)!.push(s);
-    }
+    for (const s of COMMON_SETTINGS) { const g = s.group || "other"; if (!map.has(g)) map.set(g, []); map.get(g)!.push(s); }
     return map;
   }, []);
-
-  const renderSetting = (setting: typeof COMMON_SETTINGS[number]) => {
-    const current = getValue(setting.key);
-
-    if (setting.type === "boolean") {
-      const boolVal = current === true;
-      return (
-        <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 mr-3">
-              <p className="text-xs font-medium text-app">{setting.label}</p>
-              <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-            </div>
-            <button
-              onClick={() => handleChange(setting.key, !boolVal)}
-              disabled={saving === setting.key}
-              className={cn(
-                "w-9 h-5 rounded-full transition-colors relative shrink-0",
-                boolVal ? "bg-accent" : "bg-app-tertiary/40"
-              )}
-            >
-              <div className={cn(
-                "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform",
-                boolVal ? "translate-x-[18px]" : "translate-x-0.5"
-              )} />
-            </button>
-          </div>
-          <p className="text-[10px] font-mono text-app-tertiary mt-1.5">
-            settings.json → <span className="text-accent">{setting.key}</span>
-          </p>
-        </div>
-      );
-    }
-
-    if (setting.type === "select") {
-      const strVal = typeof current === "string" ? current : "";
-      const isKnown = setting.options?.some(o => o.value === strVal);
-      return (
-        <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-          <div>
-            <p className="text-xs font-medium text-app">{setting.label}</p>
-            <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-          </div>
-          <select
-            value={isKnown || !strVal ? strVal : "__custom__"}
-            onChange={e => {
-              const v = e.target.value;
-              if (v === "__custom_input__") {
-                setShowCustomInput(true);
-                setCustomModel(strVal);
-                return;
-              }
-              if (v === "__custom__") return;
-              setShowCustomInput(false);
-              handleChange(setting.key, v || undefined);
-            }}
-            disabled={saving === setting.key}
-            className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60 cursor-pointer"
-          >
-            {setting.options?.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-            <option value="__custom_input__">✏️ 输入自定义值...</option>
-            {strVal && !isKnown && (
-              <option value="__custom__">当前: {strVal}</option>
-            )}
-          </select>
-          {/* 自定义输入 */}
-          {(showCustomInput || (strVal && !isKnown)) && (
-            <div className="flex gap-2">
-              <input
-                value={showCustomInput ? customModel : strVal}
-                onChange={e => setCustomModel(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && customModel.trim()) {
-                    handleChange(setting.key, customModel.trim());
-                    setShowCustomInput(false);
-                  }
-                }}
-                placeholder={setting.placeholder || "输入模型名称或 Bedrock ARN"}
-                spellCheck={false}
-                className="flex-1 bg-app border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60"
-              />
-              {showCustomInput && (
-                <button
-                  onClick={() => {
-                    if (customModel.trim()) handleChange(setting.key, customModel.trim());
-                    setShowCustomInput(false);
-                  }}
-                  className="text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"
-                >
-                  确认
-                </button>
-              )}
-              <button
-                onClick={() => { handleChange(setting.key, undefined); setShowCustomInput(false); }}
-                className="text-[10px] text-red-400 hover:text-red-300 px-2"
-              >
-                清除
-              </button>
-            </div>
-          )}
-          <p className="text-[10px] font-mono text-app-tertiary">
-            settings.json → <span className="text-accent">{setting.key}</span>
-            {strVal && <span className="ml-1.5 text-app-secondary">= "{strVal}"</span>}
-          </p>
-        </div>
-      );
-    }
-
-    if (setting.type === "number") {
-      const numVal = typeof current === "number" ? String(current) : "";
-      return (
-        <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-          <div>
-            <p className="text-xs font-medium text-app">{setting.label}</p>
-            <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-          </div>
-          <input
-            type="number"
-            value={numVal}
-            onChange={e => {
-              const v = e.target.value;
-              if (v === "") handleChange(setting.key, undefined);
-              else handleChange(setting.key, Number(v));
-            }}
-            placeholder={setting.placeholder}
-            disabled={saving === setting.key}
-            className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60"
-          />
-          <p className="text-[10px] font-mono text-app-tertiary">
-            settings.json → <span className="text-accent">{setting.key}</span>
-          </p>
-        </div>
-      );
-    }
-
-    // string type
-    const strVal = typeof current === "string" ? current : "";
-    return (
-      <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-        <div>
-          <p className="text-xs font-medium text-app">{setting.label}</p>
-          <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-        </div>
-        <input
-          value={strVal}
-          onChange={e => handleChange(setting.key, e.target.value || undefined)}
-          placeholder={setting.placeholder}
-          disabled={saving === setting.key}
-          spellCheck={false}
-          className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60"
-        />
-        <p className="text-[10px] font-mono text-app-tertiary">
-          settings.json → <span className="text-accent">{setting.key}</span>
-        </p>
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-6">
       {[...groups.entries()].map(([groupId, settings]) => (
         <div key={groupId}>
-          <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">
-            {GROUP_LABELS[groupId] || groupId}
-          </p>
+          <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">{GROUP_LABELS[groupId] || groupId}</p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {settings.map(renderSetting)}
+            {settings.map(setting => {
+              const current = getValue(setting.key);
+              return (
+                <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div><p className="text-xs font-medium text-app">{setting.label}</p><p className="text-[10px] text-app-tertiary">{setting.desc}</p></div>
+                    {setting.type === "boolean" && (
+                      <button onClick={() => handleChange(setting.key, !(current === true))} disabled={saving === setting.key}
+                        className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", current === true ? "bg-accent" : "bg-app-tertiary/40")}>
+                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", current === true ? "translate-x-[18px]" : "translate-x-0.5")} />
+                      </button>
+                    )}
+                  </div>
+                  {setting.type === "select" && (
+                    <select value={typeof current === "string" ? current : ""} onChange={e => handleChange(setting.key, e.target.value || undefined)} disabled={saving === setting.key}
+                      className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60 cursor-pointer">
+                      {setting.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  )}
+                  {setting.type === "string" && (
+                    <input value={typeof current === "string" ? current : ""} onChange={e => handleChange(setting.key, e.target.value || undefined)}
+                      placeholder={setting.placeholder} disabled={saving === setting.key} spellCheck={false}
+                      className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
+                  )}
+                  {setting.type === "number" && (
+                    <input type="number" value={typeof current === "number" ? current : ""} onChange={e => handleChange(setting.key, e.target.value ? Number(e.target.value) : undefined)}
+                      placeholder={setting.placeholder} disabled={saving === setting.key}
+                      className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
+                  )}
+                  <p className="text-[9px] font-mono text-app-tertiary/60 mt-1.5">settings.json → <span className="text-accent/60">{setting.key}</span></p>
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}
@@ -1477,11 +483,8 @@ function CommonSettingsEditor({ config, onUpdate }: {
   );
 }
 
-// ── 其他配置编辑器 ─────────────────────────────────────────────────
-function OtherEditor({ config, onUpdate }: {
-  config: ClaudeConfig;
-  onUpdate: (c: ClaudeConfig) => void;
-}) {
+// ── 其他配置字段 ─────────────────────────────────────────────────────
+function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
   const entries = Object.entries(config.other).filter(([key]) => !COMMON_SETTING_KEYS.has(key));
   const [saving, setSaving] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
@@ -1489,112 +492,641 @@ function OtherEditor({ config, onUpdate }: {
   const [newValue, setNewValue] = useState("");
 
   const handleSave = async (key: string, rawValue: string) => {
-    let value: unknown;
-    try { value = JSON.parse(rawValue); } catch { value = rawValue; }
+    let value: unknown; try { value = JSON.parse(rawValue); } catch { value = rawValue; }
     setSaving(key);
-    try {
-      onUpdate(await api.claudeConfig.updateOther(key, value));
-      setEditValues(prev => { const n = { ...prev }; delete n[key]; return n; });
-    } finally { setSaving(null); }
-  };
-
-  const handleDelete = async (key: string) => {
-    setSaving(key);
-    try { onUpdate(await api.claudeConfig.deleteOther(key)); }
+    try { onUpdate(await api.claudeConfig.updateOther(key, value)); setEditValues(prev => { const n = { ...prev }; delete n[key]; return n; }); }
     finally { setSaving(null); }
   };
-
+  const handleDelete = async (key: string) => { setSaving(key); try { onUpdate(await api.claudeConfig.deleteOther(key)); } finally { setSaving(null); } };
   const handleAdd = async () => {
     if (!newKey.trim()) return;
-    let value: unknown;
-    try { value = JSON.parse(newValue); } catch { value = newValue; }
-    setSaving(newKey);
-    try {
-      onUpdate(await api.claudeConfig.updateOther(newKey.trim(), value));
-      setNewKey(""); setNewValue("");
-    } finally { setSaving(null); }
+    let value: unknown; try { value = JSON.parse(newValue); } catch { value = newValue; }
+    setSaving(newKey); try { onUpdate(await api.claudeConfig.updateOther(newKey.trim(), value)); setNewKey(""); setNewValue(""); } finally { setSaving(null); }
   };
+  const formatValue = (v: unknown): string => typeof v === "string" ? v : JSON.stringify(v, null, 2);
 
-  const formatValue = (v: unknown): string =>
-    typeof v === "string" ? v : JSON.stringify(v, null, 2);
+  if (entries.length === 0 && !newKey) return null;
+  return (
+    <div>
+      <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">其他配置字段</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {entries.map(([key, value]) => {
+          const displayValue = editValues[key] ?? formatValue(value);
+          const isDirty = editValues[key] !== undefined && editValues[key] !== formatValue(value);
+          const isBool = typeof value === "boolean";
+          return (
+            <div key={key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold font-mono text-app">{key}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] text-app-tertiary font-mono">{typeof value}</span>
+                  <button onClick={() => handleDelete(key)} disabled={saving === key} className="text-app-tertiary hover:text-red-400 transition-colors p-1"><Trash2 size={12} /></button>
+                </div>
+              </div>
+              {isBool ? (
+                <button onClick={() => handleSave(key, String(!value))} disabled={saving === key}
+                  className={cn("w-9 h-5 rounded-full transition-colors relative", value ? "bg-accent" : "bg-app-tertiary/40")}>
+                  <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", value ? "translate-x-[18px]" : "translate-x-0.5")} />
+                </button>
+              ) : (
+                <>
+                  <textarea value={displayValue} onChange={e => setEditValues(prev => ({ ...prev, [key]: e.target.value }))} spellCheck={false}
+                    rows={Math.min(4, displayValue.split("\n").length + 1)}
+                    className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none resize-y focus:border-accent/60" />
+                  {isDirty && (
+                    <button onClick={() => handleSave(key, displayValue)} disabled={saving === key}
+                      className="flex items-center gap-1 text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"><Save size={10} /> 保存</button>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="border border-dashed border-app rounded-xl px-4 py-3 space-y-2 mt-3">
+        <p className="text-[10px] text-app-tertiary font-medium">添加新配置项</p>
+        <div className="flex gap-2">
+          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="配置键名" spellCheck={false}
+            className="w-40 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
+          <input value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder="值（JSON 或字符串）" spellCheck={false}
+            className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
+          <button onClick={handleAdd} disabled={!newKey.trim()}
+            className={cn("flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg font-medium", newKey.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+            <Plus size={12} /> 添加
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: 模型 + 全局配置面板
+// ═══════════════════════════════════════════════════════════════════
+function TabModel({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-2">
+        <Cpu size={16} className="text-purple-400" />
+        <h2 className="text-sm font-semibold text-app">模型与全局参数配置</h2>
+      </div>
+      <GlobalConfigPanel />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: Skills
+// ═══════════════════════════════════════════════════════════════════
+function TabSkills({ skills }: { skills: SkillDetail[] }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const detail = skills.find(s => s.name === selected);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles size={16} className="text-yellow-400" />
+        <h2 className="text-sm font-semibold text-app">Skills 技能库</h2>
+        <span className="text-[10px] text-app-tertiary">~/.claude/skills/</span>
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary ml-auto">{skills.length} 个技能</span>
+      </div>
+
+      {skills.length === 0 ? (
+        <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义 Skill</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          {/* Skill list */}
+          <div className="lg:col-span-1 space-y-2">
+            {skills.map(s => (
+              <button key={s.name} onClick={() => setSelected(s.name)}
+                className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
+                  selected === s.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary")}>
+                <p className="text-xs font-semibold text-app">{s.name}</p>
+                <p className="text-[10px] text-app-tertiary mt-0.5 line-clamp-2">{s.description || "无描述"}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  {s.has_auxiliary && <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">有辅助文件</span>}
+                  {Object.keys(s.metadata).length > 0 && <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">有元数据</span>}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Skill detail */}
+          <div className="lg:col-span-2">
+            {detail ? (
+              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-app">{detail.name}</h3>
+                  <span className="text-[9px] font-mono text-app-tertiary">{detail.path}</span>
+                </div>
+                {Object.keys(detail.metadata).length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">元数据</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(detail.metadata).map(([k, v]) => (
+                        <span key={k} className="text-[10px] px-2 py-1 rounded-md bg-app border border-app font-mono">
+                          <span className="text-accent">{k}</span>: <span className="text-app-secondary">{String(v)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {detail.auxiliary_files.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">辅助文件</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {detail.auxiliary_files.map(f => (
+                        <span key={f} className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-mono">{f}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider mb-2">SKILL.md 内容</p>
+                  <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">
+                    {detail.content}
+                  </pre>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧技能查看详情</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: Commands
+// ═══════════════════════════════════════════════════════════════════
+function TabCommands({ commands }: { commands: CommandInfo[] }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const detail = commands.find(c => c.name === selected);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <Terminal size={16} className="text-green-400" />
+        <h2 className="text-sm font-semibold text-app">自定义命令</h2>
+        <span className="text-[10px] text-app-tertiary">~/.claude/commands/</span>
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary ml-auto">{commands.length} 个命令</span>
+      </div>
+
+      {commands.length === 0 ? (
+        <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义命令</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-1 space-y-2">
+            {commands.map(c => (
+              <button key={c.name} onClick={() => setSelected(c.name)}
+                className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
+                  selected === c.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary")}>
+                <p className="text-xs font-semibold text-app font-mono">/{c.name}</p>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{c.scope}</span>
+              </button>
+            ))}
+          </div>
+          <div className="lg:col-span-2">
+            {detail ? (
+              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold font-mono text-app">/{detail.name}</h3>
+                  <span className="text-[9px] font-mono text-app-tertiary">{detail.path}</span>
+                </div>
+                <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">
+                  {detail.content}
+                </pre>
+              </div>
+            ) : (
+              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧命令查看详情</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: MCP
+// ═══════════════════════════════════════════════════════════════════
+function TabMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | null; onOverviewUpdate: (o: ClaudeOverview) => void }) {
+  const [servers, setServers] = useState<McpServer[]>(overview?.mcp_servers ?? []);
+  const [refreshing, setRefreshing] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", url: "", transport: "http", scope: "user" });
+  const [addError, setAddError] = useState("");
+  const [adding, setAdding] = useState(false);
+  useEffect(() => { if (overview) setServers(overview.mcp_servers); }, [overview]);
+
+  const refresh = async () => { setRefreshing(true); try { const list = await api.claudeConfig.listMcp(); setServers(list); if (overview) onOverviewUpdate({ ...overview, mcp_servers: list }); } finally { setRefreshing(false); } };
+  const handleRemove = async (name: string) => { setRemoving(name); try { const res = await api.claudeConfig.removeMcp(name); setServers(res.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: res.servers }); } finally { setRemoving(null); } };
+  const handleAdd = async () => {
+    if (!addForm.name.trim() || !addForm.url.trim()) return;
+    setAdding(true); setAddError("");
+    try { const res = await api.claudeConfig.addMcp({ name: addForm.name.trim(), url: addForm.url.trim(), transport: addForm.transport, scope: addForm.scope }); setServers(res.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: res.servers }); setAddForm({ name: "", url: "", transport: "http", scope: "user" }); setShowAdd(false); }
+    catch (e) { setAddError(e instanceof Error ? e.message : "添加失败"); } finally { setAdding(false); }
+  };
+  const SM: Record<string, { label: string; color: string; bg: string }> = { connected: { label: "已连接", color: "#22c55e", bg: "bg-green-500/10" }, needs_auth: { label: "需认证", color: "#f59e0b", bg: "bg-yellow-500/10" }, error: { label: "错误", color: "#ef4444", bg: "bg-red-500/10" }, unknown: { label: "未知", color: "#7878a8", bg: "bg-app-tertiary/20" } };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Globe size={16} className="text-blue-400" />
+          <h2 className="text-sm font-semibold text-app">MCP 服务器</h2>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={refresh} disabled={refreshing} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app"><RotateCcw size={10} className={refreshing ? "animate-spin" : ""} /> 刷新</button>
+          <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 添加</button>
+        </div>
+      </div>
+      {showAdd && (
+        <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">名称</label><input value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} placeholder="my-server" spellCheck={false} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60" /></div>
+            <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">URL</label><input value={addForm.url} onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))} placeholder="https://mcp.example.com" spellCheck={false} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60" /></div>
+            <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">协议</label><select value={addForm.transport} onChange={e => setAddForm(f => ({ ...f, transport: e.target.value }))} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] text-app outline-none"><option value="http">HTTP</option><option value="sse">SSE</option><option value="stdio">Stdio</option></select></div>
+            <div><label className="text-[9px] text-app-tertiary uppercase block mb-1">作用域</label><select value={addForm.scope} onChange={e => setAddForm(f => ({ ...f, scope: e.target.value }))} className="w-full bg-app border border-app rounded-md px-3 py-1.5 text-[11px] text-app outline-none"><option value="user">全局</option><option value="project">项目</option></select></div>
+          </div>
+          {addError && <p className="text-[11px] text-red-400">{addError}</p>}
+          <div className="flex gap-2">
+            <button onClick={handleAdd} disabled={adding || !addForm.name.trim() || !addForm.url.trim()} className={cn("text-[11px] px-3 py-1.5 rounded-md font-medium", addForm.name.trim() && addForm.url.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>{adding ? "添加中..." : "添加"}</button>
+            <button onClick={() => { setShowAdd(false); setAddError(""); }} className="text-[11px] text-app-tertiary hover:text-app px-3 py-1.5">取消</button>
+          </div>
+        </div>
+      )}
+      {servers.length === 0 ? (
+        <div className="text-center py-12 text-app-tertiary text-xs"><Unplug size={24} className="mx-auto mb-2 opacity-30" />暂无 MCP 服务器</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+          {servers.map(s => { const sm = SM[s.status] ?? SM.unknown; return (
+            <div key={s.name} className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: sm.color, boxShadow: s.status === "connected" ? `0 0 6px ${sm.color}60` : undefined }} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-app">{s.name}</span>
+                  <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full", sm.bg)} style={{ color: sm.color }}>{sm.label}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-app-tertiary/20 text-app-tertiary font-mono">{s.transport}</span>
+                </div>
+                {s.url && <div className="flex items-center gap-1 mt-1"><Link size={9} className="text-app-tertiary shrink-0" /><span className="text-[10px] font-mono text-app-tertiary truncate">{s.url}</span></div>}
+              </div>
+              <button onClick={() => handleRemove(s.name)} disabled={removing === s.name} className="text-app-tertiary hover:text-red-400 transition-colors p-1.5 rounded-md hover:bg-red-500/10"><Trash2 size={13} /></button>
+            </div>
+          ); })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: Hooks
+// ═══════════════════════════════════════════════════════════════════
+function TabHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [editState, setEditState] = useState<Record<string, HookRule[]>>({});
+
+  const getEditRules = (event: string): HookRule[] => editState[event] ?? config.hooks[event] ?? [];
+  const setEditRules = (event: string, rules: HookRule[]) => setEditState(prev => ({ ...prev, [event]: rules }));
+  const isDirty = (event: string) => { const e = editState[event]; if (!e) return false; return JSON.stringify(e) !== JSON.stringify(config.hooks[event] ?? []); };
+
+  const handleSave = async (event: string) => { setSaving(event); try { const u = await api.claudeConfig.updateHooks(event, getEditRules(event)); onUpdate(u); setEditState(prev => { const n = { ...prev }; delete n[event]; return n; }); } finally { setSaving(null); } };
+  const handleDelete = async (event: string) => { setSaving(event); try { onUpdate(await api.claudeConfig.deleteHookEvent(event)); setEditState(prev => { const n = { ...prev }; delete n[event]; return n; }); } finally { setSaving(null); } };
+  const addRule = (event: string) => { const r = [...getEditRules(event)]; r.push({ matcher: "", hooks: [{ type: "command", command: "", timeout: 5 }] }); setEditRules(event, r); setExpandedEvent(event); };
+  const removeRule = (event: string, idx: number) => setEditRules(event, getEditRules(event).filter((_, i) => i !== idx));
+  const updateRule = (event: string, idx: number, field: "matcher", value: string) => { const r = [...getEditRules(event)]; r[idx] = { ...r[idx], [field]: value }; setEditRules(event, r); };
+  const addHookEntry = (event: string, idx: number) => { const r = [...getEditRules(event)]; r[idx] = { ...r[idx], hooks: [...r[idx].hooks, { type: "command", command: "", timeout: 5 }] }; setEditRules(event, r); };
+  const removeHookEntry = (event: string, ri: number, hi: number) => { const r = [...getEditRules(event)]; r[ri] = { ...r[ri], hooks: r[ri].hooks.filter((_, i) => i !== hi) }; setEditRules(event, r); };
+  const updateHookEntry = (event: string, ri: number, hi: number, upd: Partial<HookEntry>) => { const r = [...getEditRules(event)]; const h = [...r[ri].hooks]; h[hi] = { ...h[hi], ...upd }; r[ri] = { ...r[ri], hooks: h }; setEditRules(event, r); };
 
   return (
     <div className="space-y-3">
-      <p className="text-[11px] text-app-tertiary mb-3">
-        hooks / enabledPlugins / permissions 之外的其他顶层配置字段。
-      </p>
-
-      {entries.length === 0 && (
-        <div className="text-center py-6 text-app-tertiary text-xs">暂无其他配置项</div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-      {entries.map(([key, value]) => {
-        const displayValue = editValues[key] ?? formatValue(value);
-        const isDirty = editValues[key] !== undefined && editValues[key] !== formatValue(value);
-        const isBool = typeof value === "boolean";
-
+      <div className="flex items-center gap-2 mb-2">
+        <Webhook size={16} className="text-orange-400" />
+        <h2 className="text-sm font-semibold text-app">Hooks 生命周期钩子</h2>
+      </div>
+      <p className="text-[11px] text-app-tertiary mb-3">Hook 在 Claude Code 事件触发时执行外部命令。每个事件可配置多个规则。</p>
+      {hookEvents.map(event => {
+        const meta = EVENT_LABELS[event] ?? { label: event, desc: "" };
+        const rules = getEditRules(event);
+        const hasRules = rules.length > 0;
+        const expanded = expandedEvent === event;
+        const dirty = isDirty(event);
         return (
-          <div key={key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold font-mono text-app">{key}</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[9px] text-app-tertiary font-mono">{typeof value}</span>
-                <button onClick={() => handleDelete(key)} disabled={saving === key}
-                  className="text-app-tertiary hover:text-red-400 transition-colors p-1">
-                  <Trash2 size={12} />
-                </button>
+          <div key={event} className={cn("rounded-xl border overflow-hidden", hasRules ? "border-app bg-app-secondary" : "border-app/50 bg-app-secondary/50")}>
+            <button onClick={() => setExpandedEvent(expanded ? null : event)} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02]">
+              {expanded ? <ChevronDown size={13} className="text-app-tertiary" /> : <ChevronRight size={13} className="text-app-tertiary" />}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-app">{meta.label}</span>
+                  <span className="text-[9px] font-mono text-app-tertiary">{event}</span>
+                  {hasRules && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-mono">{rules.length} 规则</span>}
+                  {dirty && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">未保存</span>}
+                </div>
+                <p className="text-[10px] text-app-tertiary mt-0.5">{meta.desc}</p>
               </div>
-            </div>
-
-            {isBool ? (
-              <div className="flex items-center gap-2">
-                <button onClick={() => handleSave(key, String(!value))} disabled={saving === key}
-                  className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0",
-                    value ? "bg-accent" : "bg-app-tertiary/40")}>
-                  <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform",
-                    value ? "translate-x-[18px]" : "translate-x-0.5")} />
-                </button>
-                <span className="text-[11px] font-mono text-app-secondary">{String(value)}</span>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                <textarea value={displayValue}
-                  onChange={e => setEditValues(prev => ({ ...prev, [key]: e.target.value }))}
-                  spellCheck={false}
-                  rows={Math.min(6, displayValue.split("\n").length + 1)}
-                  className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none resize-y focus:border-accent/60"
-                />
-                {isDirty && (
-                  <button onClick={() => handleSave(key, displayValue)} disabled={saving === key}
-                    className="flex items-center gap-1 text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md transition-colors">
-                    <Save size={10} /> 保存
-                  </button>
+              <button onClick={e => { e.stopPropagation(); addRule(event); }} className="text-app-tertiary hover:text-accent p-1"><Plus size={14} /></button>
+            </button>
+            {expanded && (
+              <div className="border-t border-app px-4 py-3 space-y-3">
+                {rules.length === 0 && <p className="text-[11px] text-app-tertiary text-center py-3">暂无规则</p>}
+                {rules.map((rule, ri) => (
+                  <div key={ri} className="bg-app rounded-lg border border-app/50 p-3 space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <label className="text-[10px] text-app-tertiary shrink-0 w-14">Matcher</label>
+                      <input value={rule.matcher} onChange={e => updateRule(event, ri, "matcher", e.target.value)} placeholder="* 或留空匹配全部" spellCheck={false}
+                        className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
+                      <button onClick={() => removeRule(event, ri)} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={12} /></button>
+                    </div>
+                    {rule.hooks.map((hook, hi) => (
+                      <div key={hi} className="flex items-center gap-2 pl-[62px]">
+                        <input value={hook.command} onChange={e => updateHookEntry(event, ri, hi, { command: e.target.value })} placeholder="/path/to/script.sh" spellCheck={false}
+                          className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
+                        <div className="flex items-center gap-1">
+                          <label className="text-[9px] text-app-tertiary">超时</label>
+                          <input type="number" value={hook.timeout} onChange={e => updateHookEntry(event, ri, hi, { timeout: parseInt(e.target.value) || 5 })}
+                            className="w-10 bg-app-secondary border border-app rounded px-1.5 py-1 text-[11px] font-mono text-app text-center outline-none" min={1} max={60} />
+                          <span className="text-[9px] text-app-tertiary">s</span>
+                        </div>
+                        <button onClick={() => removeHookEntry(event, ri, hi)} className="text-app-tertiary hover:text-red-400 p-1"><X size={11} /></button>
+                      </div>
+                    ))}
+                    <button onClick={() => addHookEntry(event, ri)} className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent flex items-center gap-1"><Plus size={10} /> 添加命令</button>
+                  </div>
+                ))}
+                {hasRules && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <button onClick={() => handleSave(event)} disabled={!dirty || saving === event}
+                      className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", dirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+                      <Save size={11} />{saving === event ? "保存中..." : "保存"}
+                    </button>
+                    <button onClick={() => handleDelete(event)} disabled={saving === event}
+                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20">
+                      <Trash2 size={11} /> 清除全部
+                    </button>
+                  </div>
                 )}
               </div>
             )}
           </div>
         );
       })}
-      </div>
+    </div>
+  );
+}
 
-      <div className="border border-dashed border-app rounded-xl px-4 py-3 space-y-2">
-        <p className="text-[10px] text-app-tertiary font-medium">添加新配置项</p>
-        <div className="flex gap-2">
-          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="配置键名" spellCheck={false}
-            className="w-40 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60"
-          />
-          <input value={newValue} onChange={e => setNewValue(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleAdd()}
-            placeholder="值（支持 JSON 或字符串）" spellCheck={false}
-            className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60"
-          />
-          <button onClick={handleAdd} disabled={!newKey.trim()}
-            className={cn("flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all",
-              newKey.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-            <Plus size={12} /> 添加
-          </button>
+// ═══════════════════════════════════════════════════════════════════
+// TAB: Rules
+// ═══════════════════════════════════════════════════════════════════
+function TabRules({ rules }: { rules: RuleInfo[] }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const detail = rules.find(r => r.name === selected);
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <BookOpen size={16} className="text-cyan-400" />
+        <h2 className="text-sm font-semibold text-app">Rules 规则</h2>
+        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary ml-auto">{rules.length} 个规则</span>
+      </div>
+      {rules.length === 0 ? (
+        <div className="text-center py-12 text-app-tertiary text-xs">暂无规则文件（~/.claude/rules/）</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-1 space-y-2">
+            {rules.map(r => (
+              <button key={r.name} onClick={() => setSelected(r.name)}
+                className={cn("w-full text-left px-4 py-3 rounded-xl border transition-all",
+                  selected === r.name ? "border-accent/40 bg-accent/5" : "border-app bg-app-secondary hover:border-app-secondary")}>
+                <p className="text-xs font-semibold text-app">{r.name}</p>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-tertiary/20 text-app-tertiary">{r.scope}</span>
+              </button>
+            ))}
+          </div>
+          <div className="lg:col-span-2">
+            {detail ? (
+              <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
+                <h3 className="text-sm font-bold text-app">{detail.name}</h3>
+                <pre className="text-[11px] font-mono text-app bg-app border border-app rounded-lg p-4 overflow-auto max-h-[500px] whitespace-pre-wrap leading-relaxed">{detail.content}</pre>
+              </div>
+            ) : (
+              <div className="text-center py-20 text-app-tertiary text-xs">选择左侧规则查看详情</div>
+            )}
+          </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: Permissions
+// ═══════════════════════════════════════════════════════════════════
+function TabPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+  const [jsonText, setJsonText] = useState(() => JSON.stringify(config.permissions, null, 2));
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
+  const [parseError, setParseError] = useState("");
+  useEffect(() => { setJsonText(JSON.stringify(config.permissions, null, 2)); }, [config.permissions]);
+  const handleSave = async () => {
+    let parsed; try { parsed = JSON.parse(jsonText); } catch { setParseError("JSON 格式错误"); setStatus("error"); return; }
+    setParseError(""); setSaving(true);
+    try { onUpdate(await api.claudeConfig.updatePermissions(parsed)); setStatus("ok"); setTimeout(() => setStatus("idle"), 2000); }
+    catch (e) { setParseError(e instanceof Error ? e.message : "保存失败"); setStatus("error"); } finally { setSaving(false); }
+  };
+  const isDirty = jsonText !== JSON.stringify(config.permissions, null, 2);
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 mb-2"><Shield size={16} className="text-red-400" /><h2 className="text-sm font-semibold text-app">权限配置</h2></div>
+      <p className="text-[11px] text-app-tertiary mb-3">权限配置控制 Claude Code 的工具调用权限。直接编辑 JSON 格式。</p>
+      <textarea value={jsonText} onChange={e => { setJsonText(e.target.value); setStatus("idle"); setParseError(""); }} spellCheck={false}
+        rows={Math.max(8, jsonText.split("\n").length + 1)}
+        className={cn("w-full bg-app-secondary border rounded-xl px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed", status === "error" ? "border-red-500/40" : "border-app focus:border-accent/60")} />
+      {parseError && <p className="text-[11px] text-red-400">{parseError}</p>}
+      <button onClick={handleSave} disabled={!isDirty || saving}
+        className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+        {status === "ok" ? <Check size={11} /> : <Save size={11} />}{saving ? "保存中..." : status === "ok" ? "已保存" : "保存权限"}
+      </button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: 环境变量
+// ═══════════════════════════════════════════════════════════════════
+function TabEnvVars() {
+  const ENV_DEFS = [
+    { key: "ANTHROPIC_API_KEY", desc: "API 密钥", type: "password" as const },
+    { key: "ANTHROPIC_AUTH_TOKEN", desc: "认证令牌", type: "password" as const },
+    { key: "ANTHROPIC_BASE_URL", desc: "API 端点", type: "text" as const },
+    { key: "ANTHROPIC_MODEL", desc: "默认模型", type: "text" as const },
+    { key: "HTTPS_PROXY", desc: "HTTPS 代理", type: "text" as const },
+    { key: "HTTP_PROXY", desc: "HTTP 代理", type: "text" as const },
+    { key: "NO_PROXY", desc: "绕过代理", type: "text" as const },
+    { key: "CLAUDE_CONFIG_DIR", desc: "配置目录", type: "text" as const },
+    { key: "CLAUDE_CACHE_DIR", desc: "缓存目录", type: "text" as const },
+    { key: "CLAUDE_LOG_LEVEL", desc: "日志级别", type: "text" as const },
+    { key: "CLAUDE_NO_COLOR", desc: "禁用颜色", type: "text" as const },
+    { key: "CLAUDE_EDITOR", desc: "默认编辑器", type: "text" as const },
+    { key: "DEBUG", desc: "调试模式", type: "text" as const },
+  ];
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2"><Variable size={16} className="text-purple-400" /><h2 className="text-sm font-semibold text-app">环境变量</h2></div>
+      <p className="text-[11px] text-app-tertiary">Claude Code 相关的环境变量。这些值从系统环境中读取，修改需在 shell 配置文件中设置。</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {ENV_DEFS.map(env => (
+          <div key={env.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold font-mono text-accent">{env.key}</span>
+              <span className="text-[9px] text-app-tertiary">{env.desc}</span>
+            </div>
+            <div className="text-[11px] font-mono text-app-secondary bg-app border border-app rounded-lg px-3 py-2">
+              {env.type === "password" ? "••••••••" : <span className="text-app-tertiary">（未设置 / 从环境读取）</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: Plugins
+// ═══════════════════════════════════════════════════════════════════
+function TabPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; overview: ClaudeOverview | null; onUpdate: (c: ClaudeConfig) => void }) {
+  const [saving, setSaving] = useState<string | null>(null);
+  const [newPluginId, setNewPluginId] = useState("");
+  const handleToggle = async (id: string, enabled: boolean) => { setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, enabled)); } finally { setSaving(null); } };
+  const handleRemove = async (id: string) => { setSaving(id); try { onUpdate(await api.claudeConfig.removePlugin(id)); } finally { setSaving(null); } };
+  const handleAdd = async () => { const id = newPluginId.trim(); if (!id) return; setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, true)); setNewPluginId(""); } finally { setSaving(null); } };
+  const plugins = Object.entries(config.enabled_plugins);
+  const installMap = new Map((overview?.installed_plugins ?? []).map(p => [p.plugin_id, p]));
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2"><Plug size={16} className="text-green-400" /><h2 className="text-sm font-semibold text-app">插件管理</h2></div>
+      {plugins.length === 0 && <div className="text-center py-8 text-app-tertiary text-xs">暂无已配置的插件</div>}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+        {plugins.map(([pluginId, enabled]) => {
+          const inst = installMap.get(pluginId);
+          const [name, publisher] = pluginId.includes("@") ? pluginId.split("@") : [pluginId, ""];
+          return (
+            <div key={pluginId} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
+              <div className="flex items-center gap-3">
+                <button onClick={() => handleToggle(pluginId, !enabled)} disabled={saving === pluginId}
+                  className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", enabled ? "bg-accent" : "bg-app-tertiary/40")}>
+                  <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", enabled ? "translate-x-[18px]" : "translate-x-0.5")} />
+                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2"><span className="text-xs font-semibold text-app">{name}</span>{publisher && <span className="text-[9px] text-app-tertiary font-mono">@{publisher}</span>}</div>
+                </div>
+                <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full", enabled ? "bg-green-500/10 text-green-400" : "bg-app-tertiary/20 text-app-tertiary")}>{enabled ? "已启用" : "已禁用"}</span>
+                <button onClick={() => handleRemove(pluginId)} disabled={saving === pluginId} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={13} /></button>
+              </div>
+              {inst && (
+                <div className="flex flex-wrap gap-x-4 gap-y-1 pl-12 text-[9px] font-mono text-app-tertiary">
+                  <span>v{inst.version}</span><span>安装: {inst.installed_at.slice(0, 10)}</span>
+                  {inst.git_commit && <span>commit: {inst.git_commit.slice(0, 8)}</span>}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex gap-2 pt-2">
+        <input value={newPluginId} onChange={e => setNewPluginId(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()}
+          placeholder="输入插件 ID" spellCheck={false}
+          className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
+        <button onClick={handleAdd} disabled={!newPluginId.trim()}
+          className={cn("flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium", newPluginId.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+          <Plus size={12} /> 添加
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: 监控
+// ═══════════════════════════════════════════════════════════════════
+function TabMonitoring({ overview }: { overview: ClaudeOverview }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2"><Activity size={16} className="text-emerald-400" /><h2 className="text-sm font-semibold text-app">监控与统计</h2></div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "总消息", value: fmtNum(overview.total_messages), color: "#22c55e" },
+          { label: "工具调用", value: fmtNum(overview.total_tool_calls), color: "#f59e0b" },
+          { label: "会话数", value: fmtNum(overview.total_sessions), color: "#38bdf8" },
+          { label: "活跃天数", value: String(overview.active_days), color: "#a78bfa" },
+          { label: "技能数", value: String(overview.skills.length), color: "#fbbf24" },
+          { label: "MCP 数", value: String(overview.mcp_servers.length), color: "#60a5fa" },
+          { label: "插件数", value: String(overview.installed_plugins.length), color: "#4ade80" },
+          { label: "项目数", value: String(overview.projects.length), color: "#f472b6" },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="bg-app-secondary border border-app rounded-xl px-4 py-3 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
+            <span className="text-[9px] uppercase tracking-widest font-semibold text-app-tertiary">{label}</span>
+            <p className="text-xl font-bold tabular-nums text-app mt-1" style={{ color }}>{value}</p>
+          </div>
+        ))}
+      </div>
+      {/* Activity chart */}
+      {overview.daily_activity.length > 0 && (
+        <div className="bg-app-secondary border border-app rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3"><BarChart3 size={13} className="text-app-tertiary" /><span className="text-xs font-semibold text-app">活动趋势</span></div>
+          <ActivityChart data={overview.daily_activity} />
+        </div>
+      )}
+      {/* Projects overview */}
+      <div className="bg-app-secondary border border-app rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-3"><FolderOpen size={13} className="text-green-400" /><span className="text-xs font-semibold text-app">项目记忆</span></div>
+        <div className="flex flex-wrap gap-2">
+          {overview.projects.map(p => (
+            <span key={p.dir_name} className="text-[9px] px-2 py-1 rounded-md bg-app border border-app font-mono text-app-secondary">
+              {p.dir_name.replace(/-home-sichengli-Documents-/g, "").replace(/-/g, "/")}
+              {p.has_memory && <span className="ml-1 text-green-400">M</span>}
+              {p.has_claude_md && <span className="ml-0.5 text-accent">C</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB: 关于
+// ═══════════════════════════════════════════════════════════════════
+function TabAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2"><Info size={16} className="text-blue-400" /><h2 className="text-sm font-semibold text-app">关于 Claude Code</h2></div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {[
+          { label: "CLI 版本", value: overview?.cli_version || systemInfo?.cli_version || "..." },
+          { label: "配置目录", value: systemInfo?.home_path || overview?.home_path || "~/.claude" },
+          { label: "配置文件", value: systemInfo?.config_path || "~/.claude/settings.json" },
+          { label: "缓存目录", value: systemInfo?.cache_dir || "~/.claude/cache" },
+          { label: "缓存大小", value: systemInfo ? `${systemInfo.cache_size_mb.toFixed(1)} MB` : "..." },
+          { label: "历史大小", value: systemInfo ? `${systemInfo.history_size_mb.toFixed(1)} MB` : "..." },
+          { label: "平台", value: systemInfo?.platform || "..." },
+          { label: "Python", value: systemInfo?.python_version || "..." },
+          { label: "会话数", value: systemInfo ? String(systemInfo.session_count) : "..." },
+          { label: "项目数", value: systemInfo ? String(systemInfo.project_count) : "..." },
+          { label: "技能数", value: systemInfo ? String(systemInfo.skill_count) : "..." },
+          { label: "MCP 服务器", value: systemInfo ? String(systemInfo.mcp_server_count) : "..." },
+        ].map(({ label, value }) => (
+          <div key={label} className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center justify-between">
+            <span className="text-[11px] text-app-tertiary">{label}</span>
+            <span className="text-[11px] font-mono text-app">{value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
