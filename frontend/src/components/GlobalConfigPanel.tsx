@@ -230,6 +230,311 @@ const SECTIONS: SectionDef[] = [
       { key: "autoSave", label: "自动保存", desc: "配置变更自动保存", type: "switch" },
     ],
   },
+
+  // ── CLI 命令行配置 ──────────────────────────────────────────────────
+
+  {
+    id: "cli_basic", label: "CLI 基础命令", desc: "启动模式、工作空间与初始化",
+    icon: Terminal, color: "#34d399",
+    fields: [
+      { key: "mode", label: "启动模式", desc: "--mode 交互式/批处理/守护模式", type: "select", options: [
+        { value: "interactive", label: "interactive (交互式)" },
+        { value: "batch", label: "batch (批处理)" },
+        { value: "daemon", label: "daemon (守护模式)" },
+      ]},
+      { key: "configPath", label: "配置文件", desc: "--config 指定配置文件路径", type: "text", placeholder: "~/.claude/config.json" },
+      { key: "workspace", label: "工作空间", desc: "--workspace 工作空间路径", type: "text", placeholder: "./my-project" },
+      { key: "init", label: "初始化", desc: "--init 初始化新项目", type: "switch" },
+    ],
+  },
+  {
+    id: "cli_conversation", label: "对话控制", desc: "会话管理与上下文控制",
+    icon: MessageSquare, color: "#60a5fa",
+    fields: [
+      { key: "newConversation", label: "新对话", desc: "--new 开始新对话", type: "switch" },
+      { key: "continueSession", label: "继续对话", desc: "--continue 继续上次对话", type: "text", placeholder: "session_123" },
+      { key: "sessionId", label: "对话 ID", desc: "--session-id 指定会话 ID", type: "text", placeholder: "sess_abc123" },
+      { key: "contextWindow", label: "上下文长度", desc: "--context-window 对话上下文长度", type: "number", min: 1, max: 1000, placeholder: "100" },
+      { key: "history", label: "历史记录", desc: "--history 显示历史对话条数", type: "number", min: 1, max: 100, placeholder: "20" },
+    ],
+  },
+  {
+    id: "cli_files", label: "文件操作", desc: "文件添加、排除、监视与批量处理",
+    icon: FileSearch, color: "#fbbf24",
+    fields: [
+      { key: "addFiles", label: "添加文件", desc: "--add 添加文件到上下文", type: "text", placeholder: "src/*.js" },
+      { key: "excludeFiles", label: "排除文件", desc: "--exclude 排除文件模式", type: "text", placeholder: "node_modules" },
+      { key: "watchFiles", label: "监视文件", desc: "--watch 文件变动监视", type: "text", placeholder: "src/**/*" },
+      { key: "batchFile", label: "批量处理", desc: "--batch 批量处理文件", type: "text", placeholder: "files.txt" },
+      { key: "outputFile", label: "输出文件", desc: "--output 结果输出文件", type: "text", placeholder: "result.md" },
+      { key: "maxFiles", label: "文件限制", desc: "--max-files 最大处理文件数", type: "number", min: 1, max: 10000, placeholder: "100" },
+    ],
+  },
+  {
+    id: "cli_code", label: "代码分析", desc: "审查、重构、依赖分析与测试生成",
+    icon: Code2, color: "#c084fc",
+    fields: [
+      { key: "review", label: "代码审查", desc: "--review 代码审查模式", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "normal", label: "normal (常规)" },
+        { value: "strict", label: "strict (严格)" },
+      ]},
+      { key: "refactor", label: "重构建议", desc: "--refactor 提供重构建议", type: "switch" },
+      { key: "deps", label: "依赖分析", desc: "--deps 分析依赖关系", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "list", label: "list (列表)" },
+        { value: "tree", label: "tree (树形)" },
+      ]},
+      { key: "complexity", label: "复杂度检查", desc: "--complexity 圈复杂度阈值", type: "number", min: 1, max: 50, placeholder: "10" },
+      { key: "stats", label: "代码统计", desc: "--stats 代码统计信息", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "lines", label: "按行数" },
+        { value: "functions", label: "按函数" },
+        { value: "all", label: "全部" },
+      ]},
+      { key: "generateTests", label: "测试生成", desc: "--generate-tests 自动生成测试", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "jest", label: "Jest" },
+        { value: "mocha", label: "Mocha" },
+        { value: "pytest", label: "Pytest" },
+        { value: "vitest", label: "Vitest" },
+      ]},
+    ],
+  },
+  {
+    id: "cli_search", label: "搜索查询", desc: "语义搜索、正则匹配与批量替换",
+    icon: Search, color: "#2dd4bf",
+    fields: [
+      { key: "search", label: "语义搜索", desc: "--search 自然语言搜索", type: "text", placeholder: "find bug in auth module" },
+      { key: "query", label: "代码查询", desc: "--query 代码结构查询", type: "text", placeholder: "functions>10行" },
+      { key: "grep", label: "正则匹配", desc: "--grep 正则表达式搜索", type: "text", placeholder: "TODO.*" },
+      { key: "replace", label: "替换操作", desc: "--replace 批量替换 old:new", type: "text", placeholder: "oldName:newName" },
+      { key: "similar", label: "相似代码", desc: "--similar 查找相似代码", type: "text", placeholder: "function_name" },
+    ],
+  },
+  {
+    id: "cli_git", label: "Git 集成", desc: "提交、PR 审查、差异分析与冲突解决",
+    icon: GitMerge, color: "#f472b6",
+    fields: [
+      { key: "commitMsg", label: "提交信息", desc: "--commit-msg 自动生成提交信息", type: "switch" },
+      { key: "prReview", label: "PR 审查", desc: "--pr-review PR 代码审查", type: "text", placeholder: "PR#123" },
+      { key: "diff", label: "变更分析", desc: "--diff 分析代码变更", type: "text", placeholder: "HEAD~3" },
+      { key: "merge", label: "冲突解决", desc: "--merge 辅助解决合并冲突", type: "switch" },
+      { key: "logAnalysis", label: "提交历史", desc: "--log-analysis 分析提交历史", type: "text", placeholder: "30d" },
+    ],
+  },
+  {
+    id: "cli_debug", label: "调试测试", desc: "调试模式、测试运行与覆盖率",
+    icon: Bug, color: "#fb923c",
+    fields: [
+      { key: "debug", label: "调试模式", desc: "--debug 开启调试输出", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "minimal", label: "minimal (最小)" },
+        { value: "verbose", label: "verbose (详细)" },
+      ]},
+      { key: "test", label: "测试运行", desc: "--test 运行测试目录", type: "text", placeholder: "./tests" },
+      { key: "coverage", label: "覆盖率", desc: "--coverage 测试覆盖率目标 (%)", type: "slider", min: 0, max: 100, step: 5, unit: "%" },
+      { key: "breakpoint", label: "断点调试", desc: "--breakpoint 设置断点", type: "text", placeholder: "file:line" },
+      { key: "watchVar", label: "变量监控", desc: "--watch-var 监控变量变化", type: "text", placeholder: "user.name" },
+    ],
+  },
+  {
+    id: "cli_perf", label: "性能分析", desc: "性能剖析、瓶颈检测与基准测试",
+    icon: Gauge, color: "#e879f9",
+    fields: [
+      { key: "profile", label: "性能分析", desc: "--profile 代码性能分析", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "cpu", label: "CPU" },
+        { value: "memory", label: "内存" },
+        { value: "both", label: "CPU + 内存" },
+      ]},
+      { key: "bottleneck", label: "瓶颈检测", desc: "--bottleneck 检测性能瓶颈", type: "switch" },
+      { key: "optimize", label: "优化建议", desc: "--optimize 提供优化建议", type: "text", placeholder: "query / render / all" },
+      { key: "benchmark", label: "基准测试", desc: "--benchmark 运行基准测试次数", type: "number", min: 1, max: 100000, placeholder: "1000" },
+      { key: "memoryLimit", label: "内存限制", desc: "--memory-limit 内存使用限制", type: "text", placeholder: "4GB" },
+    ],
+  },
+  {
+    id: "cli_security", label: "安全扫描", desc: "漏洞扫描、密钥检测与依赖审计",
+    icon: Lock, color: "#f43f5e",
+    fields: [
+      { key: "security", label: "安全扫描", desc: "--security 漏洞扫描级别", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "low", label: "low (低)" },
+        { value: "medium", label: "medium (中)" },
+        { value: "high", label: "high (高)" },
+      ]},
+      { key: "scanSecrets", label: "密钥检测", desc: "--scan-secrets 检测硬编码密钥", type: "switch" },
+      { key: "audit", label: "依赖检查", desc: "--audit 依赖包安全检查", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "npm", label: "npm" },
+        { value: "pip", label: "pip" },
+        { value: "cargo", label: "cargo" },
+        { value: "all", label: "全部" },
+      ]},
+      { key: "permissionsAnalysis", label: "权限分析", desc: "--permissions 分析文件权限", type: "switch" },
+      { key: "encrypt", label: "加密配置", desc: "--encrypt 加密配置文件", type: "text", placeholder: "key.pub" },
+    ],
+  },
+  {
+    id: "cli_output", label: "输出格式", desc: "格式、颜色、详细程度与进度",
+    icon: FileOutput, color: "#38bdf8",
+    fields: [
+      { key: "format", label: "输出格式", desc: "--format 输出格式", type: "select", options: [
+        { value: "text", label: "text (纯文本)" },
+        { value: "json", label: "JSON" },
+        { value: "yaml", label: "YAML" },
+        { value: "markdown", label: "Markdown" },
+        { value: "stream-json", label: "stream-json (流式)" },
+      ]},
+      { key: "color", label: "颜色输出", desc: "--color 启用/禁用颜色", type: "select", options: [
+        { value: "auto", label: "auto (自动)" },
+        { value: "always", label: "always (始终)" },
+        { value: "never", label: "never (禁用)" },
+      ]},
+      { key: "verbose", label: "详细程度", desc: "--verbose 输出详细程度", type: "slider", min: 0, max: 3, step: 1 },
+      { key: "silent", label: "静默模式", desc: "--silent 最小化输出", type: "switch" },
+      { key: "progress", label: "进度条", desc: "--progress 显示进度条", type: "switch" },
+    ],
+  },
+  {
+    id: "cli_network", label: "网络代理", desc: "代理、超时、重试与限流",
+    icon: Wifi, color: "#818cf8",
+    fields: [
+      { key: "proxy", label: "代理设置", desc: "--proxy HTTP 代理地址", type: "text", placeholder: "http://proxy:8080" },
+      { key: "timeout", label: "超时设置", desc: "--timeout 请求超时", type: "text", placeholder: "60s" },
+      { key: "retry", label: "重试策略", desc: "--retry 重试次数与策略", type: "text", placeholder: "3,exponential" },
+      { key: "concurrency", label: "并发限制", desc: "--concurrency 并发请求数", type: "number", min: 1, max: 50, placeholder: "5" },
+      { key: "rateLimit", label: "限流配置", desc: "--rate-limit API 调用限流", type: "text", placeholder: "100/min" },
+    ],
+  },
+  {
+    id: "cli_batch", label: "批处理", desc: "批量命令、并行执行与任务队列",
+    icon: Layers, color: "#a3e635",
+    fields: [
+      { key: "batchFile", label: "批量处理", desc: "--batch-file 批量命令文件", type: "text", placeholder: "commands.txt" },
+      { key: "parallel", label: "并行执行", desc: "--parallel 并行处理任务数", type: "number", min: 1, max: 32, placeholder: "4" },
+      { key: "queue", label: "任务队列", desc: "--queue 任务队列模式", type: "select", options: [
+        { value: "fifo", label: "FIFO (先进先出)" },
+        { value: "priority", label: "priority (优先级)" },
+        { value: "round-robin", label: "round-robin (轮询)" },
+      ]},
+      { key: "schedule", label: "定时任务", desc: "--schedule Cron 表达式", type: "text", placeholder: "0 2 * * *" },
+      { key: "aggregate", label: "结果聚合", desc: "--aggregate 聚合多个结果", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "summary", label: "summary (摘要)" },
+        { value: "detailed", label: "detailed (详细)" },
+      ]},
+    ],
+  },
+  {
+    id: "cli_cache", label: "缓存控制", desc: "缓存策略、清理与预热",
+    icon: Database, color: "#fcd34d",
+    fields: [
+      { key: "cache", label: "缓存策略", desc: "--cache 缓存读写策略", type: "select", options: [
+        { value: "read-write", label: "read-write (读写)" },
+        { value: "read-only", label: "read-only (只读)" },
+        { value: "write-only", label: "write-only (只写)" },
+        { value: "off", label: "off (关闭)" },
+      ]},
+      { key: "clearCache", label: "清理缓存", desc: "--clear-cache 清理所有缓存", type: "switch" },
+      { key: "warmCache", label: "缓存预热", desc: "--warm-cache 预热常用查询", type: "switch" },
+      { key: "cacheStats", label: "缓存统计", desc: "--cache-stats 查看缓存统计", type: "switch" },
+    ],
+  },
+  {
+    id: "cli_plugins", label: "插件扩展", desc: "安装、卸载与配置插件",
+    icon: Puzzle, color: "#4ade80",
+    fields: [
+      { key: "install", label: "安装插件", desc: "--install 安装插件包", type: "text", placeholder: "@claude/analyzer" },
+      { key: "uninstall", label: "卸载插件", desc: "--uninstall 卸载插件", type: "text", placeholder: "plugin-name" },
+      { key: "pluginsList", label: "插件列表", desc: "--plugins 列出已安装插件", type: "switch" },
+      { key: "pluginConfig", label: "插件配置", desc: "--plugin-config 配置特定插件", type: "text", placeholder: "plugin:key=value" },
+    ],
+  },
+  {
+    id: "cli_diag", label: "诊断监控", desc: "健康检查、日志追踪与错误报告",
+    icon: Stethoscope, color: "#14b8a6",
+    fields: [
+      { key: "health", label: "健康检查", desc: "--health 系统健康状态", type: "switch" },
+      { key: "metrics", label: "性能指标", desc: "--metrics 输出性能指标格式", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "json", label: "JSON" },
+        { value: "prometheus", label: "Prometheus" },
+      ]},
+      { key: "trace", label: "日志追踪", desc: "--trace 追踪执行过程", type: "switch" },
+      { key: "errorReport", label: "错误报告", desc: "--error-report 生成错误报告", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "brief", label: "brief (简要)" },
+        { value: "detailed", label: "detailed (详细)" },
+      ]},
+      { key: "info", label: "系统信息", desc: "--info 显示系统信息", type: "select", options: [
+        { value: "", label: "关闭" },
+        { value: "version", label: "version (版本)" },
+        { value: "env", label: "env (环境)" },
+        { value: "all", label: "all (全部)" },
+      ]},
+    ],
+  },
+  {
+    id: "cli_shortcuts", label: "快捷方式", desc: "别名、快捷键与命令模板",
+    icon: Command, color: "#fb7185",
+    fields: [
+      { key: "aliases", label: "别名设置", desc: "--alias 创建命令别名", type: "kv" },
+      { key: "shortcuts", label: "快捷命令", desc: "--shortcut 快捷键绑定", type: "kv" },
+      { key: "template", label: "常用模板", desc: "--template 命令模板", type: "text", placeholder: "code-review" },
+      { key: "recent", label: "最近命令", desc: "--recent 显示最近命令数", type: "number", min: 1, max: 50, placeholder: "10" },
+    ],
+  },
+  {
+    id: "cli_slash", label: "交互式命令", desc: "运行时 /command 快捷指令参考",
+    icon: Zap, color: "#facc15",
+    fields: [
+      { key: "slashHelp", label: "/help", desc: "显示帮助信息", type: "switch" },
+      { key: "slashClear", label: "/clear", desc: "清空当前对话", type: "switch" },
+      { key: "slashSave", label: "/save", desc: "保存当前会话", type: "text", placeholder: "session_name" },
+      { key: "slashLoad", label: "/load", desc: "加载历史会话", type: "text", placeholder: "session_id" },
+      { key: "slashExport", label: "/export", desc: "导出对话记录", type: "select", options: [
+        { value: "markdown", label: "Markdown" },
+        { value: "json", label: "JSON" },
+        { value: "text", label: "纯文本" },
+      ]},
+      { key: "slashExplain", label: "/explain", desc: "解释选中代码", type: "switch" },
+      { key: "slashFix", label: "/fix", desc: "自动修复问题", type: "switch" },
+      { key: "slashDocs", label: "/docs", desc: "生成文档", type: "switch" },
+      { key: "slashTest", label: "/test", desc: "生成测试", type: "switch" },
+      { key: "slashRefactor", label: "/refactor", desc: "重构代码", type: "switch" },
+      { key: "slashOptimize", label: "/optimize", desc: "优化代码", type: "switch" },
+      { key: "slashSecurity", label: "/security", desc: "安全检查", type: "switch" },
+    ],
+  },
+  {
+    id: "envVars", label: "环境变量", desc: "Claude Code 环境变量配置",
+    icon: Variable, color: "#a78bfa",
+    fields: [
+      { key: "CLAUDE_API_KEY", label: "CLAUDE_API_KEY", desc: "API 密钥", type: "password", placeholder: "sk-ant-..." },
+      { key: "CLAUDE_CONFIG_DIR", label: "CLAUDE_CONFIG_DIR", desc: "配置目录路径", type: "text", placeholder: "~/.claude" },
+      { key: "CLAUDE_CACHE_DIR", label: "CLAUDE_CACHE_DIR", desc: "缓存目录路径", type: "text", placeholder: "~/.cache/claude" },
+      { key: "CLAUDE_LOG_LEVEL", label: "CLAUDE_LOG_LEVEL", desc: "日志级别", type: "select", options: [
+        { value: "debug", label: "debug" },
+        { value: "info", label: "info" },
+        { value: "warn", label: "warn" },
+        { value: "error", label: "error" },
+      ]},
+      { key: "CLAUDE_MAX_TOKENS", label: "CLAUDE_MAX_TOKENS", desc: "最大 Token 数", type: "number", min: 256, max: 200000, placeholder: "4096" },
+      { key: "CLAUDE_MODEL", label: "CLAUDE_MODEL", desc: "默认模型", type: "text", placeholder: "claude-sonnet-4-6" },
+      { key: "CLAUDE_TEMPERATURE", label: "CLAUDE_TEMPERATURE", desc: "温度参数", type: "slider", min: 0, max: 1, step: 0.05 },
+      { key: "CLAUDE_NO_COLOR", label: "CLAUDE_NO_COLOR", desc: "禁用颜色输出", type: "switch" },
+      { key: "CLAUDE_EDITOR", label: "CLAUDE_EDITOR", desc: "默认编辑器", type: "select", options: [
+        { value: "vscode", label: "VS Code" },
+        { value: "vim", label: "Vim" },
+        { value: "nvim", label: "Neovim" },
+        { value: "emacs", label: "Emacs" },
+        { value: "nano", label: "Nano" },
+        { value: "sublime", label: "Sublime Text" },
+      ]},
+    ],
+  },
 ];
 
 // ── 字段渲染器 ───────────────────────────────────────────────────────
