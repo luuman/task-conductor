@@ -36,6 +36,7 @@ import {
   Globe,
   Link,
   Unplug,
+  SlidersHorizontal,
 } from "lucide-react";
 
 // ── Hook 事件中文标签 ──────────────────────────────────────────────
