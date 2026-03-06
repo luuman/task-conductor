@@ -160,6 +160,7 @@ export default function ClaudeConfigPage() {
 
   // Extra data
   const [skills, setSkills] = useState<SkillDetail[]>([]);
+  const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [commands, setCommands] = useState<CommandInfo[]>([]);
   const [rules, setRules] = useState<RuleInfo[]>([]);
   const [systemInfo, setSystemInfo] = useState<ClaudeSystemInfo | null>(null);
