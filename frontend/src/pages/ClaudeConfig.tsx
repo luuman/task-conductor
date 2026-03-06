@@ -218,6 +218,7 @@ export default function ClaudeConfigPage() {
     api.claudeConfig.listRules().then(setRules).catch(() => {});
     api.claudeConfig.systemInfo().then(setSystemInfo).catch(() => {});
     api.claudeConfig.getClaudeMd().then(r => setClaudeMd(r.content)).catch(() => {});
+    api.claudeConfig.disabledItems().then(setDisabledItems).catch(() => {});
   }, [config]);
 
   useEffect(() => { load(); }, [load]);
