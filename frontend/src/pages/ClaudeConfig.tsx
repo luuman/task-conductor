@@ -1263,16 +1263,23 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
   const [creating, setCreating] = useState(false);
   const [createErr, setCreateErr] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [presets, setPresets] = useState<PresetItem[]>([]);
   const detail = rules.find(r => r.name === selected);
+  useEffect(() => { api.claudeConfig.presetRules().then(setPresets).catch(() => {}); }, []);
+  useEffect(() => {
+    const names = new Set(rules.map(r => r.name));
+    setPresets(prev => prev.map(p => ({ ...p, installed: names.has(p.name) })));
+  }, [rules]);
   const toggle = async (name: string, enabled: boolean, ev: React.MouseEvent) => {
     ev.stopPropagation(); setToggling(name); try { await onToggle(name, enabled); } finally { setToggling(null); }
   };
-  const handleCreate = async () => {
-    const n = newName.trim(); if (!n) return;
-    setCreating(true); setCreateErr("");
-    try { await onCreate(n); setNewName(""); setShowCreate(false); setSelected(n); }
+  const handleCreate = async (name?: string, content?: string) => {
+    const n = (name ?? newName).trim(); if (!n) return;
+    if (!name) setCreating(true);
+    setCreateErr("");
+    try { await onCreate(n, content); setNewName(""); setShowCreate(false); setSelected(n); }
     catch (e) { setCreateErr(e instanceof Error ? e.message : "创建失败"); }
-    finally { setCreating(false); }
+    finally { if (!name) setCreating(false); }
   };
   const handleDelete = async (name: string, ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -1295,7 +1302,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
             <input value={newName} onChange={e => { setNewName(e.target.value); setCreateErr(""); }} placeholder="规则名称（如 no-console-log）"
               className="flex-1 px-3 py-2 text-xs bg-app border border-app rounded-lg outline-none focus:border-accent/60 text-app placeholder:text-app-tertiary"
               onKeyDown={e => e.key === "Enter" && handleCreate()} />
-            <button onClick={handleCreate} disabled={creating || !newName.trim()}
+            <button onClick={() => handleCreate()} disabled={creating || !newName.trim()}
               className="px-4 py-2 text-xs rounded-lg bg-accent hover:bg-accent-hover text-white disabled:opacity-40">
               {creating ? "创建中..." : "创建"}
             </button>
@@ -1303,10 +1310,10 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
               className="px-3 py-2 text-xs rounded-lg border border-app text-app-secondary hover:text-app"><X size={12} /></button>
           </div>
           {createErr && <p className="text-[10px] text-red-400">{createErr}</p>}
-          <p className="text-[10px] text-app-tertiary">将在 ~/.claude/rules/ 下创建 .md 文件，Claude Code 会自动加载规则</p>
         </div>
       )}
-      {!rules.length && !showCreate ? <Empty text="暂无规则文件，点击「新建」创建" /> : rules.length > 0 && (
+      <PresetGallery presets={presets} onInstall={(n, c) => handleCreate(n, c)} itemLabel="规则" />
+      {rules.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {rules.map(r => (
