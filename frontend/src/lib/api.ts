@@ -368,6 +368,9 @@ export interface AgentInfo {
   name: string; path: string; content: string; scope: string;
   enabled: boolean; metadata: Record<string, unknown>;
 }
+export interface PresetItem {
+  name: string; title: string; desc: string; icon: string; content: string; installed: boolean;
+}
 export interface ClaudeSystemInfo {
   cli_version: string; home_path: string; config_path: string;
   cache_dir: string; cache_size_mb: number; history_size_mb: number;
