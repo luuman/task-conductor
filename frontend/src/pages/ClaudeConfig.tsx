@@ -436,7 +436,7 @@ export default function ClaudeConfigPage() {
           )}
           {visibleSections.has("commands") && (
             <div ref={ref("commands")} data-section="commands">
-              <SecCommands commands={commands} onToggle={toggleCommand} />
+              <SecCommands commands={commands} onToggle={toggleCommand} onCreate={createCommand} onDelete={deleteCommand} />
             </div>
           )}
           {visibleSections.has("mcp") && (
