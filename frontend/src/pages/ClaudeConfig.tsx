@@ -578,6 +578,79 @@ function PresetGallery({ presets, onInstall, itemLabel }: {
   );
 }
 
+/** 简易 Markdown 渲染：支持标题、列表、代码块、内联代码、加粗 */
+function MdPreview({ content }: { content: string }) {
+  const blocks = useMemo(() => {
+    const result: { type: string; lines: string[]; lang?: string }[] = [];
+    let inCode = false;
+    let codeLang = "";
+    let codeLines: string[] = [];
+
+    for (const line of content.split("\n")) {
+      if (line.startsWith("```")) {
+        if (inCode) {
+          result.push({ type: "code", lines: codeLines, lang: codeLang });
+          codeLines = [];
+          inCode = false;
+        } else {
+          inCode = true;
+          codeLang = line.slice(3).trim();
+        }
+        continue;
+      }
+      if (inCode) { codeLines.push(line); continue; }
+      result.push({ type: "line", lines: [line] });
+    }
+    if (inCode) result.push({ type: "code", lines: codeLines, lang: codeLang });
+    return result;
+  }, [content]);
+
+  const renderInline = (text: string, key: number) => {
+    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+    return (
+      <span key={key}>
+        {parts.map((p, j) => {
+          if (p.startsWith("`") && p.endsWith("`"))
+            return <code key={j} className="text-[10px] px-1 py-0.5 rounded bg-accent/10 text-accent font-mono">{p.slice(1, -1)}</code>;
+          if (p.startsWith("**") && p.endsWith("**"))
+            return <strong key={j} className="font-semibold text-app">{p.slice(2, -2)}</strong>;
+          return <span key={j}>{p}</span>;
+        })}
+      </span>
+    );
+  };
+
+  return (
+    <div className="space-y-1 max-h-[300px] overflow-y-auto">
+      {blocks.map((block, i) => {
+        if (block.type === "code") {
+          return (
+            <div key={i} className="bg-app rounded-lg border border-app/50 px-3 py-2 my-1.5 overflow-x-auto">
+              {block.lang && <span className="text-[8px] text-app-tertiary/60 uppercase tracking-wider">{block.lang}</span>}
+              <pre className="text-[10px] font-mono text-app/80 leading-relaxed whitespace-pre">{block.lines.join("\n")}</pre>
+            </div>
+          );
+        }
+        const line = block.lines[0];
+        if (line.startsWith("# ")) return <p key={i} className="text-[13px] font-bold text-app mt-2">{renderInline(line.slice(2), i)}</p>;
+        if (line.startsWith("## ")) return <p key={i} className="text-[12px] font-semibold text-app mt-2">{renderInline(line.slice(3), i)}</p>;
+        if (line.startsWith("### ")) return <p key={i} className="text-[11px] font-semibold text-app/80 mt-1.5">{renderInline(line.slice(4), i)}</p>;
+        if (line.startsWith("- ")) return (
+          <div key={i} className="flex items-start gap-2 pl-1">
+            <span className="text-accent mt-0.5 shrink-0 text-[10px]">•</span>
+            <span className="text-[11px] text-app leading-relaxed">{renderInline(line.slice(2), i)}</span>
+          </div>
+        );
+        if (/^\s{2,}/.test(line) && line.trim()) return (
+          <p key={i} className="text-[11px] text-app/80 leading-relaxed pl-5">{renderInline(line.trim(), i)}</p>
+        );
+        if (!line.trim()) return <div key={i} className="h-1.5" />;
+        return <p key={i} className="text-[11px] text-app/80 leading-relaxed">{renderInline(line, i)}</p>;
+      })}
+    </div>
+  );
+}
+
 function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
   claudeMd: string; onChange: (s: string) => void;
   onSave: () => void; saving: boolean; saved: boolean;
