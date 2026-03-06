@@ -562,7 +562,8 @@ def add_mcp_server(body: McpAddRequest):
         )
         if result.returncode != 0:
             raise HTTPException(400, f"添加失败: {result.stderr.strip()}")
-        return {"ok": True, "output": result.stdout.strip(), "servers": _list_mcp_servers()}
+        _invalidate_cache("mcp_servers")
+        return {"ok": True, "output": result.stdout.strip(), "servers": _list_mcp_servers(use_cache=False)}
     except subprocess.TimeoutExpired:
         raise HTTPException(500, "命令超时")
     except HTTPException:
@@ -582,7 +583,8 @@ def remove_mcp_server(name: str, scope: str = "user"):
         )
         if result.returncode != 0:
             raise HTTPException(400, f"移除失败: {result.stderr.strip()}")
-        return {"ok": True, "servers": _list_mcp_servers()}
+        _invalidate_cache("mcp_servers")
+        return {"ok": True, "servers": _list_mcp_servers(use_cache=False)}
     except subprocess.TimeoutExpired:
         raise HTTPException(500, "命令超时")
     except HTTPException:
