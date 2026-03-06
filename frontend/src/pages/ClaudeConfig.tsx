@@ -25,8 +25,6 @@ import {
   Settings2,
   Plus,
   Trash2,
-  ChevronDown,
-  ChevronRight,
   RotateCcw,
   Save,
   AlertTriangle,
