@@ -21,6 +21,7 @@ echo ""
 echo "[2/3] 启动 FastAPI 后端..."
 cd "$ROOT_DIR/backend"
 source .venv/bin/activate
+export TC_PIN="${TC_PIN:-123456}"
 uvicorn app.main:app --host 0.0.0.0 --port 8765 --reload &
 BACKEND_PID=$!
 echo "  后端 PID: $BACKEND_PID  → http://localhost:8765"

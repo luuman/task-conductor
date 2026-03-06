@@ -2,7 +2,7 @@ import asyncio
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
-from fastapi import FastAPI, Header, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session as DBSession
 from .database import engine
@@ -14,8 +14,10 @@ from .routers import sessions as sessions_router
 from .routers import task_manager as task_manager_router
 from .routers import knowledge as knowledge_router
 from .routers import settings_router
+from .routers import claude_config as claude_config_router
+from .routers import mcp as mcp_router
 from .session import pin_session
-from .tunnel import start_cloudflare_tunnel, get_tunnel_url, stop_tunnel
+from .tunnel import start_cloudflare_tunnel, get_tunnel_url, stop_tunnel, detect_tunnel_url_from_request
 from .hooks import parse_hook_event, serialize_json_field
 from .claude.metrics_store import metrics_store
 
@@ -142,6 +144,8 @@ app.include_router(sessions_router.router)   # GET /api/sessions, GET /api/sessi
 app.include_router(task_manager_router.router)  # POST /api/task-manager/analyze
 app.include_router(knowledge_router.router)  # GET/DELETE /api/projects/{id}/knowledge
 app.include_router(settings_router.router)   # GET/PUT /api/settings
+app.include_router(claude_config_router.router)  # GET/PUT /api/claude-config
+app.include_router(mcp_router.router)            # GET/POST/DELETE /api/mcp/servers
 
 
 # ── 基础 endpoints ─────────────────────────────────────────────
@@ -153,18 +157,30 @@ def health():
 
 
 @app.get("/agent/info", tags=["认证"], summary="Agent 信息")
-def agent_info():
+def agent_info(request: Request):
     """返回当前 Cloudflare Tunnel 公网地址和版本号。"""
+    # 从请求 Host header 自动检测公网 URL
+    host = request.headers.get("host", "")
+    scheme = request.headers.get("x-forwarded-proto", "https")
+    detect_tunnel_url_from_request(host, scheme)
     return {
         "tunnel_url": get_tunnel_url(),
         "version": "2.0.0",
     }
 
 
+@app.post("/api/shutdown", tags=["系统"], summary="关闭服务")
+def shutdown():
+    """安全关闭后端服务进程。"""
+    import signal
+    os.kill(os.getpid(), signal.SIGTERM)
+    return {"status": "shutting_down"}
+
+
 # ── 认证 ────────────────────────────────────────────────────────
 
 from pydantic import BaseModel as PM
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 
 
 class PinRequest(PM):

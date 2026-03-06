@@ -17,6 +17,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const [agentVersion, setAgentVersion] = useState<string | null>(null);
   const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [shuttingDown, setShuttingDown] = useState(false);
 
   // workspace root
   const [workspaceRoot, setWorkspaceRoot] = useState("");
@@ -83,6 +84,16 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   };
 
   const handleDisconnect = () => { clearConfig(); onDisconnect(); };
+
+  const handleShutdown = async () => {
+    if (!confirm("确定要关闭后端服务吗？关闭后需要在服务器上重新启动。")) return;
+    setShuttingDown(true);
+    try {
+      await api.shutdown();
+    } catch {
+      // 服务关闭后请求会失败，属于正常情况
+    }
+  };
 
   const isDirty = workspaceInput.trim() !== workspaceRoot;
 
@@ -217,13 +228,20 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               )}
             </Row>
 
-            {tunnelUrl && (
-              <Row label="Tunnel 地址">
-                <span className="font-mono text-[11px] text-app-tertiary truncate max-w-[260px]">
+            <Row label="Tunnel 地址">
+              {tunnelUrl ? (
+                <a
+                  href={tunnelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-[11px] text-accent hover:underline truncate max-w-[320px]"
+                >
                   {tunnelUrl}
-                </span>
-              </Row>
-            )}
+                </a>
+              ) : (
+                <span className="text-xs text-app-tertiary">未检测到</span>
+              )}
+            </Row>
 
             <div className="px-4 py-3 flex items-center justify-between">
               <div>
@@ -237,6 +255,30 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                 断开连接
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* 关闭服务 */}
+        <section className="bg-app-secondary border border-red-500/20 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-app font-semibold">关闭服务</p>
+              <p className="text-[10px] text-app-tertiary mt-0.5">
+                停止后端进程，关闭后需要在服务器上手动重新启动
+              </p>
+            </div>
+            <button
+              onClick={handleShutdown}
+              disabled={shuttingDown}
+              className={cn(
+                "text-xs px-3 py-1.5 rounded-md font-medium transition-colors",
+                shuttingDown
+                  ? "bg-red-500/20 text-red-300 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-500 text-white"
+              )}
+            >
+              {shuttingDown ? "正在关闭..." : "关闭服务"}
+            </button>
           </div>
         </section>
       </div>

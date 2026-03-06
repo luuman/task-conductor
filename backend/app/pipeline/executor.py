@@ -89,7 +89,18 @@ class StageExecutor(ABC):
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         try:
             async for event in pool.run(task_id, prompt, cwd, log_file):
-                content = event.get("content") or event.get("result", "")
+                # stream-json 格式：文本在多种位置
+                content = ""
+                if event.get("type") == "assistant":
+                    # assistant 事件：文本在 message.content[].text
+                    msg = event.get("message", {})
+                    for block in msg.get("content", []):
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            content = block.get("text", "")
+                elif event.get("type") == "result":
+                    content = event.get("result", "")
+                else:
+                    content = event.get("content", "")
                 if content:
                     parts.append(str(content))
                     # 广播纯字符串，前端直接用 msg.data 显示

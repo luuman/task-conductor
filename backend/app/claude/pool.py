@@ -39,11 +39,16 @@ class ClaudePool:
 
         metric = metrics_store.start_call(task_id)
 
+        # 清除 CLAUDECODE 环境变量，允许从 Claude Code 会话内启动子进程
+        env = {**os.environ}
+        env.pop("CLAUDECODE", None)
+
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=worktree_path,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
+            env=env,
         )
         self._processes[task_id] = proc
 

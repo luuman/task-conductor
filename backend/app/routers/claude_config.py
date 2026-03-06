@@ -1,0 +1,566 @@
+"""
+读写 ~/.claude/ 目录下的配置、统计、插件等信息，供前端可视化配置 Claude Code。
+"""
+
+import json
+import os
+import subprocess
+from pathlib import Path
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/claude-config", tags=["Claude 配置"])
+
+CLAUDE_HOME = Path.home() / ".claude"
+SETTINGS_PATH = CLAUDE_HOME / "settings.json"
+
+# ── 所有已知 Hook 事件类型 ─────────────────────────────────────────
+HOOK_EVENT_TYPES = [
+    "PreToolUse",
+    "PostToolUse",
+    "PostToolUseFailure",
+    "Stop",
+    "SubagentStart",
+    "SubagentStop",
+    "SessionStart",
+    "SessionEnd",
+    "UserPromptSubmit",
+    "Notification",
+]
+
+# ── Pydantic 模型 ─────────────────────────────────────────────────
+
+
+class HookEntry(BaseModel):
+    type: str = "command"
+    command: str
+    timeout: int = 5
+
+
+class HookRule(BaseModel):
+    matcher: str = ""
+    hooks: list[HookEntry]
+
+
+class InstalledPlugin(BaseModel):
+    plugin_id: str
+    name: str
+    publisher: str
+    scope: str
+    version: str
+    install_path: str
+    installed_at: str
+    last_updated: str
+    git_commit: str | None = None
+
+
+class DailyActivity(BaseModel):
+    date: str
+    message_count: int
+    session_count: int
+    tool_call_count: int
+
+
+class SkillInfo(BaseModel):
+    name: str
+    path: str
+
+
+class HookScriptInfo(BaseModel):
+    name: str
+    path: str
+    size_bytes: int
+
+
+class ProjectRef(BaseModel):
+    dir_name: str
+    has_memory: bool
+    has_claude_md: bool
+
+
+class McpServer(BaseModel):
+    name: str
+    url: str | None = None
+    command: str | None = None
+    args: list[str] | None = None
+    transport: str = "unknown"
+    status: str = "unknown"
+    scope: str = "unknown"
+
+
+class ClaudeOverview(BaseModel):
+    cli_version: str
+    home_path: str
+    total_messages: int
+    total_tool_calls: int
+    total_sessions: int
+    first_active_day: str | None
+    last_active_day: str | None
+    active_days: int
+    daily_activity: list[DailyActivity]
+    installed_plugins: list[InstalledPlugin]
+    skills: list[SkillInfo]
+    hook_scripts: list[HookScriptInfo]
+    projects: list[ProjectRef]
+    mcp_servers: list[McpServer]
+
+
+class ClaudeConfigOut(BaseModel):
+    hooks: dict[str, list[HookRule]]
+    enabled_plugins: dict[str, bool]
+    permissions: dict[str, Any]
+    other: dict[str, Any]
+    raw: dict[str, Any]
+
+
+class HookRuleUpdate(BaseModel):
+    event: str
+    rules: list[HookRule]
+
+
+class PluginToggle(BaseModel):
+    plugin_id: str
+    enabled: bool
+
+
+class PermissionsUpdate(BaseModel):
+    permissions: dict[str, Any]
+
+
+class RawUpdate(BaseModel):
+    config: dict[str, Any]
+
+
+# ── 读写辅助 ───────────────────────────────────────────────────────
+
+
+def _read_config() -> dict:
+    if not SETTINGS_PATH.exists():
+        return {}
+    try:
+        return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _write_config(data: dict):
+    SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SETTINGS_PATH.write_text(
+        json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8"
+    )
+
+
+def _parse_config(raw: dict) -> ClaudeConfigOut:
+    hooks_raw = raw.get("hooks", {})
+    hooks: dict[str, list[HookRule]] = {}
+    for event, rules_list in hooks_raw.items():
+        parsed_rules: list[HookRule] = []
+        if isinstance(rules_list, list):
+            for rule in rules_list:
+                if isinstance(rule, dict):
+                    matcher = rule.get("matcher", "")
+                    hook_entries = []
+                    for h in rule.get("hooks", []):
+                        if isinstance(h, dict):
+                            hook_entries.append(
+                                HookEntry(
+                                    type=h.get("type", "command"),
+                                    command=h.get("command", ""),
+                                    timeout=h.get("timeout", 5),
+                                )
+                            )
+                    parsed_rules.append(
+                        HookRule(matcher=matcher, hooks=hook_entries)
+                    )
+        hooks[event] = parsed_rules
+
+    enabled_plugins = raw.get("enabledPlugins", {})
+    permissions = raw.get("permissions", {})
+
+    known_keys = {"hooks", "enabledPlugins", "permissions"}
+    other = {k: v for k, v in raw.items() if k not in known_keys}
+
+    return ClaudeConfigOut(
+        hooks=hooks,
+        enabled_plugins=enabled_plugins,
+        permissions=permissions,
+        other=other,
+        raw=raw,
+    )
+
+
+def _get_cli_version() -> str:
+    try:
+        result = subprocess.run(
+            ["claude", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        return result.stdout.strip() if result.returncode == 0 else "unknown"
+    except Exception:
+        return "unknown"
+
+
+def _read_stats() -> list[DailyActivity]:
+    stats_file = CLAUDE_HOME / "stats-cache.json"
+    if not stats_file.exists():
+        return []
+    try:
+        data = json.loads(stats_file.read_text(encoding="utf-8"))
+        activities = data.get("dailyActivity", [])
+        return [
+            DailyActivity(
+                date=a.get("date", ""),
+                message_count=a.get("messageCount", 0),
+                session_count=a.get("sessionCount", 0),
+                tool_call_count=a.get("toolCallCount", 0),
+            )
+            for a in activities
+            if isinstance(a, dict)
+        ]
+    except Exception:
+        return []
+
+
+def _read_installed_plugins() -> list[InstalledPlugin]:
+    plugins_file = CLAUDE_HOME / "plugins" / "installed_plugins.json"
+    if not plugins_file.exists():
+        return []
+    try:
+        data = json.loads(plugins_file.read_text(encoding="utf-8"))
+        plugins_map = data.get("plugins", {})
+        result: list[InstalledPlugin] = []
+        for plugin_id, installs in plugins_map.items():
+            if not isinstance(installs, list) or not installs:
+                continue
+            inst = installs[-1]  # latest install
+            parts = plugin_id.split("@", 1) if "@" in plugin_id else [plugin_id, ""]
+            result.append(
+                InstalledPlugin(
+                    plugin_id=plugin_id,
+                    name=parts[0],
+                    publisher=parts[1] if len(parts) > 1 else "",
+                    scope=inst.get("scope", "user"),
+                    version=inst.get("version", "unknown"),
+                    install_path=inst.get("installPath", ""),
+                    installed_at=inst.get("installedAt", ""),
+                    last_updated=inst.get("lastUpdated", ""),
+                    git_commit=inst.get("gitCommitSha"),
+                )
+            )
+        return result
+    except Exception:
+        return []
+
+
+def _list_skills() -> list[SkillInfo]:
+    skills_dir = CLAUDE_HOME / "skills"
+    if not skills_dir.is_dir():
+        return []
+    result: list[SkillInfo] = []
+    for entry in sorted(skills_dir.iterdir()):
+        if entry.name.startswith("."):
+            continue
+        result.append(SkillInfo(name=entry.name, path=str(entry)))
+    return result
+
+
+def _list_hook_scripts() -> list[HookScriptInfo]:
+    hooks_dir = CLAUDE_HOME / "hooks"
+    if not hooks_dir.is_dir():
+        return []
+    result: list[HookScriptInfo] = []
+    for entry in sorted(hooks_dir.iterdir()):
+        if entry.is_file():
+            result.append(
+                HookScriptInfo(
+                    name=entry.name,
+                    path=str(entry),
+                    size_bytes=entry.stat().st_size,
+                )
+            )
+    return result
+
+
+def _list_mcp_servers() -> list[McpServer]:
+    """Parse `claude mcp list` output to get MCP server info."""
+    import re
+
+    try:
+        result = subprocess.run(
+            ["claude", "mcp", "list"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        output = result.stdout + result.stderr
+    except Exception:
+        return []
+
+    servers: list[McpServer] = []
+    for line in output.strip().split("\n"):
+        line = line.strip()
+        if not line or line.startswith("Checking"):
+            continue
+        # Pattern: 'name: url (transport) - status'  or  'name: url - status'
+        m = re.match(
+            r"^(.+?):\s+(\S+)(?:\s+\((\w+)\))?\s+-\s+(.+)$", line
+        )
+        if m:
+            name = m.group(1).strip()
+            url = m.group(2).strip()
+            transport = m.group(3) or "sse"
+            status_text = m.group(4).strip()
+            # Determine status
+            if "\u2713" in status_text or "Connected" in status_text:
+                status = "connected"
+            elif "Needs auth" in status_text:
+                status = "needs_auth"
+            elif "Error" in status_text or "Failed" in status_text:
+                status = "error"
+            else:
+                status = "unknown"
+            servers.append(
+                McpServer(
+                    name=name,
+                    url=url,
+                    transport=transport.lower(),
+                    status=status,
+                )
+            )
+    return servers
+
+
+def _get_mcp_server_detail(name: str) -> dict[str, Any]:
+    """Get details of a single MCP server via `claude mcp get <name>`."""
+    try:
+        result = subprocess.run(
+            ["claude", "mcp", "get", name],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return {"raw": result.stdout.strip()}
+    except Exception:
+        return {"raw": ""}
+
+
+def _list_projects() -> list[ProjectRef]:
+    projects_dir = CLAUDE_HOME / "projects"
+    if not projects_dir.is_dir():
+        return []
+    result: list[ProjectRef] = []
+    for entry in sorted(projects_dir.iterdir()):
+        if not entry.is_dir() or entry.name.startswith("."):
+            continue
+        has_memory = (entry / "memory").is_dir()
+        has_claude_md = (entry / "CLAUDE.md").exists()
+        result.append(
+            ProjectRef(
+                dir_name=entry.name,
+                has_memory=has_memory,
+                has_claude_md=has_claude_md,
+            )
+        )
+    return result
+
+
+# ── 端点 ───────────────────────────────────────────────────────────
+
+
+@router.get("/overview", response_model=ClaudeOverview, summary="Claude 总览信息")
+def get_overview():
+    activities = _read_stats()
+    total_msgs = sum(a.message_count for a in activities)
+    total_tools = sum(a.tool_call_count for a in activities)
+    total_sess = sum(a.session_count for a in activities)
+    first_day = activities[0].date if activities else None
+    last_day = activities[-1].date if activities else None
+
+    return ClaudeOverview(
+        cli_version=_get_cli_version(),
+        home_path=str(CLAUDE_HOME),
+        total_messages=total_msgs,
+        total_tool_calls=total_tools,
+        total_sessions=total_sess,
+        first_active_day=first_day,
+        last_active_day=last_day,
+        active_days=len(activities),
+        daily_activity=activities,
+        installed_plugins=_read_installed_plugins(),
+        skills=_list_skills(),
+        hook_scripts=_list_hook_scripts(),
+        projects=_list_projects(),
+        mcp_servers=_list_mcp_servers(),
+    )
+
+
+@router.get("", response_model=ClaudeConfigOut, summary="读取 Claude 配置")
+def get_claude_config():
+    raw = _read_config()
+    return _parse_config(raw)
+
+
+@router.get("/hook-events", summary="获取所有可用的 Hook 事件类型")
+def get_hook_events() -> list[str]:
+    return HOOK_EVENT_TYPES
+
+
+@router.put("/hooks", summary="更新某个事件的 Hook 规则")
+def update_hook_rules(body: HookRuleUpdate):
+    if body.event not in HOOK_EVENT_TYPES:
+        raise HTTPException(400, f"未知事件类型: {body.event}")
+    raw = _read_config()
+    hooks = raw.setdefault("hooks", {})
+    hooks[body.event] = [rule.model_dump() for rule in body.rules]
+    if not body.rules:
+        hooks.pop(body.event, None)
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+@router.delete("/hooks/{event}", summary="删除某个事件的所有 Hook")
+def delete_hook_event(event: str):
+    raw = _read_config()
+    hooks = raw.get("hooks", {})
+    hooks.pop(event, None)
+    raw["hooks"] = hooks
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+@router.put("/plugins", summary="启用/禁用插件")
+def toggle_plugin(body: PluginToggle):
+    raw = _read_config()
+    plugins = raw.setdefault("enabledPlugins", {})
+    plugins[body.plugin_id] = body.enabled
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+@router.delete("/plugins/{plugin_id:path}", summary="移除插件配置")
+def remove_plugin(plugin_id: str):
+    raw = _read_config()
+    plugins = raw.get("enabledPlugins", {})
+    plugins.pop(plugin_id, None)
+    raw["enabledPlugins"] = plugins
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+@router.put("/permissions", summary="更新权限配置")
+def update_permissions(body: PermissionsUpdate):
+    raw = _read_config()
+    raw["permissions"] = body.permissions
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+@router.put("/other/{key}", summary="更新其他配置项")
+def update_other(key: str, body: dict[str, Any]):
+    if key in ("hooks", "enabledPlugins", "permissions"):
+        raise HTTPException(400, f"请使用专用端点修改 {key}")
+    raw = _read_config()
+    raw[key] = body.get("value")
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+@router.delete("/other/{key}", summary="删除其他配置项")
+def delete_other(key: str):
+    if key in ("hooks", "enabledPlugins", "permissions"):
+        raise HTTPException(400, f"不可删除核心字段 {key}")
+    raw = _read_config()
+    raw.pop(key, None)
+    _write_config(raw)
+    return _parse_config(raw)
+
+
+# ── MCP 端点 ───────────────────────────────────────────────────────
+
+
+class McpAddRequest(BaseModel):
+    name: str
+    url: str | None = None
+    command: str | None = None
+    args: list[str] | None = None
+    transport: str = "http"
+    scope: str = "user"
+    env: dict[str, str] | None = None
+    headers: dict[str, str] | None = None
+
+
+@router.get("/mcp", summary="列出 MCP 服务器")
+def list_mcp_servers() -> list[McpServer]:
+    return _list_mcp_servers()
+
+
+@router.post("/mcp", summary="添加 MCP 服务器")
+def add_mcp_server(body: McpAddRequest):
+    cmd = ["claude", "mcp", "add"]
+
+    # Scope
+    if body.scope:
+        cmd += ["-s", body.scope]
+
+    # Transport
+    if body.transport:
+        cmd += ["--transport", body.transport]
+
+    # Env
+    if body.env:
+        for k, v in body.env.items():
+            cmd += ["-e", f"{k}={v}"]
+
+    # Headers (for http/sse)
+    if body.headers:
+        for k, v in body.headers.items():
+            cmd += ["--header", f"{k}: {v}"]
+
+    # Name + URL/command
+    cmd.append(body.name)
+
+    if body.url:
+        cmd.append(body.url)
+    elif body.command:
+        cmd.append("--")
+        cmd.append(body.command)
+        if body.args:
+            cmd.extend(body.args)
+
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=15
+        )
+        if result.returncode != 0:
+            raise HTTPException(400, f"添加失败: {result.stderr.strip()}")
+        return {"ok": True, "output": result.stdout.strip(), "servers": _list_mcp_servers()}
+    except subprocess.TimeoutExpired:
+        raise HTTPException(500, "命令超时")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.delete("/mcp/{name}", summary="移除 MCP 服务器")
+def remove_mcp_server(name: str, scope: str = "user"):
+    try:
+        result = subprocess.run(
+            ["claude", "mcp", "remove", name, "-s", scope],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            raise HTTPException(400, f"移除失败: {result.stderr.strip()}")
+        return {"ok": True, "servers": _list_mcp_servers()}
+    except subprocess.TimeoutExpired:
+        raise HTTPException(500, "命令超时")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
