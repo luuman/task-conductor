@@ -1,5 +1,5 @@
 // frontend/src/pages/ClaudeConfig.tsx
-// Claude Code 全能配置中心 —— Tab 布局，全局配置可视化
+// Claude Code 配置中心 —— 侧边栏导航 + 右侧滚动内容区（scroll-spy）
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import {
   api,
@@ -41,10 +41,7 @@ import {
   BarChart3,
   Link,
   Unplug,
-  SlidersHorizontal,
-  Layers,
   Cpu,
-  Zap,
   FileText,
   BookOpen,
   Activity,
@@ -113,10 +110,10 @@ const COMMON_SETTINGS: {
 ];
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
 
-// ── Tab 定义 ────────────────────────────────────────────────────────
-type TabId = "global" | "model" | "skills" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
+// ── Section 定义 ─────────────────────────────────────────────────────
+type SectionId = "global" | "model" | "skills" | "commands" | "mcp" | "mcp-market" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "about";
 
-const TABS: { id: TabId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+const SECTIONS: { id: SectionId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
   { id: "global", label: "全局", icon: Settings2 },
   { id: "model", label: "模型", icon: Cpu },
   { id: "skills", label: "Skills", icon: Sparkles },
@@ -157,15 +154,18 @@ export default function ClaudeConfigPage() {
   const [hookEvents, setHookEvents] = useState<string[]>([]);
   const [loading, setLoading] = useState(!readCache(CACHE_KEY_CONFIG));
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<TabId>("global");
-  const [searchQuery, setSearchQuery] = useState("");
 
-  // Extra data for new tabs
+  // Extra data
   const [skills, setSkills] = useState<SkillDetail[]>([]);
   const [commands, setCommands] = useState<CommandInfo[]>([]);
   const [rules, setRules] = useState<RuleInfo[]>([]);
   const [systemInfo, setSystemInfo] = useState<ClaudeSystemInfo | null>(null);
   const [claudeMd, setClaudeMd] = useState("");
+
+  // Scroll-spy
+  const [activeSection, setActiveSection] = useState<SectionId>("global");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const load = useCallback(async () => {
     if (!config) setLoading(true);
@@ -181,7 +181,7 @@ export default function ClaudeConfigPage() {
     } catch (e) {
       if (!config) setError(e instanceof Error ? e.message : "加载失败");
     } finally { setLoading(false); }
-    // Load extra data (non-blocking)
+    // Non-blocking extras
     api.claudeConfig.listSkills().then(setSkills).catch(() => {});
     api.claudeConfig.listCommands().then(setCommands).catch(() => {});
     api.claudeConfig.listRules().then(setRules).catch(() => {});
@@ -191,8 +191,36 @@ export default function ClaudeConfigPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── Tab badge counts ──
-  const tabCounts: Partial<Record<TabId, number>> = useMemo(() => ({
+  // Scroll-spy observer
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible section
+        let topId: SectionId | null = null;
+        let topY = Infinity;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const rect = entry.boundingClientRect;
+            if (rect.top < topY) { topY = rect.top; topId = entry.target.getAttribute("data-section") as SectionId; }
+          }
+        }
+        if (topId) setActiveSection(topId);
+      },
+      { root: container, rootMargin: "-10% 0px -80% 0px", threshold: 0 }
+    );
+    for (const el of Object.values(sectionRefs.current)) { if (el) observer.observe(el); }
+    return () => observer.disconnect();
+  }, [config, overview]); // re-observe when data loads
+
+  const scrollToSection = (id: SectionId) => {
+    const el = sectionRefs.current[id];
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // Section badge counts
+  const sectionCounts: Partial<Record<SectionId, number>> = useMemo(() => ({
     skills: skills.length,
     commands: commands.length,
     mcp: overview?.mcp_servers.length,
@@ -203,7 +231,7 @@ export default function ClaudeConfigPage() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* ── 顶栏 ── */}
+      {/* 顶栏 */}
       <div className="shrink-0 px-6 pt-4 pb-2 flex items-center gap-4" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex-1">
           <h1 className="text-[15px] font-bold text-app">Claude Code 配置中心</h1>
@@ -211,92 +239,130 @@ export default function ClaudeConfigPage() {
             {overview?.home_path || "~/.claude"} · {overview?.cli_version || "..."}
           </p>
         </div>
-        {/* 搜索 */}
-        <div className="relative">
-          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-app-tertiary" />
-          <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            placeholder="搜索配置项..." spellCheck={false}
-            className="pl-7 pr-3 py-1.5 text-[11px] bg-app-secondary border border-app rounded-lg w-48 outline-none focus:border-accent/60 text-app placeholder:text-app-tertiary" />
-        </div>
         <button onClick={load}
           className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg border border-app text-app-tertiary hover:text-app transition-colors">
           <RotateCcw size={11} /> 刷新
         </button>
       </div>
 
-      {/* ── Tab 栏 ── */}
-      <div className="shrink-0 px-6 flex items-center gap-1 overflow-x-auto py-2" style={{ borderBottom: "1px solid var(--border)" }}>
-        {TABS.map(tab => {
-          const Icon = tab.icon;
-          const count = tabCounts[tab.id];
-          const active = activeTab === tab.id;
-          return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all shrink-0 whitespace-nowrap",
-                active
-                  ? "bg-accent/10 text-accent font-medium"
-                  : "text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03]"
-              )}>
-              <Icon size={12} />
-              {tab.label}
-              {count !== undefined && count > 0 && (
-                <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded-full",
-                  active ? "bg-accent/20 text-accent" : "bg-app-tertiary/20")}>{count}</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* 主区域：侧边栏 + 内容 */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* 侧边栏 */}
+        <div className="w-44 shrink-0 overflow-y-auto py-3 px-2 space-y-0.5" style={{ borderRight: "1px solid var(--border)" }}>
+          {SECTIONS.map(sec => {
+            const Icon = sec.icon;
+            const count = sectionCounts[sec.id];
+            const active = activeSection === sec.id;
+            return (
+              <button key={sec.id} onClick={() => scrollToSection(sec.id)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] transition-all text-left",
+                  active
+                    ? "bg-accent/10 text-accent font-medium"
+                    : "text-app-tertiary hover:text-app-secondary hover:bg-white/[0.03]"
+                )}>
+                <Icon size={13} />
+                <span className="flex-1">{sec.label}</span>
+                {count !== undefined && count > 0 && (
+                  <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded-full",
+                    active ? "bg-accent/20 text-accent" : "bg-app-tertiary/20 text-app-tertiary")}>{count}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-      {/* ── 内容区 ── */}
-      <div className="flex-1 overflow-y-auto p-6">
-        {error && (
-          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-xs text-red-400 mb-4">
-            <AlertTriangle size={14} /> {error}
-          </div>
-        )}
-        {loading && !config && (
-          <div className="flex items-center justify-center h-40">
-            <p className="text-app-tertiary text-xs animate-pulse">加载配置信息...</p>
-          </div>
-        )}
+        {/* 内容区 */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-10">
+          {error && (
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-xs text-red-400">
+              <AlertTriangle size={14} /> {error}
+            </div>
+          )}
+          {loading && !config && (
+            <div className="flex items-center justify-center h-40">
+              <p className="text-app-tertiary text-xs animate-pulse">加载配置信息...</p>
+            </div>
+          )}
 
-        {activeTab === "global" && (
-          <TabGlobal config={config} overview={overview} onUpdate={setConfig}
-            claudeMd={claudeMd} onClaudeMdChange={setClaudeMd} />
-        )}
-        {activeTab === "model" && config && (
-          <TabModel config={config} onUpdate={setConfig} />
-        )}
-        {activeTab === "skills" && <TabSkills skills={skills} />}
-        {activeTab === "commands" && <TabCommands commands={commands} />}
-        {activeTab === "mcp" && (
-          <TabMcp overview={overview} onOverviewUpdate={setOverview} />
-        )}
-        {activeTab === "mcp-market" && <McpMarketEmbed />}
-        {activeTab === "hooks" && config && (
-          <TabHooks config={config} hookEvents={hookEvents} onUpdate={setConfig} />
-        )}
-        {activeTab === "rules" && <TabRules rules={rules} />}
-        {activeTab === "permissions" && config && (
-          <TabPermissions config={config} onUpdate={setConfig} />
-        )}
-        {activeTab === "env" && <TabEnvVars />}
-        {activeTab === "plugins" && config && (
-          <TabPlugins config={config} overview={overview} onUpdate={setConfig} />
-        )}
-        {activeTab === "monitoring" && overview && <TabMonitoring overview={overview} />}
-        {activeTab === "about" && <TabAbout systemInfo={systemInfo} overview={overview} />}
+          {/* 全局 */}
+          <div ref={el => { sectionRefs.current["global"] = el; }} data-section="global">
+            <SectionGlobal config={config} overview={overview} onUpdate={setConfig}
+              claudeMd={claudeMd} onClaudeMdChange={setClaudeMd} />
+          </div>
+
+          {/* 模型 */}
+          <div ref={el => { sectionRefs.current["model"] = el; }} data-section="model">
+            <SectionModel />
+          </div>
+
+          {/* Skills */}
+          <div ref={el => { sectionRefs.current["skills"] = el; }} data-section="skills">
+            <SectionSkills skills={skills} />
+          </div>
+
+          {/* Commands */}
+          <div ref={el => { sectionRefs.current["commands"] = el; }} data-section="commands">
+            <SectionCommands commands={commands} />
+          </div>
+
+          {/* MCP */}
+          <div ref={el => { sectionRefs.current["mcp"] = el; }} data-section="mcp">
+            <SectionMcp overview={overview} onOverviewUpdate={setOverview} />
+          </div>
+
+          {/* MCP 市场 */}
+          <div ref={el => { sectionRefs.current["mcp-market"] = el; }} data-section="mcp-market">
+            <McpMarketEmbed />
+          </div>
+
+          {/* Hooks */}
+          <div ref={el => { sectionRefs.current["hooks"] = el; }} data-section="hooks">
+            {config && <SectionHooks config={config} hookEvents={hookEvents} onUpdate={setConfig} />}
+          </div>
+
+          {/* Rules */}
+          <div ref={el => { sectionRefs.current["rules"] = el; }} data-section="rules">
+            <SectionRules rules={rules} />
+          </div>
+
+          {/* 权限 */}
+          <div ref={el => { sectionRefs.current["permissions"] = el; }} data-section="permissions">
+            {config && <SectionPermissions config={config} onUpdate={setConfig} />}
+          </div>
+
+          {/* 环境变量 */}
+          <div ref={el => { sectionRefs.current["env"] = el; }} data-section="env">
+            <SectionEnvVars />
+          </div>
+
+          {/* 插件 */}
+          <div ref={el => { sectionRefs.current["plugins"] = el; }} data-section="plugins">
+            {config && <SectionPlugins config={config} overview={overview} onUpdate={setConfig} />}
+          </div>
+
+          {/* 监控 */}
+          <div ref={el => { sectionRefs.current["monitoring"] = el; }} data-section="monitoring">
+            {overview && <SectionMonitoring overview={overview} />}
+          </div>
+
+          {/* 关于 */}
+          <div ref={el => { sectionRefs.current["about"] = el; }} data-section="about">
+            <SectionAbout systemInfo={systemInfo} overview={overview} />
+          </div>
+
+          {/* 底部留白 */}
+          <div className="h-40" />
+        </div>
       </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: 全局配置
+// Section: 全局配置
 // ═══════════════════════════════════════════════════════════════════
-function TabGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange }: {
+function SectionGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange }: {
   config: ClaudeConfig | null; overview: ClaudeOverview | null;
   onUpdate: (c: ClaudeConfig) => void;
   claudeMd: string; onClaudeMdChange: (s: string) => void;
@@ -314,6 +380,8 @@ function TabGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange }: {
 
   return (
     <div className="space-y-6">
+      <SectionTitle icon={Settings2} color="var(--accent)" label="全局配置" desc="概览与常用设置" />
+
       {/* Overview stats */}
       {overview && (
         <div className="grid grid-cols-5 gap-3">
@@ -378,6 +446,25 @@ function TabGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange }: {
   );
 }
 
+// ── Section 标题组件 ─────────────────────────────────────────────────
+function SectionTitle({ icon: Icon, color, label, desc }: {
+  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  color: string; label: string; desc: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 mb-1">
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+        <Icon size={14} style={{ color }} />
+      </div>
+      <div>
+        <h2 className="text-sm font-bold text-app">{label}</h2>
+        <p className="text-[10px] text-app-tertiary">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+// ── Activity Chart ──────────────────────────────────────────────────
 function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
   const recent = useMemo(() => data.slice(-60), [data]);
   const maxMsg = useMemo(() => Math.max(1, ...recent.map(d => d.message_count)), [recent]);
@@ -561,41 +648,33 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: 模型 + 全局配置面板
+// Section: 模型 + 全局配置面板
 // ═══════════════════════════════════════════════════════════════════
-function TabModel({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+function SectionModel() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-2">
-        <Cpu size={16} className="text-purple-400" />
-        <h2 className="text-sm font-semibold text-app">模型与全局参数配置</h2>
-      </div>
+    <div className="space-y-4">
+      <SectionTitle icon={Cpu} color="#8b5cf6" label="模型与参数" desc="模型选择、API 与高级参数配置" />
       <GlobalConfigPanel />
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: Skills
+// Section: Skills
 // ═══════════════════════════════════════════════════════════════════
-function TabSkills({ skills }: { skills: SkillDetail[] }) {
+function SectionSkills({ skills }: { skills: SkillDetail[] }) {
   const [selected, setSelected] = useState<string | null>(null);
   const detail = skills.find(s => s.name === selected);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <Sparkles size={16} className="text-yellow-400" />
-        <h2 className="text-sm font-semibold text-app">Skills 技能库</h2>
-        <span className="text-[10px] text-app-tertiary">~/.claude/skills/</span>
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary ml-auto">{skills.length} 个技能</span>
-      </div>
+      <SectionTitle icon={Sparkles} color="#eab308" label="Skills 技能库" desc="~/.claude/skills/ 目录下的自定义技能" />
+      <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{skills.length} 个技能</span>
 
       {skills.length === 0 ? (
         <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义 Skill</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          {/* Skill list */}
           <div className="lg:col-span-1 space-y-2">
             {skills.map(s => (
               <button key={s.name} onClick={() => setSelected(s.name)}
@@ -610,8 +689,6 @@ function TabSkills({ skills }: { skills: SkillDetail[] }) {
               </button>
             ))}
           </div>
-
-          {/* Skill detail */}
           <div className="lg:col-span-2">
             {detail ? (
               <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
@@ -659,20 +736,16 @@ function TabSkills({ skills }: { skills: SkillDetail[] }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: Commands
+// Section: Commands
 // ═══════════════════════════════════════════════════════════════════
-function TabCommands({ commands }: { commands: CommandInfo[] }) {
+function SectionCommands({ commands }: { commands: CommandInfo[] }) {
   const [selected, setSelected] = useState<string | null>(null);
   const detail = commands.find(c => c.name === selected);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <Terminal size={16} className="text-green-400" />
-        <h2 className="text-sm font-semibold text-app">自定义命令</h2>
-        <span className="text-[10px] text-app-tertiary">~/.claude/commands/</span>
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary ml-auto">{commands.length} 个命令</span>
-      </div>
+      <SectionTitle icon={Terminal} color="#22c55e" label="自定义命令" desc="~/.claude/commands/ 目录下的 slash 命令" />
+      <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{commands.length} 个命令</span>
 
       {commands.length === 0 ? (
         <div className="text-center py-12 text-app-tertiary text-xs">暂无自定义命令</div>
@@ -710,9 +783,9 @@ function TabCommands({ commands }: { commands: CommandInfo[] }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: MCP
+// Section: MCP
 // ═══════════════════════════════════════════════════════════════════
-function TabMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | null; onOverviewUpdate: (o: ClaudeOverview) => void }) {
+function SectionMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | null; onOverviewUpdate: (o: ClaudeOverview) => void }) {
   const [servers, setServers] = useState<McpServer[]>(overview?.mcp_servers ?? []);
   const [refreshing, setRefreshing] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -735,10 +808,7 @@ function TabMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Globe size={16} className="text-blue-400" />
-          <h2 className="text-sm font-semibold text-app">MCP 服务器</h2>
-        </div>
+        <SectionTitle icon={Globe} color="#3b82f6" label="MCP 服务器" desc="Model Context Protocol 服务器管理" />
         <div className="flex gap-2">
           <button onClick={refresh} disabled={refreshing} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app"><RotateCcw size={10} className={refreshing ? "animate-spin" : ""} /> 刷新</button>
           <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 添加</button>
@@ -784,9 +854,9 @@ function TabMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: Hooks
+// Section: Hooks
 // ═══════════════════════════════════════════════════════════════════
-function TabHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
+function SectionHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [editState, setEditState] = useState<Record<string, HookRule[]>>({});
@@ -806,11 +876,7 @@ function TabHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 mb-2">
-        <Webhook size={16} className="text-orange-400" />
-        <h2 className="text-sm font-semibold text-app">Hooks 生命周期钩子</h2>
-      </div>
-      <p className="text-[11px] text-app-tertiary mb-3">Hook 在 Claude Code 事件触发时执行外部命令。每个事件可配置多个规则。</p>
+      <SectionTitle icon={Webhook} color="#f97316" label="Hooks 生命周期钩子" desc="Claude Code 事件触发时执行外部命令" />
       {hookEvents.map(event => {
         const meta = EVENT_LABELS[event] ?? { label: event, desc: "" };
         const rules = getEditRules(event);
@@ -881,20 +947,17 @@ function TabHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: Rules
+// Section: Rules
 // ═══════════════════════════════════════════════════════════════════
-function TabRules({ rules }: { rules: RuleInfo[] }) {
+function SectionRules({ rules }: { rules: RuleInfo[] }) {
   const [selected, setSelected] = useState<string | null>(null);
   const detail = rules.find(r => r.name === selected);
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <BookOpen size={16} className="text-cyan-400" />
-        <h2 className="text-sm font-semibold text-app">Rules 规则</h2>
-        <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary ml-auto">{rules.length} 个规则</span>
-      </div>
+      <SectionTitle icon={BookOpen} color="#06b6d4" label="Rules 规则" desc="~/.claude/rules/ 目录下的规则文件" />
+      <span className="text-[10px] font-mono bg-app-tertiary/20 px-2 py-0.5 rounded-full text-app-tertiary">{rules.length} 个规则</span>
       {rules.length === 0 ? (
-        <div className="text-center py-12 text-app-tertiary text-xs">暂无规则文件（~/.claude/rules/）</div>
+        <div className="text-center py-12 text-app-tertiary text-xs">暂无规则文件</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
@@ -924,9 +987,9 @@ function TabRules({ rules }: { rules: RuleInfo[] }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: Permissions
+// Section: Permissions
 // ═══════════════════════════════════════════════════════════════════
-function TabPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+function SectionPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
   const [jsonText, setJsonText] = useState(() => JSON.stringify(config.permissions, null, 2));
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
@@ -941,8 +1004,7 @@ function TabPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
   const isDirty = jsonText !== JSON.stringify(config.permissions, null, 2);
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 mb-2"><Shield size={16} className="text-red-400" /><h2 className="text-sm font-semibold text-app">权限配置</h2></div>
-      <p className="text-[11px] text-app-tertiary mb-3">权限配置控制 Claude Code 的工具调用权限。直接编辑 JSON 格式。</p>
+      <SectionTitle icon={Shield} color="#ef4444" label="权限配置" desc="Claude Code 的工具调用权限" />
       <textarea value={jsonText} onChange={e => { setJsonText(e.target.value); setStatus("idle"); setParseError(""); }} spellCheck={false}
         rows={Math.max(8, jsonText.split("\n").length + 1)}
         className={cn("w-full bg-app-secondary border rounded-xl px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed", status === "error" ? "border-red-500/40" : "border-app focus:border-accent/60")} />
@@ -956,9 +1018,9 @@ function TabPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: 环境变量
+// Section: 环境变量
 // ═══════════════════════════════════════════════════════════════════
-function TabEnvVars() {
+function SectionEnvVars() {
   const ENV_DEFS = [
     { key: "ANTHROPIC_API_KEY", desc: "API 密钥", type: "password" as const },
     { key: "ANTHROPIC_AUTH_TOKEN", desc: "认证令牌", type: "password" as const },
@@ -976,8 +1038,7 @@ function TabEnvVars() {
   ];
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2"><Variable size={16} className="text-purple-400" /><h2 className="text-sm font-semibold text-app">环境变量</h2></div>
-      <p className="text-[11px] text-app-tertiary">Claude Code 相关的环境变量。这些值从系统环境中读取，修改需在 shell 配置文件中设置。</p>
+      <SectionTitle icon={Variable} color="#a855f7" label="环境变量" desc="Claude Code 相关的环境变量（只读，修改需在 shell 中设置）" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {ENV_DEFS.map(env => (
           <div key={env.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
@@ -996,9 +1057,9 @@ function TabEnvVars() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: Plugins
+// Section: Plugins
 // ═══════════════════════════════════════════════════════════════════
-function TabPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; overview: ClaudeOverview | null; onUpdate: (c: ClaudeConfig) => void }) {
+function SectionPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; overview: ClaudeOverview | null; onUpdate: (c: ClaudeConfig) => void }) {
   const [saving, setSaving] = useState<string | null>(null);
   const [newPluginId, setNewPluginId] = useState("");
   const handleToggle = async (id: string, enabled: boolean) => { setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, enabled)); } finally { setSaving(null); } };
@@ -1009,7 +1070,7 @@ function TabPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2"><Plug size={16} className="text-green-400" /><h2 className="text-sm font-semibold text-app">插件管理</h2></div>
+      <SectionTitle icon={Plug} color="#22c55e" label="插件管理" desc="启用/禁用 Claude Code 插件" />
       {plugins.length === 0 && <div className="text-center py-8 text-app-tertiary text-xs">暂无已配置的插件</div>}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {plugins.map(([pluginId, enabled]) => {
@@ -1052,12 +1113,12 @@ function TabPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: 监控
+// Section: 监控
 // ═══════════════════════════════════════════════════════════════════
-function TabMonitoring({ overview }: { overview: ClaudeOverview }) {
+function SectionMonitoring({ overview }: { overview: ClaudeOverview }) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2"><Activity size={16} className="text-emerald-400" /><h2 className="text-sm font-semibold text-app">监控与统计</h2></div>
+      <SectionTitle icon={Activity} color="#10b981" label="监控与统计" desc="Claude Code 使用统计与活动趋势" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "总消息", value: fmtNum(overview.total_messages), color: "#22c55e" },
@@ -1076,14 +1137,12 @@ function TabMonitoring({ overview }: { overview: ClaudeOverview }) {
           </div>
         ))}
       </div>
-      {/* Activity chart */}
       {overview.daily_activity.length > 0 && (
         <div className="bg-app-secondary border border-app rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3"><BarChart3 size={13} className="text-app-tertiary" /><span className="text-xs font-semibold text-app">活动趋势</span></div>
           <ActivityChart data={overview.daily_activity} />
         </div>
       )}
-      {/* Projects overview */}
       <div className="bg-app-secondary border border-app rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3"><FolderOpen size={13} className="text-green-400" /><span className="text-xs font-semibold text-app">项目记忆</span></div>
         <div className="flex flex-wrap gap-2">
@@ -1101,12 +1160,12 @@ function TabMonitoring({ overview }: { overview: ClaudeOverview }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB: 关于
+// Section: 关于
 // ═══════════════════════════════════════════════════════════════════
-function TabAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
+function SectionAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2"><Info size={16} className="text-blue-400" /><h2 className="text-sm font-semibold text-app">关于 Claude Code</h2></div>
+      <SectionTitle icon={Info} color="#3b82f6" label="关于 Claude Code" desc="系统信息与诊断" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {[
           { label: "CLI 版本", value: overview?.cli_version || systemInfo?.cli_version || "..." },
