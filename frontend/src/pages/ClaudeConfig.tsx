@@ -1113,7 +1113,6 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
 // Sec: Hooks
 // ═══════════════════════════════════════════════════════════════════
 function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
-  const [expanded, setExpanded] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [editState, setEditState] = useState<Record<string, HookRule[]>>({});
   const getRules = (ev: string): HookRule[] => editState[ev] ?? config.hooks[ev] ?? [];
@@ -1121,7 +1120,7 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
   const dirty = (ev: string) => { const e = editState[ev]; return e ? JSON.stringify(e) !== JSON.stringify(config.hooks[ev] ?? []) : false; };
   const save = async (ev: string) => { setSaving(ev); try { const u = await api.claudeConfig.updateHooks(ev, getRules(ev)); onUpdate(u); setEditState(p => { const n = { ...p }; delete n[ev]; return n; }); } finally { setSaving(null); } };
   const del = async (ev: string) => { setSaving(ev); try { onUpdate(await api.claudeConfig.deleteHookEvent(ev)); setEditState(p => { const n = { ...p }; delete n[ev]; return n; }); } finally { setSaving(null); } };
-  const addRule = (ev: string) => { setRules(ev, [...getRules(ev), { matcher: "", hooks: [{ type: "command", command: "", timeout: 5 }] }]); setExpanded(ev); };
+  const addRule = (ev: string) => { setRules(ev, [...getRules(ev), { matcher: "", hooks: [{ type: "command", command: "", timeout: 5 }] }]); };
   const rmRule = (ev: string, i: number) => setRules(ev, getRules(ev).filter((_, j) => j !== i));
   const updRule = (ev: string, i: number, f: "matcher", v: string) => { const r = [...getRules(ev)]; r[i] = { ...r[i], [f]: v }; setRules(ev, r); };
   const addHook = (ev: string, i: number) => { const r = [...getRules(ev)]; r[i] = { ...r[i], hooks: [...r[i].hooks, { type: "command", command: "", timeout: 5 }] }; setRules(ev, r); };
@@ -1137,12 +1136,11 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
         const meta = EVENT_LABELS[ev] ?? { label: ev, desc: "" };
         const rules = getRules(ev);
         const has = rules.length > 0;
-        const exp = expanded === ev;
         const isDirty = dirty(ev);
         return (
           <div key={ev} className={cn("rounded-xl border overflow-hidden", has ? "border-app bg-app-secondary" : "border-app/50 bg-app-secondary/50")}>
-            <button onClick={() => setExpanded(exp ? null : ev)} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02]">
-              {exp ? <ChevronDown size={13} className="text-app-tertiary" /> : <ChevronRight size={13} className="text-app-tertiary" />}
+            {/* Header — 不再可点击折叠 */}
+            <div className="flex items-center gap-3 px-4 py-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-app">{meta.label}</span>
@@ -1152,11 +1150,11 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                 </div>
                 <p className="text-[10px] text-app-tertiary mt-0.5">{meta.desc}</p>
               </div>
-              <button onClick={e => { e.stopPropagation(); addRule(ev); }} className="text-app-tertiary hover:text-accent p-1"><Plus size={14} /></button>
-            </button>
-            {exp && (
+              <button onClick={() => addRule(ev)} className="text-app-tertiary hover:text-accent p-1" title="添加规则"><Plus size={14} /></button>
+            </div>
+            {/* Rules — 始终展示 */}
+            {has && (
               <div className="border-t border-app px-4 py-3 space-y-3">
-                {!rules.length && <p className="text-[11px] text-app-tertiary text-center py-3">暂无规则</p>}
                 {rules.map((rule, ri) => (
                   <div key={ri} className="bg-app rounded-lg border border-app/50 p-3 space-y-2.5">
                     <div className="flex items-center gap-2">
@@ -1178,15 +1176,13 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                     <button onClick={() => addHook(ev, ri)} className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent flex items-center gap-1"><Plus size={10} /> 添加命令</button>
                   </div>
                 ))}
-                {has && (
-                  <div className="flex items-center gap-2 pt-1">
-                    <button onClick={() => save(ev)} disabled={!isDirty || saving === ev}
-                      className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-                      <Save size={11} />{saving === ev ? "保存中..." : "保存"}</button>
-                    <button onClick={() => del(ev)} disabled={saving === ev}
-                      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20"><Trash2 size={11} /> 清除</button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 pt-1">
+                  <button onClick={() => save(ev)} disabled={!isDirty || saving === ev}
+                    className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
+                    <Save size={11} />{saving === ev ? "保存中..." : "保存"}</button>
+                  <button onClick={() => del(ev)} disabled={saving === ev}
+                    className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20"><Trash2 size={11} /> 清除</button>
+                </div>
               </div>
             )}
           </div>
