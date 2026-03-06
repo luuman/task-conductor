@@ -187,6 +187,7 @@ export default function ClaudeConfigPage() {
     } finally { setLoading(false); }
     // Non-blocking extras
     api.claudeConfig.listSkills().then(setSkills).catch(() => {});
+    api.claudeConfig.listAgents().then(setAgents).catch(() => {});
     api.claudeConfig.listCommands().then(setCommands).catch(() => {});
     api.claudeConfig.listRules().then(setRules).catch(() => {});
     api.claudeConfig.systemInfo().then(setSystemInfo).catch(() => {});
