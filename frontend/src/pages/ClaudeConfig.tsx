@@ -1497,15 +1497,25 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
         </div>
       )}
       <div className="bg-app-secondary border border-app rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3"><FolderOpen size={13} className="text-green-400" /><span className="text-xs font-semibold text-app">项目记忆</span></div>
-        <div className="flex flex-wrap gap-2">
-          {overview.projects.map(p => (
-            <span key={p.dir_name} className="text-[9px] px-2 py-1 rounded-md bg-app border border-app font-mono text-app-secondary">
-              {p.dir_name.replace(/-home-sichengli-Documents-/g, "").replace(/-/g, "/")}
-              {p.has_memory && <span className="ml-1 text-green-400">M</span>}
-              {p.has_claude_md && <span className="ml-0.5 text-accent">C</span>}
-            </span>
-          ))}
+        <div className="flex items-center gap-2 mb-3"><FolderOpen size={13} className="text-green-400" /><span className="text-xs font-semibold text-app">项目记忆</span><span className="text-[9px] text-app-tertiary">{overview.projects.length} 个项目</span></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {overview.projects.map(p => {
+            const fullPath = "/" + p.dir_name.replace(/^-/, "").replace(/-/g, "/");
+            const parts = fullPath.split("/").filter(Boolean);
+            const projectName = parts[parts.length - 1] || p.dir_name;
+            return (
+              <div key={p.dir_name} className="bg-app border border-app rounded-lg px-3 py-2.5 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-app truncate">{projectName}</span>
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    {p.has_memory && <span className="text-[8px] px-1 py-0.5 rounded bg-green-500/10 text-green-400 font-medium">Memory</span>}
+                    {p.has_claude_md && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent font-medium">CLAUDE.md</span>}
+                  </div>
+                </div>
+                <p className="text-[9px] text-app-tertiary font-mono truncate">{fullPath}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
