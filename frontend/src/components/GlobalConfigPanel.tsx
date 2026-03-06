@@ -26,6 +26,23 @@ import {
   Plus,
   Trash2,
   Zap,
+  Terminal,
+  MessageSquare,
+  FileSearch,
+  Code2,
+  Search,
+  GitMerge,
+  Bug,
+  Gauge,
+  Lock,
+  FileOutput,
+  Wifi,
+  Layers,
+  Database,
+  Puzzle,
+  Stethoscope,
+  Command,
+  Variable,
 } from "lucide-react";
 import { api } from "../lib/api";
 
