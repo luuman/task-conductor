@@ -11,6 +11,7 @@ import {
   type SkillDetail,
   type CommandInfo,
   type RuleInfo,
+  type AgentInfo,
   type ClaudeSystemInfo,
 } from "../lib/api";
 import { cn } from "../lib/utils";
