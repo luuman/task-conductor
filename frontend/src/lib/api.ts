@@ -525,6 +525,9 @@ export const api = {
       request<{ ok: boolean }>("/api/claude-config/agents/create", { method: "POST", body: JSON.stringify({ name, content }) }),
     deleteAgent: (name: string) =>
       request<{ ok: boolean }>(`/api/claude-config/agents/${encodeURIComponent(name)}`, { method: "DELETE" }),
+    presetAgents: () => request<PresetItem[]>("/api/claude-config/presets/agents"),
+    presetCommands: () => request<PresetItem[]>("/api/claude-config/presets/commands"),
+    presetRules: () => request<PresetItem[]>("/api/claude-config/presets/rules"),
     systemInfo: () => request<ClaudeSystemInfo>("/api/claude-config/system-info"),
     getClaudeMd: () => request<{ content: string; path: string }>("/api/claude-config/claude-md"),
     updateClaudeMd: (content: string) =>
