@@ -635,24 +635,8 @@ function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, s
         </div>
       )}
 
-      {/* CLAUDE.md */}
-      <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FileText size={13} className="text-accent" />
-            <span className="text-xs font-semibold text-app">全局 CLAUDE.md</span>
-            <span className="text-[9px] text-app-tertiary font-mono">~/.claude/CLAUDE.md</span>
-          </div>
-          <button onClick={handleSaveMd} disabled={mdSaving}
-            className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white transition-colors">
-            {mdSaved ? <Check size={10} /> : <Save size={10} />}
-            {mdSaving ? "保存中..." : mdSaved ? "已保存" : "保存"}
-          </button>
-        </div>
-        <textarea value={claudeMd} onChange={e => onClaudeMdChange(e.target.value)}
-          spellCheck={false} rows={8}
-          className="w-full bg-app border border-app rounded-lg px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed focus:border-accent/60" />
-      </div>
+      {/* CLAUDE.md — 展示/编辑切换 */}
+      <ClaudeMdPanel claudeMd={claudeMd} onChange={onClaudeMdChange} onSave={handleSaveMd} saving={mdSaving} saved={mdSaved} />
 
       {/* Common settings */}
       {config && <CommonSettingsGrid config={config} onUpdate={onUpdate} searchQuery={searchQuery} />}
