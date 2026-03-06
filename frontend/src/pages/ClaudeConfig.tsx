@@ -520,7 +520,7 @@ export default function ClaudeConfig() {
     const container = scrollRef.current;
     if (!container) return;
     const handler = () => {
-      const sectionIds: Section[] = ["mcp", "mcp-market", "hooks", "plugins", "permissions", "settings", "other"];
+      const sectionIds: Section[] = ["global-config", "mcp", "mcp-market", "hooks", "plugins", "permissions", "settings", "other"];
       for (const id of sectionIds) {
         const el = document.getElementById(`section-${id}`);
         if (el) {
