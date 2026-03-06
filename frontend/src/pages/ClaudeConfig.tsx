@@ -1718,6 +1718,120 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Sec: 回收站
+// ═══════════════════════════════════════════════════════════════════
+function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () => void }) {
+  const [restoring, setRestoring] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [status, setStatus] = useState<{ text: string; color: string } | null>(null);
+
+  const TYPE_LABELS: Record<string, string> = { agent: "Agent", command: "命令", rule: "规则", skill: "Skill" };
+  const TYPE_COLORS: Record<string, string> = { agent: "#f472b6", command: "#22c55e", rule: "#06b6d4", skill: "#eab308" };
+
+  const handleRestore = async (item: DisabledItem) => {
+    setRestoring(item.name);
+    try {
+      await api.claudeConfig.restoreDisabledItem(item.type, item.name);
+      setStatus({ text: `已恢复 "${item.name}"`, color: "#22c55e" });
+      onRefresh();
+    } catch (e) {
+      setStatus({ text: e instanceof Error ? e.message : "恢复失败", color: "#ef4444" });
+    } finally {
+      setRestoring(null);
+      setTimeout(() => setStatus(null), 3000);
+    }
+  };
+
+  const handleDelete = async (item: DisabledItem) => {
+    if (!confirm(`确定永久删除 "${item.name}"？此操作不可恢复。`)) return;
+    setDeleting(item.name);
+    try {
+      await api.claudeConfig.deleteDisabledItem(item.type, item.name);
+      setStatus({ text: `已永久删除 "${item.name}"`, color: "#22c55e" });
+      onRefresh();
+    } catch (e) {
+      setStatus({ text: e instanceof Error ? e.message : "删除失败", color: "#ef4444" });
+    } finally {
+      setDeleting(null);
+      setTimeout(() => setStatus(null), 3000);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!confirm(`确定永久删除所有 ${items.length} 个禁用项？此操作不可恢复。`)) return;
+    let ok = 0, fail = 0;
+    for (const item of items) {
+      try { await api.claudeConfig.deleteDisabledItem(item.type, item.name); ok++; } catch { fail++; }
+    }
+    setStatus({ text: fail ? `删除 ${ok} 项，${fail} 项失败` : `已永久删除 ${ok} 项`, color: fail ? "#eab308" : "#22c55e" });
+    onRefresh();
+    setTimeout(() => setStatus(null), 3000);
+  };
+
+  const handleRestoreAll = async () => {
+    let ok = 0, fail = 0;
+    for (const item of items) {
+      try { await api.claudeConfig.restoreDisabledItem(item.type, item.name); ok++; } catch { fail++; }
+    }
+    setStatus({ text: fail ? `恢复 ${ok} 项，${fail} 项失败` : `已恢复 ${ok} 项`, color: fail ? "#eab308" : "#22c55e" });
+    onRefresh();
+    setTimeout(() => setStatus(null), 3000);
+  };
+
+  return (
+    <div className="space-y-4">
+      <SectionHeader icon={ArchiveRestore} color="#f59e0b" label="回收站" desc="已禁用的组件，可恢复或永久删除"
+        right={items.length > 0 ? (
+          <div className="flex items-center gap-2">
+            <button onClick={handleRestoreAll}
+              className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app hover:border-accent/40 transition-colors">
+              <RotateCcw size={10} /> 全部恢复
+            </button>
+            <button onClick={handleDeleteAll}
+              className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">
+              <Trash2 size={10} /> 全部删除
+            </button>
+          </div>
+        ) : undefined} />
+
+      {status && (
+        <div className="text-xs px-3 py-2 rounded-lg" style={{ background: `${status.color}15`, color: status.color }}>
+          {status.text}
+        </div>
+      )}
+
+      {!items.length ? <Empty text="没有已禁用的组件" /> : (
+        <div className="space-y-2">
+          {items.map(item => {
+            const typeColor = TYPE_COLORS[item.type] || "#7878a8";
+            return (
+              <div key={`${item.type}-${item.name}`}
+                className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <StatusTag label={TYPE_LABELS[item.type] || item.type} color={typeColor} />
+                    <span className="text-xs font-semibold text-app">{item.name}</span>
+                  </div>
+                  <p className="text-[9px] text-app-tertiary font-mono mt-1 truncate">{item.file_path}</p>
+                </div>
+                <button onClick={() => handleRestore(item)} disabled={restoring === item.name}
+                  className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-accent hover:bg-accent/10 transition-colors disabled:opacity-40">
+                  <RotateCcw size={10} /> {restoring === item.name ? "..." : "恢复"}
+                </button>
+                <button onClick={() => handleDelete(item)} disabled={deleting === item.name}
+                  className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40">
+                  <Trash2 size={10} /> {deleting === item.name ? "..." : "删除"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // Shared tiny components
 // ═══════════════════════════════════════════════════════════════════
 function StatusTag({ label, color }: { label: string; color: string }) {
