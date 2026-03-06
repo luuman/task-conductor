@@ -211,7 +211,7 @@ def _parse_config(raw: dict) -> ClaudeConfigOut:
     )
 
 
-def _get_cli_version() -> str:
+def _get_cli_version_uncached() -> str:
     try:
         result = subprocess.run(
             ["claude", "--version"],
@@ -222,6 +222,9 @@ def _get_cli_version() -> str:
         return result.stdout.strip() if result.returncode == 0 else "unknown"
     except Exception:
         return "unknown"
+
+def _get_cli_version() -> str:
+    return _cached("cli_version", 3600, _get_cli_version_uncached)  # 1h
 
 
 def _read_stats() -> list[DailyActivity]:
