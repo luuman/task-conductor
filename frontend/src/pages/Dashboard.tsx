@@ -714,6 +714,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
 export default function Dashboard({ projectId, projects, projectsLoaded, onOpenTask, onSelectProject, onRefreshProjects }: DashboardProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [knowledgeOpen, setKnowledgeOpen] = useState(false);
+  const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -730,8 +731,6 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
       <p className="text-app-tertiary text-xs animate-pulse">加载中...</p>
     </div>
   );
-
-  const [scanning, setScanning] = useState(false);
 
   const handleScan = async () => {
     setScanning(true);
