@@ -469,6 +469,18 @@ function SectionGlobal({ config, overview, onUpdate, claudeMd, onClaudeMdChange 
   );
 }
 
+// ── 通用 Toggle 开关 ────────────────────────────────────────────────
+function ToggleSwitch({ enabled, loading, onClick }: {
+  enabled: boolean; loading?: boolean; onClick: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <button onClick={onClick} disabled={loading}
+      className={cn("w-9 h-5 rounded-full transition-colors relative shrink-0", enabled ? "bg-accent" : "bg-app-tertiary/40", loading && "opacity-50")}>
+      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", enabled ? "translate-x-[18px]" : "translate-x-0.5")} />
+    </button>
+  );
+}
+
 // ── Section 标题组件 ─────────────────────────────────────────────────
 function SectionTitle({ icon: Icon, color, label, desc }: {
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
