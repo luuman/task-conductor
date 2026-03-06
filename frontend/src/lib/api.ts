@@ -356,6 +356,21 @@ export interface ClaudeOverview {
   mcp_servers: McpServer[];
 }
 
+export interface SkillDetail {
+  name: string; path: string; description: string;
+  metadata: Record<string, unknown>; content: string;
+  has_auxiliary: boolean; auxiliary_files: string[];
+}
+export interface CommandInfo { name: string; path: string; content: string; scope: string; }
+export interface RuleInfo { name: string; path: string; content: string; scope: string; }
+export interface ClaudeSystemInfo {
+  cli_version: string; home_path: string; config_path: string;
+  cache_dir: string; cache_size_mb: number; history_size_mb: number;
+  session_count: number; project_count: number; skill_count: number;
+  plugin_count: number; hook_script_count: number; mcp_server_count: number;
+  platform: string; python_version: string;
+}
+
 export interface McpMarketServer {
   id: string; name: string; description: string; icon: string;
   type: string; url?: string; auth_type: "none" | "token" | "oauth";
