@@ -1140,6 +1140,8 @@ function CommonSettingsEditor({ config, onUpdate }: {
   onUpdate: (c: ClaudeConfig) => void;
 }) {
   const [saving, setSaving] = useState<string | null>(null);
+  const [customModel, setCustomModel] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const getValue = (key: string): unknown => config.other[key];
 
@@ -1156,141 +1158,193 @@ function CommonSettingsEditor({ config, onUpdate }: {
     }
   };
 
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {COMMON_SETTINGS.map(setting => {
-          const current = getValue(setting.key);
+  const GROUP_LABELS: Record<string, string> = {
+    model: "模型配置",
+    behavior: "行为与输出",
+    session: "会话管理",
+  };
 
-          if (setting.type === "boolean") {
-            const boolVal = current === true;
-            return (
-              <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 mr-3">
-                    <p className="text-xs font-medium text-app">{setting.label}</p>
-                    <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-                  </div>
-                  <button
-                    onClick={() => handleChange(setting.key, !boolVal)}
-                    disabled={saving === setting.key}
-                    className={cn(
-                      "w-9 h-5 rounded-full transition-colors relative shrink-0",
-                      boolVal ? "bg-accent" : "bg-app-tertiary/40"
-                    )}
-                  >
-                    <div className={cn(
-                      "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform",
-                      boolVal ? "translate-x-[18px]" : "translate-x-0.5"
-                    )} />
-                  </button>
-                </div>
-                <p className="text-[10px] font-mono text-app-tertiary mt-1.5">
-                  settings.json → <span className="text-accent">{setting.key}</span>
-                </p>
-              </div>
-            );
-          }
+  const groups = useMemo(() => {
+    const map = new Map<string, typeof COMMON_SETTINGS>();
+    for (const s of COMMON_SETTINGS) {
+      const g = s.group || "other";
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(s);
+    }
+    return map;
+  }, []);
 
-          if (setting.type === "select") {
-            const strVal = typeof current === "string" ? current : "";
-            return (
-              <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-                <div>
-                  <p className="text-xs font-medium text-app">{setting.label}</p>
-                  <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-                </div>
-                <select
-                  value={setting.options?.some(o => o.value === strVal) ? strVal : "__custom__"}
-                  onChange={e => {
-                    const v = e.target.value;
-                    if (v === "__custom__") return;
-                    handleChange(setting.key, v || undefined);
-                  }}
-                  disabled={saving === setting.key}
-                  className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60 appearance-none cursor-pointer"
-                >
-                  {setting.options?.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                  {strVal && !setting.options?.some(o => o.value === strVal) && (
-                    <option value="__custom__">自定义: {strVal}</option>
-                  )}
-                </select>
-                {/* 自定义模型输入 */}
-                {strVal && !setting.options?.some(o => o.value === strVal) && (
-                  <div className="flex gap-2">
-                    <input
-                      value={strVal}
-                      readOnly
-                      className="flex-1 bg-app border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app-secondary outline-none"
-                    />
-                    <button
-                      onClick={() => handleChange(setting.key, undefined)}
-                      className="text-[10px] text-red-400 hover:text-red-300 px-2"
-                    >
-                      清除
-                    </button>
-                  </div>
-                )}
-                <p className="text-[10px] font-mono text-app-tertiary">
-                  settings.json → <span className="text-accent">{setting.key}</span>
-                  {strVal && <span className="ml-1.5 text-app-secondary">= "{strVal}"</span>}
-                </p>
-              </div>
-            );
-          }
+  const renderSetting = (setting: typeof COMMON_SETTINGS[number]) => {
+    const current = getValue(setting.key);
 
-          if (setting.type === "number") {
-            const numVal = typeof current === "number" ? String(current) : "";
-            return (
-              <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-                <div>
-                  <p className="text-xs font-medium text-app">{setting.label}</p>
-                  <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-                </div>
-                <input
-                  type="number"
-                  value={numVal}
-                  onChange={e => {
-                    const v = e.target.value;
-                    if (v === "") handleChange(setting.key, undefined);
-                    else handleChange(setting.key, Number(v));
-                  }}
-                  placeholder={setting.placeholder}
-                  disabled={saving === setting.key}
-                  className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60"
-                />
-                <p className="text-[10px] font-mono text-app-tertiary">
-                  settings.json → <span className="text-accent">{setting.key}</span>
-                </p>
-              </div>
-            );
-          }
-
-          // string type
-          const strVal = typeof current === "string" ? current : "";
-          return (
-            <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
-              <div>
-                <p className="text-xs font-medium text-app">{setting.label}</p>
-                <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
-              </div>
-              <input
-                value={strVal}
-                onChange={e => handleChange(setting.key, e.target.value || undefined)}
-                placeholder={setting.placeholder}
-                disabled={saving === setting.key}
-                spellCheck={false}
-                className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60"
-              />
-              <p className="text-[10px] font-mono text-app-tertiary">
-                settings.json → <span className="text-accent">{setting.key}</span>
-              </p>
+    if (setting.type === "boolean") {
+      const boolVal = current === true;
+      return (
+        <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 mr-3">
+              <p className="text-xs font-medium text-app">{setting.label}</p>
+              <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
             </div>
-          );
-        })}
+            <button
+              onClick={() => handleChange(setting.key, !boolVal)}
+              disabled={saving === setting.key}
+              className={cn(
+                "w-9 h-5 rounded-full transition-colors relative shrink-0",
+                boolVal ? "bg-accent" : "bg-app-tertiary/40"
+              )}
+            >
+              <div className={cn(
+                "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform",
+                boolVal ? "translate-x-[18px]" : "translate-x-0.5"
+              )} />
+            </button>
+          </div>
+          <p className="text-[10px] font-mono text-app-tertiary mt-1.5">
+            settings.json → <span className="text-accent">{setting.key}</span>
+          </p>
+        </div>
+      );
+    }
+
+    if (setting.type === "select") {
+      const strVal = typeof current === "string" ? current : "";
+      const isKnown = setting.options?.some(o => o.value === strVal);
+      return (
+        <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
+          <div>
+            <p className="text-xs font-medium text-app">{setting.label}</p>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
+          </div>
+          <select
+            value={isKnown || !strVal ? strVal : "__custom__"}
+            onChange={e => {
+              const v = e.target.value;
+              if (v === "__custom_input__") {
+                setShowCustomInput(true);
+                setCustomModel(strVal);
+                return;
+              }
+              if (v === "__custom__") return;
+              setShowCustomInput(false);
+              handleChange(setting.key, v || undefined);
+            }}
+            disabled={saving === setting.key}
+            className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60 cursor-pointer"
+          >
+            {setting.options?.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+            <option value="__custom_input__">✏️ 输入自定义值...</option>
+            {strVal && !isKnown && (
+              <option value="__custom__">当前: {strVal}</option>
+            )}
+          </select>
+          {/* 自定义输入 */}
+          {(showCustomInput || (strVal && !isKnown)) && (
+            <div className="flex gap-2">
+              <input
+                value={showCustomInput ? customModel : strVal}
+                onChange={e => setCustomModel(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === "Enter" && customModel.trim()) {
+                    handleChange(setting.key, customModel.trim());
+                    setShowCustomInput(false);
+                  }
+                }}
+                placeholder={setting.placeholder || "输入模型名称或 Bedrock ARN"}
+                spellCheck={false}
+                className="flex-1 bg-app border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app outline-none focus:border-accent/60"
+              />
+              {showCustomInput && (
+                <button
+                  onClick={() => {
+                    if (customModel.trim()) handleChange(setting.key, customModel.trim());
+                    setShowCustomInput(false);
+                  }}
+                  className="text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"
+                >
+                  确认
+                </button>
+              )}
+              <button
+                onClick={() => { handleChange(setting.key, undefined); setShowCustomInput(false); }}
+                className="text-[10px] text-red-400 hover:text-red-300 px-2"
+              >
+                清除
+              </button>
+            </div>
+          )}
+          <p className="text-[10px] font-mono text-app-tertiary">
+            settings.json → <span className="text-accent">{setting.key}</span>
+            {strVal && <span className="ml-1.5 text-app-secondary">= "{strVal}"</span>}
+          </p>
+        </div>
+      );
+    }
+
+    if (setting.type === "number") {
+      const numVal = typeof current === "number" ? String(current) : "";
+      return (
+        <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
+          <div>
+            <p className="text-xs font-medium text-app">{setting.label}</p>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
+          </div>
+          <input
+            type="number"
+            value={numVal}
+            onChange={e => {
+              const v = e.target.value;
+              if (v === "") handleChange(setting.key, undefined);
+              else handleChange(setting.key, Number(v));
+            }}
+            placeholder={setting.placeholder}
+            disabled={saving === setting.key}
+            className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60"
+          />
+          <p className="text-[10px] font-mono text-app-tertiary">
+            settings.json → <span className="text-accent">{setting.key}</span>
+          </p>
+        </div>
+      );
+    }
+
+    // string type
+    const strVal = typeof current === "string" ? current : "";
+    return (
+      <div key={setting.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3 space-y-2">
+        <div>
+          <p className="text-xs font-medium text-app">{setting.label}</p>
+          <p className="text-[10px] text-app-tertiary mt-0.5">{setting.desc}</p>
+        </div>
+        <input
+          value={strVal}
+          onChange={e => handleChange(setting.key, e.target.value || undefined)}
+          placeholder={setting.placeholder}
+          disabled={saving === setting.key}
+          spellCheck={false}
+          className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none focus:border-accent/60"
+        />
+        <p className="text-[10px] font-mono text-app-tertiary">
+          settings.json → <span className="text-accent">{setting.key}</span>
+        </p>
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {[...groups.entries()].map(([groupId, settings]) => (
+        <div key={groupId}>
+          <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">
+            {GROUP_LABELS[groupId] || groupId}
+          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {settings.map(renderSetting)}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
