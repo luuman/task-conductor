@@ -478,6 +478,16 @@ export const api = {
       request<{ ok: boolean; servers: McpServer[] }>(`/api/claude-config/mcp/${encodeURIComponent(name)}?scope=${scope}`, {
         method: "DELETE",
       }),
+    listSkills: () => request<SkillDetail[]>("/api/claude-config/skills"),
+    listCommands: () => request<CommandInfo[]>("/api/claude-config/commands"),
+    listRules: () => request<RuleInfo[]>("/api/claude-config/rules"),
+    systemInfo: () => request<ClaudeSystemInfo>("/api/claude-config/system-info"),
+    getClaudeMd: () => request<{ content: string; path: string }>("/api/claude-config/claude-md"),
+    updateClaudeMd: (content: string) =>
+      request<{ content: string; path: string }>("/api/claude-config/claude-md", {
+        method: "PUT",
+        body: JSON.stringify({ content }),
+      }),
   },
   tcConfig: {
     get: () => request<Record<string, unknown>>("/api/tc-config"),
