@@ -793,12 +793,10 @@ function FieldRenderer({ field, value, onChange }: {
 
 // ── 分区面板 ─────────────────────────────────────────────────────────
 
-function SectionPanel({ section, data, onChange, expanded, onToggle }: {
+function SectionPanel({ section, data, onChange }: {
   section: SectionDef;
   data: AnyObj;
   onChange: (key: string, value: unknown) => void;
-  expanded: boolean;
-  onToggle: () => void;
 }) {
   const Icon = section.icon;
   const filledCount = section.fields.filter(f => {
@@ -811,11 +809,9 @@ function SectionPanel({ section, data, onChange, expanded, onToggle }: {
   }).length;
 
   return (
-    <div className={cn("rounded-xl border transition-all",
-      expanded ? "border-app bg-app-secondary" : "border-app/60 bg-app-secondary/50 hover:border-app")}>
+    <div className="rounded-xl border border-app bg-app-secondary">
       {/* Header */}
-      <button onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left">
+      <div className="flex items-center gap-3 px-4 py-3.5">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: `${section.color}15`, border: `1px solid ${section.color}30` }}>
           <Icon size={15} style={{ color: section.color }} />
@@ -829,28 +825,23 @@ function SectionPanel({ section, data, onChange, expanded, onToggle }: {
           </div>
           <p className="text-[10px] text-app-tertiary mt-0.5">{section.desc}</p>
         </div>
-        {expanded
-          ? <ChevronDown size={14} className="text-app-tertiary shrink-0" />
-          : <ChevronRight size={14} className="text-app-tertiary shrink-0" />}
-      </button>
+      </div>
 
-      {/* Fields */}
-      {expanded && (
-        <div className="border-t border-app px-4 py-4 space-y-4">
-          {section.fields.map(field => (
-            <div key={field.key} className="space-y-1.5">
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-[11px] font-medium text-app">{field.label}</span>
-                  <span className="text-[10px] text-app-tertiary ml-2">{field.desc}</span>
-                </div>
-                <span className="text-[9px] font-mono text-app-tertiary/60">{section.id}.{field.key}</span>
+      {/* Fields — always visible */}
+      <div className="border-t border-app px-4 py-4 space-y-4">
+        {section.fields.map(field => (
+          <div key={field.key} className="space-y-1.5">
+            <div className="flex items-baseline justify-between">
+              <div>
+                <span className="text-[11px] font-medium text-app">{field.label}</span>
+                <span className="text-[10px] text-app-tertiary ml-2">{field.desc}</span>
               </div>
-              <FieldRenderer field={field} value={data[field.key]} onChange={v => onChange(field.key, v)} />
+              <span className="text-[9px] font-mono text-app-tertiary/60">{section.id}.{field.key}</span>
             </div>
-          ))}
-        </div>
-      )}
+            <FieldRenderer field={field} value={data[field.key]} onChange={v => onChange(field.key, v)} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
