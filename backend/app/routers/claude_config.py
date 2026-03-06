@@ -593,3 +593,292 @@ def remove_mcp_server(name: str, scope: str = "user"):
         raise
     except Exception as e:
         raise HTTPException(500, str(e))
+
+
+# ── Skills 详情 ──────────────────────────────────────────────────
+
+
+class SkillDetail(BaseModel):
+    name: str
+    path: str
+    description: str  # first line after YAML frontmatter
+    metadata: dict[str, Any]  # YAML frontmatter parsed
+    content: str  # full SKILL.md content
+    has_auxiliary: bool  # has other files besides SKILL.md
+    auxiliary_files: list[str]  # other file names
+
+
+def _parse_yaml_frontmatter(text: str) -> tuple[dict[str, Any], str]:
+    """Parse YAML frontmatter between --- markers using simple string parsing."""
+    metadata: dict[str, Any] = {}
+    body = text
+    stripped = text.strip()
+    if stripped.startswith("---"):
+        parts = stripped.split("---", 2)
+        # parts[0] is empty, parts[1] is frontmatter, parts[2] is body
+        if len(parts) >= 3:
+            fm_text = parts[1].strip()
+            body = parts[2].strip()
+            for line in fm_text.split("\n"):
+                line = line.strip()
+                if ":" in line:
+                    key, _, val = line.partition(":")
+                    key = key.strip()
+                    val = val.strip()
+                    # Try to parse simple types
+                    if val.lower() in ("true", "yes"):
+                        metadata[key] = True
+                    elif val.lower() in ("false", "no"):
+                        metadata[key] = False
+                    elif val.isdigit():
+                        metadata[key] = int(val)
+                    else:
+                        # Strip surrounding quotes
+                        if (val.startswith('"') and val.endswith('"')) or (
+                            val.startswith("'") and val.endswith("'")
+                        ):
+                            val = val[1:-1]
+                        metadata[key] = val
+    return metadata, body
+
+
+def _read_skill_detail(skill_dir: Path) -> SkillDetail | None:
+    """Parse SKILL.md with YAML frontmatter. Return None if not a valid skill dir."""
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        return None
+    try:
+        content = skill_md.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+    metadata, body = _parse_yaml_frontmatter(content)
+
+    # Description = first non-empty line of body
+    description = ""
+    for line in body.split("\n"):
+        line = line.strip()
+        if line and not line.startswith("#"):
+            description = line
+            break
+        if line.startswith("#"):
+            description = line.lstrip("#").strip()
+            break
+
+    # Auxiliary files: everything in skill_dir except SKILL.md
+    auxiliary_files: list[str] = []
+    try:
+        for entry in sorted(skill_dir.iterdir()):
+            if entry.name != "SKILL.md" and not entry.name.startswith("."):
+                auxiliary_files.append(entry.name)
+    except Exception:
+        pass
+
+    return SkillDetail(
+        name=skill_dir.name,
+        path=str(skill_dir),
+        description=description,
+        metadata=metadata,
+        content=content,
+        has_auxiliary=len(auxiliary_files) > 0,
+        auxiliary_files=auxiliary_files,
+    )
+
+
+@router.get("/skills", summary="列出所有技能详情")
+def list_skills_detail() -> list[SkillDetail]:
+    skills_dir = CLAUDE_HOME / "skills"
+    if not skills_dir.is_dir():
+        return []
+    result: list[SkillDetail] = []
+    for entry in sorted(skills_dir.iterdir()):
+        if not entry.is_dir() or entry.name.startswith("."):
+            continue
+        detail = _read_skill_detail(entry)
+        if detail:
+            result.append(detail)
+    return result
+
+
+# ── 自定义命令 ────────────────────────────────────────────────────
+
+
+class CommandInfo(BaseModel):
+    name: str  # filename without extension
+    path: str
+    content: str
+    scope: str  # "global" or "project"
+
+
+@router.get("/commands", summary="列出自定义命令")
+def list_commands() -> list[CommandInfo]:
+    commands_dir = CLAUDE_HOME / "commands"
+    if not commands_dir.is_dir():
+        return []
+    result: list[CommandInfo] = []
+    for entry in sorted(commands_dir.iterdir()):
+        if entry.is_file() and entry.suffix == ".md":
+            try:
+                content = entry.read_text(encoding="utf-8")
+            except Exception:
+                content = ""
+            result.append(
+                CommandInfo(
+                    name=entry.stem,
+                    path=str(entry),
+                    content=content,
+                    scope="global",
+                )
+            )
+    return result
+
+
+# ── 系统信息概览 ──────────────────────────────────────────────────
+
+
+class SystemInfo(BaseModel):
+    cli_version: str
+    home_path: str
+    config_path: str
+    cache_dir: str
+    cache_size_mb: float
+    history_size_mb: float
+    session_count: int
+    project_count: int
+    skill_count: int
+    plugin_count: int
+    hook_script_count: int
+    mcp_server_count: int
+    platform: str
+    python_version: str
+
+
+def _dir_size_mb(path: Path) -> float:
+    """Calculate total size of a directory in MB."""
+    if not path.is_dir():
+        return 0.0
+    total = 0
+    try:
+        for f in path.rglob("*"):
+            if f.is_file():
+                try:
+                    total += f.stat().st_size
+                except OSError:
+                    pass
+    except Exception:
+        pass
+    return round(total / (1024 * 1024), 2)
+
+
+@router.get("/system-info", summary="系统信息概览")
+def get_system_info() -> SystemInfo:
+    # Count sessions from projects dir (each project subdir may have sessions)
+    projects_dir = CLAUDE_HOME / "projects"
+    project_count = 0
+    if projects_dir.is_dir():
+        project_count = sum(
+            1 for e in projects_dir.iterdir()
+            if e.is_dir() and not e.name.startswith(".")
+        )
+
+    skills_dir = CLAUDE_HOME / "skills"
+    skill_count = 0
+    if skills_dir.is_dir():
+        skill_count = sum(
+            1 for e in skills_dir.iterdir()
+            if e.is_dir() and not e.name.startswith(".")
+        )
+
+    plugin_count = len(_read_installed_plugins())
+
+    hooks_dir = CLAUDE_HOME / "hooks"
+    hook_script_count = 0
+    if hooks_dir.is_dir():
+        hook_script_count = sum(1 for e in hooks_dir.iterdir() if e.is_file())
+
+    mcp_servers = _list_mcp_servers()
+
+    # Cache dir: ~/.claude/cache or similar
+    cache_dir = CLAUDE_HOME / "cache"
+    cache_size = _dir_size_mb(cache_dir)
+
+    # History: ~/.claude/projects (contains conversation history)
+    history_size = _dir_size_mb(projects_dir)
+
+    # Session count from stats
+    activities = _read_stats()
+    session_count = sum(a.session_count for a in activities)
+
+    return SystemInfo(
+        cli_version=_get_cli_version(),
+        home_path=str(CLAUDE_HOME),
+        config_path=str(SETTINGS_PATH),
+        cache_dir=str(cache_dir),
+        cache_size_mb=cache_size,
+        history_size_mb=history_size,
+        session_count=session_count,
+        project_count=project_count,
+        skill_count=skill_count,
+        plugin_count=plugin_count,
+        hook_script_count=hook_script_count,
+        mcp_server_count=len(mcp_servers),
+        platform=platform.platform(),
+        python_version=sys.version,
+    )
+
+
+# ── 全局 CLAUDE.md 读写 ──────────────────────────────────────────
+
+
+@router.get("/claude-md", summary="读取全局 CLAUDE.md")
+def get_claude_md() -> dict[str, str]:
+    path = CLAUDE_HOME / "CLAUDE.md"
+    content = ""
+    if path.exists():
+        try:
+            content = path.read_text(encoding="utf-8")
+        except Exception:
+            content = ""
+    return {"content": content, "path": str(path)}
+
+
+@router.put("/claude-md", summary="更新全局 CLAUDE.md")
+def update_claude_md(body: dict[str, str]) -> dict[str, str]:
+    path = CLAUDE_HOME / "CLAUDE.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = body.get("content", "")
+    path.write_text(content, encoding="utf-8")
+    return {"content": content, "path": str(path)}
+
+
+# ── 规则文件 ──────────────────────────────────────────────────────
+
+
+class RuleInfo(BaseModel):
+    name: str
+    path: str
+    content: str
+    scope: str
+
+
+@router.get("/rules", summary="列出规则文件")
+def list_rules() -> list[RuleInfo]:
+    rules_dir = CLAUDE_HOME / "rules"
+    if not rules_dir.is_dir():
+        return []
+    result: list[RuleInfo] = []
+    for entry in sorted(rules_dir.iterdir()):
+        if entry.is_file() and entry.suffix == ".md":
+            try:
+                content = entry.read_text(encoding="utf-8")
+            except Exception:
+                content = ""
+            result.append(
+                RuleInfo(
+                    name=entry.stem,
+                    path=str(entry),
+                    content=content,
+                    scope="global",
+                )
+            )
+    return result
