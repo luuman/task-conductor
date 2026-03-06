@@ -476,7 +476,7 @@ export default function ClaudeConfig() {
   const [hookEvents, setHookEvents] = useState<string[]>([]);
   const [loading, setLoading] = useState(!readCache(CACHE_KEY_CONFIG));
   const [error, setError] = useState("");
-  const [activeSection, setActiveSection] = useState<Section>("mcp");
+  const [activeSection, setActiveSection] = useState<Section>("global-config");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
