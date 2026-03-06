@@ -484,6 +484,17 @@ export default function ClaudeConfigPage() {
               <SecMonitoring overview={overview} />
             </div>
           )}
+          {visibleSections.has("trash") && (
+            <div ref={ref("trash")} data-section="trash">
+              <SecTrash items={disabledItems} onRefresh={() => {
+                api.claudeConfig.disabledItems().then(setDisabledItems).catch(() => {});
+                api.claudeConfig.listSkills().then(setSkills).catch(() => {});
+                api.claudeConfig.listAgents().then(setAgents).catch(() => {});
+                api.claudeConfig.listCommands().then(setCommands).catch(() => {});
+                api.claudeConfig.listRules().then(setRules).catch(() => {});
+              }} />
+            </div>
+          )}
           {visibleSections.has("about") && (
             <div ref={ref("about")} data-section="about">
               <SecAbout systemInfo={systemInfo} overview={overview} />
