@@ -425,9 +425,9 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
       {/* ══ 列3：开发队列 ══ */}
       <div className="flex-1 flex flex-col min-w-0">
         <ColHeader
-          title="开发队列"
+          title={t('taskManager.columns.devQueue')}
           count={queue.length}
-          badge={queue.length > 0 ? `${queue.length} 个任务` : undefined}
+          badge={queue.length > 0 ? `${queue.length} ${t('taskManager.queue.taskCount')}` : undefined}
           badgeColor="green"
         />
 
