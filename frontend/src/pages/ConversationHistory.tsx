@@ -122,6 +122,29 @@ export default function ConversationHistory({ projects }: Props) {
     setFileFound(true);
   };
 
+  // 导出对话为 Markdown
+  const handleExport = useCallback(() => {
+    const msgs = isNewChat ? chatMessages : [...transcript, ...chatMessages];
+    if (msgs.length === 0) return;
+    const lines: string[] = [];
+    msgs.forEach(msg => {
+      const role = msg.role === "user" ? "User" : "Assistant";
+      lines.push(`## ${role}\n`);
+      msg.blocks.forEach(b => {
+        if (b.type === "text" && b.text) lines.push(b.text);
+        if (b.type === "tool_use" && b.tool_name) lines.push(`> Tool: ${b.tool_name}`);
+      });
+      lines.push("");
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [isNewChat, chatMessages, transcript]);
+
   const handleChatSend = (message: string, model: string) => {
     // 追加用户消息
     setChatMessages(prev => [
