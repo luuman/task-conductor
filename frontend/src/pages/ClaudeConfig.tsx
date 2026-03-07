@@ -700,7 +700,7 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-2">
           <FileText size={13} className="text-accent" />
-          <span className="text-xs font-semibold text-app">全局 CLAUDE.md</span>
+          <span className="text-xs font-semibold text-app">{t("claudeConfig.claudeMd.globalClaudeMd")}</span>
           <span className="text-[9px] text-app-tertiary font-mono">~/.claude/CLAUDE.md</span>
         </div>
         <div className="flex items-center gap-2">
