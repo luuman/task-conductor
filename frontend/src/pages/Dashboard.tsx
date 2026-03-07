@@ -513,11 +513,11 @@ function MetricsPanel() {
           <div className="absolute top-0 left-0 right-0"
                style={{ height: 1, background: "linear-gradient(90deg,var(--accent) 0%,transparent 55%)" }} />
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>实时处理</h3>
+            <h3 className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>{t('dashboard.gauge.realtimeProcessing')}</h3>
             <div className="flex items-center gap-1">
               <ChipTag label="Claude Code" />
-              <ChipTag label="实时监控" />
-              <ChipTag label="流水线" />
+              <ChipTag label={t('dashboard.gauge.realtimeMonitoring')} />
+              <ChipTag label={t('dashboard.gauge.pipeline')} />
             </div>
           </div>
           <WeeklyChart data={weeklyData} />
