@@ -369,7 +369,7 @@ export default function ClaudeConfigPage() {
         <div className="relative">
           <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-app-tertiary pointer-events-none" />
           <input ref={searchRef} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            placeholder="搜索配置... (Ctrl+F)" spellCheck={false}
+            placeholder={t("claudeConfig.shared.searchPlaceholder")} spellCheck={false}
             className="pl-7 pr-3 py-1.5 text-[11px] bg-app-secondary border border-app rounded-lg w-52 outline-none focus:border-accent/60 text-app placeholder:text-app-tertiary" />
           {searchQuery && (
             <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-app-tertiary hover:text-app">
