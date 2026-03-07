@@ -457,8 +457,8 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
              style={{ borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
           <span className="text-[10px] font-mono" style={{ color: "var(--text-tertiary)" }}>
             {rightView === "live"
-              ? `实时：${liveRows.length} 条`
-              : `历史：${historyRows.length} 条`}
+              ? t('sessions.statusBar.realtimeCount', { count: liveRows.length })
+              : t('sessions.statusBar.historyCount', { count: historyRows.length })}
           </span>
           {filter && (
             <button
