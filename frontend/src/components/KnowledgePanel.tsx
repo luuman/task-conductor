@@ -173,7 +173,7 @@ function KnowledgeItem({ item, onDelete }: { item: ProjectKnowledge; onDelete: (
           )}
           <p className="text-[9px] text-app-tertiary mt-1">
             {new Date(item.created_at).toLocaleString()}
-            {item.source_task_id && ` · 来源任务 #${item.source_task_id}`}
+            {item.source_task_id && ` · ${t('knowledgePanel.item.sourceTask', { id: item.source_task_id })}`}
           </p>
         </div>
         <button
