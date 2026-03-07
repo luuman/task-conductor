@@ -51,18 +51,18 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
 
       ws.onmessage = (e) => {
         try {
-          const msg = JSON.parse(e.data) as { type: string; text?: string; error?: string };
+          const msg = JSON.parse(e.data) as { type: string; data?: { text?: string; full_text?: string; error?: string; session_id?: string } };
           if (msg.type === "chat_chunk") {
-            replyBuf.current += msg.text || "";
+            replyBuf.current += msg.data?.text || "";
             setCurrentReply(replyBuf.current);
           } else if (msg.type === "chat_done") {
-            const full = replyBuf.current;
+            const full = replyBuf.current || msg.data?.full_text || "";
             setIsGenerating(false);
             setCurrentReply("");
             replyBuf.current = "";
             onCompleteRef.current?.(full);
           } else if (msg.type === "chat_error") {
-            setError(msg.error || "未知错误");
+            setError(msg.data?.error || "未知错误");
             setIsGenerating(false);
             setCurrentReply("");
             replyBuf.current = "";
