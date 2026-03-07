@@ -742,7 +742,7 @@ function FieldRenderer({ field, value, onChange }: {
               </button>
             </div>
           ))}
-          {entries.length === 0 && <span className="text-[10px] text-app-tertiary">暂无</span>}
+          {entries.length === 0 && <span className="text-[10px] text-app-tertiary">{t("globalConfig.fieldRenderer.none")}</span>}
           <div className="flex gap-1.5">
             <input value={kvKey} onChange={e => setKvKey(e.target.value)}
               placeholder="KEY" spellCheck={false}
