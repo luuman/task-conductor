@@ -192,6 +192,7 @@ interface SessionsProps {
 }
 
 export default function Sessions({ liveEvents, wsStatus, onClearLive }: SessionsProps) {
+  const { t } = useTranslation();
   // 会话列表
   const [sessions, setSessions] = useState<ClaudeSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
