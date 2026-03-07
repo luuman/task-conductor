@@ -106,7 +106,10 @@
     },
     "errors": {
       "connectionFailed": "Connection failed",
-      "sshConnectionFailed": "SSH connection failed"
+      "sshConnectionFailed": "SSH connection failed",
+      "pinWrong": "Wrong PIN",
+      "connectionTimeout": "Connection timeout (6s). Please check if the Agent URL is correct and the backend is running",
+      "cannotConnect": "Cannot connect to Agent. Please check if the URL is correct or the network is reachable"
     }
   },
 
