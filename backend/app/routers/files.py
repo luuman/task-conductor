@@ -217,3 +217,23 @@ def search_files(
 
     walk(base)
     return {"query": q, "items": results}
+
+
+@router.get("/{project_id}/file/raw", summary="获取文件原始内容（用于图片等二进制文件）")
+def raw_file(
+    project_id: int,
+    path: str = Query(..., description="相对于项目根的文件路径"),
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    target = _safe_resolve(base, path)
+
+    if not target.is_file():
+        raise HTTPException(404, "文件不存在")
+
+    size = target.stat().st_size
+    if size > 10 * 1024 * 1024:  # 10 MB limit for raw
+        raise HTTPException(400, "文件过大")
+
+    media_type = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
+    return FileResponse(str(target), media_type=media_type)
