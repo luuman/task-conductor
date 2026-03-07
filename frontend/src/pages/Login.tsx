@@ -195,7 +195,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
             </div>
             <div className="rounded-lg p-3 text-[10px] space-y-1.5"
                  style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)" }}>
-              <p className="font-medium" style={{ color: "var(--text-secondary)" }}>使用前请在本地终端建立 SSH 隧道：</p>
+              <p className="font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.ssh.setupHint')}</p>
               <code className="block font-mono" style={{ color: "var(--accent)" }}>
                 ssh -L 8000:localhost:8765 {sshUser || "user"}@{sshHost || "server"} -p {sshPort}
               </code>
