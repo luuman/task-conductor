@@ -475,7 +475,7 @@ function StageDetailPanel({
 
             {/* 重试次数 */}
             {latestArtifact.retry_count > 0 && (
-              <p className="text-[10px] text-orange-400">重试了 {latestArtifact.retry_count} 次</p>
+              <p className="text-[10px] text-orange-400">{t('taskWorkflow.stageDetailPanel.retryCount', { count: latestArtifact.retry_count })}</p>
             )}
 
             {/* 内容预览 */}
