@@ -27,24 +27,24 @@ type Bubble =
   | { kind: "notify";   message: string }
   | { kind: "subagent"; text: string };
 
-function eventsToBubbles(events: ClaudeEvent[]): Bubble[] {
+function eventsToBubbles(events: ClaudeEvent[], t: (key: string) => string): Bubble[] {
   const bubbles: Bubble[] = [];
   let i = 0;
   while (i < events.length) {
     const e = events[i];
 
     if (e.event_type === "SessionStart") {
-      bubbles.push({ kind: "banner", icon: "▶", text: "会话开始",
+      bubbles.push({ kind: "banner", icon: "▶", text: t('convBubbles.sessionStart'),
         sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-purple-400" });
       i++; continue;
     }
     if (e.event_type === "SessionEnd") {
-      bubbles.push({ kind: "banner", icon: "◀", text: "会话结束",
+      bubbles.push({ kind: "banner", icon: "◀", text: t('convBubbles.sessionEnd'),
         sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-purple-300" });
       i++; continue;
     }
     if (e.event_type === "Stop") {
-      bubbles.push({ kind: "banner", icon: "■", text: "回合结束",
+      bubbles.push({ kind: "banner", icon: "■", text: t('convBubbles.turnEnd'),
         sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-gray-400" });
       i++; continue;
     }
@@ -55,11 +55,11 @@ function eventsToBubbles(events: ClaudeEvent[]): Bubble[] {
       i++; continue;
     }
     if (e.event_type === "SubagentStart") {
-      bubbles.push({ kind: "subagent", text: "子任务开始" });
+      bubbles.push({ kind: "subagent", text: t('convBubbles.subagentStart') });
       i++; continue;
     }
     if (e.event_type === "SubagentStop") {
-      bubbles.push({ kind: "subagent", text: "子任务完成" });
+      bubbles.push({ kind: "subagent", text: t('convBubbles.subagentEnd') });
       i++; continue;
     }
     if (e.event_type === "PreToolUse") {
