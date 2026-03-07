@@ -802,7 +802,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
           {realProjects.length > 0 && (
             <>
               <h2 className="text-[11px] font-semibold uppercase tracking-wider text-app-tertiary mb-2">
-                项目 ({realProjects.length})
+                {t('dashboard.overview.projects')} ({realProjects.length})
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                 {realProjects.map((p) => (
