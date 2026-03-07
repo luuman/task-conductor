@@ -1037,8 +1037,8 @@ function SecSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (n: 
           </div>
           <div className="lg:col-span-2">
             {detail ? <DetailPanel title={detail.name} path={detail.path} metadata={detail.metadata}
-              auxiliaryFiles={detail.auxiliary_files} content={detail.content} contentLabel="SKILL.md 内容" />
-              : <EmptyDetail text="选择左侧技能查看详情" />}
+              auxiliaryFiles={detail.auxiliary_files} content={detail.content} contentLabel={t("claudeConfig.skills.skillMdContent")} />
+              : <EmptyDetail text={t("claudeConfig.skills.selectHint")} />}
           </div>
         </div>
       )}
