@@ -586,12 +586,58 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
         )}
       </div>
 
-      {/* 底部状态栏 */}
-      <div className="flex items-center mt-1.5 px-1 gap-2">
-        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ color: "var(--text-tertiary)" }}>{currentModelName}</span>
-        {chatOptions.effort && <span className="text-[9px] px-1 rounded" style={{ color: "var(--accent)", background: "rgba(68,119,255,0.08)" }}>effort:{chatOptions.effort}</span>}
+      {/* 底部工具栏 */}
+      <div className="flex items-center mt-1.5 px-1 gap-1 flex-wrap">
+        {/* 模型选择 */}
+        <ToolbarDropdown
+          label={currentModelName}
+          icon={<Cpu size={11} />}
+          options={models.map(m => ({ label: m.name + (m.default ? " (默认)" : ""), value: m.id, active: m.id === selectedModel }))}
+          onSelect={(v) => setSelectedModel(v)}
+        />
+
+        {/* Plan 模式切换 */}
+        <ToolbarToggle
+          label="Plan"
+          icon={<Shield size={11} />}
+          active={chatOptions.permission_mode === "plan"}
+          onClick={() => setChatOptions(prev => ({
+            ...prev,
+            permission_mode: prev.permission_mode === "plan" ? undefined : "plan",
+          }))}
+        />
+
+        {/* Effort 级别 */}
+        <ToolbarDropdown
+          label={chatOptions.effort || "effort"}
+          icon={<Gauge size={11} />}
+          active={!!chatOptions.effort}
+          options={[
+            { label: "Low — 快速", value: "low", active: chatOptions.effort === "low" },
+            { label: "Medium — 均衡", value: "medium", active: chatOptions.effort === "medium" },
+            { label: "High — 深度", value: "high", active: chatOptions.effort === "high" },
+            ...(chatOptions.effort ? [{ label: "清除", value: "__clear__", active: false }] : []),
+          ]}
+          onSelect={(v) => setChatOptions(prev => ({ ...prev, effort: v === "__clear__" ? undefined : v }))}
+        />
+
+        {/* 权限模式 */}
+        <ToolbarDropdown
+          label={chatOptions.permission_mode && chatOptions.permission_mode !== "plan" ? chatOptions.permission_mode : "权限"}
+          icon={<Zap size={11} />}
+          active={!!chatOptions.permission_mode && chatOptions.permission_mode !== "plan"}
+          options={[
+            { label: "default — 默认", value: "default", active: chatOptions.permission_mode === "default" },
+            { label: "auto — 自动批准", value: "auto", active: chatOptions.permission_mode === "auto" },
+            { label: "acceptEdits — 接受编辑", value: "acceptEdits", active: chatOptions.permission_mode === "acceptEdits" },
+            { label: "bypassPermissions — 跳过所有", value: "bypassPermissions", active: chatOptions.permission_mode === "bypassPermissions" },
+            ...(chatOptions.permission_mode && chatOptions.permission_mode !== "plan" ? [{ label: "清除", value: "__clear__", active: false }] : []),
+          ]}
+          onSelect={(v) => setChatOptions(prev => ({ ...prev, permission_mode: v === "__clear__" ? undefined : v }))}
+        />
+
         {dragOver && <span className="text-[10px]" style={{ color: "var(--accent)" }}>松开以上传文件</span>}
-        <span className="ml-auto text-[9px] opacity-30">/ 命令</span>
+        <span className="ml-auto text-[9px] opacity-30">/ 更多命令</span>
       </div>
     </div>
   );
