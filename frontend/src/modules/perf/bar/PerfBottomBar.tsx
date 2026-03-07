@@ -56,7 +56,7 @@ function TileLines({ id, sys }: {
   }
 }
 
-export function PerfBottomBar({ connectionStatus }: PerfBottomBarProps) {
+export function PerfBottomBar({ connectionStatus, vertical, compact }: PerfBottomBarProps) {
   const { t } = useTranslation();
   const { sys, hist, procs } = usePerfData();
   const { config } = usePerfConfig();
