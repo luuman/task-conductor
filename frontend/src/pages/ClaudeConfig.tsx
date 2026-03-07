@@ -1461,7 +1461,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
               onKeyDown={e => e.key === "Enter" && handleCreate()} />
             <button onClick={() => handleCreate()} disabled={creating || !newName.trim()}
               className="px-4 py-2 text-xs rounded-lg bg-accent hover:bg-accent-hover text-white disabled:opacity-40">
-              {creating ? "创建中..." : "创建"}
+              {creating ? t("common.loading") : t("common.create")}
             </button>
             <button onClick={() => { setShowCreate(false); setNewName(""); setCreateErr(""); }}
               className="px-3 py-2 text-xs rounded-lg border border-app text-app-secondary hover:text-app"><X size={12} /></button>
@@ -1469,7 +1469,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
           {createErr && <p className="text-[10px] text-red-400">{createErr}</p>}
         </div>
       )}
-      <PresetGallery presets={presets} onInstall={(n, c) => handleCreate(n, c)} itemLabel="规则" />
+      <PresetGallery presets={presets} onInstall={(n, c) => handleCreate(n, c)} itemLabel="Rule" />
       {rules.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
