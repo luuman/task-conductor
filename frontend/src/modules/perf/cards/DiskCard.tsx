@@ -31,7 +31,7 @@ export function DiskCard({ sys, hist, colors = {}, showTitle }: DiskCardProps) {
         </div>
         <div>
           <div className="text-xs text-gray-400">{sys?.disk_device ?? "Disk"}</div>
-          <div className="text-sm font-bold text-white">{fmtGb(sys?.disk_space.free_gb)} 可用</div>
+          <div className="text-sm font-bold text-white">{fmtGb(sys?.disk_space.free_gb)} {t('perf.disk.available')}</div>
         </div>
       </div>
 
