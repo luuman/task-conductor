@@ -173,7 +173,7 @@ function ServerCard({ server, onAction }: {
               className="px-3 py-1.5 text-[11px] rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors disabled:opacity-40 flex items-center gap-1"
             >
               {loading && <Loader2 size={11} className="animate-spin" />}
-              {showTokenInput ? "确认安装" : "安装"}
+              {showTokenInput ? t('mcpMarket.actions.confirmInstall') : t('mcpMarket.actions.install')}
             </button>
           )}
         </div>
