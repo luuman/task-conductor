@@ -191,7 +191,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
               value={inputTitle}
               onChange={(e) => setInputTitle(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && addToInbox()}
-              placeholder="输入任务标题..."
+              placeholder={t('taskManager.input.titlePlaceholder')}
               className="flex-1 bg-app-tertiary border border-app rounded-md px-2.5 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent"
             />
             <button
