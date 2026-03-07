@@ -623,6 +623,7 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Pro
   }
 
   return (
+    <OpenFileCtx.Provider value={onOpenFile ?? null}>
     <ExpandSignalCtx.Provider value={expandSignal}>
       {/* 工具栏 - 置顶悬浮 */}
       {toolCount > 0 && (
