@@ -699,7 +699,7 @@ function FieldRenderer({ field, value, onChange }: {
                 </button>
               </span>
             ))}
-            {tags.length === 0 && <span className="text-[10px] text-app-tertiary">暂无</span>}
+            {tags.length === 0 && <span className="text-[10px] text-app-tertiary">{t("globalConfig.fieldRenderer.none")}</span>}
           </div>
           <div className="flex gap-1.5">
             <input value={tagInput}
