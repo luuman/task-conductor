@@ -78,7 +78,7 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
 
       {sys && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 6 }} className="space-y-1.5">
-          {/* 负载均值 */}
+          {/* Load average */}
           <div className="flex justify-between items-baseline text-[10px] font-medium">
             <span className="text-gray-400">{t('perf.cpu.loadAvg')}</span>
             <span className="font-mono tabular-nums" style={{ color: cSys }}>
