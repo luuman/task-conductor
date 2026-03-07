@@ -1524,7 +1524,7 @@ function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
   const isDirty = jsonText !== JSON.stringify(config.permissions, null, 2);
   return (
     <div className="space-y-3">
-      <SectionHeader icon={Shield} color="#ef4444" label={t("claudeConfig.permissions.title")} desc="Claude Code 工具调用权限（allow / deny 列表）" />
+      <SectionHeader icon={Shield} color="#ef4444" label={t("claudeConfig.permissions.title")} desc={t("claudeConfig.sectionDesc.permissions")} />
       <textarea value={jsonText} onChange={e => { setJsonText(e.target.value); setStatus("idle"); setParseError(""); }} spellCheck={false}
         rows={Math.max(8, jsonText.split("\n").length + 1)}
         className={cn("w-full bg-app-secondary border rounded-xl px-4 py-3 text-[11px] font-mono text-app outline-none resize-y leading-relaxed", status === "error" ? "border-red-500/40" : "border-app focus:border-accent/60")} />
