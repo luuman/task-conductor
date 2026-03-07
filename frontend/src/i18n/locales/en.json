@@ -389,6 +389,12 @@
       "clearCredentials": "Clear local credentials and return to login",
       "disconnect": "Disconnect"
     },
+    "language": {
+      "title": "Language",
+      "hint": "Switch interface display language",
+      "zh": "中文",
+      "en": "English"
+    },
     "shutdown": {
       "title": "Shutdown Service",
       "hint": "Stop the backend process",
