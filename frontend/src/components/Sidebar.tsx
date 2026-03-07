@@ -119,8 +119,9 @@ export function Sidebar({
 
       {/* ── Primary nav ──────────────────────────────────── */}
       <nav className={cn("pt-3 pb-1 space-y-0.5 shrink-0", collapsed ? "px-1" : "px-2")}>
-        {NAV_ITEMS.map(({ id, label, Icon }) => {
+        {NAV_ITEMS.map(({ id, labelKey, Icon }) => {
           const active = activePage === id;
+          const label = t(labelKey);
           return (
             <button key={id} onClick={() => onSelectPage(id)}
               title={collapsed ? label : undefined}
