@@ -98,7 +98,7 @@ function ClaudeMetricsPanel() {
       <div className="grid grid-cols-2 lg:grid-cols-4">
         {/* ── Token 消耗 ── */}
         <div className="p-4 border-r border-b lg:border-b-0 border-app space-y-2">
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">令牌消耗</p>
+          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">{t('dashboard.claudeMetrics.tokenConsumption')}</p>
           <p className={cn("text-[22px] font-bold tabular-nums leading-none",
             hasData ? "text-app" : "text-app-tertiary")}>
             {fmtTokens(totalTokens)}
