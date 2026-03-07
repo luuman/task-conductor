@@ -103,7 +103,7 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
 
       {cpuProcs.length > 0 && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 6 }} className="space-y-1">
-          <div className="text-xs font-medium mb-1" style={{ color: cSys }}>进程</div>
+          <div className="text-xs font-medium mb-1" style={{ color: cSys }}>{t('perf.cpu.processes')}</div>
           {cpuProcs.map(p => (
             <PhoneProc key={p.pid} name={p.name} value={`${p.cpu_pct}%`} valueColor={cSys} />
           ))}
