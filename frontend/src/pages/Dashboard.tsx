@@ -362,7 +362,7 @@ function GaugeChart({ pct, label }: { pct: number; label?: string }) {
         {clamped}%
       </text>
       <text x={cx} y={cy + 10} textAnchor="middle" fill="#9ca3af" fontSize="11">
-        {clamped}%
+        {clamped}% {label ?? ""}
       </text>
     </svg>
   );
