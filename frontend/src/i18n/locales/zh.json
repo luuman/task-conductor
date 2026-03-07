@@ -986,6 +986,47 @@
       "menuColor": "菜单颜色",
       "menuSettings": "菜单设置",
       "noConfigurable": "该指标暂无可配置项"
+    },
+    "cpu": {
+      "user": "用户",
+      "system": "系统",
+      "loadAvg": "负载均值",
+      "ctxSwitch": "切换/秒",
+      "processes": "进程",
+      "uptime": "电脑开启时间",
+      "days": "天",
+      "hours": "小时"
+    },
+    "mem": {
+      "memory": "内存",
+      "swap": "交换",
+      "pressure": "压力",
+      "appMem": "App 内存",
+      "wiredMem": "联动内存",
+      "compressed": "已压缩",
+      "available": "可用",
+      "processes": "进程"
+    },
+    "net": {
+      "upload": "上传",
+      "download": "下载",
+      "established": "已建立",
+      "listen": "监听",
+      "timeWait": "等待关闭"
+    },
+    "disk": {
+      "available": "可用",
+      "read": "读",
+      "write": "写",
+      "readIops": "读IOPS",
+      "writeIops": "写IOPS",
+      "utilization": "利用率"
+    },
+    "sensors": {
+      "temperature": "温度",
+      "fan": "风扇",
+      "rpm": "转/分",
+      "frequency": "频率"
     }
   },
 
