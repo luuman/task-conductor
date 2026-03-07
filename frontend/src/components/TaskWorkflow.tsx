@@ -243,7 +243,7 @@ function buildGraph(task: Task, selectedStage: string | null, onClickStage: (s: 
   const edgeLabel = (nextStage: string, idx: number) =>
     APPROVAL_STAGES.has(nextStage) && idx < currentIdx
       ? {
-          label: "审批通过",
+          label: t('taskWorkflow.edgeLabel.approved'),
           labelStyle: { fill: "#4ade80", fontSize: 9, fontWeight: 600 },
           labelBgStyle: { fill: "#14532d", fillOpacity: 0.9 },
           labelBgPadding: [4, 6] as [number, number],
