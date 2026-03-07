@@ -116,7 +116,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
           type="number"
           value={linkedTaskId ?? ""}
           onChange={e => setLinkedTaskId(e.target.value ? Number(e.target.value) : null)}
-          placeholder="输入 Task ID（可选）"
+          placeholder={t('convEdit.taskIdPlaceholder')}
           className="w-full rounded px-2.5 py-1.5 text-[11px] outline-none"
           style={{
             background: "var(--background-tertiary)",
