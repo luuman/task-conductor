@@ -434,7 +434,7 @@ function StageDetailPanel({
                 disabled={acting}
                 className="w-full py-1.5 text-xs bg-accent hover:bg-accent-hover text-white rounded-lg font-medium disabled:opacity-40"
               >
-                {acting ? "推进中..." : "推进到下一阶段"}
+                {acting ? t('taskWorkflow.stageDetailPanel.advancing') : t('taskWorkflow.stageDetailPanel.advanceNext')}
               </button>
             )}
             {task.status === "rejected" && (
