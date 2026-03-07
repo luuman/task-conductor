@@ -632,6 +632,24 @@
       "sessionCount": "会话数",
       "activeDays": "活跃天数",
       "dailyActivity": "每日活动"
+    },
+    "sectionDesc": {
+      "overview": "Claude Code 全局信息与常用配置",
+      "settings": "API 参数、模型选择、功能开关与高级配置 (tc_global_config.json)",
+      "mcp": "Model Context Protocol 服务器管理",
+      "hooks": "Claude Code 事件触发时执行外部命令",
+      "permissions": "Claude Code 工具调用权限（allow / deny 列表）",
+      "envVars": "Claude Code 相关环境变量（只读，修改需在 shell 中设置）",
+      "plugins": "启用/禁用 Claude Code 插件",
+      "monitoring": "Claude Code 使用统计与活动趋势",
+      "about": "系统信息与诊断",
+      "trash": "已禁用的组件，可恢复或永久删除"
+    },
+    "placeholder": {
+      "agentName": "Agent 名称（如 code-reviewer）",
+      "commandName": "命令名称（如 review）",
+      "ruleName": "规则名称（如 no-console-log）",
+      "matcherHint": "* 或留空"
     }
   },
 
