@@ -288,8 +288,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
           task.status === "waiting_review" ? "warning" :
           task.status === "failed" || task.status === "rejected" ? "danger" : "default"
         }>
-          {{ pending: "待处理", running: "运行中", waiting_review: "待审批", approved: "已批准",
-             rejected: "已驳回", done: "已完成", failed: "失败", queued: "排队中" }[task.status] ?? task.status}
+          {STATUS_LABEL[task.status] ?? task.status}
         </Badge>
         {/* view toggle */}
         <div className="flex items-center border border-app rounded-lg p-0.5 gap-0.5 ml-1">
