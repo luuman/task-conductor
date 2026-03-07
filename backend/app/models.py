@@ -45,6 +45,7 @@ class Project(Base):
     # smart=自动（有依赖串行/无依赖并行）| queue=全部串行 | parallel=全部并行
     is_test: Mapped[bool] = mapped_column(Boolean, default=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)  # 越小越靠前
+    feishu_chat_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     tasks: Mapped[list["Task"]] = relationship(back_populates="project")
 
