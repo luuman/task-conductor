@@ -925,7 +925,7 @@ export default function GlobalConfigPanel() {
       setConfig(data);
       setSavedConfig(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "加载失败");
+      setError(e instanceof Error ? e.message : t("globalConfig.actions.loadFailed"));
     } finally { setLoading(false); }
   }, []);
 
