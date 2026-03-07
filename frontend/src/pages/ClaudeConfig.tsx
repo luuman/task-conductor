@@ -1358,8 +1358,8 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-app">{meta.label}</span>
                   <span className="text-[9px] font-mono text-app-tertiary">{ev}</span>
-                  {has && <StatusTag label={`${rules.length} 规则`} color="var(--accent)" />}
-                  {isDirty && <StatusTag label="未保存" color="#eab308" />}
+                  {has && <StatusTag label={`${rules.length} ${t("claudeConfig.hooks.rules")}`} color="var(--accent)" />}
+                  {isDirty && <StatusTag label={t("claudeConfig.hooks.unsaved")} color="#eab308" />}
                 </div>
                 <p className="text-[10px] text-app-tertiary mt-0.5">{meta.desc}</p>
               </div>
