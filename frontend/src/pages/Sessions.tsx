@@ -420,33 +420,22 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
           <span className="text-[10px] font-mono w-[64px] text-right" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.session')}</span>
         </div>
 
-        {/* 内容区 */}
+        {/* 内容区：统一时间线 */}
         <div className="flex-1 overflow-y-auto">
-          {rightView === "live" ? (
-            <EventTable
-              rows={liveRows}
-              filter={filter}
-              emptyHint={
-                <>
-                  <span className="text-3xl">⌗</span>
-                  <p className="text-[12px]">{t('sessions.emptyHints.waitingEvents')}</p>
-                  <p className="text-[10px]">{t('sessions.emptyHints.selectSession')}</p>
-                </>
-              }
-            />
-          ) : historyLoading ? (
+          {historyLoading ? (
             <div className="flex items-center justify-center h-full text-[12px] font-mono"
                  style={{ color: "var(--text-tertiary)" }}>
               {t('sessions.statusBar.loadingHistory')}
             </div>
           ) : (
             <EventTable
-              rows={historyRows}
+              rows={displayRows}
               filter={filter}
               emptyHint={
                 <>
-                  <span className="text-3xl">◷</span>
-                  <p className="text-[12px]">{t('sessions.emptyHints.noEvents')}</p>
+                  <span className="text-3xl">⌗</span>
+                  <p className="text-[12px]">{t('sessions.emptyHints.waitingEvents')}</p>
+                  <p className="text-[10px]">{t('sessions.emptyHints.selectSession')}</p>
                 </>
               }
             />
