@@ -16,16 +16,22 @@ const CATEGORY_COLORS: Record<string, "danger" | "warning" | "info" | "default">
   rejected_assumption: "info",
   wrong_tech_choice: "danger",
 };
-const CATEGORY_LABEL: Record<string, string> = {
-  error_pattern: "错误模式",
-  validation_fail: "验证失败",
-  rejected_assumption: "错误假设",
-  wrong_tech_choice: "技术选型误",
+const CATEGORY_KEYS: Record<string, string> = {
+  error_pattern: "knowledgePanel.categoryLabels.errorPattern",
+  validation_fail: "knowledgePanel.categoryLabels.validationFailed",
+  rejected_assumption: "knowledgePanel.categoryLabels.wrongAssumption",
+  wrong_tech_choice: "knowledgePanel.categoryLabels.techMistake",
 };
 
-const STAGE_LABEL: Record<string, string> = {
-  analysis: "分析", prd: "PRD", ui: "UI设计", plan: "技术方案",
-  dev: "开发", test: "测试", deploy: "发布", monitor: "监控",
+const STAGE_KEYS: Record<string, string> = {
+  analysis: "knowledgePanel.stageLabel.analysis",
+  prd: "knowledgePanel.stageLabel.prd",
+  ui: "knowledgePanel.stageLabel.ui",
+  plan: "knowledgePanel.stageLabel.plan",
+  dev: "knowledgePanel.stageLabel.dev",
+  test: "knowledgePanel.stageLabel.test",
+  deploy: "knowledgePanel.stageLabel.deploy",
+  monitor: "knowledgePanel.stageLabel.monitor",
 };
 
 export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
