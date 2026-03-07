@@ -22,6 +22,9 @@ echo "[2/3] 启动 FastAPI 后端..."
 cd "$ROOT_DIR/backend"
 source .venv/bin/activate
 export TC_PIN="${TC_PIN:-123456}"
+export FEISHU_APP_ID="${FEISHU_APP_ID:-cli_a9f48f35d2f89cbb}"
+export FEISHU_APP_SECRET="${FEISHU_APP_SECRET:-5cz3PaxWnriPczxKT0h5Sga5wQzFs2Ub}"
+export FEISHU_OWNER_ID="${FEISHU_OWNER_ID:-ou_79d283543cc0c01a4483a55ac049cdc2}"
 uvicorn app.main:app --host 0.0.0.0 --port 8765 --reload &
 BACKEND_PID=$!
 echo "  后端 PID: $BACKEND_PID  → http://localhost:8765"
