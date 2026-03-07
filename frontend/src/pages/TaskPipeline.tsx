@@ -479,9 +479,9 @@ function LogPanel({ logs, isRunning, stage }: {
                 <span className="text-white/15 shrink-0 tabular-nums select-none w-6 text-right">{i + 1}</span>
                 <span className={cn(
                   "flex-1 break-all",
-                  line.toLowerCase().includes("error") || line.toLowerCase().includes("错误")
+                  line.toLowerCase().includes("error") || line.toLowerCase().includes(t('taskPipeline.logPanel.error'))
                     ? "text-red-400"
-                    : line.toLowerCase().includes("warn") || line.toLowerCase().includes("警告")
+                    : line.toLowerCase().includes("warn") || line.toLowerCase().includes(t('taskPipeline.logPanel.warning'))
                     ? "text-yellow-400"
                     : line.startsWith("[critic]") || line.startsWith("✓") || line.startsWith("✗")
                     ? "text-blue-300"
