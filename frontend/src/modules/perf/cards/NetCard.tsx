@@ -15,7 +15,7 @@ export function NetCard({ sys, hist, colors = {}, showTitle }: NetCardProps) {
   const cIn  = colors.in  ?? "#007AFF";
 
   return (
-    <ICard title="网络" showTitle={showTitle}>
+    <ICard title={t('perf.metricLabel.net')} showTitle={showTitle}>
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center">
           <div className="text-lg font-bold text-white">{fmtKbps(sys?.network.out_kbps)}</div>
