@@ -198,7 +198,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               </div>
             </Row>
 
-            <Row label="Token 状态">
+            <Row label={t('settings.connection.tokenStatus')}>
               <div className="flex items-center gap-2">
                 <div className={cn(
                   "w-1.5 h-1.5 rounded-full shrink-0",
