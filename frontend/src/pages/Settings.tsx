@@ -110,9 +110,9 @@ export default function Settings({ onDisconnect }: SettingsProps) {
         {/* 工作区设置 */}
         <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-app">
-            <h2 className="text-xs font-semibold text-app">工作区</h2>
+            <h2 className="text-xs font-semibold text-app">{t('settings.workspace.title')}</h2>
             <p className="text-[10px] text-app-tertiary mt-0.5">
-              新建项目时会在此根目录下创建对应文件夹
+              {t('settings.workspace.hint')}
             </p>
           </div>
 
