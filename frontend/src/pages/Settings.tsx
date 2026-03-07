@@ -241,7 +241,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                   {tunnelUrl}
                 </a>
               ) : (
-                <span className="text-xs text-app-tertiary">未检测到</span>
+                <span className="text-xs text-app-tertiary">{t('settings.connection.notDetected')}</span>
               )}
             </Row>
 
