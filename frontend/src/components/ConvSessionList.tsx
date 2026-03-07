@@ -59,7 +59,7 @@ export function ConvSessionList({ sessions, loading, selectedId, onSelect }: Pro
       <div className="flex-1 overflow-y-auto py-1">
         {loading ? (
           <div className="flex items-center justify-center h-20 text-[11px]"
-               style={{ color: "var(--text-tertiary)" }}>加载中...</div>
+               style={{ color: "var(--text-tertiary)" }}>{t('convSession.loading')}</div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2 px-3 text-center"
                style={{ color: "var(--text-tertiary)" }}>
