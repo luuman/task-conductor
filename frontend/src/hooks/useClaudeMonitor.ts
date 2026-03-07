@@ -1,5 +1,5 @@
 // frontend/src/hooks/useClaudeMonitor.ts
-// 全局 Claude Code 执行监听 WebSocket hook
+// Global Claude Code execution monitoring WebSocket hook
 
 import { useEffect, useRef, useState } from "react";
 import { getWsUrl } from "../lib/api";
