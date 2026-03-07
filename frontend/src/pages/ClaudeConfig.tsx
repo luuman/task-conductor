@@ -1201,7 +1201,7 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
           <div className="flex gap-2">
             <div className="flex items-center flex-1 px-3 py-2 bg-app border border-app rounded-lg focus-within:border-accent/60">
               <span className="text-xs text-app-tertiary font-mono">/</span>
-              <input value={newName} onChange={e => { setNewName(e.target.value); setCreateErr(""); }} placeholder="命令名称（如 review）"
+              <input value={newName} onChange={e => { setNewName(e.target.value); setCreateErr(""); }} placeholder={t("claudeConfig.placeholder.commandName")}
                 className="flex-1 ml-1 text-xs bg-transparent outline-none text-app placeholder:text-app-tertiary font-mono"
                 onKeyDown={e => e.key === "Enter" && handleCreate()} />
             </div>
