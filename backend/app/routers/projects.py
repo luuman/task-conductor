@@ -113,6 +113,17 @@ def scan_projects(db: Session = Depends(get_db)):
             db.refresh(p)
     return imported
 
+@router.put("/{project_id}/feishu-sync", summary="切换飞书会话同步")
+def toggle_feishu_sync(project_id: int, body: dict, db: Session = Depends(get_db)):
+    p = db.get(Project, project_id)
+    if not p:
+        raise HTTPException(404, "项目不存在")
+    p.feishu_sync = bool(body.get("enabled", False))
+    db.commit()
+    db.refresh(p)
+    return ProjectOut.model_validate(p)
+
+
 @router.put("/{project_id}/sort", summary="更新项目排序")
 def update_sort(project_id: int, body: dict, db: Session = Depends(get_db)):
     p = db.get(Project, project_id)
