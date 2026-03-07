@@ -358,7 +358,7 @@ function StageDetailPanel({
         {/* 状态标签 */}
         <div className="flex items-center gap-2 flex-wrap">
           {isCompleted && (
-            <span className="text-[10px] bg-green-500/15 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">已完成</span>
+            <span className="text-[10px] bg-green-500/15 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">{t('taskWorkflow.stageDetailPanel.done')}</span>
           )}
           {isPending && (
             <span className="text-[10px] bg-white/5 text-white/40 border border-white/10 px-2 py-0.5 rounded-full">等待执行</span>
