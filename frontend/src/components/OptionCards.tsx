@@ -24,7 +24,7 @@ export function OptionCards({
           `}
         >
           <div className="flex justify-between items-start">
-            <span className="text-xl font-bold text-white">方案 {opt.label}</span>
+            <span className="text-xl font-bold text-white">{t('optionCards.option')} {opt.label}</span>
             {opt.label === recommended && (
               <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
                 AI 推荐
