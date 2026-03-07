@@ -150,7 +150,7 @@ function ArtifactCard({ artifact }: {
         <span className="text-[10px] text-app-tertiary">{artifact.artifact_type}</span>
         {artifact.retry_count > 0 && (
           <span className="text-[10px] text-orange-400 bg-orange-900/20 px-1.5 py-0.5 rounded-full">
-            重试 {artifact.retry_count}x
+            {t('taskPipeline.artifactCard.retryCount', { count: artifact.retry_count })}
           </span>
         )}
         <span className="text-[10px] text-app-tertiary ml-auto">
