@@ -1609,7 +1609,7 @@ function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
               </div>
               {inst && (
                 <div className="flex flex-wrap gap-x-4 gap-y-1 pl-12 text-[9px] font-mono text-app-tertiary">
-                  <span>v{inst.version}</span><span>安装: {inst.installed_at.slice(0, 10)}</span>
+                  <span>v{inst.version}</span><span>{t("common.installed")}: {inst.installed_at.slice(0, 10)}</span>
                   {inst.git_commit && <span>commit: {inst.git_commit.slice(0, 8)}</span>}
                 </div>
               )}
