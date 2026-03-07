@@ -759,7 +759,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("确定删除此项目及其所有任务？")) return;
+    if (!confirm(t('dashboard.projectCard.deleteConfirm'))) return;
     await api.projects.delete(id);
     onRefreshProjects?.();
   };
