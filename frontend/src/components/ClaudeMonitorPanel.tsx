@@ -198,7 +198,7 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
               onClick={handleClear}
               className="text-[10px] px-2 py-0.5 rounded font-mono text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#161b22] transition-colors"
             >
-              清空
+              {t('claudeMonitor.controls.clear')}
             </button>
             <button
               onClick={onClose}
