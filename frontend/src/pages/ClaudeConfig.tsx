@@ -1363,7 +1363,7 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                 </div>
                 <p className="text-[10px] text-app-tertiary mt-0.5">{meta.desc}</p>
               </div>
-              <button onClick={() => addRule(ev)} className="text-app-tertiary hover:text-accent p-1" title="添加规则"><Plus size={14} /></button>
+              <button onClick={() => addRule(ev)} className="text-app-tertiary hover:text-accent p-1" title="Add rule"><Plus size={14} /></button>
             </div>
             {/* Rules — 始终展示 */}
             {has && (
