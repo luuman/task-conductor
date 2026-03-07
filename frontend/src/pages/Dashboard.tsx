@@ -609,7 +609,7 @@ function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated:
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>+ 新建任务</Button>
+      <Button size="sm" onClick={() => setOpen(true)}>+ {t('dashboard.newTask.button')}</Button>
       {open && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-app-secondary border border-app rounded-xl p-5 w-96 space-y-3 shadow-2xl">
