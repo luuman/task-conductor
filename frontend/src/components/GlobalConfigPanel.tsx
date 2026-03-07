@@ -676,7 +676,7 @@ function FieldRenderer({ field, value, onChange }: {
               setJsonText(e.target.value);
               setJsonError("");
               try { onChange(JSON.parse(e.target.value)); }
-              catch { setJsonError("JSON 格式错误"); }
+              catch { setJsonError(t("globalConfig.fieldRenderer.jsonError")); }
             }}
             spellCheck={false} rows={4}
             className={cn(inputCls, "resize-y", jsonError && "border-red-500/40")} />
