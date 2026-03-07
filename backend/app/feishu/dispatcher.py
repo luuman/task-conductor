@@ -213,11 +213,7 @@ async def feishu_card(request: Request):
 
                     if next_stage != "done":
                         from ..scheduler import scheduler
-                        asyncio.create_task(
-                            asyncio.coroutine(lambda: scheduler.enqueue(task_id))()
-                            if not asyncio.iscoroutinefunction(scheduler.enqueue)
-                            else scheduler.enqueue(task_id)
-                        )
+                        asyncio.create_task(scheduler.enqueue(task_id))
                 except StageTransitionError as e:
                     logger.warning("飞书审批推进失败: %s", e)
 
