@@ -131,7 +131,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
           }} className="space-y-4">
             <div className="rounded-lg px-3 py-2 text-[11px]"
                  style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)", color: "var(--text-tertiary)" }}>
-              后端地址：<span className="font-mono" style={{ color: "var(--accent)" }}>localhost:7070 → :8765</span>
+              {t('login.local.backendUrl')}<span className="font-mono" style={{ color: "var(--accent)" }}>localhost:7070 → :8765</span>
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
