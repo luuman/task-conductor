@@ -247,8 +247,8 @@ export default function Settings({ onDisconnect }: SettingsProps) {
 
             <div className="px-4 py-3 flex items-center justify-between">
               <div>
-                <p className="text-xs text-app">重新配置连接</p>
-                <p className="text-[10px] text-app-tertiary mt-0.5">清除本地凭据，返回登录页</p>
+                <p className="text-xs text-app">{t('settings.connection.reconfigure')}</p>
+                <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.connection.clearCredentials')}</p>
               </div>
               <button
                 onClick={handleDisconnect}
