@@ -93,11 +93,11 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
 
       {/* Stats */}
       <div className="px-4 py-2 border-b border-app shrink-0 flex gap-4">
-        {Object.entries(CATEGORY_LABEL).map(([cat, label]) => {
+        {Object.entries(CATEGORY_KEYS).map(([cat, key]) => {
           const count = items.filter(k => k.category === cat).length;
           return count > 0 ? (
             <div key={cat} className="flex items-center gap-1.5">
-              <Badge variant={CATEGORY_COLORS[cat] ?? "default"}>{label}</Badge>
+              <Badge variant={CATEGORY_COLORS[cat] ?? "default"}>{t(key)}</Badge>
               <span className="text-[10px] text-app-tertiary">{count}</span>
             </div>
           ) : null;
