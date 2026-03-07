@@ -48,11 +48,15 @@ const STATE_VARIANTS: Record<VisualState, string[]> = {
   idle:    ["#4a4a6c","#3c3c5c","#56567c","#32324c","#5e5e80"],
 };
 
-const STAGE_LABEL: Record<string, string> = {
-  input:"需求", analysis:"分析", prd:"PRD", ui:"UI",
-  plan:"方案", dev:"开发", test:"测试", deploy:"部署",
-  monitor:"监控", done:"完成",
-};
+function getCanvasStageLabel(t: (key: string) => string): Record<string, string> {
+  return {
+    input: t('projectsCanvas.stageLabel.input'), analysis: t('projectsCanvas.stageLabel.analysis'),
+    prd: t('projectsCanvas.stageLabel.prd'), ui: t('projectsCanvas.stageLabel.ui'),
+    plan: t('projectsCanvas.stageLabel.plan'), dev: t('projectsCanvas.stageLabel.dev'),
+    test: t('projectsCanvas.stageLabel.test'), deploy: t('projectsCanvas.stageLabel.deploy'),
+    monitor: t('projectsCanvas.stageLabel.monitor'), done: t('projectsCanvas.stageLabel.done'),
+  };
+}
 
 // State ordering for spatial clustering (same state → same region)
 const STATE_ORDER: VisualState[] = ["failed", "review", "running", "queued", "done", "idle"];
