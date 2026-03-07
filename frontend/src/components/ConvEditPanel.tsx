@@ -111,7 +111,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
 
       {/* 关联任务 */}
       <div className="space-y-1">
-        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>关联任务 ID</label>
+        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{t('convEdit.taskId')}</label>
         <input
           type="number"
           value={linkedTaskId ?? ""}
