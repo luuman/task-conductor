@@ -12,10 +12,22 @@ interface TaskPipelineProps {
   onBack: () => void;
 }
 
-const STAGE_LABEL: Record<string, string> = {
-  input: "需求", analysis: "分析", prd: "PRD", ui: "UI设计",
-  plan: "技术方案", dev: "开发", test: "测试", deploy: "发布", monitor: "监控",
-};
+function useTPStageLabelMap() {
+  const { t } = useTranslation();
+  return useMemo<Record<string, string>>(() => ({
+    input: t('taskPipeline.stageLabel.input'), analysis: t('taskPipeline.stageLabel.analysis'), prd: t('taskPipeline.stageLabel.prd'), ui: t('taskPipeline.stageLabel.ui'),
+    plan: t('taskPipeline.stageLabel.plan'), dev: t('taskPipeline.stageLabel.dev'), test: t('taskPipeline.stageLabel.test'), deploy: t('taskPipeline.stageLabel.deploy'), monitor: t('taskPipeline.stageLabel.monitor'),
+  }), [t]);
+}
+
+function useTPStatusLabelMap() {
+  const { t } = useTranslation();
+  return useMemo<Record<string, string>>(() => ({
+    pending: t('taskPipeline.status.pending'), running: t('taskPipeline.status.running'), waiting_review: t('taskPipeline.status.approval'),
+    approved: t('taskPipeline.status.approved'), rejected: t('taskPipeline.status.rejected'), done: t('taskPipeline.status.done'),
+    failed: t('taskPipeline.status.failed'), queued: t('taskPipeline.status.queued'),
+  }), [t]);
+}
 const STAGE_COLORS: Record<string, "default" | "success" | "warning" | "danger" | "info" | "accent"> = {
   input: "default", analysis: "warning", prd: "warning", ui: "accent",
   plan: "accent", dev: "info", test: "warning", deploy: "success", monitor: "success",
