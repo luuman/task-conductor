@@ -21,12 +21,18 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [shuttingDown, setShuttingDown] = useState(false);
+  const [restarting, setRestarting] = useState(false);
 
   // workspace root
   const [workspaceRoot, setWorkspaceRoot] = useState("");
   const [workspaceInput, setWorkspaceInput] = useState("");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState("");
+
+  // feishu config
+  const [feishu, setFeishu] = useState({ app_id: "", app_secret: "", owner_id: "", default_chat_id: "" });
+  const [feishuInput, setFeishuInput] = useState({ app_id: "", app_secret: "", owner_id: "", default_chat_id: "" });
+  const [feishuSaveStatus, setFeishuSaveStatus] = useState<SaveStatus>("idle");
 
   const baseUrl = (() => {
     const isLocal =
