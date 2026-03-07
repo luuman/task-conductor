@@ -387,6 +387,41 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
   );
 }
 
+// ── Agent markdown 输出 ──────────────────────────────────────
+function AgentResultView({ result, description }: { result: string; description: string }) {
+  const [open, setOpen] = useState(false);
+  const isLong = result.length > 1000;
+  const displayed = open || !isLong ? result : result.slice(0, 1000) + "\n\n…";
+
+  return (
+    <div className="rounded-lg overflow-hidden mt-2"
+         style={{ border: "1px solid var(--border)" }}>
+      {description && (
+        <div className="flex items-center gap-2 px-3 py-1.5"
+             style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
+          <BotIcon size={13} strokeWidth={1.75} style={{ color: "var(--accent)" }} />
+          <span className="text-[11px] font-medium flex-1 truncate"
+                style={{ color: "var(--text-secondary)" }}>{description}</span>
+        </div>
+      )}
+      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto max-h-[500px]"
+           style={{ color: "var(--text-primary)", background: "var(--background)" }}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+          {displayed}
+        </ReactMarkdown>
+      </div>
+      {isLong && (
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="w-full h-6 text-[10px] font-mono transition-colors"
+          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
+          {open ? "▲ 收起" : `▼ 展开全部 (${result.length} 字)`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ── 通用输出 ─────────────────────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
   const [open, setOpen] = useState(false);
