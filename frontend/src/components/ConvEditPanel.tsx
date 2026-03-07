@@ -153,7 +153,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
           color: saved ? "#22c55e" : "white",
         }}
       >
-        {saving ? "保存中..." : saved ? "✓ 已保存" : "保存"}
+        {saving ? t('convEdit.saving') : saved ? t('convEdit.saved') : t('convEdit.save')}
       </button>
     </div>
   );
