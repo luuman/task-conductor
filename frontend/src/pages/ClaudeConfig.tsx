@@ -1386,7 +1386,7 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                         <button onClick={() => rmHook(ev, ri, hi)} className="text-app-tertiary hover:text-red-400 p-1"><X size={11} /></button>
                       </div>
                     ))}
-                    <button onClick={() => addHook(ev, ri)} className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent flex items-center gap-1"><Plus size={10} /> 添加命令</button>
+                    <button onClick={() => addHook(ev, ri)} className="ml-[62px] text-[10px] text-app-tertiary hover:text-accent flex items-center gap-1"><Plus size={10} /> {t("claudeConfig.hooks.addCommand")}</button>
                   </div>
                 ))}
                 <div className="flex items-center gap-2 pt-1">
