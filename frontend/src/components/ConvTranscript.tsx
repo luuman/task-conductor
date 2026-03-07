@@ -50,9 +50,11 @@ import {
   ChevronsDownUp,
 } from "lucide-react";
 
-// ── 展开/折叠信号 Context ───────────────────────────────────
+// ── Context ─────────────────────────────────────────────────
 // signal > 0 = expand all (increments), signal < 0 = collapse all (decrements)
 const ExpandSignalCtx = createContext(0);
+// 文件打开回调：(filePath) => void
+const OpenFileCtx = createContext<((filePath: string) => void) | null>(null);
 
 // ── Markdown 组件 ────────────────────────────────────────────
 const mdComponents: Components = {
