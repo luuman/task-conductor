@@ -103,7 +103,7 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
           ) : null;
         })}
         {items.length === 0 && !loading && (
-          <span className="text-[10px] text-app-tertiary">暂无记录</span>
+          <span className="text-[10px] text-app-tertiary">{t('knowledgePanel.stats.noRecords')}</span>
         )}
       </div>
 
