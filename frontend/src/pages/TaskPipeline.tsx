@@ -472,7 +472,7 @@ function LogPanel({ logs, isRunning, stage }: {
       {expanded && (
         <div className="px-4 pb-3 max-h-52 overflow-y-auto font-mono text-[11px] space-y-0.5">
           {logs.length === 0 ? (
-            <p className="text-white/20 py-1">等待输出...</p>
+            <p className="text-white/20 py-1">{t('taskPipeline.logPanel.waitingOutput')}</p>
           ) : (
             logs.map((line, i) => (
               <div key={i} className="flex gap-2 leading-relaxed">
