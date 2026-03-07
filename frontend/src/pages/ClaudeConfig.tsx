@@ -719,7 +719,7 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
           ) : (
             <button onClick={startEdit}
               className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app hover:border-accent/40 transition-colors">
-              <Wrench size={10} /> 编辑
+              <Wrench size={10} /> {t("claudeConfig.claudeMd.edit")}
             </button>
           )}
         </div>
