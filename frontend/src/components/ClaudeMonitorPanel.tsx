@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useClaudeMonitor, type ClaudeHookEvent } from "../hooks/useClaudeMonitor";
 import { cn } from "../lib/utils";
+import { getDateLocale } from "../i18n";
 
 const MAX_LINES = 300;
 
