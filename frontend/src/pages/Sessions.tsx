@@ -99,6 +99,7 @@ function dbEventToRow(e: ClaudeEvent): EventRow {
 // ── 状态标签 ────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: ClaudeSession["status"] }) {
+  const { t } = useTranslation();
   return (
     <span className={cn(
       "text-[9px] px-1.5 py-0.5 rounded-full font-mono",
@@ -106,7 +107,7 @@ function StatusBadge({ status }: { status: ClaudeSession["status"] }) {
       status === "idle"    ? "bg-yellow-500/15 text-yellow-400" :
                              "bg-gray-500/15 text-gray-400"
     )}>
-      {status === "active" ? "运行中" : status === "idle" ? "空闲" : "已停止"}
+      {status === "active" ? t('sessions.statusBadge.running') : status === "idle" ? t('sessions.statusBadge.idle') : t('sessions.statusBadge.stopped')}
     </span>
   );
 }
