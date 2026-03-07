@@ -179,9 +179,9 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
       {/* ══ 列1：待办清单 ══ */}
       <div className="w-[280px] shrink-0 border-r border-app flex flex-col">
         <ColHeader
-          title="待办清单"
+          title={t('taskManager.columns.todo')}
           count={inbox.length}
-          badge={inbox.length > 0 ? `${inbox.length} 项` : undefined}
+          badge={inbox.length > 0 ? `${inbox.length}` : undefined}
         />
 
         {/* 输入区 */}
