@@ -27,6 +27,7 @@ function StatusDot({ status }: { status: ClaudeSession["status"] }) {
 }
 
 export function ConvSessionList({ sessions, loading, selectedId, onSelect }: Props) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
   const filtered = search.trim()
