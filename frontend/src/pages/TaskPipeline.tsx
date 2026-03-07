@@ -103,7 +103,7 @@ function CriticNotes({ notes }: { notes: string }) {
           )}>{parsed.score}/10</span>
           {parsed.pass_review !== undefined && (
             <Badge variant={parsed.pass_review ? "success" : "danger"}>
-              {parsed.pass_review ? "通过" : "需修改"}
+              {parsed.pass_review ? t('taskPipeline.criticNotes.pass') : t('taskPipeline.criticNotes.needsRevision')}
             </Badge>
           )}
         </div>
