@@ -349,6 +349,9 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
 function Tooltip({ stats, state, color, mouse }: {
   stats: ProjectStats; state: VisualState; color: string; mouse: { x: number; y: number };
 }) {
+  const { t } = useTranslation();
+  const stateLabel = getStateLabel(t);
+  const STAGE_LABEL = getCanvasStageLabel(t);
   const meta = STATE_META[state];
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
 
