@@ -1743,6 +1743,7 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
 // Sec: 关于
 // ═══════════════════════════════════════════════════════════════════
 function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | null; overview: ClaudeOverview | null }) {
+  const { t } = useTranslation();
   const [checking, setChecking] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<string | null>(null);
   const checkUpdate = async () => {
