@@ -106,7 +106,7 @@ export function AppShell({
               </div>
             )}
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowNewProject(false)} className="text-xs text-app-tertiary hover:text-app px-3 py-1.5">取消</button>
+              <button onClick={() => setShowNewProject(false)} className="text-xs text-app-tertiary hover:text-app px-3 py-1.5">{t('appShell.cancel')}</button>
               <button onClick={handleNewProject} disabled={!newProjName.trim()}
                 className="text-xs bg-accent hover:bg-accent-hover text-white px-3 py-1.5 rounded-md disabled:opacity-40">
                 创建
