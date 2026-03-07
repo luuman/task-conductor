@@ -1077,12 +1077,12 @@ function SecAgents({ agents, onToggle, onCreate, onDelete }: {
     if (!name) setCreating(true);
     setCreateErr("");
     try { await onCreate(n, content); setNewName(""); setShowCreate(false); setSelected(n); }
-    catch (e) { setCreateErr(e instanceof Error ? e.message : "创建失败"); }
+    catch (e) { setCreateErr(e instanceof Error ? e.message : t("claudeConfig.agents.createFailed")); }
     finally { if (!name) setCreating(false); }
   };
   const handleDelete = async (name: string, ev: React.MouseEvent) => {
     ev.stopPropagation();
-    if (!confirm(`确定删除 Agent "${name}"？此操作不可恢复。`)) return;
+    if (!confirm(`${t("claudeConfig.agents.deleteConfirm")} "${name}"？`)) return;
     setDeleting(name);
     try { await onDelete(name); if (selected === name) setSelected(null); }
     finally { setDeleting(null); }
