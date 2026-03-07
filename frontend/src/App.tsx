@@ -12,6 +12,7 @@ import TaskManager from "./pages/TaskManager";
 import ConversationHistory from "./pages/ConversationHistory";
 import ProjectsCanvas from "./pages/ProjectsCanvas";
 import ClaudeConfig from "./pages/ClaudeConfig";
+import ProjectFiles from "./pages/ProjectFiles";
 import { useClaudeMonitor, type ClaudeHookEvent, type WsStatus } from "./hooks/useClaudeMonitor";
 
 type Page = "dashboard" | "project" | "task" | "sessions" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config";
