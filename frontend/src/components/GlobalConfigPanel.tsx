@@ -551,6 +551,7 @@ function FieldRenderer({ field, value, onChange }: {
   value: unknown;
   onChange: (v: unknown) => void;
 }) {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [kvKey, setKvKey] = useState("");
