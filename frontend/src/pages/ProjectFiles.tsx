@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ChevronRight,
@@ -15,6 +15,9 @@ import {
   Copy,
   Check,
   X,
+  Search,
+  Pencil,
+  Save,
 } from "lucide-react";
 import { api, type FileItem, type Project } from "../lib/api";
 import { cn } from "../lib/utils";
@@ -123,6 +126,10 @@ function FileTree({
   const [items, setItems] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedDirs, setExpandedDirs] = useState<Record<string, FileItem[]>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<FileItem[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const loadDir = useCallback(
     async (path: string) => {
@@ -142,6 +149,27 @@ function FileTree({
   useEffect(() => {
     loadDir(currentPath);
   }, [currentPath, loadDir]);
+
+  // debounced search
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    setSearching(true);
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.projects.searchFiles(projectId, searchQuery.trim());
+        setSearchResults(res.items);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+  }, [searchQuery, projectId]);
 
   const toggleSubDir = useCallback(
     async (dirPath: string) => {
@@ -205,49 +233,124 @@ function FileTree({
     );
   };
 
+  const renderSearchResult = (item: FileItem) => {
+    const isSelected = item.path === selectedFile;
+    // 显示完整路径，高亮文件名部分
+    const dirPart = item.path.includes("/") ? item.path.slice(0, item.path.lastIndexOf("/") + 1) : "";
+    return (
+      <button
+        key={item.path}
+        onClick={() => onSelectFile(item.path)}
+        className={cn(
+          "w-full flex items-center gap-1.5 py-1.5 px-2 text-[12.5px] rounded-md transition-colors text-left group",
+          isSelected ? "font-medium" : "hover:bg-white/[0.04]"
+        )}
+        style={{
+          background: isSelected ? "var(--accent-subtle)" : undefined,
+          color: isSelected ? "var(--accent)" : "var(--text-secondary)",
+        }}
+      >
+        <FileIcon name={item.name} isDir={false} />
+        <span className="truncate flex-1">
+          {dirPart && <span style={{ color: "var(--text-tertiary)" }}>{dirPart}</span>}
+          <span>{item.name}</span>
+        </span>
+        {item.size != null && (
+          <span className="text-[10px] opacity-0 group-hover:opacity-60 shrink-0 tabular-nums">
+            {formatSize(item.size)}
+          </span>
+        )}
+      </button>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="h-10 flex items-center gap-2 px-3 shrink-0"
-        style={{ borderBottom: "1px solid var(--border)" }}
-      >
-        {currentPath && (
-          <button
-            onClick={() => {
-              const parent = currentPath.includes("/")
-                ? currentPath.split("/").slice(0, -1).join("/")
-                : "";
-              onNavigate(parent);
-            }}
-            className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            <ArrowLeft size={13} />
-          </button>
-        )}
-        <Breadcrumb path={currentPath || "."} onNavigate={onNavigate} />
-        <button
-          onClick={() => loadDir(currentPath)}
-          className="ml-auto w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
-          style={{ color: "var(--text-tertiary)" }}
-          title={t("common.refresh")}
+      {/* 搜索栏 */}
+      <div className="px-2 pt-2 pb-1 shrink-0">
+        <div
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[12px]"
+          style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}
         >
-          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-        </button>
+          <Search size={12} style={{ color: "var(--text-tertiary)" }} className="shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("files.search")}
+            className="flex-1 bg-transparent outline-none text-[12px]"
+            style={{ color: "var(--text-primary)" }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="shrink-0" style={{ color: "var(--text-tertiary)" }}>
+              <X size={11} />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* 面包屑 + 刷新 */}
+      {!searchQuery && (
+        <div
+          className="h-9 flex items-center gap-2 px-3 shrink-0"
+          style={{ borderBottom: "1px solid var(--border)" }}
+        >
+          {currentPath && (
+            <button
+              onClick={() => {
+                const parent = currentPath.includes("/")
+                  ? currentPath.split("/").slice(0, -1).join("/")
+                  : "";
+                onNavigate(parent);
+              }}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              <ArrowLeft size={13} />
+            </button>
+          )}
+          <Breadcrumb path={currentPath || "."} onNavigate={onNavigate} />
+          <button
+            onClick={() => loadDir(currentPath)}
+            className="ml-auto w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
+            style={{ color: "var(--text-tertiary)" }}
+            title={t("common.refresh")}
+          >
+            <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
+      )}
+
+      {/* 文件列表 / 搜索结果 */}
       <div className="flex-1 overflow-y-auto py-1 px-1">
-        {items.length === 0 && !loading && (
-          <div className="text-center py-8 text-[12px]" style={{ color: "var(--text-tertiary)" }}>
-            {t("files.empty")}
-          </div>
+        {searchQuery ? (
+          searching ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw size={14} className="animate-spin" style={{ color: "var(--text-tertiary)" }} />
+            </div>
+          ) : searchResults && searchResults.length === 0 ? (
+            <div className="text-center py-8 text-[12px]" style={{ color: "var(--text-tertiary)" }}>
+              {t("files.noResults")}
+            </div>
+          ) : (
+            searchResults?.map(renderSearchResult)
+          )
+        ) : (
+          <>
+            {items.length === 0 && !loading && (
+              <div className="text-center py-8 text-[12px]" style={{ color: "var(--text-tertiary)" }}>
+                {t("files.empty")}
+              </div>
+            )}
+            {items.map((item) => renderItem(item, 0))}
+          </>
         )}
-        {items.map((item) => renderItem(item, 0))}
       </div>
     </div>
   );
 }
 
-/* ── CodeViewer（右栏） ──────────────────────── */
+/* ── CodeViewer（右栏，支持编辑） ──────────────── */
 function CodeViewer({
   projectId,
   filePath,
@@ -259,20 +362,28 @@ function CodeViewer({
 }) {
   const { t } = useTranslation();
   const [content, setContent] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
   const [binary, setBinary] = useState(false);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [fileSize, setFileSize] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"" | "saved" | "failed">("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setCopied(false);
+    setEditing(false);
+    setSaveStatus("");
     api.projects
       .fileContent(projectId, filePath)
       .then((res) => {
         if (cancelled) return;
         setContent(res.content);
+        setEditContent(res.content || "");
         setBinary(res.binary);
         setFileSize(res.size);
       })
@@ -292,6 +403,7 @@ function CodeViewer({
   const fileName = filePath.split("/").pop() || filePath;
   const lang = detectLang(fileName);
   const isImage = IMG_EXTS.has(getExt(fileName));
+  const hasUnsaved = editing && editContent !== content;
 
   const handleCopy = useCallback(() => {
     if (!content) return;
@@ -301,8 +413,50 @@ function CodeViewer({
     });
   }, [content]);
 
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    setSaveStatus("");
+    try {
+      await api.projects.saveFile(projectId, filePath, editContent);
+      setContent(editContent);
+      setSaveStatus("saved");
+      setEditing(false);
+      setTimeout(() => setSaveStatus(""), 2000);
+    } catch {
+      setSaveStatus("failed");
+    } finally {
+      setSaving(false);
+    }
+  }, [projectId, filePath, editContent]);
+
+  const handleStartEdit = useCallback(() => {
+    setEditContent(content || "");
+    setEditing(true);
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  }, [content]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditContent(content || "");
+    setEditing(false);
+  }, [content]);
+
+  // Ctrl+S to save
+  useEffect(() => {
+    if (!editing) return;
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [editing, handleSave]);
+
   // 行号 + 内容
   const lines = useMemo(() => content?.split("\n") || [], [content]);
+
+  const canEdit = !binary && !isImage && content != null;
 
   return (
     <div className="flex flex-col h-full">
@@ -315,16 +469,68 @@ function CodeViewer({
         <span className="text-[12.5px] font-medium truncate flex-1" style={{ color: "var(--text-primary)" }}>
           {filePath}
         </span>
+        {hasUnsaved && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">
+            {t("files.unsaved")}
+          </span>
+        )}
+        {saveStatus === "saved" && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+            {t("files.saved")}
+          </span>
+        )}
+        {saveStatus === "failed" && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">
+            {t("files.saveFailed")}
+          </span>
+        )}
         <span className="text-[10px] tabular-nums" style={{ color: "var(--text-tertiary)" }}>
           {formatSize(fileSize)}
         </span>
+        {!isImage && (
+          <span className="text-[10px] tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+            {lines.length} {t("files.lines")}
+          </span>
+        )}
         <span
           className="text-[10px] px-1.5 py-0.5 rounded"
           style={{ background: "var(--background-tertiary)", color: "var(--text-tertiary)" }}
         >
           {lang}
         </span>
-        {content && (
+        {/* 编辑/保存/取消 按钮 */}
+        {canEdit && !editing && (
+          <button
+            onClick={handleStartEdit}
+            className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
+            style={{ color: "var(--text-tertiary)" }}
+            title={t("files.edit")}
+          >
+            <Pencil size={12} />
+          </button>
+        )}
+        {editing && (
+          <>
+            <button
+              onClick={handleSave}
+              disabled={saving || !hasUnsaved}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06] disabled:opacity-30"
+              style={{ color: saving ? "var(--text-tertiary)" : "#22c55e" }}
+              title={`${t("files.save")} (Ctrl+S)`}
+            >
+              <Save size={12} className={saving ? "animate-pulse" : ""} />
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
+              style={{ color: "var(--text-tertiary)" }}
+              title={t("files.cancel")}
+            >
+              <X size={12} />
+            </button>
+          </>
+        )}
+        {content && !editing && (
           <button
             onClick={handleCopy}
             className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
@@ -350,12 +556,46 @@ function CodeViewer({
             <RefreshCw size={16} className="animate-spin" style={{ color: "var(--text-tertiary)" }} />
           </div>
         )}
-        {!loading && binary && (
+        {/* 图片预览 */}
+        {!loading && isImage && (
+          <div className="flex items-center justify-center h-full p-8">
+            <img
+              src={`/api/projects/${projectId}/file/raw?path=${encodeURIComponent(filePath)}`}
+              alt={fileName}
+              className="max-w-full max-h-full object-contain rounded-lg"
+              style={{ background: "var(--background-tertiary)" }}
+              onError={(e) => {
+                // fallback: 如果 raw 端点不存在，显示提示
+                (e.target as HTMLImageElement).style.display = "none";
+                (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                  <div style="color: var(--text-tertiary); font-size: 13px;">${t("files.imagePreview")}</div>
+                `;
+              }}
+            />
+          </div>
+        )}
+        {!loading && binary && !isImage && (
           <div className="flex items-center justify-center h-full text-[13px]" style={{ color: "var(--text-tertiary)" }}>
             {t("files.binaryFile")}
           </div>
         )}
-        {!loading && !binary && content != null && (
+        {/* 编辑模式 */}
+        {!loading && !binary && !isImage && content != null && editing && (
+          <textarea
+            ref={textareaRef}
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="w-full h-full p-4 font-mono text-[12px] leading-[1.65] resize-none outline-none"
+            style={{
+              background: "var(--background-primary)",
+              color: "var(--text-primary)",
+              tabSize: 2,
+            }}
+            spellCheck={false}
+          />
+        )}
+        {/* 只读模式 */}
+        {!loading && !binary && !isImage && content != null && !editing && (
           <div className="font-mono text-[12px] leading-[1.65]">
             <table className="w-full border-collapse">
               <tbody>
@@ -442,7 +682,7 @@ export default function ProjectFiles({
           />
         </div>
 
-        {/* 右：代码查看 */}
+        {/* 右：代码查看/编辑 */}
         {selectedFile && (
           <div className="flex-1 min-w-0">
             <CodeViewer
