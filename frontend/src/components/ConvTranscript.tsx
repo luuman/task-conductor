@@ -575,6 +575,7 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Pro
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [expandSignal, setExpandSignal] = useState(0);
+  const [autoExpand, setAutoExpand] = useState(false);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -583,6 +584,14 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Pro
 
   const expandAll = useCallback(() => setExpandSignal(v => Math.abs(v) + 1), []);
   const collapseAll = useCallback(() => setExpandSignal(v => -(Math.abs(v) + 1)), []);
+  const toggleAutoExpand = useCallback(() => {
+    setAutoExpand(v => {
+      const next = !v;
+      // 切换时同步展开/折叠所有
+      setExpandSignal(prev => next ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1));
+      return next;
+    });
+  }, []);
 
   // 统计可展开的工具数
   const toolCount = useMemo(() => {
