@@ -21,7 +21,7 @@ interface PerfBottomBarProps {
   connectionStatus?: "connected" | "disconnected" | "connecting";
 }
 
-const BAR_H = 34; // px — 两行文字的底栏高度
+const BAR_H = 34; // px — two-line bottom bar height
 
 /** 每个 tile 的两行内容 */
 function TileLines({ id, sys }: {
