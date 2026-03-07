@@ -1,5 +1,6 @@
 // frontend/src/components/ConvSessionList.tsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
 import type { ClaudeSession } from "../lib/api";
 
