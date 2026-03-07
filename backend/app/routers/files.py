@@ -145,3 +145,72 @@ def read_file(
         "binary": False,
         "content": content,
     }
+
+
+class SaveFileBody(BaseModel):
+    path: str
+    content: str
+
+
+@router.put("/{project_id}/file", summary="保存文件内容")
+def save_file(
+    project_id: int,
+    body: SaveFileBody,
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    target = _safe_resolve(base, body.path)
+
+    if not target.is_file():
+        raise HTTPException(404, "文件不存在")
+
+    size = target.stat().st_size
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(400, f"文件过大 ({size} bytes)，上限 {MAX_FILE_SIZE} bytes")
+
+    try:
+        target.write_text(body.content, encoding="utf-8")
+    except OSError as e:
+        raise HTTPException(500, f"写入失败: {e}")
+
+    new_size = target.stat().st_size
+    return {
+        "path": body.path,
+        "name": target.name,
+        "size": new_size,
+        "ok": True,
+    }
+
+
+@router.get("/{project_id}/files/search", summary="搜索项目文件")
+def search_files(
+    project_id: int,
+    q: str = Query(..., min_length=1, description="搜索关键词"),
+    db: Session = Depends(_get_db),
+):
+    """在项目目录中递归搜索文件名匹配的文件，返回前 50 条结果"""
+    base = _get_project_path(project_id, db)
+    query_lower = q.lower()
+    results: list[dict] = []
+    max_results = 50
+
+    def walk(directory: Path, depth: int = 0):
+        if depth > 10 or len(results) >= max_results:
+            return
+        try:
+            for entry in sorted(directory.iterdir(), key=lambda e: (not e.is_dir(), e.name.lower())):
+                if len(results) >= max_results:
+                    return
+                if entry.name in IGNORE_NAMES or (entry.name.startswith(".") and entry.name not in (".env.example", ".gitignore", ".editorconfig")):
+                    continue
+                if entry.is_dir():
+                    walk(entry, depth + 1)
+                elif query_lower in entry.name.lower():
+                    info = _file_info(entry, base)
+                    if info:
+                        results.append(info)
+        except PermissionError:
+            pass
+
+    walk(base)
+    return {"query": q, "items": results}
