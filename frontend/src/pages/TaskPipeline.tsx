@@ -455,7 +455,7 @@ function LogPanel({ logs, isRunning, stage }: {
           )}
         </span>
         <span className="text-[11px] text-white/40 font-mono shrink-0">
-          {isRunning ? `执行中 · ${STAGE_LABEL[stage] ?? stage}` : "执行完成"}
+          {isRunning ? `${t('taskPipeline.logPanel.executing')} · ${STAGE_LABEL[stage] ?? stage}` : t('taskPipeline.logPanel.executionDone')}
         </span>
         {/* 未展开时显示最后一行 */}
         {!expanded && lastLine && (
