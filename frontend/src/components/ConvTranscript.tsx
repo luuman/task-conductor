@@ -418,9 +418,9 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
 
 function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   return (
-    <div className="flex items-start gap-3 px-4 py-2">
+    <div className="flex items-start gap-3 px-4 py-2 justify-start">
       <ClaudeAvatar />
-      <div className="flex-1 min-w-0 rounded-lg px-3.5 py-2.5"
+      <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
            style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
         <div className="space-y-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
           {msg.blocks.map((block, i) =>
