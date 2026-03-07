@@ -17,6 +17,7 @@ from .routers import settings_router
 from .routers import claude_config as claude_config_router
 from .routers import mcp as mcp_router
 from .routers import tc_config as tc_config_router
+from .feishu.dispatcher import router as feishu_router
 from .session import pin_session
 from .tunnel import start_cloudflare_tunnel, get_tunnel_url, stop_tunnel, detect_tunnel_url_from_request
 from .hooks import parse_hook_event, serialize_json_field
