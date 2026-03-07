@@ -1,0 +1,155 @@
+/*
+ * highlight.js — Ayu Dark theme
+ * Based on https://github.com/ayu-theme/ayu-colors
+ *
+ * bg:         #0b0e14
+ * fg:         #bfbdb6
+ * comment:    #acb6bf8c → rendered as #636d77 on dark bg
+ * keyword:    #ff8f40
+ * string:     #aad94c
+ * number:     #d2a6ff
+ * function:   #ffb454
+ * type:       #59c2ff
+ * constant:   #d2a6ff
+ * operator:   #f29668
+ * tag:        #39bae6
+ * attribute:  #ffb454
+ * regex:      #95e6cb
+ * built_in:   #e6b673
+ * deleted:    #d95757
+ * addition:   #7fd962
+ * emphasis:   italic
+ * strong:     bold
+ */
+
+.hljs {
+  color: #bfbdb6;
+  background: transparent;
+}
+
+/* ── comments ────────────────────── */
+.hljs-comment,
+.hljs-quote {
+  color: #636d77;
+  font-style: italic;
+}
+
+/* ── keywords / control flow ─────── */
+.hljs-keyword,
+.hljs-selector-tag {
+  color: #ff8f40;
+}
+
+/* ── strings ─────────────────────── */
+.hljs-string,
+.hljs-template-variable,
+.hljs-addition {
+  color: #aad94c;
+}
+
+/* ── numbers / literals ──────────── */
+.hljs-number,
+.hljs-literal,
+.hljs-variable.constant_,
+.hljs-symbol {
+  color: #d2a6ff;
+}
+
+/* ── functions / calls ───────────── */
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: #ffb454;
+}
+
+/* ── types / classes ─────────────── */
+.hljs-type,
+.hljs-title.class_,
+.hljs-title.class_.inherited__ {
+  color: #59c2ff;
+}
+
+/* ── built-in ────────────────────── */
+.hljs-built_in {
+  color: #e6b673;
+}
+
+/* ── operators / punctuation ─────── */
+.hljs-operator,
+.hljs-punctuation {
+  color: #f29668;
+}
+
+/* ── tags (HTML/XML) ─────────────── */
+.hljs-tag {
+  color: #39bae6;
+}
+
+.hljs-name {
+  color: #39bae6;
+}
+
+/* ── attributes ──────────────────── */
+.hljs-attr,
+.hljs-attribute {
+  color: #ffb454;
+}
+
+/* ── regex ────────────────────────── */
+.hljs-regexp {
+  color: #95e6cb;
+}
+
+/* ── variables / params ──────────── */
+.hljs-variable,
+.hljs-params {
+  color: #bfbdb6;
+}
+
+/* ── meta / preprocessor ─────────── */
+.hljs-meta,
+.hljs-meta .hljs-keyword {
+  color: #e6b450;
+}
+
+.hljs-meta .hljs-string {
+  color: #aad94c;
+}
+
+/* ── deletion ────────────────────── */
+.hljs-deletion {
+  color: #d95757;
+}
+
+/* ── selector (CSS) ──────────────── */
+.hljs-selector-class {
+  color: #ffb454;
+}
+
+.hljs-selector-id {
+  color: #59c2ff;
+}
+
+.hljs-selector-pseudo {
+  color: #95e6cb;
+}
+
+/* ── property (CSS) ──────────────── */
+.hljs-property {
+  color: #39bae6;
+}
+
+/* ── emphasis ─────────────────────── */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* ── link ─────────────────────────── */
+.hljs-link {
+  color: #59c2ff;
+  text-decoration: underline;
+}
