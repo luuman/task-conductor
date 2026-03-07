@@ -387,7 +387,7 @@ function StageDetailPanel({
                 disabled={acting}
                 className="w-full py-1.5 text-xs bg-accent hover:bg-accent-hover text-white rounded-lg font-medium transition-colors disabled:opacity-40"
               >
-                {acting ? "启动中..." : `启动 ${STAGE_LABEL[stage]}`}
+                {acting ? t('taskWorkflow.stageDetailPanel.starting') : t('taskWorkflow.stageDetailPanel.startStage', { stage: STAGE_LABEL[stage] })}
               </button>
             )}
             {task.status === "waiting_review" && !showReject && (
