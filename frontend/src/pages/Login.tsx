@@ -9,6 +9,7 @@ import { cn } from "../lib/utils";
 type Mode = "local" | "tunnel" | "ssh";
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
+  const { t } = useTranslation();
   const isLocal =
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1";
