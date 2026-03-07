@@ -117,12 +117,14 @@ class FeishuClient:
 
     async def update_card(self, message_id: str, card: dict) -> dict:
         """更新已发送的交互卡片。"""
+        import json as _json
+
         headers = await self._headers()
         async with httpx.AsyncClient() as client:
             resp = await client.patch(
                 f"{FEISHU_API_BASE}/im/v1/messages/{message_id}",
                 headers=headers,
-                json={"content": card},
+                json={"msg_type": "interactive", "content": _json.dumps(card)},
             )
             resp.raise_for_status()
             return resp.json().get("data", {})
