@@ -580,8 +580,8 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrol
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  // 切换消息时重置信号和当前问题
-  useEffect(() => { setExpandSignal(0); setCurrentQuestion(null); }, [messages]);
+  // 切换消息时重置信号和当前问题（保持 autoExpand 状态）
+  useEffect(() => { setExpandSignal(prev => autoExpand ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1)); setCurrentQuestion(null); }, [messages]);
 
   // autoExpand 变化时同步展开/折叠信号
   useEffect(() => {
