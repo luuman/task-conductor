@@ -108,6 +108,41 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     }
   };
 
+  const handleSaveFeishu = async () => {
+    setFeishuSaveStatus("saving");
+    try {
+      const body: Record<string, string> = {};
+      if (feishuInput.app_id !== feishu.app_id) body.feishu_app_id = feishuInput.app_id;
+      if (feishuInput.app_secret !== feishu.app_secret) body.feishu_app_secret = feishuInput.app_secret;
+      if (feishuInput.owner_id !== feishu.owner_id) body.feishu_owner_id = feishuInput.owner_id;
+      if (feishuInput.default_chat_id !== feishu.default_chat_id) body.feishu_default_chat_id = feishuInput.default_chat_id;
+      if (Object.keys(body).length === 0) { setFeishuSaveStatus("idle"); return; }
+      await api.settings.updateFeishu(body);
+      setFeishu({ ...feishuInput });
+      setFeishuSaveStatus("ok");
+      setTimeout(() => setFeishuSaveStatus("idle"), 2000);
+    } catch {
+      setFeishuSaveStatus("error");
+    }
+  };
+
+  const handleRestart = async () => {
+    if (!confirm(t('settings.restart.confirm'))) return;
+    setRestarting(true);
+    try {
+      await api.settings.restart();
+    } catch {
+      // 重启后连接会断开，属于正常情况
+    }
+    // 等待后端重启后刷新页面
+    setTimeout(() => window.location.reload(), 3000);
+  };
+
+  const isFeishuDirty = feishuInput.app_id !== feishu.app_id ||
+    feishuInput.app_secret !== feishu.app_secret ||
+    feishuInput.owner_id !== feishu.owner_id ||
+    feishuInput.default_chat_id !== feishu.default_chat_id;
+
   const isDirty = workspaceInput.trim() !== workspaceRoot;
 
   return (
