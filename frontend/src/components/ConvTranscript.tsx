@@ -464,12 +464,16 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
         <span className="text-[11.5px] font-semibold shrink-0" style={{ color: "var(--text-primary)" }}>
           {isEdit ? "Edit" : toolName}
         </span>
-        {detail && (
+        {hasFilePath ? (
+          <ClickableFilePath filePath={filePath}
+            className="text-[10.5px] font-mono truncate px-1.5 py-0.5 rounded"
+            style={{ background: "var(--background)", color: "var(--text-secondary)" }} />
+        ) : detail ? (
           <code className="text-[10.5px] font-mono truncate px-1.5 py-0.5 rounded"
                 style={{ background: "var(--background)", color: "var(--text-secondary)" }}>
-            {detail.split("/").pop() || detail}
+            {detail}
           </code>
-        )}
+        ) : null}
         {editInfo && (
           <span className="text-[10px] font-mono shrink-0" style={{ color: "var(--text-tertiary)" }}>{editInfo}</span>
         )}
