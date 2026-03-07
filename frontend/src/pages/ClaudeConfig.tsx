@@ -1936,6 +1936,7 @@ function DetailPanel({ title, path, metadata, auxiliaryFiles, content, contentLa
   title: string; path: string; metadata?: Record<string, unknown>;
   auxiliaryFiles?: string[]; content: string; contentLabel: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-app-secondary border border-app rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -1944,7 +1945,7 @@ function DetailPanel({ title, path, metadata, auxiliaryFiles, content, contentLa
       </div>
       {metadata && Object.keys(metadata).length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">元数据</p>
+          <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">{t("claudeConfig.detailPanel.metadata")}</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(metadata).map(([k, v]) => (
               <span key={k} className="text-[10px] px-2 py-1 rounded-md bg-app border border-app font-mono">
