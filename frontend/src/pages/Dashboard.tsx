@@ -573,15 +573,7 @@ const STATUS_COLORS: Record<string, "default" | "success" | "warning" | "danger"
   failed: "danger",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  pending: "待处理",
-  running: "运行中",
-  waiting_review: "待审批",
-  approved: "已批准",
-  rejected: "已驳回",
-  done: "已完成",
-  failed: "失败",
-};
+// STATUS_LABEL moved to useStatusLabelMap() hook above
 
 function StatusDot({ status }: { status: string }) {
   const colors: Record<string, string> = {
