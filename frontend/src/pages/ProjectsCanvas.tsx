@@ -271,7 +271,7 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
         textTransform: "uppercase", color: "var(--text-tertiary)",
         marginBottom: 2,
       }}>
-        项目排名
+        {t('projectsCanvas.statsPanel.projectRanking')}
       </div>
 
       <div style={{ flex: 1, overflow: "auto", padding: "0 8px 12px" }}>
