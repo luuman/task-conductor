@@ -490,7 +490,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-app-secondary border border-app rounded-xl p-5 w-80 space-y-4 shadow-2xl">
             <div>
-              <h2 className="text-sm font-semibold text-app">加入开发队列</h2>
+              <h2 className="text-sm font-semibold text-app">{t('taskManager.projectDialog.title')}</h2>
               <p className="text-app-tertiary text-xs mt-0.5 truncate">{pendingAccept.item.title}</p>
             </div>
             <div className="bg-app-tertiary rounded-lg p-3 space-y-1">
