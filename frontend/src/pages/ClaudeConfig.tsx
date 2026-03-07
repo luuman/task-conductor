@@ -186,6 +186,7 @@ function writeCache(key: string, data: unknown) {
 // MAIN
 // ═══════════════════════════════════════════════════════════════════
 export default function ClaudeConfigPage() {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<ClaudeConfig | null>(() => readCache(CK_CFG));
   const [overview, setOverview] = useState<ClaudeOverview | null>(() => readCache(CK_OV));
   const [hookEvents, setHookEvents] = useState<string[]>([]);
