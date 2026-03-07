@@ -628,7 +628,7 @@ function FieldRenderer({ field, value, onChange }: {
               on ? "translate-x-[22px]" : "translate-x-[3px]")} />
           </button>
           <span className={cn("text-[11px] font-medium", on ? "text-accent" : "text-app-tertiary")}>
-            {on ? "已开启" : "已关闭"}
+            {on ? t("globalConfig.fieldRenderer.on") : t("globalConfig.fieldRenderer.off")}
           </span>
         </div>
       );
