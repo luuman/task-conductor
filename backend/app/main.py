@@ -78,6 +78,11 @@ async def lifespan(app: FastAPI):
 
     if os.getenv("TC_TUNNEL", "1") == "1":
         asyncio.create_task(_start_tunnel_bg(pin))
+
+    # 飞书初始化
+    from .feishu.client import feishu_client as _fc
+    if _fc.enabled:
+        asyncio.create_task(_init_feishu())
     yield
     stop_tunnel()
 
