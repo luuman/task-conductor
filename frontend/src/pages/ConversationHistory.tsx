@@ -212,74 +212,76 @@ export default function ConversationHistory({ projects }: Props) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* 对话内容 */}
         <div ref={transcriptRef} className="flex-1 overflow-y-auto">
-          {isNewChat ? (
-            chatMessages.length === 0 && !currentReply ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3"
-                   style={{ color: "var(--text-tertiary)" }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                     style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
-                  <BotIcon size={20} style={{ color: "var(--accent)" }} />
-                </div>
-                <p className="text-[12px]">开始新对话</p>
-                <p className="text-[10px] opacity-50">输入消息与 Claude 交流</p>
+          {/* 新对话欢迎页（无消息时） */}
+          {isNewChat && chatMessages.length === 0 && !currentReply && (
+            <div className="flex flex-col items-center justify-center h-full gap-3"
+                 style={{ color: "var(--text-tertiary)" }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                   style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                <BotIcon size={20} style={{ color: "var(--accent)" }} />
               </div>
-            ) : (
-              <div className="py-2 space-y-1">
-                {/* 已完成的消息 */}
-                <ConvTranscript messages={chatMessages} loading={false} fileFound={true} scrollRef={transcriptRef} autoExpand={autoExpand} />
+              <p className="text-[12px]">开始新对话</p>
+              <p className="text-[10px] opacity-50">输入消息与 Claude 交流</p>
+            </div>
+          )}
 
-                {/* 流式回复气泡 */}
-                {currentReply && (
-                  <div className="flex items-start gap-3 px-4 py-2 justify-start">
-                    <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
-                         style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
-                      <BotIcon size={14} style={{ color: "var(--accent)" }} />
-                    </div>
-                    <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
-                         style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
-                      <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={streamMdComponents as any}>
-                          {currentReply}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 生成中但还没收到内容 */}
-                {isGenerating && !currentReply && (
-                  <div className="flex items-start gap-3 px-4 py-2 justify-start">
-                    <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
-                         style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
-                      <BotIcon size={14} style={{ color: "var(--accent)" }} />
-                    </div>
-                    <div className="min-w-0 rounded-lg px-3.5 py-2.5"
-                         style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
-                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.2s" }} />
-                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.4s" }} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 错误提示 */}
-                {chatError && (
-                  <div className="px-4 py-2">
-                    <div className="text-[11px] px-3 py-2 rounded-lg"
-                         style={{ color: "var(--danger)", background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}>
-                      {chatError}
-                    </div>
-                  </div>
-                )}
-
-                <div ref={chatBottomRef} />
-              </div>
-            )
-          ) : (
+          {/* 历史 transcript */}
+          {!isNewChat && (
             <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} autoExpand={autoExpand} />
           )}
+
+          {/* 新对话已完成的消息 */}
+          {isNewChat && chatMessages.length > 0 && (
+            <ConvTranscript messages={chatMessages} loading={false} fileFound={true} scrollRef={transcriptRef} autoExpand={autoExpand} />
+          )}
+
+          {/* 流式回复气泡（新对话 & 历史会话共用） */}
+          {currentReply && (
+            <div className="flex items-start gap-3 px-4 py-2 justify-start">
+              <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                   style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                <BotIcon size={14} style={{ color: "var(--accent)" }} />
+              </div>
+              <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
+                   style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
+                <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={streamMdComponents as any}>
+                    {currentReply}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 生成中等待动画 */}
+          {isGenerating && !currentReply && (
+            <div className="flex items-start gap-3 px-4 py-2 justify-start">
+              <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                   style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                <BotIcon size={14} style={{ color: "var(--accent)" }} />
+              </div>
+              <div className="min-w-0 rounded-lg px-3.5 py-2.5"
+                   style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.2s" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.4s" }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 错误提示 */}
+          {chatError && (
+            <div className="px-4 py-2">
+              <div className="text-[11px] px-3 py-2 rounded-lg"
+                   style={{ color: "var(--danger)", background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}>
+                {chatError}
+              </div>
+            </div>
+          )}
+
+          <div ref={chatBottomRef} />
         </div>
 
         {/* 聊天输入框 */}
