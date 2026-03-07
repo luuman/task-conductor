@@ -115,7 +115,7 @@ function ClaudeMetricsPanel() {
             )}
           </div>
           {!hasData && (
-            <p className="text-[10px] text-app-tertiary/60 pt-1">运行 Claude Code 后自动统计</p>
+            <p className="text-[10px] text-app-tertiary/60 pt-1">{t('dashboard.claudeMetrics.autoStatsHint')}</p>
           )}
         </div>
 
