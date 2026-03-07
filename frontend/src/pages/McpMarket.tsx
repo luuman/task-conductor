@@ -210,7 +210,7 @@ export default function McpMarket() {
       {/* Header */}
       <div>
         <p className="text-xs text-app-tertiary">
-          一键安装 MCP 服务，扩展 Claude 的能力。已安装 {installedCount} / {servers.length} 个服务。
+          {t('mcpMarket.header.title')}{t('mcpMarket.header.installedCount', { installed: installedCount, total: servers.length })}
         </p>
       </div>
 
