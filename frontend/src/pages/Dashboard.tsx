@@ -841,7 +841,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
             {activeProject?.name[0].toUpperCase()}
           </div>
           <h1 className="text-sm font-semibold text-app">{activeProject?.name}</h1>
-          <Badge variant="default">{tasks.length} 个任务</Badge>
+          <Badge variant="default">{tasks.length} {t('dashboard.projectCard.taskCount')}</Badge>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => setKnowledgeOpen(true)}>知识库</Button>
