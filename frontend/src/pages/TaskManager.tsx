@@ -435,8 +435,8 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
           {queue.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-app-tertiary text-xs gap-2">
               <span className="text-3xl opacity-20">▷</span>
-              <p>接受 AI 分析结果后任务将出现在这里</p>
-              <p className="text-[10px] opacity-60">已与项目绑定，可直接进入开发流水线</p>
+              <p>{t('taskManager.emptyStates.queueHint')}</p>
+              <p className="text-[10px] opacity-60">{t('taskManager.emptyStates.queueBound')}</p>
             </div>
           ) : (
             queue.map((q, idx) => (
