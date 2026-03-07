@@ -208,7 +208,7 @@ function ClaudeMetricsPanel() {
           {/* TTFT 小型柱状图 */}
           {performance.recent_ttfts_ms.length > 0 && (
             <div className="pt-2 border-t border-app/50">
-              <p className="text-[9px] text-app-tertiary mb-1.5">TTFT 历史（ms）</p>
+              <p className="text-[9px] text-app-tertiary mb-1.5">{t('dashboard.claudeMetrics.ttftHistory')}</p>
               <div className="flex items-end gap-0.5 h-8">
                 {performance.recent_ttfts_ms.slice(-10).map((v, i) => {
                   const maxV = Math.max(...performance.recent_ttfts_ms);
