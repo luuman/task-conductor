@@ -1886,7 +1886,7 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
         </div>
       )}
 
-      {!items.length ? <Empty text="没有已禁用的组件" /> : (
+      {!items.length ? <Empty text={t("claudeConfig.shared.none")} /> : (
         <div className="space-y-2">
           {items.map(item => {
             const typeColor = TYPE_COLORS[item.type] || "#7878a8";
