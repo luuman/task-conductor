@@ -388,10 +388,10 @@ function Tooltip({ stats, state, color, mouse }: {
 
       <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
         {([
-          ["任务", stats.total, "var(--text-secondary)"],
-          ["运行", stats.running, "#22c55e"],
-          ["完成", stats.done, "#4477ff"],
-          ["异常", stats.failed, "#ef4444"],
+          [t('projectsCanvas.tooltip.tasks'), stats.total, "var(--text-secondary)"],
+          [t('projectsCanvas.tooltip.running'), stats.running, "#22c55e"],
+          [t('projectsCanvas.tooltip.done'), stats.done, "#4477ff"],
+          [t('projectsCanvas.tooltip.error'), stats.failed, "#ef4444"],
         ] as [string, number, string][]).map(([k, v, c]) => (
           <div key={k} style={{
             flex: 1, textAlign: "center",
