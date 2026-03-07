@@ -120,7 +120,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
             {/* 路径输入 */}
             <div>
               <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1.5">
-                根目录路径
+                {t('settings.workspace.rootPath')}
               </label>
               <div className="flex gap-2">
                 <div className="flex-1 relative">
