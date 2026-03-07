@@ -19,6 +19,8 @@ type Page = "dashboard" | "project" | "task" | "sessions" | "settings" | "tasks"
 const MAX_LIVE_EVENTS = 500;
 
 export default function App() {
+  const { t } = useTranslation();
+  void t; // available for future use
   const [authed, setAuthed] = useState(() => {
     const config = getConfig();
     return !!(config?.token);
