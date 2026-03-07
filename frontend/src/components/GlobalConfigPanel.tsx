@@ -1000,7 +1000,7 @@ export default function GlobalConfigPanel() {
   if (loading && !config) {
     return (
       <div className="flex items-center justify-center h-40">
-        <p className="text-app-tertiary text-xs animate-pulse">加载全局配置...</p>
+        <p className="text-app-tertiary text-xs animate-pulse">{t("globalConfig.loading")}</p>
       </div>
     );
   }
