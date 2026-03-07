@@ -1270,13 +1270,13 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
     if (!addForm.name.trim() || !addForm.url.trim()) return;
     setAdding(true); setAddError("");
     try { const r = await api.claudeConfig.addMcp({ name: addForm.name.trim(), url: addForm.url.trim(), transport: addForm.transport, scope: addForm.scope }); setServers(r.servers); if (overview) onOverviewUpdate({ ...overview, mcp_servers: r.servers }); setAddForm({ name: "", url: "", transport: "http", scope: "user" }); setShowAdd(false); }
-    catch (e) { setAddError(e instanceof Error ? e.message : "添加失败"); } finally { setAdding(false); }
+    catch (e) { setAddError(e instanceof Error ? e.message : t("claudeConfig.mcp.addFailed")); } finally { setAdding(false); }
   };
   const SM: Record<string, { label: string; color: string; bg: string }> = {
-    connected: { label: "已连接", color: "#22c55e", bg: "bg-green-500/10" },
-    needs_auth: { label: "需认证", color: "#f59e0b", bg: "bg-yellow-500/10" },
-    error: { label: "错误", color: "#ef4444", bg: "bg-red-500/10" },
-    unknown: { label: "未知", color: "#7878a8", bg: "bg-app-tertiary/20" },
+    connected: { label: t("claudeConfig.mcp.connected"), color: "#22c55e", bg: "bg-green-500/10" },
+    needs_auth: { label: t("claudeConfig.mcp.needsAuth"), color: "#f59e0b", bg: "bg-yellow-500/10" },
+    error: { label: t("claudeConfig.mcp.error"), color: "#ef4444", bg: "bg-red-500/10" },
+    unknown: { label: t("claudeConfig.mcp.unknown"), color: "#7878a8", bg: "bg-app-tertiary/20" },
   };
   return (
     <div className="space-y-4">
