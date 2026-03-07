@@ -1,9 +1,15 @@
 // frontend/src/components/ChatInput.tsx
-// 聊天输入组件：多行输入 + 模型选择 + 发送/停止按钮
+// 聊天输入组件：多行输入 + 模型选择 + 文件上传 + 发送/停止按钮
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Square, ChevronDown } from "lucide-react";
+import { SendHorizontal, Square, ChevronDown, Paperclip, X } from "lucide-react";
 import { api, type ChatModel } from "../lib/api";
+
+interface AttachedFile {
+  name: string;
+  content: string;
+  size: number;
+}
 
 export interface ChatInputProps {
   onSend: (message: string, model: string) => void;
@@ -17,8 +23,10 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
   const [models, setModels] = useState<ChatModel[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
   const [showModelMenu, setShowModelMenu] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 加载模型列表
   useEffect(() => {
@@ -29,8 +37,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
         if (def) setSelectedModel(def.id);
       })
       .catch(() => {
-        // 加载失败时使用默认值
-        setModels([{ id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4" }]);
+        setModels([{ id: "claude-sonnet-4-20250514", name: "Sonnet 4" }]);
         setSelectedModel("claude-sonnet-4-20250514");
       });
   }, []);
@@ -41,13 +48,12 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
     if (!el) return;
     el.style.height = "auto";
     const lineHeight = 20;
-    const maxHeight = lineHeight * 6 + 16; // 6 行 + padding
+    const maxHeight = lineHeight * 6 + 16;
     el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
   }, []);
 
   useEffect(() => { adjustHeight(); }, [text, adjustHeight]);
 
-  // 键盘快捷键
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -55,16 +61,57 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
     }
   };
 
+  // 构建带文件内容的消息
+  const buildMessage = (userText: string): string => {
+    if (attachedFiles.length === 0) return userText;
+    const fileParts = attachedFiles.map(f =>
+      `<file name="${f.name}">\n${f.content}\n</file>`
+    ).join("\n\n");
+    return `${fileParts}\n\n${userText}`;
+  };
+
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed || isGenerating || disabled) return;
-    onSend(trimmed, selectedModel);
+    if ((!trimmed && attachedFiles.length === 0) || isGenerating || disabled) return;
+    const msg = buildMessage(trimmed);
+    onSend(msg, selectedModel);
     setText("");
-    // 重置高度
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    setAttachedFiles([]);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
+
+  // 文件读取
+  const readFiles = (files: FileList | File[]) => {
+    Array.from(files).forEach(file => {
+      if (file.size > 512 * 1024) {
+        // 大于 512KB 跳过
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const content = reader.result as string;
+        setAttachedFiles(prev => [...prev, { name: file.name, content, size: file.size }]);
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) readFiles(e.target.files);
+    e.target.value = "";
+  };
+
+  const removeFile = (idx: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // 拖拽上传
+  const [dragOver, setDragOver] = useState(false);
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer.files.length > 0) readFiles(e.dataTransfer.files);
+  }, []);
 
   // 点击外部关闭模型菜单
   useEffect(() => {
@@ -79,17 +126,52 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
   }, [showModelMenu]);
 
   const currentModelName = models.find((m) => m.id === selectedModel)?.name || selectedModel;
+  const hasContent = text.trim() || attachedFiles.length > 0;
 
   return (
     <div
       className="shrink-0 px-3 py-2"
       style={{ borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
     >
+      {/* 已附加的文件标签 */}
+      {attachedFiles.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-1.5 px-1">
+          {attachedFiles.map((f, i) => (
+            <span key={i} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md"
+                  style={{ background: "var(--background-tertiary)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+              <span className="truncate max-w-[120px]">{f.name}</span>
+              <span className="opacity-40">{(f.size / 1024).toFixed(0)}K</span>
+              <button onClick={() => removeFile(i)} className="opacity-50 hover:opacity-100 transition-opacity">
+                <X size={10} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* 输入区域 */}
       <div
-        className="flex items-end gap-2 rounded-lg px-3 py-2"
-        style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+        className="flex items-end gap-2 rounded-lg px-3 py-2 transition-colors"
+        style={{
+          background: "var(--background)",
+          border: dragOver ? "1px solid var(--accent)" : "1px solid var(--border)",
+        }}
       >
+        {/* 文件上传按钮 */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isGenerating || disabled}
+          className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:brightness-125 disabled:opacity-30"
+          style={{ color: "var(--text-tertiary)" }}
+          title="上传文件"
+        >
+          <Paperclip size={14} />
+        </button>
+        <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
+
         <textarea
           ref={textareaRef}
           value={text}
@@ -103,7 +185,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
             background: "transparent",
             color: "var(--text-primary)",
             minHeight: "20px",
-            maxHeight: "136px", // 6行 + padding
+            maxHeight: "136px",
           }}
         />
 
@@ -120,11 +202,11 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
         ) : (
           <button
             onClick={handleSend}
-            disabled={!text.trim() || disabled}
+            disabled={!hasContent || disabled}
             className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md transition-colors disabled:opacity-30"
             style={{
-              background: text.trim() ? "var(--accent)" : "var(--background-tertiary)",
-              color: text.trim() ? "#fff" : "var(--text-tertiary)",
+              background: hasContent ? "var(--accent)" : "var(--background-tertiary)",
+              color: hasContent ? "#fff" : "var(--text-tertiary)",
             }}
             title="发送 (Enter)"
           >
@@ -178,6 +260,13 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
             </div>
           )}
         </div>
+
+        {/* 拖拽提示 */}
+        {dragOver && (
+          <span className="ml-2 text-[10px]" style={{ color: "var(--accent)" }}>
+            松开以上传文件
+          </span>
+        )}
       </div>
     </div>
   );
