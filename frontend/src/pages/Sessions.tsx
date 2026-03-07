@@ -428,8 +428,8 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               emptyHint={
                 <>
                   <span className="text-3xl">⌗</span>
-                  <p className="text-[12px]">等待 Claude Code 事件...</p>
-                  <p className="text-[10px]">在左侧选择会话可查看历史记录</p>
+                  <p className="text-[12px]">{t('sessions.emptyHints.waitingEvents')}</p>
+                  <p className="text-[10px]">{t('sessions.emptyHints.selectSession')}</p>
                 </>
               }
             />
