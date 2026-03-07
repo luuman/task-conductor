@@ -188,6 +188,8 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
   colorMap: Record<number, string>;
   onSelect: (id: number) => void;
 }) {
+  const { t } = useTranslation();
+  const stateLabel = getStateLabel(t);
   const totalTasks = allStats.reduce((a, s) => a + s.total, 0);
   const totalRunning = allStats.reduce((a, s) => a + s.running, 0);
   const totalDone = allStats.reduce((a, s) => a + s.done, 0);
