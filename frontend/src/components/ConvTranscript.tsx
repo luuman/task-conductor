@@ -268,7 +268,7 @@ function AssistantBubble({ msg }: { msg: TranscriptMessage }) {
               {block.text ?? ""}
             </ReactMarkdown>
           ) : (
-            <InlineToolCard key={i} block={block} />
+            <ToolWidget key={i} block={block} />
           )
         )}
       </div>
