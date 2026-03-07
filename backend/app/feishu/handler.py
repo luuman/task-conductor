@@ -41,10 +41,17 @@ def _get_project_cwd(project_id: int) -> str:
     return settings.get("workspace_root", "/home/sichengli/Documents/code2")
 
 
-async def handle_chat(prompt: str, chat_id: str, cwd: str) -> None:
+async def _send_or_reply_card(chat_id: str, card: dict, reply_to: str = "") -> str:
+    """发送卡片：有 reply_to 时回复到话题，否则直接发到群。返回 message_id。"""
+    if reply_to:
+        return await feishu_client.reply_card(reply_to, card)
+    return await feishu_client.send_card(chat_id, card)
+
+
+async def handle_chat(prompt: str, chat_id: str, cwd: str, reply_to: str = "") -> None:
     """对话模式：调用 Claude Code 执行，结果发回飞书。"""
-    # 1. 发送占位卡片
-    msg_id = await feishu_client.send_card(chat_id, build_thinking_card())
+    # 1. 发送占位卡片（话题模式下回复到同一话题）
+    msg_id = await _send_or_reply_card(chat_id, build_thinking_card(), reply_to)
 
     # 2. 记录开始时间
     start_ms = int(time.time() * 1000)
@@ -73,13 +80,13 @@ async def handle_chat(prompt: str, chat_id: str, cwd: str) -> None:
         # 优先用 result（完整回答），fallback 到 assistant 文本拼接
         result = result_text or "\n\n".join(assistant_texts) or "(无输出)"
 
-        # 5. 更新卡片为结果
+        # 4. 更新卡片为结果
         cost_ms = int(time.time() * 1000) - start_ms
         await feishu_client.update_card(
             msg_id, build_result_card(result, cost_ms, cwd)
         )
     except Exception as e:
-        # 6. 异常时更新为错误卡片
+        # 5. 异常时更新为错误卡片
         logger.exception("handle_chat failed: %s", e)
         await feishu_client.update_card(msg_id, build_error_card(str(e)))
 
