@@ -169,7 +169,7 @@ function ArtifactCard({ artifact }: {
               )}
               {artifact.assumptions && (
                 <div>
-                  <p className="text-[10px] text-app-tertiary mb-1 uppercase tracking-wider">AI 假设前提</p>
+                  <p className="text-[10px] text-app-tertiary mb-1 uppercase tracking-wider">{t('taskPipeline.artifactCard.aiAssumptions')}</p>
                   <AssumptionsList raw={artifact.assumptions} />
                 </div>
               )}
