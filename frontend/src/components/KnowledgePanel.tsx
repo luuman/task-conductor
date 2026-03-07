@@ -111,7 +111,7 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-32">
-            <p className="text-xs text-app-tertiary animate-pulse">加载中...</p>
+            <p className="text-xs text-app-tertiary animate-pulse">{t('common.loading')}</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
