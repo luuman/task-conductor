@@ -128,7 +128,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
 
       {/* 备注 */}
       <div className="space-y-1">
-        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>备注</label>
+        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{t('convEdit.notes')}</label>
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
