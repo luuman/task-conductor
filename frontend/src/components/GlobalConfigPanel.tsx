@@ -1062,7 +1062,7 @@ export default function GlobalConfigPanel() {
         <button onClick={() => fileInputRef.current?.click()}
           className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg border border-app text-app-secondary hover:text-app transition-colors">
           <Upload size={11} />
-          导入
+          {t("globalConfig.actions.import")}
         </button>
         <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
 
