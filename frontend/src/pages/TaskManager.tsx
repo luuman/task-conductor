@@ -475,7 +475,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
                   </span>
                   {q.taskId && (
                     <span className="text-[9px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                      ✓ 已创建
+                      ✓ {t('taskManager.queue.created')}
                     </span>
                   )}
                 </div>
