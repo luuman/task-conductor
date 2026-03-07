@@ -263,7 +263,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
 
   if (!task) return (
     <div className="flex-1 flex items-center justify-center">
-      <p className="text-app-tertiary text-xs animate-pulse">加载任务...</p>
+      <p className="text-app-tertiary text-xs animate-pulse">{t('taskPipeline.loading')}</p>
     </div>
   );
 
