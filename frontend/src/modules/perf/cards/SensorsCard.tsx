@@ -73,7 +73,7 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
         />
       </div>
 
-      {/* ── 温度 ── */}
+      {/* ── Temperature ── */}
       {temps.length > 0 && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 2 }}>
           <SectionLabel label={t('perf.sensors.temperature')} />
