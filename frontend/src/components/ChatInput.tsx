@@ -1,30 +1,36 @@
 // frontend/src/components/ChatInput.tsx
-// Discord 风格聊天输入组件：/ 命令面板 + 模型选择 + 文件上传
+// Discord 风格聊天输入：/ 命令面板 + 模型选择 + 文件上传
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { SendHorizontal, Square, Paperclip, X, Hash, Cpu, Download, Trash2, Plus, HelpCircle } from "lucide-react";
+import {
+  SendHorizontal, Square, Paperclip, X, Hash,
+  Cpu, Download, Trash2, Plus, HelpCircle,
+  Terminal, Gauge, Shield, FolderOpen, Wallet,
+  Zap, MessageSquarePlus, RotateCcw, BrainCircuit,
+  SlidersHorizontal, Ban,
+} from "lucide-react";
 import { api, type ChatModel } from "../lib/api";
+import type { ChatOptions } from "../hooks/useChatWs";
 
-// ── 类型定义 ────────────────────────────────────────────────────
+// ── 类型 ────────────────────────────────────────────────────────
 
-interface AttachedFile {
-  name: string;
-  content: string;
-  size: number;
-}
+interface AttachedFile { name: string; content: string; size: number }
+
+type CmdAction =
+  | { type: "select"; options: { label: string; value: string; current?: boolean }[] }
+  | { type: "input"; placeholder: string }
+  | { type: "immediate" };
 
 interface SlashCommand {
   name: string;
   description: string;
   icon: React.ReactNode;
-  /** 子选项（如模型列表），为空则直接执行 */
-  options?: { label: string; value: string }[];
-  /** 执行命令 */
-  execute: (option?: string) => void;
+  action: CmdAction;
+  execute: (value?: string) => void;
 }
 
 export interface ChatInputProps {
-  onSend: (message: string, model: string) => void;
+  onSend: (message: string, model: string, options?: ChatOptions) => void;
   onStop: () => void;
   isGenerating: boolean;
   disabled?: boolean;
@@ -41,18 +47,23 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
   const [selectedModel, setSelectedModel] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
-  // 命令面板状态
+  // 持久化的 Claude 参数
+  const [chatOptions, setChatOptions] = useState<ChatOptions>({});
+
+  // 命令面板
   const [showCommands, setShowCommands] = useState(false);
   const [cmdFilter, setCmdFilter] = useState("");
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [showSubOptions, setShowSubOptions] = useState<SlashCommand | null>(null);
+  const [activeCmd, setActiveCmd] = useState<SlashCommand | null>(null); // 带子面板的命令
   const [subSelectedIdx, setSubSelectedIdx] = useState(0);
+  const [inputMode, setInputMode] = useState(false); // 输入参数模式
+  const [inputPlaceholder, setInputPlaceholder] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cmdPanelRef = useRef<HTMLDivElement>(null);
 
-  // 加载模型列表
+  // 加载模型
   useEffect(() => {
     api.chat.models()
       .then((list) => {
@@ -71,185 +82,263 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
   const commands: SlashCommand[] = useMemo(() => [
     {
       name: "model",
-      description: "切换模型",
+      description: "切换 Claude 模型",
       icon: <Cpu size={14} />,
-      options: models.map(m => ({ label: `${m.name}${m.default ? " (默认)" : ""}`, value: m.id })),
-      execute: (modelId?: string) => {
-        if (modelId) setSelectedModel(modelId);
-      },
+      action: { type: "select", options: models.map(m => ({ label: m.name + (m.default ? " (默认)" : ""), value: m.id, current: m.id === selectedModel })) },
+      execute: (v) => { if (v) setSelectedModel(v); },
+    },
+    {
+      name: "effort",
+      description: "设置推理努力程度 (low/medium/high)",
+      icon: <Gauge size={14} />,
+      action: { type: "select", options: [
+        { label: "Low — 快速简短回复", value: "low", current: chatOptions.effort === "low" },
+        { label: "Medium — 均衡模式", value: "medium", current: chatOptions.effort === "medium" },
+        { label: "High — 深度思考", value: "high", current: chatOptions.effort === "high" },
+      ]},
+      execute: (v) => setChatOptions(prev => ({ ...prev, effort: v })),
+    },
+    {
+      name: "system",
+      description: "设置系统提示词",
+      icon: <BrainCircuit size={14} />,
+      action: { type: "input", placeholder: "输入系统提示词..." },
+      execute: (v) => setChatOptions(prev => ({ ...prev, system_prompt: v || undefined })),
+    },
+    {
+      name: "append-system",
+      description: "追加系统提示词（不替换默认）",
+      icon: <MessageSquarePlus size={14} />,
+      action: { type: "input", placeholder: "输入要追加的系统提示词..." },
+      execute: (v) => setChatOptions(prev => ({ ...prev, append_system_prompt: v || undefined })),
+    },
+    {
+      name: "cwd",
+      description: "设置工作目录",
+      icon: <FolderOpen size={14} />,
+      action: { type: "input", placeholder: "输入工作目录路径，如 /home/user/project" },
+      execute: (v) => setChatOptions(prev => ({ ...prev, cwd: v || undefined })),
+    },
+    {
+      name: "permission",
+      description: "设置权限模式",
+      icon: <Shield size={14} />,
+      action: { type: "select", options: [
+        { label: "default — 默认（需确认）", value: "default", current: chatOptions.permission_mode === "default" },
+        { label: "auto — 自动批准", value: "auto", current: chatOptions.permission_mode === "auto" },
+        { label: "plan — 仅规划模式", value: "plan", current: chatOptions.permission_mode === "plan" },
+        { label: "acceptEdits — 接受编辑", value: "acceptEdits", current: chatOptions.permission_mode === "acceptEdits" },
+        { label: "bypassPermissions — 跳过所有", value: "bypassPermissions", current: chatOptions.permission_mode === "bypassPermissions" },
+      ]},
+      execute: (v) => setChatOptions(prev => ({ ...prev, permission_mode: v || undefined })),
+    },
+    {
+      name: "budget",
+      description: "设置最大预算 (USD)",
+      icon: <Wallet size={14} />,
+      action: { type: "input", placeholder: "输入最大预算，如 1.0" },
+      execute: (v) => setChatOptions(prev => ({ ...prev, max_budget: v ? parseFloat(v) : undefined })),
+    },
+    {
+      name: "allow-tools",
+      description: "设置允许使用的工具",
+      icon: <SlidersHorizontal size={14} />,
+      action: { type: "input", placeholder: "工具名，逗号分隔，如 Bash,Read,Edit" },
+      execute: (v) => setChatOptions(prev => ({ ...prev, allowed_tools: v ? v.split(",").map(s => s.trim()) : undefined })),
+    },
+    {
+      name: "disallow-tools",
+      description: "设置禁止使用的工具",
+      icon: <Ban size={14} />,
+      action: { type: "input", placeholder: "工具名，逗号分隔，如 Bash,Write" },
+      execute: (v) => setChatOptions(prev => ({ ...prev, disallowed_tools: v ? v.split(",").map(s => s.trim()) : undefined })),
+    },
+    {
+      name: "continue",
+      description: "继续上一个对话",
+      icon: <RotateCcw size={14} />,
+      action: { type: "immediate" },
+      execute: () => setChatOptions(prev => ({ ...prev, continue: true })),
+    },
+    {
+      name: "resume",
+      description: "恢复指定 session",
+      icon: <Zap size={14} />,
+      action: { type: "input", placeholder: "输入 session ID" },
+      execute: (v) => setChatOptions(prev => ({ ...prev, session_id: v || undefined })),
     },
     {
       name: "new",
       description: "新建对话",
       icon: <Plus size={14} />,
-      execute: () => onNewChat?.(),
+      action: { type: "immediate" },
+      execute: () => { setChatOptions({}); onNewChat?.(); },
     },
     {
       name: "export",
       description: "导出对话为 Markdown",
       icon: <Download size={14} />,
+      action: { type: "immediate" },
       execute: () => onExport?.(),
     },
     {
       name: "clear",
       description: "清空当前对话",
       icon: <Trash2 size={14} />,
+      action: { type: "immediate" },
       execute: () => onClear?.(),
     },
     {
-      name: "help",
-      description: "查看可用命令",
-      icon: <HelpCircle size={14} />,
+      name: "reset",
+      description: "重置所有参数为默认值",
+      icon: <Terminal size={14} />,
+      action: { type: "immediate" },
       execute: () => {
-        // help 只展示命令列表，不做其他事
+        setChatOptions({});
+        const def = models.find(m => m.default) || models[0];
+        if (def) setSelectedModel(def.id);
       },
     },
-  ], [models, onNewChat, onExport, onClear]);
+    {
+      name: "help",
+      description: "查看所有可用命令",
+      icon: <HelpCircle size={14} />,
+      action: { type: "immediate" },
+      execute: () => { /* 仅展示 */ },
+    },
+  ], [models, selectedModel, chatOptions, onNewChat, onExport, onClear]);
 
-  // 过滤后的命令
   const filteredCommands = useMemo(() => {
     if (!cmdFilter) return commands;
     const q = cmdFilter.toLowerCase();
     return commands.filter(c => c.name.includes(q) || c.description.includes(q));
   }, [commands, cmdFilter]);
 
-  // ── 输入变化处理 ──────────────────────────────────────────────
+  // ── 输入处理 ──────────────────────────────────────────────────
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setText(val);
 
-    // 检测是否以 / 开头（命令模式）
+    if (inputMode) return; // 输入参数模式下不检测 /
+
     if (val.startsWith("/")) {
       const filter = val.slice(1).split(/\s/)[0] || "";
       setCmdFilter(filter);
       setShowCommands(true);
-      setShowSubOptions(null);
+      setActiveCmd(null);
       setSelectedIdx(0);
     } else {
       setShowCommands(false);
-      setShowSubOptions(null);
+      setActiveCmd(null);
     }
   };
 
   // ── 命令选择 ──────────────────────────────────────────────────
 
-  const selectCommand = useCallback((cmd: SlashCommand) => {
-    if (cmd.options && cmd.options.length > 0) {
-      setShowSubOptions(cmd);
-      setSubSelectedIdx(0);
-    } else {
-      cmd.execute();
-      setText("");
-      setShowCommands(false);
-      setShowSubOptions(null);
-      textareaRef.current?.focus();
-    }
-  }, []);
-
-  const selectSubOption = useCallback((cmd: SlashCommand, optionValue: string) => {
-    cmd.execute(optionValue);
+  const closePanel = useCallback(() => {
     setText("");
     setShowCommands(false);
-    setShowSubOptions(null);
+    setActiveCmd(null);
+    setInputMode(false);
     textareaRef.current?.focus();
   }, []);
 
-  // ── 键盘处理 ──────────────────────────────────────────────────
+  const selectCommand = useCallback((cmd: SlashCommand) => {
+    if (cmd.action.type === "select") {
+      setActiveCmd(cmd);
+      setSubSelectedIdx(0);
+    } else if (cmd.action.type === "input") {
+      // 进入输入模式
+      setActiveCmd(cmd);
+      setInputMode(true);
+      setInputPlaceholder(cmd.action.placeholder);
+      setText("");
+      setShowCommands(false);
+    } else {
+      cmd.execute();
+      closePanel();
+    }
+  }, [closePanel]);
+
+  const selectSubOption = useCallback((cmd: SlashCommand, value: string) => {
+    cmd.execute(value);
+    closePanel();
+  }, [closePanel]);
+
+  const submitInput = useCallback(() => {
+    if (!activeCmd) return;
+    activeCmd.execute(text.trim());
+    closePanel();
+  }, [activeCmd, text, closePanel]);
+
+  // ── 键盘 ──────────────────────────────────────────────────────
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // 命令面板导航
-    if (showCommands && !showSubOptions) {
-      const list = filteredCommands;
-      if (e.key === "ArrowUp") {
+    // 输入参数模式
+    if (inputMode && activeCmd) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        setSelectedIdx(prev => (prev - 1 + list.length) % list.length);
-        return;
-      }
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIdx(prev => (prev + 1) % list.length);
-        return;
-      }
-      if (e.key === "Tab" || (e.key === "Enter" && !e.shiftKey)) {
-        e.preventDefault();
-        if (list[selectedIdx]) selectCommand(list[selectedIdx]);
+        submitInput();
         return;
       }
       if (e.key === "Escape") {
         e.preventDefault();
-        setShowCommands(false);
-        setText("");
+        closePanel();
         return;
       }
+      return;
     }
 
     // 子选项导航
-    if (showSubOptions) {
-      const opts = showSubOptions.options || [];
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSubSelectedIdx(prev => (prev - 1 + opts.length) % opts.length);
-        return;
-      }
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSubSelectedIdx(prev => (prev + 1) % opts.length);
-        return;
-      }
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        if (opts[subSelectedIdx]) selectSubOption(showSubOptions, opts[subSelectedIdx].value);
-        return;
-      }
-      if (e.key === "Escape") {
-        e.preventDefault();
-        setShowSubOptions(null);
-        return;
-      }
-      if (e.key === "Backspace") {
-        e.preventDefault();
-        setShowSubOptions(null);
-        return;
-      }
+    if (activeCmd && activeCmd.action.type === "select") {
+      const opts = activeCmd.action.options || [];
+      if (e.key === "ArrowUp") { e.preventDefault(); setSubSelectedIdx(p => (p - 1 + opts.length) % opts.length); return; }
+      if (e.key === "ArrowDown") { e.preventDefault(); setSubSelectedIdx(p => (p + 1) % opts.length); return; }
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (opts[subSelectedIdx]) selectSubOption(activeCmd, opts[subSelectedIdx].value); return; }
+      if (e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); setActiveCmd(null); return; }
+      return;
+    }
+
+    // 命令列表导航
+    if (showCommands) {
+      const list = filteredCommands;
+      if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIdx(p => (p - 1 + list.length) % list.length); return; }
+      if (e.key === "ArrowDown") { e.preventDefault(); setSelectedIdx(p => (p + 1) % list.length); return; }
+      if (e.key === "Tab" || (e.key === "Enter" && !e.shiftKey)) { e.preventDefault(); if (list[selectedIdx]) selectCommand(list[selectedIdx]); return; }
+      if (e.key === "Escape") { e.preventDefault(); closePanel(); return; }
+      return;
     }
 
     // 普通发送
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   // ── 发送 ──────────────────────────────────────────────────────
 
   const buildMessage = (userText: string): string => {
     if (attachedFiles.length === 0) return userText;
-    const fileParts = attachedFiles.map(f =>
-      `<file name="${f.name}">\n${f.content}\n</file>`
-    ).join("\n\n");
+    const fileParts = attachedFiles.map(f => `<file name="${f.name}">\n${f.content}\n</file>`).join("\n\n");
     return `${fileParts}\n\n${userText}`;
   };
 
   const handleSend = () => {
-    if (showCommands || showSubOptions) return; // 命令模式下不发送
+    if (showCommands || activeCmd || inputMode) return;
     const trimmed = text.trim();
     if ((!trimmed && attachedFiles.length === 0) || isGenerating || disabled) return;
-    onSend(buildMessage(trimmed), selectedModel);
+    onSend(buildMessage(trimmed), selectedModel, chatOptions);
     setText("");
     setAttachedFiles([]);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
-  // ── 文件处理 ──────────────────────────────────────────────────
+  // ── 文件 ──────────────────────────────────────────────────────
 
   const readFiles = (files: FileList | File[]) => {
     Array.from(files).forEach(file => {
       if (file.size > 512 * 1024) return;
       const reader = new FileReader();
-      reader.onload = () => {
-        setAttachedFiles(prev => [...prev, { name: file.name, content: reader.result as string, size: file.size }]);
-      };
+      reader.onload = () => setAttachedFiles(prev => [...prev, { name: file.name, content: reader.result as string, size: file.size }]);
       reader.readAsText(file);
     });
   };
@@ -268,7 +357,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
     if (e.dataTransfer.files.length > 0) readFiles(e.dataTransfer.files);
   }, []);
 
-  // ── 自动调整高度 ──────────────────────────────────────────────
+  // ── 高度 ──────────────────────────────────────────────────────
 
   const adjustHeight = useCallback(() => {
     const el = textareaRef.current;
@@ -276,32 +365,51 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 136) + "px";
   }, []);
-
   useEffect(() => { adjustHeight(); }, [text, adjustHeight]);
 
-  // 点击外部关闭命令面板
+  // 关闭面板
   useEffect(() => {
-    if (!showCommands && !showSubOptions) return;
+    if (!showCommands && !activeCmd) return;
     const handler = (e: MouseEvent) => {
-      if (cmdPanelRef.current && !cmdPanelRef.current.contains(e.target as Node)) {
-        setShowCommands(false);
-        setShowSubOptions(null);
-      }
+      if (cmdPanelRef.current && !cmdPanelRef.current.contains(e.target as Node)) closePanel();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [showCommands, showSubOptions]);
+  }, [showCommands, activeCmd, closePanel]);
 
-  // 确保选中项可见
+  // 滚动选中项
   useEffect(() => {
-    const panel = cmdPanelRef.current;
-    if (!panel) return;
-    const active = panel.querySelector("[data-active='true']");
-    active?.scrollIntoView({ block: "nearest" });
+    const el = cmdPanelRef.current?.querySelector("[data-active='true']");
+    el?.scrollIntoView({ block: "nearest" });
   }, [selectedIdx, subSelectedIdx]);
 
-  const currentModelName = models.find((m) => m.id === selectedModel)?.name || selectedModel;
+  const currentModelName = models.find(m => m.id === selectedModel)?.name || selectedModel;
   const hasContent = text.trim() || attachedFiles.length > 0;
+  const panelOpen = showCommands || !!activeCmd;
+
+  // 活跃参数标签
+  const activeParams = useMemo(() => {
+    const tags: { label: string; key: string }[] = [];
+    if (chatOptions.effort) tags.push({ label: `effort:${chatOptions.effort}`, key: "effort" });
+    if (chatOptions.system_prompt) tags.push({ label: "system-prompt", key: "system_prompt" });
+    if (chatOptions.append_system_prompt) tags.push({ label: "append-system", key: "append_system_prompt" });
+    if (chatOptions.cwd) tags.push({ label: `cwd:${chatOptions.cwd.split("/").pop()}`, key: "cwd" });
+    if (chatOptions.permission_mode) tags.push({ label: `perm:${chatOptions.permission_mode}`, key: "permission_mode" });
+    if (chatOptions.max_budget) tags.push({ label: `budget:$${chatOptions.max_budget}`, key: "max_budget" });
+    if (chatOptions.allowed_tools?.length) tags.push({ label: `tools:${chatOptions.allowed_tools.length}`, key: "allowed_tools" });
+    if (chatOptions.disallowed_tools?.length) tags.push({ label: `deny:${chatOptions.disallowed_tools.length}`, key: "disallowed_tools" });
+    if (chatOptions.continue) tags.push({ label: "continue", key: "continue" });
+    if (chatOptions.session_id) tags.push({ label: `session:${chatOptions.session_id.slice(0, 8)}`, key: "session_id" });
+    return tags;
+  }, [chatOptions]);
+
+  const removeParam = (key: string) => {
+    setChatOptions(prev => {
+      const next = { ...prev };
+      delete (next as Record<string, unknown>)[key];
+      return next;
+    });
+  };
 
   return (
     <div
@@ -311,99 +419,112 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
-      {/* ── 命令面板（Discord 风格弹出） ── */}
-      {(showCommands || showSubOptions) && (
+      {/* ── 命令面板 ── */}
+      {panelOpen && (
         <div
           ref={cmdPanelRef}
           className="absolute bottom-full left-3 right-3 mb-1 rounded-lg shadow-xl overflow-hidden z-50"
           style={{ background: "var(--background)", border: "1px solid var(--border)" }}
         >
-          {/* 标题栏 */}
+          {/* 标题 */}
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
                style={{ color: "var(--text-tertiary)", background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
             <Hash size={10} className="inline mr-1 -mt-0.5" />
-            {showSubOptions ? showSubOptions.name : "命令"}
+            {inputMode && activeCmd ? `/${activeCmd.name}` : activeCmd ? activeCmd.name : "命令"}
           </div>
 
-          {/* 命令列表 / 子选项列表 */}
-          <div className="max-h-[240px] overflow-y-auto py-1">
-            {showSubOptions ? (
-              // 子选项列表
-              (showSubOptions.options || []).map((opt, i) => (
-                <button
-                  key={opt.value}
-                  data-active={i === subSelectedIdx}
-                  onClick={() => selectSubOption(showSubOptions, opt.value)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
-                  style={{
-                    background: i === subSelectedIdx ? "var(--accent-subtle)" : "transparent",
-                    color: i === subSelectedIdx ? "var(--accent)" : "var(--text-secondary)",
-                  }}
-                  onMouseEnter={() => setSubSelectedIdx(i)}
-                >
-                  <Cpu size={13} className="shrink-0 opacity-50" />
-                  <span className="text-[12px]">{opt.label}</span>
-                  {opt.value === selectedModel && (
-                    <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded"
-                          style={{ background: "var(--accent)", color: "#fff" }}>当前</span>
-                  )}
-                </button>
-              ))
-            ) : (
-              // 命令列表
-              filteredCommands.map((cmd, i) => (
-                <button
-                  key={cmd.name}
-                  data-active={i === selectedIdx}
-                  onClick={() => selectCommand(cmd)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors group"
-                  style={{
-                    background: i === selectedIdx ? "var(--accent-subtle)" : "transparent",
-                  }}
-                  onMouseEnter={() => setSelectedIdx(i)}
-                >
-                  <span className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center"
-                        style={{
-                          background: i === selectedIdx ? "var(--accent)" : "var(--background-tertiary)",
-                          color: i === selectedIdx ? "#fff" : "var(--text-tertiary)",
-                        }}>
-                    {cmd.icon}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-medium"
-                         style={{ color: i === selectedIdx ? "var(--accent)" : "var(--text-primary)" }}>
-                      /{cmd.name}
-                    </div>
-                    <div className="text-[10px]"
-                         style={{ color: "var(--text-tertiary)" }}>
-                      {cmd.description}
-                    </div>
-                  </div>
-                  {cmd.options && (
-                    <span className="text-[10px] opacity-40 shrink-0">▸</span>
-                  )}
-                </button>
-              ))
-            )}
-            {!showSubOptions && filteredCommands.length === 0 && (
-              <div className="px-3 py-4 text-center text-[11px]"
-                   style={{ color: "var(--text-tertiary)" }}>
-                没有匹配的命令
+          {/* 输入参数模式 */}
+          {inputMode && activeCmd && (
+            <div className="px-3 py-3">
+              <p className="text-[10px] mb-2" style={{ color: "var(--text-tertiary)" }}>{activeCmd.description}</p>
+              <div className="text-[11px] px-2 py-1.5 rounded"
+                   style={{ color: "var(--text-secondary)", background: "var(--background-secondary)", border: "1px solid var(--border)" }}>
+                在下方输入框键入值后按 Enter 确认
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* 列表 */}
+          {!inputMode && (
+            <div className="max-h-[280px] overflow-y-auto py-1">
+              {activeCmd && activeCmd.action.type === "select" ? (
+                (activeCmd.action.options).map((opt, i) => (
+                  <button
+                    key={opt.value}
+                    data-active={i === subSelectedIdx}
+                    onClick={() => selectSubOption(activeCmd, opt.value)}
+                    onMouseEnter={() => setSubSelectedIdx(i)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
+                    style={{
+                      background: i === subSelectedIdx ? "var(--accent-subtle)" : "transparent",
+                      color: i === subSelectedIdx ? "var(--accent)" : "var(--text-secondary)",
+                    }}
+                  >
+                    <span className="text-[12px] flex-1">{opt.label}</span>
+                    {opt.current && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--accent)", color: "#fff" }}>当前</span>
+                    )}
+                  </button>
+                ))
+              ) : (
+                filteredCommands.map((cmd, i) => (
+                  <button
+                    key={cmd.name}
+                    data-active={i === selectedIdx}
+                    onClick={() => selectCommand(cmd)}
+                    onMouseEnter={() => setSelectedIdx(i)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
+                    style={{ background: i === selectedIdx ? "var(--accent-subtle)" : "transparent" }}
+                  >
+                    <span className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center"
+                          style={{
+                            background: i === selectedIdx ? "var(--accent)" : "var(--background-tertiary)",
+                            color: i === selectedIdx ? "#fff" : "var(--text-tertiary)",
+                          }}>
+                      {cmd.icon}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] font-medium" style={{ color: i === selectedIdx ? "var(--accent)" : "var(--text-primary)" }}>
+                        /{cmd.name}
+                      </div>
+                      <div className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>{cmd.description}</div>
+                    </div>
+                    {cmd.action.type === "select" && <span className="text-[10px] opacity-40 shrink-0">▸</span>}
+                    {cmd.action.type === "input" && <span className="text-[10px] opacity-40 shrink-0">⌨</span>}
+                  </button>
+                ))
+              )}
+              {!activeCmd && filteredCommands.length === 0 && (
+                <div className="px-3 py-4 text-center text-[11px]" style={{ color: "var(--text-tertiary)" }}>没有匹配的命令</div>
+              )}
+            </div>
+          )}
 
           {/* 底部提示 */}
           <div className="px-3 py-1.5 flex items-center gap-3 text-[9px]"
                style={{ color: "var(--text-tertiary)", background: "var(--background-secondary)", borderTop: "1px solid var(--border)" }}>
-            <span><kbd className="px-1 py-0.5 rounded text-[8px]" style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>↑↓</kbd> 导航</span>
-            <span><kbd className="px-1 py-0.5 rounded text-[8px]" style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>Enter</kbd> 选择</span>
-            <span><kbd className="px-1 py-0.5 rounded text-[8px]" style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>Esc</kbd> 关闭</span>
+            {inputMode
+              ? <><Kbd>Enter</Kbd><span>确认</span><Kbd>Esc</Kbd><span>取消</span></>
+              : <><Kbd>↑↓</Kbd><span>导航</span><Kbd>Enter</Kbd><span>选择</span><Kbd>Esc</Kbd><span>关闭</span></>
+            }
           </div>
         </div>
       )}
 
-      {/* 已附加的文件标签 */}
+      {/* 活跃参数标签 */}
+      {activeParams.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-1.5 px-1">
+          {activeParams.map(t => (
+            <span key={t.key} className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded"
+                  style={{ background: "rgba(68,119,255,0.1)", color: "var(--accent)", border: "1px solid rgba(68,119,255,0.2)" }}>
+              {t.label}
+              <button onClick={() => removeParam(t.key)} className="opacity-60 hover:opacity-100"><X size={8} /></button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* 文件标签 */}
       {attachedFiles.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-1.5 px-1">
           {attachedFiles.map((f, i) => (
@@ -411,9 +532,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
                   style={{ background: "var(--background-tertiary)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
               <span className="truncate max-w-[120px]">{f.name}</span>
               <span className="opacity-40">{(f.size / 1024).toFixed(0)}K</span>
-              <button onClick={() => removeFile(i)} className="opacity-50 hover:opacity-100 transition-opacity">
-                <X size={10} />
-              </button>
+              <button onClick={() => removeFile(i)} className="opacity-50 hover:opacity-100"><X size={10} /></button>
             </span>
           ))}
         </div>
@@ -422,10 +541,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
       {/* 输入区域 */}
       <div
         className="flex items-end gap-2 rounded-lg px-3 py-2 transition-colors"
-        style={{
-          background: "var(--background)",
-          border: dragOver ? "1px solid var(--accent)" : "1px solid var(--border)",
-        }}
+        style={{ background: "var(--background)", border: dragOver ? "1px solid var(--accent)" : "1px solid var(--border)" }}
       >
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -443,7 +559,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder="输入消息，/ 打开命令..."
+          placeholder={inputMode ? inputPlaceholder : "输入消息，/ 打开命令..."}
           disabled={disabled}
           rows={1}
           className="flex-1 resize-none text-[12.5px] leading-[20px] outline-none placeholder:opacity-40"
@@ -451,25 +567,20 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
         />
 
         {isGenerating ? (
-          <button
-            onClick={onStop}
-            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:brightness-125"
-            style={{ background: "var(--danger)", color: "#fff" }}
-            title="停止生成"
-          >
+          <button onClick={onStop}
+            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md hover:brightness-125"
+            style={{ background: "var(--danger)", color: "#fff" }} title="停止生成">
             <Square size={13} fill="currentColor" />
           </button>
         ) : (
-          <button
-            onClick={handleSend}
-            disabled={!hasContent || disabled || showCommands}
+          <button onClick={inputMode ? submitInput : handleSend}
+            disabled={(!hasContent && !inputMode) || disabled || (showCommands && !inputMode)}
             className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md transition-colors disabled:opacity-30"
             style={{
-              background: hasContent && !showCommands ? "var(--accent)" : "var(--background-tertiary)",
-              color: hasContent && !showCommands ? "#fff" : "var(--text-tertiary)",
+              background: (hasContent || inputMode) && !showCommands ? "var(--accent)" : "var(--background-tertiary)",
+              color: (hasContent || inputMode) && !showCommands ? "#fff" : "var(--text-tertiary)",
             }}
-            title="发送 (Enter)"
-          >
+            title={inputMode ? "确认 (Enter)" : "发送 (Enter)"}>
             <SendHorizontal size={14} />
           </button>
         )}
@@ -477,15 +588,22 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
 
       {/* 底部状态栏 */}
       <div className="flex items-center mt-1.5 px-1 gap-2">
-        <span className="text-[10px] px-1.5 py-0.5 rounded"
-              style={{ color: "var(--text-tertiary)" }}>
-          {currentModelName}
-        </span>
-        {dragOver && (
-          <span className="text-[10px]" style={{ color: "var(--accent)" }}>松开以上传文件</span>
-        )}
+        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ color: "var(--text-tertiary)" }}>{currentModelName}</span>
+        {chatOptions.effort && <span className="text-[9px] px-1 rounded" style={{ color: "var(--accent)", background: "rgba(68,119,255,0.08)" }}>effort:{chatOptions.effort}</span>}
+        {dragOver && <span className="text-[10px]" style={{ color: "var(--accent)" }}>松开以上传文件</span>}
         <span className="ml-auto text-[9px] opacity-30">/ 命令</span>
       </div>
     </div>
+  );
+}
+
+// ── 小组件 ──────────────────────────────────────────────────────
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="px-1 py-0.5 rounded text-[8px]"
+         style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>
+      {children}
+    </kbd>
   );
 }
