@@ -687,6 +687,16 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest, on
           )}
           {/* 操作按钮 - hover 时显示 */}
           <div className="hidden group-hover:flex items-center gap-0.5">
+            {project.feishu_chat_id && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onToggleFeishuSync?.(project.id, !project.feishu_sync); }}
+                className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-white/10"
+                style={{ color: project.feishu_sync ? "#22c55e" : "var(--text-tertiary)" }}
+                title={project.feishu_sync ? t('dashboard.projectCard.feishuSyncOn') : t('dashboard.projectCard.feishuSyncOff')}
+              >
+                <MessageCircle size={10} />
+              </button>
+            )}
             <button
               onClick={(e) => { e.stopPropagation(); onToggleTest?.(project.id, !project.is_test); }}
               className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-white/10"
