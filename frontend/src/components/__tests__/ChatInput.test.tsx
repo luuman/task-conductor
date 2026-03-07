@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import { ChatInput } from "../ChatInput";
+import React from "react";
 
 // ── Mocks ─────────────────────────────────────────────────────
 
@@ -21,20 +21,42 @@ vi.mock("../../lib/api", () => ({
   },
 }));
 
-// Mock lucide-react icons as simple spans
-vi.mock("lucide-react", () => {
-  const handler: ProxyHandler<object> = {
-    get(_target, prop: string) {
-      if (prop === "__esModule") return true;
-      const Component = ({ size: _s, fill: _f, ...rest }: Record<string, unknown>) => (
-        <span data-testid={`icon-${prop}`} {...rest} />
-      );
-      Component.displayName = prop;
-      return Component;
-    },
+// Create a simple icon factory
+function makeIcon(name: string) {
+  const Icon = (props: { size?: number; fill?: string; className?: string }) => {
+    const { size: _s, fill: _f, ...rest } = props;
+    return React.createElement("span", { "data-testid": `icon-${name}`, ...rest });
   };
-  return new Proxy({}, handler);
-});
+  Icon.displayName = name;
+  return Icon;
+}
+
+// Mock lucide-react with explicit named exports
+vi.mock("lucide-react", () => ({
+  SendHorizontal: makeIcon("SendHorizontal"),
+  Square: makeIcon("Square"),
+  Paperclip: makeIcon("Paperclip"),
+  X: makeIcon("X"),
+  Hash: makeIcon("Hash"),
+  Cpu: makeIcon("Cpu"),
+  Download: makeIcon("Download"),
+  Trash2: makeIcon("Trash2"),
+  Plus: makeIcon("Plus"),
+  HelpCircle: makeIcon("HelpCircle"),
+  Terminal: makeIcon("Terminal"),
+  Gauge: makeIcon("Gauge"),
+  Shield: makeIcon("Shield"),
+  FolderOpen: makeIcon("FolderOpen"),
+  Wallet: makeIcon("Wallet"),
+  Zap: makeIcon("Zap"),
+  MessageSquarePlus: makeIcon("MessageSquarePlus"),
+  RotateCcw: makeIcon("RotateCcw"),
+  BrainCircuit: makeIcon("BrainCircuit"),
+  SlidersHorizontal: makeIcon("SlidersHorizontal"),
+  Ban: makeIcon("Ban"),
+}));
+
+import { ChatInput } from "../ChatInput";
 
 // ── Helpers ───────────────────────────────────────────────────
 
@@ -49,8 +71,10 @@ async function renderChatInput(overrides: Partial<typeof defaultProps> = {}) {
   await act(async () => {
     result = render(<ChatInput {...defaultProps} {...overrides} />);
   });
-  // Wait for the models useEffect to settle
-  await waitFor(() => {});
+  // Let the models useEffect resolve
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 0));
+  });
   return result!;
 }
 
@@ -63,16 +87,13 @@ describe("ChatInput", () => {
 
   it("renders textarea and send button", async () => {
     await renderChatInput();
-    const textarea = screen.getByRole("textbox");
-    expect(textarea).toBeInTheDocument();
-    const buttons = screen.getAllByRole("button");
-    expect(buttons.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    expect(screen.getAllByRole("button").length).toBeGreaterThanOrEqual(1);
   });
 
   it("send button is disabled when message is empty", async () => {
     await renderChatInput();
-    const sendBtn = screen.getByTitle("发送 (Enter)");
-    expect(sendBtn).toBeDisabled();
+    expect(screen.getByTitle("发送 (Enter)")).toBeDisabled();
   });
 
   it("send button becomes enabled after typing text", async () => {
@@ -81,8 +102,7 @@ describe("ChatInput", () => {
     await act(async () => {
       fireEvent.change(textarea, { target: { value: "Hello" } });
     });
-    const sendBtn = screen.getByTitle("发送 (Enter)");
-    expect(sendBtn).not.toBeDisabled();
+    expect(screen.getByTitle("发送 (Enter)")).not.toBeDisabled();
   });
 
   it("calls onSend with message when send button is clicked", async () => {
@@ -92,9 +112,8 @@ describe("ChatInput", () => {
     await act(async () => {
       fireEvent.change(textarea, { target: { value: "Hello world" } });
     });
-    const sendBtn = screen.getByTitle("发送 (Enter)");
     await act(async () => {
-      fireEvent.click(sendBtn);
+      fireEvent.click(screen.getByTitle("发送 (Enter)"));
     });
     expect(onSend).toHaveBeenCalledTimes(1);
     expect(onSend.mock.calls[0][0]).toBe("Hello world");
@@ -102,25 +121,22 @@ describe("ChatInput", () => {
 
   it("typing / opens the command panel", async () => {
     await renderChatInput();
-    const textarea = screen.getByRole("textbox");
     await act(async () => {
-      fireEvent.change(textarea, { target: { value: "/" } });
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "/" } });
     });
     expect(screen.getByText("命令")).toBeInTheDocument();
   });
 
   it("shows stop button when isGenerating is true", async () => {
     await renderChatInput({ isGenerating: true });
-    const stopBtn = screen.getByTitle("停止生成");
-    expect(stopBtn).toBeInTheDocument();
+    expect(screen.getByTitle("停止生成")).toBeInTheDocument();
   });
 
   it("calls onStop when stop button is clicked", async () => {
     const onStop = vi.fn();
     await renderChatInput({ isGenerating: true, onStop });
-    const stopBtn = screen.getByTitle("停止生成");
     await act(async () => {
-      fireEvent.click(stopBtn);
+      fireEvent.click(screen.getByTitle("停止生成"));
     });
     expect(onStop).toHaveBeenCalledTimes(1);
   });
@@ -128,8 +144,7 @@ describe("ChatInput", () => {
   it("does not call onSend when disabled", async () => {
     const onSend = vi.fn();
     await renderChatInput({ onSend, disabled: true });
-    const textarea = screen.getByRole("textbox");
-    expect(textarea).toBeDisabled();
+    expect(screen.getByRole("textbox")).toBeDisabled();
     expect(onSend).not.toHaveBeenCalled();
   });
 
@@ -139,9 +154,8 @@ describe("ChatInput", () => {
     await act(async () => {
       fireEvent.change(textarea, { target: { value: "test message" } });
     });
-    const sendBtn = screen.getByTitle("发送 (Enter)");
     await act(async () => {
-      fireEvent.click(sendBtn);
+      fireEvent.click(screen.getByTitle("发送 (Enter)"));
     });
     expect(textarea.value).toBe("");
   });
