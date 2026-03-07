@@ -183,6 +183,7 @@ function ServerCard({ server, onAction }: {
 }
 
 export default function McpMarket() {
+  const { t } = useTranslation();
   const [servers, setServers] = useState<McpMarketServer[]>([]);
   const [filter, setFilter] = useState<string>("all");
 
