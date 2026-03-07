@@ -211,11 +211,11 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
 
         {/* 列头 */}
         <div className="flex gap-2 px-3 py-1 border-b border-[#21262d] shrink-0">
-          <span className="text-[9px] font-mono text-[#484f58] w-[52px]">时间</span>
+          <span className="text-[9px] font-mono text-[#484f58] w-[52px]">{t('claudeMonitor.tableHeaders.time')}</span>
           <span className="text-[9px] font-mono text-[#484f58] w-3"> </span>
-          <span className="text-[9px] font-mono text-[#484f58] w-[90px]">工具</span>
-          <span className="text-[9px] font-mono text-[#484f58] flex-1">内容</span>
-          <span className="text-[9px] font-mono text-[#484f58] w-[42px]">会话</span>
+          <span className="text-[9px] font-mono text-[#484f58] w-[90px]">{t('claudeMonitor.tableHeaders.tool')}</span>
+          <span className="text-[9px] font-mono text-[#484f58] flex-1">{t('claudeMonitor.tableHeaders.content')}</span>
+          <span className="text-[9px] font-mono text-[#484f58] w-[42px]">{t('claudeMonitor.tableHeaders.session')}</span>
         </div>
 
         {/* 日志区 */}
