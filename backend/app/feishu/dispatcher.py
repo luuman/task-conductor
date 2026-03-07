@@ -110,10 +110,17 @@ def _on_message(data) -> None:
         if not chat_id:
             return
 
+        # 话题模式：提取 message_id 用于回复到同一话题
+        msg_id = message.message_id or ""
+        root_id = getattr(message, "root_id", "") or ""
+        # 有 root_id 说明是话题内回复，用 root_id 所在话题；
+        # 没有 root_id 但在话题群里，则 msg_id 本身就是话题的根消息
+        reply_to = root_id or msg_id
+
         # 将异步任务调度到主事件循环
         if _main_loop and _main_loop.is_running():
             asyncio.run_coroutine_threadsafe(
-                _dispatch_message(chat_id, text), _main_loop
+                _dispatch_message(chat_id, text, reply_to), _main_loop
             )
         else:
             logger.warning("[Feishu WS] 主事件循环不可用，跳过消息")
