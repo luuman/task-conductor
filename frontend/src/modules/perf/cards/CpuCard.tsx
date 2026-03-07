@@ -89,7 +89,7 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
           </div>
           {/* 切换/秒 */}
           <div className="flex justify-between items-baseline text-[10px] font-medium">
-            <span className="text-gray-400">切换/秒</span>
+            <span className="text-gray-400">{t('perf.cpu.ctxSwitch')}</span>
             <span className="font-mono tabular-nums" style={{ color: cSys }}>
               {sys.cpu.ctx_switches_per_sec != null
                 ? sys.cpu.ctx_switches_per_sec >= 1000
