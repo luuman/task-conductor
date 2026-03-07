@@ -90,12 +90,12 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
 
       {/* ── 风扇 ── */}
       <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 2 }}>
-        <SectionLabel label="风扇" />
+        <SectionLabel label={t('perf.sensors.fan')} />
         {fans.length > 0
           ? fans.map((f, i) => (
-              <Row key={i} name={f.label || f.sensor || "风扇"} value={`${f.rpm.toLocaleString()} 转/分`} />
+              <Row key={i} name={f.label || f.sensor || t('perf.sensors.fan')} value={`${f.rpm.toLocaleString()} ${t('perf.sensors.rpm')}`} />
             ))
-          : <Row name="风扇" value="—" />
+          : <Row name={t('perf.sensors.fan')} value="—" />
         }
       </div>
 
