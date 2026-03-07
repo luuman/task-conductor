@@ -39,14 +39,14 @@ export const METRIC_COLORS: Record<MetricId, ColorMeta[]> = {
 export const METRIC_SETTINGS: Record<MetricId, SettingMeta[]> = {
   cpu: [
     {
-      key: "procFormat", label: "进程格式",
+      key: "procFormat", label: "perf.metricSettings.cpu.procFormat",
       options: [
         { value: "percent",  label: "0-100%" },
-        { value: "absolute", label: "绝对值" },
+        { value: "absolute", label: "perf.metricSettings.cpu.procFormatAbsolute" },
       ],
     },
     {
-      key: "procCount", label: "进程数量",
+      key: "procCount", label: "perf.metricSettings.cpu.procCount",
       options: [
         { value: "3",  label: "3"  },
         { value: "5",  label: "5"  },
@@ -57,9 +57,9 @@ export const METRIC_SETTINGS: Record<MetricId, SettingMeta[]> = {
   mem: [],
   net: [
     {
-      key: "unit", label: "速率单位",
+      key: "unit", label: "perf.metricSettings.net.unit",
       options: [
-        { value: "auto", label: "自动"   },
+        { value: "auto", label: "perf.metricSettings.net.auto" },
         { value: "mbps", label: "MB/s"  },
         { value: "kbps", label: "KB/s"  },
       ],
@@ -67,9 +67,9 @@ export const METRIC_SETTINGS: Record<MetricId, SettingMeta[]> = {
   ],
   disk: [
     {
-      key: "unit", label: "速率单位",
+      key: "unit", label: "perf.metricSettings.disk.unit",
       options: [
-        { value: "auto", label: "自动"   },
+        { value: "auto", label: "perf.metricSettings.disk.auto" },
         { value: "mbps", label: "MB/s"  },
         { value: "kbps", label: "KB/s"  },
       ],
