@@ -37,6 +37,7 @@ function ServerCard({ server, onAction }: {
   server: McpMarketServer;
   onAction: () => void;
 }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [tokenInput, setTokenInput] = useState("");
   const [showTokenInput, setShowTokenInput] = useState(false);
