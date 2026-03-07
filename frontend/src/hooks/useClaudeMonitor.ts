@@ -103,7 +103,7 @@ export function useClaudeMonitor(
         if (gen !== activeGenRef.current) return;
         wsRef.current = null;
         setStatus("disconnected");
-        // 2 秒后自动重连
+        // Auto-reconnect after 2 seconds
         retryRef.current = setTimeout(connect, 2000);
       };
     }
