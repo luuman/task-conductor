@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { ChatInput } from "../ChatInput";
 
 // ── Mocks ─────────────────────────────────────────────────────
@@ -22,19 +21,19 @@ vi.mock("../../lib/api", () => ({
   },
 }));
 
-// Mock lucide-react to avoid SVG rendering issues
+// Mock lucide-react icons as simple spans
 vi.mock("lucide-react", () => {
-  const icon = (name: string) => {
-    const Component = (props: Record<string, unknown>) => {
-      const { size: _size, fill: _fill, ...rest } = props;
-      return <span data-testid={`icon-${name}`} {...rest} />;
-    };
-    Component.displayName = name;
-    return Component;
+  const handler: ProxyHandler<object> = {
+    get(_target, prop: string) {
+      if (prop === "__esModule") return true;
+      const Component = ({ size: _s, fill: _f, ...rest }: Record<string, unknown>) => (
+        <span data-testid={`icon-${prop}`} {...rest} />
+      );
+      Component.displayName = prop;
+      return Component;
+    },
   };
-  return new Proxy({}, {
-    get: (_target, prop: string) => icon(prop),
-  });
+  return new Proxy({}, handler);
 });
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -45,8 +44,14 @@ const defaultProps = {
   isGenerating: false,
 };
 
-function renderChatInput(overrides: Partial<typeof defaultProps> = {}) {
-  return render(<ChatInput {...defaultProps} {...overrides} />);
+async function renderChatInput(overrides: Partial<typeof defaultProps> = {}) {
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(<ChatInput {...defaultProps} {...overrides} />);
+  });
+  // Wait for the models useEffect to settle
+  await waitFor(() => {});
+  return result!;
 }
 
 // ── Tests ─────────────────────────────────────────────────────
@@ -56,84 +61,88 @@ describe("ChatInput", () => {
     vi.clearAllMocks();
   });
 
-  it("renders textarea and send button", () => {
-    renderChatInput();
+  it("renders textarea and send button", async () => {
+    await renderChatInput();
     const textarea = screen.getByRole("textbox");
     expect(textarea).toBeInTheDocument();
-    // Send button (SendHorizontal icon)
     const buttons = screen.getAllByRole("button");
     expect(buttons.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("send button is disabled when message is empty", () => {
-    renderChatInput();
-    // The send button has title "发送 (Enter)"
+  it("send button is disabled when message is empty", async () => {
+    await renderChatInput();
     const sendBtn = screen.getByTitle("发送 (Enter)");
     expect(sendBtn).toBeDisabled();
   });
 
   it("send button becomes enabled after typing text", async () => {
-    const user = userEvent.setup();
-    renderChatInput();
+    await renderChatInput();
     const textarea = screen.getByRole("textbox");
-    await user.type(textarea, "Hello");
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "Hello" } });
+    });
     const sendBtn = screen.getByTitle("发送 (Enter)");
     expect(sendBtn).not.toBeDisabled();
   });
 
   it("calls onSend with message when send button is clicked", async () => {
     const onSend = vi.fn();
-    const user = userEvent.setup();
-    renderChatInput({ onSend });
+    await renderChatInput({ onSend });
     const textarea = screen.getByRole("textbox");
-    await user.type(textarea, "Hello world");
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "Hello world" } });
+    });
     const sendBtn = screen.getByTitle("发送 (Enter)");
-    await user.click(sendBtn);
+    await act(async () => {
+      fireEvent.click(sendBtn);
+    });
     expect(onSend).toHaveBeenCalledTimes(1);
     expect(onSend.mock.calls[0][0]).toBe("Hello world");
   });
 
   it("typing / opens the command panel", async () => {
-    const user = userEvent.setup();
-    renderChatInput();
+    await renderChatInput();
     const textarea = screen.getByRole("textbox");
-    await user.type(textarea, "/");
-    // The command panel should show "命令" header text
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "/" } });
+    });
     expect(screen.getByText("命令")).toBeInTheDocument();
   });
 
-  it("shows stop button when isGenerating is true", () => {
-    renderChatInput({ isGenerating: true });
+  it("shows stop button when isGenerating is true", async () => {
+    await renderChatInput({ isGenerating: true });
     const stopBtn = screen.getByTitle("停止生成");
     expect(stopBtn).toBeInTheDocument();
   });
 
   it("calls onStop when stop button is clicked", async () => {
     const onStop = vi.fn();
-    const user = userEvent.setup();
-    renderChatInput({ isGenerating: true, onStop });
+    await renderChatInput({ isGenerating: true, onStop });
     const stopBtn = screen.getByTitle("停止生成");
-    await user.click(stopBtn);
+    await act(async () => {
+      fireEvent.click(stopBtn);
+    });
     expect(onStop).toHaveBeenCalledTimes(1);
   });
 
   it("does not call onSend when disabled", async () => {
     const onSend = vi.fn();
-    const user = userEvent.setup();
-    renderChatInput({ onSend, disabled: true });
+    await renderChatInput({ onSend, disabled: true });
     const textarea = screen.getByRole("textbox");
-    // textarea is disabled so we can't type
     expect(textarea).toBeDisabled();
     expect(onSend).not.toHaveBeenCalled();
   });
 
   it("clears input after sending", async () => {
-    const user = userEvent.setup();
-    renderChatInput();
+    await renderChatInput();
     const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
-    await user.type(textarea, "test message");
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "test message" } });
+    });
     const sendBtn = screen.getByTitle("发送 (Enter)");
-    await user.click(sendBtn);
+    await act(async () => {
+      fireEvent.click(sendBtn);
+    });
     expect(textarea.value).toBe("");
   });
 });
