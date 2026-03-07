@@ -58,16 +58,16 @@ import {
 
 // ── Hook 事件标签 ────────────────────────────────────────────────
 const getEventLabels = (t: (k: string) => string): Record<string, { label: string; desc: string }> => ({
-  PreToolUse:         { label: t("claudeConfig.eventLabels.PreToolUse"),         desc: "Claude 调用工具之前触发" },
-  PostToolUse:        { label: t("claudeConfig.eventLabels.PostToolUse"),        desc: "工具调用成功完成后触发" },
-  PostToolUseFailure: { label: t("claudeConfig.eventLabels.PostToolUseFailure"), desc: "工具调用失败后触发" },
-  Stop:               { label: t("claudeConfig.eventLabels.Stop"),               desc: "Claude 停止响应时触发" },
-  SubagentStart:      { label: t("claudeConfig.eventLabels.SubagentStart"),      desc: "子代理开始运行时触发" },
-  SubagentStop:       { label: t("claudeConfig.eventLabels.SubagentStop"),       desc: "子代理结束运行时触发" },
-  SessionStart:       { label: t("claudeConfig.eventLabels.SessionStart"),       desc: "新会话启动时触发" },
-  SessionEnd:         { label: t("claudeConfig.eventLabels.SessionEnd"),         desc: "会话结束时触发" },
-  UserPromptSubmit:   { label: "UserPromptSubmit",                               desc: "用户发送消息时触发" },
-  Notification:       { label: t("claudeConfig.eventLabels.Notification"),       desc: "Claude 发出通知时触发" },
+  PreToolUse:         { label: t("claudeConfig.eventLabels.PreToolUse"),         desc: t("claudeConfig.eventLabels.PreToolUseDesc") },
+  PostToolUse:        { label: t("claudeConfig.eventLabels.PostToolUse"),        desc: t("claudeConfig.eventLabels.PostToolUseDesc") },
+  PostToolUseFailure: { label: t("claudeConfig.eventLabels.PostToolUseFailure"), desc: t("claudeConfig.eventLabels.PostToolUseFailureDesc") },
+  Stop:               { label: t("claudeConfig.eventLabels.Stop"),               desc: t("claudeConfig.eventLabels.StopDesc") },
+  SubagentStart:      { label: t("claudeConfig.eventLabels.SubagentStart"),      desc: t("claudeConfig.eventLabels.SubagentStartDesc") },
+  SubagentStop:       { label: t("claudeConfig.eventLabels.SubagentStop"),       desc: t("claudeConfig.eventLabels.SubagentStopDesc") },
+  SessionStart:       { label: t("claudeConfig.eventLabels.SessionStart"),       desc: t("claudeConfig.eventLabels.SessionStartDesc") },
+  SessionEnd:         { label: t("claudeConfig.eventLabels.SessionEnd"),         desc: t("claudeConfig.eventLabels.SessionEndDesc") },
+  UserPromptSubmit:   { label: "UserPromptSubmit",                               desc: t("claudeConfig.eventLabels.UserPromptSubmitDesc") },
+  Notification:       { label: t("claudeConfig.eventLabels.Notification"),       desc: t("claudeConfig.eventLabels.NotificationDesc") },
 });
 
 // ── settings.json 常用设置 ──────────────────────────────────────
