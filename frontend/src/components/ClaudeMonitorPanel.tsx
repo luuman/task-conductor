@@ -175,10 +175,10 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
               "bg-red-400"
             )} />
             <span className="text-[11px] font-mono font-semibold text-[#e6edf3]">
-              Claude Code Monitor
+              {t('claudeMonitor.header.title')}
             </span>
             <span className="text-[9px] text-[#8b949e] font-mono">
-              全局 · 不存储
+              {t('claudeMonitor.header.subtitle')}
             </span>
           </div>
           <div className="flex items-center gap-1">
