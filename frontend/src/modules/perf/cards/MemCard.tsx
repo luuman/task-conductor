@@ -46,7 +46,7 @@ export function MemCard({ sys, procs, colors = {}, showTitle }: MemCardProps) {
 
       {memProcs.length > 0 && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 6 }} className="space-y-1">
-          <div className="text-xs font-medium mb-1" style={{ color: cCached }}>进程</div>
+          <div className="text-xs font-medium mb-1" style={{ color: cCached }}>{t('perf.mem.processes')}</div>
           {memProcs.map(p => (
             <PhoneProc key={p.pid} name={p.name}
               value={p.mem_mb >= 1024 ? `${(p.mem_mb / 1024).toFixed(1)} G` : `${Math.round(p.mem_mb)} M`}
