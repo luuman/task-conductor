@@ -845,6 +845,8 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
 }
 
 function CommonSettingsGrid({ config, onUpdate, searchQuery }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void; searchQuery: string }) {
+  const { t } = useTranslation();
+  const COMMON_SETTINGS = useMemo(() => getCommonSettings(t), [t]);
   const [saving, setSaving] = useState<string | null>(null);
   const getValue = (key: string): unknown => config.other[key];
   const handleChange = async (key: string, value: unknown) => {
@@ -855,11 +857,11 @@ function CommonSettingsGrid({ config, onUpdate, searchQuery }: { config: ClaudeC
     } finally { setSaving(null); }
   };
   const GLABELS: Record<string, string> = {
-    model: "模型配置", behavior: "行为与输出", session: "会话管理",
-    security: "登录与安全", ui: "界面与体验", advanced: "高级选项",
+    model: t("claudeConfig.settingsGroups.modelConfig"), behavior: t("claudeConfig.settingsGroups.behaviorOutput"), session: t("claudeConfig.settingsGroups.sessionManagement"),
+    security: t("claudeConfig.settingsGroups.loginSecurity"), ui: t("claudeConfig.settingsGroups.uiExperience"), advanced: t("claudeConfig.settingsGroups.advancedOptions"),
   };
   const groups = useMemo(() => {
-    const map = new Map<string, typeof COMMON_SETTINGS>();
+    const map = new Map<string, CommonSettingDef[]>();
     for (const s of COMMON_SETTINGS) {
       // Filter by search
       if (searchQuery && !s.label.toLowerCase().includes(searchQuery) && !s.key.toLowerCase().includes(searchQuery) && !s.desc.toLowerCase().includes(searchQuery)) continue;
