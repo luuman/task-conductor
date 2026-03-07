@@ -32,7 +32,7 @@ export default function App() {
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
 
-  // 全局实时 Claude 事件（页面打开即监听，不依赖 Sessions 页是否激活）
+  // Global live Claude events (always listening, regardless of Sessions page state)
   const [liveEvents, setLiveEvents] = useState<ClaudeHookEvent[]>([]);
   const liveEventsRef = useRef<ClaudeHookEvent[]>([]);
   const [monitorStatus, setMonitorStatus] = useState<WsStatus>("disconnected");
