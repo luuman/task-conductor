@@ -1787,7 +1787,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
           </div>
         </div>
         {updateInfo && (
-          <p className={cn("text-[10px] mt-2", updateInfo.startsWith("已是") ? "text-green-400" : "text-yellow-400")}>{updateInfo}</p>
+          <p className={cn("text-[10px] mt-2", updateInfo === t("claudeConfig.about.latestVersion") ? "text-green-400" : "text-yellow-400")}>{updateInfo}</p>
         )}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
