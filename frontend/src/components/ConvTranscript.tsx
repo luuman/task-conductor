@@ -186,7 +186,7 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
       <div className="flex flex-col items-center justify-center h-full gap-3"
            style={{ color: "var(--text-tertiary)" }}>
         <span className="text-3xl">💬</span>
-        <p className="text-[12px]">选择左侧会话查看对话记录</p>
+        <p className="text-[12px]">{t('convTranscript.selectHint')}</p>
       </div>
     );
   }
