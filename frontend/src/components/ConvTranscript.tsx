@@ -640,29 +640,27 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Pro
     <ExpandSignalCtx.Provider value={expandSignal}>
       {/* 工具栏 - 置顶悬浮 */}
       {toolCount > 0 && (
-        <div className="sticky top-0 z-10 h-11 flex items-center gap-1 px-4 backdrop-blur-md"
+        <div className="sticky top-0 z-10 h-11 flex items-center gap-2 px-4 backdrop-blur-md"
              style={{ background: "rgba(7,7,13,0.85)", borderBottom: "1px solid var(--border)" }}>
-          <button
-            onClick={expandAll}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors hover:bg-[var(--background-tertiary)]"
-            style={{ color: "var(--text-tertiary)", border: "1px solid var(--border)" }}
-            title="展开全部工具调用"
-          >
-            <ChevronsUpDown size={11} />
-            展开全部
-          </button>
-          <button
-            onClick={collapseAll}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors hover:bg-[var(--background-tertiary)]"
-            style={{ color: "var(--text-tertiary)", border: "1px solid var(--border)" }}
-            title="折叠全部工具调用"
-          >
-            <ChevronsDownUp size={11} />
-            折叠全部
-          </button>
-          <span className="text-[9px] font-mono ml-1" style={{ color: "var(--text-tertiary)" }}>
+          <span className="text-[9px] font-mono" style={{ color: "var(--text-tertiary)" }}>
             {toolCount} tools
           </span>
+          <span className="flex-1" />
+          <span className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+            {autoExpand ? "展开" : "折叠"}
+          </span>
+          <button
+            onClick={toggleAutoExpand}
+            className="relative w-8 h-[18px] rounded-full transition-colors shrink-0"
+            style={{ background: autoExpand ? "var(--accent)" : "var(--background-tertiary)", border: "1px solid var(--border)" }}
+            title={autoExpand ? "切换为折叠模式" : "切换为展开模式"}
+          >
+            <span className="absolute top-[2px] w-3 h-3 rounded-full transition-all"
+                  style={{
+                    left: autoExpand ? "calc(100% - 14px)" : "2px",
+                    background: autoExpand ? "#fff" : "var(--text-tertiary)",
+                  }} />
+          </button>
         </div>
       )}
       <div className="py-2 space-y-1">
