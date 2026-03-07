@@ -706,7 +706,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
         </div>
       </div>
       <p className="text-app-tertiary text-[10px]">
-        {tasks.length} 个任务
+        {tasks.length} {t('dashboard.projectCard.taskCount')}
         {project.repo_url && <span className="ml-2 font-mono opacity-60">{project.repo_url.split("/").pop()}</span>}
       </p>
       <div className="flex flex-wrap gap-1 pt-1">
