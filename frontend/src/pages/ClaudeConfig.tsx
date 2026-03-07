@@ -1604,7 +1604,7 @@ function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2"><span className="text-xs font-semibold text-app">{name}</span>{pub && <span className="text-[9px] text-app-tertiary font-mono">@{pub}</span>}</div>
                 </div>
-                <StatusTag label={enabled ? "已启用" : "已禁用"} color={enabled ? "#22c55e" : "#7878a8"} />
+                <StatusTag label={enabled ? t("common.enabled") : t("common.disabled")} color={enabled ? "#22c55e" : "#7878a8"} />
                 <button onClick={() => remove(pid)} disabled={saving === pid} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={13} /></button>
               </div>
               {inst && (
