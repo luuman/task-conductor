@@ -150,7 +150,7 @@ export function Sidebar({
           const active = activePage === "sessions";
           return (
             <button onClick={() => onSelectPage("sessions")}
-              title={collapsed ? "实时监听" : undefined}
+              title={collapsed ? t('sidebar.liveMonitor') : undefined}
               className={cn(
                 "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left",
                 collapsed ? "justify-center py-2 px-0" : "gap-2.5 px-3 py-2",
