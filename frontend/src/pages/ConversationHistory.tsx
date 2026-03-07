@@ -93,6 +93,7 @@ export default function ConversationHistory({ projects }: Props) {
   const handleSelect = (s: ClaudeSession) => {
     setIsNewChat(false);
     setSelectedSession(s);
+    setChatMessages([]);
     setActiveQuestionIdx(-1);
     const cached = transcriptCache.current.get(s.session_id);
     if (cached) {
