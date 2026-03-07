@@ -2,6 +2,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
+import { getDateLocale } from "../i18n";
 import type { ClaudeEvent } from "../lib/api";
 
 function toolSummary(toolName: string | null, input: Record<string, unknown> | null): string {
