@@ -242,7 +242,7 @@ export function Sidebar({
               className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/[0.03]"
               style={{ color: "var(--text-tertiary)" }}>
               <Plus size={12} strokeWidth={2} />
-              新建第一个项目
+              {t('sidebar.newFirstProject')}
             </button>
           )}
 
