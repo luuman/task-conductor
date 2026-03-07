@@ -109,27 +109,40 @@ export function PerfBottomBar({ connectionStatus, vertical, compact }: PerfBotto
     }
   };
 
-  return (
-    <div ref={barRef} className="relative shrink-0">
-      {/* Popover */}
-      {activeMetric && (
-        <div className="fixed z-50" style={{ bottom: BAR_H + 4, left: popoverLeft, width: 280 }}>
-          {renderCard(activeMetric)}
-        </div>
-      )}
+  // ── 侧边栏折叠模式：仅显示连接状态点 ──
+  if (compact) {
+    return (
+      <div className="flex flex-col items-center py-2 gap-1.5" style={{ borderTop: "1px solid var(--border)" }}>
+        {enabledMetrics.slice(0, 3).map((m) => (
+          <div key={m.id} className="text-[8px] font-mono leading-none text-center" style={{ color: "var(--text-tertiary)" }}>
+            <TileLines id={m.id} sys={sys} />
+          </div>
+        ))}
+        {connectionStatus !== undefined && (
+          <div className="w-2 h-2 rounded-full mt-0.5" style={{ background: connColor }} title={connText} />
+        )}
+      </div>
+    );
+  }
 
-      {/* Bottom bar */}
-      <div
-        className="flex items-center px-2 select-none"
-        style={{ height: BAR_H, background: "#080808", borderTop: "1px solid #1e1e1e" }}
-      >
-        {enabledMetrics.map((m) => {
-          const isActive = activeMetric === m.id;
-          return (
-            <div key={m.id} className="flex items-center">
-              <button
+  // ── 侧边栏展开模式：垂直排列 ──
+  if (vertical) {
+    return (
+      <div ref={barRef} className="relative select-none" style={{ borderTop: "1px solid var(--border)" }}>
+        {/* Popover */}
+        {activeMetric && (
+          <div className="fixed z-50" style={{ bottom: 48, left: popoverLeft, width: 280 }}>
+            {renderCard(activeMetric)}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-0.5 px-1.5 py-1.5">
+          {enabledMetrics.map((m) => {
+            const isActive = activeMetric === m.id;
+            return (
+              <button key={m.id}
                 onClick={e => handleTileClick(m.id, e.currentTarget)}
-                className="flex flex-col items-start gap-[3px] rounded px-2 py-1 transition-colors"
+                className="flex flex-col items-start gap-[2px] rounded px-1.5 py-1 transition-colors"
                 style={{
                   background: isActive ? "rgba(255,255,255,0.06)" : "transparent",
                   outline: "none",
@@ -137,22 +150,50 @@ export function PerfBottomBar({ connectionStatus, vertical, compact }: PerfBotto
               >
                 <TileLines id={m.id} sys={sys} />
               </button>
-            </div>
-          );
-        })}
-
-        <div className="flex-1" />
+            );
+          })}
+        </div>
 
         {/* Connection status */}
         {connectionStatus !== undefined && (
-          <>
-            <div className="flex flex-col items-end gap-[3px]">
-              <div className="flex items-center gap-1">
-                <Zap size={12} style={{ color: connColor }} />
-                <span className="text-[10px] font-mono" style={{ color: connColor }}>{connText}</span>
-              </div>
+          <div className="flex items-center gap-1.5 px-3 pb-2">
+            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: connColor }} />
+            <span className="text-[9px] font-mono" style={{ color: connColor }}>{connText}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── 默认水平底部栏（兜底，当前不再使用） ──
+  const BAR_H = 34;
+  return (
+    <div ref={barRef} className="relative shrink-0">
+      {activeMetric && (
+        <div className="fixed z-50" style={{ bottom: BAR_H + 4, left: popoverLeft, width: 280 }}>
+          {renderCard(activeMetric)}
+        </div>
+      )}
+      <div className="flex items-center px-2 select-none"
+        style={{ height: BAR_H, background: "#080808", borderTop: "1px solid #1e1e1e" }}>
+        {enabledMetrics.map((m) => {
+          const isActive = activeMetric === m.id;
+          return (
+            <div key={m.id} className="flex items-center">
+              <button onClick={e => handleTileClick(m.id, e.currentTarget)}
+                className="flex flex-col items-start gap-[3px] rounded px-2 py-1 transition-colors"
+                style={{ background: isActive ? "rgba(255,255,255,0.06)" : "transparent", outline: "none" }}>
+                <TileLines id={m.id} sys={sys} />
+              </button>
             </div>
-          </>
+          );
+        })}
+        <div className="flex-1" />
+        {connectionStatus !== undefined && (
+          <div className="flex items-center gap-1">
+            <Zap size={12} style={{ color: connColor }} />
+            <span className="text-[10px] font-mono" style={{ color: connColor }}>{connText}</span>
+          </div>
         )}
       </div>
     </div>
