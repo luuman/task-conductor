@@ -109,7 +109,7 @@ export function Sidebar({
               onClick={onToggle}
               className="w-6 h-6 flex items-center justify-center rounded-md transition-colors hover:bg-white/[0.06]"
               style={{ color: "var(--text-tertiary)" }}
-              title="折叠侧边栏"
+              title={t('sidebar.collapseSidebar')}
             >
               <ChevronLeft size={13} />
             </button>
