@@ -36,7 +36,7 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
       <div className="flex justify-between text-[10px] font-medium">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full" style={{ background: cUser }} />
-          <span className="text-gray-400">用户</span>
+          <span className="text-gray-400">{t('perf.cpu.user')}</span>
           <span className="text-white ml-1">{(sys?.cpu.user_pct ?? 0).toFixed(1)}%</span>
         </div>
         <div className="flex items-center gap-1">
