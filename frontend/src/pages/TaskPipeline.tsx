@@ -501,6 +501,7 @@ function LogPanel({ logs, isRunning, stage }: {
 
 // ── ReviewBanner ─────────────────────────────────────────────────
 function ReviewBanner({ taskId, onDone }: { taskId: number; onDone: () => void }) {
+  const { t } = useTranslation();
   const [showReject, setShowReject] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
