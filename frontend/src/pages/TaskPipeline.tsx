@@ -128,6 +128,8 @@ function CriticNotes({ notes }: { notes: string }) {
 function ArtifactCard({ artifact }: {
   artifact: StageArtifact;
 }) {
+  const { t } = useTranslation();
+  const STAGE_LABEL = useTPStageLabelMap();
   const [expanded, setExpanded] = useState(true);
 
   // Try to pretty-print JSON content
