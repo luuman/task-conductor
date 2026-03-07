@@ -19,9 +19,9 @@ function barKbps(k: number | null | undefined) {
 }
 interface PerfBottomBarProps {
   connectionStatus?: "connected" | "disconnected" | "connecting";
+  vertical?: boolean;
+  compact?: boolean;
 }
-
-const BAR_H = 34; // px — two-line bottom bar height
 
 /** Two-line content for each tile */
 function TileLines({ id, sys }: {
