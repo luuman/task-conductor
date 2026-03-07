@@ -962,7 +962,7 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
                     rows={Math.min(4, disp.split("\n").length + 1)}
                     className="w-full bg-app border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app outline-none resize-y focus:border-accent/60" />
                   {dirty && <button onClick={() => handleSave(key, disp)} disabled={saving === key}
-                    className="flex items-center gap-1 text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"><Save size={10} /> 保存</button>}
+                    className="flex items-center gap-1 text-[10px] bg-accent hover:bg-accent-hover text-white px-2.5 py-1 rounded-md"><Save size={10} /> {t("common.save")}</button>}
                 </>
               )}
             </div>
