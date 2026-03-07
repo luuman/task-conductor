@@ -431,7 +431,7 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
   return (
     <div className="rounded-lg overflow-hidden mt-2"
          style={{ border: `1px solid ${isError ? "rgba(244,63,94,0.3)" : "var(--border)"}` }}>
-      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto max-h-[400px]"
+      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto "
            style={{ color: isError ? "var(--danger)" : "var(--text-primary)", background: "var(--background)" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
           {displayed}
