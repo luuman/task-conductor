@@ -177,7 +177,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
           <form onSubmit={handleSshConnect} className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2 space-y-1.5">
-                <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>主机</label>
+                <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.ssh.host')}</label>
                 <Input value={sshHost} onChange={(e) => setSshHost(e.target.value)} placeholder="192.168.1.100" />
               </div>
               <div className="space-y-1.5">
