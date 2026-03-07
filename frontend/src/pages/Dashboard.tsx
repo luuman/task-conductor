@@ -198,7 +198,7 @@ function ClaudeMetricsPanel() {
               value={performance.avg_ttft_ms != null ? `${performance.avg_ttft_ms} ms` : "—"}
               accent={performance.avg_ttft_ms != null && performance.avg_ttft_ms < 1000 ? "text-green-400" : "text-app-secondary"}
             />
-            <StatRow label="平均时长"
+            <StatRow label={t('dashboard.claudeMetrics.avgDuration')}
               value={performance.avg_duration_s != null ? `${performance.avg_duration_s} s` : "—"}
             />
             <StatRow label="字符/秒"
