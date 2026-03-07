@@ -595,33 +595,41 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrol
 
   // IntersectionObserver 检测当前可见的用户问题
   useEffect(() => {
-    const container = containerRef.current;
+    const container = scrollRef?.current;
     if (!container || userQuestions.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // 找到最上方可见的用户消息
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const idx = Number((entry.target as HTMLElement).dataset.msgIndex);
-            const q = userQuestions.find(q => q.msgIndex === idx);
-            if (q) setCurrentQuestion(q.text.slice(0, 200));
+    // 需要等 DOM 渲染完毕
+    const timer = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              const idx = Number((entry.target as HTMLElement).dataset.msgIndex);
+              const q = userQuestions.find(q => q.msgIndex === idx);
+              if (q) setCurrentQuestion(q.text.slice(0, 200));
+            }
           }
-        }
-      },
-      { root: container, rootMargin: "-40px 0px 0px 0px", threshold: 0.1 }
-    );
+        },
+        { root: container, rootMargin: "-40px 0px 0px 0px", threshold: 0.1 }
+      );
 
-    // 只观察用户消息元素
-    const qIndices = new Set(userQuestions.map(q => q.msgIndex));
-    const elements = container.querySelectorAll("[data-msg-index]");
-    elements.forEach(el => {
-      const idx = Number((el as HTMLElement).dataset.msgIndex);
-      if (qIndices.has(idx)) observer.observe(el);
-    });
+      const qIndices = new Set(userQuestions.map(q => q.msgIndex));
+      const elements = container.querySelectorAll("[data-msg-index]");
+      elements.forEach(el => {
+        const idx = Number((el as HTMLElement).dataset.msgIndex);
+        if (qIndices.has(idx)) observer.observe(el);
+      });
 
-    return () => observer.disconnect();
-  }, [userQuestions]);
+      // store cleanup
+      (container as any).__convObserver = observer;
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      const obs = (container as any).__convObserver;
+      if (obs) { obs.disconnect(); delete (container as any).__convObserver; }
+    };
+  }, [userQuestions, scrollRef]);
 
   if (loading) {
     return (
