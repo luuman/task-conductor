@@ -245,7 +245,7 @@ export default function McpMarket() {
 
         {filtered.length === 0 && (
           <div className="text-center py-12 text-app-tertiary text-sm">
-            暂无匹配的 MCP 服务
+            {t('mcpMarket.empty')}
           </div>
         )}
     </div>
