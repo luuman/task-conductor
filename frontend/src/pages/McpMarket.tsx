@@ -217,9 +217,9 @@ export default function McpMarket() {
         {/* Filter tabs */}
         <div className="flex gap-1 flex-wrap">
           {[
-            { id: "all", label: "全部" },
-            { id: "installed", label: `已安装 (${installedCount})` },
-            ...categories.map(c => ({ id: c, label: CATEGORY_LABEL[c] || c })),
+            { id: "all", label: t('mcpMarket.filterTabs.all') },
+            { id: "installed", label: `${t('mcpMarket.filterTabs.installed')} (${installedCount})` },
+            ...categories.map(c => ({ id: c, label: CATEGORY_KEYS[c] ? t(CATEGORY_KEYS[c]) : c })),
           ].map(tab => (
             <button
               key={tab.id}
