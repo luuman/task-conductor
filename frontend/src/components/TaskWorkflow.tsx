@@ -311,6 +311,10 @@ interface StageDetailPanelProps {
 function StageDetailPanel({
   stage, task, artifacts, onClose, onRunStage, onRefresh
 }: StageDetailPanelProps) {
+  const { t } = useTranslation();
+  const STAGE_LABEL = getStageLabel(t);
+  const STAGE_DESC = getStageDesc(t);
+  const STATUS_LABEL = getStatusLabel(t);
   const currentIdx = STAGE_ORDER.indexOf(task.stage);
   const stageIdx   = STAGE_ORDER.indexOf(stage);
   const isCurrentStage = task.stage === stage;
