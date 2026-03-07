@@ -1818,10 +1818,10 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
     setRestoring(item.name);
     try {
       await api.claudeConfig.restoreDisabledItem(item.type, item.name);
-      setStatus({ text: `已恢复 "${item.name}"`, color: "#22c55e" });
+      setStatus({ text: `${t("claudeConfig.trash.restored")} "${item.name}"`, color: "#22c55e" });
       onRefresh();
     } catch (e) {
-      setStatus({ text: e instanceof Error ? e.message : "恢复失败", color: "#ef4444" });
+      setStatus({ text: e instanceof Error ? e.message : t("claudeConfig.trash.restoreFailed"), color: "#ef4444" });
     } finally {
       setRestoring(null);
       setTimeout(() => setStatus(null), 3000);
