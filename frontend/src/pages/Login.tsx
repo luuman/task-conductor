@@ -190,8 +190,8 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               <Input value={sshUser} onChange={(e) => setSshUser(e.target.value)} placeholder="user" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
-              <Input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="6 位数字" maxLength={6} />
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.local.pinCode')}</label>
+              <Input value={pin} onChange={(e) => setPin(e.target.value)} placeholder={t('login.local.pinPlaceholder')} maxLength={6} />
             </div>
             <div className="rounded-lg p-3 text-[10px] space-y-1.5"
                  style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)" }}>
