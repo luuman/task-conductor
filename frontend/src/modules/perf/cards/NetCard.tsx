@@ -1,4 +1,5 @@
 // src/modules/perf/cards/NetCard.tsx
+import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 import type { PerfData } from "../types";
 import { ICard, DualSparkline, fmtKbps, fmtSentRecv, CGR, CO } from "./shared";
