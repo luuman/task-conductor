@@ -65,6 +65,9 @@ def start_ws_client(loop: asyncio.AbstractEventLoop) -> None:
 
     def _run():
         try:
+            # 子线程必须创建独立的事件循环，否则会与主线程的 uvloop 冲突
+            new_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(new_loop)
             logger.info("[Feishu WS] 长连接启动中...")
             ws_client.start()
         except Exception:
