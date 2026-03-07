@@ -695,20 +695,20 @@ export default function ProjectsCanvas({
 
                 // Status summary
                 const statusLine = stats.running > 0
-                  ? `${stats.running} 运行中`
+                  ? t('projectsCanvas.bubbleStatus.running', { count: stats.running })
                   : stats.pendingReview > 0
-                  ? `${stats.pendingReview} 待审批`
+                  ? t('projectsCanvas.bubbleStatus.approval', { count: stats.pendingReview })
                   : stats.failed > 0
-                  ? `${stats.failed} 异常`
+                  ? t('projectsCanvas.bubbleStatus.error', { count: stats.failed })
                   : stats.total > 0
-                  ? `${stats.done}/${stats.total} 完成`
-                  : "空闲";
+                  ? t('projectsCanvas.bubbleStatus.done', { done: stats.done, total: stats.total })
+                  : t('projectsCanvas.bubbleStatus.idle');
 
                 // Action buttons
                 const actionBtns = [
-                  { label: "进入项目", angle: -60, action: () => onSelectProject(stats.project.id) },
-                  { label: "查看任务", angle: 0, action: () => onSelectProject(stats.project.id) },
-                  { label: "运行流水线", angle: 60, action: () => onSelectProject(stats.project.id) },
+                  { label: t('projectsCanvas.actions.enterProject'), angle: -60, action: () => onSelectProject(stats.project.id) },
+                  { label: t('projectsCanvas.actions.viewTask'), angle: 0, action: () => onSelectProject(stats.project.id) },
+                  { label: t('projectsCanvas.actions.runPipeline'), angle: 60, action: () => onSelectProject(stats.project.id) },
                 ];
 
                 return (
