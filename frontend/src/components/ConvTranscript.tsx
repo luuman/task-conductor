@@ -567,9 +567,10 @@ interface Props {
   loading: boolean;
   fileFound: boolean;
   onOpenFile?: (filePath: string) => void;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Props) {
+export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrollRef }: Props) {
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
