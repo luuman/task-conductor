@@ -155,9 +155,9 @@ function ClaudeMetricsPanel() {
 
         {/* ── 工具活动 ── */}
         <div className="p-4 border-r border-t lg:border-t-0 border-app space-y-2">
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">工具调用</p>
+          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">{t('dashboard.claudeMetrics.toolCalls')}</p>
           {tools.length === 0 ? (
-            <p className="text-[10px] text-app-tertiary/60 py-2">无调用记录</p>
+            <p className="text-[10px] text-app-tertiary/60 py-2">{t('dashboard.claudeMetrics.noCallRecords')}</p>
           ) : (
             <div className="space-y-1.5">
               {tools.slice(0, 6).map((t) => (
