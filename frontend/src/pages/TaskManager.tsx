@@ -403,15 +403,15 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
                     <>
                       <button onClick={() => acceptAnalysis(a)}
                         className="flex-1 py-1 rounded-md bg-green-600/80 hover:bg-green-600 text-white text-[10px] font-medium transition-colors">
-                        ✓ 接受
+                        ✓ {t('taskManager.aiAnalysis.accept')}
                       </button>
                       <button onClick={() => startEdit(a)}
                         className="px-2.5 py-1 rounded-md border border-app text-app-secondary text-[10px] hover:border-accent hover:text-accent transition-colors">
-                        编辑
+                        {t('taskManager.aiAnalysis.edit')}
                       </button>
                       <button onClick={() => skipAnalysis(a.id)}
                         className="px-2.5 py-1 rounded-md border border-app text-app-tertiary text-[10px] hover:text-red-400 transition-colors">
-                        跳过
+                        {t('taskManager.aiAnalysis.skip')}
                       </button>
                     </>
                   )}
