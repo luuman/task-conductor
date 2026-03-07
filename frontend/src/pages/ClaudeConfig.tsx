@@ -1718,7 +1718,7 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
                 {details && (
                   <div className="flex items-center gap-3 pt-0.5">
                     <span className="text-[9px] text-app-tertiary flex items-center gap-1">
-                      <MessageSquare size={9} /> {details.session_count} 会话
+                      <MessageSquare size={9} /> {details.session_count} {t("claudeConfig.monitoring.sessions")}
                     </span>
                     {details.last_active && (
                       <span className="text-[9px] text-app-tertiary flex items-center gap-1">
