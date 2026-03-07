@@ -303,7 +303,7 @@ function BashOutput({ command, result, isError }: { command: string; result: str
         <span className="text-[11px] font-mono font-bold" style={{ color: "var(--accent)" }}>$</span>
         <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>{command}</span>
       </div>
-      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[360px] overflow-y-auto leading-[1.6]"
+      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto overflow-y-auto leading-[1.6]"
            style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
         {displayed}
       </pre>
