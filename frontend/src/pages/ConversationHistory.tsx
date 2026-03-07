@@ -112,7 +112,7 @@ export default function ConversationHistory({ projects }: Props) {
       {/* ── 中栏：对话内容 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div ref={transcriptRef} className="flex-1 overflow-y-auto">
-          <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} />
+          <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} />
         </div>
       </div>
 
