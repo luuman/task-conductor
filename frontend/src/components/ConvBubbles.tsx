@@ -36,17 +36,17 @@ function eventsToBubbles(events: ClaudeEvent[], t: (key: string) => string): Bub
 
     if (e.event_type === "SessionStart") {
       bubbles.push({ kind: "banner", icon: "▶", text: t('convBubbles.sessionStart'),
-        sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-purple-400" });
+        sub: new Date(e.created_at).toLocaleString(getDateLocale()), color: "text-purple-400" });
       i++; continue;
     }
     if (e.event_type === "SessionEnd") {
       bubbles.push({ kind: "banner", icon: "◀", text: t('convBubbles.sessionEnd'),
-        sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-purple-300" });
+        sub: new Date(e.created_at).toLocaleString(getDateLocale()), color: "text-purple-300" });
       i++; continue;
     }
     if (e.event_type === "Stop") {
       bubbles.push({ kind: "banner", icon: "■", text: t('convBubbles.turnEnd'),
-        sub: new Date(e.created_at).toLocaleString("zh-CN"), color: "text-gray-400" });
+        sub: new Date(e.created_at).toLocaleString(getDateLocale()), color: "text-gray-400" });
       i++; continue;
     }
     if (e.event_type === "Notification") {
