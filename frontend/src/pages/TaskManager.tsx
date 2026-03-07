@@ -145,7 +145,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
     try {
       const task = await api.tasks.create(selectedProjectId, {
         title: item.title,
-        description: `${analysis.understanding}\n\n实现方向：${analysis.approach}`,
+        description: `${analysis.understanding}\n\n${t('taskManager.aiAnalysis.implementation')}：${analysis.approach}`,
       });
       const proj = projects.find((p) => p.id === selectedProjectId);
       setQueue((prev) => [...prev, {
