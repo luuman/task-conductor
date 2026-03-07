@@ -404,7 +404,17 @@
       "Notification": "通知",
       "SubagentStart": "子代理开始",
       "SubagentStop": "子代理停止",
-      "PostToolUseFailure": "工具调用失败"
+      "PostToolUseFailure": "工具调用失败",
+      "PreToolUseDesc": "Claude 调用工具之前触发",
+      "PostToolUseDesc": "工具调用成功完成后触发",
+      "PostToolUseFailureDesc": "工具调用失败后触发",
+      "StopDesc": "Claude 停止响应时触发",
+      "SubagentStartDesc": "子代理开始运行时触发",
+      "SubagentStopDesc": "子代理结束运行时触发",
+      "SessionStartDesc": "新会话启动时触发",
+      "SessionEndDesc": "会话结束时触发",
+      "UserPromptSubmitDesc": "用户发送消息时触发",
+      "NotificationDesc": "Claude 发出通知时触发"
     },
     "commonSettings": {
       "defaultModel": "默认模型",
