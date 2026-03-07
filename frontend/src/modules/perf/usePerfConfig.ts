@@ -33,7 +33,7 @@ function persist(c: PerfConfig) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); } catch { /* ignore */ }
 }
 
-// ── Module-level shared store（所有 usePerfConfig 共享同一份状态）──────────────
+// ── Module-level shared store (all usePerfConfig instances share the same state) ──
 type Listener = (c: PerfConfig) => void;
 const _listeners = new Set<Listener>();
 let _current: PerfConfig = load();
