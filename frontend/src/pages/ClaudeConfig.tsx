@@ -1026,11 +1026,11 @@ function SecSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (n: 
                   <p className="text-xs font-semibold text-app">{s.name}</p>
                   <ToggleSwitch enabled={s.enabled} loading={toggling === s.name} onClick={e => toggle(s.name, !s.enabled, e)} />
                 </div>
-                <p className="text-[10px] text-app-tertiary mt-0.5 line-clamp-2">{s.description || "无描述"}</p>
+                <p className="text-[10px] text-app-tertiary mt-0.5 line-clamp-2">{s.description || t("claudeConfig.skills.noDescription")}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  {!s.enabled && <StatusTag label="已禁用" color="#ef4444" />}
-                  {s.has_auxiliary && <StatusTag label="辅助文件" color="#3b82f6" />}
-                  {Object.keys(s.metadata).length > 0 && <StatusTag label="元数据" color="#a855f7" />}
+                  {!s.enabled && <StatusTag label={t("claudeConfig.skills.disabled")} color="#ef4444" />}
+                  {s.has_auxiliary && <StatusTag label={t("claudeConfig.skills.auxiliaryFiles")} color="#3b82f6" />}
+                  {Object.keys(s.metadata).length > 0 && <StatusTag label={t("claudeConfig.skills.metadata")} color="#a855f7" />}
                 </div>
               </button>
             ))}
