@@ -279,7 +279,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                   : "bg-red-600 hover:bg-red-500 text-white"
               )}
             >
-              {shuttingDown ? "正在关闭..." : "关闭服务"}
+              {shuttingDown ? t('settings.shutdown.shuttingDown') : t('settings.shutdown.title')}
             </button>
           </div>
         </section>
