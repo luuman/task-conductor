@@ -403,7 +403,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
                 className="text-[11px] px-2.5 py-1 rounded font-mono border border-transparent transition-colors hover:bg-white/[0.04]"
                 style={{ color: "var(--text-secondary)" }}
               >
-                清空
+                {t('sessions.controls.clear')}
               </button>
             )}
           </div>
