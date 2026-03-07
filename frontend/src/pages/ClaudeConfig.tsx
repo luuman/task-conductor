@@ -1132,15 +1132,15 @@ function SecAgents({ agents, onToggle, onCreate, onDelete }: {
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <StatusTag label={a.scope} color="#7878a8" />
-                  {!a.enabled && <StatusTag label="已禁用" color="#ef4444" />}
+                  {!a.enabled && <StatusTag label={t("common.disabled")} color="#ef4444" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
             {detail ? <DetailPanel title={detail.name} path={detail.path} metadata={detail.metadata}
-              content={detail.content} contentLabel="Agent 内容" />
-              : <EmptyDetail text="选择左侧代理查看详情" />}
+              content={detail.content} contentLabel={t("claudeConfig.agents.agentContent")} />
+              : <EmptyDetail text={t("claudeConfig.agents.selectHint")} />}
           </div>
         </div>
       )}
