@@ -205,7 +205,7 @@ export function Sidebar({
                 <button onClick={onScanProjects}
                   className="w-4 h-4 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
                   style={{ color: "var(--text-tertiary)" }}
-                  title="扫描本地项目"
+                  title={t('sidebar.scanLocalProjects')}
                 >
                   <FolderSearch size={11} strokeWidth={2} />
                 </button>
