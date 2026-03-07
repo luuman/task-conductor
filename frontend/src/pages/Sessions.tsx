@@ -45,7 +45,7 @@ let rowCounter = 0;
 
 function hookEventToRow(event: ClaudeHookEvent): EventRow {
   const { type, tool, tool_input, session_id, raw } = event.data;
-  const ts = new Date(event.ts + "Z").toLocaleTimeString("zh-CN", { hour12: false });
+  const ts = new Date(event.ts + "Z").toLocaleTimeString(getDateLocale(), { hour12: false });
   let icon = "·", iconColor = "text-gray-500";
   let displayTool = tool || type;
   let detail = getToolDetail(tool, tool_input);
@@ -73,7 +73,7 @@ function hookEventToRow(event: ClaudeHookEvent): EventRow {
 }
 
 function dbEventToRow(e: ClaudeEvent): EventRow {
-  const ts = new Date(e.created_at).toLocaleTimeString("zh-CN", { hour12: false });
+  const ts = new Date(e.created_at).toLocaleTimeString(getDateLocale(), { hour12: false });
   let icon = "·", iconColor = "text-gray-500";
   let displayTool = e.tool_name || e.event_type;
   let detail = getToolDetail(e.tool_name, e.tool_input ?? undefined);
