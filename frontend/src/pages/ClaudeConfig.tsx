@@ -918,6 +918,7 @@ function CommonSettingsGrid({ config, onUpdate, searchQuery }: { config: ClaudeC
 }
 
 function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+  const { t } = useTranslation();
   const entries = Object.entries(config.other).filter(([k]) => !COMMON_SETTING_KEYS.has(k));
   const [saving, setSaving] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
