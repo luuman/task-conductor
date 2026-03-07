@@ -240,6 +240,14 @@ async def handle_chat_ws(ws: WebSocket):
                         session_id=msg.get("session_id"),
                         model=msg.get("model"),
                         cwd=msg.get("cwd"),
+                        system_prompt=msg.get("system_prompt"),
+                        append_system_prompt=msg.get("append_system_prompt"),
+                        effort=msg.get("effort"),
+                        allowed_tools=msg.get("allowed_tools"),
+                        disallowed_tools=msg.get("disallowed_tools"),
+                        permission_mode=msg.get("permission_mode"),
+                        max_budget=msg.get("max_budget"),
+                        continue_session=msg.get("continue", False),
                     )
                 )
 
