@@ -499,7 +499,7 @@ function MetricsPanel() {
              }}>
           <div className="absolute top-0 left-0 right-0"
                style={{ height: 1, background: "linear-gradient(90deg,var(--accent) 0%,transparent 55%)" }} />
-          <h3 className="text-[13px] font-semibold mb-4" style={{ color: "var(--text-primary)" }}>高可用性</h3>
+          <h3 className="text-[13px] font-semibold mb-4" style={{ color: "var(--text-primary)" }}>{t('dashboard.gauge.highAvailability')}</h3>
           <GaugeChart pct={m?.gauge.availability_pct ?? 0} />
         </div>
 
