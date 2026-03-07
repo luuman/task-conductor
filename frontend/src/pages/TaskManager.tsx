@@ -392,11 +392,11 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
                     <>
                       <button onClick={() => saveEdit(a.id)}
                         className="flex-1 py-1 rounded-md bg-accent hover:bg-accent-hover text-white text-[10px] font-medium transition-colors">
-                        保存
+                        {t('common.save')}
                       </button>
                       <button onClick={() => setEditingId(null)}
                         className="px-2.5 py-1 rounded-md border border-app text-app-tertiary text-[10px] hover:text-app transition-colors">
-                        取消
+                        {t('common.cancel')}
                       </button>
                     </>
                   ) : (
