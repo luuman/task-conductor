@@ -52,6 +52,7 @@ function ConfidenceMeter({ value }: { value: number }) {
 
 // ── AssumptionsList ──────────────────────────────────────────────
 function AssumptionsList({ raw }: { raw: string }) {
+  const { t } = useTranslation();
   const items: string[] = (() => { try { return JSON.parse(raw); } catch { return [raw]; } })();
   const [wrong, setWrong] = useState<Set<number>>(new Set());
   if (!items.length) return null;
