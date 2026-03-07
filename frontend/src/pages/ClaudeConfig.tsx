@@ -596,7 +596,7 @@ function PresetGallery({ presets, onInstall, itemLabel }: {
               <p className="text-[9px] text-app-tertiary mt-0.5 line-clamp-2">{p.desc}</p>
             </div>
             {p.installed ? (
-              <span className="text-[9px] text-green-400 shrink-0 mt-1 flex items-center gap-0.5"><Check size={10} />已装</span>
+              <span className="text-[9px] text-green-400 shrink-0 mt-1 flex items-center gap-0.5"><Check size={10} />{t("claudeConfig.shared.installedShort")}</span>
             ) : (
               <button onClick={() => install(p)} disabled={installing === p.name}
                 className="shrink-0 mt-0.5 text-[9px] px-2 py-1 rounded bg-accent hover:bg-accent-hover text-white disabled:opacity-50">
