@@ -119,7 +119,7 @@ function ServerCard({ server, onAction }: {
           <input
             value={tokenInput}
             onChange={e => setTokenInput(e.target.value)}
-            placeholder={server.auth_note || "输入 Token"}
+            placeholder={server.auth_note || t('mcpMarket.actions.inputToken')}
             className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white/80 outline-none focus:border-accent/60"
           />
         </div>
