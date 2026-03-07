@@ -289,9 +289,9 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
       {/* ══ 列2：AI 分析结果 ══ */}
       <div className="w-[340px] shrink-0 border-r border-app flex flex-col">
         <ColHeader
-          title="AI 分析"
+          title={t('taskManager.columns.aiAnalysis')}
           count={pendingAnalyses.length}
-          badge={phase === "loading" ? "分析中..." : phase === "done" ? `${pendingAnalyses.length} 待确认` : undefined}
+          badge={phase === "loading" ? t('taskManager.aiAnalysis.analyzing') : phase === "done" ? `${pendingAnalyses.length} ${t('taskManager.aiAnalysis.pending')}` : undefined}
           badgeColor={phase === "loading" ? "yellow" : "blue"}
         />
 
