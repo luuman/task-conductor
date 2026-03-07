@@ -96,7 +96,7 @@ export function useClaudeMonitor(
       };
 
       ws.onerror = () => {
-        // 错误后 onclose 会跟着触发，在 onclose 里重连
+        // onclose fires after error; reconnect is handled in onclose
       };
 
       ws.onclose = () => {
