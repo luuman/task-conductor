@@ -360,7 +360,7 @@ export default function ClaudeConfigPage() {
       {/* ── 顶栏 ── */}
       <div className="shrink-0 px-5 pt-3 pb-2 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex-1 min-w-0">
-          <h1 className="text-[14px] font-bold text-app">Claude Code 配置中心</h1>
+          <h1 className="text-[14px] font-bold text-app">Claude Code</h1>
           <p className="text-[10px] text-app-tertiary font-mono truncate">
             {overview?.home_path || "~/.claude"} · {overview?.cli_version || "..."}
           </p>
