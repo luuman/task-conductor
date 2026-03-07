@@ -482,6 +482,10 @@ export const api = {
       request<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`),
     deleteKnowledge: (projectId: number, knowledgeId: number) =>
       request<{ ok: boolean }>(`/api/projects/${projectId}/knowledge/${knowledgeId}`, { method: "DELETE" }),
+    docs: (projectId: number) =>
+      request<{ has_docs: boolean; items: FileItem[] }>(`/api/projects/${projectId}/docs`),
+    docContent: (projectId: number, path: string) =>
+      request<FileContentResponse>(`/api/projects/${projectId}/docs/content?path=${encodeURIComponent(path)}`),
   },
   tasks: {
     get: (id: number) => request<Task>(`/api/tasks/${id}`),
