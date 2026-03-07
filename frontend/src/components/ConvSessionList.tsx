@@ -108,7 +108,7 @@ export function ConvSessionList({ sessions, loading, selectedId, onSelect }: Pro
                   </span>
                   <span className="text-[10px] shrink-0"
                         style={{ color: "var(--text-tertiary)" }}>
-                    {s.event_count} 条
+                    {s.event_count} {t('convSession.eventCount')}
                   </span>
                 </div>
 
