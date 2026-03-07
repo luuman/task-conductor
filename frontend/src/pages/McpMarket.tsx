@@ -143,7 +143,7 @@ function ServerCard({ server, onAction }: {
         {server.installed && (
           <span className="text-[10px] text-green-400 flex items-center gap-1 font-medium">
             <Check size={10} />
-            已安装
+            {t('mcpMarket.actions.installed')}
           </span>
         )}
 
