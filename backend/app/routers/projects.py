@@ -9,6 +9,26 @@ from .settings_router import _load as _load_settings
 
 router = APIRouter(prefix="/api/projects", tags=["项目"])
 
+
+async def _create_feishu_group(project_id: int, project_name: str):
+    """异步创建飞书群聊并绑定到项目"""
+    from ..feishu.client import feishu_client
+    from ..feishu.cards import build_welcome_card
+    try:
+        data = await feishu_client.create_group(f"TC: {project_name}")
+        chat_id = data.get("chat_id", "")
+        if not chat_id:
+            return
+        with Session(engine) as db:
+            p = db.get(Project, project_id)
+            if p:
+                p.feishu_chat_id = chat_id
+                db.commit()
+        await feishu_client.send_card(chat_id, build_welcome_card(project_name))
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"[Feishu] 建群失败: {e}")
+
 def get_db():
     with Session(engine) as session:
         yield session
