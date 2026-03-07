@@ -538,7 +538,59 @@ async def receive_claude_hook(payload: dict):
         },
     )
 
+    # ── 飞书会话同步：Stop 事件时把最终回答发到项目群 ──────────────
+    if event_type == "Stop" and event.get("cwd"):
+        asyncio.create_task(_sync_stop_to_feishu(event))
+
     return {"ok": True}
+
+
+async def _sync_stop_to_feishu(event: dict) -> None:
+    """Stop 事件触发时，匹配项目并发送摘要到飞书群。"""
+    from .models import Project
+    from .feishu.client import feishu_client
+    from .feishu.cards import build_result_card
+
+    if not feishu_client.enabled:
+        return
+
+    cwd = event.get("cwd", "")
+    if not cwd:
+        return
+
+    # 按 cwd 前缀匹配项目
+    with DBSession(engine) as db:
+        projects = db.query(Project).filter(
+            Project.feishu_sync == True,  # noqa: E712
+            Project.feishu_chat_id != None,  # noqa: E711
+            Project.feishu_chat_id != "",
+        ).all()
+        match = None
+        for p in projects:
+            if p.repo_url and cwd.startswith(p.repo_url):
+                match = (p.feishu_chat_id, p.name)
+                break
+
+    if not match:
+        return
+
+    chat_id, project_name = match
+
+    # 提取 Stop 事件中的消息摘要
+    extra = event.get("extra") or {}
+    message = extra.get("message", "")
+    if not message:
+        return
+
+    try:
+        card = build_result_card(
+            message,
+            cwd=cwd,
+        )
+        await feishu_client.send_card(chat_id, card)
+    except Exception:
+        import logging
+        logging.getLogger(__name__).warning("[Feishu Sync] 发送会话摘要失败", exc_info=True)
 
 
 # ── tmux 管理（保留原有接口）────────────────────────────────────
