@@ -751,6 +751,7 @@ function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, s
   claudeMd: string; onClaudeMdChange: (s: string) => void;
   searchQuery: string;
 }) {
+  const { t } = useTranslation();
   const [mdSaving, setMdSaving] = useState(false);
   const [mdSaved, setMdSaved] = useState(false);
   const handleSaveMd = async () => {
