@@ -393,7 +393,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
           {/* Live Logs */}
           {logs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-app mb-2">实时日志</h3>
+              <h3 className="text-xs font-semibold text-app mb-2">{t('taskPipeline.sections.realTimeLogs')}</h3>
               <div className="bg-app-secondary border border-app rounded-lg p-3 font-mono text-[11px] text-app-secondary max-h-60 overflow-y-auto space-y-0.5">
                 {logs.map((l, i) => <div key={i}>{l}</div>)}
                 <div ref={logsEndRef} />
