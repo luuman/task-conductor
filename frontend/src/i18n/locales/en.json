@@ -1251,7 +1251,7 @@
         "desc": "Semantic search, regex matching, and batch replace",
         "fields": {
           "search": { "label": "Semantic Search", "desc": "--search natural language search" },
-          "query": { "label": "Code Query", "desc": "--query code structure query" },
+          "query": { "label": "Code Query", "desc": "--query code structure query", "placeholder": "functions>10lines" },
           "grep": { "label": "Regex Match", "desc": "--grep regex search" },
           "replace": { "label": "Replace", "desc": "--replace batch replace old:new" },
           "similar": { "label": "Similar Code", "desc": "--similar find similar code" }
