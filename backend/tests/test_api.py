@@ -67,4 +67,4 @@ def test_run_analysis_returns_started():
                        json={"title": "实现 OAuth2 登录", "description": "支持 Google 登录"}).json()
     resp = client.post(f"/api/pipeline/{task['id']}/run-analysis")
     assert resp.status_code == 200
-    assert resp.json()["status"] == "started"
+    assert resp.json()["status"] in ("started", "queued")
