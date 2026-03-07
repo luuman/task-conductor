@@ -366,7 +366,7 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
         </span>
       </div>
       {highlighted ? (
-        <pre className="px-3 py-2 text-[11px] font-mono overflow-x-auto max-h-[440px] overflow-y-auto leading-[1.7]"
+        <pre className="hljs px-3 py-2 text-[11px] font-mono overflow-x-auto max-h-[440px] overflow-y-auto leading-[1.7]"
              style={{ margin: 0, background: "var(--background)" }}
              dangerouslySetInnerHTML={{ __html: highlighted }} />
       ) : (
