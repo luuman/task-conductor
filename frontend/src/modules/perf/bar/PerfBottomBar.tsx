@@ -10,7 +10,7 @@ import { MemCard } from "../cards/MemCard";
 import { DiskCard } from "../cards/DiskCard";
 import { NetCard } from "../cards/NetCard";
 import { SensorsCard } from "../cards/SensorsCard";
-// ── 底栏专用格式化（无小数）────────────────────────────────────────────────
+// ── Bottom bar formatting (no decimals) ────────────────────────────────────
 function barKbps(k: number | null | undefined) {
   if (k == null) return "—";
   if (k >= 1024 * 1024) return `${Math.round(k / 1024 / 1024)} GB/s`;
