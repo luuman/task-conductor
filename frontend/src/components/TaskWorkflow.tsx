@@ -361,7 +361,7 @@ function StageDetailPanel({
             <span className="text-[10px] bg-green-500/15 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">{t('taskWorkflow.stageDetailPanel.done')}</span>
           )}
           {isPending && (
-            <span className="text-[10px] bg-white/5 text-white/40 border border-white/10 px-2 py-0.5 rounded-full">等待执行</span>
+            <span className="text-[10px] bg-white/5 text-white/40 border border-white/10 px-2 py-0.5 rounded-full">{t('taskWorkflow.stageDetailPanel.waitingExecution')}</span>
           )}
           {isCurrentStage && (
             <span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-medium flex items-center gap-1", statusColor,
