@@ -55,14 +55,13 @@ async def handle_chat(prompt: str, chat_id: str, cwd: str) -> None:
 
     try:
         pool = ClaudePool()
-        contents: list[str] = []
+        result_text = ""
         async for event in pool.run(task_id, prompt, cwd, log_file):
-            text = extract_text(event)
-            if text:
-                contents.append(text)
+            # 只取 result 事件（Claude 最终完整回答）
+            if event.get("type") == "result":
+                result_text = event.get("result", "")
 
-        # 4. 合并所有输出
-        result = "\n".join(contents) if contents else "(无输出)"
+        result = result_text or "(无输出)"
 
         # 5. 更新卡片为结果
         cost_ms = int(time.time() * 1000) - start_ms
