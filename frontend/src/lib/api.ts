@@ -650,6 +650,9 @@ export const api = {
     projectDetails: (dirName: string) =>
       request<ProjectDetails>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/details`),
   },
+  chat: {
+    models: () => request<ChatModel[]>("/api/chat/models"),
+  },
   tcConfig: {
     get: () => request<Record<string, unknown>>("/api/tc-config"),
     update: (config: Record<string, unknown>) =>
