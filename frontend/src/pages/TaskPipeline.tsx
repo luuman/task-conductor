@@ -328,9 +328,9 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
           {/* Action Banner */}
           {canStart && (
             <div className="bg-accent/10 border border-accent/30 rounded-lg p-3 flex items-center justify-between">
-              <p className="text-xs text-accent">任务处于 <b>{STAGE_LABEL[task.stage]}</b> 阶段，等待执行</p>
+              <p className="text-xs text-accent"><b>{STAGE_LABEL[task.stage]}</b> — {t('taskPipeline.actionBanner.waitingExecution')}</p>
               <Button size="sm" onClick={() => handleRunStage(task.stage)}>
-                启动 {STAGE_LABEL[task.stage]}
+                {t('taskPipeline.actionBanner.start')} {STAGE_LABEL[task.stage]}
               </Button>
             </div>
           )}
