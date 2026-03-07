@@ -113,11 +113,11 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
       {sys && (
         <div className="flex justify-between items-center text-[11px] font-medium uppercase tracking-wider"
              style={{ borderTop: "1px solid #1a1a1a", paddingTop: 8, color: "#636366" }}>
-          <span style={{ color: cSys }}>电脑开启时间</span>
+          <span style={{ color: cSys }}>{t('perf.cpu.uptime')}</span>
           <span className="text-white">
             {sys.uptime_hours >= 24
-              ? `${Math.floor(sys.uptime_hours / 24)} 天 ${(sys.uptime_hours % 24).toFixed(0)} 小时`
-              : `${sys.uptime_hours.toFixed(1)} 小时`}
+              ? `${Math.floor(sys.uptime_hours / 24)} ${t('perf.cpu.days')} ${(sys.uptime_hours % 24).toFixed(0)} ${t('perf.cpu.hours')}`
+              : `${sys.uptime_hours.toFixed(1)} ${t('perf.cpu.hours')}`}
           </span>
         </div>
       )}
