@@ -181,7 +181,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
                 <Input value={sshHost} onChange={(e) => setSshHost(e.target.value)} placeholder="192.168.1.100" />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>端口</label>
+                <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.ssh.port')}</label>
                 <Input value={sshPort} onChange={(e) => setSshPort(e.target.value)} placeholder="22" />
               </div>
             </div>
