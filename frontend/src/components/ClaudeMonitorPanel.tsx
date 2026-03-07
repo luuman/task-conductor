@@ -3,6 +3,7 @@
 // 仅在面板打开时建立 WebSocket，不持久化到后端
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useClaudeMonitor, type ClaudeHookEvent } from "../hooks/useClaudeMonitor";
 import { cn } from "../lib/utils";
 
