@@ -87,7 +87,7 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
                 : "—"}
             </span>
           </div>
-          {/* 切换/秒 */}
+          {/* Context switches/sec */}
           <div className="flex justify-between items-baseline text-[10px] font-medium">
             <span className="text-gray-400">{t('perf.cpu.ctxSwitch')}</span>
             <span className="font-mono tabular-nums" style={{ color: cSys }}>
