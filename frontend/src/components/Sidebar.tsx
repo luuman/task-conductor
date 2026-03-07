@@ -2,6 +2,7 @@
 import { LayoutDashboard, CheckSquare, Settings, Radio, MessageSquare, Plus, ChevronLeft, ChevronRight, Layers, Cpu, FolderSearch, FlaskConical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
+import { PerfBottomBar } from "../modules/perf/bar/PerfBottomBar";
 import type { Project } from "../lib/api";
 
 interface SidebarProps {
@@ -14,6 +15,7 @@ interface SidebarProps {
   onScanProjects?: () => void;
   collapsed: boolean;
   onToggle: () => void;
+  connectionStatus?: "connected" | "disconnected" | "connecting";
 }
 
 const NAV_ITEMS = [
