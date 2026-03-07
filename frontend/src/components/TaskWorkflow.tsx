@@ -443,7 +443,7 @@ function StageDetailPanel({
                 disabled={acting}
                 className="w-full py-1.5 text-xs border border-accent/40 text-accent hover:bg-accent/10 rounded-lg font-medium disabled:opacity-40"
               >
-                重新执行
+                {t('taskWorkflow.stageDetailPanel.reExecute')}
               </button>
             )}
           </div>
