@@ -1012,9 +1012,9 @@ function SecSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (n: 
   };
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Sparkles} color="#eab308" label="Skills 技能库" desc="~/.claude/skills/"
-        right={<CountBadges items={[{ label: "总计", count: skills.length }, { label: "启用", count: skills.filter(s => s.enabled).length, color: "#22c55e" }]} />} />
-      {!skills.length ? <Empty text="暂无自定义 Skill" /> : (
+      <SectionHeader icon={Sparkles} color="#eab308" label={t("claudeConfig.skills.title")} desc="~/.claude/skills/"
+        right={<CountBadges items={[{ label: t("common.total"), count: skills.length }, { label: t("common.enabled"), count: skills.filter(s => s.enabled).length, color: "#22c55e" }]} />} />
+      {!skills.length ? <Empty text={t("claudeConfig.skills.noSkills")} /> : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-1 space-y-2">
             {skills.map(s => (
