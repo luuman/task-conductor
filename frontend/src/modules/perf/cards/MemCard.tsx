@@ -9,6 +9,7 @@ interface MemCardProps extends PerfData {
 }
 
 export function MemCard({ sys, procs, colors = {}, showTitle }: MemCardProps) {
+  const { t } = useTranslation();
   const cUsed   = colors.used   ?? "#FF2D55";
   const cCached = colors.cached ?? "#007AFF";
 
