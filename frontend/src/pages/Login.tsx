@@ -125,7 +125,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               saveConfig({ type: "tunnel", tunnelUrl: "", token });
               onLogin();
             } catch {
-              setError("PIN 错误或后端未启动（请先运行 ./start.sh）");
+              setError(t('login.local.pinError'));
               setLoading(false);
             }
           }} className="space-y-4">
