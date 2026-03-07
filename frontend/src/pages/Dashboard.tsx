@@ -1,5 +1,6 @@
 // frontend/src/pages/Dashboard.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Star, Activity, Zap, Shield, FolderSearch, Trash2, FlaskConical } from "lucide-react";
 import { api, type Project, type Task, type Metrics } from "../lib/api";
 import { Badge } from "../components/ui/badge";
