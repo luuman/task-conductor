@@ -655,7 +655,7 @@ export default function ProjectsCanvas({
           onMouseEnter={e => (e.currentTarget.style.background = "var(--border)")}
           onMouseLeave={e => (e.currentTarget.style.background = "var(--background-tertiary)")}
           >
-            复位
+            {t('projectsCanvas.header.reset')}
           </button>
         </div>
 
