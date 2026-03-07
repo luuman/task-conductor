@@ -11,6 +11,7 @@ interface Props {
 }
 
 export default function ConversationHistory({ projects }: Props) {
+  const { t } = useTranslation();
   const [sessions, setSessions] = useState<ClaudeSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
 
