@@ -862,8 +862,9 @@ function StatusBar({ config, lastSaved, saving, dirty }: {
   saving: boolean;
   dirty: boolean;
 }) {
+  const { t } = useTranslation();
   const apiOk = !!(config?.api?.apiKey);
-  const modelName = config?.model?.model || "未设置";
+  const modelName = config?.model?.model || t("globalConfig.statusBar.notSet");
   const monitorOn = config?.monitoring?.enabled !== false;
 
   return (
@@ -871,31 +872,31 @@ function StatusBar({ config, lastSaved, saving, dirty }: {
       {/* API 状态 */}
       <div className="flex items-center gap-1.5">
         <div className={cn("w-2 h-2 rounded-full", apiOk ? "bg-green-400" : "bg-yellow-400")} />
-        <span className="text-app-tertiary">API</span>
+        <span className="text-app-tertiary">{t("globalConfig.statusBar.api")}</span>
         <span className={cn("font-medium", apiOk ? "text-green-400" : "text-yellow-400")}>
-          {apiOk ? "已配置" : "未配置"}
+          {apiOk ? t("globalConfig.statusBar.configured") : t("globalConfig.statusBar.notConfigured")}
         </span>
       </div>
       {/* 模型 */}
       <div className="flex items-center gap-1.5">
         <Cpu size={10} className="text-app-tertiary" />
-        <span className="text-app-tertiary">模型</span>
+        <span className="text-app-tertiary">{t("globalConfig.statusBar.model")}</span>
         <span className="font-mono text-app-secondary">{modelName.replace("claude-", "").slice(0, 15)}</span>
       </div>
       {/* 监控 */}
       <div className="flex items-center gap-1.5">
         <Activity size={10} className="text-app-tertiary" />
         <span className={cn("font-medium", monitorOn ? "text-green-400" : "text-app-tertiary")}>
-          {monitorOn ? "监控中" : "监控关"}
+          {monitorOn ? t("globalConfig.statusBar.monitoringOn") : t("globalConfig.statusBar.monitoringOff")}
         </span>
       </div>
       {/* 保存状态 */}
       <div className="ml-auto flex items-center gap-1.5">
-        {saving && <span className="text-accent animate-pulse">保存中...</span>}
-        {dirty && !saving && <span className="text-yellow-400">有未保存的更改</span>}
+        {saving && <span className="text-accent animate-pulse">{t("globalConfig.statusBar.saving")}</span>}
+        {dirty && !saving && <span className="text-yellow-400">{t("globalConfig.statusBar.unsavedChanges")}</span>}
         {!dirty && !saving && lastSaved && (
           <span className="text-app-tertiary">
-            最后保存: {lastSaved}
+            {t("globalConfig.statusBar.lastSaved", { time: lastSaved })}
           </span>
         )}
       </div>
