@@ -1,7 +1,7 @@
 // frontend/src/pages/Dashboard.tsx
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Star, Activity, Zap, Shield, FolderSearch, Trash2, FlaskConical, MessageCircle } from "lucide-react";
+import { Star, Activity, Zap, Shield, FolderSearch, Trash2, FlaskConical, MessageCircle, FolderOpen } from "lucide-react";
 import { api, type Project, type Task, type Metrics } from "../lib/api";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
