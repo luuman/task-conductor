@@ -52,7 +52,7 @@ class FeishuClient:
         if self._tenant_token and time.time() < self._token_expires_at:
             return self._tenant_token
 
-        async with httpx.AsyncClient() as client:
+        async with _client() as client:
             resp = await client.post(
                 f"{FEISHU_API_BASE}/auth/v3/tenant_access_token/internal",
                 json={"app_id": self.app_id, "app_secret": self.app_secret},
@@ -79,7 +79,7 @@ class FeishuClient:
         body: dict = {"name": name}
         if self.owner_id:
             body["owner_id"] = self.owner_id
-        async with httpx.AsyncClient() as client:
+        async with _client() as client:
             resp = await client.post(
                 f"{FEISHU_API_BASE}/im/v1/chats",
                 headers=headers,
@@ -91,7 +91,7 @@ class FeishuClient:
     async def add_member(self, chat_id: str, user_id: str) -> dict:
         """拉人入群。"""
         headers = await self._headers()
-        async with httpx.AsyncClient() as client:
+        async with _client() as client:
             resp = await client.post(
                 f"{FEISHU_API_BASE}/im/v1/chats/{chat_id}/members",
                 headers=headers,
@@ -107,7 +107,7 @@ class FeishuClient:
     async def send_message(self, chat_id: str, msg_type: str, content: str) -> str:
         """发送消息到群聊，返回 message_id。"""
         headers = await self._headers()
-        async with httpx.AsyncClient() as client:
+        async with _client() as client:
             resp = await client.post(
                 f"{FEISHU_API_BASE}/im/v1/messages",
                 headers=headers,
@@ -133,7 +133,7 @@ class FeishuClient:
         import json as _json
 
         headers = await self._headers()
-        async with httpx.AsyncClient() as client:
+        async with _client() as client:
             resp = await client.patch(
                 f"{FEISHU_API_BASE}/im/v1/messages/{message_id}",
                 headers=headers,
@@ -145,7 +145,7 @@ class FeishuClient:
     async def reply_message(self, message_id: str, msg_type: str, content: str) -> str:
         """回复指定消息，返回新 message_id。"""
         headers = await self._headers()
-        async with httpx.AsyncClient() as client:
+        async with _client() as client:
             resp = await client.post(
                 f"{FEISHU_API_BASE}/im/v1/messages/{message_id}/reply",
                 headers=headers,
