@@ -168,7 +168,7 @@ function KnowledgeItem({ item, onDelete }: { item: ProjectKnowledge; onDelete: (
               onClick={() => setExpanded(e => !e)}
               className="text-[10px] text-accent hover:underline mt-0.5"
             >
-              {expanded ? "收起" : "展开全部"}
+              {expanded ? t('knowledgePanel.item.collapse') : t('knowledgePanel.item.expand')}
             </button>
           )}
           <p className="text-[9px] text-app-tertiary mt-1">
