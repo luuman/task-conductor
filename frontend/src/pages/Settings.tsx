@@ -176,8 +176,8 @@ export default function Settings({ onDisconnect }: SettingsProps) {
         {/* ── 性能模块 ── */}
         <div className="rounded-xl overflow-hidden" style={{ background: "var(--background-secondary)", border: "1px solid var(--border)" }}>
           <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-            <h3 className="text-[12px] font-semibold" style={{ color: "var(--text-primary)" }}>底部性能栏</h3>
-            <p className="text-[11px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>控制底部栏显示的指标与顺序</p>
+            <h3 className="text-[12px] font-semibold" style={{ color: "var(--text-primary)" }}>{t('settings.performance.title')}</h3>
+            <p className="text-[11px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>{t('settings.performance.hint')}</p>
           </div>
           <PerfSettings />
         </div>
