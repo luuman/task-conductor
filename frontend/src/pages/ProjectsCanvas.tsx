@@ -1,6 +1,7 @@
 // frontend/src/pages/ProjectsCanvas.tsx
 // Packed-bubble chart — Dribbble reference (flat, tight-packed, color-clustered)
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type Project, type Task } from "../lib/api";
 
 // ── Types ──────────────────────────────────────────────────────────
