@@ -16,12 +16,47 @@ def get_db():
         yield session
 
 
+def _get_session_summary(session_id: str, cwd: str) -> Optional[str]:
+    """从 JSONL 文件中提取第一条用户消息作为会话摘要（最多 120 字符）。"""
+    project_path = (cwd or "").replace("/", "-")
+    home = _os.path.expanduser("~")
+    path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
+    if not _os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = _json_mod.loads(line)
+                except Exception:
+                    continue
+                entry_type = entry.get("type", "")
+                msg = entry.get("message", {})
+                role = msg.get("role", "")
+                content = msg.get("content", [])
+                if entry_type == "user" or role == "user":
+                    if isinstance(content, str) and content.strip():
+                        return content.strip()[:120]
+                    if isinstance(content, list):
+                        for block in content:
+                            if isinstance(block, dict) and block.get("type") == "text":
+                                text = (block.get("text") or "").strip()
+                                if text:
+                                    return text[:120]
+    except Exception:
+        pass
+    return None
+
+
 @router.get("", summary="Claude 会话列表")
 def list_sessions(db: Session = Depends(get_db)):
     """
     获取最近 50 个 Claude Code 会话，按最后活跃时间倒序排列。
 
-    每条记录包含：会话 ID、工作目录、状态（active/idle/stopped）、事件总数。
+    每条记录包含：会话 ID、工作目录、状态、事件总数、首条用户消息摘要。
     """
     # 一次查询拿到事件数（避免 N+1）
     event_count_sq = (
@@ -42,8 +77,10 @@ def list_sessions(db: Session = Depends(get_db)):
         .all()
     )
 
-    return [
-        {
+    results = []
+    for s, event_count, note in rows:
+        summary = _get_session_summary(s.session_id, s.cwd or "")
+        results.append({
             "id": s.id,
             "session_id": s.session_id,
             "cwd": s.cwd,
@@ -53,9 +90,9 @@ def list_sessions(db: Session = Depends(get_db)):
             "last_seen_at": s.last_seen_at.isoformat(),
             "event_count": event_count or 0,
             "note": _note_to_dict(note),
-        }
-        for s, event_count, note in rows
-    ]
+            "summary": summary,
+        })
+    return results
 
 
 @router.get("/{session_id}/events", summary="获取会话事件历史")
