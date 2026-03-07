@@ -1777,7 +1777,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
       {/* CLI 版本 - 特殊行，带更新按钮 */}
       <div className="bg-app-secondary border border-app rounded-xl px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-app-tertiary">CLI 版本</span>
+          <span className="text-[11px] text-app-tertiary">{t("claudeConfig.about.cliVersion")}</span>
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono text-app">{overview?.cli_version || systemInfo?.cli_version || "..."}</span>
             <button onClick={checkUpdate} disabled={checking}
