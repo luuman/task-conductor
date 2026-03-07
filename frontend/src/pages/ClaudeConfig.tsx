@@ -1519,7 +1519,7 @@ function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
     let parsed; try { parsed = JSON.parse(jsonText); } catch { setParseError(t("claudeConfig.permissions.jsonError")); setStatus("error"); return; }
     setParseError(""); setSaving(true);
     try { onUpdate(await api.claudeConfig.updatePermissions(parsed)); setStatus("ok"); setTimeout(() => setStatus("idle"), 2000); }
-    catch (e) { setParseError(e instanceof Error ? e.message : "保存失败"); setStatus("error"); } finally { setSaving(false); }
+    catch (e) { setParseError(e instanceof Error ? e.message : t("common.saveFailed")); setStatus("error"); } finally { setSaving(false); }
   };
   const isDirty = jsonText !== JSON.stringify(config.permissions, null, 2);
   return (
