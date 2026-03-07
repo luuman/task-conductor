@@ -83,7 +83,7 @@ function ClaudeMetricsPanel() {
           <div className={cn("w-1.5 h-1.5 rounded-full",
             sessions.active > 0 ? "bg-green-400 animate-pulse" : "bg-gray-600")} />
           <span className="text-[11px] font-semibold text-app">Claude Code</span>
-          <span className="text-[9px] font-mono text-app-tertiary">Token · 成本 · 工具 · 性能</span>
+          <span className="text-[9px] font-mono text-app-tertiary">Token · {t('dashboard.claudeMetrics.costEstimate')} · {t('dashboard.claudeMetrics.toolCalls')} · {t('dashboard.claudeMetrics.performance')}</span>
         </div>
         <div className="flex gap-3 text-[9px] font-mono">
           <span className={cn(sessions.active > 0 ? "text-green-400" : "text-app-tertiary")}>
