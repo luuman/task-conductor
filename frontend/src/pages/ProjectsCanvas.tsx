@@ -484,6 +484,7 @@ interface ProjectsCanvasProps {
 export default function ProjectsCanvas({
   projects, onSelectProject, onOpenTask: _onOpenTask,
 }: ProjectsCanvasProps) {
+  const { t } = useTranslation();
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef  = useRef<SVGSVGElement>(null);
   const [tasksMap, setTasksMap] = useState<Record<number, Task[]>>({});
