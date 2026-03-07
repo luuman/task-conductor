@@ -196,7 +196,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
             />
             <button
               onClick={() => setShowDesc((v) => !v)}
-              title="添加描述"
+              title={t('taskManager.input.addDesc')}
               className={cn(
                 "w-7 h-7 rounded-md border text-xs flex items-center justify-center transition-colors",
                 showDesc ? "border-accent text-accent bg-accent/10" : "border-app text-app-tertiary hover:text-app"
