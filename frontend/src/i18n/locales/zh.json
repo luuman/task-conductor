@@ -1590,5 +1590,13 @@
       "loadFailed": "加载失败"
     },
     "loading": "加载全局配置..."
+  },
+
+  "files": {
+    "title": "文件浏览",
+    "empty": "目录为空",
+    "copy": "复制内容",
+    "binaryFile": "二进制文件，无法预览",
+    "loadError": "文件加载失败"
   }
 }
