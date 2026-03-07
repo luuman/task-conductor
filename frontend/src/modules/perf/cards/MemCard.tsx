@@ -27,10 +27,10 @@ export function MemCard({ sys, procs, colors = {}, showTitle }: MemCardProps) {
 
       <div className="space-y-1">
         {[
-          { label: "App 内存", gb: sys?.memory.used_gb    ?? 0, color: cCached       },
-          { label: "联动内存", gb: sys?.memory.buffers_gb ?? 0, color: cUsed         },
-          { label: "已压缩",   gb: sys?.memory.cached_gb  ?? 0, color: "#FF9F0A"     },
-          { label: "可用",     gb: sys?.memory.free_gb    ?? 0, color: "#6b7280"     },
+          { label: t('perf.mem.appMem'),      gb: sys?.memory.used_gb    ?? 0, color: cCached       },
+          { label: t('perf.mem.wiredMem'),     gb: sys?.memory.buffers_gb ?? 0, color: cUsed         },
+          { label: t('perf.mem.compressed'),   gb: sys?.memory.cached_gb  ?? 0, color: "#FF9F0A"     },
+          { label: t('perf.mem.available'),    gb: sys?.memory.free_gb    ?? 0, color: "#6b7280"     },
         ].filter(r => r.gb > 0.01).map((r, i) => (
           <div key={i} className="flex justify-between items-center text-sm">
             <div className="flex items-center gap-2">
