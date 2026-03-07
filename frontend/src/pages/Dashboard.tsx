@@ -736,7 +736,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest, on
   );
 }
 
-export default function Dashboard({ projectId, projects, projectsLoaded, onOpenTask, onSelectProject, onRefreshProjects }: DashboardProps) {
+export default function Dashboard({ projectId, projects, projectsLoaded, onOpenTask, onSelectProject, onRefreshProjects, onOpenFiles }: DashboardProps) {
   const { t } = useTranslation();
   const STAGE_LABEL = useStageLabelMap();
   const STATUS_LABEL = useStatusLabelMap();
