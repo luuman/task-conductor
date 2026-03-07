@@ -1695,7 +1695,7 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
       <div className="bg-app-secondary border border-app rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <FolderOpen size={13} className="text-green-400" />
-          <span className="text-xs font-semibold text-app">项目记忆</span>
+          <span className="text-xs font-semibold text-app">{t("claudeConfig.monitoring.projectMemory")}</span>
           <span className="text-[9px] text-app-tertiary">{overview.projects.length} 个项目</span>
           {loadingDetails && <span className="text-[9px] text-app-tertiary animate-pulse">加载详情...</span>}
         </div>
