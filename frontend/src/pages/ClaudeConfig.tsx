@@ -1392,9 +1392,9 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                 <div className="flex items-center gap-2 pt-1">
                   <button onClick={() => save(ev)} disabled={!isDirty || saving === ev}
                     className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-                    <Save size={11} />{saving === ev ? "保存中..." : "保存"}</button>
+                    <Save size={11} />{saving === ev ? t("common.saving") : t("common.save")}</button>
                   <button onClick={() => del(ev)} disabled={saving === ev}
-                    className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20"><Trash2 size={11} /> 清除</button>
+                    className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md text-red-400 hover:bg-red-500/10 border border-red-500/20"><Trash2 size={11} /> {t("claudeConfig.hooks.clear")}</button>
                 </div>
               </div>
             )}
