@@ -299,8 +299,8 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
           {phase === "idle" && (
             <div className="flex flex-col items-center justify-center h-48 text-app-tertiary text-xs gap-2">
               <span className="text-3xl opacity-20">✦</span>
-              <p>添加任务后点击"AI 梳理优先级"</p>
-              <p className="text-[10px] opacity-60">AI 将分析优先级、复杂度和实现方向</p>
+              <p>{t('taskManager.emptyStates.analysisHint')}</p>
+              <p className="text-[10px] opacity-60">{t('taskManager.emptyStates.analysisDesc')}</p>
             </div>
           )}
 
