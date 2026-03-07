@@ -1,7 +1,5 @@
 """项目文件浏览 API：列出目录树、读取文件内容"""
 
-import os
-import stat
 from pathlib import Path
 from datetime import datetime
 
