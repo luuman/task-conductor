@@ -543,6 +543,7 @@ export interface TaskWorkflowProps {
 }
 
 export function TaskWorkflow({ task, artifacts = [], onRefresh }: TaskWorkflowProps) {
+  const { t } = useTranslation();
   const [selectedStage, setSelectedStage] = useState<string | null>(task.stage);
 
   const handleClickStage = useCallback((stage: string) => {
