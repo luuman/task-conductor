@@ -1760,16 +1760,16 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
   };
   const infoItems = [
     { label: t("claudeConfig.about.configDir"), value: systemInfo?.home_path || overview?.home_path || "~/.claude" },
-    { label: "配置文件", value: systemInfo?.config_path || "~/.claude/settings.json" },
-    { label: "缓存目录", value: systemInfo?.cache_dir || "~/.claude/cache" },
-    { label: "缓存大小", value: systemInfo ? `${systemInfo.cache_size_mb.toFixed(1)} MB` : "..." },
-    { label: "历史大小", value: systemInfo ? `${systemInfo.history_size_mb.toFixed(1)} MB` : "..." },
-    { label: "平台", value: systemInfo?.platform || "..." },
+    { label: "Config File", value: systemInfo?.config_path || "~/.claude/settings.json" },
+    { label: "Cache Dir", value: systemInfo?.cache_dir || "~/.claude/cache" },
+    { label: "Cache Size", value: systemInfo ? `${systemInfo.cache_size_mb.toFixed(1)} MB` : "..." },
+    { label: "History Size", value: systemInfo ? `${systemInfo.history_size_mb.toFixed(1)} MB` : "..." },
+    { label: "Platform", value: systemInfo?.platform || "..." },
     { label: "Python", value: systemInfo?.python_version || "..." },
-    { label: "会话数", value: systemInfo ? String(systemInfo.session_count) : "..." },
-    { label: "项目数", value: systemInfo ? String(systemInfo.project_count) : "..." },
-    { label: "技能数", value: systemInfo ? String(systemInfo.skill_count) : "..." },
-    { label: "MCP 服务器", value: systemInfo ? String(systemInfo.mcp_server_count) : "..." },
+    { label: t("claudeConfig.overviewStats.sessionCount"), value: systemInfo ? String(systemInfo.session_count) : "..." },
+    { label: "Projects", value: systemInfo ? String(systemInfo.project_count) : "..." },
+    { label: "Skills", value: systemInfo ? String(systemInfo.skill_count) : "..." },
+    { label: "MCP", value: systemInfo ? String(systemInfo.mcp_server_count) : "..." },
   ];
   return (
     <div className="space-y-4">
