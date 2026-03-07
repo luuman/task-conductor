@@ -132,12 +132,12 @@ function ToolCard({ b, t }: { b: Extract<Bubble, { kind: "tool" }>; t: (key: str
   );
 }
 
-function NotifyBar({ b }: { b: Extract<Bubble, { kind: "notify" }> }) {
+function NotifyBar({ b, t }: { b: Extract<Bubble, { kind: "notify" }>; t: (key: string) => string }) {
   return (
     <div className="mx-4 my-1.5 flex items-center gap-2 px-3 py-2 rounded-lg text-[11px]"
          style={{ background: "rgba(234,179,8,0.1)", border: "1px solid rgba(234,179,8,0.3)", color: "#e3b341" }}>
       <span>◆</span>
-      <span className="flex-1 truncate">{b.message || "通知"}</span>
+      <span className="flex-1 truncate">{b.message || t('convBubbles.notify')}</span>
     </div>
   );
 }
