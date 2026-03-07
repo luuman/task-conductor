@@ -191,6 +191,14 @@ export function Sidebar({
           );
         })()}
       </nav>
+
+      {/* ── Spacer ─────────────────────────────────────── */}
+      <div className="flex-1" />
+
+      {/* ── Bottom perf bar ────────────────────────────── */}
+      <div className="shrink-0">
+        <PerfBottomBar connectionStatus={connectionStatus} vertical={!collapsed} compact={collapsed} />
+      </div>
     </div>
   );
 }
