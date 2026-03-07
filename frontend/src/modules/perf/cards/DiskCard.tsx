@@ -14,7 +14,7 @@ export function DiskCard({ sys, hist, colors = {}, showTitle }: DiskCardProps) {
   const cWrite = colors.write ?? "#007AFF";
 
   return (
-    <ICard title="磁盘" showTitle={showTitle}>
+    <ICard title={t('perf.metricLabel.disk')} showTitle={showTitle}>
       <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-800"
            style={{ background: "rgba(17,17,17,0.5)" }}>
         <div className="relative flex items-center justify-center shrink-0" style={{ width: 40, height: 40 }}>
