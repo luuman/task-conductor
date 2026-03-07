@@ -793,7 +793,7 @@ function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, s
         <div className="bg-app-secondary border border-app rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <BarChart3 size={13} className="text-app-tertiary" />
-            <span className="text-xs font-semibold text-app">每日活动</span>
+            <span className="text-xs font-semibold text-app">{t("claudeConfig.overviewStats.dailyActivity")}</span>
             <span className="text-[9px] text-app-tertiary font-mono ml-auto">{overview.first_active_day} ~ {overview.last_active_day}</span>
           </div>
           <ActivityChart data={overview.daily_activity} />
