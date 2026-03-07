@@ -1,4 +1,5 @@
 // src/modules/perf/cards/SensorsCard.tsx
+import { useTranslation } from "react-i18next";
 import type { PerfData } from "../types";
 import { ICard, RingGauge, tColor, CC } from "./shared";
 
