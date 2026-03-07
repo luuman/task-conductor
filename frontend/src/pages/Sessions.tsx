@@ -329,7 +329,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
                   {cwd(s.cwd) || "—"}
                 </p>
                 <p className="text-[10px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>
-                  {s.event_count} 条事件
+                  {s.event_count} {t('sessions.eventCount')}
                 </p>
               </button>
             ))
