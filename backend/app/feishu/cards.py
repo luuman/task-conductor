@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 # ------------------------------------------------------------------
 # 颜色常量
@@ -13,6 +14,36 @@ ORANGE = "orange"
 GREEN = "green"
 
 MAX_CONTENT_LEN = 3000
+
+
+def _to_feishu_md(text: str) -> str:
+    """将标准 Markdown 转为飞书卡片兼容的 Markdown。
+
+    飞书卡片 markdown 不支持 # 标题、表格等语法，需要转换。
+    """
+    lines = text.split("\n")
+    result: list[str] = []
+    in_code_block = False
+
+    for line in lines:
+        # 代码块内不做转换
+        if line.strip().startswith("```"):
+            in_code_block = not in_code_block
+            result.append(line)
+            continue
+        if in_code_block:
+            result.append(line)
+            continue
+
+        # # 标题 → **标题**
+        m = re.match(r"^(#{1,6})\s+(.+)$", line)
+        if m:
+            result.append(f"**{m.group(2).strip()}**")
+            continue
+
+        result.append(line)
+
+    return "\n".join(result)
 
 
 def _header(title: str, color: str) -> dict:
