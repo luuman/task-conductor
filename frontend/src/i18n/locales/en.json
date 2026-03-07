@@ -1,3 +1,1460 @@
 {
-  "_placeholder": true
+  "common": {
+    "save": "Save",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "add": "Add",
+    "refresh": "Refresh",
+    "create": "Create",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "none": "None",
+    "restore": "Restore",
+    "total": "Total",
+    "enable": "Enable",
+    "edit": "Edit",
+    "done": "Done",
+    "search": "Search",
+    "close": "Close",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "back": "Back",
+    "install": "Install",
+    "uninstall": "Uninstall",
+    "installed": "Installed",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "retry": "Retry",
+    "start": "Start",
+    "stop": "Stop",
+    "on": "On",
+    "off": "Off",
+    "yes": "Yes",
+    "no": "No",
+    "expand": "Expand All",
+    "collapse": "Collapse",
+    "noMatchResults": "No matching results",
+    "loadFailed": "Failed to load",
+    "saveFailed": "Failed to save",
+    "jsonFormatError": "JSON format error",
+    "noContent": "No content, click to edit...",
+    "message": "Message",
+    "toolCall": "Tool Call",
+    "recommended": "Recommended",
+    "overview": "Overview"
+  },
+
+  "sidebar": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "canvas": "Project Canvas",
+      "tasks": "Task Manager",
+      "conversations": "Conversations",
+      "claudeConfig": "Claude Config",
+      "settings": "Settings"
+    },
+    "sections": {
+      "projects": "Projects",
+      "test": "Test"
+    },
+    "liveMonitor": "Live Monitor",
+    "live": "LIVE",
+    "expandSidebar": "Expand Sidebar",
+    "collapseSidebar": "Collapse Sidebar",
+    "scanLocalProjects": "Scan Local Projects",
+    "newProject": "New Project",
+    "newFirstProject": "Create Your First Project"
+  },
+
+  "appShell": {
+    "newProject": "New Project",
+    "projectName": "Project Name",
+    "willCreateAt": "Will be created at",
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+
+  "login": {
+    "connectionModes": {
+      "local": "Local",
+      "tunnel": "Tunnel",
+      "ssh": "SSH"
+    },
+    "subtitle": "Connect to your local AI dev agent",
+    "local": {
+      "backendUrl": "Backend URL",
+      "pinCode": "PIN Code",
+      "pinPlaceholder": "6-digit code",
+      "pinHint": "PIN shown in terminal after running ./start.sh",
+      "pinError": "Wrong PIN or backend not running",
+      "connecting": "Connecting...",
+      "connectButton": "Connect Locally"
+    },
+    "tunnel": {
+      "connectAgent": "Connect Agent",
+      "pinHint": "6-digit PIN shown in terminal when agent starts",
+      "runOnServer": "Run on server..."
+    },
+    "ssh": {
+      "host": "Host",
+      "port": "Port",
+      "username": "Username",
+      "setupHint": "Set up an SSH tunnel in your local terminal first",
+      "connectButton": "Connect via SSH"
+    },
+    "errors": {
+      "connectionFailed": "Connection failed",
+      "sshConnectionFailed": "SSH connection failed"
+    }
+  },
+
+  "dashboard": {
+    "claudeMetrics": {
+      "tokenConsumption": "Token Consumption",
+      "input": "Input",
+      "output": "Output",
+      "cacheHit": "Cache Hit",
+      "cacheWrite": "Cache Write",
+      "costEstimate": "Cost Estimate",
+      "toolCalls": "Tool Calls",
+      "noCallRecords": "No call records",
+      "recent": "Recent",
+      "performance": "Performance",
+      "callCount": "Call Count",
+      "ttft": "TTFT",
+      "avgDuration": "Avg Duration",
+      "charsPerSec": "Chars/sec",
+      "ttftHistory": "TTFT History",
+      "costHint": "Auto-estimated based on model pricing",
+      "autoStatsHint": "Auto-collected after running Claude Code",
+      "activeSessionsHint": "Active / Total sessions",
+      "processRunning": "Process running"
+    },
+    "metricsPanel": {
+      "aiScore": "AI Score",
+      "overallScore": "Overall Score",
+      "interactions": "Interactions",
+      "totalSessions": "Total Sessions",
+      "responseTime": "Response Time",
+      "avgLatency": "Avg Latency",
+      "uptime": "Uptime",
+      "availability": "Availability",
+      "excellent": "+Excellent",
+      "good": "Good",
+      "needsImprovement": "Needs Improvement"
+    },
+    "dayCn": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "gauge": {
+      "highAvailability": "High Availability",
+      "normalUptime": "Normal Uptime",
+      "realtimeProcessing": "Realtime Processing",
+      "realtimeMonitoring": "Realtime Monitoring",
+      "pipeline": "Pipeline"
+    },
+    "stageLabel": {
+      "input": "Input",
+      "analysis": "Analysis",
+      "prd": "PRD",
+      "ui": "UI",
+      "plan": "Plan",
+      "dev": "Dev",
+      "test": "Test",
+      "deploy": "Deploy",
+      "monitor": "Monitor"
+    },
+    "statusLabel": {
+      "pending": "Pending",
+      "running": "Running",
+      "approval": "Awaiting Approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "done": "Done",
+      "failed": "Failed",
+      "queued": "Queued"
+    },
+    "newTask": {
+      "button": "New Task",
+      "titlePlaceholder": "Task title",
+      "descPlaceholder": "Description (optional)",
+      "creating": "Creating...",
+      "create": "Create"
+    },
+    "projectCard": {
+      "running": "Running",
+      "taskCount": "tasks",
+      "cancelTestMark": "Unmark as Test",
+      "markAsTest": "Mark as Test Project",
+      "deleteProject": "Delete Project",
+      "deleteConfirm": "Delete this project and all its tasks?"
+    },
+    "overview": {
+      "title": "Overview",
+      "projectCount": "projects",
+      "scanning": "Scanning...",
+      "scanLocal": "Scan Local Projects",
+      "noProjects": "No projects yet",
+      "scanHint": "Click \"Scan Local Projects\"",
+      "projects": "Projects",
+      "testProjects": "Test Projects"
+    },
+    "projectTaskList": {
+      "knowledgeBase": "Knowledge Base",
+      "noTasks": "No tasks yet"
+    }
+  },
+
+  "taskPipeline": {
+    "stageLabel": {
+      "input": "Input",
+      "analysis": "Analysis",
+      "prd": "PRD",
+      "ui": "UI Design",
+      "plan": "Tech Plan",
+      "dev": "Dev",
+      "test": "Test",
+      "deploy": "Deploy",
+      "monitor": "Monitor"
+    },
+    "confidenceMeter": "Confidence",
+    "assumptions": {
+      "cancelMark": "Unmark",
+      "markAsWrong": "Mark as Wrong Assumption",
+      "undo": "Undo",
+      "wrong": "Wrong"
+    },
+    "criticNotes": {
+      "title": "Critic Score",
+      "pass": "Pass",
+      "needsRevision": "Needs Revision"
+    },
+    "artifactCard": {
+      "retryCount": "Retry {{count}}x",
+      "aiAssumptions": "AI Assumptions",
+      "criticReview": "Critic Review",
+      "errorLog": "Error Log",
+      "truncated": "Truncated"
+    },
+    "status": {
+      "pending": "Pending",
+      "running": "Running",
+      "approval": "Awaiting Approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "done": "Done",
+      "failed": "Failed",
+      "queued": "Queued"
+    },
+    "viewToggle": {
+      "detail": "Detail",
+      "flow": "Flow"
+    },
+    "actionBanner": {
+      "waitingExecution": "Waiting for execution",
+      "start": "Start",
+      "executing": "Executing",
+      "approvedReady": "Approved, ready to advance",
+      "advanceNext": "Advance to Next Stage",
+      "rejectedRetrigger": "Rejected, can re-trigger",
+      "reExecute": "Re-execute"
+    },
+    "taskMeta": {
+      "created": "Created",
+      "started": "Started",
+      "completed": "Completed",
+      "enqueued": "Enqueued"
+    },
+    "sections": {
+      "stageArtifacts": "Stage Artifacts",
+      "realTimeLogs": "Real-time Logs"
+    },
+    "logPanel": {
+      "executing": "Executing",
+      "executionDone": "Execution complete",
+      "lines": "lines",
+      "waitingOutput": "Waiting for output...",
+      "error": "Error",
+      "warning": "Warning"
+    },
+    "reviewBanner": {
+      "waitingApproval": "Awaiting Approval",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectReason": "Rejection reason (required)",
+      "confirmReject": "Confirm Reject"
+    },
+    "loading": "Loading task...",
+    "backButton": "← Back"
+  },
+
+  "sessions": {
+    "statusBadge": {
+      "running": "Running",
+      "idle": "Idle",
+      "stopped": "Stopped"
+    },
+    "sessionList": {
+      "title": "Sessions",
+      "realtime": "Realtime",
+      "connecting": "Connecting",
+      "disconnected": "Disconnected"
+    },
+    "loading": "Loading...",
+    "noSessions": "No sessions yet",
+    "autoAppearHint": "Sessions appear automatically after running Claude Code",
+    "eventCount": "events",
+    "viewTabs": {
+      "realtime": "● Realtime",
+      "history": "◷ History"
+    },
+    "filter": "Filter tool / content...",
+    "controls": {
+      "resume": "▶ Resume",
+      "pause": "⏸ Pause",
+      "clear": "Clear"
+    },
+    "tableHeaders": {
+      "time": "Time",
+      "tool": "Tool",
+      "content": "Content",
+      "session": "Session"
+    },
+    "emptyHints": {
+      "waitingEvents": "Waiting for Claude Code events...",
+      "selectSession": "Select a session on the left to view history",
+      "noEvents": "No events for this session"
+    },
+    "statusBar": {
+      "realtimeCount": "Realtime: {{count}}",
+      "historyCount": "History: {{count}}",
+      "clearFilter": "Clear filter",
+      "loadingHistory": "Loading history events..."
+    }
+  },
+
+  "settings": {
+    "connectionTypes": {
+      "local": "Local",
+      "tunnel": "Cloudflare Tunnel",
+      "ssh": "SSH Tunnel",
+      "unknown": "Unknown"
+    },
+    "header": {
+      "title": "Settings",
+      "subtitle": "Workspace configuration & authentication"
+    },
+    "workspace": {
+      "title": "Workspace",
+      "hint": "New projects will be created under this root directory",
+      "rootPath": "Root Path",
+      "pathPreview": "Path Preview",
+      "projectName": "<project-name>",
+      "example": "e.g."
+    },
+    "saveStates": {
+      "saving": "Saving...",
+      "saved": "Saved ✓",
+      "save": "Save",
+      "saveFailed": "Failed to save"
+    },
+    "performance": {
+      "title": "Bottom Performance Bar",
+      "hint": "Control which metrics are shown in the bottom bar and their order"
+    },
+    "connection": {
+      "title": "Connection & Auth",
+      "address": "Address",
+      "tokenStatus": "Token Status",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "verifying": "Verifying...",
+      "reVerify": "Re-verify",
+      "backendVersion": "Backend Version",
+      "fetching": "Fetching...",
+      "tunnelAddress": "Tunnel Address",
+      "notDetected": "Not detected",
+      "reconfigure": "Reconfigure Connection",
+      "clearCredentials": "Clear local credentials and return to login",
+      "disconnect": "Disconnect"
+    },
+    "shutdown": {
+      "title": "Shutdown Service",
+      "hint": "Stop the backend process",
+      "shuttingDown": "Shutting down...",
+      "confirmShutdown": "Are you sure you want to shut down the backend?"
+    }
+  },
+
+  "claudeConfig": {
+    "eventLabels": {
+      "PreToolUse": "Pre Tool Use",
+      "PostToolUse": "Post Tool Use",
+      "Stop": "Stop",
+      "SessionStart": "Session Start",
+      "SessionEnd": "Session End",
+      "Notification": "Notification",
+      "SubagentStart": "Subagent Start",
+      "SubagentStop": "Subagent Stop",
+      "PostToolUseFailure": "Post Tool Use Failure"
+    },
+    "commonSettings": {
+      "defaultModel": "Default Model",
+      "effortLevel": "Effort Level",
+      "responseLang": "Response Language"
+    },
+    "navGroups": {
+      "core": "Core Config",
+      "extensions": "Extensions",
+      "security": "Security & Control",
+      "system": "System"
+    },
+    "navItems": {
+      "overview": "Overview",
+      "modelAndParams": "Model & Parameters",
+      "skills": "Skills",
+      "agents": "Agents",
+      "commands": "Commands",
+      "mcpServers": "MCP Servers",
+      "hooks": "Hooks",
+      "rules": "Rules",
+      "permissions": "Permissions",
+      "envVars": "Environment Variables",
+      "plugins": "Plugins",
+      "monitoring": "Monitoring",
+      "trash": "Trash",
+      "about": "About"
+    },
+    "claudeMd": {
+      "globalClaudeMd": "Global CLAUDE.md",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "edit": "Edit",
+      "done": "Done",
+      "noContent": "No content, click to edit..."
+    },
+    "settingsGroups": {
+      "modelConfig": "Model Config",
+      "behaviorOutput": "Behavior & Output",
+      "sessionManagement": "Session Management",
+      "loginSecurity": "Login & Security",
+      "uiExperience": "UI & Experience",
+      "advancedOptions": "Advanced Options"
+    },
+    "otherConfig": {
+      "title": "Other Config Fields",
+      "addNew": "Add New Field",
+      "keyName": "Key",
+      "value": "Value"
+    },
+    "skills": {
+      "title": "Skills Library",
+      "noSkills": "No custom skills yet",
+      "noDescription": "No description",
+      "disabled": "Disabled",
+      "auxiliaryFiles": "Auxiliary Files",
+      "metadata": "Metadata",
+      "selectHint": "Select a skill on the left to view details",
+      "skillMdContent": "SKILL.md Content"
+    },
+    "agents": {
+      "title": "Agents",
+      "newAgent": "New Agent",
+      "createFailed": "Failed to create",
+      "deleteConfirm": "Confirm delete Agent",
+      "selectHint": "Select an agent on the left to view details",
+      "agentContent": "Agent Content"
+    },
+    "commands": {
+      "title": "Custom Commands",
+      "newCommand": "New Command",
+      "deleteConfirm": "Confirm delete command",
+      "commandContent": "Command Content",
+      "selectHint": "Select a command on the left to view details"
+    },
+    "mcp": {
+      "title": "MCP Servers",
+      "noServers": "No MCP servers yet",
+      "connected": "Connected",
+      "needsAuth": "Needs Auth",
+      "error": "Error",
+      "unknown": "Unknown",
+      "addFailed": "Failed to add",
+      "name": "Name",
+      "url": "URL",
+      "protocol": "Protocol",
+      "scope": "Scope",
+      "global": "Global",
+      "project": "Project"
+    },
+    "hooks": {
+      "title": "Hooks Lifecycle",
+      "configured": "Configured",
+      "rules": "Rules",
+      "unsaved": "Unsaved",
+      "addCommand": "Add Command",
+      "clear": "Clear",
+      "timeout": "Timeout"
+    },
+    "rules": {
+      "title": "Rules",
+      "newRule": "New Rule",
+      "deleteConfirm": "Confirm delete rule",
+      "ruleContent": "Rule Content",
+      "selectHint": "Select a rule on the left to view details"
+    },
+    "permissions": {
+      "title": "Permissions",
+      "jsonError": "JSON format error",
+      "savePermissions": "Save Permissions"
+    },
+    "envVars": {
+      "title": "Environment Variables",
+      "apiKey": "API Key",
+      "authToken": "Auth Token",
+      "apiEndpoint": "API Endpoint"
+    },
+    "plugins": {
+      "title": "Plugin Management",
+      "noPlugins": "No plugins configured",
+      "inputPluginId": "Enter plugin ID"
+    },
+    "monitoring": {
+      "title": "Monitoring & Statistics",
+      "activityTrend": "Activity Trend",
+      "projectMemory": "Project Memory",
+      "loadingDetails": "Loading details...",
+      "minutesAgo": "min ago",
+      "hoursAgo": "hr ago",
+      "daysAgo": "d ago",
+      "sessions": "Sessions"
+    },
+    "about": {
+      "title": "About Claude Code",
+      "cliVersion": "CLI Version",
+      "latestVersion": "Up to date",
+      "checkUpdate": "Check for Updates",
+      "configDir": "Config Directory"
+    },
+    "trash": {
+      "title": "Trash",
+      "restoreAll": "Restore All",
+      "deleteAll": "Delete All",
+      "restored": "Restored",
+      "permanentlyDeleted": "Permanently deleted",
+      "confirmPermanentDelete": "Confirm permanent delete",
+      "restoreFailed": "Failed to restore",
+      "deleteFailed": "Failed to delete"
+    },
+    "shared": {
+      "recommended": "Recommended",
+      "installed": "Installed",
+      "installedShort": "Inst.",
+      "install": "Install",
+      "message": "Message",
+      "toolCall": "Tool Call",
+      "none": "None",
+      "loadFailed": "Failed to load",
+      "loadingConfig": "Loading configuration...",
+      "noMatchResults": "No matching results",
+      "searchPlaceholder": "Search config... (Ctrl+F)"
+    },
+    "presetGallery": {
+      "recommendedItems": "Recommended {{itemLabel}}",
+      "installedCount": "Installed {{installed}} / {{total}}"
+    },
+    "detailPanel": {
+      "metadata": "Metadata",
+      "auxiliaryFiles": "Auxiliary Files"
+    },
+    "overviewStats": {
+      "cliVersion": "CLI Version",
+      "totalMessages": "Total Messages",
+      "toolCalls": "Tool Calls",
+      "sessionCount": "Sessions",
+      "activeDays": "Active Days",
+      "dailyActivity": "Daily Activity"
+    }
+  },
+
+  "mcpMarket": {
+    "categoryLabels": {
+      "knowledge": "Knowledge",
+      "design": "Design",
+      "efficiency": "Efficiency",
+      "development": "Development",
+      "tools": "Tools",
+      "database": "Database",
+      "custom": "Custom"
+    },
+    "filterTabs": {
+      "all": "All",
+      "installed": "Installed"
+    },
+    "header": {
+      "title": "One-Click MCP Service Install",
+      "installedCount": "Installed {{installed}} / {{total}} services"
+    },
+    "actions": {
+      "inputToken": "Enter Token",
+      "needsOAuth": "Requires OAuth",
+      "needsApiToken": "Requires API Token",
+      "installed": "Installed",
+      "uninstall": "Uninstall",
+      "authInstall": "Authorize & Install",
+      "confirmInstall": "Confirm Install",
+      "install": "Install"
+    },
+    "empty": "No matching MCP services"
+  },
+
+  "taskManager": {
+    "complexityLabels": {
+      "S": "S · <1 day",
+      "M": "M · 2-3 days",
+      "L": "L · 1 week",
+      "XL": "XL · 1 week+"
+    },
+    "columns": {
+      "todo": "To-Do List",
+      "aiAnalysis": "AI Analysis",
+      "devQueue": "Dev Queue"
+    },
+    "input": {
+      "titlePlaceholder": "Enter task title...",
+      "addDesc": "Add description",
+      "descPlaceholder": "Task description (optional)"
+    },
+    "emptyStates": {
+      "todoHint": "Type a task and press Enter to add",
+      "analysisHint": "Add tasks then click \"AI Prioritize\"",
+      "analysisDesc": "AI will analyze priority, complexity, and approach",
+      "aiAnalyzing": "Claude is analyzing {{count}} tasks...",
+      "allProcessed": "All tasks have been processed",
+      "queueHint": "Tasks will appear here after accepting AI analysis",
+      "queueBound": "Bound to project, ready for dev pipeline"
+    },
+    "aiAnalysis": {
+      "understanding": "AI Understanding",
+      "implementation": "Implementation",
+      "accept": "Accept",
+      "edit": "Edit",
+      "skip": "Skip",
+      "analyzing": "Analyzing...",
+      "pending": "Pending"
+    },
+    "queue": {
+      "taskCount": "tasks",
+      "created": "Created",
+      "unknownProject": "Unknown Project"
+    },
+    "projectDialog": {
+      "title": "Add to Dev Queue",
+      "selectProject": "Select Project",
+      "noProjects": "No projects yet, please create one in the dashboard",
+      "creating": "Creating...",
+      "confirm": "Confirm"
+    },
+    "aiButton": {
+      "analyzing": "AI Analyzing...",
+      "analyze": "AI Prioritize"
+    }
+  },
+
+  "conversationHistory": {
+    "header": "Conversations",
+    "eventCount": "events"
+  },
+
+  "projectsCanvas": {
+    "stateMeta": {
+      "running": "Running",
+      "error": "Error",
+      "approval": "Awaiting Approval",
+      "queued": "Queued",
+      "done": "Done",
+      "idle": "Idle"
+    },
+    "stageLabel": {
+      "input": "Input",
+      "analysis": "Analysis",
+      "prd": "PRD",
+      "ui": "UI",
+      "plan": "Plan",
+      "dev": "Dev",
+      "test": "Test",
+      "deploy": "Deploy",
+      "monitor": "Monitor",
+      "done": "Done"
+    },
+    "statsPanel": {
+      "projectRanking": "Project Ranking",
+      "noProjects": "No projects yet"
+    },
+    "tooltip": {
+      "tasks": "Tasks",
+      "running": "Running",
+      "done": "Done",
+      "error": "Error",
+      "currentStage": "Current Stage",
+      "progress": "Progress"
+    },
+    "bubbleStatus": {
+      "running": "{{count}} running",
+      "approval": "{{count}} awaiting approval",
+      "error": "{{count}} error",
+      "done": "{{done}}/{{total}} done",
+      "idle": "Idle"
+    },
+    "actions": {
+      "enterProject": "Enter Project",
+      "viewTask": "View Task",
+      "runPipeline": "Run Pipeline"
+    },
+    "header": {
+      "loading": "Loading...",
+      "info": "{{count}} projects · Scroll to zoom · Drag to pan · Click to interact",
+      "reset": "Reset"
+    },
+    "empty": "No projects yet, please create one first"
+  },
+
+  "knowledgePanel": {
+    "categoryLabels": {
+      "errorPattern": "Error Pattern",
+      "validationFailed": "Validation Failed",
+      "wrongAssumption": "Wrong Assumption",
+      "techMistake": "Tech Mistake"
+    },
+    "stageLabel": {
+      "analysis": "Analysis",
+      "prd": "PRD",
+      "ui": "UI Design",
+      "plan": "Tech Plan",
+      "dev": "Dev",
+      "test": "Test",
+      "deploy": "Deploy",
+      "monitor": "Monitor"
+    },
+    "header": {
+      "title": "Error Knowledge Base",
+      "subtitle": "Lessons learned from failures, auto-injected into future task prompts"
+    },
+    "search": "Search knowledge entries...",
+    "stats": {
+      "noRecords": "No records yet"
+    },
+    "empty": {
+      "noMatch": "No matching records",
+      "isEmpty": "Knowledge base is empty — lessons are accumulated automatically from failures"
+    },
+    "footer": "{{count}} entries · Auto-injected into Claude's next same-stage prompt",
+    "item": {
+      "collapse": "Collapse",
+      "expand": "Expand All",
+      "sourceTask": "Source Task #{{id}}",
+      "delete": "Delete",
+      "deleteHint": "Delete this entry"
+    }
+  },
+
+  "claudeMonitor": {
+    "header": {
+      "title": "Claude Code Monitor",
+      "subtitle": "Global · Not Stored"
+    },
+    "controls": {
+      "resumeScroll": "Resume Scroll",
+      "pauseScroll": "Pause Scroll",
+      "resume": "▶ Resume",
+      "pause": "⏸ Pause",
+      "clear": "Clear"
+    },
+    "tableHeaders": {
+      "time": "Time",
+      "tool": "Tool",
+      "content": "Content",
+      "session": "Session"
+    },
+    "empty": {
+      "waiting": "Waiting for Claude Code events...",
+      "hooksHint": "Please verify hooks are registered:"
+    },
+    "statusBar": {
+      "recordCount": "{{count}} records (max {{max}})",
+      "paused": "● Paused",
+      "realtime": "● Realtime",
+      "connecting": "● Connecting...",
+      "disconnected": "● Disconnected"
+    }
+  },
+
+  "convSession": {
+    "search": "Search alias / path / tags...",
+    "loading": "Loading...",
+    "noMatch": "No matching results",
+    "noSessions": "No sessions yet",
+    "eventCount": "events"
+  },
+
+  "convEdit": {
+    "sessionInfo": "Session Info",
+    "alias": "Alias",
+    "aliasPlaceholder": "Session alias",
+    "tags": "Tags",
+    "tagsPlaceholder": "Type a tag and press Enter",
+    "taskId": "Linked Task ID",
+    "taskIdPlaceholder": "Enter Task ID (optional)",
+    "notes": "Notes",
+    "notesPlaceholder": "Free-form notes...",
+    "saving": "Saving...",
+    "saved": "✓ Saved",
+    "save": "Save"
+  },
+
+  "convTranscript": {
+    "loading": "Loading...",
+    "fileNotExist": "Local transcript file does not exist",
+    "maybeDeleted": "The conversation transcript may have been deleted",
+    "selectHint": "Select a session on the left to view transcript"
+  },
+
+  "convBubbles": {
+    "sessionStart": "Session Start",
+    "sessionEnd": "Session End",
+    "turnEnd": "Turn End",
+    "toolExecuting": "Executing...",
+    "subagentStart": "Subtask Start",
+    "subagentEnd": "Subtask Complete",
+    "notify": "Notification",
+    "loading": "Loading...",
+    "selectHint": "Select a session on the left to view transcript"
+  },
+
+  "taskWorkflow": {
+    "stageLabel": {
+      "input": "Requirements",
+      "analysis": "Analysis",
+      "prd": "PRD Document",
+      "ui": "UI Design",
+      "plan": "Tech Plan",
+      "dev": "Development",
+      "test": "Testing",
+      "deploy": "Deployment",
+      "monitor": "Monitoring",
+      "done": "Done"
+    },
+    "stageDesc": {
+      "input": "Enter task requirements and description",
+      "analysis": "AI generates 3 technical proposals to choose from",
+      "prd": "Auto-generate product requirements document",
+      "ui": "Generate UI design proposals",
+      "plan": "Create detailed technical implementation plan",
+      "dev": "Claude Code auto-coding",
+      "test": "Auto-generate and run tests",
+      "deploy": "Auto-deploy to target environment",
+      "monitor": "Monitor production status",
+      "done": "All tasks completed"
+    },
+    "statusLabel": {
+      "running": "Running",
+      "approval": "Awaiting Approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "pending": "Pending",
+      "done": "Done",
+      "failed": "Failed",
+      "queued": "Queued"
+    },
+    "edgeLabel": {
+      "approved": "Approved"
+    },
+    "stageDetailPanel": {
+      "done": "Done",
+      "waitingExecution": "Waiting for execution",
+      "needsApproval": "Needs Approval",
+      "starting": "Starting...",
+      "startStage": "Start {{stage}}",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectReason": "Rejection reason (required)",
+      "confirmReject": "Confirm Reject",
+      "advancing": "Advancing...",
+      "advanceNext": "Advance to Next Stage",
+      "reExecute": "Re-execute",
+      "artifacts": "Artifacts",
+      "confidence": "Confidence",
+      "retryCount": "Retried {{count}} times",
+      "criticPass": "Pass",
+      "criticFail": "Fail",
+      "waitHint": "Will auto-execute after previous stage completes (or trigger manually)"
+    },
+    "hint": "Click a node to view stage details and actions"
+  },
+
+  "stageProgress": {
+    "labels": {
+      "input": "Input",
+      "analysis": "Analysis",
+      "prd": "PRD",
+      "ui": "UI",
+      "plan": "Plan",
+      "dev": "Dev",
+      "test": "Test",
+      "deploy": "Deploy",
+      "monitor": "Monitor"
+    }
+  },
+
+  "optionCards": {
+    "option": "Option",
+    "aiRecommend": "AI Recommended",
+    "workload": "Workload",
+    "risk": "Risk",
+    "selectOption": "Select This Option",
+    "confirmSelect": "Confirm Selection"
+  },
+
+  "logStream": {
+    "empty": "Waiting for AI output..."
+  },
+
+  "perfBar": {
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "disconnectedAlt": "Disconnected"
+  },
+
+  "perf": {
+    "metricLabel": {
+      "cpu": "CPU",
+      "mem": "Memory",
+      "net": "Network",
+      "disk": "Disk",
+      "sensors": "Sensors"
+    },
+    "metricColors": {
+      "cpu": {
+        "user": "User",
+        "sys": "System",
+        "efficient": "Efficiency Cores",
+        "perf": "Performance Cores"
+      },
+      "mem": {
+        "used": "Used",
+        "cached": "Cached"
+      },
+      "net": {
+        "out": "Upload ↑",
+        "in": "Download ↓"
+      },
+      "disk": {
+        "read": "Read",
+        "write": "Write"
+      },
+      "sensors": {
+        "cpu": "CPU Temp",
+        "nvme": "NVMe Temp",
+        "board": "Board Temp"
+      }
+    },
+    "metricSettings": {
+      "cpu": {
+        "procFormat": "Process Format",
+        "procFormatAbsolute": "Absolute",
+        "procCount": "Process Count"
+      },
+      "net": {
+        "unit": "Rate Unit",
+        "auto": "Auto"
+      },
+      "disk": {
+        "unit": "Rate Unit",
+        "auto": "Auto"
+      }
+    },
+    "settings": {
+      "menuColor": "Menu Color",
+      "menuSettings": "Menu Settings",
+      "noConfigurable": "No configurable options for this metric"
+    }
+  },
+
+  "globalConfig": {
+    "sections": {
+      "project": {
+        "label": "Basic Info",
+        "desc": "Project identity and working directory",
+        "fields": {
+          "name": { "label": "Project Name", "desc": "Current Claude Code project identifier" },
+          "description": { "label": "Description", "desc": "Project purpose", "placeholder": "Brief project description..." },
+          "workDir": { "label": "Working Directory", "desc": "Code directory path" },
+          "framework": { "label": "Language/Framework", "desc": "Python/JavaScript/Java, etc." }
+        },
+        "frameworkOptions": {
+          "auto": "Auto Detect",
+          "other": "Other"
+        }
+      },
+      "api": {
+        "label": "API Config",
+        "desc": "Claude API authentication and connection parameters",
+        "fields": {
+          "apiKey": { "label": "API Key", "desc": "Claude API authentication key" },
+          "endpoint": { "label": "API Endpoint", "desc": "Custom API address" },
+          "version": { "label": "API Version", "desc": "API version selection" },
+          "timeout": { "label": "Timeout", "desc": "Request timeout (seconds)" },
+          "retries": { "label": "Retries", "desc": "Number of retry attempts" }
+        }
+      },
+      "model": {
+        "label": "Model Config",
+        "desc": "Model selection and generation parameters",
+        "fields": {
+          "model": { "label": "Model", "desc": "Claude model version" },
+          "temperature": { "label": "Temperature", "desc": "Output randomness (0=deterministic, 1=creative)" },
+          "maxTokens": { "label": "Max Tokens", "desc": "Response length limit" },
+          "topP": { "label": "Top P", "desc": "Nucleus sampling parameter" },
+          "frequencyPenalty": { "label": "Frequency Penalty", "desc": "Avoid repetitive generation" },
+          "presencePenalty": { "label": "Presence Penalty", "desc": "Topic diversity control" }
+        },
+        "modelOptions": {
+          "opus": "Claude Opus 4.6 (Most Powerful)",
+          "sonnet": "Claude Sonnet 4.6 (Balanced)",
+          "haiku": "Claude Haiku 4.5 (Fast)"
+        }
+      },
+      "features": {
+        "label": "Feature Toggles",
+        "desc": "Enable or disable auxiliary features",
+        "fields": {
+          "autoComplete": { "label": "Auto Complete", "desc": "Code auto-completion" },
+          "realTimeAnalysis": { "label": "Real-time Analysis", "desc": "Real-time code analysis" },
+          "errorDetection": { "label": "Error Detection", "desc": "Auto-detect code errors" },
+          "performanceSuggestions": { "label": "Performance Tips", "desc": "Performance optimization suggestions" },
+          "securityAudit": { "label": "Security Audit", "desc": "Code security checks" },
+          "docGeneration": { "label": "Doc Generation", "desc": "Auto-generate documentation" }
+        }
+      },
+      "advanced": {
+        "label": "Advanced Config",
+        "desc": "Concurrency, cache, logging, and network",
+        "fields": {
+          "concurrency": { "label": "Concurrency", "desc": "Max concurrent requests" },
+          "cacheSize": { "label": "Cache Size", "desc": "Response cache (MB)" },
+          "logLevel": { "label": "Log Level", "desc": "Logging verbosity" },
+          "logRetentionDays": { "label": "Log Retention", "desc": "Log retention in days" },
+          "proxy": { "label": "Proxy", "desc": "HTTP proxy address" },
+          "customHeaders": { "label": "Custom Headers", "desc": "Custom request headers (JSON)" }
+        },
+        "units": {
+          "days": "days"
+        }
+      },
+      "permissions": {
+        "label": "Permissions",
+        "desc": "File, network, and execution permissions",
+        "fields": {
+          "fileAccess": { "label": "File Access", "desc": "Read/Write/Execute permissions" },
+          "networkAccess": { "label": "Network Access", "desc": "Allow network access" },
+          "terminalExec": { "label": "Terminal Exec", "desc": "Allow command execution" },
+          "envVars": { "label": "Environment Variables", "desc": "Custom environment variables" },
+          "whitelistPaths": { "label": "Whitelist Paths", "desc": "Allowed directories" },
+          "blacklistFiles": { "label": "Blacklist Files", "desc": "Blocked files" }
+        },
+        "checkOptions": {
+          "read": "Read",
+          "write": "Write",
+          "execute": "Execute"
+        }
+      },
+      "notifications": {
+        "label": "Notifications",
+        "desc": "Email, Slack, and Discord",
+        "fields": {
+          "emailEnabled": { "label": "Email Notifications", "desc": "Send email on task completion" },
+          "email": { "label": "Email Address", "desc": "Notification email address" },
+          "slackWebhook": { "label": "Slack Webhook", "desc": "Slack integration Webhook URL" },
+          "discordWebhook": { "label": "Discord Webhook", "desc": "Discord integration Webhook URL" },
+          "notifyLevel": { "label": "Notify Level", "desc": "Minimum level to trigger notifications" }
+        },
+        "levelOptions": {
+          "all": "All Events",
+          "warn": "Warning and Above",
+          "error": "Errors Only"
+        }
+      },
+      "monitoring": {
+        "label": "Performance Monitoring",
+        "desc": "Sampling, alerting, and data retention",
+        "fields": {
+          "enabled": { "label": "Monitoring", "desc": "Enable performance monitoring" },
+          "sampleRate": { "label": "Sample Rate", "desc": "Monitoring data sample ratio" },
+          "alertThresholdMs": { "label": "Alert Threshold", "desc": "Response time alert threshold" },
+          "dataRetentionDays": { "label": "Data Retention", "desc": "Monitoring data retention in days" }
+        }
+      },
+      "integrations": {
+        "label": "Integrations",
+        "desc": "Git, Jira, GitHub, and Slack",
+        "fields": {
+          "gitAutoCommit": { "label": "Git Auto Commit", "desc": "Auto-commit code changes" },
+          "jiraUrl": { "label": "Jira URL", "desc": "Jira instance URL" },
+          "jiraToken": { "label": "Jira Token", "desc": "Jira API auth token" },
+          "githubToken": { "label": "GitHub Token", "desc": "GitHub personal access token" },
+          "slackBotToken": { "label": "Slack Bot Token", "desc": "Slack Bot OAuth Token" }
+        }
+      },
+      "ui": {
+        "label": "UI Settings",
+        "desc": "Theme, font, and display preferences",
+        "fields": {
+          "theme": { "label": "Theme", "desc": "UI theme mode" },
+          "fontSize": { "label": "Font Size", "desc": "UI font size" },
+          "codeHighlight": { "label": "Code Highlight", "desc": "Enable syntax highlighting" },
+          "autoSave": { "label": "Auto Save", "desc": "Auto-save config changes" }
+        },
+        "themeOptions": {
+          "system": "System",
+          "dark": "Dark",
+          "light": "Light"
+        },
+        "fontSizeOptions": {
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        }
+      }
+    },
+    "cli": {
+      "basic": {
+        "label": "CLI Basics",
+        "desc": "Startup mode, workspace, and initialization",
+        "fields": {
+          "mode": { "label": "Startup Mode", "desc": "--mode interactive/batch/daemon mode" },
+          "configPath": { "label": "Config File", "desc": "--config specify config file path" },
+          "workspace": { "label": "Workspace", "desc": "--workspace workspace path" },
+          "init": { "label": "Initialize", "desc": "--init initialize a new project" }
+        },
+        "modeOptions": {
+          "interactive": "interactive",
+          "batch": "batch",
+          "daemon": "daemon"
+        }
+      },
+      "conversation": {
+        "label": "Conversation Control",
+        "desc": "Session management and context control",
+        "fields": {
+          "newConversation": { "label": "New Conversation", "desc": "--new start a new conversation" },
+          "continueSession": { "label": "Continue Session", "desc": "--continue resume previous session" },
+          "sessionId": { "label": "Session ID", "desc": "--session-id specify session ID" },
+          "contextWindow": { "label": "Context Window", "desc": "--context-window conversation context length" },
+          "history": { "label": "History", "desc": "--history show recent conversation count" }
+        }
+      },
+      "files": {
+        "label": "File Operations",
+        "desc": "Add, exclude, watch, and batch process files",
+        "fields": {
+          "addFiles": { "label": "Add Files", "desc": "--add add files to context" },
+          "excludeFiles": { "label": "Exclude Files", "desc": "--exclude exclude file patterns" },
+          "watchFiles": { "label": "Watch Files", "desc": "--watch watch for file changes" },
+          "batchFile": { "label": "Batch Process", "desc": "--batch batch process files" },
+          "outputFile": { "label": "Output File", "desc": "--output result output file" },
+          "maxFiles": { "label": "File Limit", "desc": "--max-files max files to process" }
+        }
+      },
+      "code": {
+        "label": "Code Analysis",
+        "desc": "Review, refactor, dependency analysis, and test generation",
+        "fields": {
+          "review": { "label": "Code Review", "desc": "--review code review mode" },
+          "refactor": { "label": "Refactor", "desc": "--refactor provide refactor suggestions" },
+          "deps": { "label": "Dependency Analysis", "desc": "--deps analyze dependencies" },
+          "complexity": { "label": "Complexity Check", "desc": "--complexity cyclomatic complexity threshold" },
+          "stats": { "label": "Code Stats", "desc": "--stats code statistics" },
+          "generateTests": { "label": "Test Generation", "desc": "--generate-tests auto-generate tests" }
+        },
+        "reviewOptions": {
+          "off": "Off",
+          "normal": "normal",
+          "strict": "strict"
+        },
+        "depsOptions": {
+          "off": "Off",
+          "list": "list",
+          "tree": "tree"
+        },
+        "statsOptions": {
+          "off": "Off",
+          "lines": "By Lines",
+          "functions": "By Functions",
+          "all": "All"
+        }
+      },
+      "search": {
+        "label": "Search & Query",
+        "desc": "Semantic search, regex matching, and batch replace",
+        "fields": {
+          "search": { "label": "Semantic Search", "desc": "--search natural language search" },
+          "query": { "label": "Code Query", "desc": "--query code structure query" },
+          "grep": { "label": "Regex Match", "desc": "--grep regex search" },
+          "replace": { "label": "Replace", "desc": "--replace batch replace old:new" },
+          "similar": { "label": "Similar Code", "desc": "--similar find similar code" }
+        }
+      },
+      "git": {
+        "label": "Git Integration",
+        "desc": "Commit, PR review, diff analysis, and conflict resolution",
+        "fields": {
+          "commitMsg": { "label": "Commit Message", "desc": "--commit-msg auto-generate commit message" },
+          "prReview": { "label": "PR Review", "desc": "--pr-review PR code review" },
+          "diff": { "label": "Diff Analysis", "desc": "--diff analyze code changes" },
+          "merge": { "label": "Conflict Resolution", "desc": "--merge assist merge conflict resolution" },
+          "logAnalysis": { "label": "Commit History", "desc": "--log-analysis analyze commit history" }
+        }
+      },
+      "debug": {
+        "label": "Debug & Test",
+        "desc": "Debug mode, test runner, and coverage",
+        "fields": {
+          "debug": { "label": "Debug Mode", "desc": "--debug enable debug output" },
+          "test": { "label": "Test Runner", "desc": "--test run test directory" },
+          "coverage": { "label": "Coverage", "desc": "--coverage test coverage target (%)" },
+          "breakpoint": { "label": "Breakpoint", "desc": "--breakpoint set breakpoints" },
+          "watchVar": { "label": "Watch Variable", "desc": "--watch-var watch variable changes" }
+        },
+        "debugOptions": {
+          "off": "Off",
+          "minimal": "minimal",
+          "verbose": "verbose"
+        }
+      },
+      "perf": {
+        "label": "Performance Profiling",
+        "desc": "Profiling, bottleneck detection, and benchmarks",
+        "fields": {
+          "profile": { "label": "Profile", "desc": "--profile code performance profiling" },
+          "bottleneck": { "label": "Bottleneck Detection", "desc": "--bottleneck detect performance bottlenecks" },
+          "optimize": { "label": "Optimization Tips", "desc": "--optimize provide optimization suggestions" },
+          "benchmark": { "label": "Benchmark", "desc": "--benchmark run benchmark iterations" },
+          "memoryLimit": { "label": "Memory Limit", "desc": "--memory-limit memory usage limit" }
+        },
+        "profileOptions": {
+          "off": "Off",
+          "cpu": "CPU",
+          "memory": "Memory",
+          "both": "CPU + Memory"
+        }
+      },
+      "security": {
+        "label": "Security Scan",
+        "desc": "Vulnerability scan, secret detection, and dependency audit",
+        "fields": {
+          "security": { "label": "Security Scan", "desc": "--security vulnerability scan level" },
+          "scanSecrets": { "label": "Secret Detection", "desc": "--scan-secrets detect hardcoded secrets" },
+          "audit": { "label": "Dependency Audit", "desc": "--audit dependency security check" },
+          "permissionsAnalysis": { "label": "Permission Analysis", "desc": "--permissions analyze file permissions" },
+          "encrypt": { "label": "Encrypt Config", "desc": "--encrypt encrypt config files" }
+        },
+        "securityOptions": {
+          "off": "Off",
+          "low": "low",
+          "medium": "medium",
+          "high": "high"
+        },
+        "auditOptions": {
+          "off": "Off",
+          "all": "All"
+        }
+      },
+      "output": {
+        "label": "Output Format",
+        "desc": "Format, color, verbosity, and progress",
+        "fields": {
+          "format": { "label": "Output Format", "desc": "--format output format" },
+          "color": { "label": "Color Output", "desc": "--color enable/disable color" },
+          "verbose": { "label": "Verbosity", "desc": "--verbose output verbosity" },
+          "silent": { "label": "Silent Mode", "desc": "--silent minimize output" },
+          "progress": { "label": "Progress Bar", "desc": "--progress show progress bar" }
+        },
+        "formatOptions": {
+          "text": "text",
+          "stream": "stream-json"
+        },
+        "colorOptions": {
+          "auto": "auto",
+          "always": "always",
+          "never": "never"
+        }
+      },
+      "network": {
+        "label": "Network & Proxy",
+        "desc": "Proxy, timeout, retry, and rate limiting",
+        "fields": {
+          "proxy": { "label": "Proxy", "desc": "--proxy HTTP proxy address" },
+          "timeout": { "label": "Timeout", "desc": "--timeout request timeout" },
+          "retry": { "label": "Retry Strategy", "desc": "--retry retry count and strategy" },
+          "concurrency": { "label": "Concurrency Limit", "desc": "--concurrency concurrent requests" },
+          "rateLimit": { "label": "Rate Limit", "desc": "--rate-limit API rate limiting" }
+        }
+      },
+      "batch": {
+        "label": "Batch Processing",
+        "desc": "Batch commands, parallel execution, and task queues",
+        "fields": {
+          "batchFile": { "label": "Batch File", "desc": "--batch-file batch command file" },
+          "parallel": { "label": "Parallel Exec", "desc": "--parallel parallel task count" },
+          "queue": { "label": "Task Queue", "desc": "--queue task queue mode" },
+          "schedule": { "label": "Scheduled Task", "desc": "--schedule cron expression" },
+          "aggregate": { "label": "Result Aggregation", "desc": "--aggregate aggregate multiple results" }
+        },
+        "queueOptions": {
+          "fifo": "FIFO",
+          "priority": "priority",
+          "roundRobin": "round-robin"
+        },
+        "aggregateOptions": {
+          "off": "Off",
+          "summary": "summary",
+          "detailed": "detailed"
+        }
+      },
+      "cache": {
+        "label": "Cache Control",
+        "desc": "Cache strategy, cleanup, and warm-up",
+        "fields": {
+          "cache": { "label": "Cache Strategy", "desc": "--cache cache read/write strategy" },
+          "clearCache": { "label": "Clear Cache", "desc": "--clear-cache clear all cache" },
+          "warmCache": { "label": "Warm Cache", "desc": "--warm-cache warm up frequent queries" },
+          "cacheStats": { "label": "Cache Stats", "desc": "--cache-stats view cache statistics" }
+        },
+        "cacheOptions": {
+          "readWrite": "read-write",
+          "readOnly": "read-only",
+          "writeOnly": "write-only",
+          "off": "off"
+        }
+      },
+      "plugins": {
+        "label": "Plugin Extensions",
+        "desc": "Install, uninstall, and configure plugins",
+        "fields": {
+          "install": { "label": "Install Plugin", "desc": "--install install plugin package" },
+          "uninstall": { "label": "Uninstall Plugin", "desc": "--uninstall uninstall plugin" },
+          "pluginsList": { "label": "Plugin List", "desc": "--plugins list installed plugins" },
+          "pluginConfig": { "label": "Plugin Config", "desc": "--plugin-config configure specific plugin" }
+        }
+      },
+      "diag": {
+        "label": "Diagnostics",
+        "desc": "Health check, log tracing, and error reporting",
+        "fields": {
+          "health": { "label": "Health Check", "desc": "--health system health status" },
+          "metrics": { "label": "Metrics", "desc": "--metrics output metrics format" },
+          "trace": { "label": "Log Trace", "desc": "--trace trace execution" },
+          "errorReport": { "label": "Error Report", "desc": "--error-report generate error report" },
+          "info": { "label": "System Info", "desc": "--info show system information" }
+        },
+        "errorReportOptions": {
+          "off": "Off",
+          "brief": "brief",
+          "detailed": "detailed"
+        },
+        "infoOptions": {
+          "off": "Off",
+          "version": "version",
+          "env": "env",
+          "all": "all"
+        }
+      },
+      "shortcuts": {
+        "label": "Shortcuts",
+        "desc": "Aliases, hotkeys, and command templates",
+        "fields": {
+          "aliases": { "label": "Aliases", "desc": "--alias create command aliases" },
+          "shortcuts": { "label": "Shortcuts", "desc": "--shortcut hotkey bindings" },
+          "template": { "label": "Templates", "desc": "--template command templates" },
+          "recent": { "label": "Recent Commands", "desc": "--recent show recent commands count" }
+        }
+      },
+      "slash": {
+        "label": "Interactive Commands",
+        "desc": "Runtime /command quick reference",
+        "fields": {
+          "help": { "label": "/help", "desc": "Show help information" },
+          "clear": { "label": "/clear", "desc": "Clear current conversation" },
+          "save": { "label": "/save", "desc": "Save current session" },
+          "load": { "label": "/load", "desc": "Load previous session" },
+          "export": { "label": "/export", "desc": "Export conversation" },
+          "explain": { "label": "/explain", "desc": "Explain selected code" },
+          "fix": { "label": "/fix", "desc": "Auto-fix issues" },
+          "docs": { "label": "/docs", "desc": "Generate documentation" },
+          "test": { "label": "/test", "desc": "Generate tests" },
+          "refactor": { "label": "/refactor", "desc": "Refactor code" },
+          "optimize": { "label": "/optimize", "desc": "Optimize code" },
+          "security": { "label": "/security", "desc": "Security check" }
+        },
+        "exportOptions": {
+          "text": "Plain Text"
+        }
+      },
+      "envVars": {
+        "label": "Environment Variables",
+        "desc": "Claude Code environment variable configuration",
+        "fields": {
+          "apiKey": { "label": "CLAUDE_API_KEY", "desc": "API key" },
+          "configDir": { "label": "CLAUDE_CONFIG_DIR", "desc": "Config directory path" },
+          "cacheDir": { "label": "CLAUDE_CACHE_DIR", "desc": "Cache directory path" },
+          "logLevel": { "label": "CLAUDE_LOG_LEVEL", "desc": "Log level" },
+          "maxTokens": { "label": "CLAUDE_MAX_TOKENS", "desc": "Max tokens" },
+          "model": { "label": "CLAUDE_MODEL", "desc": "Default model" },
+          "temperature": { "label": "CLAUDE_TEMPERATURE", "desc": "Temperature parameter" },
+          "noColor": { "label": "CLAUDE_NO_COLOR", "desc": "Disable color output" },
+          "editor": { "label": "CLAUDE_EDITOR", "desc": "Default editor" }
+        }
+      }
+    },
+    "fieldRenderer": {
+      "on": "On",
+      "off": "Off",
+      "jsonError": "JSON format error",
+      "none": "None",
+      "addHint": "Type and press Enter to add"
+    },
+    "statusBar": {
+      "api": "API",
+      "configured": "Configured",
+      "notConfigured": "Not Configured",
+      "model": "Model",
+      "notSet": "Not Set",
+      "monitoringOn": "Monitoring",
+      "monitoringOff": "Monitor Off",
+      "saving": "Saving...",
+      "unsavedChanges": "Unsaved changes",
+      "lastSaved": "Last saved: {{time}}"
+    },
+    "actions": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "saveConfig": "Save Config",
+      "resetDefault": "Reset to Default",
+      "export": "Export",
+      "import": "Import",
+      "refresh": "Refresh",
+      "importFailed": "Import failed: invalid JSON",
+      "loadFailed": "Failed to load"
+    },
+    "loading": "Loading global config..."
+  }
 }
