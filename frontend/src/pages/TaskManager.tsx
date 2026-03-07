@@ -2,6 +2,7 @@
 // AI 驱动的任务管理 — 待办 → AI分析 → 开发队列
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type InboxItem, type ItemAnalysis, type Project } from "../lib/api";
 import { cn } from "../lib/utils";
 
