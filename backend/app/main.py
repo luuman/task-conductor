@@ -97,6 +97,48 @@ async def _start_tunnel_bg(pin: str):
         ], title="Cloudflare Tunnel 已就绪")
 
 
+async def _init_feishu():
+    """启动时初始化飞书：确保默认群存在"""
+    from .feishu.client import feishu_client
+    from .feishu.dispatcher import set_default_chat_id
+    from .routers.settings_router import _load, _save
+
+    settings = _load()
+    default_chat_id = settings.get("feishu_default_chat_id", "")
+
+    if not default_chat_id:
+        try:
+            data = await feishu_client.create_group("Claude 助手")
+            default_chat_id = data.get("chat_id", "")
+            if not default_chat_id:
+                print("  [Feishu] 创建默认群未返回 chat_id")
+                return
+            settings["feishu_default_chat_id"] = default_chat_id
+            _save(settings)
+            await feishu_client.send_card(
+                default_chat_id,
+                {
+                    "header": {
+                        "template": "blue",
+                        "title": {"tag": "plain_text", "content": "🤖 Claude 助手"},
+                    },
+                    "elements": [{
+                        "tag": "markdown",
+                        "content": "默认对话群已就绪。直接发消息即可与 Claude Code 交互。",
+                    }],
+                },
+            )
+        except Exception as e:
+            print(f"  [Feishu] 创建默认群失败: {e}")
+            return
+
+    set_default_chat_id(default_chat_id)
+    _print_table([
+        ("飞书 App", feishu_client.app_id),
+        ("默认群", default_chat_id),
+    ], title="飞书集成已启动")
+
+
 tags_metadata = [
     {
         "name": "认证",
