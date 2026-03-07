@@ -1280,7 +1280,7 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
   };
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Globe} color="#3b82f6" label={t("claudeConfig.mcp.title")} desc="Model Context Protocol 服务器管理"
+      <SectionHeader icon={Globe} color="#3b82f6" label={t("claudeConfig.mcp.title")} desc={t("claudeConfig.sectionDesc.mcp")}
         right={<div className="flex gap-2">
           <button onClick={refresh} disabled={refreshing} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app"><RotateCcw size={10} className={refreshing ? "animate-spin" : ""} /> {t("common.refresh")}</button>
           <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> {t("common.add")}</button>
