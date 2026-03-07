@@ -389,6 +389,12 @@
       "clearCredentials": "清除本地凭据返回登录页",
       "disconnect": "断开连接"
     },
+    "language": {
+      "title": "语言",
+      "hint": "切换界面显示语言",
+      "zh": "中文",
+      "en": "English"
+    },
     "shutdown": {
       "title": "关闭服务",
       "hint": "停止后端进程",
