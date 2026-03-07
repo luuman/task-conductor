@@ -1295,8 +1295,8 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
           </div>
           {addError && <p className="text-[11px] text-red-400">{addError}</p>}
           <div className="flex gap-2">
-            <button onClick={handleAdd} disabled={adding || !addForm.name.trim() || !addForm.url.trim()} className={cn("text-[11px] px-3 py-1.5 rounded-md font-medium", addForm.name.trim() && addForm.url.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>{adding ? "添加中..." : "添加"}</button>
-            <button onClick={() => { setShowAdd(false); setAddError(""); }} className="text-[11px] text-app-tertiary hover:text-app px-3 py-1.5">取消</button>
+            <button onClick={handleAdd} disabled={adding || !addForm.name.trim() || !addForm.url.trim()} className={cn("text-[11px] px-3 py-1.5 rounded-md font-medium", addForm.name.trim() && addForm.url.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>{adding ? t("common.loading") : t("common.add")}</button>
+            <button onClick={() => { setShowAdd(false); setAddError(""); }} className="text-[11px] text-app-tertiary hover:text-app px-3 py-1.5">{t("common.cancel")}</button>
           </div>
         </div>
       )}
