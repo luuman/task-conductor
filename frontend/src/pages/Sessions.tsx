@@ -365,7 +365,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
                 ? { background: "var(--background-secondary)", color: "var(--text-primary)" }
                 : { color: "var(--text-secondary)" }}
             >
-              ◷ 历史
+              {t('sessions.viewTabs.history')}
             </button>
           </div>
 
