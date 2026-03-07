@@ -58,6 +58,7 @@ function PriorityBadge({ n }: { n: number }) {
 // ── 主页面 ───────────────────────────────────────────────────
 
 export default function TaskManager({ projects }: { projects: Project[] }) {
+  const { t } = useTranslation();
   // 待办清单
   const [inbox, setInbox] = useState<InboxItem[]>([]);
   const [inputTitle, setInputTitle] = useState("");
