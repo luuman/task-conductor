@@ -267,6 +267,7 @@ function ConfigPanel({
   onColorChange:   (key: string, val: string) => void;
   onSettingChange: (key: string, val: string) => void;
 }) {
+  const { t } = useTranslation();
   const colorMetas   = METRIC_COLORS[mc.id];
   const settingMetas = METRIC_SETTINGS[mc.id];
 
@@ -274,26 +275,27 @@ function ConfigPanel({
     <div className="flex flex-col h-full overflow-y-auto pb-3">
       {colorMetas.length > 0 && (
         <>
-          <SectionHead label="菜单颜色" />
+          <SectionHead label={t('perf.settings.menuColor')} />
           {colorMetas.map(cm => (
-            <ColorRow key={cm.key} label={cm.label} colorKey={cm.key}
+            <ColorRow key={cm.key} label={t(cm.label)} colorKey={cm.key}
               value={mc.colors[cm.key] ?? cm.default} onChange={onColorChange} />
           ))}
         </>
       )}
       {settingMetas.length > 0 && (
         <>
-          <SectionHead label="菜单设置" />
+          <SectionHead label={t('perf.settings.menuSettings')} />
           {settingMetas.map(sm => (
-            <SettingRow key={sm.key} label={sm.label} optionKey={sm.key}
+            <SettingRow key={sm.key} label={t(sm.label)} optionKey={sm.key}
               value={mc.settings[sm.key] ?? sm.options[0].value}
-              options={sm.options} onChange={onSettingChange} />
+              options={sm.options.map(opt => ({ ...opt, label: opt.label.startsWith('perf.') ? t(opt.label) : opt.label }))}
+              onChange={onSettingChange} />
           ))}
         </>
       )}
       {colorMetas.length === 0 && settingMetas.length === 0 && (
         <div className="px-4 py-10 text-center">
-          <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>该指标暂无可配置项</p>
+          <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>{t('perf.settings.noConfigurable')}</p>
         </div>
       )}
     </div>
