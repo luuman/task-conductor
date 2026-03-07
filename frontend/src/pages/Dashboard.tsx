@@ -844,7 +844,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
           <Badge variant="default">{tasks.length} {t('dashboard.projectCard.taskCount')}</Badge>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setKnowledgeOpen(true)}>知识库</Button>
+          <Button variant="ghost" size="sm" onClick={() => setKnowledgeOpen(true)}>{t('dashboard.projectTaskList.knowledgeBase')}</Button>
           <NewTaskButton projectId={projectId} onCreated={(t) => { setTasks((p) => [t, ...p]); onOpenTask(t.id); }} />
         </div>
       </div>
