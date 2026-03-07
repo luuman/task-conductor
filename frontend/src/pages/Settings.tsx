@@ -264,9 +264,9 @@ export default function Settings({ onDisconnect }: SettingsProps) {
         <section className="bg-app-secondary border border-red-500/20 rounded-xl overflow-hidden">
           <div className="px-4 py-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-app font-semibold">关闭服务</p>
+              <p className="text-xs text-app font-semibold">{t('settings.shutdown.title')}</p>
               <p className="text-[10px] text-app-tertiary mt-0.5">
-                停止后端进程，关闭后需要在服务器上手动重新启动
+                {t('settings.shutdown.hint')}
               </p>
             </div>
             <button
