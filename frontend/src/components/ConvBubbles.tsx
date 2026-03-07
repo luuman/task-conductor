@@ -101,7 +101,7 @@ function Banner({ b }: { b: Extract<Bubble, { kind: "banner" }> }) {
   );
 }
 
-function ToolCard({ b }: { b: Extract<Bubble, { kind: "tool" }> }) {
+function ToolCard({ b, t }: { b: Extract<Bubble, { kind: "tool" }>; t: (key: string) => string }) {
   return (
     <div className="mx-4 my-1.5 rounded-lg overflow-hidden"
          style={{ border: "1px solid var(--border)", background: "var(--background-secondary)" }}>
@@ -110,7 +110,7 @@ function ToolCard({ b }: { b: Extract<Bubble, { kind: "tool" }> }) {
         <span className="text-[11px] font-semibold text-[#79c0ff]">{b.name}</span>
         {!b.done && (
           <span className="text-[10px] animate-pulse" style={{ color: "var(--text-tertiary)" }}>
-            执行中...
+            {t('convBubbles.toolExecuting')}
           </span>
         )}
         {b.done && (
