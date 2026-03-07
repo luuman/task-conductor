@@ -1866,7 +1866,7 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
 
   return (
     <div className="space-y-4">
-      <SectionHeader icon={ArchiveRestore} color="#f59e0b" label="回收站" desc="已禁用的组件，可恢复或永久删除"
+      <SectionHeader icon={ArchiveRestore} color="#f59e0b" label={t("claudeConfig.trash.title")} desc="已禁用的组件，可恢复或永久删除"
         right={items.length > 0 ? (
           <div className="flex items-center gap-2">
             <button onClick={handleRestoreAll}
