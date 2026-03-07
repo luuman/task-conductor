@@ -144,7 +144,8 @@ function buildTree(items: FileItem[]): TreeNode[] {
   const getOrCreateDir = (pathParts: string[], fullPath: string): TreeNode => {
     const existing = dirs.get(fullPath);
     if (existing) return existing;
-    const node: TreeNode = { name: pathParts[pathParts.length - 1], path: fullPath, isDir: true, children: [] };
+    const dirName = pathParts[pathParts.length - 1];
+    const node: TreeNode = { name: dirName, displayName: dirName, path: fullPath, isDir: true, children: [] };
     dirs.set(fullPath, node);
 
     if (pathParts.length === 1) {
