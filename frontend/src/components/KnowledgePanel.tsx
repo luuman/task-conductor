@@ -152,7 +152,7 @@ function KnowledgeItem({ item, onDelete }: { item: ProjectKnowledge; onDelete: (
             </Badge>
             {item.stage && (
               <span className="text-[10px] text-app-tertiary">
-                {STAGE_LABEL[item.stage] ?? item.stage}
+                {STAGE_KEYS[item.stage] ? t(STAGE_KEYS[item.stage]) : item.stage}
               </span>
             )}
           </div>
