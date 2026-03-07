@@ -120,7 +120,7 @@ def test_token_summary_empty():
     assert s["total_input"] == 0
     assert s["session_count"] == 0
     assert s["by_model"] == []
-    assert len(s["hourly"]) == 24
+    assert s["hourly"] == []
 
 
 def test_record_tokens_and_summary():
