@@ -1,5 +1,5 @@
 // frontend/src/components/ConvTranscript.tsx
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -123,45 +123,261 @@ function toolLabel(name: string | null | undefined, input: Record<string, unknow
       return `WebFetch(${String(input.url || "").slice(0, 80)})`;
     case "Agent":
       return `Agent(${String(input.description || input.prompt || "").slice(0, 80)})`;
-    case "TodoWrite":
-      return "TodoWrite";
-    case "TodoRead":
-      return "TodoRead";
     default:
       return name;
   }
 }
 
-// ── Edit 差异摘要 ────────────────────────────────────────────
-function editDiffSummary(input: Record<string, unknown> | null | undefined): string | null {
-  if (!input) return null;
-  const oldStr = String(input.old_string ?? "");
-  const newStr = String(input.new_string ?? "");
-  if (!oldStr && !newStr) return null;
-
-  const oldLines = oldStr ? oldStr.split("\n").length : 0;
-  const newLines = newStr ? newStr.split("\n").length : 0;
-  const added = Math.max(0, newLines - oldLines);
-  const removed = Math.max(0, oldLines - newLines);
-  const parts: string[] = [];
-  if (added > 0) parts.push(`+${added}`);
-  if (removed > 0) parts.push(`-${removed}`);
-  if (parts.length === 0 && oldLines > 0) parts.push(`~${oldLines} lines`);
-  return parts.join(", ");
+// ── 简单 diff 算法 ──────────────────────────────────────────
+interface DiffLine {
+  type: "added" | "removed" | "unchanged";
+  text: string;
+  oldNum?: number;
+  newNum?: number;
 }
 
-// ── 结果展示（可展开）────────────────────────────────────────
-const RESULT_TRUNCATE = 600;
+function computeDiff(oldStr: string, newStr: string): { lines: DiffLine[]; added: number; removed: number } {
+  const oldLines = oldStr.split("\n");
+  const newLines = newStr.split("\n");
+  const result: DiffLine[] = [];
+  let added = 0, removed = 0;
 
-function ResultContent({ result, isError }: { result: string; isError: boolean }) {
+  // Simple LCS-based diff
+  const m = oldLines.length, n = newLines.length;
+
+  // For performance, if both are large, use a simpler approach
+  if (m + n > 500) {
+    // Fallback: show all old as removed, all new as added
+    let oldNum = 1;
+    for (const line of oldLines) {
+      result.push({ type: "removed", text: line, oldNum: oldNum++ });
+      removed++;
+    }
+    let newNum = 1;
+    for (const line of newLines) {
+      result.push({ type: "added", text: line, newNum: newNum++ });
+      added++;
+    }
+    return { lines: result, added, removed };
+  }
+
+  // Build LCS table
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = oldLines[i - 1] === newLines[j - 1]
+        ? dp[i - 1][j - 1] + 1
+        : Math.max(dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+
+  // Backtrack
+  const diffParts: DiffLine[] = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
+      diffParts.push({ type: "unchanged", text: oldLines[i - 1], oldNum: i, newNum: j });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      diffParts.push({ type: "added", text: newLines[j - 1], newNum: j });
+      added++;
+      j--;
+    } else {
+      diffParts.push({ type: "removed", text: oldLines[i - 1], oldNum: i });
+      removed++;
+      i--;
+    }
+  }
+
+  diffParts.reverse();
+
+  // Collapse long unchanged regions (>4 lines) into context
+  let contextLines = 0;
+  for (const d of diffParts) {
+    if (d.type === "unchanged") {
+      contextLines++;
+    } else {
+      contextLines = 0;
+    }
+    result.push(d);
+  }
+
+  return { lines: result, added, removed };
+}
+
+// ── Edit Diff 视图组件 ──────────────────────────────────────
+function EditDiffView({ input }: { input: Record<string, unknown> }) {
+  const oldStr = String(input.old_string ?? "");
+  const newStr = String(input.new_string ?? "");
+  const filePath = String(input.file_path ?? "");
+  const shortPath = filePath.split("/").pop() || filePath;
+
+  const { lines, added, removed } = useMemo(() => computeDiff(oldStr, newStr), [oldStr, newStr]);
+
+  // Collapse runs of >3 unchanged lines into a "... N unchanged lines ..." divider
+  const rendered: (DiffLine | { type: "collapse"; count: number })[] = [];
+  let unchangedRun: DiffLine[] = [];
+
+  const flushUnchanged = () => {
+    if (unchangedRun.length <= 3) {
+      rendered.push(...unchangedRun);
+    } else {
+      rendered.push(unchangedRun[0]);
+      rendered.push({ type: "collapse", count: unchangedRun.length - 2 });
+      rendered.push(unchangedRun[unchangedRun.length - 1]);
+    }
+    unchangedRun = [];
+  };
+
+  for (const line of lines) {
+    if (line.type === "unchanged") {
+      unchangedRun.push(line);
+    } else {
+      if (unchangedRun.length > 0) flushUnchanged();
+      rendered.push(line);
+    }
+  }
+  if (unchangedRun.length > 0) flushUnchanged();
+
+  return (
+    <div className="my-1.5 rounded-lg overflow-hidden text-[11px] font-mono"
+         style={{ border: "1px solid var(--border)" }}>
+      {/* 头部：文件名 + 统计 */}
+      <div className="flex items-center gap-2 px-3 py-1.5"
+           style={{ background: "rgba(210,153,34,0.08)", borderBottom: "1px solid var(--border)" }}>
+        <span style={{ color: "#d29922" }}>✎</span>
+        <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{shortPath}</span>
+        <span className="flex-1" />
+        {added > 0 && <span style={{ color: "#3fb950" }}>+{added}</span>}
+        {removed > 0 && <span style={{ color: "#f85149" }}>-{removed}</span>}
+      </div>
+      {/* Diff 内容 */}
+      <div className="overflow-x-auto max-h-[440px] overflow-y-auto"
+           style={{ background: "#0d1117" }}>
+        {rendered.map((item, idx) => {
+          if ("count" in item) {
+            return (
+              <div key={idx} className="px-4 py-0.5 text-center text-[10px]"
+                   style={{ background: "rgba(255,255,255,0.02)", color: "var(--text-tertiary)", borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                ⋯ {item.count} unchanged lines ⋯
+              </div>
+            );
+          }
+          const bg = item.type === "added"
+            ? "rgba(63,185,80,0.10)"
+            : item.type === "removed"
+            ? "rgba(248,81,73,0.10)"
+            : "transparent";
+          const numColor = item.type === "added"
+            ? "rgba(63,185,80,0.5)"
+            : item.type === "removed"
+            ? "rgba(248,81,73,0.5)"
+            : "rgba(255,255,255,0.15)";
+          const textColor = item.type === "added"
+            ? "#aff5b4"
+            : item.type === "removed"
+            ? "#ffa198"
+            : "#8b949e";
+          const sign = item.type === "added" ? "+" : item.type === "removed" ? "-" : " ";
+          const lineNum = item.type === "removed" ? item.oldNum : item.newNum;
+
+          return (
+            <div key={idx} className="flex leading-[1.6]" style={{ background: bg }}>
+              {/* 行号 */}
+              <span className="w-[40px] text-right pr-2 select-none shrink-0"
+                    style={{ color: numColor }}>
+                {lineNum ?? ""}
+              </span>
+              {/* +/- 标记 */}
+              <span className="w-[16px] text-center select-none shrink-0"
+                    style={{ color: item.type === "added" ? "#3fb950" : item.type === "removed" ? "#f85149" : "transparent" }}>
+                {sign}
+              </span>
+              {/* 代码内容 */}
+              <span className="flex-1 whitespace-pre" style={{ color: textColor }}>
+                {item.text || " "}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Bash 结果块 ─────────────────────────────────────────────
+function BashResultBlock({ command, result, isError }: { command: string; result: string; isError: boolean }) {
   const [expanded, setExpanded] = useState(false);
-  const needsTruncate = result.length > RESULT_TRUNCATE;
-  const displayed = expanded || !needsTruncate ? result : result.slice(0, RESULT_TRUNCATE) + "…";
+  const lines = result.split("\n");
+  const isLong = lines.length > 12;
+  const displayed = expanded || !isLong ? result : lines.slice(0, 8).join("\n") + "\n…";
+
+  return (
+    <div className="my-1.5 rounded-lg overflow-hidden text-[11px] font-mono"
+         style={{ border: `1px solid ${isError ? "rgba(248,81,73,0.3)" : "var(--border)"}` }}>
+      {/* 命令头 */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5"
+           style={{ background: "rgba(188,140,255,0.06)", borderBottom: "1px solid var(--border)" }}>
+        <span style={{ color: "#bc8cff", fontWeight: 600 }}>$</span>
+        <span className="flex-1 truncate" style={{ color: "var(--text-secondary)" }}>{command}</span>
+      </div>
+      {/* 输出 */}
+      <div className="overflow-x-auto max-h-[400px] overflow-y-auto" style={{ background: "#0d1117" }}>
+        <pre className="px-3 py-2 whitespace-pre-wrap break-words leading-[1.5]"
+             style={{ color: isError ? "#ffa198" : "#8b949e", margin: 0 }}>
+          {displayed}
+        </pre>
+      </div>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="w-full px-3 py-1 text-[10px] text-left hover:bg-white/[0.02]"
+          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)" }}>
+          {expanded ? "收起" : `展开全部 (${lines.length} 行)`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Read 结果块 ─────────────────────────────────────────────
+function ReadResultBlock({ result, isError }: { result: string; isError: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const lines = result.split("\n");
+  const isLong = lines.length > 15;
+  const displayed = expanded || !isLong ? result : lines.slice(0, 10).join("\n") + "\n…";
+
+  return (
+    <div className="my-1.5 rounded-lg overflow-hidden text-[11px] font-mono"
+         style={{ border: `1px solid ${isError ? "rgba(248,81,73,0.3)" : "var(--border)"}` }}>
+      <div className="overflow-x-auto max-h-[500px] overflow-y-auto" style={{ background: "#0d1117" }}>
+        <pre className="px-3 py-2 whitespace-pre-wrap break-words leading-[1.5]"
+             style={{ color: isError ? "#ffa198" : "#8b949e", margin: 0 }}>
+          {displayed}
+        </pre>
+      </div>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="w-full px-3 py-1 text-[10px] text-left hover:bg-white/[0.02]"
+          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)" }}>
+          {expanded ? "收起" : `展开全部 (${lines.length} 行)`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── 通用结果块 ──────────────────────────────────────────────
+function GenericResultBlock({ result, isError }: { result: string; isError: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const needsTruncate = result.length > 600;
+  const displayed = expanded || !needsTruncate ? result : result.slice(0, 600) + "…";
 
   return (
     <div className="mt-0.5">
       <pre className="text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[400px] overflow-y-auto leading-[1.5]"
-           style={{ color: isError ? "#f85149" : "var(--text-tertiary)", margin: 0 }}>
+           style={{ color: isError ? "#ffa198" : "var(--text-tertiary)", margin: 0 }}>
         {displayed}
       </pre>
       {needsTruncate && (
@@ -176,6 +392,22 @@ function ResultContent({ result, isError }: { result: string; isError: boolean }
   );
 }
 
+// ── Edit 差异摘要 ────────────────────────────────────────────
+function editDiffSummary(input: Record<string, unknown> | null | undefined): string | null {
+  if (!input) return null;
+  const oldStr = String(input.old_string ?? "");
+  const newStr = String(input.new_string ?? "");
+  if (!oldStr && !newStr) return null;
+  const oldLines = oldStr ? oldStr.split("\n").length : 0;
+  const newLines = newStr ? newStr.split("\n").length : 0;
+  const added = Math.max(0, newLines - oldLines);
+  const removed = Math.max(0, oldLines - newLines);
+  const parts: string[] = [];
+  if (added > 0 || newLines > 0) parts.push(`Added ${added || newLines} line${(added || newLines) > 1 ? "s" : ""}`);
+  if (removed > 0 || oldLines > 0) parts.push(`removed ${removed || oldLines} line${(removed || oldLines) > 1 ? "s" : ""}`);
+  return parts.join(", ");
+}
+
 // ── 工具调用行（CLI 风格 ● ToolName(summary)）──────────────
 function ToolLine({ block }: { block: TranscriptBlock }) {
   const [open, setOpen] = useState(false);
@@ -186,19 +418,19 @@ function ToolLine({ block }: { block: TranscriptBlock }) {
   const hasResult = block.tool_result != null && block.tool_result !== "";
   const isError = block.tool_error === true;
   const isEdit = block.tool_name === "Edit" || block.tool_name === "MultiEdit";
+  const isBash = block.tool_name === "Bash";
+  const isRead = block.tool_name === "Read";
+  const hasEditData = isEdit && block.tool_input && (block.tool_input.old_string || block.tool_input.new_string);
   const diffInfo = isEdit ? editDiffSummary(block.tool_input) : null;
-
-  // Determine result summary for collapsed view
-  const resultPreview = hasResult
-    ? block.tool_result!.split("\n").slice(0, 2).join(" ").slice(0, 120)
-    : null;
+  const bashCmd = isBash ? String(block.tool_input?.command ?? "") : "";
+  const hasExpandable = hasResult || hasEditData;
 
   return (
     <div className="group">
       {/* ● 工具名(摘要) */}
       <button
-        onClick={toggle}
-        className="flex items-start gap-2 w-full text-left py-0.5 hover:bg-white/[0.02] rounded px-1 -mx-1 transition-colors"
+        onClick={hasExpandable ? toggle : undefined}
+        className={`flex items-start gap-2 w-full text-left py-0.5 rounded px-1 -mx-1 transition-colors ${hasExpandable ? "hover:bg-white/[0.02] cursor-pointer" : "cursor-default"}`}
       >
         {/* ● 圆点 */}
         <span className="shrink-0 text-[10px] mt-[3px] leading-none" style={{ color }}>●</span>
@@ -207,43 +439,62 @@ function ToolLine({ block }: { block: TranscriptBlock }) {
           <span className="text-[12px] font-mono" style={{ color }}>
             {label}
           </span>
-          {/* Edit 差异信息 */}
-          {diffInfo && (
-            <span className="text-[10px] ml-1.5 font-mono" style={{ color: "var(--text-tertiary)" }}>
-              ({diffInfo})
-            </span>
-          )}
           {/* 错误标记 */}
           {isError && (
-            <span className="text-[10px] ml-1.5 font-mono" style={{ color: "#f85149" }}>ERROR</span>
+            <span className="text-[10px] ml-1.5 font-mono px-1.5 py-0.5 rounded-sm"
+                  style={{ color: "#f85149", background: "rgba(248,81,73,0.1)" }}>
+              ERROR
+            </span>
           )}
         </span>
         {/* 展开箭头 */}
-        {hasResult && (
-          <span className="shrink-0 text-[9px] mt-[3px] opacity-40 transition-transform"
+        {hasExpandable && (
+          <span className="shrink-0 text-[9px] mt-[4px] opacity-30 group-hover:opacity-60 transition-all"
                 style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}>
             ▶
           </span>
         )}
       </button>
 
-      {/* ⎿ 结果预览（折叠时） */}
-      {!open && hasResult && resultPreview && (
+      {/* ⎿ 折叠摘要 */}
+      {!open && (
         <div className="flex items-start gap-2 pl-1">
           <span className="shrink-0 text-[12px] leading-none mt-[1px]" style={{ color: "var(--border)" }}>⎿</span>
-          <span className="text-[11px] font-mono truncate" style={{ color: "var(--text-tertiary)" }}>
-            {resultPreview}
+          <span className="text-[11px] truncate" style={{ color: "var(--text-tertiary)" }}>
+            {isEdit && diffInfo ? (
+              <span className="font-mono">{diffInfo}</span>
+            ) : isBash && hasResult ? (
+              <span className="font-mono">{block.tool_result!.split("\n").slice(0, 1).join("").slice(0, 120) || "(no output)"}</span>
+            ) : isRead && hasResult ? (
+              <span className="font-mono">{block.tool_result!.split("\n").length} lines</span>
+            ) : hasResult ? (
+              <span className="font-mono">{block.tool_result!.split("\n").slice(0, 1).join("").slice(0, 120)}</span>
+            ) : (
+              <span className="opacity-50">(no output)</span>
+            )}
           </span>
         </div>
       )}
 
-      {/* ⎿ 结果详情（展开时）*/}
-      {open && hasResult && (
-        <div className="flex items-start gap-2 pl-1">
-          <span className="shrink-0 text-[12px] leading-none mt-[1px]" style={{ color: "var(--border)" }}>⎿</span>
-          <div className="flex-1 min-w-0">
-            <ResultContent result={block.tool_result!} isError={isError} />
-          </div>
+      {/* 展开详情 */}
+      {open && (
+        <div className="pl-5">
+          {/* Edit: 显示 diff 视图 */}
+          {hasEditData && (
+            <EditDiffView input={block.tool_input!} />
+          )}
+          {/* Bash: 显示命令 + 输出 */}
+          {isBash && hasResult && (
+            <BashResultBlock command={bashCmd} result={block.tool_result!} isError={isError} />
+          )}
+          {/* Read: 显示文件内容 */}
+          {isRead && hasResult && (
+            <ReadResultBlock result={block.tool_result!} isError={isError} />
+          )}
+          {/* 其他工具: 通用结果 */}
+          {!isEdit && !isBash && !isRead && hasResult && (
+            <GenericResultBlock result={block.tool_result!} isError={isError} />
+          )}
         </div>
       )}
     </div>
@@ -256,9 +507,9 @@ function UserLine({ msg }: { msg: TranscriptMessage }) {
   if (!text) return null;
 
   return (
-    <div className="flex items-start gap-2 py-1">
+    <div className="flex items-start gap-2 pt-2 pb-1">
       <span className="shrink-0 text-[13px] font-bold mt-[1px]" style={{ color: "#59c2ff" }}>❯</span>
-      <div className="flex-1 min-w-0 text-[12px] leading-relaxed" style={{ color: "#e6e1cf" }}>
+      <div className="flex-1 min-w-0 text-[12px] leading-relaxed font-medium" style={{ color: "#e6e1cf" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
           {text}
         </ReactMarkdown>
@@ -283,21 +534,6 @@ function AssistantBlock({ msg }: { msg: TranscriptMessage }) {
           <ToolLine key={i} block={block} />
         )
       )}
-    </div>
-  );
-}
-
-// ── 时间分隔符 ──────────────────────────────────────────────
-function TimeSeparator({ ts }: { ts: string }) {
-  const d = new Date(ts);
-  const time = d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  return (
-    <div className="flex items-center gap-2 py-1">
-      <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.3 }} />
-      <span className="text-[9px] font-mono shrink-0" style={{ color: "var(--text-tertiary)", opacity: 0.5 }}>
-        {time}
-      </span>
-      <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.3 }} />
     </div>
   );
 }
@@ -342,25 +578,16 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
     );
   }
 
-  // Group consecutive messages and insert time separators
-  let lastTs = "";
-
   return (
-    <div className="px-5 py-3 space-y-1 font-[system-ui]" style={{ maxWidth: 860, margin: "0 auto" }}>
-      {messages.map((msg, i) => {
-        const showTime = msg.ts && msg.ts !== lastTs;
-        if (msg.ts) lastTs = msg.ts;
-
-        return (
-          <div key={i}>
-            {showTime && msg.ts && <TimeSeparator ts={msg.ts} />}
-            {msg.role === "user"
-              ? <UserLine msg={msg} />
-              : <AssistantBlock msg={msg} />
-            }
-          </div>
-        );
-      })}
+    <div className="px-5 py-3 space-y-0.5 font-[system-ui]" style={{ maxWidth: 860, margin: "0 auto" }}>
+      {messages.map((msg, i) => (
+        <div key={i}>
+          {msg.role === "user"
+            ? <UserLine msg={msg} />
+            : <AssistantBlock msg={msg} />
+          }
+        </div>
+      ))}
       <div ref={bottomRef} />
     </div>
   );
