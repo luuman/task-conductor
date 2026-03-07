@@ -185,6 +185,9 @@ export interface TranscriptBlock {
   text?: string;
   tool_name?: string | null;
   tool_input?: Record<string, unknown> | null;
+  tool_use_id?: string | null;
+  tool_result?: string | null;
+  tool_error?: boolean | null;
 }
 
 export interface TranscriptMessage {
