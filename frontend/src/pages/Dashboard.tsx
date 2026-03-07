@@ -121,7 +121,7 @@ function ClaudeMetricsPanel() {
 
         {/* ── 成本追踪 ── */}
         <div className="p-4 border-b lg:border-b-0 border-r-0 lg:border-r border-app space-y-2">
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">成本估算</p>
+          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">{t('dashboard.claudeMetrics.costEstimate')}</p>
           <p className={cn("text-[22px] font-bold tabular-nums leading-none",
             tokens.total_cost_usd > 1 ? "text-yellow-400" : "text-app")}>
             {fmtCost(tokens.total_cost_usd)}
