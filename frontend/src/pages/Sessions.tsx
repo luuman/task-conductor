@@ -436,7 +436,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
           ) : historyLoading ? (
             <div className="flex items-center justify-center h-full text-[12px] font-mono"
                  style={{ color: "var(--text-tertiary)" }}>
-              加载历史事件...
+              {t('sessions.statusBar.loadingHistory')}
             </div>
           ) : (
             <EventTable
