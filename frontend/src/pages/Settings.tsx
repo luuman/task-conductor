@@ -1,5 +1,6 @@
 // frontend/src/pages/Settings.tsx
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, getConfig, clearConfig } from "../lib/api";
 import { cn } from "../lib/utils";
 import { PerfSettings } from "../modules/perf/settings/PerfSettings";
