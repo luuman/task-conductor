@@ -93,7 +93,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
             value={tagInput}
             onChange={e => setTagInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && addTag()}
-            placeholder="输入标签后按 Enter"
+            placeholder={t('convEdit.tagsPlaceholder')}
             className="flex-1 rounded px-2.5 py-1.5 text-[11px] outline-none"
             style={{
               background: "var(--background-tertiary)",
