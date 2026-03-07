@@ -631,7 +631,7 @@ export default function ProjectsCanvas({
             Bubble Chart
           </span>
           <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-            {loading ? "加载中..." : `${projects.length} 项目 · 滚轮缩放 · 拖拽平移 · 点击操作`}
+            {loading ? t('projectsCanvas.header.loading') : t('projectsCanvas.header.info', { count: projects.length })}
           </span>
 
           <div style={{ flex: 1 }} />
