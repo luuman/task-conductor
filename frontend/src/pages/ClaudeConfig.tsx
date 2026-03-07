@@ -1833,10 +1833,10 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
     setDeleting(item.name);
     try {
       await api.claudeConfig.deleteDisabledItem(item.type, item.name);
-      setStatus({ text: `已永久删除 "${item.name}"`, color: "#22c55e" });
+      setStatus({ text: `${t("claudeConfig.trash.permanentlyDeleted")} "${item.name}"`, color: "#22c55e" });
       onRefresh();
     } catch (e) {
-      setStatus({ text: e instanceof Error ? e.message : "删除失败", color: "#ef4444" });
+      setStatus({ text: e instanceof Error ? e.message : t("claudeConfig.trash.deleteFailed"), color: "#ef4444" });
     } finally {
       setDeleting(null);
       setTimeout(() => setStatus(null), 3000);
