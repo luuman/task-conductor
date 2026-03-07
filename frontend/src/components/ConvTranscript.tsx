@@ -336,11 +336,10 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
     : "";
 
   return (
-    <div className="rounded-lg overflow-hidden my-1.5"
-         style={{ border: "1px solid var(--border)", background: "var(--background-tertiary)" }}>
+    <div className="my-1">
       <button
         onClick={canExpand ? toggle : undefined}
-        className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${canExpand ? "hover:brightness-110" : ""}`}
+        className={`w-full flex items-center gap-2 py-1 text-left transition-colors rounded ${canExpand ? "hover:bg-white/[0.03]" : ""}`}
       >
         <ToolIcon name={toolName} size={14} />
         <span className="text-[11.5px] font-semibold shrink-0" style={{ color: "var(--text-primary)" }}>
@@ -370,7 +369,7 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
         )}
       </button>
       {open && (
-        <div className="px-3 pb-3" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="pt-1 pb-1">
           {hasEditData && <EditDiffView input={block.tool_input!} />}
           {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
           {!isEdit && !isBash && hasResult && <OutputBlock result={block.tool_result!} isError={isError} />}
