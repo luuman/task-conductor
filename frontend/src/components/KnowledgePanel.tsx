@@ -86,7 +86,7 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
         <input
           value={filter}
           onChange={e => setFilter(e.target.value)}
-          placeholder="搜索知识条目..."
+          placeholder={t('knowledgePanel.search')}
           className="w-full bg-app-secondary border border-app rounded px-2.5 py-1.5 text-xs text-app outline-none focus:border-accent"
         />
       </div>
