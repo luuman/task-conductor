@@ -355,9 +355,9 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
 
           {task.status === "rejected" && (
             <div className="bg-red-900/10 border border-red-800/30 rounded-lg p-3">
-              <p className="text-xs text-red-400">已驳回，可重新触发当前阶段</p>
+              <p className="text-xs text-red-400">{t('taskPipeline.actionBanner.rejectedRetrigger')}</p>
               <Button size="sm" className="mt-2" onClick={() => handleRunStage(task.stage)}>
-                重新执行
+                {t('taskPipeline.actionBanner.reExecute')}
               </Button>
             </div>
           )}
