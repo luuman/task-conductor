@@ -425,7 +425,7 @@ export default function ClaudeConfigPage() {
           )}
           {loading && !config && (
             <div className="flex items-center justify-center h-40">
-              <p className="text-app-tertiary text-xs animate-pulse">加载配置信息...</p>
+              <p className="text-app-tertiary text-xs animate-pulse">{t("claudeConfig.shared.loadingConfig")}</p>
             </div>
           )}
 
