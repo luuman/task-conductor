@@ -613,26 +613,26 @@ function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated:
       {open && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-app-secondary border border-app rounded-xl p-5 w-96 space-y-3 shadow-2xl">
-            <h2 className="text-sm font-semibold text-app">新建任务</h2>
+            <h2 className="text-sm font-semibold text-app">{t('dashboard.newTask.button')}</h2>
             <input
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="任务标题"
+              placeholder={t('dashboard.newTask.titlePlaceholder')}
               className="w-full bg-app-tertiary border border-app rounded-md px-3 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent"
             />
             <textarea
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              placeholder="需求描述（可选）"
+              placeholder={t('dashboard.newTask.descPlaceholder')}
               rows={3}
               className="w-full bg-app-tertiary border border-app rounded-md px-3 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent resize-none"
             />
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setOpen(false)} className="text-xs text-app-tertiary hover:text-app px-3 py-1.5">取消</button>
+              <button onClick={() => setOpen(false)} className="text-xs text-app-tertiary hover:text-app px-3 py-1.5">{t('common.cancel')}</button>
               <button onClick={handleCreate} disabled={!title.trim() || loading}
                 className="text-xs bg-accent hover:bg-accent-hover text-white px-3 py-1.5 rounded-md disabled:opacity-40">
-                {loading ? "创建中..." : "创建"}
+                {loading ? t('dashboard.newTask.creating') : t('dashboard.newTask.create')}
               </button>
             </div>
           </div>
