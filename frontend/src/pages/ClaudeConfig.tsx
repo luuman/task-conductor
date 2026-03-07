@@ -1759,7 +1759,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
     finally { setChecking(false); }
   };
   const infoItems = [
-    { label: "配置目录", value: systemInfo?.home_path || overview?.home_path || "~/.claude" },
+    { label: t("claudeConfig.about.configDir"), value: systemInfo?.home_path || overview?.home_path || "~/.claude" },
     { label: "配置文件", value: systemInfo?.config_path || "~/.claude/settings.json" },
     { label: "缓存目录", value: systemInfo?.cache_dir || "~/.claude/cache" },
     { label: "缓存大小", value: systemInfo ? `${systemInfo.cache_size_mb.toFixed(1)} MB` : "..." },
