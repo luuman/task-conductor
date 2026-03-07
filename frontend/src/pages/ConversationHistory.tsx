@@ -125,8 +125,20 @@ export default function ConversationHistory({ projects }: Props) {
                style={{ borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
             <List size={12} />
             <span>问题导航</span>
-            <span className="ml-auto text-[9px] font-mono tabular-nums" style={{ color: "var(--text-tertiary)" }}>
-              {questions.length}
+            <span className="ml-auto flex items-center gap-1.5">
+              <span className="text-[9px]">{autoExpand ? "展开" : "折叠"}</span>
+              <button
+                onClick={() => setAutoExpand(v => !v)}
+                className="relative w-7 h-[16px] rounded-full transition-colors shrink-0"
+                style={{ background: autoExpand ? "var(--accent)" : "var(--background-tertiary)", border: "1px solid var(--border)" }}
+                title={autoExpand ? "切换为折叠模式" : "切换为展开模式"}
+              >
+                <span className="absolute top-[2px] w-2.5 h-2.5 rounded-full transition-all"
+                      style={{
+                        left: autoExpand ? "calc(100% - 12px)" : "2px",
+                        background: autoExpand ? "#fff" : "var(--text-tertiary)",
+                      }} />
+              </button>
             </span>
           </div>
           <div className="flex-1 overflow-y-auto py-1">
