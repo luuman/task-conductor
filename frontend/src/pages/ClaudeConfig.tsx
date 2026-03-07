@@ -1670,14 +1670,14 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
       <SectionHeader icon={Activity} color="#10b981" label={t("claudeConfig.monitoring.title")} desc="Claude Code 使用统计与活动趋势" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "总消息", value: fmtNum(overview.total_messages), color: "#22c55e" },
-          { label: "工具调用", value: fmtNum(overview.total_tool_calls), color: "#f59e0b" },
-          { label: "会话数", value: fmtNum(overview.total_sessions), color: "#38bdf8" },
-          { label: "活跃天数", value: String(overview.active_days), color: "#a78bfa" },
-          { label: "技能数", value: String(overview.skills.length), color: "#fbbf24" },
-          { label: "MCP 数", value: String(overview.mcp_servers.length), color: "#60a5fa" },
-          { label: "插件数", value: String(overview.installed_plugins.length), color: "#4ade80" },
-          { label: "项目数", value: String(overview.projects.length), color: "#f472b6" },
+          { label: t("claudeConfig.overviewStats.totalMessages"), value: fmtNum(overview.total_messages), color: "#22c55e" },
+          { label: t("claudeConfig.overviewStats.toolCalls"), value: fmtNum(overview.total_tool_calls), color: "#f59e0b" },
+          { label: t("claudeConfig.overviewStats.sessionCount"), value: fmtNum(overview.total_sessions), color: "#38bdf8" },
+          { label: t("claudeConfig.overviewStats.activeDays"), value: String(overview.active_days), color: "#a78bfa" },
+          { label: "Skills", value: String(overview.skills.length), color: "#fbbf24" },
+          { label: "MCP", value: String(overview.mcp_servers.length), color: "#60a5fa" },
+          { label: "Plugins", value: String(overview.installed_plugins.length), color: "#4ade80" },
+          { label: "Projects", value: String(overview.projects.length), color: "#f472b6" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-app-secondary border border-app rounded-xl px-4 py-3 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
