@@ -96,7 +96,7 @@ export default function ConversationHistory({ projects }: Props) {
       {/* ── 左栏：会话列表 ── */}
       <div className="w-[260px] shrink-0 flex flex-col"
            style={{ borderRight: "1px solid var(--border)" }}>
-        <div className="px-3 py-2.5 shrink-0"
+        <div className="h-11 flex items-center px-3 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
           <span className="text-[11px] font-semibold"
                 style={{ color: "var(--text-primary)" }}>{t('conversationHistory.header')}</span>
