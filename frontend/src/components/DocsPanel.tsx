@@ -222,6 +222,7 @@ function DocTree({
 
   const matchesFilter = (node: TreeNode): boolean => {
     if (!filter) return true;
+    if (node.displayName.toLowerCase().includes(filterLower)) return true;
     if (node.name.toLowerCase().includes(filterLower)) return true;
     if (node.isDir) return node.children.some(matchesFilter);
     return false;
