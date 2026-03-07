@@ -762,7 +762,7 @@ function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, s
 
   return (
     <div className="space-y-6">
-      <SectionHeader icon={Settings2} color="var(--accent)" label={t("claudeConfig.navItems.overview")} desc="Claude Code 全局信息与常用配置" />
+      <SectionHeader icon={Settings2} color="var(--accent)" label={t("claudeConfig.navItems.overview")} desc={t("claudeConfig.sectionDesc.overview")} />
 
       {/* Stats cards */}
       {overview && (
