@@ -159,6 +159,7 @@ interface Props {
 }
 
 export function ConvTranscript({ messages, loading, fileFound }: Props) {
+  const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
