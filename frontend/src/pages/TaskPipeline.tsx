@@ -183,7 +183,7 @@ function ArtifactCard({ artifact }: {
               )}
               {artifact.error_log && (
                 <div>
-                  <p className="text-[10px] text-red-400 mb-1 uppercase tracking-wider">错误日志</p>
+                  <p className="text-[10px] text-red-400 mb-1 uppercase tracking-wider">{t('taskPipeline.artifactCard.errorLog')}</p>
                   <pre className="text-[10px] text-red-300 bg-red-900/10 rounded p-2 overflow-x-auto whitespace-pre-wrap max-h-24 overflow-y-auto">
                     {artifact.error_log}
                   </pre>
