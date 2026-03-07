@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { id: "dashboard",     labelKey: "sidebar.nav.dashboard",      Icon: LayoutDashboard },
   { id: "canvas",        labelKey: "sidebar.nav.canvas",         Icon: Layers          },
   { id: "tasks",         labelKey: "sidebar.nav.tasks",          Icon: CheckSquare     },
+  { id: "files",         labelKey: "sidebar.nav.files",          Icon: FolderSearch    },
   { id: "conversations", labelKey: "sidebar.nav.conversations",  Icon: MessageSquare   },
   { id: "claude-config", labelKey: "sidebar.nav.claudeConfig",   Icon: Cpu             },
   { id: "settings",      labelKey: "sidebar.nav.settings",       Icon: Settings        },
@@ -188,75 +189,6 @@ export function Sidebar({
           );
         })()}
       </nav>
-
-      {/* ── Divider ──────────────────────────────────────── */}
-      {!collapsed && <div className="mx-3 my-1" style={{ borderTop: "1px solid var(--border-subtle)" }} />}
-
-      {/* ── Projects ─────────────────────────────────────── */}
-      <div className={cn("flex-1 overflow-y-auto pb-2", collapsed ? "px-1" : "px-2")}>
-        {!collapsed && (
-          <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.08em]"
-                  style={{ color: "var(--text-tertiary)" }}>
-              {t('sidebar.sections.projects')}
-            </span>
-            <div className="flex items-center gap-1">
-              {onScanProjects && (
-                <button onClick={onScanProjects}
-                  className="w-4 h-4 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
-                  style={{ color: "var(--text-tertiary)" }}
-                  title={t('sidebar.scanLocalProjects')}
-                >
-                  <FolderSearch size={11} strokeWidth={2} />
-                </button>
-              )}
-              <button onClick={onNewProject}
-                className="w-4 h-4 rounded flex items-center justify-center transition-colors hover:bg-white/[0.06]"
-                style={{ color: "var(--text-tertiary)" }}
-                title={t('sidebar.newProject')}
-              >
-                <Plus size={11} strokeWidth={2.5} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className={cn("space-y-0.5", !collapsed && "mt-0.5")}>
-          {/* 正式项目 */}
-          {realProjects.map(renderProjectItem)}
-
-          {/* 测试项目分隔 */}
-          {testProjects.length > 0 && !collapsed && (
-            <div className="flex items-center gap-2 px-3 pt-2 pb-1">
-              <span className="text-[9px] font-semibold uppercase tracking-[0.08em]"
-                    style={{ color: "var(--text-tertiary)" }}>
-                {t('sidebar.sections.test')}
-              </span>
-              <div className="flex-1 h-px" style={{ background: "var(--border-subtle)" }} />
-            </div>
-          )}
-          {testProjects.map(renderProjectItem)}
-
-          {projects.length === 0 && !collapsed && (
-            <button onClick={onNewProject}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/[0.03]"
-              style={{ color: "var(--text-tertiary)" }}>
-              <Plus size={12} strokeWidth={2} />
-              {t('sidebar.newFirstProject')}
-            </button>
-          )}
-
-          {collapsed && (
-            <button onClick={onNewProject}
-              title={t('sidebar.newProject')}
-              className="relative w-full flex items-center justify-center py-1.5 rounded-lg transition-colors hover:bg-white/[0.03]"
-              style={{ color: "var(--text-tertiary)" }}>
-              <Plus size={12} strokeWidth={2} />
-            </button>
-          )}
-        </div>
-      </div>
-
     </div>
   );
 }
