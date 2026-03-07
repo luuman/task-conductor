@@ -5,7 +5,10 @@ import stat
 from pathlib import Path
 from datetime import datetime
 
+import mimetypes
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
