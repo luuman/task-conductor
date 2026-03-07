@@ -494,7 +494,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
               <p className="text-app-tertiary text-xs mt-0.5 truncate">{pendingAccept.item.title}</p>
             </div>
             <div className="bg-app-tertiary rounded-lg p-3 space-y-1">
-              <p className="text-[9px] text-app-tertiary uppercase tracking-wider font-medium">AI 理解</p>
+              <p className="text-[9px] text-app-tertiary uppercase tracking-wider font-medium">{t('taskManager.aiAnalysis.understanding')}</p>
               <p className="text-[11px] text-app-secondary">{pendingAccept.analysis.understanding}</p>
             </div>
             <div className="space-y-1.5">
