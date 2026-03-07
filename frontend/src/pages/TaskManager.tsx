@@ -524,7 +524,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
               <button
                 onClick={() => setPendingAccept(null)}
                 className="text-xs text-app-tertiary hover:text-app px-3 py-1.5"
-              >取消</button>
+              >{t('common.cancel')}</button>
               <button
                 onClick={confirmAccept}
                 disabled={!selectedProjectId || creatingTask || projects.length === 0}
