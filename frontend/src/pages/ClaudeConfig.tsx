@@ -972,7 +972,7 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
       <div className="border border-dashed border-app rounded-xl px-4 py-3 space-y-2 mt-3">
         <p className="text-[10px] text-app-tertiary font-medium">{t("claudeConfig.otherConfig.addNew")}</p>
         <div className="flex gap-2">
-          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="键名" spellCheck={false}
+          <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder={t("claudeConfig.otherConfig.keyName")} spellCheck={false}
             className="w-36 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
           <input value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder="值（JSON 或字符串）" spellCheck={false}
             className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-1.5 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
