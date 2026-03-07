@@ -990,7 +990,7 @@ export default function GlobalConfigPanel() {
         setSavedConfig(updated);
         setLastSaved(new Date().toLocaleTimeString());
       } catch {
-        setError("导入失败：JSON 格式错误");
+        setError(t("globalConfig.actions.importFailed"));
       } finally { setSaving(false); }
     };
     reader.readAsText(file);
