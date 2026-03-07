@@ -1659,9 +1659,9 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
     const d = new Date(iso);
     const now = Date.now();
     const diffH = (now - d.getTime()) / 3600000;
-    if (diffH < 1) return `${Math.floor(diffH * 60)}分钟前`;
-    if (diffH < 24) return `${Math.floor(diffH)}小时前`;
-    if (diffH < 720) return `${Math.floor(diffH / 24)}天前`;
+    if (diffH < 1) return `${Math.floor(diffH * 60)}${t("claudeConfig.monitoring.minutesAgo")}`;
+    if (diffH < 24) return `${Math.floor(diffH)}${t("claudeConfig.monitoring.hoursAgo")}`;
+    if (diffH < 720) return `${Math.floor(diffH / 24)}${t("claudeConfig.monitoring.daysAgo")}`;
     return d.toLocaleDateString();
   };
 
