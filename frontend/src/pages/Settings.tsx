@@ -425,3 +425,23 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     </div>
   );
 }
+
+function FieldInput({ label, value, onChange, placeholder, type = "text" }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
+}) {
+  return (
+    <div>
+      <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1">
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        spellCheck={false}
+        className="w-full bg-app border border-app rounded-md px-3 py-2 text-xs font-mono text-app outline-none transition-colors focus:border-accent/60"
+      />
+    </div>
+  );
+}
