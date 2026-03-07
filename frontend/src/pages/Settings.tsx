@@ -217,7 +217,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                   disabled={checking}
                   className="text-[10px] text-app-tertiary hover:text-app transition-colors disabled:opacity-40"
                 >
-                  重新验证
+                  {t('settings.connection.reVerify')}
                 </button>
               </div>
             </Row>
