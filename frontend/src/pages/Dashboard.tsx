@@ -725,6 +725,9 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
 }
 
 export default function Dashboard({ projectId, projects, projectsLoaded, onOpenTask, onSelectProject, onRefreshProjects }: DashboardProps) {
+  const { t } = useTranslation();
+  const STAGE_LABEL = useStageLabelMap();
+  const STATUS_LABEL = useStatusLabelMap();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [knowledgeOpen, setKnowledgeOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
