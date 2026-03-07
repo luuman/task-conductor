@@ -226,7 +226,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               {agentVersion ? (
                 <span className="text-xs text-app font-mono">v{agentVersion}</span>
               ) : (
-                <span className="text-xs text-app-tertiary">获取中...</span>
+                <span className="text-xs text-app-tertiary">{t('settings.connection.fetching')}</span>
               )}
             </Row>
 
