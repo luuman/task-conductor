@@ -780,6 +780,11 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
     onRefreshProjects?.();
   };
 
+  const handleToggleFeishuSync = async (id: number, enabled: boolean) => {
+    await api.projects.toggleFeishuSync(id, enabled);
+    onRefreshProjects?.();
+  };
+
   const realProjects = projects.filter(p => !p.is_test);
   const testProjects = projects.filter(p => p.is_test);
 
