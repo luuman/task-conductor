@@ -45,7 +45,7 @@ export function OptionCards({
                   : "bg-red-900 text-red-300"
               }`}
             >
-              风险 {opt.risk}
+              {t('optionCards.risk')} {opt.risk}
             </span>
           </div>
           <p className="text-gray-400 text-xs leading-relaxed">{opt.description}</p>
