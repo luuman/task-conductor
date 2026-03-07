@@ -19,6 +19,7 @@ class ProjectOut(BaseModel):
     max_parallel: int
     execution_mode: str
     is_test: bool
+    feishu_chat_id: Optional[str] = None
     sort_order: int
     created_at: datetime
     model_config = {"from_attributes": True}
