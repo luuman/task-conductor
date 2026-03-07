@@ -409,6 +409,27 @@ export interface McpMarketServer {
   auth_note?: string; auth_env?: string; category: string; installed: boolean;
 }
 
+export interface FileItem {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size: number | null;
+  modified: string;
+}
+
+export interface FileListResponse {
+  path: string;
+  items: FileItem[];
+}
+
+export interface FileContentResponse {
+  path: string;
+  name: string;
+  size: number;
+  binary: boolean;
+  content: string | null;
+}
+
 export interface InboxItem { id: string; title: string; description: string; }
 export interface ItemAnalysis {
   id: string;
