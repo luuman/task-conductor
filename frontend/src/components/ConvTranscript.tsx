@@ -1,5 +1,5 @@
 // frontend/src/components/ConvTranscript.tsx
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,7 +16,13 @@ import {
   User,
   ChevronDown,
   ChevronRight,
+  ChevronsUpDown,
+  ChevronsDownUp,
 } from "lucide-react";
+
+// ── 展开/折叠信号 Context ───────────────────────────────────
+// signal > 0 = expand all (increments), signal < 0 = collapse all (decrements)
+const ExpandSignalCtx = createContext(0);
 
 // ── Markdown 组件 ────────────────────────────────────────────
 const mdComponents: Components = {
@@ -160,7 +166,6 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
   const added = raw.filter(d => d.type === "add").length;
   const removed = raw.filter(d => d.type === "del").length;
 
-  // Collapse long unchanged runs
   const lines: (DiffLine | { type: "fold"; count: number })[] = [];
   let ctxRun: DiffLine[] = [];
   const flushCtx = () => {
@@ -181,7 +186,6 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
   return (
     <div className="rounded-lg overflow-hidden mt-2"
          style={{ border: "1px solid var(--border)" }}>
-      {/* 文件头 */}
       <div className="flex items-center gap-2 px-3 py-2"
            style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
         <FileEdit size={13} strokeWidth={1.75} style={{ color: "var(--warning)" }} />
@@ -193,7 +197,6 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
           {removed > 0 && <span style={{ color: "var(--danger)" }}>−{removed}</span>}
         </div>
       </div>
-      {/* Diff 内容 */}
       <div className="overflow-x-auto max-h-[440px] overflow-y-auto text-[11px] font-mono leading-[1.7]"
            style={{ background: "var(--background)" }}>
         {lines.map((item, idx) => {
@@ -211,34 +214,21 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
           const isDel = item.type === "del";
           return (
             <div key={idx} className="flex group"
-                 style={{
-                   background: isAdd
-                     ? "rgba(34,197,94,0.07)"
-                     : isDel
-                     ? "rgba(244,63,94,0.07)"
-                     : "transparent",
-                 }}>
-              {/* 旧行号 */}
+                 style={{ background: isAdd ? "rgba(34,197,94,0.07)" : isDel ? "rgba(244,63,94,0.07)" : "transparent" }}>
               <span className="w-[38px] text-right pr-2 select-none shrink-0 tabular-nums"
                     style={{ color: "var(--text-tertiary)", opacity: isDel ? 0.6 : 0.25 }}>
                 {isDel ? item.oldNum : item.type === "ctx" ? item.oldNum : ""}
               </span>
-              {/* 新行号 */}
               <span className="w-[38px] text-right pr-2 select-none shrink-0 tabular-nums"
                     style={{ color: "var(--text-tertiary)", opacity: isAdd ? 0.6 : 0.25 }}>
                 {isAdd ? item.newNum : item.type === "ctx" ? item.newNum : ""}
               </span>
-              {/* +/- 标记 */}
               <span className="w-5 text-center select-none shrink-0 font-semibold"
                     style={{ color: isAdd ? "var(--success)" : isDel ? "var(--danger)" : "transparent" }}>
                 {isAdd ? "+" : isDel ? "−" : " "}
               </span>
-              {/* 代码内容 */}
               <span className="flex-1 whitespace-pre pr-4"
-                    style={{
-                      color: isAdd ? "#86efac" : isDel ? "#fda4af" : "var(--text-tertiary)",
-                      opacity: isAdd || isDel ? 1 : 0.6,
-                    }}>
+                    style={{ color: isAdd ? "#86efac" : isDel ? "#fda4af" : "var(--text-tertiary)", opacity: isAdd || isDel ? 1 : 0.6 }}>
                 {item.text || " "}
               </span>
             </div>
@@ -305,10 +295,19 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
   );
 }
 
-// ── 工具卡片（内嵌在助手消息中）─────────────────────────────
+// ── 工具卡片 ─────────────────────────────────────────────────
 function ToolWidget({ block }: { block: TranscriptBlock }) {
+  const signal = useContext(ExpandSignalCtx);
   const [open, setOpen] = useState(false);
   const toggle = useCallback(() => setOpen(v => !v), []);
+
+  // 响应全局展开/折叠信号
+  const prevSignal = useRef(signal);
+  useEffect(() => {
+    if (signal === prevSignal.current) return;
+    prevSignal.current = signal;
+    setOpen(signal > 0);
+  }, [signal]);
 
   const toolName = block.tool_name || "Tool";
   const detail = getToolDetail(block.tool_name, block.tool_input);
@@ -320,7 +319,6 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
   const bashCmd = isBash ? String(block.tool_input?.command ?? "") : "";
   const canExpand = hasResult || hasEditData;
 
-  // Edit summary
   const editInfo = useMemo(() => {
     if (!hasEditData || !block.tool_input) return "";
     const oldN = String(block.tool_input.old_string ?? "").split("\n").length;
@@ -331,7 +329,6 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
     return parts.join(" ");
   }, [hasEditData, block.tool_input]);
 
-  // Result preview
   const preview = hasResult
     ? block.tool_name === "Read"
       ? `${block.tool_result!.split("\n").length} lines`
@@ -341,7 +338,6 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
   return (
     <div className="rounded-lg overflow-hidden my-1.5"
          style={{ border: "1px solid var(--border)", background: "var(--background-tertiary)" }}>
-      {/* 头部：点击展开 */}
       <button
         onClick={canExpand ? toggle : undefined}
         className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${canExpand ? "hover:brightness-110" : ""}`}
@@ -356,24 +352,16 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
             {detail.split("/").pop() || detail}
           </code>
         )}
-        {/* Edit 统计 */}
         {editInfo && (
-          <span className="text-[10px] font-mono shrink-0" style={{ color: "var(--text-tertiary)" }}>
-            {editInfo}
-          </span>
+          <span className="text-[10px] font-mono shrink-0" style={{ color: "var(--text-tertiary)" }}>{editInfo}</span>
         )}
         {isError && (
           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
-                style={{ color: "var(--danger)", background: "rgba(244,63,94,0.1)" }}>
-            ERROR
-          </span>
+                style={{ color: "var(--danger)", background: "rgba(244,63,94,0.1)" }}>ERROR</span>
         )}
         <span className="flex-1" />
-        {/* 折叠预览 */}
         {!open && preview && (
-          <span className="text-[10px] font-mono truncate max-w-[180px]" style={{ color: "var(--text-tertiary)" }}>
-            {preview}
-          </span>
+          <span className="text-[10px] font-mono truncate max-w-[180px]" style={{ color: "var(--text-tertiary)" }}>{preview}</span>
         )}
         {canExpand && (
           open
@@ -381,8 +369,6 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
             : <ChevronRight size={12} style={{ color: "var(--text-tertiary)" }} className="shrink-0" />
         )}
       </button>
-
-      {/* 展开内容 */}
       {open && (
         <div className="px-3 pb-3" style={{ borderTop: "1px solid var(--border)" }}>
           {hasEditData && <EditDiffView input={block.tool_input!} />}
@@ -394,7 +380,7 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
   );
 }
 
-// ── Claude 头像 ─────────────────────────────────────────────
+// ── 头像 ─────────────────────────────────────────────────────
 function ClaudeAvatar() {
   return (
     <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
@@ -404,7 +390,6 @@ function ClaudeAvatar() {
   );
 }
 
-// ── 用户头像 ─────────────────────────────────────────────────
 function UserAvatar() {
   return (
     <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
@@ -414,45 +399,33 @@ function UserAvatar() {
   );
 }
 
-// ── 用户消息卡片 ─────────────────────────────────────────────
+// ── 消息卡片 ─────────────────────────────────────────────────
 function UserCard({ msg }: { msg: TranscriptMessage }) {
   const text = msg.blocks.filter(b => b.type === "text").map(b => b.text).join("\n").trim();
   if (!text) return null;
-
   return (
     <div className="flex items-start gap-3 px-4 py-2">
       <UserAvatar />
       <div className="flex-1 min-w-0 rounded-lg px-3.5 py-2.5"
-           style={{
-             background: "var(--background-tertiary)",
-             border: "1px solid var(--border)",
-           }}>
+           style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>
         <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-            {text}
-          </ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{text}</ReactMarkdown>
         </div>
       </div>
     </div>
   );
 }
 
-// ── 助手消息卡片 ─────────────────────────────────────────────
 function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   return (
     <div className="flex items-start gap-3 px-4 py-2">
       <ClaudeAvatar />
       <div className="flex-1 min-w-0 rounded-lg px-3.5 py-2.5"
-           style={{
-             background: "rgba(68,119,255,0.04)",
-             border: "1px solid rgba(68,119,255,0.12)",
-           }}>
+           style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
         <div className="space-y-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
           {msg.blocks.map((block, i) =>
             block.type === "text" ? (
-              <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>
-                {block.text ?? ""}
-              </ReactMarkdown>
+              <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>{block.text ?? ""}</ReactMarkdown>
             ) : (
               <ToolWidget key={i} block={block} />
             )
@@ -473,7 +446,29 @@ interface Props {
 export function ConvTranscript({ messages, loading, fileFound }: Props) {
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [expandSignal, setExpandSignal] = useState(0);
+
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // 切换消息时重置信号
+  useEffect(() => { setExpandSignal(0); }, [messages]);
+
+  const expandAll = useCallback(() => setExpandSignal(v => Math.abs(v) + 1), []);
+  const collapseAll = useCallback(() => setExpandSignal(v => -(Math.abs(v) + 1)), []);
+
+  // 统计可展开的工具数
+  const toolCount = useMemo(() => {
+    let n = 0;
+    for (const msg of messages) {
+      for (const b of msg.blocks) {
+        if (b.type === "tool_use" && ((b.tool_result != null && b.tool_result !== "") ||
+            ((b.tool_name === "Edit" || b.tool_name === "MultiEdit") && b.tool_input && (b.tool_input.old_string || b.tool_input.new_string)))) {
+          n++;
+        }
+      }
+    }
+    return n;
+  }, [messages]);
 
   if (loading) {
     return (
@@ -504,16 +499,44 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
   }
 
   return (
-    <div className="py-4 space-y-1">
-      {messages.map((msg, i) => (
-        <div key={i} data-msg-index={i}>
-          {msg.role === "user"
-            ? <UserCard msg={msg} />
-            : <AssistantCard msg={msg} />
-          }
+    <ExpandSignalCtx.Provider value={expandSignal}>
+      {/* 工具栏 */}
+      {toolCount > 0 && (
+        <div className="flex items-center gap-1 px-4 pt-3 pb-1">
+          <button
+            onClick={expandAll}
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors hover:bg-[var(--background-tertiary)]"
+            style={{ color: "var(--text-tertiary)", border: "1px solid var(--border)" }}
+            title="展开全部工具调用"
+          >
+            <ChevronsUpDown size={11} />
+            展开全部
+          </button>
+          <button
+            onClick={collapseAll}
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors hover:bg-[var(--background-tertiary)]"
+            style={{ color: "var(--text-tertiary)", border: "1px solid var(--border)" }}
+            title="折叠全部工具调用"
+          >
+            <ChevronsDownUp size={11} />
+            折叠全部
+          </button>
+          <span className="text-[9px] font-mono ml-1" style={{ color: "var(--text-tertiary)" }}>
+            {toolCount} tools
+          </span>
         </div>
-      ))}
-      <div ref={bottomRef} />
-    </div>
+      )}
+      <div className="py-2 space-y-1">
+        {messages.map((msg, i) => (
+          <div key={i} data-msg-index={i}>
+            {msg.role === "user"
+              ? <UserCard msg={msg} />
+              : <AssistantCard msg={msg} />
+            }
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+    </ExpandSignalCtx.Provider>
   );
 }
