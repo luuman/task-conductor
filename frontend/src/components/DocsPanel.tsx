@@ -129,7 +129,8 @@ function useDragResize(
 /* ── tree node structure ─────────────────────── */
 
 interface TreeNode {
-  name: string;
+  name: string;       // file/dir name
+  displayName: string; // title from doc content, fallback to name
   path: string;
   isDir: boolean;
   children: TreeNode[];
