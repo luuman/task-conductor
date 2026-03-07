@@ -53,7 +53,7 @@ export function OptionCards({
             onClick={() => {
               if (
                 window.confirm(
-                  `确认选择方案 ${opt.label}：${opt.title}？\n\n此操作确认后不可撤销。`
+                  `${t('optionCards.confirmSelect')} ${opt.label}：${opt.title}？`
                 )
               ) {
                 onSelect(opt.label);
