@@ -1003,6 +1003,7 @@ function SecSettings() {
 // Sec: Skills
 // ═══════════════════════════════════════════════════════════════════
 function SecSkills({ skills, onToggle }: { skills: SkillDetail[]; onToggle: (n: string, e: boolean) => Promise<void> }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const detail = skills.find(s => s.name === selected);
