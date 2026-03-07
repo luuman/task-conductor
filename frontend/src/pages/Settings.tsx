@@ -38,12 +38,12 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const connType =
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1"
-      ? "本地直连"
+      ? t('settings.connectionTypes.local')
       : config?.type === "tunnel"
-      ? "Cloudflare Tunnel"
+      ? t('settings.connectionTypes.tunnel')
       : config?.type === "ssh"
-      ? "SSH 隧道"
-      : "未知";
+      ? t('settings.connectionTypes.ssh')
+      : t('settings.connectionTypes.unknown');
 
   const checkToken = async () => {
     setChecking(true);
