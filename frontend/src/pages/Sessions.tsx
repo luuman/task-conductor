@@ -412,11 +412,11 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
         {/* 列头 */}
         <div className="flex px-3 py-1.5 shrink-0"
              style={{ borderBottom: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          <span className="text-[10px] font-mono w-[58px]" style={{ color: "var(--text-tertiary)" }}>时间</span>
+          <span className="text-[10px] font-mono w-[58px]" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.time')}</span>
           <span className="text-[10px] font-mono w-4"      style={{ color: "var(--text-tertiary)" }}> </span>
-          <span className="text-[10px] font-mono w-[96px]" style={{ color: "var(--text-tertiary)" }}>工具</span>
-          <span className="text-[10px] font-mono flex-1"   style={{ color: "var(--text-tertiary)" }}>内容</span>
-          <span className="text-[10px] font-mono w-[64px] text-right" style={{ color: "var(--text-tertiary)" }}>会话</span>
+          <span className="text-[10px] font-mono w-[96px]" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.tool')}</span>
+          <span className="text-[10px] font-mono flex-1"   style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.content')}</span>
+          <span className="text-[10px] font-mono w-[64px] text-right" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.session')}</span>
         </div>
 
         {/* 内容区 */}
