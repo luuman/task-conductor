@@ -74,9 +74,6 @@ export function AppShell({
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {children}
-        <PerfBottomBar
-          connectionStatus={connectionStatus}
-        />
       </div>
 
       {/* Right Panel (optional) */}
