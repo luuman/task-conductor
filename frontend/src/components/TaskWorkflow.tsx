@@ -457,7 +457,7 @@ function StageDetailPanel({
             {/* 置信度 */}
             {latestArtifact.confidence !== null && latestArtifact.confidence !== undefined && (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-white/40">置信度</span>
+                <span className="text-[10px] text-white/40">{t('taskWorkflow.stageDetailPanel.confidence')}</span>
                 <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
                   <div
                     className={cn("h-full rounded-full",
