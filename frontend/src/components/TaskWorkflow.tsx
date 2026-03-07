@@ -551,8 +551,8 @@ export function TaskWorkflow({ task, artifacts = [], onRefresh }: TaskWorkflowPr
   }, []);
 
   const { nodes, edges } = useMemo(
-    () => buildGraph(task, selectedStage, handleClickStage),
-    [task.stage, task.status, selectedStage, handleClickStage],
+    () => buildGraph(task, selectedStage, handleClickStage, t),
+    [task.stage, task.status, selectedStage, handleClickStage, t],
   );
 
   const handleRunStage = async (stage: string) => {
