@@ -743,6 +743,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
   const STATUS_LABEL = useStatusLabelMap();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [knowledgeOpen, setKnowledgeOpen] = useState(false);
+  const [docsOpen, setDocsOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
