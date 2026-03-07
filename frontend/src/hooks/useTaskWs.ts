@@ -20,7 +20,7 @@ export function useTaskWs(
     };
 
     ws.onerror = () => {
-      // 静默处理（后端未启动时不崩溃）
+      // Silently ignore (avoid crash when backend is not running)
     };
 
     return () => ws.close();
