@@ -1,6 +1,7 @@
 // frontend/src/pages/ConversationHistory.tsx
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { List } from "lucide-react";
 import { api, type ClaudeSession, type TranscriptMessage, type Project } from "../lib/api";
 import { ConvSessionList } from "../components/ConvSessionList";
 import { ConvTranscript } from "../components/ConvTranscript";
@@ -18,11 +19,11 @@ export default function ConversationHistory({ projects }: Props) {
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [fileFound, setFileFound] = useState(true);
+  const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1);
 
-  // 缓存已加载的 transcript，避免重复请求
+  const transcriptRef = useRef<HTMLDivElement>(null);
   const transcriptCache = useRef<Map<string, { messages: TranscriptMessage[]; fileFound: boolean }>>(new Map());
 
-  // 加载会话列表（5s 轮询刷新状态）
   const loadSessions = useCallback(() => {
     api.sessions.list()
       .then(s => { setSessions(s); setSessionsLoading(false); })
@@ -35,9 +36,9 @@ export default function ConversationHistory({ projects }: Props) {
     return () => clearInterval(id);
   }, [loadSessions]);
 
-  // 选中会话时加载 transcript（命中缓存则直接渲染，无需等待）
   const handleSelect = (s: ClaudeSession) => {
     setSelectedSession(s);
+    setActiveQuestionIdx(-1);
     const cached = transcriptCache.current.get(s.session_id);
     if (cached) {
       setTranscript(cached.messages);
@@ -56,6 +57,38 @@ export default function ConversationHistory({ projects }: Props) {
       .catch(() => { setTranscript([]); setFileFound(false); setTranscriptLoading(false); });
   };
 
+  // 提取用户问题列表（带原始 index）
+  const questions = useMemo(() => {
+    const qs: { text: string; msgIndex: number }[] = [];
+    transcript.forEach((msg, i) => {
+      if (msg.role !== "user") return;
+      const text = msg.blocks
+        .filter(b => b.type === "text")
+        .map(b => b.text)
+        .join(" ")
+        .trim();
+      if (text) qs.push({ text: text.slice(0, 200), msgIndex: i });
+    });
+    return qs;
+  }, [transcript]);
+
+  // 跳转到对应问题
+  const jumpToQuestion = useCallback((qIdx: number, msgIndex: number) => {
+    setActiveQuestionIdx(qIdx);
+    const container = transcriptRef.current;
+    if (!container) return;
+    // 找到第 msgIndex 个消息 DOM
+    const cards = container.querySelectorAll("[data-msg-index]");
+    for (const card of cards) {
+      if ((card as HTMLElement).dataset.msgIndex === String(msgIndex)) {
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+  }, []);
+
+  const hasQuestions = questions.length > 0 && !transcriptLoading && fileFound;
+
   return (
     <div className="flex-1 flex h-full overflow-hidden"
          style={{ background: "var(--background)" }}>
@@ -63,7 +96,6 @@ export default function ConversationHistory({ projects }: Props) {
       {/* ── 左栏：会话列表 ── */}
       <div className="w-[260px] shrink-0 flex flex-col"
            style={{ borderRight: "1px solid var(--border)" }}>
-        {/* 标题 */}
         <div className="px-3 py-2.5 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
           <span className="text-[11px] font-semibold"
@@ -77,12 +109,50 @@ export default function ConversationHistory({ projects }: Props) {
         />
       </div>
 
-      {/* ── 右栏：气泡 ── */}
+      {/* ── 中栏：对话内容 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto">
+        <div ref={transcriptRef} className="flex-1 overflow-y-auto">
           <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} />
         </div>
       </div>
+
+      {/* ── 右栏：问题导航 ── */}
+      {hasQuestions && (
+        <div className="w-[220px] shrink-0 flex flex-col overflow-hidden"
+             style={{ borderLeft: "1px solid var(--border)" }}>
+          <div className="h-9 flex items-center gap-1.5 px-3 shrink-0 text-[11px] font-medium"
+               style={{ borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
+            <List size={12} />
+            <span>问题导航</span>
+            <span className="ml-auto text-[9px] font-mono tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+              {questions.length}
+            </span>
+          </div>
+          <div className="flex-1 overflow-y-auto py-1">
+            {questions.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => jumpToQuestion(i, q.msgIndex)}
+                className="w-full text-left px-3 py-1.5 text-[11px] leading-snug rounded-sm transition-colors group"
+                style={{
+                  color: activeQuestionIdx === i ? "var(--accent)" : "var(--text-secondary)",
+                  background: activeQuestionIdx === i ? "var(--accent-subtle)" : "transparent",
+                }}
+              >
+                <div className="flex items-start gap-1.5">
+                  <span className="shrink-0 text-[9px] font-mono tabular-nums mt-[2px] w-4 text-right"
+                        style={{ color: activeQuestionIdx === i ? "var(--accent)" : "var(--text-tertiary)" }}>
+                    {i + 1}
+                  </span>
+                  <span className="line-clamp-2 group-hover:text-[var(--text-primary)] transition-colors">
+                    {q.text}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
