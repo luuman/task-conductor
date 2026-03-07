@@ -572,38 +572,56 @@ interface Props {
 export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Props) {
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [expandSignal, setExpandSignal] = useState(0);
   const [autoExpand, setAutoExpand] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  // 切换消息时重置信号
-  useEffect(() => { setExpandSignal(0); }, [messages]);
+  // 切换消息时重置信号和当前问题
+  useEffect(() => { setExpandSignal(0); setCurrentQuestion(null); }, [messages]);
 
-  const expandAll = useCallback(() => setExpandSignal(v => Math.abs(v) + 1), []);
-  const collapseAll = useCallback(() => setExpandSignal(v => -(Math.abs(v) + 1)), []);
-  const toggleAutoExpand = useCallback(() => {
-    setAutoExpand(v => {
-      const next = !v;
-      // 切换时同步展开/折叠所有
-      setExpandSignal(prev => next ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1));
-      return next;
+  // 提取用户问题列表
+  const userQuestions = useMemo(() => {
+    const qs: { text: string; msgIndex: number }[] = [];
+    messages.forEach((msg, i) => {
+      if (msg.role !== "user") return;
+      const text = msg.blocks.filter(b => b.type === "text").map(b => b.text).join(" ").trim();
+      if (text) qs.push({ text, msgIndex: i });
     });
-  }, []);
-
-  // 统计可展开的工具数
-  const toolCount = useMemo(() => {
-    let n = 0;
-    for (const msg of messages) {
-      for (const b of msg.blocks) {
-        if (b.type === "tool_use" && ((b.tool_result != null && b.tool_result !== "") ||
-            ((b.tool_name === "Edit" || b.tool_name === "MultiEdit") && b.tool_input && (b.tool_input.old_string || b.tool_input.new_string)))) {
-          n++;
-        }
-      }
-    }
-    return n;
+    return qs;
   }, [messages]);
+
+  // IntersectionObserver 检测当前可见的用户问题
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || userQuestions.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // 找到最上方可见的用户消息
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.msgIndex);
+            const q = userQuestions.find(q => q.msgIndex === idx);
+            if (q) setCurrentQuestion(q.text.slice(0, 200));
+          }
+        }
+      },
+      { root: container, rootMargin: "-40px 0px 0px 0px", threshold: 0.1 }
+    );
+
+    // 只观察用户消息元素
+    const qIndices = new Set(userQuestions.map(q => q.msgIndex));
+    const elements = container.querySelectorAll("[data-msg-index]");
+    elements.forEach(el => {
+      const idx = Number((el as HTMLElement).dataset.msgIndex);
+      if (qIndices.has(idx)) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [userQuestions]);
 
   if (loading) {
     return (
