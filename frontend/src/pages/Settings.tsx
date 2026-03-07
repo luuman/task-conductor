@@ -243,6 +243,65 @@ export default function Settings({ onDisconnect }: SettingsProps) {
           </div>
         </section>
 
+        {/* ── 飞书配置 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.feishu.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.feishu.hint')}</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            <FieldInput label="App ID" value={feishuInput.app_id}
+              onChange={v => setFeishuInput(p => ({ ...p, app_id: v }))}
+              placeholder="cli_xxxxxxxx" />
+            <FieldInput label="App Secret" value={feishuInput.app_secret}
+              onChange={v => setFeishuInput(p => ({ ...p, app_secret: v }))}
+              placeholder="xxxxxxxx" type="password" />
+            <FieldInput label="Owner ID" value={feishuInput.owner_id}
+              onChange={v => setFeishuInput(p => ({ ...p, owner_id: v }))}
+              placeholder="ou_xxxxxxxx" />
+            <FieldInput label={t('settings.feishu.defaultChatId')} value={feishuInput.default_chat_id}
+              onChange={v => setFeishuInput(p => ({ ...p, default_chat_id: v }))}
+              placeholder="oc_xxxxxxxx" />
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={handleSaveFeishu}
+                disabled={!isFeishuDirty || feishuSaveStatus === "saving"}
+                className={cn(
+                  "px-3 py-2 text-xs rounded-md font-medium transition-all",
+                  !isFeishuDirty || feishuSaveStatus === "saving"
+                    ? "bg-app-tertiary/30 text-app-tertiary cursor-not-allowed"
+                    : "bg-accent hover:bg-accent-hover text-white"
+                )}
+              >
+                {feishuSaveStatus === "saving" ? t('settings.saveStates.saving') : feishuSaveStatus === "ok" ? t('settings.saveStates.saved') : t('settings.saveStates.save')}
+              </button>
+              <span className="text-[10px] text-app-tertiary">{t('settings.feishu.restartNote')}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 重启服务 ── */}
+        <section className="bg-app-secondary border border-amber-500/20 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-app font-semibold">{t('settings.restart.title')}</p>
+              <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.restart.hint')}</p>
+            </div>
+            <button
+              onClick={handleRestart}
+              disabled={restarting}
+              className={cn(
+                "text-xs px-3 py-1.5 rounded-md font-medium transition-colors",
+                restarting
+                  ? "bg-amber-500/20 text-amber-300 cursor-not-allowed"
+                  : "bg-amber-600 hover:bg-amber-500 text-white"
+              )}
+            >
+              {restarting ? t('settings.restart.restarting') : t('settings.restart.title')}
+            </button>
+          </div>
+        </section>
+
         {/* ── 性能模块 ── */}
         <div className="rounded-xl overflow-hidden" style={{ background: "var(--background-secondary)", border: "1px solid var(--border)" }}>
           <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
