@@ -1,5 +1,6 @@
 // frontend/src/components/ConvBubbles.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
 import type { ClaudeEvent } from "../lib/api";
 
