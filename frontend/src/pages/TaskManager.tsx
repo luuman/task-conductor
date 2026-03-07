@@ -342,7 +342,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
 
                 {/* AI 理解 */}
                 <div>
-                  <p className="text-[9px] text-app-tertiary uppercase tracking-wider mb-1 font-medium">AI 理解</p>
+                  <p className="text-[9px] text-app-tertiary uppercase tracking-wider mb-1 font-medium">{t('taskManager.aiAnalysis.understanding')}</p>
                   {isEditing ? (
                     <textarea
                       value={editDraft.understanding ?? ""}
