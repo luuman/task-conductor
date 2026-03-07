@@ -35,12 +35,13 @@ const STAGE_COLORS: Record<string, "default" | "success" | "warning" | "danger" 
 
 // ── ConfidenceMeter ──────────────────────────────────────────────
 function ConfidenceMeter({ value }: { value: number }) {
+  const { t } = useTranslation();
   const pct = Math.round(value * 100);
   const color = pct >= 80 ? "bg-green-500" : pct >= 60 ? "bg-yellow-500" : "bg-red-500";
   const textColor = pct >= 80 ? "text-green-400" : pct >= 60 ? "text-yellow-400" : "text-red-400";
   return (
     <div className="flex items-center gap-2 min-w-0">
-      <span className="text-[10px] text-app-tertiary whitespace-nowrap">置信度</span>
+      <span className="text-[10px] text-app-tertiary whitespace-nowrap">{t('taskPipeline.confidenceMeter')}</span>
       <div className="flex-1 h-1.5 bg-app-tertiary/30 rounded-full overflow-hidden min-w-[60px]">
         <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${pct}%` }} />
       </div>
