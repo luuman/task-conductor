@@ -828,7 +828,7 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
           const last = i === recent.length - 1;
           return (
             <g key={d.date}>
-              <title>{`${d.date}\n消息: ${d.message_count}\n工具: ${d.tool_call_count}\n会话: ${d.session_count}`}</title>
+              <title>{`${d.date}\n${t("claudeConfig.shared.message")}: ${d.message_count}\n${t("claudeConfig.shared.toolCall")}: ${d.tool_call_count}\n${t("claudeConfig.monitoring.sessions")}: ${d.session_count}`}</title>
               <rect x={x} y={H - msgH} width={barW} height={msgH} rx={1} fill={last ? "#22c55e" : "#4477ff"} opacity={0.7} />
               <rect x={x} y={H - toolH} width={barW} height={toolH} rx={1} fill={last ? "#86efac" : "#f59e0b"} opacity={0.5} />
               {i % 7 === 0 && <text x={x + barW / 2} y={H + 12} textAnchor="middle" fill="var(--text-tertiary)" fontSize="6" fontFamily="monospace">{d.date.slice(5)}</text>}
