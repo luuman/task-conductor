@@ -179,9 +179,9 @@ function KnowledgeItem({ item, onDelete }: { item: ProjectKnowledge; onDelete: (
         <button
           onClick={onDelete}
           className="opacity-0 group-hover:opacity-100 text-[10px] text-red-400 hover:text-red-300 transition-all px-1.5 py-0.5 rounded hover:bg-red-900/20 shrink-0"
-          title="删除此条经验"
+          title={t('knowledgePanel.item.deleteHint')}
         >
-          删除
+          {t('knowledgePanel.item.delete')}
         </button>
       </div>
     </div>
