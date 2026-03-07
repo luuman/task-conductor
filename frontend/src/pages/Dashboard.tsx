@@ -90,7 +90,7 @@ function ClaudeMetricsPanel() {
             {sessions.active} / {sessions.total} {t('dashboard.claudeMetrics.activeSessionsHint')}
           </span>
           {performance.active_processes > 0 && (
-            <span className="text-blue-400">{performance.active_processes} 进程运行中</span>
+            <span className="text-blue-400">{performance.active_processes} {t('dashboard.claudeMetrics.processRunning')}</span>
           )}
         </div>
       </div>
