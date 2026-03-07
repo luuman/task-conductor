@@ -47,8 +47,6 @@ import {
   User,
   ChevronDown,
   ChevronRight,
-  ChevronsUpDown,
-  ChevronsDownUp,
 } from "lucide-react";
 
 // ── Context ─────────────────────────────────────────────────
