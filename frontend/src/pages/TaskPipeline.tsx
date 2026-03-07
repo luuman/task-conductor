@@ -533,8 +533,8 @@ function ReviewBanner({ taskId, onDone }: { taskId: number; onDone: () => void }
               placeholder={t('taskPipeline.reviewBanner.rejectReason')}
               className="bg-app border border-app rounded px-2 py-1 text-xs text-app outline-none focus:border-accent w-44"
             />
-            <Button variant="danger" size="sm" disabled={!rejectReason.trim()} onClick={handleReject}>确认驳回</Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowReject(false)}>取消</Button>
+            <Button variant="danger" size="sm" disabled={!rejectReason.trim()} onClick={handleReject}>{t('taskPipeline.reviewBanner.confirmReject')}</Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowReject(false)}>{t('common.cancel')}</Button>
           </div>
         )}
       </div>
