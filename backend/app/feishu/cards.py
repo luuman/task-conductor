@@ -85,6 +85,7 @@ def _button(text: str, value: dict, *, type: str = "default") -> dict:  # noqa: 
 
 def build_result_card(content: str, cost_ms: int = 0, cwd: str = "") -> dict:
     """Claude 执行结果卡片。"""
+    content = _to_feishu_md(content)
     if len(content) > MAX_CONTENT_LEN:
         content = content[:MAX_CONTENT_LEN] + "\n\n... (内容已截断)"
 
