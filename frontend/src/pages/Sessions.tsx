@@ -242,10 +242,14 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
     return () => clearInterval(id);
   }, []);
 
-  // 点击会话：加载历史
+  // 点击会话：加载历史并过滤
   const handleSelectSession = (sid: string) => {
+    if (selectedId === sid) {
+      setSelectedId(null);
+      setHistoryRows([]);
+      return;
+    }
     setSelectedId(sid);
-    setRightView("history");
     setHistoryLoading(true);
     api.sessions.events(sid)
       .then((evs) => {
@@ -254,6 +258,16 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
       })
       .catch(() => setHistoryLoading(false));
   };
+
+  // 合并时间线：选中会话时 = 历史 + 该会话的实时新事件（去重）；未选中 = 全部实时
+  const displayRows = useMemo(() => {
+    if (!selectedId) return liveRows;
+    const shortId = selectedId.slice(0, 8);
+    const sessionLive = liveRows.filter(r => r.sessionId === shortId);
+    const seen = new Set(historyRows.map(r => `${r.ts}|${r.tool}|${r.eventType}`));
+    const newLive = sessionLive.filter(r => !seen.has(`${r.ts}|${r.tool}|${r.eventType}`));
+    return [...historyRows, ...newLive];
+  }, [selectedId, liveRows, historyRows]);
 
   const handleClearLive = () => {
     setLiveRows([]);
