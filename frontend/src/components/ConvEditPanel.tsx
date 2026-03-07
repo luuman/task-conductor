@@ -61,11 +61,11 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
 
       {/* 别名 */}
       <div className="space-y-1">
-        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>别名</label>
+        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{t('convEdit.alias')}</label>
         <input
           value={alias}
           onChange={e => setAlias(e.target.value)}
-          placeholder={session.cwd.split("/").slice(-1)[0] || "会话别名"}
+          placeholder={session.cwd.split("/").slice(-1)[0] || t('convEdit.aliasPlaceholder')}
           className="w-full rounded px-2.5 py-1.5 text-[11px] outline-none"
           style={{
             background: "var(--background-tertiary)",
