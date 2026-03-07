@@ -1516,7 +1516,7 @@ function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
   const [parseError, setParseError] = useState("");
   useEffect(() => { setJsonText(JSON.stringify(config.permissions, null, 2)); }, [config.permissions]);
   const handleSave = async () => {
-    let parsed; try { parsed = JSON.parse(jsonText); } catch { setParseError("JSON 格式错误"); setStatus("error"); return; }
+    let parsed; try { parsed = JSON.parse(jsonText); } catch { setParseError(t("claudeConfig.permissions.jsonError")); setStatus("error"); return; }
     setParseError(""); setSaving(true);
     try { onUpdate(await api.claudeConfig.updatePermissions(parsed)); setStatus("ok"); setTimeout(() => setStatus("idle"), 2000); }
     catch (e) { setParseError(e instanceof Error ? e.message : "保存失败"); setStatus("error"); } finally { setSaving(false); }
