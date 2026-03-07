@@ -1902,11 +1902,11 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
                 </div>
                 <button onClick={() => handleRestore(item)} disabled={restoring === item.name}
                   className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-accent hover:bg-accent/10 transition-colors disabled:opacity-40">
-                  <RotateCcw size={10} /> {restoring === item.name ? "..." : "恢复"}
+                  <RotateCcw size={10} /> {restoring === item.name ? "..." : t("common.restore")}
                 </button>
                 <button onClick={() => handleDelete(item)} disabled={deleting === item.name}
                   className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40">
-                  <Trash2 size={10} /> {deleting === item.name ? "..." : "删除"}
+                  <Trash2 size={10} /> {deleting === item.name ? "..." : t("common.delete")}
                 </button>
               </div>
             );
