@@ -1,5 +1,6 @@
 // frontend/src/pages/McpMarket.tsx
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   BookOpen, Figma, Calendar, Mail, Github, Globe, Folder,
   Database, Bug, LayoutList, Puzzle, Check, Loader2, Trash2, Lock, KeyRound,
