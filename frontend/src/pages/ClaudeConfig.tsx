@@ -811,10 +811,11 @@ function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, s
 }
 
 function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
+  const { t } = useTranslation();
   const recent = useMemo(() => data.slice(-60), [data]);
   const maxMsg = useMemo(() => Math.max(1, ...recent.map(d => d.message_count)), [recent]);
   const maxTool = useMemo(() => Math.max(1, ...recent.map(d => d.tool_call_count)), [recent]);
-  if (!recent.length) return <div className="text-[10px] text-app-tertiary text-center py-6">暂无</div>;
+  if (!recent.length) return <div className="text-[10px] text-app-tertiary text-center py-6">{t("claudeConfig.shared.none")}</div>;
   const H = 80, barW = Math.max(3, Math.min(8, (600 - recent.length) / recent.length)), gap = 1;
   const W = recent.length * (barW + gap);
   return (
