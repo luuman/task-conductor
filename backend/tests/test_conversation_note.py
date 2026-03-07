@@ -71,6 +71,11 @@ def test_patch_note_updates_existing():
 
 def test_sessions_list_includes_note_field():
     _create_session("note-test-4")
+    # 更新 last_seen_at 确保排序在前
+    with DBSession(engine) as db:
+        s = db.query(ClaudeSession).filter_by(session_id="note-test-4").first()
+        s.last_seen_at = datetime.utcnow()
+        db.commit()
     client.patch("/api/sessions/note-test-4/note", json={"alias": "列表中的别名"})
     resp = client.get("/api/sessions")
     assert resp.status_code == 200
