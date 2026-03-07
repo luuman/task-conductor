@@ -91,7 +91,7 @@ export function useClaudeMonitor(
             onEventRef.current(msg as ClaudeHookEvent);
           }
         } catch {
-          // 忽略解析错误
+          // Ignore parse errors
         }
       };
 
