@@ -41,6 +41,16 @@ def _to_feishu_md(text: str) -> str:
             result.append(f"**{m.group(2).strip()}**")
             continue
 
+        # 跳过表格分隔行 |---|---|
+        if re.match(r"^\|[\s\-:|]+\|$", line):
+            continue
+
+        # 表格行 | a | b | → a  b
+        if line.strip().startswith("|") and line.strip().endswith("|"):
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            result.append("  ".join(cells))
+            continue
+
         result.append(line)
 
     return "\n".join(result)
