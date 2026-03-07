@@ -80,7 +80,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
       setSaveStatus("ok");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (e: unknown) {
-      setSaveError(e instanceof Error ? e.message : "保存失败");
+      setSaveError(e instanceof Error ? e.message : t('common.saveFailed'));
       setSaveStatus("error");
     }
   };
