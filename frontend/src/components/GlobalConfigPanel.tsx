@@ -1048,7 +1048,7 @@ export default function GlobalConfigPanel() {
         <button onClick={handleReset} disabled={saving}
           className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">
           <RotateCcw size={11} />
-          重置默认
+          {t("globalConfig.actions.resetDefault")}
         </button>
 
         <div className="flex-1" />
