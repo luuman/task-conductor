@@ -62,7 +62,20 @@ async def handle_chat_ws(ws: WebSocket):
         except Exception:
             pass
 
-    async def _run_claude(message: str, session_id: Optional[str], model: Optional[str], cwd: Optional[str]):
+    async def _run_claude(
+        message: str,
+        session_id: Optional[str] = None,
+        model: Optional[str] = None,
+        cwd: Optional[str] = None,
+        system_prompt: Optional[str] = None,
+        append_system_prompt: Optional[str] = None,
+        effort: Optional[str] = None,
+        allowed_tools: Optional[list[str]] = None,
+        disallowed_tools: Optional[list[str]] = None,
+        permission_mode: Optional[str] = None,
+        max_budget: Optional[float] = None,
+        continue_session: bool = False,
+    ):
         """启动 claude -p 子进程并流式返回结果"""
         nonlocal active_proc
 
@@ -75,9 +88,32 @@ async def handle_chat_ws(ws: WebSocket):
 
         if session_id:
             cmd.extend(["--resume", session_id])
+        elif continue_session:
+            cmd.append("--continue")
 
         if model:
             cmd.extend(["--model", model])
+
+        if system_prompt:
+            cmd.extend(["--system-prompt", system_prompt])
+
+        if append_system_prompt:
+            cmd.extend(["--append-system-prompt", append_system_prompt])
+
+        if effort and effort in ("low", "medium", "high"):
+            cmd.extend(["--effort", effort])
+
+        if allowed_tools:
+            cmd.extend(["--allowed-tools", ",".join(allowed_tools)])
+
+        if disallowed_tools:
+            cmd.extend(["--disallowed-tools", ",".join(disallowed_tools)])
+
+        if permission_mode and permission_mode in ("acceptEdits", "bypassPermissions", "default", "plan", "auto"):
+            cmd.extend(["--permission-mode", permission_mode])
+
+        if max_budget and max_budget > 0:
+            cmd.extend(["--max-budget-usd", str(max_budget)])
 
         work_dir = cwd or os.path.expanduser("~")
 
