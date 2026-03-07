@@ -31,7 +31,7 @@ export function clearConfig() {
 }
 
 function getBaseUrl(): string {
-  // 本地访问（localhost/127.0.0.1）时直连后端，绕过 tunnel URL 和系统代理
+  // Local access (localhost/127.0.0.1): connect to backend directly, bypassing tunnel URL and system proxy
   const isLocal =
     typeof window !== "undefined" &&
     (window.location.hostname === "localhost" ||
