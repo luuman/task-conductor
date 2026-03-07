@@ -1,6 +1,7 @@
 // frontend/src/pages/ClaudeConfig.tsx
 // Claude Code 配置中心 —— 分组侧边栏 + 搜索 + scroll-spy
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   api,
   type ClaudeConfig,
