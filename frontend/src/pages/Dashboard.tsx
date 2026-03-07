@@ -589,6 +589,7 @@ function StatusDot({ status }: { status: string }) {
 }
 
 function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated: (t: Task) => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
