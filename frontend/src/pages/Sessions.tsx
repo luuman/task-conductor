@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { api, type ClaudeSession, type ClaudeEvent } from "../lib/api";
 import type { ClaudeHookEvent, WsStatus } from "../hooks/useClaudeMonitor";
 import { cn } from "../lib/utils";
+import { getDateLocale } from "../i18n";
 
 // ── 工具调用详情格式化 ────────────────────────────────────────
 
