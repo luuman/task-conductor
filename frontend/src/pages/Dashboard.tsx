@@ -900,9 +900,13 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
         )}
       </div>
 
-      {/* Knowledge Panel */}
+      {/* Error Book (formerly Knowledge Panel) */}
       {knowledgeOpen && (
         <KnowledgePanel projectId={projectId} onClose={() => setKnowledgeOpen(false)} />
+      )}
+      {/* Docs Knowledge Panel */}
+      {docsOpen && (
+        <DocsPanel projectId={projectId} onClose={() => setDocsOpen(false)} />
       )}
     </div>
   );
