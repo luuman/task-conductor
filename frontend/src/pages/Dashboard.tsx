@@ -649,6 +649,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
   onDelete?: (id: number) => void;
   onToggleTest?: (id: number, isTest: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [tasks, setTasks] = useState<Task[]>([]);
   useEffect(() => {
     api.projects.tasks(project.id).then(setTasks).catch(() => {});
@@ -681,7 +682,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
         </div>
         <div className="flex items-center gap-1">
           {runningCount > 0 && (
-            <Badge variant="info">{runningCount} 运行中</Badge>
+            <Badge variant="info">{runningCount} {t('dashboard.projectCard.running')}</Badge>
           )}
           {/* 操作按钮 - hover 时显示 */}
           <div className="hidden group-hover:flex items-center gap-0.5">
@@ -689,7 +690,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
               onClick={(e) => { e.stopPropagation(); onToggleTest?.(project.id, !project.is_test); }}
               className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-white/10"
               style={{ color: project.is_test ? "#a855f7" : "var(--text-tertiary)" }}
-              title={project.is_test ? "取消测试标记" : "标记为测试项目"}
+              title={project.is_test ? t('dashboard.projectCard.cancelTestMark') : t('dashboard.projectCard.markAsTest')}
             >
               <FlaskConical size={10} />
             </button>
@@ -697,7 +698,7 @@ function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: 
               onClick={(e) => { e.stopPropagation(); onDelete?.(project.id); }}
               className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-red-500/20"
               style={{ color: "var(--text-tertiary)" }}
-              title="删除项目"
+              title={t('dashboard.projectCard.deleteProject')}
             >
               <Trash2 size={10} />
             </button>
