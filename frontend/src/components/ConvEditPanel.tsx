@@ -57,7 +57,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
     <div className="px-4 py-3 space-y-3 text-[12px]"
          style={{ borderTop: "1px solid var(--border)" }}>
       <p className="text-[10px] font-semibold uppercase tracking-widest"
-         style={{ color: "var(--text-tertiary)" }}>会话信息</p>
+         style={{ color: "var(--text-tertiary)" }}>{t('convEdit.sessionInfo')}</p>
 
       {/* 别名 */}
       <div className="space-y-1">
