@@ -568,9 +568,10 @@ interface Props {
   fileFound: boolean;
   onOpenFile?: (filePath: string) => void;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  autoExpand?: boolean;
 }
 
-export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrollRef }: Props) {
+export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrollRef, autoExpand: autoExpandProp }: Props) {
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [expandSignal, setExpandSignal] = useState(0);
