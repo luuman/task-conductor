@@ -786,7 +786,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
           className="flex items-center gap-1.5 text-[11px] text-app-tertiary hover:text-app px-3 py-1.5 rounded-lg border border-app hover:border-accent/40 transition-all disabled:opacity-40"
         >
           <FolderSearch size={13} className={scanning ? "animate-spin" : ""} />
-          {scanning ? "扫描中..." : "扫描本地项目"}
+          {scanning ? t('dashboard.overview.scanning') : t('dashboard.overview.scanLocal')}
         </button>
       </div>
       <ClaudeMetricsPanel />
