@@ -41,7 +41,7 @@ export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitl
         </div>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full" style={{ background: cSys }} />
-          <span className="text-gray-400">系统</span>
+          <span className="text-gray-400">{t('perf.cpu.system')}</span>
           <span className="text-white ml-1">{(sys?.cpu.system_pct ?? 0).toFixed(1)}%</span>
         </div>
       </div>
