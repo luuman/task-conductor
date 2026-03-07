@@ -366,6 +366,18 @@ export default function ConversationHistory({ projects }: Props) {
               </button>
             ))}
           </div>
+          {/* 底部导出按钮 */}
+          <div className="shrink-0 px-2 py-2" style={{ borderTop: "1px solid var(--border)" }}>
+            <button
+              onClick={handleExport}
+              className="w-full flex items-center justify-center gap-1.5 text-[10px] py-1.5 rounded-md transition-colors hover:brightness-125"
+              style={{ color: "var(--text-tertiary)", background: "var(--background-tertiary)" }}
+              title="导出为 Markdown"
+            >
+              <Download size={11} />
+              <span>导出对话</span>
+            </button>
+          </div>
         </div>
       )}
     </div>
