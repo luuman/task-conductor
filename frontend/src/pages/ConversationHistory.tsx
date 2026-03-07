@@ -103,7 +103,7 @@ export default function ConversationHistory({ projects }: Props) {
             </span>
             <span className="text-[10px] ml-auto"
                   style={{ color: "var(--text-tertiary)" }}>
-              {selectedSession.event_count} 条事件
+              {selectedSession.event_count} {t('conversationHistory.eventCount')}
             </span>
           </div>
         )}
