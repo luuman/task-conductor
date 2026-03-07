@@ -21,14 +21,14 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: 
   puzzle: Puzzle,
 };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  knowledge: "知识",
-  design: "设计",
-  productivity: "效率",
-  development: "开发",
-  utility: "工具",
-  database: "数据库",
-  custom: "自定义",
+const CATEGORY_KEYS: Record<string, string> = {
+  knowledge: "mcpMarket.categoryLabels.knowledge",
+  design: "mcpMarket.categoryLabels.design",
+  productivity: "mcpMarket.categoryLabels.efficiency",
+  development: "mcpMarket.categoryLabels.development",
+  utility: "mcpMarket.categoryLabels.tools",
+  database: "mcpMarket.categoryLabels.database",
+  custom: "mcpMarket.categoryLabels.custom",
 };
 
 const CATEGORY_ORDER = ["development", "productivity", "knowledge", "design", "utility", "database", "custom"];
