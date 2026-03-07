@@ -71,13 +71,14 @@ const getEventLabels = (t: (k: string) => string): Record<string, { label: strin
 });
 
 // ── settings.json 常用设置 ──────────────────────────────────────
-const COMMON_SETTINGS: {
+type CommonSettingDef = {
   key: string; label: string; desc: string;
   type: "string" | "boolean" | "number" | "select";
   options?: { value: string; label: string }[];
   placeholder?: string; group?: string;
-}[] = [
-  { key: "model", label: "默认模型", desc: "别名或完整模型名", type: "select", options: [
+};
+const getCommonSettings = (t: (k: string) => string): CommonSettingDef[] => [
+  { key: "model", label: t("claudeConfig.commonSettings.defaultModel"), desc: "别名或完整模型名", type: "select", options: [
     { value: "", label: "default（按订阅层级）" },
     { value: "opus", label: "opus — Opus 4.6" },
     { value: "sonnet", label: "sonnet — Sonnet 4.6" },
@@ -88,10 +89,10 @@ const COMMON_SETTINGS: {
     { value: "claude-sonnet-4-6", label: "claude-sonnet-4-6（固定版本）" },
     { value: "claude-haiku-4-5-20251001", label: "claude-haiku-4-5（固定版本）" },
   ], placeholder: "opus / sonnet", group: "model" },
-  { key: "effortLevel", label: "努力级别", desc: "low=快速, medium=默认, high=深度推理", type: "select", options: [
+  { key: "effortLevel", label: t("claudeConfig.commonSettings.effortLevel"), desc: "low=快速, medium=默认, high=深度推理", type: "select", options: [
     { value: "", label: "默认" }, { value: "low", label: "low" }, { value: "medium", label: "medium" }, { value: "high", label: "high" },
   ], group: "model" },
-  { key: "language", label: "响应语言", desc: "Claude 响应语言", type: "string", placeholder: "chinese", group: "behavior" },
+  { key: "language", label: t("claudeConfig.commonSettings.responseLang"), desc: "Claude 响应语言", type: "string", placeholder: "chinese", group: "behavior" },
   { key: "outputStyle", label: "输出风格", desc: "系统提示输出样式", type: "string", placeholder: "Concise", group: "behavior" },
   { key: "alwaysThinkingEnabled", label: "始终扩展思考", desc: "默认启用 Extended Thinking", type: "boolean", group: "behavior" },
   { key: "showTurnDuration", label: "显示轮次耗时", desc: "响应后显示耗时", type: "boolean", group: "behavior" },
