@@ -394,7 +394,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
                 )}
                 style={!paused ? { color: "var(--text-secondary)" } : undefined}
               >
-                {paused ? "▶ 继续" : "⏸ 暂停"}
+                {paused ? t('sessions.controls.resume') : t('sessions.controls.pause')}
               </button>
             )}
             {rightView === "live" && (
