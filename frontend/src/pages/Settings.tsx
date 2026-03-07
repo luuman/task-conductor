@@ -222,7 +222,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               </div>
             </Row>
 
-            <Row label="后端版本">
+            <Row label={t('settings.connection.backendVersion')}>
               {agentVersion ? (
                 <span className="text-xs text-app font-mono">v{agentVersion}</span>
               ) : (
