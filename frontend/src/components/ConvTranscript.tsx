@@ -5,22 +5,34 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import type { TranscriptMessage, TranscriptBlock } from "../lib/api";
+import {
+  Terminal,
+  FileText,
+  FileEdit,
+  Search,
+  FolderSearch,
+  Globe,
+  Bot as BotIcon,
+  User,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 
 // ── Markdown 组件 ────────────────────────────────────────────
 const mdComponents: Components = {
-  p:      ({ children }) => <p className="mb-1 last:mb-0 leading-relaxed">{children}</p>,
-  h1:     ({ children }) => <h1 className="text-[13px] font-bold mb-1 mt-2" style={{ color: "var(--text-primary)" }}>{children}</h1>,
-  h2:     ({ children }) => <h2 className="text-[13px] font-bold mb-1 mt-1.5" style={{ color: "var(--text-primary)" }}>{children}</h2>,
-  h3:     ({ children }) => <h3 className="text-[12px] font-semibold mb-0.5 mt-1" style={{ color: "var(--text-primary)" }}>{children}</h3>,
-  ul:     ({ children }) => <ul className="list-disc pl-4 mb-1 space-y-0.5">{children}</ul>,
-  ol:     ({ children }) => <ol className="list-decimal pl-4 mb-1 space-y-0.5">{children}</ol>,
+  p:      ({ children }) => <p className="mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
+  h1:     ({ children }) => <h1 className="text-[14px] font-bold mb-1 mt-3" style={{ color: "var(--text-primary)" }}>{children}</h1>,
+  h2:     ({ children }) => <h2 className="text-[13px] font-bold mb-1 mt-2" style={{ color: "var(--text-primary)" }}>{children}</h2>,
+  h3:     ({ children }) => <h3 className="text-[12.5px] font-semibold mb-0.5 mt-1.5" style={{ color: "var(--text-primary)" }}>{children}</h3>,
+  ul:     ({ children }) => <ul className="list-disc pl-4 mb-1.5 space-y-0.5">{children}</ul>,
+  ol:     ({ children }) => <ol className="list-decimal pl-4 mb-1.5 space-y-0.5">{children}</ol>,
   li:     ({ children }) => <li className="leading-relaxed">{children}</li>,
   strong: ({ children }) => <strong className="font-semibold" style={{ color: "var(--text-primary)" }}>{children}</strong>,
   em:     ({ children }) => <em className="italic" style={{ color: "var(--text-secondary)" }}>{children}</em>,
   code:   ({ children, className }) => {
     if (className?.includes("language-")) {
       return (
-        <code className="block text-[11px] font-mono px-3 py-2 rounded-md my-1 overflow-x-auto whitespace-pre"
+        <code className="block text-[11px] font-mono px-3 py-2 rounded-md my-1.5 overflow-x-auto whitespace-pre"
               style={{ background: "var(--background)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
           {children}
         </code>
@@ -35,12 +47,12 @@ const mdComponents: Components = {
   },
   pre:    ({ children }) => <pre className="my-1 overflow-x-auto">{children}</pre>,
   blockquote: ({ children }) => (
-    <blockquote className="pl-3 my-1 opacity-90"
+    <blockquote className="pl-3 my-1.5"
                 style={{ borderLeft: "2px solid var(--accent)", color: "var(--text-secondary)" }}>
       {children}
     </blockquote>
   ),
-  hr: () => <hr className="my-2" style={{ borderColor: "var(--border)" }} />,
+  hr: () => <hr className="my-3" style={{ borderColor: "var(--border)" }} />,
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noopener noreferrer"
        className="underline underline-offset-2 hover:brightness-125 transition-all"
@@ -49,7 +61,7 @@ const mdComponents: Components = {
     </a>
   ),
   table: ({ children }) => (
-    <div className="overflow-x-auto my-1">
+    <div className="overflow-x-auto my-1.5">
       <table className="text-[11px] border-collapse w-full">{children}</table>
     </div>
   ),
@@ -64,62 +76,34 @@ const mdComponents: Components = {
   ),
 };
 
-// ── 工具颜色（使用项目 semantic tokens）──────────────────────
-const TOOL_COLORS: Record<string, string> = {
-  Read:         "var(--info)",      // #38bdf8
-  Write:        "var(--success)",   // #22c55e
-  Edit:         "var(--warning)",   // #f59e0b
-  MultiEdit:    "var(--warning)",
-  Bash:         "var(--accent)",    // #4477ff
-  Grep:         "var(--warning)",   // #f59e0b
-  Glob:         "var(--info)",      // #38bdf8
-  WebSearch:    "var(--info)",
-  WebFetch:     "var(--info)",
-  Agent:        "var(--accent)",
-  TodoWrite:    "var(--text-secondary)",
-  TodoRead:     "var(--text-secondary)",
-  NotebookEdit: "var(--warning)",
-};
-
-function getToolColor(name: string | null | undefined) {
-  if (!name) return "var(--text-tertiary)";
-  return TOOL_COLORS[name] ?? "var(--text-tertiary)";
+// ── 工具图标 ─────────────────────────────────────────────────
+function ToolIcon({ name, size = 14 }: { name: string; size?: number }) {
+  const props = { size, strokeWidth: 1.75, className: "shrink-0" };
+  switch (name) {
+    case "Bash": return <Terminal {...props} style={{ color: "var(--accent)" }} />;
+    case "Read": return <FileText {...props} style={{ color: "var(--info)" }} />;
+    case "Write": return <FileEdit {...props} style={{ color: "var(--success)" }} />;
+    case "Edit": case "MultiEdit": return <FileEdit {...props} style={{ color: "var(--warning)" }} />;
+    case "Grep": return <Search {...props} style={{ color: "var(--warning)" }} />;
+    case "Glob": return <FolderSearch {...props} style={{ color: "var(--info)" }} />;
+    case "WebSearch": case "WebFetch": return <Globe {...props} style={{ color: "var(--info)" }} />;
+    default: return <Terminal {...props} style={{ color: "var(--text-tertiary)" }} />;
+  }
 }
 
 // ── 工具标签 ─────────────────────────────────────────────────
-function toolLabel(name: string | null | undefined, input: Record<string, unknown> | null | undefined): { tag: string; detail: string } {
-  if (!name) return { tag: "Tool", detail: "" };
-  if (!input) return { tag: name, detail: "" };
-
+function getToolDetail(name: string | null | undefined, input: Record<string, unknown> | null | undefined): string {
+  if (!name || !input) return "";
   switch (name) {
-    case "Bash": {
-      const cmd = String(input.command || "").trim();
-      return { tag: "Bash", detail: cmd.length > 120 ? cmd.slice(0, 120) + "…" : cmd };
-    }
-    case "Read": {
-      const fp = String(input.file_path || "");
-      return { tag: "Read", detail: fp.split("/").pop() || fp };
-    }
-    case "Write": {
-      const fp = String(input.file_path || "");
-      return { tag: "Write", detail: fp.split("/").pop() || fp };
-    }
-    case "Edit": case "MultiEdit": {
-      const fp = String(input.file_path || "");
-      return { tag: "Update", detail: fp.split("/").pop() || fp };
-    }
-    case "Glob":
-      return { tag: "Glob", detail: String(input.pattern || "") };
-    case "Grep":
-      return { tag: "Grep", detail: `"${input.pattern || ""}"${input.path ? " " + input.path : ""}` };
-    case "WebSearch":
-      return { tag: "WebSearch", detail: String(input.query || "") };
-    case "WebFetch":
-      return { tag: "WebFetch", detail: String(input.url || "").slice(0, 80) };
-    case "Agent":
-      return { tag: "Agent", detail: String(input.description || input.prompt || "").slice(0, 80) };
-    default:
-      return { tag: name, detail: "" };
+    case "Bash": return String(input.command || "").slice(0, 120);
+    case "Read": case "Write": return String(input.file_path || "");
+    case "Edit": case "MultiEdit": return String(input.file_path || "");
+    case "Glob": return String(input.pattern || "");
+    case "Grep": return `"${input.pattern || ""}"${input.path ? " in " + input.path : ""}`;
+    case "WebSearch": return String(input.query || "");
+    case "WebFetch": return String(input.url || "").slice(0, 80);
+    case "Agent": return String(input.description || input.prompt || "").slice(0, 80);
+    default: return "";
   }
 }
 
@@ -170,18 +154,18 @@ function computeDiff(oldStr: string, newStr: string): DiffLine[] {
 function EditDiffView({ input }: { input: Record<string, unknown> }) {
   const oldStr = String(input.old_string ?? "");
   const newStr = String(input.new_string ?? "");
+  const filePath = String(input.file_path ?? "");
 
   const raw = useMemo(() => computeDiff(oldStr, newStr), [oldStr, newStr]);
   const added = raw.filter(d => d.type === "add").length;
   const removed = raw.filter(d => d.type === "del").length;
 
-  // Collapse long unchanged runs (keep 1 line context each side)
+  // Collapse long unchanged runs
   const lines: (DiffLine | { type: "fold"; count: number })[] = [];
   let ctxRun: DiffLine[] = [];
   const flushCtx = () => {
-    if (ctxRun.length <= 4) {
-      lines.push(...ctxRun);
-    } else {
+    if (ctxRun.length <= 4) { lines.push(...ctxRun); }
+    else {
       lines.push(ctxRun[0]);
       lines.push({ type: "fold", count: ctxRun.length - 2 });
       lines.push(ctxRun[ctxRun.length - 1]);
@@ -189,31 +173,36 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
     ctxRun = [];
   };
   for (const d of raw) {
-    if (d.type === "ctx") { ctxRun.push(d); }
+    if (d.type === "ctx") ctxRun.push(d);
     else { if (ctxRun.length) flushCtx(); lines.push(d); }
   }
   if (ctxRun.length) flushCtx();
 
   return (
-    <div className="rounded-lg overflow-hidden"
-         style={{ background: "var(--background)", border: "1px solid var(--border)" }}>
-      {/* 统计头 */}
-      <div className="flex items-center gap-3 px-3 h-7 text-[10px] font-mono"
-           style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
-        {added > 0 && <span style={{ color: "var(--success)" }}>+{added}</span>}
-        {removed > 0 && <span style={{ color: "var(--danger)" }}>-{removed}</span>}
-        {added === 0 && removed === 0 && <span>no changes</span>}
+    <div className="rounded-lg overflow-hidden mt-2"
+         style={{ border: "1px solid var(--border)" }}>
+      {/* 文件头 */}
+      <div className="flex items-center gap-2 px-3 py-2"
+           style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
+        <FileEdit size={13} strokeWidth={1.75} style={{ color: "var(--warning)" }} />
+        <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>
+          {filePath}
+        </span>
+        <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
+          {added > 0 && <span style={{ color: "var(--success)" }}>+{added}</span>}
+          {removed > 0 && <span style={{ color: "var(--danger)" }}>−{removed}</span>}
+        </div>
       </div>
-      {/* Diff 行 */}
-      <div className="overflow-x-auto max-h-[380px] overflow-y-auto text-[11px] font-mono leading-[1.65]">
+      {/* Diff 内容 */}
+      <div className="overflow-x-auto max-h-[440px] overflow-y-auto text-[11px] font-mono leading-[1.7]"
+           style={{ background: "var(--background)" }}>
         {lines.map((item, idx) => {
           if ("count" in item) {
             return (
-              <div key={idx} className="flex items-center h-[22px]"
-                   style={{ background: "var(--background-secondary)" }}>
-                <span className="w-[72px]" />
-                <span className="text-[10px] px-2" style={{ color: "var(--text-tertiary)" }}>
-                  ⋯ {item.count} lines ⋯
+              <div key={idx} className="flex items-center justify-center py-0.5"
+                   style={{ background: "var(--background-secondary)", borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
+                <span className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                  ⋯ {item.count} unchanged lines ⋯
                 </span>
               </div>
             );
@@ -221,29 +210,34 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
           const isAdd = item.type === "add";
           const isDel = item.type === "del";
           return (
-            <div key={idx} className="flex"
+            <div key={idx} className="flex group"
                  style={{
-                   background: isAdd ? "rgba(34,197,94,0.06)" : isDel ? "rgba(244,63,94,0.06)" : "transparent",
+                   background: isAdd
+                     ? "rgba(34,197,94,0.07)"
+                     : isDel
+                     ? "rgba(244,63,94,0.07)"
+                     : "transparent",
                  }}>
               {/* 旧行号 */}
-              <span className="w-[36px] text-right pr-1.5 select-none shrink-0"
-                    style={{ color: isDel ? "rgba(244,63,94,0.4)" : "var(--text-tertiary)", opacity: isDel ? 1 : 0.4 }}>
+              <span className="w-[38px] text-right pr-2 select-none shrink-0 tabular-nums"
+                    style={{ color: "var(--text-tertiary)", opacity: isDel ? 0.6 : 0.25 }}>
                 {isDel ? item.oldNum : item.type === "ctx" ? item.oldNum : ""}
               </span>
               {/* 新行号 */}
-              <span className="w-[36px] text-right pr-1.5 select-none shrink-0"
-                    style={{ color: isAdd ? "rgba(34,197,94,0.4)" : "var(--text-tertiary)", opacity: isAdd ? 1 : 0.4 }}>
+              <span className="w-[38px] text-right pr-2 select-none shrink-0 tabular-nums"
+                    style={{ color: "var(--text-tertiary)", opacity: isAdd ? 0.6 : 0.25 }}>
                 {isAdd ? item.newNum : item.type === "ctx" ? item.newNum : ""}
               </span>
-              {/* +/- */}
-              <span className="w-[18px] text-center select-none shrink-0"
+              {/* +/- 标记 */}
+              <span className="w-5 text-center select-none shrink-0 font-semibold"
                     style={{ color: isAdd ? "var(--success)" : isDel ? "var(--danger)" : "transparent" }}>
                 {isAdd ? "+" : isDel ? "−" : " "}
               </span>
-              {/* 代码 */}
-              <span className="flex-1 whitespace-pre pr-3"
+              {/* 代码内容 */}
+              <span className="flex-1 whitespace-pre pr-4"
                     style={{
                       color: isAdd ? "#86efac" : isDel ? "#fda4af" : "var(--text-tertiary)",
+                      opacity: isAdd || isDel ? 1 : 0.6,
                     }}>
                 {item.text || " "}
               </span>
@@ -255,7 +249,7 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
   );
 }
 
-// ── Bash 输出块 ─────────────────────────────────────────────
+// ── Bash 输出 ────────────────────────────────────────────────
 function BashOutput({ command, result, isError }: { command: string; result: string; isError: boolean }) {
   const [open, setOpen] = useState(false);
   const lines = result.split("\n");
@@ -263,46 +257,46 @@ function BashOutput({ command, result, isError }: { command: string; result: str
   const displayed = open || !isLong ? result : lines.slice(0, 6).join("\n") + "\n…";
 
   return (
-    <div className="rounded-lg overflow-hidden"
-         style={{ background: "var(--background)", border: `1px solid ${isError ? "rgba(244,63,94,0.25)" : "var(--border)"}` }}>
-      <div className="flex items-center gap-2 px-3 h-7"
+    <div className="rounded-lg overflow-hidden mt-2"
+         style={{ border: `1px solid ${isError ? "rgba(244,63,94,0.3)" : "var(--border)"}` }}>
+      <div className="flex items-center gap-2 px-3 py-1.5"
            style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
-        <span className="text-[11px] font-mono font-semibold" style={{ color: "var(--accent)" }}>$</span>
+        <span className="text-[11px] font-mono font-bold" style={{ color: "var(--accent)" }}>$</span>
         <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>{command}</span>
       </div>
-      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[360px] overflow-y-auto leading-[1.55]"
-           style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0 }}>
+      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[360px] overflow-y-auto leading-[1.6]"
+           style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
         {displayed}
       </pre>
       {isLong && (
         <button
           onClick={() => setOpen(v => !v)}
-          className="w-full h-6 text-[10px] font-mono hover:brightness-125 transition-all"
+          className="w-full h-6 text-[10px] font-mono transition-colors"
           style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? "▲ 收起" : `▼ 展开 (${lines.length} 行)`}
+          {open ? "▲ 收起" : `▼ ${lines.length} 行`}
         </button>
       )}
     </div>
   );
 }
 
-// ── 通用输出块 ──────────────────────────────────────────────
+// ── 通用输出 ─────────────────────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
   const [open, setOpen] = useState(false);
   const isLong = result.length > 500;
   const displayed = open || !isLong ? result : result.slice(0, 500) + "…";
 
   return (
-    <div className="rounded-lg overflow-hidden"
-         style={{ background: "var(--background)", border: "1px solid var(--border)" }}>
-      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[360px] overflow-y-auto leading-[1.55]"
-           style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0 }}>
+    <div className="rounded-lg overflow-hidden mt-2"
+         style={{ border: "1px solid var(--border)" }}>
+      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[360px] overflow-y-auto leading-[1.6]"
+           style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
         {displayed}
       </pre>
       {isLong && (
         <button
           onClick={() => setOpen(v => !v)}
-          className="w-full h-6 text-[10px] font-mono hover:brightness-125 transition-all"
+          className="w-full h-6 text-[10px] font-mono transition-colors"
           style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
           {open ? "▲ 收起" : `▼ 展开 (${result.length} 字)`}
         </button>
@@ -311,82 +305,86 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
   );
 }
 
-// ── Edit 折叠摘要 ────────────────────────────────────────────
-function editSummary(input: Record<string, unknown> | null | undefined): string {
-  if (!input) return "";
-  const oldN = String(input.old_string ?? "").split("\n").length;
-  const newN = String(input.new_string ?? "").split("\n").length;
-  const parts: string[] = [];
-  if (newN > 0) parts.push(`Added ${newN} line${newN > 1 ? "s" : ""}`);
-  if (oldN > 0) parts.push(`removed ${oldN} line${oldN > 1 ? "s" : ""}`);
-  return parts.join(", ");
-}
-
-// ── 工具调用行 ──────────────────────────────────────────────
-function ToolLine({ block }: { block: TranscriptBlock }) {
+// ── 工具卡片（内嵌在助手消息中）─────────────────────────────
+function ToolWidget({ block }: { block: TranscriptBlock }) {
   const [open, setOpen] = useState(false);
   const toggle = useCallback(() => setOpen(v => !v), []);
 
-  const color = getToolColor(block.tool_name);
-  const { tag, detail } = toolLabel(block.tool_name, block.tool_input);
+  const toolName = block.tool_name || "Tool";
+  const detail = getToolDetail(block.tool_name, block.tool_input);
   const hasResult = block.tool_result != null && block.tool_result !== "";
   const isError = block.tool_error === true;
-  const isEdit = block.tool_name === "Edit" || block.tool_name === "MultiEdit";
-  const isBash = block.tool_name === "Bash";
+  const isEdit = toolName === "Edit" || toolName === "MultiEdit";
+  const isBash = toolName === "Bash";
   const hasEditData = isEdit && block.tool_input && (block.tool_input.old_string || block.tool_input.new_string);
   const bashCmd = isBash ? String(block.tool_input?.command ?? "") : "";
   const canExpand = hasResult || hasEditData;
 
-  // Collapsed summary line
-  const collapsedText = isEdit && hasEditData
-    ? editSummary(block.tool_input)
-    : isBash && hasResult
-    ? block.tool_result!.split("\n")[0].slice(0, 140)
-    : block.tool_name === "Read" && hasResult
-    ? `${block.tool_result!.split("\n").length} lines`
-    : hasResult
-    ? block.tool_result!.split("\n")[0].slice(0, 140)
+  // Edit summary
+  const editInfo = useMemo(() => {
+    if (!hasEditData || !block.tool_input) return "";
+    const oldN = String(block.tool_input.old_string ?? "").split("\n").length;
+    const newN = String(block.tool_input.new_string ?? "").split("\n").length;
+    const parts: string[] = [];
+    if (newN > 0) parts.push(`+${newN}`);
+    if (oldN > 0) parts.push(`−${oldN}`);
+    return parts.join(" ");
+  }, [hasEditData, block.tool_input]);
+
+  // Result preview
+  const preview = hasResult
+    ? block.tool_name === "Read"
+      ? `${block.tool_result!.split("\n").length} lines`
+      : block.tool_result!.split("\n")[0].slice(0, 100)
     : "";
 
   return (
-    <div>
-      {/* ● Tag(detail) */}
-      <div
+    <div className="rounded-lg overflow-hidden my-1.5"
+         style={{ border: "1px solid var(--border)", background: "var(--background-tertiary)" }}>
+      {/* 头部：点击展开 */}
+      <button
         onClick={canExpand ? toggle : undefined}
-        className={`flex items-baseline gap-2 py-[3px] rounded-md px-1 -mx-1 transition-colors ${canExpand ? "cursor-pointer hover:bg-[var(--background-tertiary)]" : ""}`}
+        className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${canExpand ? "hover:brightness-110" : ""}`}
       >
-        <span className="text-[9px] mt-[2px] leading-none shrink-0" style={{ color }}>●</span>
-        <span className="text-[12px] font-mono font-semibold shrink-0" style={{ color }}>{tag}</span>
+        <ToolIcon name={toolName} size={14} />
+        <span className="text-[11.5px] font-semibold shrink-0" style={{ color: "var(--text-primary)" }}>
+          {isEdit ? "Edit" : toolName}
+        </span>
         {detail && (
-          <span className="text-[11px] font-mono truncate" style={{ color: "var(--text-secondary)" }}>
-            {detail}
+          <code className="text-[10.5px] font-mono truncate px-1.5 py-0.5 rounded"
+                style={{ background: "var(--background)", color: "var(--text-secondary)" }}>
+            {detail.split("/").pop() || detail}
+          </code>
+        )}
+        {/* Edit 统计 */}
+        {editInfo && (
+          <span className="text-[10px] font-mono shrink-0" style={{ color: "var(--text-tertiary)" }}>
+            {editInfo}
           </span>
         )}
         {isError && (
-          <span className="text-[9px] font-mono px-1.5 py-[1px] rounded font-semibold shrink-0"
+          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
                 style={{ color: "var(--danger)", background: "rgba(244,63,94,0.1)" }}>
             ERROR
           </span>
         )}
-        {canExpand && (
-          <span className="text-[8px] opacity-25 shrink-0 transition-transform ml-auto"
-                style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
-        )}
-      </div>
-
-      {/* ⎿ 折叠摘要 */}
-      {!open && collapsedText && (
-        <div className="flex items-start gap-2 pl-[3px] pb-0.5">
-          <span className="shrink-0 text-[11px] leading-none mt-px" style={{ color: "var(--border)" }}>⎿</span>
-          <span className="text-[11px] font-mono truncate" style={{ color: "var(--text-tertiary)" }}>
-            {collapsedText}
+        <span className="flex-1" />
+        {/* 折叠预览 */}
+        {!open && preview && (
+          <span className="text-[10px] font-mono truncate max-w-[180px]" style={{ color: "var(--text-tertiary)" }}>
+            {preview}
           </span>
-        </div>
-      )}
+        )}
+        {canExpand && (
+          open
+            ? <ChevronDown size={12} style={{ color: "var(--text-tertiary)" }} className="shrink-0" />
+            : <ChevronRight size={12} style={{ color: "var(--text-tertiary)" }} className="shrink-0" />
+        )}
+      </button>
 
       {/* 展开内容 */}
       {open && (
-        <div className="ml-4 mt-1 mb-2">
+        <div className="px-3 pb-3" style={{ borderTop: "1px solid var(--border)" }}>
           {hasEditData && <EditDiffView input={block.tool_input!} />}
           {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
           {!isEdit && !isBash && hasResult && <OutputBlock result={block.tool_result!} isError={isError} />}
@@ -396,39 +394,71 @@ function ToolLine({ block }: { block: TranscriptBlock }) {
   );
 }
 
-// ── 用户消息 ─────────────────────────────────────────────────
-function UserLine({ msg }: { msg: TranscriptMessage }) {
+// ── Claude 头像 ─────────────────────────────────────────────
+function ClaudeAvatar() {
+  return (
+    <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+         style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+      <BotIcon size={14} style={{ color: "var(--accent)" }} />
+    </div>
+  );
+}
+
+// ── 用户头像 ─────────────────────────────────────────────────
+function UserAvatar() {
+  return (
+    <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+         style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>
+      <User size={14} style={{ color: "var(--text-secondary)" }} />
+    </div>
+  );
+}
+
+// ── 用户消息卡片 ─────────────────────────────────────────────
+function UserCard({ msg }: { msg: TranscriptMessage }) {
   const text = msg.blocks.filter(b => b.type === "text").map(b => b.text).join("\n").trim();
   if (!text) return null;
 
   return (
-    <div className="flex items-start gap-2.5 pt-3 pb-1">
-      <span className="shrink-0 text-[14px] font-bold leading-none mt-[2px]" style={{ color: "var(--accent)" }}>❯</span>
-      <div className="flex-1 min-w-0 text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-          {text}
-        </ReactMarkdown>
+    <div className="flex items-start gap-3 px-4 py-2">
+      <UserAvatar />
+      <div className="flex-1 min-w-0 rounded-lg px-3.5 py-2.5"
+           style={{
+             background: "var(--background-tertiary)",
+             border: "1px solid var(--border)",
+           }}>
+        <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+            {text}
+          </ReactMarkdown>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── 助手消息 ─────────────────────────────────────────────────
-function AssistantBlock({ msg }: { msg: TranscriptMessage }) {
+// ── 助手消息卡片 ─────────────────────────────────────────────
+function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   return (
-    <div className="space-y-0.5 pb-0.5">
-      {msg.blocks.map((block, i) =>
-        block.type === "text" ? (
-          <div key={i} className="text-[12px] leading-relaxed py-0.5 pl-[3px]"
-               style={{ color: "var(--text-primary)" }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-              {block.text ?? ""}
-            </ReactMarkdown>
-          </div>
-        ) : (
-          <ToolLine key={i} block={block} />
-        )
-      )}
+    <div className="flex items-start gap-3 px-4 py-2">
+      <ClaudeAvatar />
+      <div className="flex-1 min-w-0 rounded-lg px-3.5 py-2.5"
+           style={{
+             background: "rgba(68,119,255,0.04)",
+             border: "1px solid rgba(68,119,255,0.12)",
+           }}>
+        <div className="space-y-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+          {msg.blocks.map((block, i) =>
+            block.type === "text" ? (
+              <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>
+                {block.text ?? ""}
+              </ReactMarkdown>
+            ) : (
+              <ToolWidget key={i} block={block} />
+            )
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -474,14 +504,11 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
   }
 
   return (
-    <div className="px-5 py-4 space-y-0.5" style={{ maxWidth: 880, margin: "0 auto" }}>
+    <div className="py-4 space-y-1" style={{ maxWidth: 900, margin: "0 auto" }}>
       {messages.map((msg, i) => (
-        <div key={i}>
-          {msg.role === "user"
-            ? <UserLine msg={msg} />
-            : <AssistantBlock msg={msg} />
-          }
-        </div>
+        msg.role === "user"
+          ? <UserCard key={i} msg={msg} />
+          : <AssistantCard key={i} msg={msg} />
       ))}
       <div ref={bottomRef} />
     </div>
