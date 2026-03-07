@@ -1372,7 +1372,7 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                   <div key={ri} className="bg-app rounded-lg border border-app/50 p-3 space-y-2.5">
                     <div className="flex items-center gap-2">
                       <label className="text-[10px] text-app-tertiary shrink-0 w-14">Matcher</label>
-                      <input value={rule.matcher} onChange={e => updRule(ev, ri, "matcher", e.target.value)} placeholder="* 或留空" spellCheck={false}
+                      <input value={rule.matcher} onChange={e => updRule(ev, ri, "matcher", e.target.value)} placeholder={t("claudeConfig.placeholder.matcherHint")} spellCheck={false}
                         className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
                       <button onClick={() => rmRule(ev, ri)} className="text-app-tertiary hover:text-red-400 p-1"><Trash2 size={12} /></button>
                     </div>
