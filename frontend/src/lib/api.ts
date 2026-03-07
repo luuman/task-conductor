@@ -98,7 +98,7 @@ export async function authWithPin(tunnelUrl: string, pin: string): Promise<strin
       signal: ctrl.signal,
     });
     clearTimeout(timer);
-    if (!resp.ok) throw new Error("PIN 错误");
+    if (!resp.ok) throw new Error(i18n.t("login.errors.pinWrong"));
     const data = await resp.json();
     return data.token;
   } catch (err) {
