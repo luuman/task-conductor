@@ -1697,7 +1697,7 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
           <FolderOpen size={13} className="text-green-400" />
           <span className="text-xs font-semibold text-app">{t("claudeConfig.monitoring.projectMemory")}</span>
           <span className="text-[9px] text-app-tertiary">{overview.projects.length} 个项目</span>
-          {loadingDetails && <span className="text-[9px] text-app-tertiary animate-pulse">加载详情...</span>}
+          {loadingDetails && <span className="text-[9px] text-app-tertiary animate-pulse">{t("claudeConfig.monitoring.loadingDetails")}</span>}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {overview.projects.map(p => {
