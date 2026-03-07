@@ -1531,7 +1531,7 @@ function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
       {parseError && <p className="text-[11px] text-red-400">{parseError}</p>}
       <button onClick={handleSave} disabled={!isDirty || saving}
         className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-md font-medium", isDirty ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
-        {status === "ok" ? <Check size={11} /> : <Save size={11} />}{saving ? "保存中..." : status === "ok" ? "已保存" : "保存权限"}
+        {status === "ok" ? <Check size={11} /> : <Save size={11} />}{saving ? t("common.saving") : status === "ok" ? t("common.saved") : t("claudeConfig.permissions.savePermissions")}
       </button>
     </div>
   );
