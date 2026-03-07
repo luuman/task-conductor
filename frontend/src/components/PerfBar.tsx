@@ -94,7 +94,7 @@ export function PerfBar({ connectionStatus, onDisconnect }: PerfBarProps) {
   const isConnected  = connectionStatus === "connected";
   const isConnecting = connectionStatus === "connecting";
   const connColor = isConnected ? "#22c55e" : isConnecting ? "#f59e0b" : "#636366";
-  const connText  = isConnected ? "已连接" : isConnecting ? "连接中…" : "未连接";
+  const connText  = isConnected ? t('perfBar.connected') : isConnecting ? t('perfBar.connecting') : t('perfBar.disconnected');
 
   return (
     <div
