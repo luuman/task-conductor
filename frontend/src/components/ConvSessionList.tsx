@@ -85,32 +85,42 @@ function SessionItem({ s, active, onSelect }: {
   onSelect: (s: ClaudeSession) => void;
 }) {
   const { t } = useTranslation();
-  const displayName = s.note?.alias || s.session_id.slice(0, 8);
+  const title = s.note?.alias || s.summary || s.session_id.slice(0, 8);
   const tags = s.note?.tags ?? [];
+  const time = relativeTime(s.started_at);
 
   return (
     <button
       onClick={() => onSelect(s)}
-      className="w-full pl-5 pr-3 py-1.5 text-left transition-colors border-l-2 hover:bg-white/[0.03]"
+      className="w-full pl-5 pr-3 py-2 text-left transition-colors border-l-2 hover:bg-white/[0.03]"
       style={{
         borderLeftColor: active ? "var(--accent)" : "transparent",
         background: active ? "var(--background-tertiary)" : undefined,
       }}
     >
-      <div className="flex items-center gap-1.5">
+      {/* 第一行：状态 + 摘要 */}
+      <div className="flex items-start gap-1.5">
         <StatusDot status={s.status} />
-        <span className="text-[11px] font-medium truncate flex-1"
+        <span className="text-[11px] leading-snug font-medium flex-1 line-clamp-2"
               style={{ color: "var(--text-primary)" }}>
-          {displayName}
+          {title}
         </span>
-        <span className="text-[9px] shrink-0"
+      </div>
+
+      {/* 第二行：时间 + 事件数 */}
+      <div className="flex items-center justify-between mt-1 ml-3">
+        <span className="text-[9px]"
               style={{ color: "var(--text-tertiary)" }}>
-          {s.event_count}
+          {time}
+        </span>
+        <span className="text-[9px]"
+              style={{ color: "var(--text-tertiary)" }}>
+          {s.event_count} {t('convSession.eventCount')}
         </span>
       </div>
 
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-0.5 ml-3">
+        <div className="flex flex-wrap gap-1 mt-1 ml-3">
           {tags.slice(0, 3).map(tag => (
             <span key={tag}
                   className="text-[8px] px-1 py-0.5 rounded-full"
@@ -122,7 +132,7 @@ function SessionItem({ s, active, onSelect }: {
       )}
 
       {s.note?.linked_task_id && (
-        <span className="text-[9px] ml-3 block"
+        <span className="text-[9px] mt-0.5 ml-3 block"
               style={{ color: "var(--accent)" }}>
           → Task #{s.note.linked_task_id}
         </span>
