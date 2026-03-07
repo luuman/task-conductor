@@ -160,10 +160,10 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               </p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.local.pinCode')}</label>
               <Input value={pin} onChange={(e) => setPin(e.target.value)}
-                placeholder="6 位数字" maxLength={6} inputMode="numeric" />
-              <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>Agent 启动时终端显示的 6 位 PIN</p>
+                placeholder={t('login.local.pinPlaceholder')} maxLength={6} inputMode="numeric" />
+              <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>{t('login.tunnel.pinHint')}</p>
             </div>
             {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
             <Button type="submit" disabled={!tunnelUrl || pin.length !== 6 || loading} className="w-full" size="lg">
