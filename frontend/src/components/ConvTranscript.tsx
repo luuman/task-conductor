@@ -114,6 +114,22 @@ const mdComponents: Components = {
   ),
 };
 
+// ── 可点击文件路径 ───────────────────────────────────────────
+function ClickableFilePath({ filePath, className, style }: { filePath: string; className?: string; style?: React.CSSProperties }) {
+  const onOpenFile = useContext(OpenFileCtx);
+  const fileName = filePath.split("/").pop() || filePath;
+  return (
+    <span
+      title={filePath}
+      className={`${className || ""} ${onOpenFile ? "cursor-pointer hover:underline" : ""}`}
+      style={{ ...style, ...(onOpenFile ? { color: "var(--accent)" } : {}) }}
+      onClick={onOpenFile ? (e) => { e.stopPropagation(); onOpenFile(filePath); } : undefined}
+    >
+      {fileName}
+    </span>
+  );
+}
+
 // ── 工具图标 ─────────────────────────────────────────────────
 function ToolIcon({ name, size = 14 }: { name: string; size?: number }) {
   const props = { size, strokeWidth: 1.75, className: "shrink-0" };
