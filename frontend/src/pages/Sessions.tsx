@@ -184,8 +184,6 @@ function EventTable({ rows, filter, emptyHint }: {
 
 // ── 主页面 ──────────────────────────────────────────────────
 
-type RightView = "live" | "history";
-
 interface SessionsProps {
   liveEvents: ClaudeHookEvent[];
   wsStatus: WsStatus;
