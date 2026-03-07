@@ -348,8 +348,8 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
 
           {isApproved && (
             <div className="bg-green-900/10 border border-green-800/30 rounded-lg p-3 flex items-center justify-between">
-              <p className="text-xs text-green-400">已批准，准备推进到下一阶段</p>
-              <Button size="sm" onClick={handleAdvance}>推进到下一阶段</Button>
+              <p className="text-xs text-green-400">{t('taskPipeline.actionBanner.approvedReady')}</p>
+              <Button size="sm" onClick={handleAdvance}>{t('taskPipeline.actionBanner.advanceNext')}</Button>
             </div>
           )}
 
