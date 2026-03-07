@@ -147,16 +147,37 @@ export default function App() {
     if (page === "claude-config") {
       return <ClaudeConfig />;
     }
-    if (page === "files" && activeProjectId) {
-      const proj = projects.find((p) => p.id === activeProjectId);
-      if (proj) {
-        return (
-          <ProjectFiles
-            project={proj}
-            onBack={() => setPage("project")}
-          />
-        );
+    if (page === "files") {
+      if (activeProjectId) {
+        const proj = projects.find((p) => p.id === activeProjectId);
+        if (proj) {
+          return (
+            <ProjectFiles
+              project={proj}
+              onBack={() => setPage("project")}
+            />
+          );
+        }
       }
+      // 未选项目时显示项目选择列表
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-4" style={{ color: "var(--text-tertiary)" }}>
+          <FolderOpen size={40} strokeWidth={1.2} />
+          <p className="text-[14px]">{t("files.selectProject")}</p>
+          <div className="flex flex-col gap-2 w-64">
+            {projects.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => { setActiveProjectId(p.id); }}
+                className="px-4 py-2.5 rounded-lg text-[13px] text-left hover:bg-white/[0.04] transition-colors"
+                style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
     }
     if (page === "canvas") {
       return (
