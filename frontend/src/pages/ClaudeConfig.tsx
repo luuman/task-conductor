@@ -379,7 +379,7 @@ export default function ClaudeConfigPage() {
         </div>
         <button onClick={load}
           className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg border border-app text-app-tertiary hover:text-app transition-colors shrink-0">
-          <RotateCcw size={11} /> 刷新
+          <RotateCcw size={11} /> {t("common.refresh")}
         </button>
       </div>
 
