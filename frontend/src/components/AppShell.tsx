@@ -1,5 +1,6 @@
 // frontend/src/components/AppShell.tsx
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Sidebar } from "./Sidebar";
 import { PerfBottomBar } from "../modules/perf/bar/PerfBottomBar";
 import { api, type Project } from "../lib/api";
