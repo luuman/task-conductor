@@ -1559,7 +1559,7 @@ function SecEnvVars() {
   ];
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Variable} color="#a855f7" label="环境变量" desc="Claude Code 相关环境变量（只读，修改需在 shell 中设置）" />
+      <SectionHeader icon={Variable} color="#a855f7" label={t("claudeConfig.envVars.title")} desc="Claude Code 相关环境变量（只读，修改需在 shell 中设置）" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {DEFS.map(env => (
           <div key={env.key} className="bg-app-secondary border border-app rounded-xl px-4 py-3">
