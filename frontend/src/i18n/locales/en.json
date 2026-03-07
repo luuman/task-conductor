@@ -840,16 +840,16 @@
       "monitor": "Monitor"
     },
     "header": {
-      "title": "Error Knowledge Base",
+      "title": "Error Book",
       "subtitle": "Lessons learned from failures, auto-injected into future task prompts"
     },
-    "search": "Search knowledge entries...",
+    "search": "Search error entries...",
     "stats": {
       "noRecords": "No records yet"
     },
     "empty": {
       "noMatch": "No matching records",
-      "isEmpty": "Knowledge base is empty — lessons are accumulated automatically from failures"
+      "isEmpty": "Error book is empty — lessons are accumulated automatically from failures"
     },
     "footer": "{{count}} entries · Auto-injected into Claude's next same-stage prompt",
     "item": {
@@ -859,6 +859,19 @@
       "delete": "Delete",
       "deleteHint": "Delete this entry"
     }
+  },
+
+  "docsPanel": {
+    "header": {
+      "title": "Knowledge Base",
+      "subtitle": "Documents from project docs/ directory"
+    },
+    "search": "Search docs...",
+    "empty": "docs/ directory is empty or doesn't exist",
+    "noMatch": "No matching docs",
+    "noDocs": "No docs/ directory in this project",
+    "lines": "lines",
+    "close": "Close"
   },
 
   "claudeMonitor": {
