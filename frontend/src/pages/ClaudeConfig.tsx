@@ -687,6 +687,7 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
   claudeMd: string; onChange: (s: string) => void;
   onSave: () => void; saving: boolean; saved: boolean;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isEmpty = !claudeMd.trim();
