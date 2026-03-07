@@ -307,7 +307,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
           {phase === "loading" && (
             <div className="flex flex-col items-center justify-center h-48 text-app-tertiary text-xs gap-3">
               <span className="text-3xl animate-pulse">✦</span>
-              <p>Claude 正在分析 {inbox.length} 个任务...</p>
+              <p>{t('taskManager.emptyStates.aiAnalyzing', { count: inbox.length })}</p>
             </div>
           )}
 
