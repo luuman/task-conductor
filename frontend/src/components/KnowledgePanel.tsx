@@ -131,7 +131,7 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
       {/* Footer */}
       <div className="px-4 py-2 border-t border-app shrink-0">
         <p className="text-[10px] text-app-tertiary">
-          共 {items.length} 条 · 自动注入到 Claude 的下一次同阶段 Prompt
+          {t('knowledgePanel.footer', { count: items.length })}
         </p>
       </div>
     </div>
