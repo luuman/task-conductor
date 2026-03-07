@@ -464,7 +464,7 @@ function LogPanel({ logs, isRunning, stage }: {
           </span>
         )}
         <span className="ml-auto text-[10px] text-white/25 shrink-0">
-          {logs.length} 行 {expanded ? "▼" : "▲"}
+          {logs.length} {t('taskPipeline.logPanel.lines')} {expanded ? "▼" : "▲"}
         </span>
       </div>
 
