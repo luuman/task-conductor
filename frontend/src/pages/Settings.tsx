@@ -71,7 +71,11 @@ export default function Settings({ onDisconnect }: SettingsProps) {
       .then((info) => { setAgentVersion(info.version); setTunnelUrl(info.tunnel_url); })
       .catch(() => {});
     api.settings.get()
-      .then((s) => { setWorkspaceRoot(s.workspace_root); setWorkspaceInput(s.workspace_root); })
+      .then((s) => {
+        setWorkspaceRoot(s.workspace_root); setWorkspaceInput(s.workspace_root);
+        const fs = { app_id: s.feishu_app_id || "", app_secret: s.feishu_app_secret || "", owner_id: s.feishu_owner_id || "", default_chat_id: s.feishu_default_chat_id || "" };
+        setFeishu(fs); setFeishuInput(fs);
+      })
       .catch(() => {});
   }, []);
 
