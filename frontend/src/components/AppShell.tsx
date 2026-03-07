@@ -30,6 +30,7 @@ export function AppShell({
   onRefreshProjects,
   connectionStatus,
 }: AppShellProps) {
+  const { t } = useTranslation();
   const [showNewProject, setShowNewProject] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [newProjName, setNewProjName] = useState("");
