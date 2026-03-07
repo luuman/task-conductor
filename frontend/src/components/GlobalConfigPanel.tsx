@@ -312,7 +312,7 @@ function getSections(t: TFunc): SectionDef[] {
     icon: Search, color: "#2dd4bf",
     fields: [
       { key: "search", label: t("globalConfig.cli.search.fields.search.label"), desc: t("globalConfig.cli.search.fields.search.desc"), type: "text", placeholder: "find bug in auth module" },
-      { key: "query", label: t("globalConfig.cli.search.fields.query.label"), desc: t("globalConfig.cli.search.fields.query.desc"), type: "text", placeholder: "functions>10行" },
+      { key: "query", label: t("globalConfig.cli.search.fields.query.label"), desc: t("globalConfig.cli.search.fields.query.desc"), type: "text", placeholder: t("globalConfig.cli.search.fields.query.placeholder") },
       { key: "grep", label: t("globalConfig.cli.search.fields.grep.label"), desc: t("globalConfig.cli.search.fields.grep.desc"), type: "text", placeholder: "TODO.*" },
       { key: "replace", label: t("globalConfig.cli.search.fields.replace.label"), desc: t("globalConfig.cli.search.fields.replace.desc"), type: "text", placeholder: "oldName:newName" },
       { key: "similar", label: t("globalConfig.cli.search.fields.similar.label"), desc: t("globalConfig.cli.search.fields.similar.desc"), type: "text", placeholder: "function_name" },
