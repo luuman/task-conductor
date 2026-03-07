@@ -64,7 +64,7 @@ export function ConvSessionList({ sessions, loading, selectedId, onSelect }: Pro
           <div className="flex flex-col items-center justify-center h-32 gap-2 px-3 text-center"
                style={{ color: "var(--text-tertiary)" }}>
             <span className="text-2xl">💬</span>
-            <p className="text-[11px]">{search ? "无匹配结果" : "暂无会话记录"}</p>
+            <p className="text-[11px]">{search ? t('convSession.noMatch') : t('convSession.noSessions')}</p>
           </div>
         ) : (
           filtered.map(s => {
