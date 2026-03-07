@@ -1667,7 +1667,7 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
 
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Activity} color="#10b981" label="监控与统计" desc="Claude Code 使用统计与活动趋势" />
+      <SectionHeader icon={Activity} color="#10b981" label={t("claudeConfig.monitoring.title")} desc="Claude Code 使用统计与活动趋势" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "总消息", value: fmtNum(overview.total_messages), color: "#22c55e" },
