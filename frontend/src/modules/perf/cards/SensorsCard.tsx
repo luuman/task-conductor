@@ -57,7 +57,7 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
   }
 
   return (
-    <ICard title="传感器" showTitle={showTitle}>
+    <ICard title={t('perf.metricLabel.sensors')} showTitle={showTitle}>
       {/* ── Top rings ── */}
       <div className="flex justify-between items-center px-1">
         <RingGauge
