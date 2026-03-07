@@ -1590,5 +1590,13 @@
       "loadFailed": "Failed to load"
     },
     "loading": "Loading global config..."
+  },
+
+  "files": {
+    "title": "Files",
+    "empty": "Empty directory",
+    "copy": "Copy content",
+    "binaryFile": "Binary file, cannot preview",
+    "loadError": "Failed to load file"
   }
 }
