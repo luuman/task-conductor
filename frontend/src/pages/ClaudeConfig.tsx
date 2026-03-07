@@ -1343,8 +1343,8 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
   const activeCount = hookEvents.filter(ev => (config.hooks[ev]?.length ?? 0) > 0).length;
   return (
     <div className="space-y-3">
-      <SectionHeader icon={Webhook} color="#f97316" label="Hooks 生命周期钩子" desc="Claude Code 事件触发时执行外部命令"
-        right={<CountBadges items={[{ label: "已配置", count: activeCount, color: "#f97316" }]} />} />
+      <SectionHeader icon={Webhook} color="#f97316" label={t("claudeConfig.hooks.title")} desc="Claude Code 事件触发时执行外部命令"
+        right={<CountBadges items={[{ label: t("claudeConfig.hooks.configured"), count: activeCount, color: "#f97316" }]} />} />
       {hookEvents.map(ev => {
         const meta = EVENT_LABELS[ev] ?? { label: ev, desc: "" };
         const rules = getRules(ev);
