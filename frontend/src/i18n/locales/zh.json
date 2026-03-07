@@ -395,6 +395,18 @@
       "zh": "中文",
       "en": "English"
     },
+    "feishu": {
+      "title": "飞书集成",
+      "hint": "配置飞书开放平台 API 凭据，用于消息推送和群聊管理",
+      "defaultChatId": "默认群 Chat ID",
+      "restartNote": "修改后需重启服务生效"
+    },
+    "restart": {
+      "title": "重启服务",
+      "hint": "重启后端进程，使配置变更生效",
+      "restarting": "正在重启...",
+      "confirm": "确定要重启后端服务吗？页面将自动刷新。"
+    },
     "shutdown": {
       "title": "关闭服务",
       "hint": "停止后端进程",
