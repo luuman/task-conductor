@@ -395,6 +395,18 @@
       "zh": "中文",
       "en": "English"
     },
+    "feishu": {
+      "title": "Feishu Integration",
+      "hint": "Configure Feishu Open Platform API credentials for messaging and group management",
+      "defaultChatId": "Default Chat ID",
+      "restartNote": "Restart required after changes"
+    },
+    "restart": {
+      "title": "Restart Service",
+      "hint": "Restart the backend process to apply configuration changes",
+      "restarting": "Restarting...",
+      "confirm": "Are you sure you want to restart the backend? The page will refresh automatically."
+    },
     "shutdown": {
       "title": "Shutdown Service",
       "hint": "Stop the backend process",
