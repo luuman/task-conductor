@@ -1610,6 +1610,7 @@
     "editing": "编辑模式",
     "unsaved": "未保存",
     "imagePreview": "图片预览",
-    "lines": "行"
+    "lines": "行",
+    "selectProject": "选择一个项目以浏览文件"
   }
 }
