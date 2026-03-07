@@ -114,6 +114,7 @@ function CardPreview({
   mc: MetricConfig;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   const { sys, hist, procs } = usePerfData();
   const Icon  = METRIC_ICONS[mc.id];
   const data  = { sys, hist, procs };
