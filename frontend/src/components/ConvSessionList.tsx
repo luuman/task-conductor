@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
+import { getDateLocale } from "../i18n";
 import type { ClaudeSession } from "../lib/api";
 
 interface Props {
