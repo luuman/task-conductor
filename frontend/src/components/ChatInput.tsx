@@ -653,3 +653,84 @@ function Kbd({ children }: { children: React.ReactNode }) {
     </kbd>
   );
 }
+
+/** 工具栏切换按钮 */
+function ToolbarToggle({ label, icon, active, onClick }: {
+  label: string; icon: React.ReactNode; active: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded transition-colors hover:brightness-125"
+      style={{
+        background: active ? "rgba(68,119,255,0.15)" : "transparent",
+        color: active ? "var(--accent)" : "var(--text-tertiary)",
+        border: active ? "1px solid rgba(68,119,255,0.3)" : "1px solid transparent",
+      }}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+/** 工具栏下拉按钮 */
+function ToolbarDropdown({ label, icon, active, options, onSelect }: {
+  label: string;
+  icon: React.ReactNode;
+  active?: boolean;
+  options: { label: string; value: string; active?: boolean }[];
+  onSelect: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded transition-colors hover:brightness-125"
+        style={{
+          background: active ? "rgba(68,119,255,0.15)" : "transparent",
+          color: active ? "var(--accent)" : "var(--text-tertiary)",
+          border: active ? "1px solid rgba(68,119,255,0.3)" : "1px solid transparent",
+        }}
+      >
+        {icon}
+        <span>{label}</span>
+        <span className="text-[8px] opacity-50">▾</span>
+      </button>
+
+      {open && (
+        <div
+          className="absolute bottom-full left-0 mb-1 min-w-[160px] rounded-lg shadow-xl overflow-hidden z-50 py-1"
+          style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+        >
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onSelect(opt.value); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-[11px] transition-colors hover:brightness-125"
+              style={{
+                background: opt.active ? "var(--accent-subtle)" : "transparent",
+                color: opt.active ? "var(--accent)" : "var(--text-secondary)",
+              }}
+            >
+              <span className="flex-1">{opt.label}</span>
+              {opt.active && <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent)" }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
