@@ -254,7 +254,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                 onClick={handleDisconnect}
                 className="text-xs px-3 py-1.5 rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
               >
-                断开连接
+                {t('settings.connection.disconnect')}
               </button>
             </div>
           </div>
