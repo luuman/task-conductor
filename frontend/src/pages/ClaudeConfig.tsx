@@ -709,11 +709,11 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
               <button onClick={handleSave} disabled={saving}
                 className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white">
                 {saved ? <Check size={10} /> : <Save size={10} />}
-                {saving ? "保存中..." : saved ? "已保存" : "保存"}
+                {saving ? t("claudeConfig.claudeMd.saving") : saved ? t("claudeConfig.claudeMd.saved") : t("common.save")}
               </button>
               <button onClick={handleDone}
                 className="text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app">
-                完成
+                {t("claudeConfig.claudeMd.done")}
               </button>
             </>
           ) : (
