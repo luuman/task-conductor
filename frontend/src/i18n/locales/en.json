@@ -986,6 +986,47 @@
       "menuColor": "Menu Color",
       "menuSettings": "Menu Settings",
       "noConfigurable": "No configurable options for this metric"
+    },
+    "cpu": {
+      "user": "User",
+      "system": "System",
+      "loadAvg": "Load Avg",
+      "ctxSwitch": "ctx/s",
+      "processes": "Processes",
+      "uptime": "Uptime",
+      "days": "d",
+      "hours": "h"
+    },
+    "mem": {
+      "memory": "Memory",
+      "swap": "Swap",
+      "pressure": "Pressure",
+      "appMem": "App Memory",
+      "wiredMem": "Wired Memory",
+      "compressed": "Compressed",
+      "available": "Available",
+      "processes": "Processes"
+    },
+    "net": {
+      "upload": "Upload",
+      "download": "Download",
+      "established": "Established",
+      "listen": "Listen",
+      "timeWait": "Time Wait"
+    },
+    "disk": {
+      "available": "Available",
+      "read": "Read",
+      "write": "Write",
+      "readIops": "Read IOPS",
+      "writeIops": "Write IOPS",
+      "utilization": "Utilization"
+    },
+    "sensors": {
+      "temperature": "Temperature",
+      "fan": "Fan",
+      "rpm": "RPM",
+      "frequency": "Frequency"
     }
   },
 
