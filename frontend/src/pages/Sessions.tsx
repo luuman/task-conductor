@@ -445,7 +445,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               emptyHint={
                 <>
                   <span className="text-3xl">◷</span>
-                  <p className="text-[12px]">该会话暂无事件记录</p>
+                  <p className="text-[12px]">{t('sessions.emptyHints.noEvents')}</p>
                 </>
               }
             />
