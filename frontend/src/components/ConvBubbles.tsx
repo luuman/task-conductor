@@ -158,17 +158,20 @@ interface Props {
 }
 
 export function ConvBubbles({ events, loading }: Props) {
+  const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [events]);
 
+  const bubbles = useMemo(() => eventsToBubbles(events, t), [events, t]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full text-[12px]"
            style={{ color: "var(--text-tertiary)" }}>
-        加载中...
+        {t('convBubbles.loading')}
       </div>
     );
   }
@@ -178,19 +181,17 @@ export function ConvBubbles({ events, loading }: Props) {
       <div className="flex flex-col items-center justify-center h-full gap-3"
            style={{ color: "var(--text-tertiary)" }}>
         <span className="text-3xl">💬</span>
-        <p className="text-[12px]">选择左侧会话查看对话记录</p>
+        <p className="text-[12px]">{t('convBubbles.selectHint')}</p>
       </div>
     );
   }
-
-  const bubbles = eventsToBubbles(events);
 
   return (
     <div className="py-2">
       {bubbles.map((b, idx) => {
         if (b.kind === "banner")   return <Banner     key={idx} b={b} />;
-        if (b.kind === "tool")     return <ToolCard   key={idx} b={b} />;
-        if (b.kind === "notify")   return <NotifyBar  key={idx} b={b} />;
+        if (b.kind === "tool")     return <ToolCard   key={idx} b={b} t={t} />;
+        if (b.kind === "notify")   return <NotifyBar  key={idx} b={b} t={t} />;
         if (b.kind === "subagent") return <SubagentRow key={idx} b={b} />;
         return null;
       })}
