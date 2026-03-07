@@ -52,6 +52,7 @@
       "canvas": "Project Canvas",
       "tasks": "Task Manager",
       "conversations": "Conversations",
+      "files": "Files",
       "claudeConfig": "Claude Config",
       "settings": "Settings"
     },
