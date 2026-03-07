@@ -230,7 +230,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               )}
             </Row>
 
-            <Row label="Tunnel 地址">
+            <Row label={t('settings.connection.tunnelAddress')}>
               {tunnelUrl ? (
                 <a
                   href={tunnelUrl}
