@@ -210,7 +210,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                   tokenStatus === "valid"   ? "text-green-400" :
                   tokenStatus === "invalid" ? "text-red-400" : "text-yellow-400"
                 )}>
-                  {tokenStatus === "valid" ? "有效" : tokenStatus === "invalid" ? "无效" : "验证中..."}
+                  {tokenStatus === "valid" ? t('settings.connection.valid') : tokenStatus === "invalid" ? t('settings.connection.invalid') : t('settings.connection.verifying')}
                 </span>
                 <button
                   onClick={checkToken}
