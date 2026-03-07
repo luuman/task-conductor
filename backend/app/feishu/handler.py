@@ -11,7 +11,6 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from ..claude.pool import ClaudePool
-from ..claude.stream import extract_text
 from ..database import engine
 from ..models import Task, Project
 from ..pipeline.runner import run_pipeline
