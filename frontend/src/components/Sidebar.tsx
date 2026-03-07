@@ -91,7 +91,7 @@ export function Sidebar({
             onClick={onToggle}
             className="w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:bg-white/[0.06]"
             style={{ color: "var(--text-tertiary)" }}
-            title="展开侧边栏"
+            title={t('sidebar.expandSidebar')}
           >
             <ChevronRight size={13} />
           </button>
