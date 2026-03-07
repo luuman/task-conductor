@@ -1190,10 +1190,10 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
   };
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Terminal} color="#22c55e" label="自定义命令" desc="~/.claude/commands/"
+      <SectionHeader icon={Terminal} color="#22c55e" label={t("claudeConfig.commands.title")} desc="~/.claude/commands/"
         right={<div className="flex items-center gap-2">
-          <CountBadges items={[{ label: "总计", count: commands.length }, { label: "启用", count: commands.filter(c => c.enabled).length, color: "#22c55e" }]} />
-          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 新建</button>
+          <CountBadges items={[{ label: t("common.total"), count: commands.length }, { label: t("common.enabled"), count: commands.filter(c => c.enabled).length, color: "#22c55e" }]} />
+          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> {t("claudeConfig.commands.newCommand")}</button>
         </div>} />
       {showCreate && (
         <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
