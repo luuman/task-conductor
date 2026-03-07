@@ -1,5 +1,6 @@
 // src/modules/perf/bar/PerfBottomBar.tsx
 import { useRef, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Zap } from "lucide-react";
 import { usePerfData } from "../usePerfData";
 import { usePerfConfig } from "../usePerfConfig";
