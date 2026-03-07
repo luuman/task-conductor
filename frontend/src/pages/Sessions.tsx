@@ -446,9 +446,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
         <div className="flex items-center justify-between px-4 py-1.5 shrink-0"
              style={{ borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
           <span className="text-[10px] font-mono" style={{ color: "var(--text-tertiary)" }}>
-            {rightView === "live"
-              ? t('sessions.statusBar.realtimeCount', { count: liveRows.length })
-              : t('sessions.statusBar.historyCount', { count: historyRows.length })}
+            {t('sessions.statusBar.realtimeCount', { count: displayRows.length })}
           </span>
           {filter && (
             <button
