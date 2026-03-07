@@ -37,7 +37,7 @@ function getBaseUrl(): string {
     (window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1");
   if (isLocal) {
-    // 走 Vite proxy，不硬编码后端端口，macOS 只需转发 7070 即可
+    // Use Vite proxy, no hard-coded backend port; on macOS just forward 7070
     return import.meta.env.VITE_API_URL || "";
   }
   const config = getConfig();
