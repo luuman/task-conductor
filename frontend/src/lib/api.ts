@@ -212,6 +212,7 @@ export interface ClaudeSession {
   last_seen_at: string;
   event_count: number;
   note: ConversationNote;
+  summary: string | null;
 }
 
 export interface ClaudeEvent {
