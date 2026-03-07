@@ -635,6 +635,24 @@
       "sessionCount": "Sessions",
       "activeDays": "Active Days",
       "dailyActivity": "Daily Activity"
+    },
+    "sectionDesc": {
+      "overview": "Claude Code global information and common settings",
+      "settings": "API parameters, model selection, feature toggles & advanced config (tc_global_config.json)",
+      "mcp": "Model Context Protocol server management",
+      "hooks": "Execute external commands on Claude Code events",
+      "permissions": "Claude Code tool call permissions (allow / deny lists)",
+      "envVars": "Claude Code environment variables (read-only, modify in shell)",
+      "plugins": "Enable/disable Claude Code plugins",
+      "monitoring": "Claude Code usage statistics and activity trends",
+      "about": "System information and diagnostics",
+      "trash": "Disabled components, can be restored or permanently deleted"
+    },
+    "placeholder": {
+      "agentName": "Agent name (e.g. code-reviewer)",
+      "commandName": "Command name (e.g. review)",
+      "ruleName": "Rule name (e.g. no-console-log)",
+      "matcherHint": "* or leave empty"
     }
   },
 
