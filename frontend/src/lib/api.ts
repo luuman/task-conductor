@@ -460,6 +460,15 @@ export const api = {
       request<FileListResponse>(`/api/projects/${projectId}/files?path=${encodeURIComponent(path)}`),
     fileContent: (projectId: number, path: string) =>
       request<FileContentResponse>(`/api/projects/${projectId}/file?path=${encodeURIComponent(path)}`),
+    saveFile: (projectId: number, path: string, content: string) =>
+      request<{ path: string; name: string; size: number; ok: boolean }>(
+        `/api/projects/${projectId}/file`,
+        { method: "PUT", body: JSON.stringify({ path, content }) },
+      ),
+    searchFiles: (projectId: number, q: string) =>
+      request<{ query: string; items: FileItem[] }>(
+        `/api/projects/${projectId}/files/search?q=${encodeURIComponent(q)}`,
+      ),
     knowledge: (projectId: number) =>
       request<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`),
     deleteKnowledge: (projectId: number, knowledgeId: number) =>
