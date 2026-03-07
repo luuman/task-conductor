@@ -1,6 +1,7 @@
 // frontend/src/components/GlobalConfigPanel.tsx
 // 全局配置可视化编辑面板 —— 供 ClaudeConfig 页面嵌入使用
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
 import {
   Save,
