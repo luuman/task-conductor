@@ -430,6 +430,8 @@ export const api = {
     scan: () => request<Project[]>("/api/projects/scan", { method: "POST" }),
     updateSort: (projectId: number, body: { sort_order?: number; is_test?: boolean }) =>
       request<Project>(`/api/projects/${projectId}/sort`, { method: "PUT", body: JSON.stringify(body) }),
+    toggleFeishuSync: (projectId: number, enabled: boolean) =>
+      request<Project>(`/api/projects/${projectId}/feishu-sync`, { method: "PUT", body: JSON.stringify({ enabled }) }),
     tasks: (projectId: number) => request<Task[]>(`/api/projects/${projectId}/tasks`),
     knowledge: (projectId: number) =>
       request<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`),
