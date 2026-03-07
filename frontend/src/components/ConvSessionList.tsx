@@ -18,9 +18,21 @@ function projectName(cwd: string): string {
   return parts[parts.length - 1] || cwd || "unknown";
 }
 
-function cwdShort(path: string): string {
-  const parts = path.replace(/\\/g, "/").split("/");
-  return parts.slice(-2).join("/") || path;
+/** 相对时间显示 */
+function relativeTime(isoStr: string): string {
+  const d = new Date(isoStr);
+  const now = new Date();
+  const locale = getDateLocale();
+  const timeStr = d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", hour12: false });
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.floor((today.getTime() - target.getTime()) / 86400000);
+
+  if (diffDays === 0) return timeStr;
+  if (diffDays === 1) return `昨天 ${timeStr}`;
+  if (diffDays < 7) return `${diffDays}天前`;
+  return d.toLocaleDateString(locale, { month: "numeric", day: "numeric" });
 }
 
 function StatusDot({ status }: { status: ClaudeSession["status"] }) {
