@@ -1,5 +1,6 @@
 // src/modules/perf/settings/PerfSettings.tsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent,
