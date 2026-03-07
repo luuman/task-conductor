@@ -16,12 +16,12 @@ export function MemCard({ sys, procs, colors = {}, showTitle }: MemCardProps) {
   const memProcs = procs?.by_mem.slice(0, 3) ?? [];
 
   return (
-    <ICard title="内存" showTitle={showTitle}>
+    <ICard title={t('perf.metricLabel.mem')} showTitle={showTitle}>
       <div className="flex justify-between items-center px-2">
-        <RingGauge pct={sys?.memory.percent ?? 0} label="内存" color={cUsed} size={110} />
+        <RingGauge pct={sys?.memory.percent ?? 0} label={t('perf.mem.memory')} color={cUsed} size={110} />
         {(sys?.swap.total_gb ?? 0) > 0.1
-          ? <RingGauge pct={sys?.swap.percent ?? 0} label="交换" color={cCached} size={110} />
-          : <RingGauge pct={sys?.memory.percent ?? 0} label="压力" color={cCached} size={110} />
+          ? <RingGauge pct={sys?.swap.percent ?? 0} label={t('perf.mem.swap')} color={cCached} size={110} />
+          : <RingGauge pct={sys?.memory.percent ?? 0} label={t('perf.mem.pressure')} color={cCached} size={110} />
         }
       </div>
 
