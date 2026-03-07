@@ -61,7 +61,7 @@ export function OptionCards({
             }}
             className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-sm font-medium transition mt-1"
           >
-            选择此方案
+            {t('optionCards.selectOption')}
           </button>
         </div>
       ))}
