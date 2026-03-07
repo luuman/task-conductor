@@ -96,21 +96,146 @@ const mdComponents: Components = {
   ),
 };
 
-// ── 内联工具卡 ────────────────────────────────────────────────
-function InlineToolCard({ block }: { block: TranscriptBlock }) {
-  const detail = toolSummary(block.tool_name, block.tool_input ?? null);
+// ── 工具图标与颜色映射 ────────────────────────────────────────
+const TOOL_META: Record<string, { icon: string; color: string }> = {
+  Read:       { icon: "\u{1F4C4}", color: "#58a6ff" },   // 📄 蓝色
+  Write:      { icon: "\u270F\uFE0F", color: "#3fb950" },  // ✏️ 绿色
+  Edit:       { icon: "\u{1F527}", color: "#d29922" },   // 🔧 黄色
+  Bash:       { icon: "$",  color: "#bc8cff" },           // $ 紫色
+  Grep:       { icon: "\u{1F50D}", color: "#f0883e" },   // 🔍 橙色
+  Glob:       { icon: "\u{1F4C1}", color: "#39d2c0" },   // 📁 青色
+  WebSearch:  { icon: "\u{1F310}", color: "#56d4dd" },   // 🌐 蓝绿色
+  WebFetch:   { icon: "\u{1F310}", color: "#56d4dd" },
+  Agent:      { icon: "\u{1F916}", color: "#bc8cff" },   // 🤖 紫色
+};
+const DEFAULT_TOOL_META = { icon: "\u2699\uFE0F", color: "#8b949e" }; // ⚙️ 灰色
+
+function getToolMeta(name: string | null | undefined) {
+  if (!name) return DEFAULT_TOOL_META;
+  return TOOL_META[name] ?? DEFAULT_TOOL_META;
+}
+
+// ── 结果展示区 ────────────────────────────────────────────────
+const RESULT_TRUNCATE = 500;
+
+function ToolResultBlock({ result, isError }: { result: string; isError: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const needsTruncate = result.length > RESULT_TRUNCATE;
+  const displayed = expanded || !needsTruncate ? result : result.slice(0, RESULT_TRUNCATE) + "…";
+
+  return (
+    <div className="mt-1 rounded text-[10.5px] font-mono overflow-hidden"
+         style={{
+           background: "var(--background-tertiary)",
+           border: `1px solid ${isError ? "#f85149" : "var(--border)"}`,
+         }}>
+      <pre className="px-2.5 py-2 whitespace-pre-wrap break-all overflow-x-auto max-h-[400px] overflow-y-auto"
+           style={{ color: isError ? "#f85149" : "var(--text-secondary)", margin: 0 }}>
+        {displayed}
+      </pre>
+      {needsTruncate && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="w-full px-2.5 py-1 text-[10px] text-left hover:underline"
+          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)" }}>
+          {expanded ? "收起" : `展开全部 (${result.length} 字符)`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── 工具卡片（可展开） ───────────────────────────────────────
+function ToolWidget({ block }: { block: TranscriptBlock }) {
+  const [open, setOpen] = useState(false);
+  const toggle = useCallback(() => setOpen(v => !v), []);
+
+  const meta = getToolMeta(block.tool_name);
+  const summary = toolSummary(block.tool_name, block.tool_input ?? null);
+  const hasResult = block.tool_result != null && block.tool_result !== "";
+  const isError = block.tool_error === true;
+  const hasInput = block.tool_input != null && Object.keys(block.tool_input).length > 0;
+  const hasDetails = hasResult || hasInput;
+
+  // Bash 命令行前缀
+  const bashCmd = block.tool_name === "Bash" ? String(block.tool_input?.command ?? "") : "";
+
   return (
     <div className="my-1 rounded-md overflow-hidden text-[11px]"
          style={{ border: "1px solid var(--border)", background: "var(--background-tertiary)" }}>
-      <div className="flex items-center gap-1.5 px-2.5 py-1">
-        <span className="font-semibold text-[#79c0ff]">{block.tool_name || "Tool"}</span>
-        {detail && (
+      {/* 顶栏：图标 + 工具名 + 摘要 + 状态标记 + 展开按钮 */}
+      <button
+        onClick={toggle}
+        className="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-left hover:brightness-110 transition-all"
+        style={{ background: "transparent" }}>
+        {/* 工具图标 */}
+        <span className="shrink-0 w-5 text-center text-[12px] leading-none"
+              style={{ color: meta.color }}>
+          {meta.icon}
+        </span>
+        {/* 工具名 */}
+        <span className="shrink-0 font-semibold" style={{ color: meta.color }}>
+          {block.tool_name || "Tool"}
+        </span>
+        {/* 摘要 */}
+        {summary && (
           <span className="flex-1 truncate font-mono opacity-70"
-                style={{ color: "var(--text-secondary)" }} title={detail}>
-            {detail}
+                style={{ color: "var(--text-secondary)" }} title={summary}>
+            {summary}
           </span>
         )}
-      </div>
+        {!summary && <span className="flex-1" />}
+        {/* 结果状态标记 */}
+        {hasResult && (
+          <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-sm font-medium"
+                style={{
+                  background: isError ? "rgba(248,81,73,0.15)" : "rgba(63,185,80,0.15)",
+                  color: isError ? "#f85149" : "#3fb950",
+                }}>
+            {isError ? "ERROR" : "OK"}
+          </span>
+        )}
+        {/* 展开/折叠箭头 */}
+        {hasDetails && (
+          <span className="shrink-0 text-[10px] opacity-50 transition-transform"
+                style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}>
+            ▶
+          </span>
+        )}
+      </button>
+
+      {/* 展开区域：输入 + 结果 */}
+      {open && hasDetails && (
+        <div className="px-2.5 pb-2" style={{ borderTop: "1px solid var(--border)" }}>
+          {/* 工具输入 */}
+          {hasInput && (
+            <div className="mt-1.5">
+              <div className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide"
+                   style={{ color: "var(--text-tertiary)" }}>Input</div>
+              <pre className="text-[10.5px] font-mono px-2 py-1.5 rounded whitespace-pre-wrap break-all overflow-x-auto max-h-[300px] overflow-y-auto"
+                   style={{ background: "var(--background-primary)", color: "var(--text-secondary)", border: "1px solid var(--border)", margin: 0 }}>
+                {JSON.stringify(block.tool_input, null, 2)}
+              </pre>
+            </div>
+          )}
+          {/* Bash 命令行提示 */}
+          {bashCmd && hasResult && (
+            <div className="mt-1.5 flex items-center gap-1 text-[10.5px] font-mono"
+                 style={{ color: "#bc8cff" }}>
+              <span>$</span>
+              <span className="truncate opacity-80">{bashCmd}</span>
+            </div>
+          )}
+          {/* 工具结果 */}
+          {hasResult && (
+            <div className="mt-1">
+              <div className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide"
+                   style={{ color: "var(--text-tertiary)" }}>Result</div>
+              <ToolResultBlock result={block.tool_result!} isError={isError} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
