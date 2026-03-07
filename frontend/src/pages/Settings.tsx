@@ -185,7 +185,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
         {/* 连接与认证 */}
         <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-app">
-            <h2 className="text-xs font-semibold text-app">连接与认证</h2>
+            <h2 className="text-xs font-semibold text-app">{t('settings.connection.title')}</h2>
           </div>
 
           <div className="divide-y divide-app">
