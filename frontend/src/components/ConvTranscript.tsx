@@ -387,6 +387,7 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
   const isError = block.tool_error === true;
   const isEdit = toolName === "Edit" || toolName === "MultiEdit";
   const isBash = toolName === "Bash";
+  const isRead = toolName === "Read";
   const hasEditData = isEdit && block.tool_input && (block.tool_input.old_string || block.tool_input.new_string);
   const bashCmd = isBash ? String(block.tool_input?.command ?? "") : "";
   const canExpand = hasResult || hasEditData;
