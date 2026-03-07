@@ -1597,6 +1597,18 @@
     "empty": "目录为空",
     "copy": "复制内容",
     "binaryFile": "二进制文件，无法预览",
-    "loadError": "文件加载失败"
+    "loadError": "文件加载失败",
+    "search": "搜索文件…",
+    "noResults": "未找到匹配的文件",
+    "edit": "编辑",
+    "save": "保存",
+    "saving": "保存中…",
+    "saved": "已保存",
+    "saveFailed": "保存失败",
+    "cancel": "取消",
+    "editing": "编辑模式",
+    "unsaved": "未保存",
+    "imagePreview": "图片预览",
+    "lines": "行"
   }
 }
