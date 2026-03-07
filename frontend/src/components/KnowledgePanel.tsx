@@ -139,6 +139,7 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
 }
 
 function KnowledgeItem({ item, onDelete }: { item: ProjectKnowledge; onDelete: () => void }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   return (
