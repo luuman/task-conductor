@@ -1753,7 +1753,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
       const data = await res.json();
       const latest = data.version as string;
       const current = overview?.cli_version || systemInfo?.cli_version || "";
-      if (latest === current) { setUpdateInfo("已是最新版本"); }
+      if (latest === current) { setUpdateInfo(t("claudeConfig.about.latestVersion")); }
       else { setUpdateInfo(`最新版本: ${latest}，运行 npm update -g @anthropic-ai/claude-code 更新`); }
     } catch { setUpdateInfo("检查失败，请手动运行 claude --version"); }
     finally { setChecking(false); }
