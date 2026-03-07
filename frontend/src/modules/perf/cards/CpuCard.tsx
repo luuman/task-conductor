@@ -10,6 +10,7 @@ interface CpuCardProps extends PerfData {
 }
 
 export function CpuCard({ sys, hist, procs, colors = {}, settings = {}, showTitle }: CpuCardProps) {
+  const { t } = useTranslation();
   const cUser = colors.user      ?? "#FF2D55";
   const cSys  = colors.sys       ?? "#007AFF";
   const procCount = Number(settings.procCount ?? 3);
