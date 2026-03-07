@@ -77,9 +77,9 @@ function AssumptionsList({ raw }: { raw: string }) {
                 ? "border-green-700 text-green-400 hover:bg-green-900/20"
                 : "border-red-700/50 text-red-400 hover:bg-red-900/20"
             )}
-            title={wrong.has(i) ? "取消标记" : "标记为错误假设"}
+            title={wrong.has(i) ? t('taskPipeline.assumptions.cancelMark') : t('taskPipeline.assumptions.markAsWrong')}
           >
-            {wrong.has(i) ? "撤销" : "有误"}
+            {wrong.has(i) ? t('taskPipeline.assumptions.undo') : t('taskPipeline.assumptions.wrong')}
           </button>
         </div>
       ))}
