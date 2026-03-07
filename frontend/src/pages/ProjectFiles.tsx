@@ -741,7 +741,7 @@ export default function ProjectFiles({
         style={{ borderBottom: "1px solid var(--border)" }}
       >
         <button
-          onClick={onBack}
+          onClick={() => selectedFile ? setSelectedFile(null) : onBack()}
           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white/[0.06]"
           style={{ color: "var(--text-tertiary)" }}
         >
