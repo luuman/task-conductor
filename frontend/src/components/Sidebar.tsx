@@ -198,7 +198,7 @@ export function Sidebar({
           <div className="flex items-center justify-between px-3 py-1.5">
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em]"
                   style={{ color: "var(--text-tertiary)" }}>
-              项目
+              {t('sidebar.sections.projects')}
             </span>
             <div className="flex items-center gap-1">
               {onScanProjects && (
