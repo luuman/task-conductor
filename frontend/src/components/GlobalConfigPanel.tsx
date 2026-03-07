@@ -1022,7 +1022,7 @@ export default function GlobalConfigPanel() {
 
       {/* 分区列表 */}
       <div className="space-y-2">
-        {SECTIONS.map(section => (
+        {sections.map(section => (
           <SectionPanel
             key={section.id}
             section={section}
