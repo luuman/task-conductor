@@ -573,7 +573,6 @@ interface Props {
 export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrollRef }: Props) {
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const [expandSignal, setExpandSignal] = useState(0);
   const [autoExpand, setAutoExpand] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
