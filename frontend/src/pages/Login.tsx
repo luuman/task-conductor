@@ -90,7 +90,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               TaskConductor
             </h1>
             <p className="text-xs mt-0.5" style={{ color: "var(--text-tertiary)" }}>
-              连接你的本地 AI 开发 Agent
+              {t('login.subtitle')}
             </p>
           </div>
         </div>
