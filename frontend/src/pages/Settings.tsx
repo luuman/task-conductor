@@ -160,7 +160,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
 
             {/* 当前生效预览 */}
             <div className="bg-app rounded-lg px-3 py-2.5 space-y-1.5">
-              <p className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium">路径预览</p>
+              <p className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium">{t('settings.workspace.pathPreview')}</p>
               <div className="flex items-center gap-1.5 text-[11px] font-mono">
                 <span className="text-app-secondary">{workspaceRoot || "…"}</span>
                 <span className="text-app-tertiary">/</span>
