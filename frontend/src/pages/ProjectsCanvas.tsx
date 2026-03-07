@@ -197,10 +197,10 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
 
   // Donut chart
   const segments = [
-    { label: "运行中", count: totalRunning, color: "#22c55e" },
-    { label: "已完成", count: totalDone, color: "#4477ff" },
-    { label: "异常", count: totalFailed, color: "#ef4444" },
-    { label: "其他", count: Math.max(0, totalTasks - totalRunning - totalDone - totalFailed), color: "#3c3c5c" },
+    { label: stateLabel.running, count: totalRunning, color: "#22c55e" },
+    { label: stateLabel.done, count: totalDone, color: "#4477ff" },
+    { label: stateLabel.failed, count: totalFailed, color: "#ef4444" },
+    { label: stateLabel.idle, count: Math.max(0, totalTasks - totalRunning - totalDone - totalFailed), color: "#3c3c5c" },
   ].filter(s => s.count > 0);
   const total = Math.max(1, segments.reduce((a, s) => a + s.count, 0));
 
