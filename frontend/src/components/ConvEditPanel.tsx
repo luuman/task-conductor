@@ -132,7 +132,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          placeholder="自由文本备注..."
+          placeholder={t('convEdit.notesPlaceholder')}
           rows={3}
           className="w-full rounded px-2.5 py-1.5 text-[11px] outline-none resize-none"
           style={{
