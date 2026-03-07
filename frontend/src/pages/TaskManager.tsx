@@ -357,7 +357,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
 
                 {/* 实现方向 */}
                 <div>
-                  <p className="text-[9px] text-app-tertiary uppercase tracking-wider mb-1 font-medium">实现方向</p>
+                  <p className="text-[9px] text-app-tertiary uppercase tracking-wider mb-1 font-medium">{t('taskManager.aiAnalysis.implementation')}</p>
                   {isEditing ? (
                     <div className="space-y-1">
                       <textarea
