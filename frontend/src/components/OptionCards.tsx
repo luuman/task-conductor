@@ -10,6 +10,7 @@ export function OptionCards({
   onSelect: (label: string) => void;
   recommended?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {options.map((opt) => (
