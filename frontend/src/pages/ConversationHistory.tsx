@@ -56,15 +56,6 @@ export default function ConversationHistory({ projects }: Props) {
       .catch(() => { setTranscript([]); setFileFound(false); setTranscriptLoading(false); });
   };
 
-  // note 保存后更新会话列表中的 note 字段
-  const handleNoteSaved = (updated: ConversationNote) => {
-    if (!selectedSession) return;
-    setSessions(prev => prev.map(s =>
-      s.id === selectedSession.id ? { ...s, note: updated } : s
-    ));
-    setSelectedSession(prev => prev ? { ...prev, note: updated } : prev);
-  };
-
   return (
     <div className="flex-1 flex h-full overflow-hidden"
          style={{ background: "var(--background)" }}>
