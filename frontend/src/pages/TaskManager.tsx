@@ -530,7 +530,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
                 disabled={!selectedProjectId || creatingTask || projects.length === 0}
                 className="text-xs bg-accent hover:bg-accent-hover text-white px-4 py-1.5 rounded-md disabled:opacity-40 transition-colors"
               >
-                {creatingTask ? "创建中..." : "确认加入"}
+                {creatingTask ? t('taskManager.projectDialog.creating') : t('taskManager.projectDialog.confirm')}
               </button>
             </div>
           </div>
