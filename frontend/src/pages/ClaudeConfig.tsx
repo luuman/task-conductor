@@ -115,7 +115,13 @@ const getCommonSettings = (t: (k: string) => string): CommonSettingDef[] => [
     { value: "", label: "默认 (auto)" }, { value: "auto", label: "auto" }, { value: "in-process", label: "in-process" }, { value: "tmux", label: "tmux" },
   ], group: "advanced" },
 ];
-const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map(s => s.key));
+const COMMON_SETTING_KEYS = new Set([
+  "model", "effortLevel", "language", "outputStyle", "alwaysThinkingEnabled",
+  "showTurnDuration", "cleanupPeriodDays", "plansDirectory", "forceLoginMethod",
+  "autoUpdatesChannel", "spinnerTipsEnabled", "terminalProgressBarEnabled",
+  "prefersReducedMotion", "respectGitignore", "includeCoAuthoredBy",
+  "enableAllProjectMcpServers", "fastModePerSessionOptIn", "teammateMode",
+]);
 
 // ── 分组侧边栏定义 ──────────────────────────────────────────────
 type SectionId = "overview" | "settings" | "skills" | "agents" | "commands" | "mcp" | "hooks" | "rules" | "permissions" | "env" | "plugins" | "monitoring" | "trash" | "about";
