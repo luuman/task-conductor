@@ -58,9 +58,9 @@ async def handle_chat(prompt: str, chat_id: str, cwd: str) -> None:
         pool = ClaudePool()
         contents: list[str] = []
         async for event in pool.run(task_id, prompt, cwd, log_file):
-            content = event.get("content") or event.get("result", "")
-            if content:
-                contents.append(str(content))
+            text = extract_text(event)
+            if text:
+                contents.append(text)
 
         # 4. 合并所有输出
         result = "\n".join(contents) if contents else "(无输出)"
