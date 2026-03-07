@@ -39,13 +39,13 @@ export function DiskCard({ sys, hist, colors = {}, showTitle }: DiskCardProps) {
         <div className="text-center">
           <div className="text-lg font-bold text-white">{fmtMbps(sys?.disk_io.read_mbps)}</div>
           <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400">
-            <div className="w-2 h-2 rounded-full" style={{ background: cRead }} /> 读
+            <div className="w-2 h-2 rounded-full" style={{ background: cRead }} /> {t('perf.disk.read')}
           </div>
         </div>
         <div className="text-center">
           <div className="text-lg font-bold text-white">{fmtMbps(sys?.disk_io.write_mbps)}</div>
           <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400">
-            <div className="w-2 h-2 rounded-full" style={{ background: cWrite }} /> 写
+            <div className="w-2 h-2 rounded-full" style={{ background: cWrite }} /> {t('perf.disk.write')}
           </div>
         </div>
       </div>
