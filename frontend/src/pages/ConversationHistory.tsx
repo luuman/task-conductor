@@ -20,7 +20,7 @@ export default function ConversationHistory({ projects }: Props) {
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [fileFound, setFileFound] = useState(true);
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1);
-  const [autoExpand, setAutoExpand] = useState(false);
+  const [autoExpand, setAutoExpand] = useState(true);
 
   const transcriptRef = useRef<HTMLDivElement>(null);
   const transcriptCache = useRef<Map<string, { messages: TranscriptMessage[]; fileFound: boolean }>>(new Map());
