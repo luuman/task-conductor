@@ -420,6 +420,8 @@ function LogPanel({ logs, isRunning, stage }: {
   isRunning: boolean;
   stage: string;
 }) {
+  const { t } = useTranslation();
+  const STAGE_LABEL = useTPStageLabelMap();
   const [expanded, setExpanded] = useState(true);
   const endRef = useRef<HTMLDivElement>(null);
 
