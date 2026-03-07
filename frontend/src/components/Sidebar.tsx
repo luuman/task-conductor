@@ -38,7 +38,8 @@ export function Sidebar({
   onScanProjects,
   collapsed,
   onToggle,
-}: SidebarProps & { connectionStatus?: "connected" | "disconnected" | "connecting" }) {
+  connectionStatus,
+}: SidebarProps) {
   const { t } = useTranslation();
   const realProjects = projects.filter(p => !p.is_test);
   const testProjects = projects.filter(p => p.is_test);
