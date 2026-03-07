@@ -175,8 +175,8 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
       <div className="flex flex-col items-center justify-center h-full gap-2"
            style={{ color: "var(--text-tertiary)" }}>
         <span className="text-2xl">📂</span>
-        <p className="text-[12px]">本地 transcript 文件不存在</p>
-        <p className="text-[10px] opacity-60">（该会话的对话记录可能已被删除）</p>
+        <p className="text-[12px]">{t('convTranscript.fileNotExist')}</p>
+        <p className="text-[10px] opacity-60">{t('convTranscript.maybeDeleted')}</p>
       </div>
     );
   }
