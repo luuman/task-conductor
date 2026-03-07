@@ -1236,14 +1236,14 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <StatusTag label={c.scope} color="#7878a8" />
-                  {!c.enabled && <StatusTag label="已禁用" color="#ef4444" />}
+                  {!c.enabled && <StatusTag label={t("common.disabled")} color="#ef4444" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
-            {detail ? <DetailPanel title={`/${detail.name}`} path={detail.path} content={detail.content} contentLabel="命令内容" />
-              : <EmptyDetail text="选择左侧命令查看详情" />}
+            {detail ? <DetailPanel title={`/${detail.name}`} path={detail.path} content={detail.content} contentLabel={t("claudeConfig.commands.commandContent")} />
+              : <EmptyDetail text={t("claudeConfig.commands.selectHint")} />}
           </div>
         </div>
       )}
