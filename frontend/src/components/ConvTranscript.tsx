@@ -676,6 +676,7 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Pro
         <div ref={bottomRef} />
       </div>
     </ExpandSignalCtx.Provider>
+    </AutoExpandCtx.Provider>
     </OpenFileCtx.Provider>
   );
 }
