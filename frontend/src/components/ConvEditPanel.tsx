@@ -1,5 +1,6 @@
 // frontend/src/components/ConvEditPanel.tsx
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type ClaudeSession, type ConversationNote, type Project } from "../lib/api";
 
 interface Props {
