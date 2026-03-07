@@ -1412,6 +1412,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
   rules: RuleInfo[]; onToggle: (n: string, e: boolean) => Promise<void>;
   onCreate: (name: string, content?: string) => Promise<void>; onDelete: (name: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
