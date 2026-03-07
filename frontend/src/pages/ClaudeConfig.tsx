@@ -1447,10 +1447,10 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
   };
   return (
     <div className="space-y-4">
-      <SectionHeader icon={BookOpen} color="#06b6d4" label="Rules 规则" desc="~/.claude/rules/"
+      <SectionHeader icon={BookOpen} color="#06b6d4" label={t("claudeConfig.rules.title")} desc="~/.claude/rules/"
         right={<div className="flex items-center gap-2">
-          <CountBadges items={[{ label: "总计", count: rules.length }, { label: "启用", count: rules.filter(r => r.enabled).length, color: "#22c55e" }]} />
-          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 新建</button>
+          <CountBadges items={[{ label: t("common.total"), count: rules.length }, { label: t("common.enabled"), count: rules.filter(r => r.enabled).length, color: "#22c55e" }]} />
+          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> {t("claudeConfig.rules.newRule")}</button>
         </div>} />
       {showCreate && (
         <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
