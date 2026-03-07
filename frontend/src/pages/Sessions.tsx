@@ -466,7 +466,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               className="text-[10px] font-mono transition-colors hover:text-app-secondary"
               style={{ color: "var(--text-tertiary)" }}
             >
-              清除过滤
+              {t('sessions.statusBar.clearFilter')}
             </button>
           )}
         </div>
