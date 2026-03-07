@@ -777,8 +777,8 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
     <div className="flex-1 p-6 overflow-y-auto">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-base font-semibold text-app">概览</h1>
-          <p className="text-app-tertiary text-xs mt-0.5">{projects.length} 个项目</p>
+          <h1 className="text-base font-semibold text-app">{t('dashboard.overview.title')}</h1>
+          <p className="text-app-tertiary text-xs mt-0.5">{projects.length} {t('dashboard.overview.projectCount')}</p>
         </div>
         <button
           onClick={handleScan}
