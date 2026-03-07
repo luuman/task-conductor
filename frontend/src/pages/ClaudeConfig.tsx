@@ -570,6 +570,7 @@ function CountBadges({ items }: { items: { label: string; count: number; color?:
 function PresetGallery({ presets, onInstall, itemLabel }: {
   presets: PresetItem[]; onInstall: (name: string, content: string) => Promise<void>; itemLabel: string;
 }) {
+  const { t } = useTranslation();
   const [installing, setInstalling] = useState<string | null>(null);
   const install = async (p: PresetItem) => {
     setInstalling(p.name);
@@ -582,8 +583,8 @@ function PresetGallery({ presets, onInstall, itemLabel }: {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Download size={13} className="text-accent" />
-        <span className="text-xs font-semibold text-app">推荐{itemLabel}</span>
-        <span className="text-[9px] text-app-tertiary">已安装 {installed.length} / {presets.length}</span>
+        <span className="text-xs font-semibold text-app">{t("claudeConfig.presetGallery.recommendedItems", { itemLabel })}</span>
+        <span className="text-[9px] text-app-tertiary">{t("claudeConfig.presetGallery.installedCount", { installed: installed.length, total: presets.length })}</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
         {presets.map(p => (
