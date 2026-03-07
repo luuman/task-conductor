@@ -10,7 +10,7 @@ def test_parse_pre_tool_use():
     }
     event = parse_hook_event(payload)
     assert event["type"] == "PreToolUse"
-    assert event["tool"] == "Bash"
+    assert event["tool_name"] == "Bash"
     assert event["session_id"] == "abc123"
 
 def test_parse_stop_event():
