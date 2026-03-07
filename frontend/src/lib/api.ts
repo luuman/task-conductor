@@ -69,7 +69,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   return resp.json();
 }
 
-// 本地免 PIN 认证（仅 localhost 可用）
+// Local auth without PIN (localhost only)
 export async function authLocal(): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 3000);
