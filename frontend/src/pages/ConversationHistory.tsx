@@ -77,7 +77,7 @@ export default function ConversationHistory({ projects }: Props) {
         <div className="px-3 py-2.5 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
           <span className="text-[11px] font-semibold"
-                style={{ color: "var(--text-primary)" }}>对话历史</span>
+                style={{ color: "var(--text-primary)" }}>{t('conversationHistory.header')}</span>
         </div>
         <ConvSessionList
           sessions={sessions}
