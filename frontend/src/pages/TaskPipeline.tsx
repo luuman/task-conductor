@@ -89,13 +89,14 @@ function AssumptionsList({ raw }: { raw: string }) {
 
 // ── CriticNotes ──────────────────────────────────────────────────
 function CriticNotes({ notes }: { notes: string }) {
+  const { t } = useTranslation();
   const parsed: { score?: number; issues?: string[]; suggestions?: string; pass_review?: boolean } =
     (() => { try { return JSON.parse(notes); } catch { return {}; } })();
   return (
     <div className="space-y-1.5">
       {parsed.score !== undefined && (
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-app-tertiary">Critic 评分</span>
+          <span className="text-[10px] text-app-tertiary">{t('taskPipeline.criticNotes.title')}</span>
           <span className={cn(
             "text-xs font-bold",
             parsed.score >= 8 ? "text-green-400" : parsed.score >= 6 ? "text-yellow-400" : "text-red-400"
