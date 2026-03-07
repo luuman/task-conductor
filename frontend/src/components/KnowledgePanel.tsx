@@ -148,7 +148,7 @@ function KnowledgeItem({ item, onDelete }: { item: ProjectKnowledge; onDelete: (
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <Badge variant={CATEGORY_COLORS[item.category] ?? "default"}>
-              {CATEGORY_LABEL[item.category] ?? item.category}
+              {CATEGORY_KEYS[item.category] ? t(CATEGORY_KEYS[item.category]) : item.category}
             </Badge>
             {item.stage && (
               <span className="text-[10px] text-app-tertiary">
