@@ -476,12 +476,30 @@ export const api = {
       }),
   },
   settings: {
-    get: () => request<{ workspace_root: string }>("/api/settings"),
+    get: () => request<{
+      workspace_root: string;
+      feishu_app_id: string;
+      feishu_app_secret: string;
+      feishu_owner_id: string;
+      feishu_default_chat_id: string;
+    }>("/api/settings"),
     update: (workspace_root: string) =>
       request<{ workspace_root: string }>("/api/settings", {
         method: "PUT",
         body: JSON.stringify({ workspace_root }),
       }),
+    updateFeishu: (body: {
+      feishu_app_id?: string;
+      feishu_app_secret?: string;
+      feishu_owner_id?: string;
+      feishu_default_chat_id?: string;
+    }) =>
+      request<Record<string, string>>("/api/settings/feishu", {
+        method: "PUT",
+        body: JSON.stringify(body),
+      }),
+    restart: () =>
+      request<void>("/api/settings/restart", { method: "POST" }),
   },
   claudeConfig: {
     get: () => request<ClaudeConfig>("/api/claude-config"),
