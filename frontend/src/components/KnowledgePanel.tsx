@@ -116,7 +116,7 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
             <p className="text-xs text-app-tertiary">
-              {filter ? "无匹配记录" : "知识库为空 — 执行失败时自动积累经验"}
+              {filter ? t('knowledgePanel.empty.noMatch') : t('knowledgePanel.empty.isEmpty')}
             </p>
           </div>
         ) : (
