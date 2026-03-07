@@ -382,7 +382,7 @@ function Tooltip({ stats, state, color, mouse }: {
           fontSize: 9, fontWeight: 700, color: meta.base,
           background: `${meta.base}18`, borderRadius: 4, padding: "2px 6px",
         }}>
-          {meta.label}
+          {stateLabel[state]}
         </span>
       </div>
 
