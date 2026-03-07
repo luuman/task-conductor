@@ -415,6 +415,7 @@ export interface FileItem {
   is_dir: boolean;
   size: number | null;
   modified: string;
+  title?: string | null; // 文档标题（从内容提取）
 }
 
 export interface FileListResponse {
