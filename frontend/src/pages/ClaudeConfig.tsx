@@ -1773,7 +1773,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
   ];
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Info} color="#3b82f6" label={t("claudeConfig.about.title")} desc="系统信息与诊断" />
+      <SectionHeader icon={Info} color="#3b82f6" label={t("claudeConfig.about.title")} desc={t("claudeConfig.sectionDesc.about")} />
       {/* CLI 版本 - 特殊行，带更新按钮 */}
       <div className="bg-app-secondary border border-app rounded-xl px-4 py-3">
         <div className="flex items-center justify-between">
