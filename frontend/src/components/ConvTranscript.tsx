@@ -166,7 +166,7 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full text-[12px]"
-           style={{ color: "var(--text-tertiary)" }}>加载中...</div>
+           style={{ color: "var(--text-tertiary)" }}>{t('convTranscript.loading')}</div>
     );
   }
 
