@@ -143,7 +143,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
             </div>
             {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
             <Button type="submit" disabled={pin.length !== 6 || loading} className="w-full" size="lg">
-              {loading ? "连接中…" : "本地连接"}
+              {loading ? t('login.local.connecting') : t('login.local.connectButton')}
             </Button>
           </form>
         )}
