@@ -67,16 +67,13 @@ def _to_feishu_md(text: str) -> str:
 
 
 def _card(header_title: str, color: str, elements: list[dict]) -> dict:
-    """构建 JSON 2.0 schema 卡片。"""
+    """构建飞书卡片（兼容 send_card 和 update_card）。"""
     return {
-        "schema": "2.0",
         "header": {
             "title": {"tag": "plain_text", "content": header_title},
             "template": color,
         },
-        "body": {
-            "elements": elements,
-        },
+        "elements": elements,
     }
 
 
