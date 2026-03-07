@@ -374,7 +374,7 @@ function StageDetailPanel({
             </span>
           )}
           {APPROVAL_STAGES.has(stage) && (
-            <span className="text-[10px] text-yellow-400/60 border border-yellow-500/20 px-2 py-0.5 rounded-full">需审批</span>
+            <span className="text-[10px] text-yellow-400/60 border border-yellow-500/20 px-2 py-0.5 rounded-full">{t('taskWorkflow.stageDetailPanel.needsApproval')}</span>
           )}
         </div>
 
