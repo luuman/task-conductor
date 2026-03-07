@@ -68,9 +68,9 @@ export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
       {/* Header */}
       <div className="px-4 py-3 border-b border-app flex items-center gap-3 shrink-0">
         <div className="flex-1">
-          <h2 className="text-sm font-semibold text-app">错误知识库</h2>
+          <h2 className="text-sm font-semibold text-app">{t('knowledgePanel.header.title')}</h2>
           <p className="text-[10px] text-app-tertiary mt-0.5">
-            AI 从失败中提炼的经验，自动注入未来任务的 Prompt
+            {t('knowledgePanel.header.subtitle')}
           </p>
         </div>
         <button
