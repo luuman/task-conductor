@@ -1,5 +1,6 @@
 // frontend/src/components/KnowledgePanel.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type ProjectKnowledge } from "../lib/api";
 import { Badge } from "./ui/badge";
 import { cn } from "../lib/utils";
