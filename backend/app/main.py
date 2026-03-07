@@ -133,9 +133,16 @@ async def _init_feishu():
             return
 
     set_default_chat_id(default_chat_id)
+
+    # 启动 WebSocket 长连接
+    from .feishu.dispatcher import start_ws_client
+    loop = asyncio.get_running_loop()
+    start_ws_client(loop)
+
     _print_table([
         ("飞书 App", feishu_client.app_id),
         ("默认群", default_chat_id),
+        ("模式", "WebSocket 长连接"),
     ], title="飞书集成已启动")
 
 
