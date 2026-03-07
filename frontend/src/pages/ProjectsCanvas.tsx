@@ -337,7 +337,7 @@ function StatsPanel({ allStats, colorMap, onSelect }: {
         })}
         {sorted.length === 0 && (
           <div style={{ padding: "20px 0", textAlign: "center", fontSize: 11, color: "var(--text-tertiary)" }}>
-            暂无项目
+            {t('projectsCanvas.statsPanel.noProjects')}
           </div>
         )}
       </div>
