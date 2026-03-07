@@ -177,7 +177,7 @@ function ClaudeMetricsPanel() {
           {/* 最近调用 */}
           {recent_tools.length > 0 && (
             <div className="pt-2 border-t border-app/50 space-y-0.5">
-              <p className="text-[9px] text-app-tertiary mb-1">最近</p>
+              <p className="text-[9px] text-app-tertiary mb-1">{t('dashboard.claudeMetrics.recent')}</p>
               {recent_tools.slice(0, 3).map((t, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-[9px] font-mono opacity-70 hover:opacity-100">
                   <span>{toolIcon(t.tool)}</span>
