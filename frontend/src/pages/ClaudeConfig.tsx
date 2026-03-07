@@ -1782,7 +1782,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
             <span className="text-[11px] font-mono text-app">{overview?.cli_version || systemInfo?.cli_version || "..."}</span>
             <button onClick={checkUpdate} disabled={checking}
               className="text-[9px] px-2 py-1 rounded bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-50 transition-colors">
-              {checking ? "检查中..." : "检查更新"}
+              {checking ? "..." : t("claudeConfig.about.checkUpdate")}
             </button>
           </div>
         </div>
