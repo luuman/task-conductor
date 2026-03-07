@@ -223,8 +223,8 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
           {lines.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-[#484f58]">
               <div className="text-2xl">⌗</div>
-              <p className="text-[11px]">等待 Claude Code 事件...</p>
-              <p className="text-[10px]">请确认 hooks 已注册：</p>
+              <p className="text-[11px]">{t('claudeMonitor.empty.waiting')}</p>
+              <p className="text-[10px]">{t('claudeMonitor.empty.hooksHint')}</p>
               <code className="text-[9px] bg-[#161b22] px-2 py-1 rounded text-[#8b949e]">
                 bash scripts/install-hooks.sh
               </code>
