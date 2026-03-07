@@ -164,7 +164,7 @@ function ServerCard({ server, onAction }: {
               className="px-3 py-1.5 text-[11px] rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white transition-colors disabled:opacity-40 flex items-center gap-1"
             >
               {loading ? <Loader2 size={11} className="animate-spin" /> : <Lock size={11} />}
-              授权安装
+              {t('mcpMarket.actions.authInstall')}
             </button>
           ) : (
             <button
