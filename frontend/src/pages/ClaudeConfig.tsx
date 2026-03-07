@@ -1871,11 +1871,11 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
           <div className="flex items-center gap-2">
             <button onClick={handleRestoreAll}
               className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-app text-app-secondary hover:text-app hover:border-accent/40 transition-colors">
-              <RotateCcw size={10} /> 全部恢复
+              <RotateCcw size={10} /> {t("claudeConfig.trash.restoreAll")}
             </button>
             <button onClick={handleDeleteAll}
               className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">
-              <Trash2 size={10} /> 全部删除
+              <Trash2 size={10} /> {t("claudeConfig.trash.deleteAll")}
             </button>
           </div>
         ) : undefined} />
