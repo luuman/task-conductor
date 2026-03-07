@@ -1490,14 +1490,14 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <StatusTag label={r.scope} color="#7878a8" />
-                  {!r.enabled && <StatusTag label="已禁用" color="#ef4444" />}
+                  {!r.enabled && <StatusTag label={t("common.disabled")} color="#ef4444" />}
                 </div>
               </button>
             ))}
           </div>
           <div className="lg:col-span-2">
-            {detail ? <DetailPanel title={detail.name} path={detail.path} content={detail.content} contentLabel="规则内容" />
-              : <EmptyDetail text="选择左侧规则查看详情" />}
+            {detail ? <DetailPanel title={detail.name} path={detail.path} content={detail.content} contentLabel={t("claudeConfig.rules.ruleContent")} />
+              : <EmptyDetail text={t("claudeConfig.rules.selectHint")} />}
           </div>
         </div>
       )}
