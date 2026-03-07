@@ -907,6 +907,7 @@ function StatusBar({ config, lastSaved, saving, dirty }: {
 // ── 主组件 ───────────────────────────────────────────────────────────
 
 export default function GlobalConfigPanel() {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<AnyObj | null>(null);
   const [savedConfig, setSavedConfig] = useState<AnyObj | null>(null);
   const [loading, setLoading] = useState(true);
@@ -915,6 +916,7 @@ export default function GlobalConfigPanel() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "ok" | "error">("idle");
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sections = useMemo(() => getSections(t), [t]);
 
   const load = useCallback(async () => {
     setLoading(true); setError("");
