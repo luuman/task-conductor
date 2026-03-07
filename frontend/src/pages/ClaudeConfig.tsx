@@ -1806,6 +1806,7 @@ function SecAbout({ systemInfo, overview }: { systemInfo: ClaudeSystemInfo | nul
 // Sec: 回收站
 // ═══════════════════════════════════════════════════════════════════
 function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () => void }) {
+  const { t } = useTranslation();
   const [restoring, setRestoring] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [status, setStatus] = useState<{ text: string; color: string } | null>(null);
