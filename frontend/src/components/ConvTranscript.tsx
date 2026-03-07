@@ -246,7 +246,7 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
           {removed > 0 && <span style={{ color: "var(--danger)" }}>−{removed}</span>}
         </div>
       </div>
-      <div className="overflow-x-auto max-h-[440px] overflow-y-auto text-[11px] font-mono leading-[1.7]"
+      <div className="overflow-x-auto overflow-y-auto text-[11px] font-mono leading-[1.7]"
            style={{ background: "var(--background)" }}>
         {lines.map((item, idx) => {
           if ("count" in item) {
@@ -366,11 +366,11 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
         </span>
       </div>
       {highlighted ? (
-        <pre className="hljs px-3 py-2 text-[11px] font-mono overflow-x-auto max-h-[440px] overflow-y-auto leading-[1.7]"
+        <pre className="hljs px-3 py-2 text-[11px] font-mono overflow-x-auto overflow-y-auto leading-[1.7]"
              style={{ margin: 0, background: "var(--background)" }}
              dangerouslySetInnerHTML={{ __html: highlighted }} />
       ) : (
-        <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[440px] overflow-y-auto leading-[1.7]"
+        <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto overflow-y-auto leading-[1.7]"
              style={{ color: "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
           {displayed}
         </pre>
