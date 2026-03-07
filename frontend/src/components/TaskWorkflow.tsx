@@ -517,7 +517,7 @@ function StageDetailPanel({
         {isPending && !latestArtifact && (
           <div className="bg-white/4 rounded-lg px-3 py-2.5 border border-white/6">
             <p className="text-[10px] text-white/40 leading-relaxed">
-              等待前序阶段完成后自动执行（或手动触发）
+              {t('taskWorkflow.stageDetailPanel.waitHint')}
             </p>
           </div>
         )}
