@@ -297,7 +297,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
           {sessionsLoading ? (
             <div className="flex items-center justify-center h-20 text-[11px]"
                  style={{ color: "var(--text-tertiary)" }}>
-              加载中...
+              {t('sessions.loading')}
             </div>
           ) : sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 gap-2 px-3 text-center"
