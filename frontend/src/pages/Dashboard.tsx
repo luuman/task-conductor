@@ -542,10 +542,26 @@ const STAGE_COLORS: Record<string, "default" | "success" | "warning" | "danger" 
   done: "success",
 };
 
-const STAGE_LABEL: Record<string, string> = {
-  input: "需求", analysis: "分析", prd: "PRD", ui: "UI",
-  plan: "方案", dev: "开发", test: "测试", deploy: "发布", monitor: "监控", done: "完成",
-};
+function useStageLabelMap() {
+  const { t } = useTranslation();
+  return useMemo<Record<string, string>>(() => ({
+    input: t('dashboard.stageLabel.input'), analysis: t('dashboard.stageLabel.analysis'), prd: t('dashboard.stageLabel.prd'), ui: t('dashboard.stageLabel.ui'),
+    plan: t('dashboard.stageLabel.plan'), dev: t('dashboard.stageLabel.dev'), test: t('dashboard.stageLabel.test'), deploy: t('dashboard.stageLabel.deploy'), monitor: t('dashboard.stageLabel.monitor'), done: t('common.done'),
+  }), [t]);
+}
+
+function useStatusLabelMap() {
+  const { t } = useTranslation();
+  return useMemo<Record<string, string>>(() => ({
+    pending: t('dashboard.statusLabel.pending'),
+    running: t('dashboard.statusLabel.running'),
+    waiting_review: t('dashboard.statusLabel.approval'),
+    approved: t('dashboard.statusLabel.approved'),
+    rejected: t('dashboard.statusLabel.rejected'),
+    done: t('dashboard.statusLabel.done'),
+    failed: t('dashboard.statusLabel.failed'),
+  }), [t]);
+}
 
 const STATUS_COLORS: Record<string, "default" | "success" | "warning" | "danger" | "info" | "accent"> = {
   pending: "default",
