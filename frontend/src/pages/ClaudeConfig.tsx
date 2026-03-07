@@ -1811,7 +1811,7 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
   const [deleting, setDeleting] = useState<string | null>(null);
   const [status, setStatus] = useState<{ text: string; color: string } | null>(null);
 
-  const TYPE_LABELS: Record<string, string> = { agent: "Agent", command: "命令", rule: "规则", skill: "Skill" };
+  const TYPE_LABELS: Record<string, string> = { agent: "Agent", command: "Command", rule: "Rule", skill: "Skill" };
   const TYPE_COLORS: Record<string, string> = { agent: "#f472b6", command: "#22c55e", rule: "#06b6d4", skill: "#eab308" };
 
   const handleRestore = async (item: DisabledItem) => {
