@@ -4,8 +4,21 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { getWsUrl } from "../lib/api";
 
+export interface ChatOptions {
+  cwd?: string;
+  system_prompt?: string;
+  append_system_prompt?: string;
+  effort?: string;
+  allowed_tools?: string[];
+  disallowed_tools?: string[];
+  permission_mode?: string;
+  max_budget?: number;
+  continue?: boolean;
+  session_id?: string;
+}
+
 export interface UseChatWsReturn {
-  send: (message: string, model: string, cwd?: string) => void;
+  send: (message: string, model: string, options?: ChatOptions) => void;
   stop: () => void;
   isGenerating: boolean;
   currentReply: string;
