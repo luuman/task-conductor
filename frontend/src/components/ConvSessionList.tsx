@@ -45,7 +45,7 @@ export function ConvSessionList({ sessions, loading, selectedId, onSelect }: Pro
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="搜索别名 / 路径 / 标签..."
+          placeholder={t('convSession.search')}
           className="w-full text-[11px] font-mono rounded px-2.5 py-1.5 outline-none"
           style={{
             background: "var(--background-tertiary)",
