@@ -1541,10 +1541,11 @@ function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: 
 // Sec: 环境变量
 // ═══════════════════════════════════════════════════════════════════
 function SecEnvVars() {
+  const { t } = useTranslation();
   const DEFS = [
-    { key: "ANTHROPIC_API_KEY", desc: "API 密钥", pw: true },
-    { key: "ANTHROPIC_AUTH_TOKEN", desc: "认证令牌", pw: true },
-    { key: "ANTHROPIC_BASE_URL", desc: "API 端点" },
+    { key: "ANTHROPIC_API_KEY", desc: t("claudeConfig.envVars.apiKey"), pw: true },
+    { key: "ANTHROPIC_AUTH_TOKEN", desc: t("claudeConfig.envVars.authToken"), pw: true },
+    { key: "ANTHROPIC_BASE_URL", desc: t("claudeConfig.envVars.apiEndpoint") },
     { key: "ANTHROPIC_MODEL", desc: "默认模型" },
     { key: "HTTPS_PROXY", desc: "HTTPS 代理" },
     { key: "HTTP_PROXY", desc: "HTTP 代理" },
