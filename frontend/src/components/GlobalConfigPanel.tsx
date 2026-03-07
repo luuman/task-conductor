@@ -927,7 +927,7 @@ export default function GlobalConfigPanel() {
     } catch (e) {
       setError(e instanceof Error ? e.message : t("globalConfig.actions.loadFailed"));
     } finally { setLoading(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => { load(); }, [load]);
 
