@@ -270,6 +270,78 @@ function BashOutput({ command, result, isError }: { command: string; result: str
   );
 }
 
+// ── Read 文件高亮视图 ────────────────────────────────────────
+function guessLang(filePath: string): string {
+  const ext = filePath.split(".").pop()?.toLowerCase() || "";
+  const map: Record<string, string> = {
+    ts: "typescript", tsx: "typescript", js: "javascript", jsx: "javascript",
+    py: "python", rs: "rust", go: "go", java: "java", kt: "kotlin",
+    rb: "ruby", sh: "bash", zsh: "bash", bash: "bash",
+    css: "css", scss: "scss", less: "less", html: "xml", xml: "xml", svg: "xml",
+    json: "json", yaml: "yaml", yml: "yaml", toml: "ini", md: "markdown",
+    sql: "sql", c: "c", cpp: "cpp", h: "c", hpp: "cpp",
+    dockerfile: "dockerfile", makefile: "makefile",
+  };
+  return map[ext] || "";
+}
+
+function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
+  const [open, setOpen] = useState(false);
+  const lines = result.split("\n");
+  const isLong = lines.length > 30;
+  const displayed = open || !isLong ? result : lines.slice(0, 20).join("\n") + "\n…";
+  const lang = guessLang(filePath);
+
+  const highlighted = useMemo(() => {
+    try {
+      const hljs = require("highlight.js/lib/core") as typeof import("highlight.js/lib/core");
+      if (lang) {
+        try {
+          hljs.default.getLanguage(lang) || hljs.default.registerLanguage(lang, require(`highlight.js/lib/languages/${lang}`).default);
+          return hljs.default.highlight(displayed, { language: lang }).value;
+        } catch { /* fallback */ }
+      }
+      return hljs.default.highlightAuto(displayed).value;
+    } catch {
+      return null;
+    }
+  }, [displayed, lang]);
+
+  return (
+    <div className="rounded-lg overflow-hidden mt-2"
+         style={{ border: "1px solid var(--border)" }}>
+      <div className="flex items-center gap-2 px-3 py-1.5"
+           style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
+        <FileText size={13} strokeWidth={1.75} style={{ color: "var(--info)" }} />
+        <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>
+          {filePath}
+        </span>
+        <span className="text-[10px] font-mono shrink-0" style={{ color: "var(--text-tertiary)" }}>
+          {lines.length} lines
+        </span>
+      </div>
+      {highlighted ? (
+        <pre className="px-3 py-2 text-[11px] font-mono overflow-x-auto max-h-[440px] overflow-y-auto leading-[1.7]"
+             style={{ margin: 0, background: "var(--background)" }}
+             dangerouslySetInnerHTML={{ __html: highlighted }} />
+      ) : (
+        <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[440px] overflow-y-auto leading-[1.7]"
+             style={{ color: "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
+          {displayed}
+        </pre>
+      )}
+      {isLong && (
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="w-full h-6 text-[10px] font-mono transition-colors"
+          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
+          {open ? "▲ 收起" : `▼ ${lines.length} lines`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ── 通用输出 ─────────────────────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
   const [open, setOpen] = useState(false);
