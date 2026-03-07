@@ -397,14 +397,14 @@ function StageDetailPanel({
                   disabled={acting}
                   className="flex-1 py-1.5 text-xs bg-green-600 hover:bg-green-500 text-white rounded-lg font-medium disabled:opacity-40"
                 >
-                  批准
+                  {t('taskWorkflow.stageDetailPanel.approve')}
                 </button>
                 <button
                   onClick={() => setShowReject(true)}
                   disabled={acting}
                   className="flex-1 py-1.5 text-xs border border-red-500/40 text-red-400 hover:bg-red-500/10 rounded-lg font-medium"
                 >
-                  驳回
+                  {t('taskWorkflow.stageDetailPanel.reject')}
                 </button>
               </div>
             )}
