@@ -134,6 +134,9 @@ async def _init_feishu():
 
     set_default_chat_id(default_chat_id)
 
+    # 为没有飞书群的项目自动创建
+    await _ensure_project_groups(feishu_client)
+
     # 启动 WebSocket 长连接
     from .feishu.dispatcher import start_ws_client
     loop = asyncio.get_running_loop()
@@ -144,6 +147,64 @@ async def _init_feishu():
         ("默认群", default_chat_id),
         ("模式", "WebSocket 长连接"),
     ], title="飞书集成已启动")
+
+
+async def _ensure_project_groups(feishu_client):
+    """为所有没有飞书群的项目创建群聊并发送介绍消息。"""
+    from .feishu.cards import build_welcome_card
+    from .models import Project
+
+    with DBSession(engine) as db:
+        projects = db.query(Project).filter(
+            (Project.feishu_chat_id == None) | (Project.feishu_chat_id == "")  # noqa: E711
+        ).all()
+        # 提取信息，避免后续 session 关闭问题
+        project_infos = [(p.id, p.name, p.repo_url or "") for p in projects]
+
+    if not project_infos:
+        return
+
+    print(f"  [Feishu] 为 {len(project_infos)} 个项目创建群聊...")
+
+    for pid, pname, repo_url in project_infos:
+        try:
+            data = await feishu_client.create_group(f"TC: {pname}")
+            chat_id = data.get("chat_id", "")
+            if not chat_id:
+                print(f"  [Feishu] {pname}: 建群未返回 chat_id")
+                continue
+
+            # 绑定到项目
+            with DBSession(engine) as db:
+                p = db.get(Project, pid)
+                if p:
+                    p.feishu_chat_id = chat_id
+                    db.commit()
+
+            # 发送项目介绍卡片
+            desc_lines = [
+                f"本群已接入 **TaskConductor** AI 任务编排系统。\n",
+                f"**项目**: {pname}",
+            ]
+            if repo_url:
+                desc_lines.append(f"**目录**: `{repo_url}`")
+            desc_lines.append("")
+            desc_lines.append("**对话模式**：直接发送消息即可与 Claude 对话。")
+            desc_lines.append("**创建任务**：发送 `/task 任务描述` 可创建流水线任务。")
+
+            card = {
+                "header": {
+                    "template": "blue",
+                    "title": {"tag": "plain_text", "content": f"欢迎加入 {pname}"},
+                },
+                "elements": [
+                    {"tag": "markdown", "content": "\n".join(desc_lines)},
+                ],
+            }
+            await feishu_client.send_card(chat_id, card)
+            print(f"  [Feishu] ✓ {pname} → {chat_id}")
+        except Exception as e:
+            print(f"  [Feishu] ✗ {pname}: {e}")
 
 
 tags_metadata = [
