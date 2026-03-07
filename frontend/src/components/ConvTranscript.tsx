@@ -671,7 +671,7 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile, scrol
     <ExpandSignalCtx.Provider value={expandSignal}>
       {/* 吸顶问题灯 */}
       {currentQuestion && (
-        <div className="sticky top-0 z-10 h-9 flex items-center gap-2 px-4 backdrop-blur-md"
+        <div className="sticky top-0 z-10 h-11 flex items-center gap-2 px-4 backdrop-blur-md"
              style={{ background: "rgba(7,7,13,0.85)", borderBottom: "1px solid var(--border)" }}>
           <User size={12} style={{ color: "var(--text-tertiary)" }} className="shrink-0" />
           <span className="text-[11px] truncate flex-1" style={{ color: "var(--text-secondary)" }}>
