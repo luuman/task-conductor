@@ -472,6 +472,8 @@ export const api = {
         `/api/projects/${projectId}/file`,
         { method: "PUT", body: JSON.stringify({ path, content }) },
       ),
+    gitStatus: (projectId: number) =>
+      request<GitStatusResponse>(`/api/projects/${projectId}/git-status`),
     searchFiles: (projectId: number, q: string) =>
       request<{ query: string; items: FileItem[] }>(
         `/api/projects/${projectId}/files/search?q=${encodeURIComponent(q)}`,
