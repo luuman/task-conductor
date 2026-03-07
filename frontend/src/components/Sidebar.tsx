@@ -1,5 +1,6 @@
 // frontend/src/components/Sidebar.tsx
 import { LayoutDashboard, CheckSquare, Settings, Radio, MessageSquare, Plus, ChevronLeft, ChevronRight, Layers, Cpu, FolderSearch, FlaskConical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
 import type { Project } from "../lib/api";
 
