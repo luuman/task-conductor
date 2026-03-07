@@ -39,6 +39,7 @@ function IconTab({
   isSelected: boolean;
   onSelect: (id: MetricId) => void;
 }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: item.id });
   const Icon = METRIC_ICONS[item.id];
@@ -57,7 +58,7 @@ function IconTab({
         cursor: "grab",
       }}
       className="flex items-center justify-center py-3 select-none"
-      title={METRIC_LABEL[item.id]}
+      title={t(METRIC_LABEL[item.id])}
       onClick={() => onSelect(item.id)}
     >
       <Icon
