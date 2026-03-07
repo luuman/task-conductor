@@ -1688,7 +1688,7 @@ function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
       </div>
       {overview.daily_activity.length > 0 && (
         <div className="bg-app-secondary border border-app rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3"><BarChart3 size={13} className="text-app-tertiary" /><span className="text-xs font-semibold text-app">活动趋势</span></div>
+          <div className="flex items-center gap-2 mb-3"><BarChart3 size={13} className="text-app-tertiary" /><span className="text-xs font-semibold text-app">{t("claudeConfig.monitoring.activityTrend")}</span></div>
           <ActivityChart data={overview.daily_activity} />
         </div>
       )}
