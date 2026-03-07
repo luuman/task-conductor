@@ -14,8 +14,11 @@ import {
   ChevronDown,
   List,
 } from "lucide-react";
-import hljs from "highlight.js";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import "../styles/hljs-ayu-dark.css";
+import "../styles/markdown-prose.css";
 import { api, type FileItem } from "../lib/api";
 import { cn } from "../lib/utils";
 
@@ -35,16 +38,6 @@ function DocIcon({ name, size = 14 }: { name: string; size?: number }) {
   return <File size={size} className="shrink-0" style={{ color: "var(--text-tertiary)" }} />;
 }
 
-function detectLang(name: string): string {
-  const ext = getExt(name);
-  const map: Record<string, string> = {
-    md: "markdown", txt: "plaintext", rst: "plaintext",
-    json: "json", yaml: "yaml", yml: "yaml", toml: "toml",
-    html: "html",
-  };
-  return map[ext] || "plaintext";
-}
-
 function formatSize(bytes: number | null) {
   if (bytes == null) return "";
   if (bytes < 1024) return `${bytes} B`;
@@ -52,34 +45,56 @@ function formatSize(bytes: number | null) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-/* ── heading extraction（文章导航） ───────────── */
-
-interface Heading {
-  level: number;
-  text: string;
-  line: number; // 0-based line index
+/** Strip YAML frontmatter (--- ... ---) from markdown */
+function stripFrontmatter(content: string): string {
+  if (!content.startsWith("---")) return content;
+  const end = content.indexOf("\n---", 3);
+  if (end === -1) return content;
+  return content.slice(end + 4).trimStart();
 }
 
-function extractHeadings(content: string, fileName: string): Heading[] {
-  const ext = getExt(fileName);
-  const headings: Heading[] = [];
-  const lines = content.split("\n");
+/** Preprocess Docusaurus admonitions (:::tip → html blocks) */
+function preprocessAdmonitions(content: string): string {
+  return content.replace(
+    /^:::(tip|warning|info|danger|note|caution)\s*(.*)?$\n([\s\S]*?)^:::$/gm,
+    (_match, type: string, title: string, body: string) => {
+      const label = (title || type).trim();
+      const normalizedType = type === "caution" ? "warning" : type;
+      return `<div class="md-admonition ${normalizedType}"><div class="md-admonition-title">${label}</div>\n\n${body.trim()}\n\n</div>`;
+    }
+  );
+}
 
-  if (ext === "md" || ext === "rst" || ext === "txt") {
-    lines.forEach((line, i) => {
-      // ATX headings: # H1, ## H2, etc.
-      const m = line.match(/^(#{1,6})\s+(.+)/);
-      if (m) {
-        headings.push({ level: m[1].length, text: m[2].replace(/\s*#+\s*$/, ""), line: i });
-      }
-    });
-  } else if (ext === "html") {
-    lines.forEach((line, i) => {
-      const m = line.match(/<h([1-6])[^>]*>([^<]+)<\/h[1-6]>/i);
-      if (m) {
-        headings.push({ level: parseInt(m[1]), text: m[2], line: i });
-      }
-    });
+/** Generate a slug from heading text for anchor IDs */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fff\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+/* ── heading extraction for TOC ───────────────── */
+
+interface TocHeading {
+  level: number;
+  text: string;
+  id: string;
+}
+
+function extractTocHeadings(content: string, fileName: string): TocHeading[] {
+  const ext = getExt(fileName);
+  const headings: TocHeading[] = [];
+  if (ext !== "md" && ext !== "txt" && ext !== "rst") return headings;
+
+  const stripped = stripFrontmatter(content);
+  for (const line of stripped.split("\n")) {
+    const m = line.match(/^(#{1,6})\s+(.+)/);
+    if (m) {
+      const text = m[2].replace(/\s*#+\s*$/, "");
+      headings.push({ level: m[1].length, text, id: slugify(text) });
+    }
   }
   return headings;
 }
@@ -129,8 +144,8 @@ function useDragResize(
 /* ── tree node structure ─────────────────────── */
 
 interface TreeNode {
-  name: string;       // file/dir name
-  displayName: string; // title from doc content, fallback to name
+  name: string;
+  displayName: string;
   path: string;
   isDir: boolean;
   children: TreeNode[];
@@ -159,7 +174,6 @@ function buildTree(items: FileItem[]): TreeNode[] {
   };
 
   for (const item of items) {
-    // Strip "docs/" prefix for tree display
     const rel = item.path.replace(/^docs\//, "");
     const parts = rel.split("/");
     const display = item.title || item.name;
@@ -173,7 +187,6 @@ function buildTree(items: FileItem[]): TreeNode[] {
     }
   }
 
-  // Sort: dirs first, then files, alphabetical
   const sortNodes = (nodes: TreeNode[]) => {
     nodes.sort((a, b) => {
       if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
@@ -199,7 +212,6 @@ function DocTree({
   onSelect: (path: string) => void;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(() => {
-    // Default expand all directories
     const s = new Set<string>();
     const walk = (ns: TreeNode[]) => {
       for (const n of ns) {
@@ -273,21 +285,15 @@ function DocTree({
 
 function TocNav({
   headings,
-  activeLine,
+  activeId,
   onJump,
 }: {
-  headings: Heading[];
-  activeLine: number;
-  onJump: (line: number) => void;
+  headings: TocHeading[];
+  activeId: string;
+  onJump: (id: string) => void;
 }) {
   const { t } = useTranslation();
   if (headings.length === 0) return null;
-
-  // Find which heading is "active" based on scroll position
-  let activeIdx = 0;
-  for (let i = headings.length - 1; i >= 0; i--) {
-    if (headings[i].line <= activeLine) { activeIdx = i; break; }
-  }
 
   const minLevel = Math.min(...headings.map((h) => h.level));
 
@@ -303,11 +309,11 @@ function TocNav({
       <div className="flex-1 overflow-y-auto py-1">
         {headings.map((h, i) => {
           const indent = (h.level - minLevel) * 12 + 8;
-          const isActive = i === activeIdx;
+          const isActive = h.id === activeId;
           return (
             <button
-              key={`${h.line}-${i}`}
-              onClick={() => onJump(h.line)}
+              key={`${h.id}-${i}`}
+              onClick={() => onJump(h.id)}
               className={cn(
                 "w-full text-left py-[3px] pr-2 text-[11px] rounded transition-colors truncate",
                 isActive ? "font-medium" : "hover:bg-white/[0.04]"
@@ -341,6 +347,59 @@ function ResizeHandle({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => v
   );
 }
 
+/* ── Markdown Viewer ─────────────────────────── */
+
+function MarkdownViewer({
+  content,
+  fileName,
+  containerRef,
+}: {
+  content: string;
+  fileName: string;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const ext = getExt(fileName);
+  const isMarkdown = ext === "md" || ext === "txt" || ext === "rst";
+
+  if (!isMarkdown) {
+    // Non-markdown: show as preformatted text
+    return (
+      <div ref={containerRef} className="flex-1 overflow-auto">
+        <pre className="p-4 text-[13px] font-mono whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>
+          {content}
+        </pre>
+      </div>
+    );
+  }
+
+  const processed = preprocessAdmonitions(stripFrontmatter(content));
+
+  return (
+    <div ref={containerRef} className="flex-1 overflow-auto">
+      <div className="md-prose">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight]}
+          components={{
+            // Add IDs to headings for TOC navigation
+            h1: ({ children, ...props }) => <h1 id={slugify(String(children))} {...props}>{children}</h1>,
+            h2: ({ children, ...props }) => <h2 id={slugify(String(children))} {...props}>{children}</h2>,
+            h3: ({ children, ...props }) => <h3 id={slugify(String(children))} {...props}>{children}</h3>,
+            h4: ({ children, ...props }) => <h4 id={slugify(String(children))} {...props}>{children}</h4>,
+            h5: ({ children, ...props }) => <h5 id={slugify(String(children))} {...props}>{children}</h5>,
+            h6: ({ children, ...props }) => <h6 id={slugify(String(children))} {...props}>{children}</h6>,
+            // Hide <!-- truncate --> comments
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            hr: (props) => <hr className="md-truncate-marker" {...props} />,
+          }}
+        >
+          {processed}
+        </ReactMarkdown>
+      </div>
+    </div>
+  );
+}
+
 /* ── DocsPanel 主组件 ────────────────────────── */
 
 interface DocsPanelProps {
@@ -357,7 +416,7 @@ export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [docContent, setDocContent] = useState<string | null>(null);
   const [docLoading, setDocLoading] = useState(false);
-  const [scrollLine, setScrollLine] = useState(0);
+  const [activeHeadingId, setActiveHeadingId] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Resizable panes
@@ -383,7 +442,7 @@ export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
     setSelectedPath(path);
     setDocLoading(true);
     setDocContent(null);
-    setScrollLine(0);
+    setActiveHeadingId("");
     try {
       const res = await api.projects.docContent(projectId, path);
       setDocContent(res.content);
@@ -397,47 +456,50 @@ export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
   const tree = useMemo(() => buildTree(items), [items]);
 
   const selectedName = selectedPath?.split("/").pop() || "";
-  const selectedLang = selectedName ? detectLang(selectedName) : "";
-
-  const highlightedLines = useMemo(() => {
-    if (!docContent) return [];
-    try {
-      const hljsLang = selectedLang === "plaintext" ? undefined : selectedLang;
-      const result = hljsLang && hljs.getLanguage(hljsLang)
-        ? hljs.highlight(docContent, { language: hljsLang })
-        : { value: docContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") };
-      return result.value.split("\n");
-    } catch {
-      return docContent.split("\n").map((l) =>
-        l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      );
-    }
-  }, [docContent, selectedLang]);
 
   const headings = useMemo(() => {
     if (!docContent || !selectedName) return [];
-    return extractHeadings(docContent, selectedName);
+    return extractTocHeadings(docContent, selectedName);
   }, [docContent, selectedName]);
 
-  // Track scroll position to highlight active heading
-  const handleScroll = useCallback(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    const rows = el.querySelectorAll("tr");
-    for (let i = rows.length - 1; i >= 0; i--) {
-      if (rows[i].getBoundingClientRect().top <= el.getBoundingClientRect().top + 60) {
-        setScrollLine(i);
-        return;
-      }
-    }
-    setScrollLine(0);
-  }, []);
+  // Track active heading via IntersectionObserver
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container || headings.length === 0) return;
 
-  const jumpToLine = useCallback((line: number) => {
-    const el = contentRef.current;
-    if (!el) return;
-    const row = el.querySelectorAll("tr")[line];
-    if (row) row.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Small delay to let markdown render
+    const timer = setTimeout(() => {
+      const headingEls = container.querySelectorAll("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]");
+      if (headingEls.length === 0) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          // Find the topmost visible heading
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible.length > 0) {
+            setActiveHeadingId(visible[0].target.id);
+          }
+        },
+        { root: container, rootMargin: "-10px 0px -80% 0px", threshold: 0 }
+      );
+
+      headingEls.forEach((el) => observer.observe(el));
+      return () => observer.disconnect();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [docContent, headings]);
+
+  const jumpToHeading = useCallback((id: string) => {
+    const container = contentRef.current;
+    if (!container) return;
+    const el = container.querySelector(`#${CSS.escape(id)}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveHeadingId(id);
+    }
   }, []);
 
   const hasContent = selectedPath && docContent != null && !docLoading;
@@ -466,11 +528,6 @@ export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
           </span>
         )}
         <span className="flex-1" />
-        {hasContent && (
-          <span className="text-[10px] tabular-nums" style={{ color: "var(--text-tertiary)" }}>
-            {highlightedLines.length} {t("docsPanel.lines")}
-          </span>
-        )}
         <button
           onClick={onClose}
           className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
@@ -567,32 +624,11 @@ export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
             </div>
           )}
           {hasContent && (
-            <div
-              ref={contentRef}
-              className="flex-1 overflow-auto"
-              onScroll={handleScroll}
-            >
-              <div className="font-mono text-[12px] leading-[1.65]">
-                <table className="w-full border-collapse">
-                  <tbody>
-                    {highlightedLines.map((html, i) => (
-                      <tr key={i} className="hover:bg-white/[0.02]">
-                        <td
-                          className="text-right select-none px-3 py-0 align-top shrink-0 w-[1%] whitespace-nowrap"
-                          style={{ color: "#636d77", opacity: 0.6, borderRight: "1px solid var(--border)" }}
-                        >
-                          {i + 1}
-                        </td>
-                        <td
-                          className="px-4 py-0 whitespace-pre-wrap hljs"
-                          dangerouslySetInnerHTML={{ __html: html || " " }}
-                        />
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <MarkdownViewer
+              content={docContent}
+              fileName={selectedName}
+              containerRef={contentRef}
+            />
           )}
         </div>
 
@@ -601,7 +637,7 @@ export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
           <>
             <ResizeHandle onMouseDown={rightPane.onMouseDown} />
             <div className="shrink-0 overflow-hidden" style={{ width: `${rightPane.width}px` }}>
-              <TocNav headings={headings} activeLine={scrollLine} onJump={jumpToLine} />
+              <TocNav headings={headings} activeId={activeHeadingId} onJump={jumpToHeading} />
             </div>
           </>
         )}
