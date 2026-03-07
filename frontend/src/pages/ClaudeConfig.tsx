@@ -78,41 +78,41 @@ type CommonSettingDef = {
   placeholder?: string; group?: string;
 };
 const getCommonSettings = (t: (k: string) => string): CommonSettingDef[] => [
-  { key: "model", label: t("claudeConfig.commonSettings.defaultModel"), desc: "别名或完整模型名", type: "select", options: [
-    { value: "", label: "default（按订阅层级）" },
+  { key: "model", label: t("claudeConfig.commonSettings.defaultModel"), desc: t("claudeConfig.commonSettings.defaultModelDesc"), type: "select", options: [
+    { value: "", label: t("claudeConfig.commonSettings.defaultBySubscription") },
     { value: "opus", label: "opus — Opus 4.6" },
     { value: "sonnet", label: "sonnet — Sonnet 4.6" },
     { value: "haiku", label: "haiku — Haiku 4.5" },
-    { value: "opusplan", label: "opusplan — 计划 Opus + 执行 Sonnet" },
-    { value: "sonnet[1m]", label: "sonnet[1m] — 100万上下文" },
-    { value: "claude-opus-4-6", label: "claude-opus-4-6（固定版本）" },
-    { value: "claude-sonnet-4-6", label: "claude-sonnet-4-6（固定版本）" },
-    { value: "claude-haiku-4-5-20251001", label: "claude-haiku-4-5（固定版本）" },
+    { value: "opusplan", label: t("claudeConfig.commonSettings.opusplan") },
+    { value: "sonnet[1m]", label: t("claudeConfig.commonSettings.sonnet1m") },
+    { value: "claude-opus-4-6", label: `claude-opus-4-6（${t("claudeConfig.commonSettings.fixedVersion")}）` },
+    { value: "claude-sonnet-4-6", label: `claude-sonnet-4-6（${t("claudeConfig.commonSettings.fixedVersion")}）` },
+    { value: "claude-haiku-4-5-20251001", label: `claude-haiku-4-5（${t("claudeConfig.commonSettings.fixedVersion")}）` },
   ], placeholder: "opus / sonnet", group: "model" },
-  { key: "effortLevel", label: t("claudeConfig.commonSettings.effortLevel"), desc: "low=快速, medium=默认, high=深度推理", type: "select", options: [
-    { value: "", label: "默认" }, { value: "low", label: "low" }, { value: "medium", label: "medium" }, { value: "high", label: "high" },
+  { key: "effortLevel", label: t("claudeConfig.commonSettings.effortLevel"), desc: t("claudeConfig.commonSettings.effortLevelDesc"), type: "select", options: [
+    { value: "", label: t("claudeConfig.commonSettings.default") }, { value: "low", label: "low" }, { value: "medium", label: "medium" }, { value: "high", label: "high" },
   ], group: "model" },
-  { key: "language", label: t("claudeConfig.commonSettings.responseLang"), desc: "Claude 响应语言", type: "string", placeholder: "chinese", group: "behavior" },
-  { key: "outputStyle", label: "输出风格", desc: "系统提示输出样式", type: "string", placeholder: "Concise", group: "behavior" },
-  { key: "alwaysThinkingEnabled", label: "始终扩展思考", desc: "默认启用 Extended Thinking", type: "boolean", group: "behavior" },
-  { key: "showTurnDuration", label: "显示轮次耗时", desc: "响应后显示耗时", type: "boolean", group: "behavior" },
-  { key: "cleanupPeriodDays", label: "会话清理（天）", desc: "非活跃会话清理周期", type: "number", placeholder: "30", group: "session" },
-  { key: "plansDirectory", label: "计划文件目录", desc: "计划文件存储位置", type: "string", placeholder: "./plans", group: "session" },
-  { key: "forceLoginMethod", label: "强制登录方式", desc: "限制登录方式", type: "select", options: [
-    { value: "", label: "不限制" }, { value: "claudeai", label: "claudeai" }, { value: "console", label: "console" },
+  { key: "language", label: t("claudeConfig.commonSettings.responseLang"), desc: t("claudeConfig.commonSettings.responseLangDesc"), type: "string", placeholder: "chinese", group: "behavior" },
+  { key: "outputStyle", label: t("claudeConfig.commonSettings.outputStyle"), desc: t("claudeConfig.commonSettings.outputStyleDesc"), type: "string", placeholder: "Concise", group: "behavior" },
+  { key: "alwaysThinkingEnabled", label: t("claudeConfig.commonSettings.alwaysThinking"), desc: t("claudeConfig.commonSettings.alwaysThinkingDesc"), type: "boolean", group: "behavior" },
+  { key: "showTurnDuration", label: t("claudeConfig.commonSettings.showTurnDuration"), desc: t("claudeConfig.commonSettings.showTurnDurationDesc"), type: "boolean", group: "behavior" },
+  { key: "cleanupPeriodDays", label: t("claudeConfig.commonSettings.cleanupPeriodDays"), desc: t("claudeConfig.commonSettings.cleanupPeriodDaysDesc"), type: "number", placeholder: "30", group: "session" },
+  { key: "plansDirectory", label: t("claudeConfig.commonSettings.plansDirectory"), desc: t("claudeConfig.commonSettings.plansDirectoryDesc"), type: "string", placeholder: "./plans", group: "session" },
+  { key: "forceLoginMethod", label: t("claudeConfig.commonSettings.forceLoginMethod"), desc: t("claudeConfig.commonSettings.forceLoginMethodDesc"), type: "select", options: [
+    { value: "", label: t("claudeConfig.commonSettings.noRestriction") }, { value: "claudeai", label: "claudeai" }, { value: "console", label: "console" },
   ], group: "security" },
-  { key: "autoUpdatesChannel", label: "更新频道", desc: "stable / latest", type: "select", options: [
-    { value: "", label: "默认 (latest)" }, { value: "latest", label: "latest" }, { value: "stable", label: "stable" },
+  { key: "autoUpdatesChannel", label: t("claudeConfig.commonSettings.autoUpdatesChannel"), desc: "stable / latest", type: "select", options: [
+    { value: "", label: t("claudeConfig.commonSettings.defaultLatest") }, { value: "latest", label: "latest" }, { value: "stable", label: "stable" },
   ], group: "ui" },
-  { key: "spinnerTipsEnabled", label: "微调器提示", desc: "工作时显示操作提示", type: "boolean", group: "ui" },
-  { key: "terminalProgressBarEnabled", label: "终端进度条", desc: "支持的终端显示进度条", type: "boolean", group: "ui" },
-  { key: "prefersReducedMotion", label: "减少动画", desc: "减少 UI 动画", type: "boolean", group: "ui" },
-  { key: "respectGitignore", label: "遵守 .gitignore", desc: "排除 .gitignore 匹配文件", type: "boolean", group: "ui" },
-  { key: "includeCoAuthoredBy", label: "Git 署名", desc: "提交中包含 Co-authored-by", type: "boolean", group: "ui" },
-  { key: "enableAllProjectMcpServers", label: "自动批准项目 MCP", desc: "自动批准 .mcp.json 中的 MCP", type: "boolean", group: "advanced" },
-  { key: "fastModePerSessionOptIn", label: "快速模式按会话", desc: "每会话手动 /fast 启用", type: "boolean", group: "advanced" },
-  { key: "teammateMode", label: "Agent Teams 模式", desc: "队友显示方式", type: "select", options: [
-    { value: "", label: "默认 (auto)" }, { value: "auto", label: "auto" }, { value: "in-process", label: "in-process" }, { value: "tmux", label: "tmux" },
+  { key: "spinnerTipsEnabled", label: t("claudeConfig.commonSettings.spinnerTips"), desc: t("claudeConfig.commonSettings.spinnerTipsDesc"), type: "boolean", group: "ui" },
+  { key: "terminalProgressBarEnabled", label: t("claudeConfig.commonSettings.terminalProgressBar"), desc: t("claudeConfig.commonSettings.terminalProgressBarDesc"), type: "boolean", group: "ui" },
+  { key: "prefersReducedMotion", label: t("claudeConfig.commonSettings.reduceMotion"), desc: t("claudeConfig.commonSettings.reduceMotionDesc"), type: "boolean", group: "ui" },
+  { key: "respectGitignore", label: t("claudeConfig.commonSettings.respectGitignore"), desc: t("claudeConfig.commonSettings.respectGitignoreDesc"), type: "boolean", group: "ui" },
+  { key: "includeCoAuthoredBy", label: t("claudeConfig.commonSettings.gitCoAuthor"), desc: t("claudeConfig.commonSettings.gitCoAuthorDesc"), type: "boolean", group: "ui" },
+  { key: "enableAllProjectMcpServers", label: t("claudeConfig.commonSettings.autoApproveMcp"), desc: t("claudeConfig.commonSettings.autoApproveMcpDesc"), type: "boolean", group: "advanced" },
+  { key: "fastModePerSessionOptIn", label: t("claudeConfig.commonSettings.fastModePerSession"), desc: t("claudeConfig.commonSettings.fastModePerSessionDesc"), type: "boolean", group: "advanced" },
+  { key: "teammateMode", label: t("claudeConfig.commonSettings.teammateMode"), desc: t("claudeConfig.commonSettings.teammateModeDesc"), type: "select", options: [
+    { value: "", label: t("claudeConfig.commonSettings.defaultAuto") }, { value: "auto", label: "auto" }, { value: "in-process", label: "in-process" }, { value: "tmux", label: "tmux" },
   ], group: "advanced" },
 ];
 const COMMON_SETTING_KEYS = new Set([
