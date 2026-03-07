@@ -280,18 +280,21 @@ export default function ClaudeConfigPage() {
       || item.keywords.some(k => k.toLowerCase().includes(q));
   }, [q]);
 
+  const NAV_GROUPS = useMemo(() => getNavGroups(t), [t]);
+  const ALL_ITEMS = useMemo(() => NAV_GROUPS.flatMap(g => g.items), [NAV_GROUPS]);
+
   const filteredGroups = useMemo(() => {
     if (!q) return NAV_GROUPS;
     return NAV_GROUPS.map(g => ({
       ...g,
       items: g.items.filter(matchesSearch),
     })).filter(g => g.items.length > 0);
-  }, [q, matchesSearch]);
+  }, [q, matchesSearch, NAV_GROUPS]);
 
   const visibleSections = useMemo(() => {
     if (!q) return new Set(ALL_ITEMS.map(i => i.id));
     return new Set(filteredGroups.flatMap(g => g.items.map(i => i.id)));
-  }, [q, filteredGroups]);
+  }, [q, filteredGroups, ALL_ITEMS]);
 
   // Counts
   const counts: Partial<Record<SectionId, number>> = useMemo(() => ({
