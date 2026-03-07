@@ -90,7 +90,7 @@ export function AppShell({
       {showNewProject && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-app-secondary border border-app rounded-xl p-5 w-80 space-y-3 shadow-2xl">
-            <h2 className="text-sm font-semibold text-app">新建项目</h2>
+            <h2 className="text-sm font-semibold text-app">{t('appShell.newProject')}</h2>
             <input
               autoFocus
               value={newProjName}
