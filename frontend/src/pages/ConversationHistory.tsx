@@ -37,6 +37,15 @@ export default function ConversationHistory({ projects }: Props) {
     return () => clearInterval(id);
   }, [loadSessions]);
 
+  // 默认选中第一个会话
+  const autoSelected = useRef(false);
+  useEffect(() => {
+    if (!autoSelected.current && sessions.length > 0 && !selectedSession) {
+      autoSelected.current = true;
+      handleSelect(sessions[0]);
+    }
+  }, [sessions]);
+
   const handleSelect = (s: ClaudeSession) => {
     setSelectedSession(s);
     setActiveQuestionIdx(-1);
