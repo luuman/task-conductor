@@ -413,7 +413,7 @@ function StageDetailPanel({
                 <input
                   value={rejectReason}
                   onChange={e => setRejectReason(e.target.value)}
-                  placeholder="驳回原因（必填）"
+                  placeholder={t('taskWorkflow.stageDetailPanel.rejectReason')}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white/80 outline-none focus:border-accent/60"
                 />
                 <div className="flex gap-2">
