@@ -102,7 +102,7 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
       {/* ── 频率 ── */}
       {sys?.cpu.freq_mhz && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 2 }}>
-          <SectionLabel label="频率" />
+          <SectionLabel label={t('perf.sensors.frequency')} />
           <Row
             name="CPU"
             value={`${(sys.cpu.freq_mhz / 1000).toFixed(2)} GHz`}
