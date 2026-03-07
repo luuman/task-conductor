@@ -183,6 +183,9 @@ class TranscriptBlock(BaseModel):
     text: Optional[str] = None
     tool_name: Optional[str] = None
     tool_input: Optional[dict] = None
+    tool_use_id: Optional[str] = None
+    tool_result: Optional[str] = None
+    tool_error: Optional[bool] = None
 
 
 class TranscriptMessage(BaseModel):
