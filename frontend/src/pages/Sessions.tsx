@@ -303,8 +303,8 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
             <div className="flex flex-col items-center justify-center h-32 gap-2 px-3 text-center"
                  style={{ color: "var(--text-tertiary)" }}>
               <span className="text-2xl">⌗</span>
-              <p className="text-[11px]">暂无会话记录</p>
-              <p className="text-[10px]">运行 Claude Code 后自动出现</p>
+              <p className="text-[11px]">{t('sessions.noSessions')}</p>
+              <p className="text-[10px]">{t('sessions.autoAppearHint')}</p>
             </div>
           ) : (
             sessions.map((s) => (
