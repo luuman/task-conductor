@@ -175,6 +175,10 @@ export default function App() {
         onOpenTask={handleOpenTask}
         onSelectProject={handleSelectProject}
         onRefreshProjects={refreshProjects}
+        onOpenFiles={(pid) => {
+          setActiveProjectId(pid);
+          setPage("files");
+        }}
       />
     );
   };
