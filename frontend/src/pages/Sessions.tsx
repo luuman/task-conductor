@@ -354,31 +354,24 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
         {/* 工具栏 */}
         <div className="flex items-center justify-between px-4 py-2 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
-          {/* 视图切换 */}
-          <div className="flex items-center gap-1 rounded-md p-0.5"
-               style={{ background: "var(--background-tertiary)" }}>
-            <button
-              onClick={() => setRightView("live")}
-              className="text-[11px] px-2.5 py-1 rounded font-mono transition-colors"
-              style={rightView === "live"
-                ? { background: "var(--background-secondary)", color: "var(--text-primary)" }
-                : { color: "var(--text-secondary)" }}
-            >
-              {t('sessions.viewTabs.realtime')}
-            </button>
-            <button
-              onClick={() => selectedId && setRightView("history")}
-              disabled={!selectedId}
-              className={cn(
-                "text-[11px] px-2.5 py-1 rounded font-mono transition-colors",
-                !selectedId && "opacity-30 cursor-not-allowed"
-              )}
-              style={rightView === "history"
-                ? { background: "var(--background-secondary)", color: "var(--text-primary)" }
-                : { color: "var(--text-secondary)" }}
-            >
-              {t('sessions.viewTabs.history')}
-            </button>
+          {/* 当前视图指示 */}
+          <div className="flex items-center gap-2">
+            {selectedId ? (
+              <button
+                onClick={() => { setSelectedId(null); setHistoryRows([]); }}
+                className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded font-mono transition-colors"
+                style={{ background: "var(--background-tertiary)", color: "var(--text-primary)" }}
+                title={t('sessions.viewTabs.showAll')}
+              >
+                <span style={{ color: "var(--accent)" }}>{selectedId.slice(0, 8)}</span>
+                <span style={{ color: "var(--text-tertiary)" }}>✕</span>
+              </button>
+            ) : (
+              <span className="text-[11px] px-2.5 py-1 font-mono"
+                    style={{ color: "var(--text-secondary)" }}>
+                {t('sessions.viewTabs.allSessions')}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
