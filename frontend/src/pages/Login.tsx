@@ -167,7 +167,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
             </div>
             {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
             <Button type="submit" disabled={!tunnelUrl || pin.length !== 6 || loading} className="w-full" size="lg">
-              {loading ? "连接中…" : "连接 Agent"}
+              {loading ? t('login.local.connecting') : t('login.tunnel.connectAgent')}
             </Button>
           </form>
         )}
