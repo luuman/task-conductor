@@ -136,7 +136,7 @@ function ServerCard({ server, onAction }: {
         {needsToken && !showTokenInput && !server.installed && (
           <span className="text-[10px] text-blue-400/80 flex items-center gap-1">
             <KeyRound size={10} />
-            需要 API Token
+            {t('mcpMarket.actions.needsApiToken')}
           </span>
         )}
         {!isOAuth && !needsToken && !server.installed && <span />}
