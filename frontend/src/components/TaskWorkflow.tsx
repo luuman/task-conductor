@@ -603,7 +603,7 @@ export function TaskWorkflow({ task, artifacts = [], onRefresh }: TaskWorkflowPr
       {/* 提示 */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 pointer-events-none">
         <span className="text-[10px] text-white/20 bg-black/30 px-3 py-1 rounded-full">
-          点击节点查看阶段详情与操作
+          {t('taskWorkflow.hint')}
         </span>
       </div>
     </div>
