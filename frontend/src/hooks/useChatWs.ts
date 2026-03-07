@@ -110,7 +110,7 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
     });
   }, []);
 
-  const send = useCallback((message: string, model: string, cwd?: string) => {
+  const send = useCallback((message: string, model: string, options?: ChatOptions) => {
     setError(null);
     setCurrentReply("");
     replyBuf.current = "";
@@ -118,12 +118,13 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
 
     ensureConnected()
       .then((ws) => {
-        ws.send(JSON.stringify({
-          type: "chat",
-          message,
-          model,
-          ...(cwd ? { cwd } : {}),
-        }));
+        const payload: Record<string, unknown> = { type: "chat", message, model };
+        if (options) {
+          Object.entries(options).forEach(([k, v]) => {
+            if (v !== undefined && v !== null && v !== "") payload[k] = v;
+          });
+        }
+        ws.send(JSON.stringify(payload));
       })
       .catch((err) => {
         setError(err.message || "发送失败");
