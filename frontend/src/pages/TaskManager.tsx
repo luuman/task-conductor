@@ -498,7 +498,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
               <p className="text-[11px] text-app-secondary">{pendingAccept.analysis.understanding}</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-app-secondary">选择项目</label>
+              <label className="text-xs text-app-secondary">{t('taskManager.projectDialog.selectProject')}</label>
               {projects.length === 0 ? (
                 <p className="text-xs text-app-tertiary">暂无项目，请先在仪表盘创建项目</p>
               ) : (
