@@ -148,7 +148,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                       : "bg-accent hover:bg-accent-hover text-white"
                   )}
                 >
-                  {saveStatus === "saving" ? "保存中..." : saveStatus === "ok" ? "已保存 ✓" : "保存"}
+                  {saveStatus === "saving" ? t('settings.saveStates.saving') : saveStatus === "ok" ? t('settings.saveStates.saved') : t('settings.saveStates.save')}
                 </button>
               </div>
 
