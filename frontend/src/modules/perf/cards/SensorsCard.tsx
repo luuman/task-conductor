@@ -76,7 +76,7 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
       {/* ── 温度 ── */}
       {temps.length > 0 && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 2 }}>
-          <SectionLabel label="温度" />
+          <SectionLabel label={t('perf.sensors.temperature')} />
           {temps.slice(0, 10).map((t, i) => (
             <Row
               key={i}
