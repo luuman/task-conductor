@@ -200,8 +200,9 @@ export default function ClaudeConfigPage() {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const searchRef = useRef<HTMLInputElement>(null);
 
+  const loadRef = useRef(false);
   const load = useCallback(async () => {
-    if (!config) setLoading(true);
+    setLoading(prev => !loadRef.current ? true : prev);
     setError("");
     try {
       const [cfg, events, ov] = await Promise.all([
@@ -209,8 +210,9 @@ export default function ClaudeConfigPage() {
       ]);
       setConfig(cfg); setHookEvents(events); setOverview(ov);
       writeCache(CK_CFG, cfg); writeCache(CK_OV, ov);
+      loadRef.current = true;
     } catch (e) {
-      if (!config) setError(e instanceof Error ? e.message : "加载失败");
+      if (!loadRef.current) setError(e instanceof Error ? e.message : "加载失败");
     } finally { setLoading(false); }
     api.claudeConfig.listSkills().then(setSkills).catch(() => {});
     api.claudeConfig.listAgents().then(setAgents).catch(() => {});
@@ -219,7 +221,8 @@ export default function ClaudeConfigPage() {
     api.claudeConfig.systemInfo().then(setSystemInfo).catch(() => {});
     api.claudeConfig.getClaudeMd().then(r => setClaudeMd(r.content)).catch(() => {});
     api.claudeConfig.disabledItems().then(setDisabledItems).catch(() => {});
-  }, [config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
