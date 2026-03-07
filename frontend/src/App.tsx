@@ -67,7 +67,7 @@ export default function App() {
       try {
         await api.health();
         setConnectionStatus("connected");
-        // 后端在线时校验 token 是否仍有效（SECRET_KEY 变化等情况）
+        // When backend is online, verify the token is still valid (e.g. SECRET_KEY change)
         const ok = await checkAuth();
         if (!ok) {
           clearConfig();
