@@ -10,6 +10,19 @@ import httpx
 FEISHU_API_BASE = "https://open.feishu.cn/open-apis"
 
 
+def _http_proxy() -> str | None:
+    """获取 HTTP 代理地址（避免使用 socks5 代理）"""
+    return os.getenv("https_proxy") or os.getenv("http_proxy") or None
+
+
+def _client() -> httpx.AsyncClient:
+    """创建 httpx 客户端，显式使用 HTTP 代理避免 socks5 问题"""
+    proxy = _http_proxy()
+    if proxy and proxy.startswith("socks"):
+        proxy = None  # 跳过 socks 代理
+    return httpx.AsyncClient(proxy=proxy, timeout=15)
+
+
 class FeishuClient:
     """飞书 API 异步客户端，全局单例。"""
 
