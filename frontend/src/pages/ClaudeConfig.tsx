@@ -732,7 +732,7 @@ function ClaudeMdPanel({ claudeMd, onChange, onSave, saving, saved }: {
       ) : (
         <div className="px-4 py-3 cursor-pointer hover:bg-white/[0.02] transition-colors" onClick={startEdit}>
           {isEmpty ? (
-            <p className="text-[11px] text-app-tertiary italic py-4 text-center">暂无内容，点击编辑...</p>
+            <p className="text-[11px] text-app-tertiary italic py-4 text-center">{t("claudeConfig.claudeMd.noContent")}</p>
           ) : (
             <MdPreview content={claudeMd} />
           )}
