@@ -279,7 +279,7 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
         {/* 底部状态栏 */}
         <div className="flex items-center justify-between px-3 py-1.5 border-t border-[#21262d] shrink-0">
           <span className="text-[9px] font-mono text-[#484f58]">
-            {lines.length} 条记录（最多 {MAX_LINES}）
+            {t('claudeMonitor.statusBar.recordCount', { count: lines.length, max: MAX_LINES })}
           </span>
           <span className={cn(
             "text-[9px] font-mono",
