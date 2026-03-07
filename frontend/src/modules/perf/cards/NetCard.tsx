@@ -20,13 +20,13 @@ export function NetCard({ sys, hist, colors = {}, showTitle }: NetCardProps) {
         <div className="text-center">
           <div className="text-lg font-bold text-white">{fmtKbps(sys?.network.out_kbps)}</div>
           <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400">
-            <div className="w-2 h-2 rounded-full" style={{ background: cOut }} /> 上传
+            <div className="w-2 h-2 rounded-full" style={{ background: cOut }} /> {t('perf.net.upload')}
           </div>
         </div>
         <div className="text-center">
           <div className="text-lg font-bold text-white">{fmtKbps(sys?.network.in_kbps)}</div>
           <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400">
-            <div className="w-2 h-2 rounded-full" style={{ background: cIn }} /> 下载
+            <div className="w-2 h-2 rounded-full" style={{ background: cIn }} /> {t('perf.net.download')}
           </div>
         </div>
       </div>
