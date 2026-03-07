@@ -338,7 +338,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
           {isRunning && (
             <div className="bg-blue-900/10 border border-blue-800/30 rounded-lg p-3 flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
-              <p className="text-xs text-blue-400">Claude 正在执行 <b>{STAGE_LABEL[task.stage]}</b> 阶段...</p>
+              <p className="text-xs text-blue-400">{t('taskPipeline.actionBanner.executing')} <b>{STAGE_LABEL[task.stage]}</b>...</p>
             </div>
           )}
 
