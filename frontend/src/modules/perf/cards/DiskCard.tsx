@@ -9,6 +9,7 @@ interface DiskCardProps extends PerfData {
 }
 
 export function DiskCard({ sys, hist, colors = {}, showTitle }: DiskCardProps) {
+  const { t } = useTranslation();
   const cRead  = colors.read  ?? "#FF2D55";
   const cWrite = colors.write ?? "#007AFF";
 
