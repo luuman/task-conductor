@@ -329,6 +329,9 @@ export default function ConversationHistory({ projects }: Props) {
           onSend={handleChatSend}
           onStop={chatStop}
           isGenerating={isGenerating}
+          onNewChat={handleNewChat}
+          onExport={handleExport}
+          onClear={() => { setChatMessages([]); }}
         />
       </div>
 
