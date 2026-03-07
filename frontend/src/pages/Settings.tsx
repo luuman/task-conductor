@@ -88,7 +88,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const handleDisconnect = () => { clearConfig(); onDisconnect(); };
 
   const handleShutdown = async () => {
-    if (!confirm("确定要关闭后端服务吗？关闭后需要在服务器上重新启动。")) return;
+    if (!confirm(t('settings.shutdown.confirmShutdown'))) return;
     setShuttingDown(true);
     try {
       await api.shutdown();
