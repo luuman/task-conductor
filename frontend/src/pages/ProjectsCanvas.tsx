@@ -18,14 +18,25 @@ type ProjectStats = {
 type BubbleData = { x: number; y: number; r: number; stats: ProjectStats; decorative?: boolean };
 
 // ── Status palette ─────────────────────────────────────────────────
-const STATE_META: Record<VisualState, { base: string; text: string; label: string }> = {
-  running: { base: "#22c55e", text: "#fff", label: "运行中" },
-  failed:  { base: "#ef4444", text: "#fff", label: "异常"   },
-  review:  { base: "#f59e0b", text: "#fff", label: "待审批" },
-  queued:  { base: "#7b9ed9", text: "#fff", label: "排队中" },
-  done:    { base: "#4477ff", text: "#fff", label: "已完成" },
-  idle:    { base: "#3c3c5c", text: "#7878a8", label: "空闲" },
+const STATE_META: Record<VisualState, { base: string; text: string }> = {
+  running: { base: "#22c55e", text: "#fff" },
+  failed:  { base: "#ef4444", text: "#fff" },
+  review:  { base: "#f59e0b", text: "#fff" },
+  queued:  { base: "#7b9ed9", text: "#fff" },
+  done:    { base: "#4477ff", text: "#fff" },
+  idle:    { base: "#3c3c5c", text: "#7878a8" },
 };
+
+function getStateLabel(t: (key: string) => string): Record<VisualState, string> {
+  return {
+    running: t('projectsCanvas.stateMeta.running'),
+    failed: t('projectsCanvas.stateMeta.error'),
+    review: t('projectsCanvas.stateMeta.approval'),
+    queued: t('projectsCanvas.stateMeta.queued'),
+    done: t('projectsCanvas.stateMeta.done'),
+    idle: t('projectsCanvas.stateMeta.idle'),
+  };
+}
 
 // Softer color variants for visual richness
 const STATE_VARIANTS: Record<VisualState, string[]> = {
