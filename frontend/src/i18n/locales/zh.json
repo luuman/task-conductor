@@ -214,7 +214,8 @@
       "testProjects": "测试项目"
     },
     "projectTaskList": {
-      "knowledgeBase": "知识库",
+      "errorBook": "错题集",
+      "docsKnowledge": "知识库",
       "noTasks": "暂无任务"
     }
   },
