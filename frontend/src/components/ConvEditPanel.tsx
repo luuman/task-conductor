@@ -77,7 +77,7 @@ export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) 
 
       {/* 标签 */}
       <div className="space-y-1">
-        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>标签</label>
+        <label className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{t('convEdit.tags')}</label>
         <div className="flex flex-wrap gap-1 mb-1">
           {tags.map(t => (
             <span key={t}
