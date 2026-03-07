@@ -1859,7 +1859,7 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
     for (const item of items) {
       try { await api.claudeConfig.restoreDisabledItem(item.type, item.name); ok++; } catch { fail++; }
     }
-    setStatus({ text: fail ? `恢复 ${ok} 项，${fail} 项失败` : `已恢复 ${ok} 项`, color: fail ? "#eab308" : "#22c55e" });
+    setStatus({ text: fail ? `${ok} ok, ${fail} failed` : `${t("claudeConfig.trash.restored")} ${ok}`, color: fail ? "#eab308" : "#22c55e" });
     onRefresh();
     setTimeout(() => setStatus(null), 3000);
   };
