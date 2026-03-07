@@ -301,7 +301,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
                 view === v ? "bg-accent text-white" : "text-app-tertiary hover:text-app"
               )}
             >
-              {v === "detail" ? "详情" : "流程图"}
+              {v === "detail" ? t('taskPipeline.viewToggle.detail') : t('taskPipeline.viewToggle.flow')}
             </button>
           ))}
         </div>
