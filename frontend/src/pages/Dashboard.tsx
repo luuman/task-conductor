@@ -87,7 +87,7 @@ function ClaudeMetricsPanel() {
         </div>
         <div className="flex gap-3 text-[9px] font-mono">
           <span className={cn(sessions.active > 0 ? "text-green-400" : "text-app-tertiary")}>
-            {sessions.active} 活跃 / {sessions.total} 总会话
+            {sessions.active} / {sessions.total} {t('dashboard.claudeMetrics.activeSessionsHint')}
           </span>
           {performance.active_processes > 0 && (
             <span className="text-blue-400">{performance.active_processes} 进程运行中</span>
