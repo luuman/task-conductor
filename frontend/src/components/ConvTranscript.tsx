@@ -324,14 +324,10 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
 
   const highlighted = useMemo(() => {
     try {
-      const hljs = require("highlight.js/lib/core") as typeof import("highlight.js/lib/core");
-      if (lang) {
-        try {
-          hljs.default.getLanguage(lang) || hljs.default.registerLanguage(lang, require(`highlight.js/lib/languages/${lang}`).default);
-          return hljs.default.highlight(displayed, { language: lang }).value;
-        } catch { /* fallback */ }
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(displayed, { language: lang }).value;
       }
-      return hljs.default.highlightAuto(displayed).value;
+      return hljs.highlightAuto(displayed).value;
     } catch {
       return null;
     }
