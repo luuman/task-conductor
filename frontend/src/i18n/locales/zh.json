@@ -840,16 +840,16 @@
       "monitor": "监控"
     },
     "header": {
-      "title": "错误知识库",
+      "title": "错题集",
       "subtitle": "AI 从失败中提炼的经验，自动注入未来任务的 Prompt"
     },
-    "search": "搜索知识条目...",
+    "search": "搜索错题条目...",
     "stats": {
       "noRecords": "暂无记录"
     },
     "empty": {
       "noMatch": "无匹配记录",
-      "isEmpty": "知识库为空 — 执行失败时自动积累经验"
+      "isEmpty": "错题集为空 — 执行失败时自动积累经验"
     },
     "footer": "共 {{count}} 条 · 自动注入到 Claude 的下一次同阶段 Prompt",
     "item": {
@@ -859,6 +859,19 @@
       "delete": "删除",
       "deleteHint": "删除此条经验"
     }
+  },
+
+  "docsPanel": {
+    "header": {
+      "title": "知识库",
+      "subtitle": "项目 docs/ 目录下的文档"
+    },
+    "search": "搜索文档...",
+    "empty": "docs/ 目录为空或不存在",
+    "noMatch": "无匹配文档",
+    "noDocs": "该项目无 docs/ 目录",
+    "lines": "行",
+    "close": "关闭"
   },
 
   "claudeMonitor": {
