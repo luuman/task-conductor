@@ -378,7 +378,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
           {/* Stage Artifacts */}
           {artifacts.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-app mb-2">阶段成果物</h3>
+              <h3 className="text-xs font-semibold text-app mb-2">{t('taskPipeline.sections.stageArtifacts')}</h3>
               <div className="space-y-2">
                 {artifacts.map((a) => (
                   <ArtifactCard
