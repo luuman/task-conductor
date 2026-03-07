@@ -230,7 +230,7 @@ export function Sidebar({
             <div className="flex items-center gap-2 px-3 pt-2 pb-1">
               <span className="text-[9px] font-semibold uppercase tracking-[0.08em]"
                     style={{ color: "var(--text-tertiary)" }}>
-                测试
+                {t('sidebar.sections.test')}
               </span>
               <div className="flex-1 h-px" style={{ background: "var(--border-subtle)" }} />
             </div>
