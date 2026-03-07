@@ -49,7 +49,7 @@ export default function App() {
 
   const { status: wsMonitorStatus } = useClaudeMonitor(authed, handleMonitorEvent);
 
-  // 同步 ws 状态
+  // Sync WS status
   useEffect(() => {
     setMonitorStatus(wsMonitorStatus);
   }, [wsMonitorStatus]);
