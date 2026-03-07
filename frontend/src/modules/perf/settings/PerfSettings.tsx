@@ -140,7 +140,7 @@ function CardPreview({
       >
         <Icon size={13} style={{ color: mc.enabled ? "var(--accent)" : "var(--text-tertiary)" }} strokeWidth={2} />
         <span className="flex-1 text-[12px] font-semibold" style={{ color: "var(--text-primary)" }}>
-          {METRIC_LABEL[mc.id]}
+          {t(METRIC_LABEL[mc.id])}
         </span>
         {/* toggle */}
         <button
