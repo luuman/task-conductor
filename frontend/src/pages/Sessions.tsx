@@ -388,29 +388,25 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               onFocus={e => e.currentTarget.style.borderColor = "var(--accent)"}
               onBlur={e => e.currentTarget.style.borderColor = "var(--border)"}
             />
-            {rightView === "live" && (
-              <button
-                onClick={() => setPaused((p) => !p)}
-                className={cn(
-                  "text-[11px] px-2.5 py-1 rounded font-mono transition-colors border",
-                  paused
-                    ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/40"
-                    : "border-transparent"
-                )}
-                style={!paused ? { color: "var(--text-secondary)" } : undefined}
-              >
-                {paused ? t('sessions.controls.resume') : t('sessions.controls.pause')}
-              </button>
-            )}
-            {rightView === "live" && (
-              <button
-                onClick={handleClearLive}
-                className="text-[11px] px-2.5 py-1 rounded font-mono border border-transparent transition-colors hover:bg-white/[0.04]"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {t('sessions.controls.clear')}
-              </button>
-            )}
+            <button
+              onClick={() => setPaused((p) => !p)}
+              className={cn(
+                "text-[11px] px-2.5 py-1 rounded font-mono transition-colors border",
+                paused
+                  ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/40"
+                  : "border-transparent"
+              )}
+              style={!paused ? { color: "var(--text-secondary)" } : undefined}
+            >
+              {paused ? t('sessions.controls.resume') : t('sessions.controls.pause')}
+            </button>
+            <button
+              onClick={handleClearLive}
+              className="text-[11px] px-2.5 py-1 rounded font-mono border border-transparent transition-colors hover:bg-white/[0.04]"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {t('sessions.controls.clear')}
+            </button>
           </div>
         </div>
 
