@@ -197,11 +197,10 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // 历史事件
+  // 历史事件（选中会话后从 DB 加载）
   const [historyRows, setHistoryRows] = useState<EventRow[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const [rightView, setRightView] = useState<RightView>("live");
   const [filter, setFilter] = useState("");
   const [paused, setPaused] = useState(false);
   const pausedRef = useRef(false);
