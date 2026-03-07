@@ -1380,7 +1380,7 @@ function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hook
                       <div key={hi} className="flex items-center gap-2 pl-[62px]">
                         <input value={h.command} onChange={e => updHook(ev, ri, hi, { command: e.target.value })} placeholder="/path/to/script.sh" spellCheck={false}
                           className="flex-1 bg-app-secondary border border-app rounded px-2 py-1 text-[11px] font-mono text-app outline-none focus:border-accent/60" />
-                        <div className="flex items-center gap-1"><label className="text-[9px] text-app-tertiary">超时</label>
+                        <div className="flex items-center gap-1"><label className="text-[9px] text-app-tertiary">{t("claudeConfig.hooks.timeout")}</label>
                           <input type="number" value={h.timeout} onChange={e => updHook(ev, ri, hi, { timeout: parseInt(e.target.value) || 5 })}
                             className="w-10 bg-app-secondary border border-app rounded px-1.5 py-1 text-[11px] font-mono text-app text-center outline-none" min={1} max={60} /><span className="text-[9px] text-app-tertiary">s</span></div>
                         <button onClick={() => rmHook(ev, ri, hi)} className="text-app-tertiary hover:text-red-400 p-1"><X size={11} /></button>
