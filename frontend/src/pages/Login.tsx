@@ -50,9 +50,9 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   };
 
   const tabs = ([
-    { id: "local",  label: "本地",   localOnly: true  },
-    { id: "tunnel", label: "Tunnel", localOnly: false },
-    { id: "ssh",    label: "SSH",    localOnly: false },
+    { id: "local",  label: t('login.connectionModes.local'),   localOnly: true  },
+    { id: "tunnel", label: t('login.connectionModes.tunnel'), localOnly: false },
+    { id: "ssh",    label: t('login.connectionModes.ssh'),    localOnly: false },
   ] as { id: Mode; label: string; localOnly: boolean }[]).filter(m => !m.localOnly || isLocal);
 
   return (
