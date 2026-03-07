@@ -130,7 +130,7 @@ function ServerCard({ server, onAction }: {
         {isOAuth && !server.installed && (
           <span className="text-[10px] text-yellow-400/80 flex items-center gap-1">
             <Lock size={10} />
-            {server.auth_note || "需要 OAuth 授权"}
+            {server.auth_note || t('mcpMarket.actions.needsOAuth')}
           </span>
         )}
         {needsToken && !showTokenInput && !server.installed && (
