@@ -35,6 +35,7 @@ const STAGE_KEYS: Record<string, string> = {
 };
 
 export function KnowledgePanel({ projectId, onClose }: KnowledgePanelProps) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<ProjectKnowledge[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
