@@ -10,6 +10,7 @@ interface NetCardProps extends PerfData {
 }
 
 export function NetCard({ sys, hist, colors = {}, showTitle }: NetCardProps) {
+  const { t } = useTranslation();
   const cOut = colors.out ?? "#FF2D55";
   const cIn  = colors.in  ?? "#007AFF";
 
