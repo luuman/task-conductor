@@ -1619,7 +1619,7 @@ function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
       </div>
       <div className="flex gap-2 pt-2">
         <input value={newId} onChange={e => setNewId(e.target.value)} onKeyDown={e => e.key === "Enter" && add()}
-          placeholder="输入插件 ID" spellCheck={false}
+          placeholder={t("claudeConfig.plugins.inputPluginId")} spellCheck={false}
           className="flex-1 bg-app-secondary border border-app rounded-lg px-3 py-2 text-[11px] font-mono text-app placeholder:text-app-tertiary outline-none focus:border-accent/60" />
         <button onClick={add} disabled={!newId.trim()}
           className={cn("flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium", newId.trim() ? "bg-accent hover:bg-accent-hover text-white" : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed")}>
