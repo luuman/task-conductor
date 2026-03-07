@@ -362,7 +362,7 @@ function GaugeChart({ pct }: { pct: number }) {
         {clamped}%
       </text>
       <text x={cx} y={cy + 10} textAnchor="middle" fill="#9ca3af" fontSize="11">
-        {clamped}% 正常运行时间
+        {clamped}%
       </text>
     </svg>
   );
