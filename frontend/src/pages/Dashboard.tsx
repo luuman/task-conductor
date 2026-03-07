@@ -105,13 +105,13 @@ function ClaudeMetricsPanel() {
             <span className="text-[9px] font-normal text-app-tertiary ml-1">tokens</span>
           </p>
           <div className="space-y-1 pt-1 border-t border-app/50">
-            <StatRow label="输入" value={fmtTokens(tokens.total_input)} accent="text-blue-400" />
-            <StatRow label="输出" value={fmtTokens(tokens.total_output)} accent="text-green-400" />
+            <StatRow label={t('dashboard.claudeMetrics.input')} value={fmtTokens(tokens.total_input)} accent="text-blue-400" />
+            <StatRow label={t('dashboard.claudeMetrics.output')} value={fmtTokens(tokens.total_output)} accent="text-green-400" />
             {tokens.total_cache_read > 0 && (
-              <StatRow label="缓存命中" value={fmtTokens(tokens.total_cache_read)} accent="text-purple-400" />
+              <StatRow label={t('dashboard.claudeMetrics.cacheHit')} value={fmtTokens(tokens.total_cache_read)} accent="text-purple-400" />
             )}
             {tokens.total_cache_write > 0 && (
-              <StatRow label="缓存写入" value={fmtTokens(tokens.total_cache_write)} accent="text-app-tertiary" />
+              <StatRow label={t('dashboard.claudeMetrics.cacheWrite')} value={fmtTokens(tokens.total_cache_write)} accent="text-app-tertiary" />
             )}
           </div>
           {!hasData && (
