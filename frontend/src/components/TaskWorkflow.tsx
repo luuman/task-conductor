@@ -452,7 +452,7 @@ function StageDetailPanel({
         {/* 成果物预览 */}
         {latestArtifact && (
           <div className="space-y-2">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider font-medium">成果物</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider font-medium">{t('taskWorkflow.stageDetailPanel.artifacts')}</p>
 
             {/* 置信度 */}
             {latestArtifact.confidence !== null && latestArtifact.confidence !== undefined && (
