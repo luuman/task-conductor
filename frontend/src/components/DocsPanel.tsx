@@ -254,7 +254,7 @@ function DocTree({
           ) : (
             <><span className="w-[11px] shrink-0" /><DocIcon name={node.name} size={13} /></>
           )}
-          <span className="truncate flex-1">{node.name}</span>
+          <span className="truncate flex-1" title={node.name}>{node.displayName}</span>
           {!node.isDir && node.item?.size != null && (
             <span className="text-[9px] opacity-0 group-hover:opacity-50 shrink-0 tabular-nums">
               {formatSize(node.item.size)}
