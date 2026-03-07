@@ -219,7 +219,7 @@ def _handle_approval(task_id: int, action: str) -> None:
 # ── 消息分发（在主事件循环中执行）──────────────────────────────────
 
 
-async def _dispatch_message(chat_id: str, text: str) -> None:
+async def _dispatch_message(chat_id: str, text: str, reply_to: str = "") -> None:
     """根据 chat_id 分发消息到不同处理器。"""
     try:
         # 情况 1: 默认对话群
@@ -228,7 +228,7 @@ async def _dispatch_message(chat_id: str, text: str) -> None:
 
             settings = _load()
             cwd = settings.get("workspace_root", "/home/sichengli/Documents/code2")
-            await handle_chat(text, chat_id, cwd)
+            await handle_chat(text, chat_id, cwd, reply_to=reply_to)
             return
 
         # 情况 2: 项目群
@@ -247,7 +247,7 @@ async def _dispatch_message(chat_id: str, text: str) -> None:
                     await handle_task_create(title, chat_id, project_id, project_name)
             else:
                 cwd = project_cwd or "/home/sichengli/Documents/code2"
-                await handle_chat(text, chat_id, cwd=cwd)
+                await handle_chat(text, chat_id, cwd=cwd, reply_to=reply_to)
             return
 
         # 情况 3: 不匹配任何已知群 → 忽略
