@@ -429,47 +429,48 @@ function ChipTag({ label }: { label: string }) {
 }
 
 function MetricsPanel() {
+  const { t } = useTranslation();
   const { metrics, apiLatency } = useMetrics();
   const m = metrics;
 
   const kpiCards = [
     {
-      label: "AI 评分",
+      label: t('dashboard.metricsPanel.aiScore'),
       Icon: Star,
       value: m?.kpi.ai_rating != null ? m.kpi.ai_rating.toFixed(2) : "—",
-      sub: "综合评分",
+      sub: t('dashboard.metricsPanel.overallScore'),
       trend: m?.kpi.ai_rating != null
-        ? { text: m.kpi.ai_rating >= 4 ? "+优秀" : m.kpi.ai_rating >= 3 ? "良好" : "待改善", positive: m.kpi.ai_rating >= 4 }
+        ? { text: m.kpi.ai_rating >= 4 ? t('dashboard.metricsPanel.excellent') : m.kpi.ai_rating >= 3 ? t('dashboard.metricsPanel.good') : t('dashboard.metricsPanel.needsImprovement'), positive: m.kpi.ai_rating >= 4 }
         : null,
     },
     {
-      label: "交互次数",
+      label: t('dashboard.metricsPanel.interactions'),
       Icon: Activity,
       value: m?.kpi.interactions != null ? String(m.kpi.interactions) : "—",
-      sub: "总会话数",
+      sub: t('dashboard.metricsPanel.totalSessions'),
       trend: null,
     },
     {
-      label: "响应时间",
+      label: t('dashboard.metricsPanel.responseTime'),
       Icon: Zap,
       value: m?.kpi.avg_response_time_s != null
         ? `${m.kpi.avg_response_time_s}s`
         : apiLatency != null ? `${(apiLatency / 1000).toFixed(2)}s` : "—",
-      sub: "平均延迟",
+      sub: t('dashboard.metricsPanel.avgLatency'),
       trend: null,
     },
     {
-      label: "在线率",
+      label: t('dashboard.metricsPanel.uptime'),
       Icon: Shield,
       value: m?.kpi.uptime_pct != null ? `${m.kpi.uptime_pct}%` : "—",
-      sub: "可用性",
+      sub: t('dashboard.metricsPanel.availability'),
       trend: null,
     },
   ];
 
   const DAY_CN: Record<string, string> = {
-    Sun: "周日", Mon: "周一", Tue: "周二", Wed: "周三",
-    Thu: "周四", Fri: "周五", Sat: "周六",
+    Sun: t('dashboard.dayCn.sun'), Mon: t('dashboard.dayCn.mon'), Tue: t('dashboard.dayCn.tue'), Wed: t('dashboard.dayCn.wed'),
+    Thu: t('dashboard.dayCn.thu'), Fri: t('dashboard.dayCn.fri'), Sat: t('dashboard.dayCn.sat'),
   };
   const weeklyData = (m?.weekly ?? Array.from({ length: 7 }, (_, i) => ({
     day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i],
