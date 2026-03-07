@@ -287,7 +287,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               wsStatus === "connecting" ? "bg-yellow-400 animate-pulse" : "bg-red-400"
             )} />
             <span className="text-[9px] font-mono" style={{ color: "var(--text-tertiary)" }}>
-              {wsStatus === "connected" ? "实时" : wsStatus === "connecting" ? "连接中" : "断开"}
+              {wsStatus === "connected" ? t('sessions.sessionList.realtime') : wsStatus === "connecting" ? t('sessions.sessionList.connecting') : t('sessions.sessionList.disconnected')}
             </span>
           </div>
         </div>
