@@ -1,5 +1,6 @@
-"""项目文件浏览 API：列出目录树、读取文件内容"""
+"""项目文件浏览 API：列出目录树、读取文件内容、Git 状态"""
 
+import subprocess
 from pathlib import Path
 from datetime import datetime
 
