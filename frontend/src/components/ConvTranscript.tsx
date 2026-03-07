@@ -417,7 +417,8 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
 // ── 工具卡片 ─────────────────────────────────────────────────
 function ToolWidget({ block }: { block: TranscriptBlock }) {
   const signal = useContext(ExpandSignalCtx);
-  const [open, setOpen] = useState(false);
+  const autoExpand = useContext(AutoExpandCtx);
+  const [open, setOpen] = useState(autoExpand);
   const toggle = useCallback(() => setOpen(v => !v), []);
 
   // 响应全局展开/折叠信号
