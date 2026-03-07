@@ -224,7 +224,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
           {inbox.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-app-tertiary text-xs gap-1.5">
               <span className="text-2xl opacity-30">☐</span>
-              <p>输入任务，按回车添加</p>
+              <p>{t('taskManager.emptyStates.todoHint')}</p>
             </div>
           ) : (
             inbox.map((item) => {
