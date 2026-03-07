@@ -871,7 +871,9 @@
     "noMatch": "无匹配文档",
     "noDocs": "该项目无 docs/ 目录",
     "lines": "行",
-    "close": "关闭"
+    "close": "关闭",
+    "selectDoc": "选择左侧文档查看",
+    "outline": "文章导航"
   },
 
   "claudeMonitor": {
