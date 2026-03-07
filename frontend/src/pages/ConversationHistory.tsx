@@ -234,6 +234,22 @@ export default function ConversationHistory({ projects }: Props) {
 
       {/* ── 中栏：对话内容 + 聊天输入 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* 工具条 */}
+        {((!isNewChat && transcript.length > 0) || (isNewChat && chatMessages.length > 0)) && (
+          <div className="h-9 flex items-center justify-end px-3 shrink-0"
+               style={{ borderBottom: "1px solid var(--border)" }}>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-1 text-[10px] px-2 py-1 rounded transition-colors hover:brightness-125"
+              style={{ color: "var(--text-tertiary)" }}
+              title="导出为 Markdown"
+            >
+              <Download size={12} />
+              <span>导出</span>
+            </button>
+          </div>
+        )}
+
         {/* 对话内容 */}
         <div ref={transcriptRef} className="flex-1 overflow-y-auto">
           {/* 新对话欢迎页（无消息时） */}
