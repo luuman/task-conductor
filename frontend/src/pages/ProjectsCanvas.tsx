@@ -641,7 +641,7 @@ export default function ProjectsCanvas({
             .map(([k, v]) => (
             <div key={k} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, color: "var(--text-tertiary)" }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: v.base, flexShrink: 0 }} />
-              {v.label}
+              {getStateLabel(t)[k as VisualState]}
             </div>
           ))}
 
