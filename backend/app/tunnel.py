@@ -58,6 +58,9 @@ async def start_cloudflare_tunnel(port: int = 8000) -> Optional[str]:
 def stop_tunnel():
     global _tunnel_proc, _tunnel_url
     if _tunnel_proc:
-        _tunnel_proc.terminate()
+        try:
+            _tunnel_proc.terminate()
+        except ProcessLookupError:
+            pass
         _tunnel_proc = None
     _tunnel_url = None
