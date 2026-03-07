@@ -175,7 +175,7 @@ function ArtifactCard({ artifact }: {
               )}
               {artifact.critic_notes && (
                 <div>
-                  <p className="text-[10px] text-app-tertiary mb-1 uppercase tracking-wider">Critic 评审</p>
+                  <p className="text-[10px] text-app-tertiary mb-1 uppercase tracking-wider">{t('taskPipeline.artifactCard.criticReview')}</p>
                   <div className="bg-app/50 rounded p-2">
                     <CriticNotes notes={artifact.critic_notes} />
                   </div>
