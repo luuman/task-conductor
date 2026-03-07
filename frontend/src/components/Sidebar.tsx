@@ -36,6 +36,7 @@ export function Sidebar({
   collapsed,
   onToggle,
 }: SidebarProps) {
+  const { t } = useTranslation();
   const realProjects = projects.filter(p => !p.is_test);
   const testProjects = projects.filter(p => p.is_test);
 
