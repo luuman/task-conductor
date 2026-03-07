@@ -593,7 +593,7 @@ export const api = {
 export function getWsUrl(path: string): string {
   const base = getBaseUrl();
   if (!base && typeof window !== "undefined") {
-    // Vite proxy 模式：从当前页面地址推导 WebSocket 地址
+    // Vite proxy mode: derive WebSocket URL from current page address
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${proto}//${window.location.host}${path}`;
   }
