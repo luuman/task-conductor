@@ -137,10 +137,10 @@ export default function ConversationHistory({ projects }: Props) {
   // 自动滚动到底部（新消息或流式输出时）
   const chatBottomRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (isNewChat) {
+    if (chatMessages.length > 0 || currentReply || isGenerating) {
       chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [chatMessages, currentReply, isNewChat]);
+  }, [chatMessages, currentReply, isGenerating]);
 
   // 展示的消息：历史会话模式用 transcript，新对话模式用 chatMessages
   const displayMessages = isNewChat ? chatMessages : transcript;
