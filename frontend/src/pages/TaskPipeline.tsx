@@ -194,7 +194,7 @@ function ArtifactCard({ artifact }: {
 
           {/* Content */}
           <pre className="text-[11px] text-app-secondary overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto bg-app/50 rounded p-2">
-            {displayContent.slice(0, 2000)}{displayContent.length > 2000 ? "\n…(截断)" : ""}
+            {displayContent.slice(0, 2000)}{displayContent.length > 2000 ? `\n…(${t('taskPipeline.artifactCard.truncated')})` : ""}
           </pre>
         </div>
       )}
