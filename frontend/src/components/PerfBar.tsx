@@ -54,6 +54,7 @@ interface PerfBarProps {
 }
 
 export function PerfBar({ connectionStatus, onDisconnect }: PerfBarProps) {
+  const { t } = useTranslation();
   const [sys, setSys]   = useState<SystemMetrics | null>(null);
   const histRef         = useRef<MiniHist[]>([]);
   const [tick, setTick] = useState(0);   // 触发重渲染
