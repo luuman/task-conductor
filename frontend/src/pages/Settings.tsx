@@ -167,7 +167,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                 <span className="text-accent">{t('settings.workspace.projectName')}</span>
               </div>
               <p className="text-[10px] text-app-tertiary">
-                例：{workspaceRoot || "…"}/my-app
+                {t('settings.workspace.example')}{workspaceRoot || "…"}/my-app
               </p>
             </div>
           </div>
