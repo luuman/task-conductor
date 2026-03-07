@@ -422,19 +422,21 @@ function AgentResultView({ result, description }: { result: string; description:
   );
 }
 
-// ── 通用输出 ─────────────────────────────────────────────────
+// ── 通用输出（markdown 渲染） ────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
   const [open, setOpen] = useState(false);
-  const isLong = result.length > 500;
-  const displayed = open || !isLong ? result : result.slice(0, 500) + "…";
+  const isLong = result.length > 800;
+  const displayed = open || !isLong ? result : result.slice(0, 800) + "\n\n…";
 
   return (
     <div className="rounded-lg overflow-hidden mt-2"
-         style={{ border: "1px solid var(--border)" }}>
-      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto max-h-[360px] overflow-y-auto leading-[1.6]"
-           style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
-        {displayed}
-      </pre>
+         style={{ border: `1px solid ${isError ? "rgba(244,63,94,0.3)" : "var(--border)"}` }}>
+      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto max-h-[400px]"
+           style={{ color: isError ? "var(--danger)" : "var(--text-primary)", background: "var(--background)" }}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+          {displayed}
+        </ReactMarkdown>
+      </div>
       {isLong && (
         <button
           onClick={() => setOpen(v => !v)}
