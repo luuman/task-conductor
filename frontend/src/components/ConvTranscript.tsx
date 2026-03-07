@@ -637,29 +637,14 @@ export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Pro
     <OpenFileCtx.Provider value={onOpenFile ?? null}>
     <AutoExpandCtx.Provider value={autoExpand}>
     <ExpandSignalCtx.Provider value={expandSignal}>
-      {/* 工具栏 - 置顶悬浮 */}
-      {toolCount > 0 && (
-        <div className="sticky top-0 z-10 h-11 flex items-center gap-2 px-4 backdrop-blur-md"
+      {/* 吸顶问题灯 */}
+      {currentQuestion && (
+        <div className="sticky top-0 z-10 h-9 flex items-center gap-2 px-4 backdrop-blur-md"
              style={{ background: "rgba(7,7,13,0.85)", borderBottom: "1px solid var(--border)" }}>
-          <span className="text-[9px] font-mono" style={{ color: "var(--text-tertiary)" }}>
-            {toolCount} tools
+          <User size={12} style={{ color: "var(--text-tertiary)" }} className="shrink-0" />
+          <span className="text-[11px] truncate flex-1" style={{ color: "var(--text-secondary)" }}>
+            {currentQuestion}
           </span>
-          <span className="flex-1" />
-          <span className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
-            {autoExpand ? "展开" : "折叠"}
-          </span>
-          <button
-            onClick={toggleAutoExpand}
-            className="relative w-8 h-[18px] rounded-full transition-colors shrink-0"
-            style={{ background: autoExpand ? "var(--accent)" : "var(--background-tertiary)", border: "1px solid var(--border)" }}
-            title={autoExpand ? "切换为折叠模式" : "切换为展开模式"}
-          >
-            <span className="absolute top-[2px] w-3 h-3 rounded-full transition-all"
-                  style={{
-                    left: autoExpand ? "calc(100% - 14px)" : "2px",
-                    background: autoExpand ? "#fff" : "var(--text-tertiary)",
-                  }} />
-          </button>
         </div>
       )}
       <div className="py-2 space-y-1">
