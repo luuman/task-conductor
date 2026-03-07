@@ -1,10 +1,9 @@
 // frontend/src/pages/ConversationHistory.tsx
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { api, type ClaudeSession, type TranscriptMessage, type ConversationNote, type Project } from "../lib/api";
+import { api, type ClaudeSession, type TranscriptMessage, type Project } from "../lib/api";
 import { ConvSessionList } from "../components/ConvSessionList";
 import { ConvTranscript } from "../components/ConvTranscript";
-import { ConvEditPanel } from "../components/ConvEditPanel";
 
 interface Props {
   projects: Project[];
