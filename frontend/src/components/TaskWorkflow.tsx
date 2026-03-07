@@ -24,24 +24,25 @@ const STAGE_ORDER = [
   "dev",   "test",     "deploy", "monitor", "done",
 ];
 
-const STAGE_LABEL: Record<string, string> = {
-  input: "需求输入", analysis: "需求分析", prd: "PRD 文档", ui: "UI 设计",
-  plan: "技术方案",  dev: "开发实现",    test: "测试验证", deploy: "部署发布",
-  monitor: "线上监控", done: "已完成",
-};
+function getStageLabel(t: (key: string) => string): Record<string, string> {
+  return {
+    input: t('taskWorkflow.stageLabel.input'), analysis: t('taskWorkflow.stageLabel.analysis'),
+    prd: t('taskWorkflow.stageLabel.prd'), ui: t('taskWorkflow.stageLabel.ui'),
+    plan: t('taskWorkflow.stageLabel.plan'), dev: t('taskWorkflow.stageLabel.dev'),
+    test: t('taskWorkflow.stageLabel.test'), deploy: t('taskWorkflow.stageLabel.deploy'),
+    monitor: t('taskWorkflow.stageLabel.monitor'), done: t('taskWorkflow.stageLabel.done'),
+  };
+}
 
-const STAGE_DESC: Record<string, string> = {
-  input:    "录入任务需求与描述",
-  analysis: "AI 生成 3 个技术方案供选择",
-  prd:      "生成产品需求文档",
-  ui:       "生成界面原型设计方案",
-  plan:     "生成详细技术实现规划",
-  dev:      "Claude Code 自动编码实现",
-  test:     "运行自动化测试与验证",
-  deploy:   "CI/CD 流水线自动部署",
-  monitor:  "线上监控与异常告警",
-  done:     "任务圆满完成",
-};
+function getStageDesc(t: (key: string) => string): Record<string, string> {
+  return {
+    input: t('taskWorkflow.stageDesc.input'), analysis: t('taskWorkflow.stageDesc.analysis'),
+    prd: t('taskWorkflow.stageDesc.prd'), ui: t('taskWorkflow.stageDesc.ui'),
+    plan: t('taskWorkflow.stageDesc.plan'), dev: t('taskWorkflow.stageDesc.dev'),
+    test: t('taskWorkflow.stageDesc.test'), deploy: t('taskWorkflow.stageDesc.deploy'),
+    monitor: t('taskWorkflow.stageDesc.monitor'), done: t('taskWorkflow.stageDesc.done'),
+  };
+}
 
 const STAGE_ICON: Record<string, string> = {
   input: "📋", analysis: "🔍", prd: "📄", ui: "🎨",
