@@ -1324,6 +1324,8 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
 // Sec: Hooks
 // ═══════════════════════════════════════════════════════════════════
 function SecHooks({ config, hookEvents, onUpdate }: { config: ClaudeConfig; hookEvents: string[]; onUpdate: (c: ClaudeConfig) => void }) {
+  const { t } = useTranslation();
+  const EVENT_LABELS = useMemo(() => getEventLabels(t), [t]);
   const [saving, setSaving] = useState<string | null>(null);
   const [editState, setEditState] = useState<Record<string, HookRule[]>>({});
   const getRules = (ev: string): HookRule[] => editState[ev] ?? config.hooks[ev] ?? [];
