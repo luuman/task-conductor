@@ -56,7 +56,7 @@ export function NetCard({ sys, hist, colors = {}, showTitle }: NetCardProps) {
             const n = sys.network.tcp_states[s] ?? 0;
             if (!n) return null;
             const c   = s === "ESTABLISHED" ? CGR : s === "LISTEN" ? cIn : CO;
-            const lbl = s === "ESTABLISHED" ? "已建立" : s === "LISTEN" ? "监听" : "等待关闭";
+            const lbl = s === "ESTABLISHED" ? t('perf.net.established') : s === "LISTEN" ? t('perf.net.listen') : t('perf.net.timeWait');
             return (
               <div key={s} className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
