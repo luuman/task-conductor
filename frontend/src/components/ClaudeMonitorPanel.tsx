@@ -116,6 +116,7 @@ interface ClaudeMonitorPanelProps {
 }
 
 export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
+  const { t } = useTranslation();
   const [lines, setLines] = useState<LogLine[]>([]);
   const [paused, setPaused] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
