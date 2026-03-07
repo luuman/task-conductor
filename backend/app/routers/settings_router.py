@@ -1,6 +1,9 @@
 import json
 import os
+import signal
+import sys
 from pathlib import Path
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -28,16 +31,41 @@ def _save(data: dict):
 
 class SettingsOut(BaseModel):
     workspace_root: str
+    feishu_app_id: str = ""
+    feishu_app_secret: str = ""
+    feishu_owner_id: str = ""
+    feishu_default_chat_id: str = ""
 
 
 class SettingsUpdate(BaseModel):
     workspace_root: str
 
 
+class FeishuConfigUpdate(BaseModel):
+    feishu_app_id: Optional[str] = None
+    feishu_app_secret: Optional[str] = None
+    feishu_owner_id: Optional[str] = None
+    feishu_default_chat_id: Optional[str] = None
+
+
 @router.get("", response_model=SettingsOut, summary="获取全局设置")
 def get_settings():
-    """返回全局设置（目前包含工作区根目录）。"""
-    return _load()
+    """返回全局设置（工作区根目录 + 飞书配置）。"""
+    data = _load()
+    return {
+        "workspace_root": data.get("workspace_root", DEFAULT_WORKSPACE_ROOT),
+        "feishu_app_id": os.getenv("FEISHU_APP_ID", ""),
+        "feishu_app_secret": _mask_secret(os.getenv("FEISHU_APP_SECRET", "")),
+        "feishu_owner_id": os.getenv("FEISHU_OWNER_ID", ""),
+        "feishu_default_chat_id": data.get("feishu_default_chat_id", ""),
+    }
+
+
+def _mask_secret(secret: str) -> str:
+    """遮蔽密钥，只显示前4位和后4位。"""
+    if len(secret) <= 8:
+        return "*" * len(secret)
+    return secret[:4] + "*" * (len(secret) - 8) + secret[-4:]
 
 
 @router.put("", response_model=SettingsOut, summary="更新全局设置")
@@ -56,4 +84,38 @@ def update_settings(body: SettingsUpdate):
     data = _load()
     data["workspace_root"] = path
     _save(data)
-    return data
+    return get_settings()
+
+
+@router.put("/feishu", summary="更新飞书配置")
+def update_feishu_config(body: FeishuConfigUpdate):
+    """更新飞书 API 配置。app_id/app_secret/owner_id 写入环境变量，default_chat_id 持久化到文件。"""
+    data = _load()
+
+    if body.feishu_app_id is not None:
+        os.environ["FEISHU_APP_ID"] = body.feishu_app_id
+    if body.feishu_app_secret is not None and "*" not in body.feishu_app_secret:
+        os.environ["FEISHU_APP_SECRET"] = body.feishu_app_secret
+    if body.feishu_owner_id is not None:
+        os.environ["FEISHU_OWNER_ID"] = body.feishu_owner_id
+    if body.feishu_default_chat_id is not None:
+        data["feishu_default_chat_id"] = body.feishu_default_chat_id
+
+    _save(data)
+
+    # 刷新 feishu_client 单例
+    from ..feishu.client import feishu_client
+    feishu_client.app_id = os.getenv("FEISHU_APP_ID", "")
+    feishu_client.app_secret = os.getenv("FEISHU_APP_SECRET", "")
+    feishu_client.owner_id = os.getenv("FEISHU_OWNER_ID", "")
+
+    return get_settings()
+
+
+@router.post("/restart", summary="重启服务")
+def restart_service():
+    """重启后端服务进程（通过 exec 替换当前进程）。"""
+    import subprocess
+    # uvicorn --reload 模式下，修改文件即可触发重启
+    # 但显式重启更可靠：用新进程替换当前进程
+    os.execv(sys.executable, [sys.executable] + sys.argv)
