@@ -1,4 +1,5 @@
 // src/modules/perf/cards/CpuCard.tsx
+import { useTranslation } from "react-i18next";
 import type { PerfData } from "../types";
 import { ICard, DualSparkline, PhoneProc, CO } from "./shared";
 
