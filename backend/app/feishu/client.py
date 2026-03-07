@@ -142,6 +142,12 @@ class FeishuClient:
             resp.raise_for_status()
             return resp.json().get("data", {})
 
+    async def reply_card(self, message_id: str, card: dict) -> str:
+        """回复交互卡片到消息所在话题，返回新 message_id。"""
+        import json as _json
+
+        return await self.reply_message(message_id, "interactive", _json.dumps(card))
+
     async def reply_message(self, message_id: str, msg_type: str, content: str) -> str:
         """回复指定消息，返回新 message_id。"""
         headers = await self._headers()
