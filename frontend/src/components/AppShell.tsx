@@ -101,7 +101,7 @@ export function AppShell({
             />
             {projPath && (
               <div className="bg-app rounded-md px-3 py-2 space-y-0.5">
-                <p className="text-[9px] text-app-tertiary uppercase tracking-wider">将创建于</p>
+                <p className="text-[9px] text-app-tertiary uppercase tracking-wider">{t('appShell.willCreateAt')}</p>
                 <p className="text-[11px] font-mono text-accent break-all">{projPath}</p>
               </div>
             )}
