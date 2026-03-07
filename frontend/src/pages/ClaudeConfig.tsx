@@ -1089,10 +1089,10 @@ function SecAgents({ agents, onToggle, onCreate, onDelete }: {
   };
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Bot} color="#f472b6" label="Agents 代理" desc="~/.claude/agents/"
+      <SectionHeader icon={Bot} color="#f472b6" label={t("claudeConfig.agents.title")} desc="~/.claude/agents/"
         right={<div className="flex items-center gap-2">
-          <CountBadges items={[{ label: "总计", count: agents.length }, { label: "启用", count: agents.filter(a => a.enabled).length, color: "#22c55e" }]} />
-          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> 新建</button>
+          <CountBadges items={[{ label: t("common.total"), count: agents.length }, { label: t("common.enabled"), count: agents.filter(a => a.enabled).length, color: "#22c55e" }]} />
+          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white"><Plus size={10} /> {t("claudeConfig.agents.newAgent")}</button>
         </div>} />
       {showCreate && (
         <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
