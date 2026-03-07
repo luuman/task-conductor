@@ -797,7 +797,7 @@ export default function ProjectsCanvas({
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ textAlign: "center", color: "var(--text-tertiary)" }}>
                 <div style={{ fontSize: 48, marginBottom: 10, opacity: 0.15 }}>◉</div>
-                <div style={{ fontSize: 13 }}>暂无项目，请先创建项目</div>
+                <div style={{ fontSize: 13 }}>{t('projectsCanvas.empty')}</div>
               </div>
             </div>
           )}
