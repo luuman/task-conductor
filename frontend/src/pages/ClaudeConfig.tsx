@@ -1957,7 +1957,7 @@ function DetailPanel({ title, path, metadata, auxiliaryFiles, content, contentLa
       )}
       {auxiliaryFiles && auxiliaryFiles.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">辅助文件</p>
+          <p className="text-[10px] font-semibold text-app-secondary uppercase tracking-wider">{t("claudeConfig.detailPanel.auxiliaryFiles")}</p>
           <div className="flex flex-wrap gap-1.5">
             {auxiliaryFiles.map(f => <span key={f} className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-mono">{f}</span>)}
           </div>
