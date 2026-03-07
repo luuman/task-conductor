@@ -282,14 +282,12 @@ export default function ConversationHistory({ projects }: Props) {
           )}
         </div>
 
-        {/* 聊天输入框（仅新对话模式） */}
-        {isNewChat && (
-          <ChatInput
-            onSend={handleChatSend}
-            onStop={chatStop}
-            isGenerating={isGenerating}
-          />
-        )}
+        {/* 聊天输入框 */}
+        <ChatInput
+          onSend={handleChatSend}
+          onStop={chatStop}
+          isGenerating={isGenerating}
+        />
       </div>
 
       {/* ── 右栏：问题导航 ── */}
