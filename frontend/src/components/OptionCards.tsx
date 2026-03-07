@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { AnalysisOption } from "../lib/api";
 
 export function OptionCards({
