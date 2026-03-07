@@ -352,7 +352,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
                 ? { background: "var(--background-secondary)", color: "var(--text-primary)" }
                 : { color: "var(--text-secondary)" }}
             >
-              ● 实时
+              {t('sessions.viewTabs.realtime')}
             </button>
             <button
               onClick={() => selectedId && setRightView("history")}
