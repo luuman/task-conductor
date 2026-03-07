@@ -1597,6 +1597,18 @@
     "empty": "Empty directory",
     "copy": "Copy content",
     "binaryFile": "Binary file, cannot preview",
-    "loadError": "Failed to load file"
+    "loadError": "Failed to load file",
+    "search": "Search files…",
+    "noResults": "No matching files found",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveFailed": "Save failed",
+    "cancel": "Cancel",
+    "editing": "Editing",
+    "unsaved": "Unsaved",
+    "imagePreview": "Image preview",
+    "lines": "lines"
   }
 }
