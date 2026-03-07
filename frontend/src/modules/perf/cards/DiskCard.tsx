@@ -56,11 +56,11 @@ export function DiskCard({ sys, hist, colors = {}, showTitle }: DiskCardProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-x-3 text-xs font-mono" style={{ color: "#636366" }}>
-        <div className="flex justify-between"><span>读IOPS</span><span style={{ color: cRead }}>{sys?.disk_io.read_iops  ?? "—"}</span></div>
-        <div className="flex justify-between"><span>写IOPS</span><span style={{ color: cWrite }}>{sys?.disk_io.write_iops ?? "—"}</span></div>
+        <div className="flex justify-between"><span>{t('perf.disk.readIops')}</span><span style={{ color: cRead }}>{sys?.disk_io.read_iops  ?? "—"}</span></div>
+        <div className="flex justify-between"><span>{t('perf.disk.writeIops')}</span><span style={{ color: cWrite }}>{sys?.disk_io.write_iops ?? "—"}</span></div>
         {sys?.disk_io.util_pct != null && (
           <div className="flex justify-between col-span-2">
-            <span>利用率</span>
+            <span>{t('perf.disk.utilization')}</span>
             <span style={{ color: sys.disk_io.util_pct >= 80 ? cRead : CGR }}>{sys.disk_io.util_pct}%</span>
           </div>
         )}
