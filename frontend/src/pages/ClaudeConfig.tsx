@@ -1829,7 +1829,7 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
   };
 
   const handleDelete = async (item: DisabledItem) => {
-    if (!confirm(`确定永久删除 "${item.name}"？此操作不可恢复。`)) return;
+    if (!confirm(`${t("claudeConfig.trash.confirmPermanentDelete")} "${item.name}"？`)) return;
     setDeleting(item.name);
     try {
       await api.claudeConfig.deleteDisabledItem(item.type, item.name);
