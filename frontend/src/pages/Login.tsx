@@ -31,7 +31,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       saveConfig({ type: "tunnel", tunnelUrl, token });
       onLogin();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "连接失败");
+      setError(err instanceof Error ? err.message : t('login.errors.connectionFailed'));
       setLoading(false);
     }
   };
