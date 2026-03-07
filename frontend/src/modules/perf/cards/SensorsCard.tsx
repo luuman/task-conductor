@@ -99,7 +99,7 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
         }
       </div>
 
-      {/* ── 频率 ── */}
+      {/* ── Frequency ── */}
       {sys?.cpu.freq_mhz && (
         <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 2 }}>
           <SectionLabel label={t('perf.sensors.frequency')} />
