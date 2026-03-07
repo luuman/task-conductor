@@ -1042,7 +1042,7 @@ export default function GlobalConfigPanel() {
               : "bg-app-tertiary/20 text-app-tertiary cursor-not-allowed"
           )}>
           {saveStatus === "ok" ? <Check size={12} /> : <Save size={12} />}
-          {saving ? "保存中..." : saveStatus === "ok" ? "已保存" : "保存配置"}
+          {saving ? t("globalConfig.actions.saving") : saveStatus === "ok" ? t("globalConfig.actions.saved") : t("globalConfig.actions.saveConfig")}
         </button>
 
         <button onClick={handleReset} disabled={saving}
