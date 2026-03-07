@@ -288,10 +288,10 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
             wsStatus === "connecting" ? "text-yellow-500" :
             "text-red-400"
           )}>
-            {paused ? "● 已暂停" :
-             wsStatus === "connected" ? "● 实时" :
-             wsStatus === "connecting" ? "● 连接中..." :
-             "● 已断开"}
+            {paused ? t('claudeMonitor.statusBar.paused') :
+             wsStatus === "connected" ? t('claudeMonitor.statusBar.realtime') :
+             wsStatus === "connecting" ? t('claudeMonitor.statusBar.connecting') :
+             t('claudeMonitor.statusBar.disconnected')}
           </span>
         </div>
       </div>
