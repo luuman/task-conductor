@@ -77,23 +77,11 @@ export default function ConversationHistory({ projects }: Props) {
         />
       </div>
 
-      {/* ── 右栏：气泡 + 编辑面板 ── */}
+      {/* ── 右栏：气泡 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 气泡区（可滚动） */}
         <div className="flex-1 overflow-y-auto">
           <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} />
         </div>
-
-        {/* 编辑面板（固定底部） */}
-        {selectedSession && (
-          <div className="shrink-0" style={{ maxHeight: "280px", overflowY: "auto" }}>
-            <ConvEditPanel
-              session={selectedSession}
-              projects={projects}
-              onSaved={handleNoteSaved}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
