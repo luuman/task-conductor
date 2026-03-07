@@ -1,5 +1,6 @@
 // frontend/src/components/ConvTranscript.tsx
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
