@@ -13,6 +13,7 @@ type TokenStatus = "checking" | "valid" | "invalid";
 type SaveStatus = "idle" | "saving" | "ok" | "error";
 
 export default function Settings({ onDisconnect }: SettingsProps) {
+  const { t } = useTranslation();
   const config = getConfig();
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>("checking");
   const [agentVersion, setAgentVersion] = useState<string | null>(null);
