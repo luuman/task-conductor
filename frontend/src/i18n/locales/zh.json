@@ -52,6 +52,7 @@
       "canvas": "项目视图",
       "tasks": "任务管理",
       "conversations": "对话历史",
+      "files": "文件浏览",
       "claudeConfig": "Claude 配置",
       "settings": "设置"
     },
