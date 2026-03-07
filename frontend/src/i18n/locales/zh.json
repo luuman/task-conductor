@@ -106,7 +106,10 @@
     },
     "errors": {
       "connectionFailed": "连接失败",
-      "sshConnectionFailed": "SSH 连接失败"
+      "sshConnectionFailed": "SSH 连接失败",
+      "pinWrong": "PIN 错误",
+      "connectionTimeout": "连接超时（6s），请检查 Agent URL 是否正确、后端是否启动",
+      "cannotConnect": "无法连接到 Agent，请检查 URL 是否正确或网络是否可达"
     }
   },
 
