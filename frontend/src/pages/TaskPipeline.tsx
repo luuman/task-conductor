@@ -277,7 +277,7 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
       {/* Header */}
       <div className="px-5 py-3 border-b border-app flex items-center gap-3 shrink-0">
         <button onClick={onBack} className="text-app-tertiary hover:text-app text-xs flex items-center gap-1">
-          ← 返回
+          {t('taskPipeline.backButton')}
         </button>
         <div className="w-px h-4 bg-border" />
         <h1 className="text-sm font-semibold text-app flex-1 truncate">{task.title}</h1>
