@@ -184,7 +184,7 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setPaused((p) => !p)}
-              title={paused ? "继续滚动" : "暂停滚动"}
+              title={paused ? t('claudeMonitor.controls.resumeScroll') : t('claudeMonitor.controls.pauseScroll')}
               className={cn(
                 "text-[10px] px-2 py-0.5 rounded font-mono transition-colors",
                 paused
