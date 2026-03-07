@@ -1319,7 +1319,7 @@
         "desc": "语义搜索、正则匹配与批量替换",
         "fields": {
           "search": { "label": "语义搜索", "desc": "--search 自然语言搜索" },
-          "query": { "label": "代码查询", "desc": "--query 代码结构查询" },
+          "query": { "label": "代码查询", "desc": "--query 代码结构查询", "placeholder": "functions>10行" },
           "grep": { "label": "正则匹配", "desc": "--grep 正则表达式搜索" },
           "replace": { "label": "替换操作", "desc": "--replace 批量替换 old:new" },
           "similar": { "label": "相似代码", "desc": "--similar 查找相似代码" }
