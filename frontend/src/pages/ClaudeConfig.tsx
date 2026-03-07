@@ -993,7 +993,7 @@ function SecSettings() {
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Cpu} color="#8b5cf6" label={t("claudeConfig.navItems.modelAndParams")} desc="API 参数、模型选择、功能开关与高级配置 (tc_global_config.json)" />
+      <SectionHeader icon={Cpu} color="#8b5cf6" label={t("claudeConfig.navItems.modelAndParams")} desc={t("claudeConfig.sectionDesc.settings")} />
       <GlobalConfigPanel />
     </div>
   );
