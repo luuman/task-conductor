@@ -198,7 +198,9 @@
       "cancelTestMark": "Unmark as Test",
       "markAsTest": "Mark as Test Project",
       "deleteProject": "Delete Project",
-      "deleteConfirm": "Delete this project and all its tasks?"
+      "deleteConfirm": "Delete this project and all its tasks?",
+      "feishuSyncOn": "Feishu sync enabled (click to disable)",
+      "feishuSyncOff": "Enable Feishu session sync"
     },
     "overview": {
       "title": "Overview",
