@@ -1633,6 +1633,7 @@ function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
 // Sec: 监控
 // ═══════════════════════════════════════════════════════════════════
 function SecMonitoring({ overview }: { overview: ClaudeOverview }) {
+  const { t } = useTranslation();
   const [projectDetails, setProjectDetails] = useState<Record<string, ProjectDetails>>({});
   const [loadingDetails, setLoadingDetails] = useState(false);
 
