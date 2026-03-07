@@ -1300,7 +1300,7 @@ function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | nul
           </div>
         </div>
       )}
-      {!servers.length ? <Empty text="暂无 MCP 服务器" /> : (
+      {!servers.length ? <Empty text={t("claudeConfig.mcp.noServers")} /> : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           {servers.map(s => { const sm = SM[s.status] ?? SM.unknown; return (
             <div key={s.name} className="bg-app-secondary border border-app rounded-xl px-4 py-3 flex items-center gap-3">
