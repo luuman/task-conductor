@@ -1056,7 +1056,7 @@ export default function GlobalConfigPanel() {
         <button onClick={handleExport}
           className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg border border-app text-app-secondary hover:text-app transition-colors">
           <Download size={11} />
-          导出
+          {t("globalConfig.actions.export")}
         </button>
 
         <button onClick={() => fileInputRef.current?.click()}
