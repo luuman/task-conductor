@@ -147,7 +147,7 @@ function ClaudeMetricsPanel() {
             </div>
           ) : (
             <div className="space-y-1 pt-1 border-t border-app/50">
-              <p className="text-[10px] text-app-tertiary/60">按模型定价自动估算</p>
+              <p className="text-[10px] text-app-tertiary/60">{t('dashboard.claudeMetrics.costHint')}</p>
               <p className="text-[9px] text-app-tertiary/40 font-mono">Sonnet $3/$15 · Haiku $0.8/$4</p>
             </div>
           )}
