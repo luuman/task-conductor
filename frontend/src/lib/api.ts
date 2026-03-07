@@ -127,6 +127,8 @@ export interface Project {
   max_parallel: number;
   execution_mode: string;
   is_test: boolean;
+  feishu_chat_id: string | null;
+  feishu_sync: boolean;
   sort_order: number;
   created_at: string;
 }
