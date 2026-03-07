@@ -405,7 +405,7 @@ function Tooltip({ stats, state, color, mouse }: {
 
       {stats.activeStage && (
         <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 6 }}>
-          当前阶段：<span style={{ color: meta.base, fontWeight: 600 }}>
+          {t('projectsCanvas.tooltip.currentStage')}{t('common.message') ? '：' : ': '}<span style={{ color: meta.base, fontWeight: 600 }}>
             {STAGE_LABEL[stats.activeStage] ?? stats.activeStage}
           </span>
         </div>
