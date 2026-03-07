@@ -155,7 +155,7 @@ function ServerCard({ server, onAction }: {
               className="px-3 py-1.5 text-[11px] rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 flex items-center gap-1"
             >
               {loading ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
-              卸载
+              {t('mcpMarket.actions.uninstall')}
             </button>
           ) : isOAuth ? (
             <button
