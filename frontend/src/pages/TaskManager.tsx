@@ -314,7 +314,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
           {phase === "done" && pendingAnalyses.length === 0 && (
             <div className="flex flex-col items-center justify-center h-48 text-app-tertiary text-xs gap-2">
               <span className="text-2xl">✓</span>
-              <p>所有任务已处理完毕</p>
+              <p>{t('taskManager.emptyStates.allProcessed')}</p>
             </div>
           )}
 
