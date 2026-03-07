@@ -190,7 +190,9 @@ const nodeTypes = { stageNode: StageNode };
 
 // ── 构建 nodes & edges ────────────────────────────────────────────
 
-function buildGraph(task: Task, selectedStage: string | null, onClickStage: (s: string) => void) {
+function buildGraph(task: Task, selectedStage: string | null, onClickStage: (s: string) => void, t: (key: string) => string) {
+  const STAGE_LABEL = getStageLabel(t);
+  const STAGE_DESC = getStageDesc(t);
   const currentIdx = STAGE_ORDER.indexOf(task.stage);
   const row1 = STAGE_ORDER.slice(0, 5);
   const row2 = STAGE_ORDER.slice(5);
