@@ -1255,6 +1255,7 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
 // Sec: MCP
 // ═══════════════════════════════════════════════════════════════════
 function SecMcp({ overview, onOverviewUpdate }: { overview: ClaudeOverview | null; onOverviewUpdate: (o: ClaudeOverview) => void }) {
+  const { t } = useTranslation();
   const [servers, setServers] = useState<McpServer[]>(overview?.mcp_servers ?? []);
   const [refreshing, setRefreshing] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
