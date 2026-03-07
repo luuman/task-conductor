@@ -357,9 +357,9 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
       <div className="flex items-center gap-2 px-3 py-1.5"
            style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
         <FileText size={13} strokeWidth={1.75} style={{ color: "var(--info)" }} />
-        <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>
-          {filePath}
-        </span>
+        <ClickableFilePath filePath={filePath}
+          className="text-[11px] font-mono flex-1 truncate"
+          style={{ color: "var(--text-secondary)" }} />
         <span className="text-[10px] font-mono shrink-0" style={{ color: "var(--text-tertiary)" }}>
           {lines.length} lines
         </span>
