@@ -530,7 +530,7 @@ function ReviewBanner({ taskId, onDone }: { taskId: number; onDone: () => void }
             <input
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="驳回原因（必填）"
+              placeholder={t('taskPipeline.reviewBanner.rejectReason')}
               className="bg-app border border-app rounded px-2 py-1 text-xs text-app outline-none focus:border-accent w-44"
             />
             <Button variant="danger" size="sm" disabled={!rejectReason.trim()} onClick={handleReject}>确认驳回</Button>
