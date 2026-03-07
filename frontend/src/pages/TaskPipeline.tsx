@@ -519,7 +519,7 @@ function ReviewBanner({ taskId, onDone }: { taskId: number; onDone: () => void }
   return (
     <div className="bg-yellow-900/10 border border-yellow-800/30 rounded-lg p-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-yellow-400">等待审批：请查看成果物后批准或驳回</p>
+        <p className="text-xs text-yellow-400">{t('taskPipeline.reviewBanner.waitingApproval')}</p>
         {!showReject ? (
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => setShowReject(true)}>驳回</Button>
