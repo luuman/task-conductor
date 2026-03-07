@@ -59,7 +59,7 @@ let lineCounter = 0;
 
 function buildLogLine(event: ClaudeHookEvent): LogLine {
   const { type, tool, tool_input, session_id, raw } = event.data;
-  const ts = new Date(event.ts + "Z").toLocaleTimeString("zh-CN", { hour12: false });
+  const ts = new Date(event.ts + "Z").toLocaleTimeString(getDateLocale(), { hour12: false });
   const shortSession = (session_id || "").slice(0, 6) || "??????";
 
   let icon = "·";
