@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function ConvEditPanel({ session, projects: _projects, onSaved }: Props) {
+  const { t } = useTranslation();
   const [alias, setAlias]         = useState(session.note?.alias  ?? "");
   const [notes, setNotes]         = useState(session.note?.notes  ?? "");
   const [tagInput, setTagInput]   = useState("");
