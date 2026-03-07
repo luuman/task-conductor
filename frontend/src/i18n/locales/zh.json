@@ -1,3 +1,1460 @@
 {
-  "_placeholder": true
+  "common": {
+    "save": "保存",
+    "delete": "删除",
+    "cancel": "取消",
+    "add": "添加",
+    "refresh": "刷新",
+    "create": "创建",
+    "confirm": "确定",
+    "loading": "加载中...",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "none": "暂无",
+    "restore": "恢复",
+    "total": "总计",
+    "enable": "启用",
+    "edit": "编辑",
+    "done": "完成",
+    "search": "搜索",
+    "close": "关闭",
+    "saving": "保存中...",
+    "saved": "已保存",
+    "back": "返回",
+    "install": "安装",
+    "uninstall": "卸载",
+    "installed": "已安装",
+    "connect": "连接",
+    "disconnect": "断开",
+    "retry": "重试",
+    "start": "启动",
+    "stop": "停止",
+    "on": "已开启",
+    "off": "已关闭",
+    "yes": "是",
+    "no": "否",
+    "expand": "展开全部",
+    "collapse": "收起",
+    "noMatchResults": "无匹配结果",
+    "loadFailed": "加载失败",
+    "saveFailed": "保存失败",
+    "jsonFormatError": "JSON 格式错误",
+    "noContent": "暂无内容，点击编辑...",
+    "message": "消息",
+    "toolCall": "工具调用",
+    "recommended": "推荐",
+    "overview": "总览"
+  },
+
+  "sidebar": {
+    "nav": {
+      "dashboard": "仪表盘",
+      "canvas": "项目视图",
+      "tasks": "任务管理",
+      "conversations": "对话历史",
+      "claudeConfig": "Claude 配置",
+      "settings": "设置"
+    },
+    "sections": {
+      "projects": "项目",
+      "test": "测试"
+    },
+    "liveMonitor": "实时监听",
+    "live": "LIVE",
+    "expandSidebar": "展开侧边栏",
+    "collapseSidebar": "折叠侧边栏",
+    "scanLocalProjects": "扫描本地项目",
+    "newProject": "新建项目",
+    "newFirstProject": "新建第一个项目"
+  },
+
+  "appShell": {
+    "newProject": "新建项目",
+    "projectName": "项目名称",
+    "willCreateAt": "将创建于",
+    "cancel": "取消",
+    "create": "创建"
+  },
+
+  "login": {
+    "connectionModes": {
+      "local": "本地",
+      "tunnel": "Tunnel",
+      "ssh": "SSH"
+    },
+    "subtitle": "连接你的本地 AI 开发 Agent",
+    "local": {
+      "backendUrl": "后端地址",
+      "pinCode": "PIN 码",
+      "pinPlaceholder": "6 位数字",
+      "pinHint": "运行 ./start.sh 后终端显示的 PIN",
+      "pinError": "PIN 错误或后端未启动",
+      "connecting": "连接中…",
+      "connectButton": "本地连接"
+    },
+    "tunnel": {
+      "connectAgent": "连接 Agent",
+      "pinHint": "Agent 启动时终端显示的 6 位 PIN",
+      "runOnServer": "在服务器运行..."
+    },
+    "ssh": {
+      "host": "主机",
+      "port": "端口",
+      "username": "用户名",
+      "setupHint": "使用前请在本地终端建立 SSH 隧道",
+      "connectButton": "通过 SSH 连接"
+    },
+    "errors": {
+      "connectionFailed": "连接失败",
+      "sshConnectionFailed": "SSH 连接失败"
+    }
+  },
+
+  "dashboard": {
+    "claudeMetrics": {
+      "tokenConsumption": "令牌消耗",
+      "input": "输入",
+      "output": "输出",
+      "cacheHit": "缓存命中",
+      "cacheWrite": "缓存写入",
+      "costEstimate": "成本估算",
+      "toolCalls": "工具调用",
+      "noCallRecords": "无调用记录",
+      "recent": "最近",
+      "performance": "性能",
+      "callCount": "调用次数",
+      "ttft": "TTFT",
+      "avgDuration": "平均时长",
+      "charsPerSec": "字符/秒",
+      "ttftHistory": "TTFT 历史",
+      "costHint": "按模型定价自动估算",
+      "autoStatsHint": "运行 Claude Code 后自动统计",
+      "activeSessionsHint": "活跃/总会话",
+      "processRunning": "进程运行中"
+    },
+    "metricsPanel": {
+      "aiScore": "AI 评分",
+      "overallScore": "综合评分",
+      "interactions": "交互次数",
+      "totalSessions": "总会话数",
+      "responseTime": "响应时间",
+      "avgLatency": "平均延迟",
+      "uptime": "在线率",
+      "availability": "可用性",
+      "excellent": "+优秀",
+      "good": "良好",
+      "needsImprovement": "待改善"
+    },
+    "dayCn": {
+      "sun": "周日",
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六"
+    },
+    "gauge": {
+      "highAvailability": "高可用性",
+      "normalUptime": "正常运行时间",
+      "realtimeProcessing": "实时处理",
+      "realtimeMonitoring": "实时监控",
+      "pipeline": "流水线"
+    },
+    "stageLabel": {
+      "input": "需求",
+      "analysis": "分析",
+      "prd": "PRD",
+      "ui": "UI",
+      "plan": "方案",
+      "dev": "开发",
+      "test": "测试",
+      "deploy": "发布",
+      "monitor": "监控"
+    },
+    "statusLabel": {
+      "pending": "待处理",
+      "running": "运行中",
+      "approval": "待审批",
+      "approved": "已批准",
+      "rejected": "已驳回",
+      "done": "已完成",
+      "failed": "失败",
+      "queued": "排队中"
+    },
+    "newTask": {
+      "button": "新建任务",
+      "titlePlaceholder": "任务标题",
+      "descPlaceholder": "需求描述（可选）",
+      "creating": "创建中...",
+      "create": "创建"
+    },
+    "projectCard": {
+      "running": "运行中",
+      "taskCount": "个任务",
+      "cancelTestMark": "取消测试标记",
+      "markAsTest": "标记为测试项目",
+      "deleteProject": "删除项目",
+      "deleteConfirm": "确定删除此项目及其所有任务？"
+    },
+    "overview": {
+      "title": "概览",
+      "projectCount": "个项目",
+      "scanning": "扫描中...",
+      "scanLocal": "扫描本地项目",
+      "noProjects": "暂无项目",
+      "scanHint": "点击「扫描本地项目」",
+      "projects": "项目",
+      "testProjects": "测试项目"
+    },
+    "projectTaskList": {
+      "knowledgeBase": "知识库",
+      "noTasks": "暂无任务"
+    }
+  },
+
+  "taskPipeline": {
+    "stageLabel": {
+      "input": "需求",
+      "analysis": "分析",
+      "prd": "PRD",
+      "ui": "UI设计",
+      "plan": "技术方案",
+      "dev": "开发",
+      "test": "测试",
+      "deploy": "发布",
+      "monitor": "监控"
+    },
+    "confidenceMeter": "置信度",
+    "assumptions": {
+      "cancelMark": "取消标记",
+      "markAsWrong": "标记为错误假设",
+      "undo": "撤销",
+      "wrong": "有误"
+    },
+    "criticNotes": {
+      "title": "Critic 评分",
+      "pass": "通过",
+      "needsRevision": "需修改"
+    },
+    "artifactCard": {
+      "retryCount": "重试 {{count}}x",
+      "aiAssumptions": "AI 假设前提",
+      "criticReview": "Critic 评审",
+      "errorLog": "错误日志",
+      "truncated": "截断"
+    },
+    "status": {
+      "pending": "待处理",
+      "running": "运行中",
+      "approval": "待审批",
+      "approved": "已批准",
+      "rejected": "已驳回",
+      "done": "已完成",
+      "failed": "失败",
+      "queued": "排队中"
+    },
+    "viewToggle": {
+      "detail": "详情",
+      "flow": "流程图"
+    },
+    "actionBanner": {
+      "waitingExecution": "等待执行",
+      "start": "启动",
+      "executing": "正在执行",
+      "approvedReady": "已批准准备推进",
+      "advanceNext": "推进到下一阶段",
+      "rejectedRetrigger": "已驳回可重新触发",
+      "reExecute": "重新执行"
+    },
+    "taskMeta": {
+      "created": "创建",
+      "started": "开始",
+      "completed": "完成",
+      "enqueued": "入队"
+    },
+    "sections": {
+      "stageArtifacts": "阶段成果物",
+      "realTimeLogs": "实时日志"
+    },
+    "logPanel": {
+      "executing": "执行中",
+      "executionDone": "执行完成",
+      "lines": "行",
+      "waitingOutput": "等待输出...",
+      "error": "错误",
+      "warning": "警告"
+    },
+    "reviewBanner": {
+      "waitingApproval": "等待审批",
+      "approve": "批准",
+      "reject": "驳回",
+      "rejectReason": "驳回原因（必填）",
+      "confirmReject": "确认驳回"
+    },
+    "loading": "加载任务...",
+    "backButton": "← 返回"
+  },
+
+  "sessions": {
+    "statusBadge": {
+      "running": "运行中",
+      "idle": "空闲",
+      "stopped": "已停止"
+    },
+    "sessionList": {
+      "title": "会话列表",
+      "realtime": "实时",
+      "connecting": "连接中",
+      "disconnected": "断开"
+    },
+    "loading": "加载中...",
+    "noSessions": "暂无会话记录",
+    "autoAppearHint": "运行 Claude Code 后自动出现",
+    "eventCount": "条事件",
+    "viewTabs": {
+      "realtime": "● 实时",
+      "history": "◷ 历史"
+    },
+    "filter": "过滤工具 / 内容...",
+    "controls": {
+      "resume": "▶ 继续",
+      "pause": "⏸ 暂停",
+      "clear": "清空"
+    },
+    "tableHeaders": {
+      "time": "时间",
+      "tool": "工具",
+      "content": "内容",
+      "session": "会话"
+    },
+    "emptyHints": {
+      "waitingEvents": "等待 Claude Code 事件...",
+      "selectSession": "在左侧选择会话可查看历史记录",
+      "noEvents": "该会话暂无事件记录"
+    },
+    "statusBar": {
+      "realtimeCount": "实时：{{count}} 条",
+      "historyCount": "历史：{{count}} 条",
+      "clearFilter": "清除过滤",
+      "loadingHistory": "加载历史事件..."
+    }
+  },
+
+  "settings": {
+    "connectionTypes": {
+      "local": "本地直连",
+      "tunnel": "Cloudflare Tunnel",
+      "ssh": "SSH 隧道",
+      "unknown": "未知"
+    },
+    "header": {
+      "title": "设置",
+      "subtitle": "工作区配置与连接认证"
+    },
+    "workspace": {
+      "title": "工作区",
+      "hint": "新建项目时会在此根目录下创建对应文件夹",
+      "rootPath": "根目录路径",
+      "pathPreview": "路径预览",
+      "projectName": "<项目名称>",
+      "example": "例："
+    },
+    "saveStates": {
+      "saving": "保存中...",
+      "saved": "已保存 ✓",
+      "save": "保存",
+      "saveFailed": "保存失败"
+    },
+    "performance": {
+      "title": "底部性能栏",
+      "hint": "控制底部栏显示的指标与顺序"
+    },
+    "connection": {
+      "title": "连接与认证",
+      "address": "连接地址",
+      "tokenStatus": "Token 状态",
+      "valid": "有效",
+      "invalid": "无效",
+      "verifying": "验证中...",
+      "reVerify": "重新验证",
+      "backendVersion": "后端版本",
+      "fetching": "获取中...",
+      "tunnelAddress": "Tunnel 地址",
+      "notDetected": "未检测到",
+      "reconfigure": "重新配置连接",
+      "clearCredentials": "清除本地凭据返回登录页",
+      "disconnect": "断开连接"
+    },
+    "shutdown": {
+      "title": "关闭服务",
+      "hint": "停止后端进程",
+      "shuttingDown": "正在关闭...",
+      "confirmShutdown": "确定要关闭后端服务吗？"
+    }
+  },
+
+  "claudeConfig": {
+    "eventLabels": {
+      "PreToolUse": "工具调用前",
+      "PostToolUse": "工具调用后",
+      "Stop": "停止",
+      "SessionStart": "会话开始",
+      "SessionEnd": "会话结束",
+      "Notification": "通知",
+      "SubagentStart": "子代理开始",
+      "SubagentStop": "子代理停止",
+      "PostToolUseFailure": "工具调用失败"
+    },
+    "commonSettings": {
+      "defaultModel": "默认模型",
+      "effortLevel": "努力级别",
+      "responseLang": "响应语言"
+    },
+    "navGroups": {
+      "core": "核心配置",
+      "extensions": "扩展能力",
+      "security": "安全与控制",
+      "system": "系统管理"
+    },
+    "navItems": {
+      "overview": "总览",
+      "modelAndParams": "模型与参数",
+      "skills": "Skills",
+      "agents": "Agents",
+      "commands": "Commands",
+      "mcpServers": "MCP 服务器",
+      "hooks": "Hooks",
+      "rules": "Rules",
+      "permissions": "权限",
+      "envVars": "环境变量",
+      "plugins": "插件",
+      "monitoring": "监控",
+      "trash": "回收站",
+      "about": "关于"
+    },
+    "claudeMd": {
+      "globalClaudeMd": "全局 CLAUDE.md",
+      "saving": "保存中...",
+      "saved": "已保存",
+      "edit": "编辑",
+      "done": "完成",
+      "noContent": "暂无内容，点击编辑..."
+    },
+    "settingsGroups": {
+      "modelConfig": "模型配置",
+      "behaviorOutput": "行为与输出",
+      "sessionManagement": "会话管理",
+      "loginSecurity": "登录与安全",
+      "uiExperience": "界面与体验",
+      "advancedOptions": "高级选项"
+    },
+    "otherConfig": {
+      "title": "其他配置字段",
+      "addNew": "添加新配置项",
+      "keyName": "键名",
+      "value": "值"
+    },
+    "skills": {
+      "title": "Skills 技能库",
+      "noSkills": "暂无自定义 Skill",
+      "noDescription": "无描述",
+      "disabled": "已禁用",
+      "auxiliaryFiles": "辅助文件",
+      "metadata": "元数据",
+      "selectHint": "选择左侧技能查看详情",
+      "skillMdContent": "SKILL.md 内容"
+    },
+    "agents": {
+      "title": "Agents 代理",
+      "newAgent": "新建 Agent",
+      "createFailed": "创建失败",
+      "deleteConfirm": "确定删除 Agent",
+      "selectHint": "选择左侧代理查看详情",
+      "agentContent": "Agent 内容"
+    },
+    "commands": {
+      "title": "自定义命令",
+      "newCommand": "新建自定义命令",
+      "deleteConfirm": "确定删除命令",
+      "commandContent": "命令内容",
+      "selectHint": "选择左侧命令查看详情"
+    },
+    "mcp": {
+      "title": "MCP 服务器",
+      "noServers": "暂无 MCP 服务器",
+      "connected": "已连接",
+      "needsAuth": "需认证",
+      "error": "错误",
+      "unknown": "未知",
+      "addFailed": "添加失败",
+      "name": "名称",
+      "url": "URL",
+      "protocol": "协议",
+      "scope": "作用域",
+      "global": "全局",
+      "project": "项目"
+    },
+    "hooks": {
+      "title": "Hooks 生命周期钩子",
+      "configured": "已配置",
+      "rules": "规则",
+      "unsaved": "未保存",
+      "addCommand": "添加命令",
+      "clear": "清除",
+      "timeout": "超时"
+    },
+    "rules": {
+      "title": "Rules 规则",
+      "newRule": "新建规则",
+      "deleteConfirm": "确定删除规则",
+      "ruleContent": "规则内容",
+      "selectHint": "选择左侧规则查看详情"
+    },
+    "permissions": {
+      "title": "权限配置",
+      "jsonError": "JSON 格式错误",
+      "savePermissions": "保存权限"
+    },
+    "envVars": {
+      "title": "环境变量",
+      "apiKey": "API 密钥",
+      "authToken": "认证令牌",
+      "apiEndpoint": "API 端点"
+    },
+    "plugins": {
+      "title": "插件管理",
+      "noPlugins": "暂无已配置的插件",
+      "inputPluginId": "输入插件 ID"
+    },
+    "monitoring": {
+      "title": "监控与统计",
+      "activityTrend": "活动趋势",
+      "projectMemory": "项目记忆",
+      "loadingDetails": "加载详情...",
+      "minutesAgo": "分钟前",
+      "hoursAgo": "小时前",
+      "daysAgo": "天前",
+      "sessions": "会话"
+    },
+    "about": {
+      "title": "关于 Claude Code",
+      "cliVersion": "CLI 版本",
+      "latestVersion": "已是最新版本",
+      "checkUpdate": "检查更新",
+      "configDir": "配置目录"
+    },
+    "trash": {
+      "title": "回收站",
+      "restoreAll": "全部恢复",
+      "deleteAll": "全部删除",
+      "restored": "已恢复",
+      "permanentlyDeleted": "已永久删除",
+      "confirmPermanentDelete": "确定永久删除",
+      "restoreFailed": "恢复失败",
+      "deleteFailed": "删除失败"
+    },
+    "shared": {
+      "recommended": "推荐",
+      "installed": "已安装",
+      "installedShort": "已装",
+      "install": "安装",
+      "message": "消息",
+      "toolCall": "工具调用",
+      "none": "暂无",
+      "loadFailed": "加载失败",
+      "loadingConfig": "加载配置信息...",
+      "noMatchResults": "无匹配结果",
+      "searchPlaceholder": "搜索配置... (Ctrl+F)"
+    },
+    "presetGallery": {
+      "recommendedItems": "推荐{{itemLabel}}",
+      "installedCount": "已安装 {{installed}} / {{total}}"
+    },
+    "detailPanel": {
+      "metadata": "元数据",
+      "auxiliaryFiles": "辅助文件"
+    },
+    "overviewStats": {
+      "cliVersion": "CLI 版本",
+      "totalMessages": "总消息",
+      "toolCalls": "工具调用",
+      "sessionCount": "会话数",
+      "activeDays": "活跃天数",
+      "dailyActivity": "每日活动"
+    }
+  },
+
+  "mcpMarket": {
+    "categoryLabels": {
+      "knowledge": "知识",
+      "design": "设计",
+      "efficiency": "效率",
+      "development": "开发",
+      "tools": "工具",
+      "database": "数据库",
+      "custom": "自定义"
+    },
+    "filterTabs": {
+      "all": "全部",
+      "installed": "已安装"
+    },
+    "header": {
+      "title": "一键安装 MCP 服务",
+      "installedCount": "已安装 {{installed}} / {{total}} 个服务"
+    },
+    "actions": {
+      "inputToken": "输入 Token",
+      "needsOAuth": "需要 OAuth 授权",
+      "needsApiToken": "需要 API Token",
+      "installed": "已安装",
+      "uninstall": "卸载",
+      "authInstall": "授权安装",
+      "confirmInstall": "确认安装",
+      "install": "安装"
+    },
+    "empty": "暂无匹配的 MCP 服务"
+  },
+
+  "taskManager": {
+    "complexityLabels": {
+      "S": "S·1天内",
+      "M": "M·2-3天",
+      "L": "L·1周",
+      "XL": "XL·1周+"
+    },
+    "columns": {
+      "todo": "待办清单",
+      "aiAnalysis": "AI 分析",
+      "devQueue": "开发队列"
+    },
+    "input": {
+      "titlePlaceholder": "输入任务标题...",
+      "addDesc": "添加描述",
+      "descPlaceholder": "任务描述（可选）"
+    },
+    "emptyStates": {
+      "todoHint": "输入任务，按回车添加",
+      "analysisHint": "添加任务后点击\"AI 梳理优先级\"",
+      "analysisDesc": "AI 将分析优先级、复杂度和实现方向",
+      "aiAnalyzing": "Claude 正在分析 {{count}} 个任务...",
+      "allProcessed": "所有任务已处理完毕",
+      "queueHint": "接受 AI 分析结果后任务将出现在这里",
+      "queueBound": "已与项目绑定，可直接进入开发流水线"
+    },
+    "aiAnalysis": {
+      "understanding": "AI 理解",
+      "implementation": "实现方向",
+      "accept": "接受",
+      "edit": "编辑",
+      "skip": "跳过",
+      "analyzing": "分析中...",
+      "pending": "待确认"
+    },
+    "queue": {
+      "taskCount": "个任务",
+      "created": "已创建",
+      "unknownProject": "未知项目"
+    },
+    "projectDialog": {
+      "title": "加入开发队列",
+      "selectProject": "选择项目",
+      "noProjects": "暂无项目请先在仪表盘创建项目",
+      "creating": "创建中...",
+      "confirm": "确认加入"
+    },
+    "aiButton": {
+      "analyzing": "AI 分析中...",
+      "analyze": "AI 梳理优先级"
+    }
+  },
+
+  "conversationHistory": {
+    "header": "对话历史",
+    "eventCount": "条事件"
+  },
+
+  "projectsCanvas": {
+    "stateMeta": {
+      "running": "运行中",
+      "error": "异常",
+      "approval": "待审批",
+      "queued": "排队中",
+      "done": "已完成",
+      "idle": "空闲"
+    },
+    "stageLabel": {
+      "input": "需求",
+      "analysis": "分析",
+      "prd": "PRD",
+      "ui": "UI",
+      "plan": "方案",
+      "dev": "开发",
+      "test": "测试",
+      "deploy": "部署",
+      "monitor": "监控",
+      "done": "完成"
+    },
+    "statsPanel": {
+      "projectRanking": "项目排名",
+      "noProjects": "暂无项目"
+    },
+    "tooltip": {
+      "tasks": "任务",
+      "running": "运行",
+      "done": "完成",
+      "error": "异常",
+      "currentStage": "当前阶段",
+      "progress": "完成进度"
+    },
+    "bubbleStatus": {
+      "running": "{{count}} 运行中",
+      "approval": "{{count}} 待审批",
+      "error": "{{count}} 异常",
+      "done": "{{done}}/{{total}} 完成",
+      "idle": "空闲"
+    },
+    "actions": {
+      "enterProject": "进入项目",
+      "viewTask": "查看任务",
+      "runPipeline": "运行流水线"
+    },
+    "header": {
+      "loading": "加载中...",
+      "info": "{{count}} 项目 · 滚轮缩放 · 拖拽平移 · 点击操作",
+      "reset": "复位"
+    },
+    "empty": "暂无项目，请先创建项目"
+  },
+
+  "knowledgePanel": {
+    "categoryLabels": {
+      "errorPattern": "错误模式",
+      "validationFailed": "验证失败",
+      "wrongAssumption": "错误假设",
+      "techMistake": "技术选型误"
+    },
+    "stageLabel": {
+      "analysis": "分析",
+      "prd": "PRD",
+      "ui": "UI设计",
+      "plan": "技术方案",
+      "dev": "开发",
+      "test": "测试",
+      "deploy": "发布",
+      "monitor": "监控"
+    },
+    "header": {
+      "title": "错误知识库",
+      "subtitle": "AI 从失败中提炼的经验，自动注入未来任务的 Prompt"
+    },
+    "search": "搜索知识条目...",
+    "stats": {
+      "noRecords": "暂无记录"
+    },
+    "empty": {
+      "noMatch": "无匹配记录",
+      "isEmpty": "知识库为空 — 执行失败时自动积累经验"
+    },
+    "footer": "共 {{count}} 条 · 自动注入到 Claude 的下一次同阶段 Prompt",
+    "item": {
+      "collapse": "收起",
+      "expand": "展开全部",
+      "sourceTask": "来源任务 #{{id}}",
+      "delete": "删除",
+      "deleteHint": "删除此条经验"
+    }
+  },
+
+  "claudeMonitor": {
+    "header": {
+      "title": "Claude Code Monitor",
+      "subtitle": "全局 · 不存储"
+    },
+    "controls": {
+      "resumeScroll": "继续滚动",
+      "pauseScroll": "暂停滚动",
+      "resume": "▶ 继续",
+      "pause": "⏸ 暂停",
+      "clear": "清空"
+    },
+    "tableHeaders": {
+      "time": "时间",
+      "tool": "工具",
+      "content": "内容",
+      "session": "会话"
+    },
+    "empty": {
+      "waiting": "等待 Claude Code 事件...",
+      "hooksHint": "请确认 hooks 已注册："
+    },
+    "statusBar": {
+      "recordCount": "{{count}} 条记录（最多 {{max}}）",
+      "paused": "● 已暂停",
+      "realtime": "● 实时",
+      "connecting": "● 连接中...",
+      "disconnected": "● 已断开"
+    }
+  },
+
+  "convSession": {
+    "search": "搜索别名 / 路径 / 标签...",
+    "loading": "加载中...",
+    "noMatch": "无匹配结果",
+    "noSessions": "暂无会话记录",
+    "eventCount": "条"
+  },
+
+  "convEdit": {
+    "sessionInfo": "会话信息",
+    "alias": "别名",
+    "aliasPlaceholder": "会话别名",
+    "tags": "标签",
+    "tagsPlaceholder": "输入标签后按 Enter",
+    "taskId": "关联任务 ID",
+    "taskIdPlaceholder": "输入 Task ID（可选）",
+    "notes": "备注",
+    "notesPlaceholder": "自由文本备注...",
+    "saving": "保存中...",
+    "saved": "✓ 已保存",
+    "save": "保存"
+  },
+
+  "convTranscript": {
+    "loading": "加载中...",
+    "fileNotExist": "本地 transcript 文件不存在",
+    "maybeDeleted": "该会话的对话记录可能已被删除",
+    "selectHint": "选择左侧会话查看对话记录"
+  },
+
+  "convBubbles": {
+    "sessionStart": "会话开始",
+    "sessionEnd": "会话结束",
+    "turnEnd": "回合结束",
+    "toolExecuting": "执行中...",
+    "subagentStart": "子任务开始",
+    "subagentEnd": "子任务完成",
+    "notify": "通知",
+    "loading": "加载中...",
+    "selectHint": "选择左侧会话查看对话记录"
+  },
+
+  "taskWorkflow": {
+    "stageLabel": {
+      "input": "需求输入",
+      "analysis": "需求分析",
+      "prd": "PRD 文档",
+      "ui": "UI 设计",
+      "plan": "技术方案",
+      "dev": "开发实现",
+      "test": "测试验证",
+      "deploy": "部署发布",
+      "monitor": "线上监控",
+      "done": "已完成"
+    },
+    "stageDesc": {
+      "input": "录入任务需求与描述",
+      "analysis": "AI 生成 3 个技术方案供选择",
+      "prd": "自动生成产品需求文档",
+      "ui": "生成界面设计方案",
+      "plan": "制定详细技术实现方案",
+      "dev": "Claude Code 自动编码",
+      "test": "自动生成并运行测试",
+      "deploy": "自动部署到目标环境",
+      "monitor": "线上运行状态监控",
+      "done": "任务全部完成"
+    },
+    "statusLabel": {
+      "running": "运行中",
+      "approval": "待审批",
+      "approved": "已批准",
+      "rejected": "已驳回",
+      "pending": "待处理",
+      "done": "已完成",
+      "failed": "失败",
+      "queued": "排队中"
+    },
+    "edgeLabel": {
+      "approved": "审批通过"
+    },
+    "stageDetailPanel": {
+      "done": "已完成",
+      "waitingExecution": "等待执行",
+      "needsApproval": "需审批",
+      "starting": "启动中...",
+      "startStage": "启动 {{stage}}",
+      "approve": "批准",
+      "reject": "驳回",
+      "rejectReason": "驳回原因（必填）",
+      "confirmReject": "确认驳回",
+      "advancing": "推进中...",
+      "advanceNext": "推进到下一阶段",
+      "reExecute": "重新执行",
+      "artifacts": "成果物",
+      "confidence": "置信度",
+      "retryCount": "重试了 {{count}} 次",
+      "criticPass": "通过",
+      "criticFail": "未通过",
+      "waitHint": "等待前序阶段完成后自动执行（或手动触发）"
+    },
+    "hint": "点击节点查看阶段详情与操作"
+  },
+
+  "stageProgress": {
+    "labels": {
+      "input": "需求",
+      "analysis": "分析",
+      "prd": "PRD",
+      "ui": "UI",
+      "plan": "方案",
+      "dev": "开发",
+      "test": "测试",
+      "deploy": "发布",
+      "monitor": "监控"
+    }
+  },
+
+  "optionCards": {
+    "option": "方案",
+    "aiRecommend": "AI 推荐",
+    "workload": "工作量",
+    "risk": "风险",
+    "selectOption": "选择此方案",
+    "confirmSelect": "确认选择方案"
+  },
+
+  "logStream": {
+    "empty": "等待 AI 输出..."
+  },
+
+  "perfBar": {
+    "connected": "已连接",
+    "connecting": "连接中…",
+    "disconnected": "未连接",
+    "disconnectedAlt": "断开"
+  },
+
+  "perf": {
+    "metricLabel": {
+      "cpu": "CPU",
+      "mem": "内存",
+      "net": "网络",
+      "disk": "磁盘",
+      "sensors": "传感器"
+    },
+    "metricColors": {
+      "cpu": {
+        "user": "用户",
+        "sys": "系统",
+        "efficient": "能效核心",
+        "perf": "性能核心"
+      },
+      "mem": {
+        "used": "已用",
+        "cached": "缓存"
+      },
+      "net": {
+        "out": "上传 ↑",
+        "in": "下载 ↓"
+      },
+      "disk": {
+        "read": "读取",
+        "write": "写入"
+      },
+      "sensors": {
+        "cpu": "CPU 温度",
+        "nvme": "NVMe 温度",
+        "board": "主板温度"
+      }
+    },
+    "metricSettings": {
+      "cpu": {
+        "procFormat": "进程格式",
+        "procFormatAbsolute": "绝对值",
+        "procCount": "进程数量"
+      },
+      "net": {
+        "unit": "速率单位",
+        "auto": "自动"
+      },
+      "disk": {
+        "unit": "速率单位",
+        "auto": "自动"
+      }
+    },
+    "settings": {
+      "menuColor": "菜单颜色",
+      "menuSettings": "菜单设置",
+      "noConfigurable": "该指标暂无可配置项"
+    }
+  },
+
+  "globalConfig": {
+    "sections": {
+      "project": {
+        "label": "基础信息",
+        "desc": "项目标识与工作目录",
+        "fields": {
+          "name": { "label": "项目名称", "desc": "当前 Claude Code 项目标识" },
+          "description": { "label": "项目描述", "desc": "项目用途说明", "placeholder": "项目简要描述..." },
+          "workDir": { "label": "工作目录", "desc": "代码所在目录路径" },
+          "framework": { "label": "语言/框架", "desc": "Python/JavaScript/Java 等" }
+        },
+        "frameworkOptions": {
+          "auto": "自动检测",
+          "other": "其他"
+        }
+      },
+      "api": {
+        "label": "API 配置",
+        "desc": "Claude API 认证与连接参数",
+        "fields": {
+          "apiKey": { "label": "API 密钥", "desc": "Claude API 认证密钥" },
+          "endpoint": { "label": "API 端点", "desc": "自定义 API 地址" },
+          "version": { "label": "API 版本", "desc": "API 版本选择" },
+          "timeout": { "label": "超时时间", "desc": "请求超时（秒）" },
+          "retries": { "label": "重试次数", "desc": "失败重试次数" }
+        }
+      },
+      "model": {
+        "label": "模型配置",
+        "desc": "模型选择与生成参数调节",
+        "fields": {
+          "model": { "label": "模型选择", "desc": "Claude 模型版本" },
+          "temperature": { "label": "温度", "desc": "输出随机性 (0=确定, 1=创意)" },
+          "maxTokens": { "label": "最大 Token 数", "desc": "响应长度限制" },
+          "topP": { "label": "Top P", "desc": "核采样参数" },
+          "frequencyPenalty": { "label": "频率惩罚", "desc": "避免重复生成" },
+          "presencePenalty": { "label": "存在惩罚", "desc": "话题多样性控制" }
+        },
+        "modelOptions": {
+          "opus": "Claude Opus 4.6 (最强)",
+          "sonnet": "Claude Sonnet 4.6 (均衡)",
+          "haiku": "Claude Haiku 4.5 (快速)"
+        }
+      },
+      "features": {
+        "label": "功能开关",
+        "desc": "启用或禁用各项辅助功能",
+        "fields": {
+          "autoComplete": { "label": "自动补全", "desc": "代码自动补全" },
+          "realTimeAnalysis": { "label": "实时分析", "desc": "实时代码分析" },
+          "errorDetection": { "label": "错误检测", "desc": "自动检测代码错误" },
+          "performanceSuggestions": { "label": "性能建议", "desc": "性能优化建议" },
+          "securityAudit": { "label": "安全审计", "desc": "代码安全检查" },
+          "docGeneration": { "label": "文档生成", "desc": "自动生成文档" }
+        }
+      },
+      "advanced": {
+        "label": "高级配置",
+        "desc": "并发、缓存、日志与网络",
+        "fields": {
+          "concurrency": { "label": "并发请求", "desc": "最大并发数" },
+          "cacheSize": { "label": "缓存大小", "desc": "响应缓存 (MB)" },
+          "logLevel": { "label": "日志级别", "desc": "日志详细程度" },
+          "logRetentionDays": { "label": "日志保留", "desc": "日志保留天数" },
+          "proxy": { "label": "代理设置", "desc": "HTTP 代理地址" },
+          "customHeaders": { "label": "自定义头信息", "desc": "自定义请求头 (JSON)" }
+        },
+        "units": {
+          "days": "天"
+        }
+      },
+      "permissions": {
+        "label": "权限配置",
+        "desc": "文件、网络与执行权限",
+        "fields": {
+          "fileAccess": { "label": "文件访问", "desc": "读/写/执行权限" },
+          "networkAccess": { "label": "网络访问", "desc": "允许访问网络" },
+          "terminalExec": { "label": "终端执行", "desc": "允许执行命令" },
+          "envVars": { "label": "环境变量", "desc": "自定义环境变量" },
+          "whitelistPaths": { "label": "白名单路径", "desc": "允许访问的目录" },
+          "blacklistFiles": { "label": "黑名单文件", "desc": "禁止访问的文件" }
+        },
+        "checkOptions": {
+          "read": "读取",
+          "write": "写入",
+          "execute": "执行"
+        }
+      },
+      "notifications": {
+        "label": "通知配置",
+        "desc": "邮件、Slack 与 Discord",
+        "fields": {
+          "emailEnabled": { "label": "邮件通知", "desc": "任务完成时发送邮件" },
+          "email": { "label": "邮箱地址", "desc": "接收通知的邮箱" },
+          "slackWebhook": { "label": "Slack Webhook", "desc": "Slack 集成 Webhook URL" },
+          "discordWebhook": { "label": "Discord Webhook", "desc": "Discord 集成 Webhook URL" },
+          "notifyLevel": { "label": "通知级别", "desc": "触发通知的最低级别" }
+        },
+        "levelOptions": {
+          "all": "所有事件",
+          "warn": "警告及以上",
+          "error": "仅错误"
+        }
+      },
+      "monitoring": {
+        "label": "性能监控",
+        "desc": "采样、告警与数据保留",
+        "fields": {
+          "enabled": { "label": "监控开关", "desc": "启用性能监控" },
+          "sampleRate": { "label": "采样率", "desc": "监控数据采样比例" },
+          "alertThresholdMs": { "label": "告警阈值", "desc": "响应时间告警阈值" },
+          "dataRetentionDays": { "label": "数据保留", "desc": "监控数据保留天数" }
+        }
+      },
+      "integrations": {
+        "label": "集成配置",
+        "desc": "Git、Jira、GitHub 与 Slack",
+        "fields": {
+          "gitAutoCommit": { "label": "Git 自动提交", "desc": "自动提交代码变更" },
+          "jiraUrl": { "label": "Jira 地址", "desc": "Jira 实例 URL" },
+          "jiraToken": { "label": "Jira Token", "desc": "Jira API 认证令牌" },
+          "githubToken": { "label": "GitHub Token", "desc": "GitHub 个人访问令牌" },
+          "slackBotToken": { "label": "Slack Bot Token", "desc": "Slack Bot OAuth Token" }
+        }
+      },
+      "ui": {
+        "label": "界面设置",
+        "desc": "主题、字体与显示偏好",
+        "fields": {
+          "theme": { "label": "主题", "desc": "界面主题模式" },
+          "fontSize": { "label": "字体大小", "desc": "界面字号" },
+          "codeHighlight": { "label": "代码高亮", "desc": "启用语法高亮" },
+          "autoSave": { "label": "自动保存", "desc": "配置变更自动保存" }
+        },
+        "themeOptions": {
+          "system": "跟随系统",
+          "dark": "暗色",
+          "light": "亮色"
+        },
+        "fontSizeOptions": {
+          "small": "小",
+          "medium": "中",
+          "large": "大"
+        }
+      }
+    },
+    "cli": {
+      "basic": {
+        "label": "CLI 基础命令",
+        "desc": "启动模式、工作空间与初始化",
+        "fields": {
+          "mode": { "label": "启动模式", "desc": "--mode 交互式/批处理/守护模式" },
+          "configPath": { "label": "配置文件", "desc": "--config 指定配置文件路径" },
+          "workspace": { "label": "工作空间", "desc": "--workspace 工作空间路径" },
+          "init": { "label": "初始化", "desc": "--init 初始化新项目" }
+        },
+        "modeOptions": {
+          "interactive": "interactive (交互式)",
+          "batch": "batch (批处理)",
+          "daemon": "daemon (守护模式)"
+        }
+      },
+      "conversation": {
+        "label": "对话控制",
+        "desc": "会话管理与上下文控制",
+        "fields": {
+          "newConversation": { "label": "新对话", "desc": "--new 开始新对话" },
+          "continueSession": { "label": "继续对话", "desc": "--continue 继续上次对话" },
+          "sessionId": { "label": "对话 ID", "desc": "--session-id 指定会话 ID" },
+          "contextWindow": { "label": "上下文长度", "desc": "--context-window 对话上下文长度" },
+          "history": { "label": "历史记录", "desc": "--history 显示历史对话条数" }
+        }
+      },
+      "files": {
+        "label": "文件操作",
+        "desc": "文件添加、排除、监视与批量处理",
+        "fields": {
+          "addFiles": { "label": "添加文件", "desc": "--add 添加文件到上下文" },
+          "excludeFiles": { "label": "排除文件", "desc": "--exclude 排除文件模式" },
+          "watchFiles": { "label": "监视文件", "desc": "--watch 文件变动监视" },
+          "batchFile": { "label": "批量处理", "desc": "--batch 批量处理文件" },
+          "outputFile": { "label": "输出文件", "desc": "--output 结果输出文件" },
+          "maxFiles": { "label": "文件限制", "desc": "--max-files 最大处理文件数" }
+        }
+      },
+      "code": {
+        "label": "代码分析",
+        "desc": "审查、重构、依赖分析与测试生成",
+        "fields": {
+          "review": { "label": "代码审查", "desc": "--review 代码审查模式" },
+          "refactor": { "label": "重构建议", "desc": "--refactor 提供重构建议" },
+          "deps": { "label": "依赖分析", "desc": "--deps 分析依赖关系" },
+          "complexity": { "label": "复杂度检查", "desc": "--complexity 圈复杂度阈值" },
+          "stats": { "label": "代码统计", "desc": "--stats 代码统计信息" },
+          "generateTests": { "label": "测试生成", "desc": "--generate-tests 自动生成测试" }
+        },
+        "reviewOptions": {
+          "off": "关闭",
+          "normal": "normal (常规)",
+          "strict": "strict (严格)"
+        },
+        "depsOptions": {
+          "off": "关闭",
+          "list": "list (列表)",
+          "tree": "tree (树形)"
+        },
+        "statsOptions": {
+          "off": "关闭",
+          "lines": "按行数",
+          "functions": "按函数",
+          "all": "全部"
+        }
+      },
+      "search": {
+        "label": "搜索查询",
+        "desc": "语义搜索、正则匹配与批量替换",
+        "fields": {
+          "search": { "label": "语义搜索", "desc": "--search 自然语言搜索" },
+          "query": { "label": "代码查询", "desc": "--query 代码结构查询" },
+          "grep": { "label": "正则匹配", "desc": "--grep 正则表达式搜索" },
+          "replace": { "label": "替换操作", "desc": "--replace 批量替换 old:new" },
+          "similar": { "label": "相似代码", "desc": "--similar 查找相似代码" }
+        }
+      },
+      "git": {
+        "label": "Git 集成",
+        "desc": "提交、PR 审查、差异分析与冲突解决",
+        "fields": {
+          "commitMsg": { "label": "提交信息", "desc": "--commit-msg 自动生成提交信息" },
+          "prReview": { "label": "PR 审查", "desc": "--pr-review PR 代码审查" },
+          "diff": { "label": "变更分析", "desc": "--diff 分析代码变更" },
+          "merge": { "label": "冲突解决", "desc": "--merge 辅助解决合并冲突" },
+          "logAnalysis": { "label": "提交历史", "desc": "--log-analysis 分析提交历史" }
+        }
+      },
+      "debug": {
+        "label": "调试测试",
+        "desc": "调试模式、测试运行与覆盖率",
+        "fields": {
+          "debug": { "label": "调试模式", "desc": "--debug 开启调试输出" },
+          "test": { "label": "测试运行", "desc": "--test 运行测试目录" },
+          "coverage": { "label": "覆盖率", "desc": "--coverage 测试覆盖率目标 (%)" },
+          "breakpoint": { "label": "断点调试", "desc": "--breakpoint 设置断点" },
+          "watchVar": { "label": "变量监控", "desc": "--watch-var 监控变量变化" }
+        },
+        "debugOptions": {
+          "off": "关闭",
+          "minimal": "minimal (最小)",
+          "verbose": "verbose (详细)"
+        }
+      },
+      "perf": {
+        "label": "性能分析",
+        "desc": "性能剖析、瓶颈检测与基准测试",
+        "fields": {
+          "profile": { "label": "性能分析", "desc": "--profile 代码性能分析" },
+          "bottleneck": { "label": "瓶颈检测", "desc": "--bottleneck 检测性能瓶颈" },
+          "optimize": { "label": "优化建议", "desc": "--optimize 提供优化建议" },
+          "benchmark": { "label": "基准测试", "desc": "--benchmark 运行基准测试次数" },
+          "memoryLimit": { "label": "内存限制", "desc": "--memory-limit 内存使用限制" }
+        },
+        "profileOptions": {
+          "off": "关闭",
+          "cpu": "CPU",
+          "memory": "内存",
+          "both": "CPU + 内存"
+        }
+      },
+      "security": {
+        "label": "安全扫描",
+        "desc": "漏洞扫描、密钥检测与依赖审计",
+        "fields": {
+          "security": { "label": "安全扫描", "desc": "--security 漏洞扫描级别" },
+          "scanSecrets": { "label": "密钥检测", "desc": "--scan-secrets 检测硬编码密钥" },
+          "audit": { "label": "依赖检查", "desc": "--audit 依赖包安全检查" },
+          "permissionsAnalysis": { "label": "权限分析", "desc": "--permissions 分析文件权限" },
+          "encrypt": { "label": "加密配置", "desc": "--encrypt 加密配置文件" }
+        },
+        "securityOptions": {
+          "off": "关闭",
+          "low": "low (低)",
+          "medium": "medium (中)",
+          "high": "high (高)"
+        },
+        "auditOptions": {
+          "off": "关闭",
+          "all": "全部"
+        }
+      },
+      "output": {
+        "label": "输出格式",
+        "desc": "格式、颜色、详细程度与进度",
+        "fields": {
+          "format": { "label": "输出格式", "desc": "--format 输出格式" },
+          "color": { "label": "颜色输出", "desc": "--color 启用/禁用颜色" },
+          "verbose": { "label": "详细程度", "desc": "--verbose 输出详细程度" },
+          "silent": { "label": "静默模式", "desc": "--silent 最小化输出" },
+          "progress": { "label": "进度条", "desc": "--progress 显示进度条" }
+        },
+        "formatOptions": {
+          "text": "text (纯文本)",
+          "stream": "stream-json (流式)"
+        },
+        "colorOptions": {
+          "auto": "auto (自动)",
+          "always": "always (始终)",
+          "never": "never (禁用)"
+        }
+      },
+      "network": {
+        "label": "网络代理",
+        "desc": "代理、超时、重试与限流",
+        "fields": {
+          "proxy": { "label": "代理设置", "desc": "--proxy HTTP 代理地址" },
+          "timeout": { "label": "超时设置", "desc": "--timeout 请求超时" },
+          "retry": { "label": "重试策略", "desc": "--retry 重试次数与策略" },
+          "concurrency": { "label": "并发限制", "desc": "--concurrency 并发请求数" },
+          "rateLimit": { "label": "限流配置", "desc": "--rate-limit API 调用限流" }
+        }
+      },
+      "batch": {
+        "label": "批处理",
+        "desc": "批量命令、并行执行与任务队列",
+        "fields": {
+          "batchFile": { "label": "批量处理", "desc": "--batch-file 批量命令文件" },
+          "parallel": { "label": "并行执行", "desc": "--parallel 并行处理任务数" },
+          "queue": { "label": "任务队列", "desc": "--queue 任务队列模式" },
+          "schedule": { "label": "定时任务", "desc": "--schedule Cron 表达式" },
+          "aggregate": { "label": "结果聚合", "desc": "--aggregate 聚合多个结果" }
+        },
+        "queueOptions": {
+          "fifo": "FIFO (先进先出)",
+          "priority": "priority (优先级)",
+          "roundRobin": "round-robin (轮询)"
+        },
+        "aggregateOptions": {
+          "off": "关闭",
+          "summary": "summary (摘要)",
+          "detailed": "detailed (详细)"
+        }
+      },
+      "cache": {
+        "label": "缓存控制",
+        "desc": "缓存策略、清理与预热",
+        "fields": {
+          "cache": { "label": "缓存策略", "desc": "--cache 缓存读写策略" },
+          "clearCache": { "label": "清理缓存", "desc": "--clear-cache 清理所有缓存" },
+          "warmCache": { "label": "缓存预热", "desc": "--warm-cache 预热常用查询" },
+          "cacheStats": { "label": "缓存统计", "desc": "--cache-stats 查看缓存统计" }
+        },
+        "cacheOptions": {
+          "readWrite": "read-write (读写)",
+          "readOnly": "read-only (只读)",
+          "writeOnly": "write-only (只写)",
+          "off": "off (关闭)"
+        }
+      },
+      "plugins": {
+        "label": "插件扩展",
+        "desc": "安装、卸载与配置插件",
+        "fields": {
+          "install": { "label": "安装插件", "desc": "--install 安装插件包" },
+          "uninstall": { "label": "卸载插件", "desc": "--uninstall 卸载插件" },
+          "pluginsList": { "label": "插件列表", "desc": "--plugins 列出已安装插件" },
+          "pluginConfig": { "label": "插件配置", "desc": "--plugin-config 配置特定插件" }
+        }
+      },
+      "diag": {
+        "label": "诊断监控",
+        "desc": "健康检查、日志追踪与错误报告",
+        "fields": {
+          "health": { "label": "健康检查", "desc": "--health 系统健康状态" },
+          "metrics": { "label": "性能指标", "desc": "--metrics 输出性能指标格式" },
+          "trace": { "label": "日志追踪", "desc": "--trace 追踪执行过程" },
+          "errorReport": { "label": "错误报告", "desc": "--error-report 生成错误报告" },
+          "info": { "label": "系统信息", "desc": "--info 显示系统信息" }
+        },
+        "errorReportOptions": {
+          "off": "关闭",
+          "brief": "brief (简要)",
+          "detailed": "detailed (详细)"
+        },
+        "infoOptions": {
+          "off": "关闭",
+          "version": "version (版本)",
+          "env": "env (环境)",
+          "all": "all (全部)"
+        }
+      },
+      "shortcuts": {
+        "label": "快捷方式",
+        "desc": "别名、快捷键与命令模板",
+        "fields": {
+          "aliases": { "label": "别名设置", "desc": "--alias 创建命令别名" },
+          "shortcuts": { "label": "快捷命令", "desc": "--shortcut 快捷键绑定" },
+          "template": { "label": "常用模板", "desc": "--template 命令模板" },
+          "recent": { "label": "最近命令", "desc": "--recent 显示最近命令数" }
+        }
+      },
+      "slash": {
+        "label": "交互式命令",
+        "desc": "运行时 /command 快捷指令参考",
+        "fields": {
+          "help": { "label": "/help", "desc": "显示帮助信息" },
+          "clear": { "label": "/clear", "desc": "清空当前对话" },
+          "save": { "label": "/save", "desc": "保存当前会话" },
+          "load": { "label": "/load", "desc": "加载历史会话" },
+          "export": { "label": "/export", "desc": "导出对话记录" },
+          "explain": { "label": "/explain", "desc": "解释选中代码" },
+          "fix": { "label": "/fix", "desc": "自动修复问题" },
+          "docs": { "label": "/docs", "desc": "生成文档" },
+          "test": { "label": "/test", "desc": "生成测试" },
+          "refactor": { "label": "/refactor", "desc": "重构代码" },
+          "optimize": { "label": "/optimize", "desc": "优化代码" },
+          "security": { "label": "/security", "desc": "安全检查" }
+        },
+        "exportOptions": {
+          "text": "纯文本"
+        }
+      },
+      "envVars": {
+        "label": "环境变量",
+        "desc": "Claude Code 环境变量配置",
+        "fields": {
+          "apiKey": { "label": "CLAUDE_API_KEY", "desc": "API 密钥" },
+          "configDir": { "label": "CLAUDE_CONFIG_DIR", "desc": "配置目录路径" },
+          "cacheDir": { "label": "CLAUDE_CACHE_DIR", "desc": "缓存目录路径" },
+          "logLevel": { "label": "CLAUDE_LOG_LEVEL", "desc": "日志级别" },
+          "maxTokens": { "label": "CLAUDE_MAX_TOKENS", "desc": "最大 Token 数" },
+          "model": { "label": "CLAUDE_MODEL", "desc": "默认模型" },
+          "temperature": { "label": "CLAUDE_TEMPERATURE", "desc": "温度参数" },
+          "noColor": { "label": "CLAUDE_NO_COLOR", "desc": "禁用颜色输出" },
+          "editor": { "label": "CLAUDE_EDITOR", "desc": "默认编辑器" }
+        }
+      }
+    },
+    "fieldRenderer": {
+      "on": "已开启",
+      "off": "已关闭",
+      "jsonError": "JSON 格式错误",
+      "none": "暂无",
+      "addHint": "输入后按 Enter 添加"
+    },
+    "statusBar": {
+      "api": "API",
+      "configured": "已配置",
+      "notConfigured": "未配置",
+      "model": "模型",
+      "notSet": "未设置",
+      "monitoringOn": "监控中",
+      "monitoringOff": "监控关",
+      "saving": "保存中...",
+      "unsavedChanges": "有未保存的更改",
+      "lastSaved": "最后保存: {{time}}"
+    },
+    "actions": {
+      "saving": "保存中...",
+      "saved": "已保存",
+      "saveConfig": "保存配置",
+      "resetDefault": "重置默认",
+      "export": "导出",
+      "import": "导入",
+      "refresh": "刷新",
+      "importFailed": "导入失败：JSON 格式错误",
+      "loadFailed": "加载失败"
+    },
+    "loading": "加载全局配置..."
+  }
 }
