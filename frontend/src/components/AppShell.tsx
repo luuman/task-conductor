@@ -96,7 +96,7 @@ export function AppShell({
               value={newProjName}
               onChange={(e) => setNewProjName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleNewProject()}
-              placeholder="项目名称"
+              placeholder={t('appShell.projectName')}
               className="w-full bg-app-tertiary border border-app rounded-md px-3 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent"
             />
             {projPath && (
