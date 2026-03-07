@@ -44,7 +44,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       saveConfig({ type: "ssh", tunnelUrl: "", sshHost, sshPort: parseInt(sshPort), sshUser, token });
       onLogin();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "SSH 连接失败，请先在终端建立 SSH 隧道");
+      setError(err instanceof Error ? err.message : t('login.errors.sshConnectionFailed'));
       setLoading(false);
     }
   };
