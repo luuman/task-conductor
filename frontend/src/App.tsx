@@ -75,7 +75,7 @@ export default function App() {
         }
       } catch {
         setConnectionStatus("disconnected");
-        // 后端离线不影响登录态，重连后仍可使用
+        // Backend being offline doesn't invalidate login; still usable after reconnect
       }
     };
     check();
