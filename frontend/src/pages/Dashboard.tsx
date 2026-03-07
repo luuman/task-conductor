@@ -744,7 +744,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
 
   if (!projectsLoaded) return (
     <div className="flex-1 flex items-center justify-center">
-      <p className="text-app-tertiary text-xs animate-pulse">加载中...</p>
+      <p className="text-app-tertiary text-xs animate-pulse">{t('common.loading')}</p>
     </div>
   );
 
