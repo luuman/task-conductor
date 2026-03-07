@@ -120,7 +120,7 @@ export default function ConversationHistory({ projects }: Props) {
       {hasQuestions && (
         <div className="w-[220px] shrink-0 flex flex-col overflow-hidden"
              style={{ borderLeft: "1px solid var(--border)" }}>
-          <div className="h-9 flex items-center gap-1.5 px-3 shrink-0 text-[11px] font-medium"
+          <div className="h-11 flex items-center gap-1.5 px-3 shrink-0 text-[11px] font-medium"
                style={{ borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
             <List size={12} />
             <span>问题导航</span>
