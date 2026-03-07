@@ -20,6 +20,7 @@ class ProjectOut(BaseModel):
     execution_mode: str
     is_test: bool
     feishu_chat_id: Optional[str] = None
+    feishu_sync: bool = False
     sort_order: int
     created_at: datetime
     model_config = {"from_attributes": True}
