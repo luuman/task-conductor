@@ -456,6 +456,10 @@ export const api = {
     toggleFeishuSync: (projectId: number, enabled: boolean) =>
       request<Project>(`/api/projects/${projectId}/feishu-sync`, { method: "PUT", body: JSON.stringify({ enabled }) }),
     tasks: (projectId: number) => request<Task[]>(`/api/projects/${projectId}/tasks`),
+    files: (projectId: number, path = "") =>
+      request<FileListResponse>(`/api/projects/${projectId}/files?path=${encodeURIComponent(path)}`),
+    fileContent: (projectId: number, path: string) =>
+      request<FileContentResponse>(`/api/projects/${projectId}/file?path=${encodeURIComponent(path)}`),
     knowledge: (projectId: number) =>
       request<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`),
     deleteKnowledge: (projectId: number, knowledgeId: number) =>
