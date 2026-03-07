@@ -200,11 +200,23 @@ class TranscriptResponse(BaseModel):
     file_found: bool = True
 
 
+def _extract_tool_result_text(content) -> str:
+    """从 tool_result 的 content 字段提取文本，截断到 5000 字符。"""
+    MAX_LEN = 5000
+    if isinstance(content, str):
+        return content[:MAX_LEN]
+    if isinstance(content, list):
+        for item in content:
+            if isinstance(item, dict) and item.get("type") == "text":
+                return (item.get("text") or "")[:MAX_LEN]
+    return ""
+
+
 @router.get("/{session_id}/transcript", response_model=TranscriptResponse, summary="读取会话对话记录")
 def get_transcript(session_id: str, db: Session = Depends(get_db)):
     """
     从本地 ~/.claude/projects/{project_path}/{session_id}.jsonl 读取完整对话记录。
-    返回 user/assistant 消息列表，过滤掉纯 tool_result 的用户消息（自动生成的）。
+    两遍解析：第一遍构建消息 + 收集 tool_result，第二遍将 tool_result 关联到对应 tool_use block。
     """
     s = db.query(ClaudeSession).filter_by(session_id=session_id).first()
     if not s:
@@ -219,67 +231,92 @@ def get_transcript(session_id: str, db: Session = Depends(get_db)):
     if not _os.path.exists(transcript_path):
         return TranscriptResponse(messages=[], file_found=False)
 
+    # ── 第一遍：解析所有消息，同时收集 tool_result ──
     messages: list[TranscriptMessage] = []
+    # key=tool_use_id, value=(result_text, is_error)
+    tool_results: dict[str, tuple[str, bool]] = {}
 
+    entries: list[dict] = []
     with open(transcript_path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             try:
-                entry = _json_mod.loads(line)
+                entries.append(_json_mod.loads(line))
             except Exception:
                 continue
 
-            entry_type = entry.get("type", "")
-            msg = entry.get("message", {})
-            role = msg.get("role", "")
-            content = msg.get("content", [])
-            ts = entry.get("timestamp")
+    for entry in entries:
+        entry_type = entry.get("type", "")
+        msg = entry.get("message", {})
+        role = msg.get("role", "")
+        content = msg.get("content", [])
+        ts = entry.get("timestamp")
 
-            # ── 用户消息 ──
-            if entry_type == "user" or role == "user":
-                if isinstance(content, str):
-                    if content.strip():
-                        messages.append(TranscriptMessage(
-                            role="user",
-                            ts=ts,
-                            blocks=[TranscriptBlock(type="text", text=content)],
-                        ))
-                elif isinstance(content, list):
-                    text_blocks = [c for c in content if c.get("type") == "text" and c.get("text", "").strip()]
-                    if text_blocks:
-                        messages.append(TranscriptMessage(
-                            role="user",
-                            ts=ts,
-                            blocks=[TranscriptBlock(type="text", text=b["text"]) for b in text_blocks],
-                        ))
-                continue
-
-            # ── 助手消息 ──
-            if role == "assistant" or entry_type == "assistant":
-                if not isinstance(content, list):
-                    continue
-                blocks: list[TranscriptBlock] = []
+        # ── 用户消息 ──
+        if entry_type == "user" or role == "user":
+            # 收集 tool_result 到 dict
+            if isinstance(content, list):
                 for block in content:
-                    btype = block.get("type")
-                    if btype == "text":
-                        text = block.get("text", "").strip()
-                        if text:
-                            blocks.append(TranscriptBlock(type="text", text=text))
-                    elif btype == "tool_use":
-                        blocks.append(TranscriptBlock(
-                            type="tool_use",
-                            tool_name=block.get("name"),
-                            tool_input=block.get("input") or {},
-                        ))
-                    # 忽略 thinking 块
-                if blocks:
+                    if isinstance(block, dict) and block.get("type") == "tool_result":
+                        tuid = block.get("tool_use_id")
+                        if tuid:
+                            result_text = _extract_tool_result_text(block.get("content", ""))
+                            is_error = bool(block.get("is_error", False))
+                            tool_results[tuid] = (result_text, is_error)
+
+            # 仍然提取用户的文本消息（非纯 tool_result 的）
+            if isinstance(content, str):
+                if content.strip():
                     messages.append(TranscriptMessage(
-                        role="assistant",
+                        role="user",
                         ts=ts,
-                        blocks=blocks,
-                        model=msg.get("model"),
+                        blocks=[TranscriptBlock(type="text", text=content)],
                     ))
+            elif isinstance(content, list):
+                text_blocks = [c for c in content if isinstance(c, dict) and c.get("type") == "text" and c.get("text", "").strip()]
+                if text_blocks:
+                    messages.append(TranscriptMessage(
+                        role="user",
+                        ts=ts,
+                        blocks=[TranscriptBlock(type="text", text=b["text"]) for b in text_blocks],
+                    ))
+            continue
+
+        # ── 助手消息 ──
+        if role == "assistant" or entry_type == "assistant":
+            if not isinstance(content, list):
+                continue
+            blocks: list[TranscriptBlock] = []
+            for block in content:
+                btype = block.get("type")
+                if btype == "text":
+                    text = block.get("text", "").strip()
+                    if text:
+                        blocks.append(TranscriptBlock(type="text", text=text))
+                elif btype == "tool_use":
+                    blocks.append(TranscriptBlock(
+                        type="tool_use",
+                        tool_name=block.get("name"),
+                        tool_input=block.get("input") or {},
+                        tool_use_id=block.get("id"),
+                    ))
+                # 忽略 thinking 块
+            if blocks:
+                messages.append(TranscriptMessage(
+                    role="assistant",
+                    ts=ts,
+                    blocks=blocks,
+                    model=msg.get("model"),
+                ))
+
+    # ── 第二遍：将 tool_result 关联到对应的 tool_use block ──
+    for msg in messages:
+        for block in msg.blocks:
+            if block.type == "tool_use" and block.tool_use_id and block.tool_use_id in tool_results:
+                result_text, is_error = tool_results[block.tool_use_id]
+                block.tool_result = result_text
+                block.tool_error = is_error if is_error else None
 
     return TranscriptResponse(messages=messages)
