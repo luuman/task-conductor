@@ -1,4 +1,9 @@
-"""飞书 MessageCard 模板构建函数。"""
+"""飞书 MessageCard 模板构建函数（JSON 2.0 schema）。
+
+飞书卡片 markdown 组件支持：加粗、斜体、删除线、链接、代码块、
+有序/无序列表（7.6+）、<font color>彩色文本、@用户。
+不支持：# 标题、表格语法。
+"""
 
 from __future__ import annotations
 
@@ -17,16 +22,16 @@ MAX_CONTENT_LEN = 3000
 
 
 def _to_feishu_md(text: str) -> str:
-    """将标准 Markdown 转为飞书卡片兼容的 Markdown。
+    """将标准 Markdown 转为飞书卡片兼容格式。
 
-    飞书卡片 markdown 不支持 # 标题、表格等语法，需要转换。
+    仅转换飞书不支持的语法：# 标题 → 加粗，表格 → 纯文本。
+    其余（加粗/列表/代码块/链接等）飞书原生支持，保持不变。
     """
     lines = text.split("\n")
     result: list[str] = []
     in_code_block = False
 
     for line in lines:
-        # 代码块内不做转换
         if line.strip().startswith("```"):
             in_code_block = not in_code_block
             result.append(line)
@@ -56,8 +61,23 @@ def _to_feishu_md(text: str) -> str:
     return "\n".join(result)
 
 
-def _header(title: str, color: str) -> dict:
-    return {"title": {"tag": "plain_text", "content": title}, "template": color}
+# ------------------------------------------------------------------
+# JSON 2.0 卡片构建器
+# ------------------------------------------------------------------
+
+
+def _card(header_title: str, color: str, elements: list[dict]) -> dict:
+    """构建 JSON 2.0 schema 卡片。"""
+    return {
+        "schema": "2.0",
+        "header": {
+            "title": {"tag": "plain_text", "content": header_title},
+            "template": color,
+        },
+        "body": {
+            "elements": elements,
+        },
+    }
 
 
 def _markdown(text: str) -> dict:
@@ -110,26 +130,17 @@ def build_result_card(content: str, cost_ms: int = 0, cwd: str = "") -> dict:
         elements.append(_divider())
         elements.append(_note(" | ".join(note_parts)))
 
-    return {
-        "header": _header("Claude Code", BLUE),
-        "elements": elements,
-    }
+    return _card("Claude Code", BLUE, elements)
 
 
 def build_thinking_card() -> dict:
     """思考中占位卡片。"""
-    return {
-        "header": _header("Claude Code", BLUE),
-        "elements": [_markdown("⏳ 正在思考...")],
-    }
+    return _card("Claude Code", BLUE, [_markdown("⏳ 正在思考...")])
 
 
 def build_error_card(error: str) -> dict:
     """错误卡片。"""
-    return {
-        "header": _header("执行失败", RED),
-        "elements": [_markdown(f"```\n{error}\n```")],
-    }
+    return _card("执行失败", RED, [_markdown(f"```\n{error}\n```")])
 
 
 def build_approval_card(
@@ -148,17 +159,14 @@ def build_approval_card(
     approve_value = json.dumps({"action": "approve", "task_id": task_id})
     reject_value = json.dumps({"action": "reject", "task_id": task_id})
 
-    return {
-        "header": _header(f"{stage} 阶段完成 - 待审批", ORANGE),
-        "elements": [
-            _markdown("\n".join(info_lines)),
-            _divider(),
-            _action(
-                _button("✅ 通过", {"value": approve_value}, type="primary"),
-                _button("❌ 驳回", {"value": reject_value}, type="danger"),
-            ),
-        ],
-    }
+    return _card(f"{stage} 阶段完成 - 待审批", ORANGE, [
+        _markdown("\n".join(info_lines)),
+        _divider(),
+        _action(
+            _button("✅ 通过", {"value": approve_value}, type="primary"),
+            _button("❌ 驳回", {"value": reject_value}, type="danger"),
+        ),
+    ])
 
 
 def build_approved_card(task_id: int, stage: str, action: str) -> dict:
@@ -170,35 +178,26 @@ def build_approved_card(task_id: int, stage: str, action: str) -> dict:
         color = RED
         label = "已驳回"
 
-    return {
-        "header": _header(f"{stage} 阶段 - {label}", color),
-        "elements": [
-            _markdown(f"**任务 ID**: {task_id}\n**结果**: {label}"),
-        ],
-    }
+    return _card(f"{stage} 阶段 - {label}", color, [
+        _markdown(f"**任务 ID**: {task_id}\n**结果**: {label}"),
+    ])
 
 
 def build_task_created_card(task_id: int, title: str, project_name: str) -> dict:
     """任务创建通知卡片。"""
-    return {
-        "header": _header("新任务已创建", GREEN),
-        "elements": [
-            _markdown(
-                f"**项目**: {project_name}\n**任务**: {title}\n**ID**: {task_id}"
-            ),
-        ],
-    }
+    return _card("新任务已创建", GREEN, [
+        _markdown(
+            f"**项目**: {project_name}\n**任务**: {title}\n**ID**: {task_id}"
+        ),
+    ])
 
 
 def build_welcome_card(project_name: str) -> dict:
     """项目群欢迎卡片。"""
-    return {
-        "header": _header(f"欢迎加入 {project_name}", BLUE),
-        "elements": [
-            _markdown(
-                "本群已接入 **TaskConductor** AI 任务编排系统。\n\n"
-                "**对话模式**：直接发送消息即可与 Claude 对话。\n\n"
-                "**创建任务**：发送 `/task 任务描述` 可创建流水线任务。"
-            ),
-        ],
-    }
+    return _card(f"欢迎加入 {project_name}", BLUE, [
+        _markdown(
+            "本群已接入 **TaskConductor** AI 任务编排系统。\n\n"
+            "**对话模式**：直接发送消息即可与 Claude 对话。\n\n"
+            "**创建任务**：发送 `/task 任务描述` 可创建流水线任务。"
+        ),
+    ])
