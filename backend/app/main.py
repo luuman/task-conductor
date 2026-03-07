@@ -166,7 +166,9 @@ async def _ensure_project_groups(feishu_client):
 
     print(f"  [Feishu] 为 {len(project_infos)} 个项目创建群聊...")
 
-    for pid, pname, repo_url in project_infos:
+    for i, (pid, pname, repo_url) in enumerate(project_infos):
+        if i > 0:
+            await asyncio.sleep(1)  # 避免触发飞书 API 频率限制
         try:
             data = await feishu_client.create_group(f"TC: {pname}")
             chat_id = data.get("chat_id", "")
