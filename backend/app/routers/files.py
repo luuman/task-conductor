@@ -236,3 +236,73 @@ def raw_file(
 
     media_type = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
     return FileResponse(str(target), media_type=media_type)
+
+
+@router.get("/{project_id}/git-status", summary="获取项目 Git 状态")
+def git_status(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    """返回 git status --porcelain=v1 解析后的文件状态映射"""
+    base = _get_project_path(project_id, db)
+
+    # 检查是否是 git 仓库
+    if not (base / ".git").exists():
+        return {"is_git": False, "branch": None, "files": {}, "summary": {}}
+
+    try:
+        # 当前分支
+        branch_result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=str(base), capture_output=True, text=True, timeout=5,
+        )
+        branch = branch_result.stdout.strip() if branch_result.returncode == 0 else None
+
+        # git status --porcelain
+        result = subprocess.run(
+            ["git", "status", "--porcelain=v1"],
+            cwd=str(base), capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode != 0:
+            return {"is_git": True, "branch": branch, "files": {}, "summary": {}}
+
+        # 解析: XY filename
+        # X = index status, Y = worktree status
+        # M = modified, A = added, D = deleted, R = renamed, ? = untracked
+        files: dict[str, str] = {}
+        for line in result.stdout.splitlines():
+            if len(line) < 4:
+                continue
+            xy = line[:2]
+            path = line[3:]
+            # 处理重命名 "R  old -> new"
+            if " -> " in path:
+                path = path.split(" -> ", 1)[1]
+
+            if xy == "??":
+                files[path] = "untracked"
+            elif "D" in xy:
+                files[path] = "deleted"
+            elif "A" in xy or xy[0] == "A":
+                files[path] = "added"
+            elif "M" in xy:
+                files[path] = "modified"
+            elif "R" in xy:
+                files[path] = "renamed"
+            else:
+                files[path] = "changed"
+
+        # 统计
+        summary: dict[str, int] = {}
+        for status in files.values():
+            summary[status] = summary.get(status, 0) + 1
+
+        return {
+            "is_git": True,
+            "branch": branch,
+            "files": files,
+            "summary": summary,
+        }
+
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return {"is_git": False, "branch": None, "files": {}, "summary": {}}
