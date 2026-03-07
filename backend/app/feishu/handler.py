@@ -56,12 +56,22 @@ async def handle_chat(prompt: str, chat_id: str, cwd: str) -> None:
     try:
         pool = ClaudePool()
         result_text = ""
+        assistant_texts: list[str] = []
         async for event in pool.run(task_id, prompt, cwd, log_file):
-            # 只取 result 事件（Claude 最终完整回答）
-            if event.get("type") == "result":
+            etype = event.get("type", "")
+            if etype == "result":
                 result_text = event.get("result", "")
+            elif etype == "assistant":
+                # 收集 assistant 文本作为 fallback
+                msg = event.get("message", {})
+                for block in msg.get("content", []):
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        t = block.get("text", "").strip()
+                        if t:
+                            assistant_texts.append(t)
 
-        result = result_text or "(无输出)"
+        # 优先用 result（完整回答），fallback 到 assistant 文本拼接
+        result = result_text or "\n\n".join(assistant_texts) or "(无输出)"
 
         # 5. 更新卡片为结果
         cost_ms = int(time.time() * 1000) - start_ms
