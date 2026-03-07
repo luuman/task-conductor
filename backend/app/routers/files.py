@@ -306,3 +306,71 @@ def git_status(
 
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return {"is_git": False, "branch": None, "files": {}, "summary": {}}
+
+
+# ── docs 知识库 ─────────────────────────────────────────
+DOCS_EXTENSIONS = {".md", ".txt", ".rst", ".html", ".pdf", ".json", ".yaml", ".yml", ".toml"}
+
+
+@router.get("/{project_id}/docs", summary="列出项目 docs/ 文档")
+def list_docs(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    """递归扫描项目 docs/ 目录，返回文档列表"""
+    base = _get_project_path(project_id, db)
+    docs_dir = base / "docs"
+    if not docs_dir.is_dir():
+        return {"has_docs": False, "items": []}
+
+    items: list[dict] = []
+
+    def walk(directory: Path, depth: int = 0):
+        if depth > 5 or len(items) >= 200:
+            return
+        try:
+            for entry in sorted(directory.iterdir(), key=lambda e: (not e.is_dir(), e.name.lower())):
+                if len(items) >= 200:
+                    return
+                if entry.name.startswith("."):
+                    continue
+                if entry.is_dir():
+                    walk(entry, depth + 1)
+                elif entry.suffix.lower() in DOCS_EXTENSIONS:
+                    info = _file_info(entry, base)
+                    if info:
+                        items.append(info)
+        except PermissionError:
+            pass
+
+    walk(docs_dir)
+    return {"has_docs": True, "items": items}
+
+
+@router.get("/{project_id}/docs/content", summary="读取 docs/ 下的文档内容")
+def read_doc(
+    project_id: int,
+    path: str = Query(..., description="相对于项目根的文件路径（必须在 docs/ 下）"),
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    target = _safe_resolve(base, path)
+
+    # 安全检查：必须在 docs/ 下
+    docs_dir = (base / "docs").resolve()
+    if not str(target).startswith(str(docs_dir)):
+        raise HTTPException(403, "只能读取 docs/ 目录下的文件")
+
+    if not target.is_file():
+        raise HTTPException(404, "文件不存在")
+
+    size = target.stat().st_size
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(400, f"文件过大 ({size} bytes)")
+
+    try:
+        content = target.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return {"path": path, "name": target.name, "size": size, "binary": True, "content": None}
+
+    return {"path": path, "name": target.name, "size": size, "binary": False, "content": content}
