@@ -164,7 +164,7 @@ function StageNode({ data }: NodeProps) {
         <div className="flex items-center gap-1.5 mt-2 flex-wrap">
           {d.requiresApproval && (
             <span className="text-[8px] border border-yellow-500/30 text-yellow-400/70 px-1.5 py-0.5 rounded-full">
-              需审批
+              {t('taskWorkflow.stageDetailPanel.needsApproval')}
             </span>
           )}
           {d.isCurrentStage && d.status && (
