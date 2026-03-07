@@ -6,6 +6,7 @@ import { api, type Project, type Task, type Metrics } from "../lib/api";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { KnowledgePanel } from "../components/KnowledgePanel";
+import { DocsPanel } from "../components/DocsPanel";
 import { cn } from "../lib/utils";
 
 interface DashboardProps {
