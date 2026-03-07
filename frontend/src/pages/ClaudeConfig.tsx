@@ -129,44 +129,42 @@ type SectionId = "overview" | "settings" | "skills" | "agents" | "commands" | "m
 interface NavItem { id: SectionId; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; keywords: string[] }
 interface NavGroup { label: string; items: NavItem[] }
 
-const NAV_GROUPS: NavGroup[] = [
+const getNavGroups = (t: (k: string) => string): NavGroup[] => [
   {
-    label: "核心配置",
+    label: t("claudeConfig.navGroups.core"),
     items: [
-      { id: "overview", label: "总览", icon: Settings2, keywords: ["全局", "overview", "概览", "CLAUDE.md", "版本", "统计"] },
-      { id: "settings", label: "模型与参数", icon: Cpu, keywords: ["模型", "model", "温度", "token", "API", "参数"] },
+      { id: "overview", label: t("claudeConfig.navItems.overview"), icon: Settings2, keywords: ["全局", "overview", "概览", "CLAUDE.md", "版本", "统计"] },
+      { id: "settings", label: t("claudeConfig.navItems.modelAndParams"), icon: Cpu, keywords: ["模型", "model", "温度", "token", "API", "参数"] },
     ],
   },
   {
-    label: "扩展能力",
+    label: t("claudeConfig.navGroups.extensions"),
     items: [
-      { id: "skills", label: "Skills", icon: Sparkles, keywords: ["技能", "skill", "SKILL.md"] },
-      { id: "agents", label: "Agents", icon: Bot, keywords: ["代理", "agent", "persona"] },
-      { id: "commands", label: "Commands", icon: Terminal, keywords: ["命令", "command", "slash"] },
-      { id: "mcp", label: "MCP 服务器", icon: Globe, keywords: ["mcp", "model context", "服务器", "stdio", "http"] },
+      { id: "skills", label: t("claudeConfig.navItems.skills"), icon: Sparkles, keywords: ["技能", "skill", "SKILL.md"] },
+      { id: "agents", label: t("claudeConfig.navItems.agents"), icon: Bot, keywords: ["代理", "agent", "persona"] },
+      { id: "commands", label: t("claudeConfig.navItems.commands"), icon: Terminal, keywords: ["命令", "command", "slash"] },
+      { id: "mcp", label: t("claudeConfig.navItems.mcpServers"), icon: Globe, keywords: ["mcp", "model context", "服务器", "stdio", "http"] },
     ],
   },
   {
-    label: "安全与控制",
+    label: t("claudeConfig.navGroups.security"),
     items: [
-      { id: "hooks", label: "Hooks", icon: Webhook, keywords: ["hook", "钩子", "生命周期", "PreToolUse", "PostToolUse"] },
-      { id: "rules", label: "Rules", icon: BookOpen, keywords: ["规则", "rule", "CLAUDE.md"] },
-      { id: "permissions", label: "权限", icon: Shield, keywords: ["权限", "permission", "allow", "deny", "白名单", "黑名单"] },
-      { id: "env", label: "环境变量", icon: Variable, keywords: ["环境", "env", "ANTHROPIC", "proxy", "变量"] },
+      { id: "hooks", label: t("claudeConfig.navItems.hooks"), icon: Webhook, keywords: ["hook", "钩子", "生命周期", "PreToolUse", "PostToolUse"] },
+      { id: "rules", label: t("claudeConfig.navItems.rules"), icon: BookOpen, keywords: ["规则", "rule", "CLAUDE.md"] },
+      { id: "permissions", label: t("claudeConfig.navItems.permissions"), icon: Shield, keywords: ["权限", "permission", "allow", "deny", "白名单", "黑名单"] },
+      { id: "env", label: t("claudeConfig.navItems.envVars"), icon: Variable, keywords: ["环境", "env", "ANTHROPIC", "proxy", "变量"] },
     ],
   },
   {
-    label: "系统管理",
+    label: t("claudeConfig.navGroups.system"),
     items: [
-      { id: "plugins", label: "插件", icon: Plug, keywords: ["插件", "plugin", "扩展", "marketplace"] },
-      { id: "monitoring", label: "监控", icon: Activity, keywords: ["监控", "统计", "活动", "消息", "工具调用"] },
-      { id: "trash", label: "回收站", icon: ArchiveRestore, keywords: ["回收", "trash", "禁用", "disabled", "恢复", "restore"] },
-      { id: "about", label: "关于", icon: Info, keywords: ["关于", "about", "版本", "系统", "缓存"] },
+      { id: "plugins", label: t("claudeConfig.navItems.plugins"), icon: Plug, keywords: ["插件", "plugin", "扩展", "marketplace"] },
+      { id: "monitoring", label: t("claudeConfig.navItems.monitoring"), icon: Activity, keywords: ["监控", "统计", "活动", "消息", "工具调用"] },
+      { id: "trash", label: t("claudeConfig.navItems.trash"), icon: ArchiveRestore, keywords: ["回收", "trash", "禁用", "disabled", "恢复", "restore"] },
+      { id: "about", label: t("claudeConfig.navItems.about"), icon: Info, keywords: ["关于", "about", "版本", "系统", "缓存"] },
     ],
   },
 ];
-
-const ALL_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
