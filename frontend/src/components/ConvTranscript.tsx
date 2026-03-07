@@ -564,9 +564,10 @@ interface Props {
   messages: TranscriptMessage[];
   loading: boolean;
   fileFound: boolean;
+  onOpenFile?: (filePath: string) => void;
 }
 
-export function ConvTranscript({ messages, loading, fileFound }: Props) {
+export function ConvTranscript({ messages, loading, fileFound, onOpenFile }: Props) {
   const { t } = useTranslation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [expandSignal, setExpandSignal] = useState(0);
