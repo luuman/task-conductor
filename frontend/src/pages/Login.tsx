@@ -186,7 +186,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>用户名</label>
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.ssh.username')}</label>
               <Input value={sshUser} onChange={(e) => setSshUser(e.target.value)} placeholder="user" />
             </div>
             <div className="space-y-1.5">
