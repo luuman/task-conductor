@@ -212,7 +212,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
             <textarea
               value={inputDesc}
               onChange={(e) => setInputDesc(e.target.value)}
-              placeholder="任务描述（可选）"
+              placeholder={t('taskManager.input.descPlaceholder')}
               rows={2}
               className="w-full bg-app-tertiary border border-app rounded-md px-2.5 py-1.5 text-xs text-app placeholder:text-app-tertiary outline-none focus:border-accent resize-none"
             />
