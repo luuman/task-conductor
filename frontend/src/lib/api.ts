@@ -430,6 +430,13 @@ export interface FileContentResponse {
   content: string | null;
 }
 
+export interface GitStatusResponse {
+  is_git: boolean;
+  branch: string | null;
+  files: Record<string, string>; // path -> "modified"|"added"|"deleted"|"untracked"|"renamed"|"changed"
+  summary: Record<string, number>;
+}
+
 export interface InboxItem { id: string; title: string; description: string; }
 export interface ItemAnalysis {
   id: string;
