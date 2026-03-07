@@ -871,7 +871,9 @@
     "noMatch": "No matching docs",
     "noDocs": "No docs/ directory in this project",
     "lines": "lines",
-    "close": "Close"
+    "close": "Close",
+    "selectDoc": "Select a document from the left",
+    "outline": "Outline"
   },
 
   "claudeMonitor": {
