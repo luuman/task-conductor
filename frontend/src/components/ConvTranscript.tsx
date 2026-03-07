@@ -404,7 +404,7 @@ function AgentResultView({ result, description }: { result: string; description:
                 style={{ color: "var(--text-secondary)" }}>{description}</span>
         </div>
       )}
-      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto max-h-[500px]"
+      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto "
            style={{ color: "var(--text-primary)", background: "var(--background)" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
           {displayed}
