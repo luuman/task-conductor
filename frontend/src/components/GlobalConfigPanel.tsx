@@ -1069,7 +1069,7 @@ export default function GlobalConfigPanel() {
         <button onClick={load} disabled={saving}
           className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg border border-app text-app-secondary hover:text-app transition-colors">
           <Zap size={11} />
-          刷新
+          {t("globalConfig.actions.refresh")}
         </button>
       </div>
     </div>
