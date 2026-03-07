@@ -12,6 +12,7 @@ import {
   type Node,
 } from "@xyflow/react";
 import { useMemo, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
 import type { Task, StageArtifact } from "../lib/api";
 import { api } from "../lib/api";
