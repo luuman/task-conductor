@@ -23,7 +23,7 @@ interface PerfBottomBarProps {
 
 const BAR_H = 34; // px — two-line bottom bar height
 
-/** 每个 tile 的两行内容 */
+/** Two-line content for each tile */
 function TileLines({ id, sys }: {
   id: MetricId;
   sys: ReturnType<typeof usePerfData>["sys"];
