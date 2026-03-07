@@ -1849,7 +1849,7 @@ function SecTrash({ items, onRefresh }: { items: DisabledItem[]; onRefresh: () =
     for (const item of items) {
       try { await api.claudeConfig.deleteDisabledItem(item.type, item.name); ok++; } catch { fail++; }
     }
-    setStatus({ text: fail ? `删除 ${ok} 项，${fail} 项失败` : `已永久删除 ${ok} 项`, color: fail ? "#eab308" : "#22c55e" });
+    setStatus({ text: fail ? `${ok} ok, ${fail} failed` : `${t("claudeConfig.trash.permanentlyDeleted")} ${ok}`, color: fail ? "#eab308" : "#22c55e" });
     onRefresh();
     setTimeout(() => setStatus(null), 3000);
   };
