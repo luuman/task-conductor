@@ -62,11 +62,12 @@ function StatRow({ label, value, accent = "text-app-secondary" }: { label: strin
 }
 
 function ClaudeMetricsPanel() {
+  const { t } = useTranslation();
   const data = useAutoRefresh(() => api.claudeUsage(), 5000);
 
   if (!data) return (
     <div className="bg-app-secondary border border-app rounded-xl p-4 mb-3 animate-pulse text-center text-app-tertiary text-[11px]">
-      加载 Claude 指标...
+      {t('common.loading')}
     </div>
   );
 
