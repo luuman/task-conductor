@@ -17,12 +17,12 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: "dashboard",     label: "仪表盘",  Icon: LayoutDashboard },
-  { id: "canvas",        label: "项目视图", Icon: Layers          },
-  { id: "tasks",         label: "任务管理", Icon: CheckSquare     },
-  { id: "conversations", label: "对话历史", Icon: MessageSquare   },
-  { id: "claude-config", label: "Claude 配置", Icon: Cpu        },
-  { id: "settings",      label: "设置",    Icon: Settings        },
+  { id: "dashboard",     labelKey: "sidebar.nav.dashboard",      Icon: LayoutDashboard },
+  { id: "canvas",        labelKey: "sidebar.nav.canvas",         Icon: Layers          },
+  { id: "tasks",         labelKey: "sidebar.nav.tasks",          Icon: CheckSquare     },
+  { id: "conversations", labelKey: "sidebar.nav.conversations",  Icon: MessageSquare   },
+  { id: "claude-config", labelKey: "sidebar.nav.claudeConfig",   Icon: Cpu             },
+  { id: "settings",      labelKey: "sidebar.nav.settings",       Icon: Settings        },
 ];
 
 export function Sidebar({
