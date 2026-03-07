@@ -52,11 +52,14 @@ const STAGE_ICON: Record<string, string> = {
 
 const APPROVAL_STAGES = new Set(["analysis", "prd", "ui", "plan", "test", "deploy"]);
 
-const STATUS_LABEL: Record<string, string> = {
-  running: "运行中", waiting_review: "待审批", approved: "已批准",
-  rejected: "已驳回", pending: "待处理", done: "已完成", failed: "失败",
-  queued: "排队中",
-};
+function getStatusLabel(t: (key: string) => string): Record<string, string> {
+  return {
+    running: t('taskWorkflow.statusLabel.running'), waiting_review: t('taskWorkflow.statusLabel.approval'),
+    approved: t('taskWorkflow.statusLabel.approved'), rejected: t('taskWorkflow.statusLabel.rejected'),
+    pending: t('taskWorkflow.statusLabel.pending'), done: t('taskWorkflow.statusLabel.done'),
+    failed: t('taskWorkflow.statusLabel.failed'), queued: t('taskWorkflow.statusLabel.queued'),
+  };
+}
 
 const NODE_W = 180;
 const COL_STEP = 250;
