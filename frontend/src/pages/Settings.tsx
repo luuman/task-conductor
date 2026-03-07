@@ -164,7 +164,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               <div className="flex items-center gap-1.5 text-[11px] font-mono">
                 <span className="text-app-secondary">{workspaceRoot || "…"}</span>
                 <span className="text-app-tertiary">/</span>
-                <span className="text-accent">{"<项目名称>"}</span>
+                <span className="text-accent">{t('settings.workspace.projectName')}</span>
               </div>
               <p className="text-[10px] text-app-tertiary">
                 例：{workspaceRoot || "…"}/my-app
