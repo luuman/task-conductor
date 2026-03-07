@@ -34,7 +34,7 @@ export function OptionCards({
           <p className="font-medium text-gray-100 text-sm">{opt.title}</p>
           <div className="flex gap-2 flex-wrap">
             <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">
-              工作量 {opt.effort}
+              {t('optionCards.workload')} {opt.effort}
             </span>
             <span
               className={`text-xs px-2 py-0.5 rounded ${
