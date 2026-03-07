@@ -12,27 +12,27 @@ export interface SettingMeta {
 
 export const METRIC_COLORS: Record<MetricId, ColorMeta[]> = {
   cpu: [
-    { key: "user",      label: "用户",     default: "#FF2D55" },
-    { key: "sys",       label: "系统",     default: "#007AFF" },
-    { key: "efficient", label: "能效核心", default: "#FF2D55" },
-    { key: "perf",      label: "性能核心", default: "#007AFF" },
+    { key: "user",      label: "perf.metricColors.cpu.user",      default: "#FF2D55" },
+    { key: "sys",       label: "perf.metricColors.cpu.sys",       default: "#007AFF" },
+    { key: "efficient", label: "perf.metricColors.cpu.efficient", default: "#FF2D55" },
+    { key: "perf",      label: "perf.metricColors.cpu.perf",      default: "#007AFF" },
   ],
   mem: [
-    { key: "used",   label: "已用", default: "#FF2D55" },
-    { key: "cached", label: "缓存", default: "#007AFF" },
+    { key: "used",   label: "perf.metricColors.mem.used",   default: "#FF2D55" },
+    { key: "cached", label: "perf.metricColors.mem.cached", default: "#007AFF" },
   ],
   net: [
-    { key: "out", label: "上传 ↑", default: "#FF2D55" },
-    { key: "in",  label: "下载 ↓", default: "#007AFF" },
+    { key: "out", label: "perf.metricColors.net.out", default: "#FF2D55" },
+    { key: "in",  label: "perf.metricColors.net.in",  default: "#007AFF" },
   ],
   disk: [
-    { key: "read",  label: "读取", default: "#FF2D55" },
-    { key: "write", label: "写入", default: "#007AFF" },
+    { key: "read",  label: "perf.metricColors.disk.read",  default: "#FF2D55" },
+    { key: "write", label: "perf.metricColors.disk.write", default: "#007AFF" },
   ],
   sensors: [
-    { key: "cpu",   label: "CPU 温度",  default: "#007AFF" },
-    { key: "nvme",  label: "NVMe 温度", default: "#FF9F0A" },
-    { key: "board", label: "主板温度",  default: "#BF5AF2" },
+    { key: "cpu",   label: "perf.metricColors.sensors.cpu",   default: "#007AFF" },
+    { key: "nvme",  label: "perf.metricColors.sensors.nvme",  default: "#FF9F0A" },
+    { key: "board", label: "perf.metricColors.sensors.board", default: "#BF5AF2" },
   ],
 };
 
