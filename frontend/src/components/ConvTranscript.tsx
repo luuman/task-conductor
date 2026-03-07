@@ -54,6 +54,8 @@ import {
 // ── Context ─────────────────────────────────────────────────
 // signal > 0 = expand all (increments), signal < 0 = collapse all (decrements)
 const ExpandSignalCtx = createContext(0);
+// 默认展开模式
+const AutoExpandCtx = createContext(false);
 // 文件打开回调：(filePath) => void
 const OpenFileCtx = createContext<((filePath: string) => void) | null>(null);
 
