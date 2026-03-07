@@ -502,7 +502,7 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
     <ExpandSignalCtx.Provider value={expandSignal}>
       {/* 工具栏 - 置顶悬浮 */}
       {toolCount > 0 && (
-        <div className="sticky top-0 z-10 flex items-center gap-1 px-4 py-1.5 backdrop-blur-md"
+        <div className="sticky top-0 z-10 h-11 flex items-center gap-1 px-4 backdrop-blur-md"
              style={{ background: "rgba(7,7,13,0.85)", borderBottom: "1px solid var(--border)" }}>
           <button
             onClick={expandAll}
