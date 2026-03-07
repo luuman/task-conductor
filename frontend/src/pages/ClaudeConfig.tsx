@@ -412,7 +412,7 @@ export default function ClaudeConfigPage() {
             </div>
           ))}
           {filteredGroups.length === 0 && (
-            <p className="text-[10px] text-app-tertiary text-center py-8">无匹配结果</p>
+            <p className="text-[10px] text-app-tertiary text-center py-8">{t("claudeConfig.shared.noMatchResults")}</p>
           )}
         </div>
 
