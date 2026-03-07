@@ -51,6 +51,16 @@ def _print_table(rows: list[tuple[str, str]], title: str = "") -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+
+    # 飞书字段迁移
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE projects ADD COLUMN feishu_chat_id VARCHAR(100)"))
+            conn.commit()
+    except Exception:
+        pass  # 列已存在
+
     pin = pin_session.generate_pin()
     fixed = os.getenv("TC_PIN", "")
     is_fixed = fixed.isdigit() and len(fixed) == 6
