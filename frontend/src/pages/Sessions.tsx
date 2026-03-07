@@ -373,7 +373,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="过滤工具 / 内容..."
+              placeholder={t('sessions.filter')}
               className="text-[11px] font-mono rounded px-2.5 py-1 outline-none w-44 transition-colors"
               style={{
                 background: "var(--background-tertiary)",
