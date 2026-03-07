@@ -870,7 +870,7 @@ function CommonSettingsGrid({ config, onUpdate, searchQuery }: { config: ClaudeC
       map.get(g)!.push(s);
     }
     return map;
-  }, [searchQuery]);
+  }, [searchQuery, COMMON_SETTINGS]);
 
   if (groups.size === 0) return null;
   return (
