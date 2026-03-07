@@ -147,6 +147,17 @@ export default function App() {
     if (page === "claude-config") {
       return <ClaudeConfig />;
     }
+    if (page === "files" && activeProjectId) {
+      const proj = projects.find((p) => p.id === activeProjectId);
+      if (proj) {
+        return (
+          <ProjectFiles
+            project={proj}
+            onBack={() => setPage("project")}
+          />
+        );
+      }
+    }
     if (page === "canvas") {
       return (
         <ProjectsCanvas
