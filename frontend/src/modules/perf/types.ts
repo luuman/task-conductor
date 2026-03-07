@@ -105,7 +105,7 @@ export const DEFAULT_CONFIG: PerfConfig = {
 };
 
 export const METRIC_LABEL: Record<MetricId, string> = {
-  cpu: "CPU", mem: "内存", net: "网络", disk: "磁盘", sensors: "传感器",
+  cpu: "perf.metricLabel.cpu", mem: "perf.metricLabel.mem", net: "perf.metricLabel.net", disk: "perf.metricLabel.disk", sensors: "perf.metricLabel.sensors",
 };
 
 // ── Data types ───────────────────────────────────────────────────────────────
