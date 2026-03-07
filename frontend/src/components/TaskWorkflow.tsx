@@ -103,6 +103,8 @@ const HANDLE_STYLE: React.CSSProperties = {
 // ── StageNode ─────────────────────────────────────────────────────
 
 function StageNode({ data }: NodeProps) {
+  const { t } = useTranslation();
+  const STATUS_LABEL = getStatusLabel(t);
   const d = data as StageNodeData;
 
   const borderColor = d.isSelected
