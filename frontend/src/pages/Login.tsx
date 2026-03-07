@@ -134,11 +134,11 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               {t('login.local.backendUrl')}<span className="font-mono" style={{ color: "var(--accent)" }}>localhost:7070 → :8765</span>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>PIN 码</label>
+              <label className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.local.pinCode')}</label>
               <Input value={pin} onChange={(e) => setPin(e.target.value)}
-                placeholder="6 位数字" maxLength={6} inputMode="numeric" autoFocus />
+                placeholder={t('login.local.pinPlaceholder')} maxLength={6} inputMode="numeric" autoFocus />
               <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
-                运行 <code className="px-1 rounded" style={{ background: "var(--background-tertiary)" }}>./start.sh</code> 后终端显示的 PIN
+                {t('login.local.pinHint')}
               </p>
             </div>
             {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
