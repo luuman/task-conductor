@@ -57,18 +57,18 @@ import {
 } from "lucide-react";
 
 // ── Hook 事件标签 ────────────────────────────────────────────────
-const EVENT_LABELS: Record<string, { label: string; desc: string }> = {
-  PreToolUse:         { label: "工具调用前",   desc: "Claude 调用工具之前触发" },
-  PostToolUse:        { label: "工具调用后",   desc: "工具调用成功完成后触发" },
-  PostToolUseFailure: { label: "工具调用失败", desc: "工具调用失败后触发" },
-  Stop:               { label: "会话结束",     desc: "Claude 停止响应时触发" },
-  SubagentStart:      { label: "子代理启动",   desc: "子代理开始运行时触发" },
-  SubagentStop:       { label: "子代理结束",   desc: "子代理结束运行时触发" },
-  SessionStart:       { label: "会话开始",     desc: "新会话启动时触发" },
-  SessionEnd:         { label: "会话关闭",     desc: "会话结束时触发" },
-  UserPromptSubmit:   { label: "用户提交",     desc: "用户发送消息时触发" },
-  Notification:       { label: "通知",         desc: "Claude 发出通知时触发" },
-};
+const getEventLabels = (t: (k: string) => string): Record<string, { label: string; desc: string }> => ({
+  PreToolUse:         { label: t("claudeConfig.eventLabels.PreToolUse"),         desc: "Claude 调用工具之前触发" },
+  PostToolUse:        { label: t("claudeConfig.eventLabels.PostToolUse"),        desc: "工具调用成功完成后触发" },
+  PostToolUseFailure: { label: t("claudeConfig.eventLabels.PostToolUseFailure"), desc: "工具调用失败后触发" },
+  Stop:               { label: t("claudeConfig.eventLabels.Stop"),               desc: "Claude 停止响应时触发" },
+  SubagentStart:      { label: t("claudeConfig.eventLabels.SubagentStart"),      desc: "子代理开始运行时触发" },
+  SubagentStop:       { label: t("claudeConfig.eventLabels.SubagentStop"),       desc: "子代理结束运行时触发" },
+  SessionStart:       { label: t("claudeConfig.eventLabels.SessionStart"),       desc: "新会话启动时触发" },
+  SessionEnd:         { label: t("claudeConfig.eventLabels.SessionEnd"),         desc: "会话结束时触发" },
+  UserPromptSubmit:   { label: "UserPromptSubmit",                               desc: "用户发送消息时触发" },
+  Notification:       { label: t("claudeConfig.eventLabels.Notification"),       desc: "Claude 发出通知时触发" },
+});
 
 // ── settings.json 常用设置 ──────────────────────────────────────
 const COMMON_SETTINGS: {
