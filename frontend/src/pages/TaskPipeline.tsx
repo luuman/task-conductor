@@ -403,10 +403,10 @@ export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
 
           {/* Task meta */}
           <div className="text-[10px] text-app-tertiary space-y-0.5 pt-2 border-t border-app">
-            <div>创建：{new Date(task.created_at).toLocaleString()}</div>
-            {task.started_at && <div>开始：{new Date(task.started_at).toLocaleString()}</div>}
-            {task.finished_at && <div>完成：{new Date(task.finished_at).toLocaleString()}</div>}
-            {task.queued_at && !task.started_at && <div>入队：{new Date(task.queued_at).toLocaleString()}</div>}
+            <div>{t('taskPipeline.taskMeta.created')}: {new Date(task.created_at).toLocaleString()}</div>
+            {task.started_at && <div>{t('taskPipeline.taskMeta.started')}: {new Date(task.started_at).toLocaleString()}</div>}
+            {task.finished_at && <div>{t('taskPipeline.taskMeta.completed')}: {new Date(task.finished_at).toLocaleString()}</div>}
+            {task.queued_at && !task.started_at && <div>{t('taskPipeline.taskMeta.enqueued')}: {new Date(task.queued_at).toLocaleString()}</div>}
           </div>
         </div>
       )}
