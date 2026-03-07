@@ -192,7 +192,7 @@ export function ClaudeMonitorPanel({ open, onClose }: ClaudeMonitorPanelProps) {
                   : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#161b22]"
               )}
             >
-              {paused ? "▶ 继续" : "⏸ 暂停"}
+              {paused ? t('claudeMonitor.controls.resume') : t('claudeMonitor.controls.pause')}
             </button>
             <button
               onClick={handleClear}
