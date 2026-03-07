@@ -214,7 +214,8 @@
       "testProjects": "Test Projects"
     },
     "projectTaskList": {
-      "knowledgeBase": "Knowledge Base",
+      "errorBook": "Error Book",
+      "docsKnowledge": "Knowledge Base",
       "noTasks": "No tasks yet"
     }
   },
