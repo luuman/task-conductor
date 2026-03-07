@@ -219,7 +219,7 @@ export default function ClaudeConfigPage() {
       writeCache(CK_CFG, cfg); writeCache(CK_OV, ov);
       loadRef.current = true;
     } catch (e) {
-      if (!loadRef.current) setError(e instanceof Error ? e.message : "加载失败");
+      if (!loadRef.current) setError(e instanceof Error ? e.message : t("claudeConfig.shared.loadFailed"));
     } finally { setLoading(false); }
     api.claudeConfig.listSkills().then(setSkills).catch(() => {});
     api.claudeConfig.listAgents().then(setAgents).catch(() => {});
