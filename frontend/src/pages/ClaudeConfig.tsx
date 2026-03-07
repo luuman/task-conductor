@@ -768,11 +768,11 @@ function SecOverview({ config, overview, onUpdate, claudeMd, onClaudeMdChange, s
       {overview && (
         <div className="grid grid-cols-5 gap-3">
           {[
-            { label: "CLI 版本", value: overview.cli_version, Icon: Terminal, color: "var(--accent)" },
-            { label: "总消息", value: fmtNum(overview.total_messages), Icon: MessageSquare, color: "#22c55e" },
-            { label: "工具调用", value: fmtNum(overview.total_tool_calls), Icon: Wrench, color: "#f59e0b" },
-            { label: "会话数", value: fmtNum(overview.total_sessions), Icon: Users, color: "#38bdf8" },
-            { label: "活跃天数", value: String(overview.active_days), Icon: Calendar, color: "#a78bfa" },
+            { label: t("claudeConfig.overviewStats.cliVersion"), value: overview.cli_version, Icon: Terminal, color: "var(--accent)" },
+            { label: t("claudeConfig.overviewStats.totalMessages"), value: fmtNum(overview.total_messages), Icon: MessageSquare, color: "#22c55e" },
+            { label: t("claudeConfig.overviewStats.toolCalls"), value: fmtNum(overview.total_tool_calls), Icon: Wrench, color: "#f59e0b" },
+            { label: t("claudeConfig.overviewStats.sessionCount"), value: fmtNum(overview.total_sessions), Icon: Users, color: "#38bdf8" },
+            { label: t("claudeConfig.overviewStats.activeDays"), value: String(overview.active_days), Icon: Calendar, color: "#a78bfa" },
           ].map(({ label, value, Icon, color }) => (
             <div key={label} className="bg-app-secondary border border-app rounded-xl px-3 py-3 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, ${color}, transparent 60%)` }} />
