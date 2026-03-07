@@ -248,7 +248,7 @@ export function Sidebar({
 
           {collapsed && (
             <button onClick={onNewProject}
-              title="新建项目"
+              title={t('sidebar.newProject')}
               className="relative w-full flex items-center justify-center py-1.5 rounded-lg transition-colors hover:bg-white/[0.03]"
               style={{ color: "var(--text-tertiary)" }}>
               <Plus size={12} strokeWidth={2} />
