@@ -1,14 +1,40 @@
 // frontend/src/pages/ConversationHistory.tsx
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { List } from "lucide-react";
+import { List, Plus, Bot as BotIcon } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { api, type ClaudeSession, type TranscriptMessage, type Project } from "../lib/api";
 import { ConvSessionList } from "../components/ConvSessionList";
 import { ConvTranscript } from "../components/ConvTranscript";
+import { ChatInput } from "../components/ChatInput";
+import { useChatWs } from "../hooks/useChatWs";
 
 interface Props {
   projects: Project[];
 }
+
+/** 简化版 Markdown 组件（用于流式回复气泡） */
+const streamMdComponents = {
+  p:      ({ children }: { children?: React.ReactNode }) => <p className="mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
+  code:   ({ children, className }: { children?: React.ReactNode; className?: string }) => {
+    if (className?.includes("language-")) {
+      return (
+        <code className="block text-[11px] font-mono px-3 py-2 rounded-md my-1.5 overflow-x-auto whitespace-pre"
+              style={{ background: "var(--background)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+          {children}
+        </code>
+      );
+    }
+    return (
+      <code className="text-[11px] font-mono px-1 py-0.5 rounded"
+            style={{ background: "var(--background-tertiary)", color: "var(--accent)" }}>
+        {children}
+      </code>
+    );
+  },
+  pre: ({ children }: { children?: React.ReactNode }) => <pre className="my-1 overflow-x-auto">{children}</pre>,
+};
 
 export default function ConversationHistory({ projects }: Props) {
   const { t } = useTranslation();
@@ -22,8 +48,26 @@ export default function ConversationHistory({ projects }: Props) {
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1);
   const [autoExpand, setAutoExpand] = useState(true);
 
+  // 新对话模式
+  const [isNewChat, setIsNewChat] = useState(false);
+  const [chatMessages, setChatMessages] = useState<TranscriptMessage[]>([]);
+
   const transcriptRef = useRef<HTMLDivElement>(null);
   const transcriptCache = useRef<Map<string, { messages: TranscriptMessage[]; fileFound: boolean }>>(new Map());
+
+  // Chat WebSocket
+  const handleChatComplete = useCallback((fullText: string) => {
+    setChatMessages(prev => [
+      ...prev,
+      {
+        role: "assistant" as const,
+        ts: new Date().toISOString(),
+        blocks: [{ type: "text" as const, text: fullText }],
+      },
+    ]);
+  }, []);
+
+  const { send: chatSend, stop: chatStop, isGenerating, currentReply, error: chatError } = useChatWs(handleChatComplete);
 
   const loadSessions = useCallback(() => {
     api.sessions.list()
@@ -40,13 +84,14 @@ export default function ConversationHistory({ projects }: Props) {
   // 默认选中第一个会话
   const autoSelected = useRef(false);
   useEffect(() => {
-    if (!autoSelected.current && sessions.length > 0 && !selectedSession) {
+    if (!autoSelected.current && sessions.length > 0 && !selectedSession && !isNewChat) {
       autoSelected.current = true;
       handleSelect(sessions[0]);
     }
   }, [sessions]);
 
   const handleSelect = (s: ClaudeSession) => {
+    setIsNewChat(false);
     setSelectedSession(s);
     setActiveQuestionIdx(-1);
     const cached = transcriptCache.current.get(s.session_id);
@@ -67,10 +112,43 @@ export default function ConversationHistory({ projects }: Props) {
       .catch(() => { setTranscript([]); setFileFound(false); setTranscriptLoading(false); });
   };
 
+  const handleNewChat = () => {
+    setIsNewChat(true);
+    setSelectedSession(null);
+    setTranscript([]);
+    setChatMessages([]);
+    setTranscriptLoading(false);
+    setFileFound(true);
+  };
+
+  const handleChatSend = (message: string, model: string) => {
+    // 追加用户消息
+    setChatMessages(prev => [
+      ...prev,
+      {
+        role: "user" as const,
+        ts: new Date().toISOString(),
+        blocks: [{ type: "text" as const, text: message }],
+      },
+    ]);
+    chatSend(message, model);
+  };
+
+  // 自动滚动到底部（新消息或流式输出时）
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isNewChat) {
+      chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, currentReply, isNewChat]);
+
+  // 展示的消息：历史会话模式用 transcript，新对话模式用 chatMessages
+  const displayMessages = isNewChat ? chatMessages : transcript;
+
   // 提取用户问题列表（带原始 index）
   const questions = useMemo(() => {
     const qs: { text: string; msgIndex: number }[] = [];
-    transcript.forEach((msg, i) => {
+    displayMessages.forEach((msg, i) => {
       if (msg.role !== "user") return;
       const text = msg.blocks
         .filter(b => b.type === "text")
@@ -80,14 +158,13 @@ export default function ConversationHistory({ projects }: Props) {
       if (text) qs.push({ text: text.slice(0, 200), msgIndex: i });
     });
     return qs;
-  }, [transcript]);
+  }, [displayMessages]);
 
   // 跳转到对应问题
   const jumpToQuestion = useCallback((qIdx: number, msgIndex: number) => {
     setActiveQuestionIdx(qIdx);
     const container = transcriptRef.current;
     if (!container) return;
-    // 找到第 msgIndex 个消息 DOM
     const cards = container.querySelectorAll("[data-msg-index]");
     for (const card of cards) {
       if ((card as HTMLElement).dataset.msgIndex === String(msgIndex)) {
@@ -97,7 +174,7 @@ export default function ConversationHistory({ projects }: Props) {
     }
   }, []);
 
-  const hasQuestions = questions.length > 0 && !transcriptLoading && fileFound;
+  const hasQuestions = questions.length > 0 && !transcriptLoading && fileFound && !isNewChat;
 
   return (
     <div className="flex-1 flex h-full overflow-hidden"
@@ -108,22 +185,111 @@ export default function ConversationHistory({ projects }: Props) {
            style={{ borderRight: "1px solid var(--border)" }}>
         <div className="h-11 flex items-center px-3 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
-          <span className="text-[11px] font-semibold"
+          <span className="text-[11px] font-semibold flex-1"
                 style={{ color: "var(--text-primary)" }}>{t('conversationHistory.header')}</span>
+          <button
+            onClick={handleNewChat}
+            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded transition-colors hover:brightness-125"
+            style={{
+              color: isNewChat ? "var(--accent)" : "var(--text-tertiary)",
+              background: isNewChat ? "var(--accent-subtle)" : "transparent",
+            }}
+            title="新建对话"
+          >
+            <Plus size={12} />
+            <span>新对话</span>
+          </button>
         </div>
         <ConvSessionList
           sessions={sessions}
           loading={sessionsLoading}
-          selectedId={selectedSession?.id ?? null}
+          selectedId={isNewChat ? null : (selectedSession?.id ?? null)}
           onSelect={handleSelect}
         />
       </div>
 
-      {/* ── 中栏：对话内容 ── */}
+      {/* ── 中栏：对话内容 + 聊天输入 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* 对话内容 */}
         <div ref={transcriptRef} className="flex-1 overflow-y-auto">
-          <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} autoExpand={autoExpand} />
+          {isNewChat ? (
+            chatMessages.length === 0 && !currentReply ? (
+              <div className="flex flex-col items-center justify-center h-full gap-3"
+                   style={{ color: "var(--text-tertiary)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                     style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                  <BotIcon size={20} style={{ color: "var(--accent)" }} />
+                </div>
+                <p className="text-[12px]">开始新对话</p>
+                <p className="text-[10px] opacity-50">输入消息与 Claude 交流</p>
+              </div>
+            ) : (
+              <div className="py-2 space-y-1">
+                {/* 已完成的消息 */}
+                <ConvTranscript messages={chatMessages} loading={false} fileFound={true} scrollRef={transcriptRef} autoExpand={autoExpand} />
+
+                {/* 流式回复气泡 */}
+                {currentReply && (
+                  <div className="flex items-start gap-3 px-4 py-2 justify-start">
+                    <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                         style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                      <BotIcon size={14} style={{ color: "var(--accent)" }} />
+                    </div>
+                    <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
+                         style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
+                      <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={streamMdComponents as any}>
+                          {currentReply}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 生成中但还没收到内容 */}
+                {isGenerating && !currentReply && (
+                  <div className="flex items-start gap-3 px-4 py-2 justify-start">
+                    <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                         style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                      <BotIcon size={14} style={{ color: "var(--accent)" }} />
+                    </div>
+                    <div className="min-w-0 rounded-lg px-3.5 py-2.5"
+                         style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.2s" }} />
+                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.4s" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 错误提示 */}
+                {chatError && (
+                  <div className="px-4 py-2">
+                    <div className="text-[11px] px-3 py-2 rounded-lg"
+                         style={{ color: "var(--danger)", background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}>
+                      {chatError}
+                    </div>
+                  </div>
+                )}
+
+                <div ref={chatBottomRef} />
+              </div>
+            )
+          ) : (
+            <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} autoExpand={autoExpand} />
+          )}
         </div>
+
+        {/* 聊天输入框（仅新对话模式） */}
+        {isNewChat && (
+          <ChatInput
+            onSend={handleChatSend}
+            onStop={chatStop}
+            isGenerating={isGenerating}
+          />
+        )}
       </div>
 
       {/* ── 右栏：问题导航 ── */}
