@@ -1610,6 +1610,7 @@
     "editing": "Editing",
     "unsaved": "Unsaved",
     "imagePreview": "Image preview",
-    "lines": "lines"
+    "lines": "lines",
+    "selectProject": "Select a project to browse files"
   }
 }
