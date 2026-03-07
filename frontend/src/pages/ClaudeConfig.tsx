@@ -600,7 +600,7 @@ function PresetGallery({ presets, onInstall, itemLabel }: {
             ) : (
               <button onClick={() => install(p)} disabled={installing === p.name}
                 className="shrink-0 mt-0.5 text-[9px] px-2 py-1 rounded bg-accent hover:bg-accent-hover text-white disabled:opacity-50">
-                {installing === p.name ? "..." : "安装"}
+                {installing === p.name ? "..." : t("claudeConfig.shared.install")}
               </button>
             )}
           </div>
