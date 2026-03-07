@@ -710,7 +710,7 @@ function FieldRenderer({ field, value, onChange }: {
                   setTagInput("");
                 }
               }}
-              placeholder="输入后按 Enter 添加" spellCheck={false}
+              placeholder={t("globalConfig.fieldRenderer.addHint")} spellCheck={false}
               className={cn(inputCls, "flex-1")} />
             <button onClick={() => {
               if (tagInput.trim()) { onChange([...tags, tagInput.trim()]); setTagInput(""); }
