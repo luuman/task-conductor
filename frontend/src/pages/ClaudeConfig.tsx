@@ -939,7 +939,7 @@ function OtherFieldsGrid({ config, onUpdate }: { config: ClaudeConfig; onUpdate:
   if (!entries.length && !newKey) return null;
   return (
     <div>
-      <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">其他配置字段</p>
+      <p className="text-[11px] font-semibold text-app-secondary uppercase tracking-wider mb-3">{t("claudeConfig.otherConfig.title")}</p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {entries.map(([key, value]) => {
           const disp = editValues[key] ?? fmt(value);
