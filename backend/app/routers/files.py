@@ -311,13 +311,46 @@ def git_status(
 # ── docs 知识库 ─────────────────────────────────────────
 DOCS_EXTENSIONS = {".md", ".txt", ".rst", ".html", ".pdf", ".json", ".yaml", ".yml", ".toml"}
 
+import re
+
+_HEADING_RE = re.compile(r"^#{1,6}\s+(.+)")
+_HTML_HEADING_RE = re.compile(r"<h[1-6][^>]*>([^<]+)</h[1-6]>", re.IGNORECASE)
+
+
+def _extract_title(file_path: Path) -> str | None:
+    """从文档文件中提取第一个标题，返回 None 则 fallback 到文件名"""
+    ext = file_path.suffix.lower()
+    if ext not in {".md", ".txt", ".rst", ".html"}:
+        return None
+    try:
+        # 只读前 50 行，够找标题了
+        with open(file_path, "r", encoding="utf-8") as f:
+            for _ in range(50):
+                line = f.readline()
+                if not line:
+                    break
+                line = line.strip()
+                if not line:
+                    continue
+                if ext in {".md", ".txt", ".rst"}:
+                    m = _HEADING_RE.match(line)
+                    if m:
+                        return m.group(1).strip().rstrip("#").strip()
+                elif ext == ".html":
+                    m = _HTML_HEADING_RE.search(line)
+                    if m:
+                        return m.group(1).strip()
+    except (OSError, UnicodeDecodeError):
+        pass
+    return None
+
 
 @router.get("/{project_id}/docs", summary="列出项目 docs/ 文档")
 def list_docs(
     project_id: int,
     db: Session = Depends(_get_db),
 ):
-    """递归扫描项目 docs/ 目录，返回文档列表"""
+    """递归扫描项目 docs/ 目录，返回文档列表（含标题提取）"""
     base = _get_project_path(project_id, db)
     docs_dir = base / "docs"
     if not docs_dir.is_dir():
@@ -339,6 +372,8 @@ def list_docs(
                 elif entry.suffix.lower() in DOCS_EXTENSIONS:
                     info = _file_info(entry, base)
                     if info:
+                        title = _extract_title(entry)
+                        info["title"] = title  # None if not found
                         items.append(info)
         except PermissionError:
             pass
