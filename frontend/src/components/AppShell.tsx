@@ -68,6 +68,7 @@ export function AppShell({
         }}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(c => !c)}
+        connectionStatus={connectionStatus}
       />
 
       {/* Main */}
