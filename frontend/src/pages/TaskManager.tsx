@@ -278,9 +278,9 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
             )}
           >
             {phase === "loading" ? (
-              <><span className="animate-spin">◌</span> AI 分析中...</>
+              <><span className="animate-spin">◌</span> {t('taskManager.aiButton.analyzing')}</>
             ) : (
-              <>✦ AI 梳理优先级 {inbox.length > 0 && `(${inbox.length})`}</>
+              <>✦ {t('taskManager.aiButton.analyze')} {inbox.length > 0 && `(${inbox.length})`}</>
             )}
           </button>
         </div>
