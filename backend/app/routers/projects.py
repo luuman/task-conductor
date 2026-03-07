@@ -28,6 +28,13 @@ def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
             pass
     p = Project(**data)
     db.add(p); db.commit(); db.refresh(p)
+
+    # 飞书自动建群
+    from ..feishu.client import feishu_client
+    if feishu_client.enabled:
+        import asyncio
+        asyncio.create_task(_create_feishu_group(p.id, p.name))
+
     return p
 
 @router.get("", response_model=list[ProjectOut], summary="项目列表")
