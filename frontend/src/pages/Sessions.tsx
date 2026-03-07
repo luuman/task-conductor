@@ -1,5 +1,6 @@
 // frontend/src/pages/Sessions.tsx
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type ClaudeSession, type ClaudeEvent } from "../lib/api";
 import type { ClaudeHookEvent, WsStatus } from "../hooks/useClaudeMonitor";
 import { cn } from "../lib/utils";
