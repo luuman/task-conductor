@@ -49,7 +49,7 @@ export function usePerfConfig() {
   const [config, setLocal] = useState<PerfConfig>(() => _current);
 
   useEffect(() => {
-    // 挂载时同步最新状态，然后订阅后续变化
+    // Sync latest state on mount, then subscribe to subsequent changes
     setLocal(_current);
     _listeners.add(setLocal);
     return () => { _listeners.delete(setLocal); };
