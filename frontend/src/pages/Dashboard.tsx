@@ -201,7 +201,7 @@ function ClaudeMetricsPanel() {
             <StatRow label={t('dashboard.claudeMetrics.avgDuration')}
               value={performance.avg_duration_s != null ? `${performance.avg_duration_s} s` : "—"}
             />
-            <StatRow label="字符/秒"
+            <StatRow label={t('dashboard.claudeMetrics.charsPerSec')}
               value={performance.avg_chars_per_sec != null ? `${performance.avg_chars_per_sec}` : "—"}
             />
           </div>
