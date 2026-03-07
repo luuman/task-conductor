@@ -237,9 +237,9 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
       <div className="flex items-center gap-2 px-3 py-2"
            style={{ background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
         <FileEdit size={13} strokeWidth={1.75} style={{ color: "var(--warning)" }} />
-        <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>
-          {filePath}
-        </span>
+        <ClickableFilePath filePath={filePath}
+          className="text-[11px] font-mono flex-1 truncate"
+          style={{ color: "var(--text-secondary)" }} />
         <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
           {added > 0 && <span style={{ color: "var(--success)" }}>+{added}</span>}
           {removed > 0 && <span style={{ color: "var(--danger)" }}>−{removed}</span>}
