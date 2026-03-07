@@ -442,6 +442,12 @@ export interface GitStatusResponse {
   summary: Record<string, number>;
 }
 
+export interface ChatModel {
+  id: string;
+  name: string;
+  default?: boolean;
+}
+
 export interface InboxItem { id: string; title: string; description: string; }
 export interface ItemAnalysis {
   id: string;
