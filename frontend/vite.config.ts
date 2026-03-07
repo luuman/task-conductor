@@ -9,10 +9,12 @@ export default defineConfig({
     port: 7070,
     strictPort: true,
     proxy: {
-      "/api":   { target: "http://localhost:8765", changeOrigin: true },
-      "/auth":  { target: "http://localhost:8765", changeOrigin: true },
-      "/hooks": { target: "http://localhost:8765", changeOrigin: true },
-      "/ws":    { target: "ws://localhost:8765",   ws: true, changeOrigin: true },
+      "/api":        { target: "http://localhost:8765", changeOrigin: true },
+      "/auth":       { target: "http://localhost:8765", changeOrigin: true },
+      "/health":     { target: "http://localhost:8765", changeOrigin: true },
+      "/agent/info": { target: "http://localhost:8765", changeOrigin: true },
+      "/hooks":      { target: "http://localhost:8765", changeOrigin: true },
+      "/ws":         { target: "ws://localhost:8765",   ws: true, changeOrigin: true },
     },
   },
 })
