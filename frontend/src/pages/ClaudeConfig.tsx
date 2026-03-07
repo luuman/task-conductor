@@ -1581,6 +1581,7 @@ function SecEnvVars() {
 // Sec: Plugins
 // ═══════════════════════════════════════════════════════════════════
 function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; overview: ClaudeOverview | null; onUpdate: (c: ClaudeConfig) => void }) {
+  const { t } = useTranslation();
   const [saving, setSaving] = useState<string | null>(null);
   const [newId, setNewId] = useState("");
   const toggle = async (id: string, en: boolean) => { setSaving(id); try { onUpdate(await api.claudeConfig.togglePlugin(id, en)); } finally { setSaving(null); } };
