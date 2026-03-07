@@ -1591,8 +1591,8 @@ function SecPlugins({ config, overview, onUpdate }: { config: ClaudeConfig; over
   const instMap = new Map((overview?.installed_plugins ?? []).map(p => [p.plugin_id, p]));
   return (
     <div className="space-y-4">
-      <SectionHeader icon={Plug} color="#22c55e" label="插件管理" desc="启用/禁用 Claude Code 插件" />
-      {!plugins.length && <Empty text="暂无已配置的插件" />}
+      <SectionHeader icon={Plug} color="#22c55e" label={t("claudeConfig.plugins.title")} desc="启用/禁用 Claude Code 插件" />
+      {!plugins.length && <Empty text={t("claudeConfig.plugins.noPlugins")} />}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {plugins.map(([pid, enabled]) => {
           const inst = instMap.get(pid);
