@@ -103,8 +103,8 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     <div className="flex-1 overflow-y-auto p-6">
       <div className="max-w-4xl space-y-6">
         <div>
-          <h1 className="text-base font-semibold text-app">设置</h1>
-          <p className="text-app-tertiary text-xs mt-0.5">工作区配置与连接认证</p>
+          <h1 className="text-base font-semibold text-app">{t('settings.header.title')}</h1>
+          <p className="text-app-tertiary text-xs mt-0.5">{t('settings.header.subtitle')}</p>
         </div>
 
         {/* 工作区设置 */}
