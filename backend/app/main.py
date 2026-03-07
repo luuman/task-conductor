@@ -430,6 +430,19 @@ async def claude_monitor_ws(websocket: WebSocket):
         manager.disconnect(websocket, "sessions")
 
 
+@app.websocket("/ws/chat")
+async def ws_chat(websocket: WebSocket):
+    """
+    [WebSocket] 与 Claude 自由对话。
+
+    前端发送 `{"type": "chat", "message": "..."}` 开始对话，
+    后端流式返回 `chat_chunk` / `chat_done` / `chat_error` 消息。
+    支持 `{"type": "stop"}` 中断生成，`{"type": "ping"}` 心跳。
+    """
+    from app.routers.chat import handle_chat_ws
+    await handle_chat_ws(websocket)
+
+
 # ── Claude Code Hook 接收端 ──────────────────────────────────────
 
 @app.post("/hooks/claude", tags=["会话"], summary="接收 Claude Code Hook 事件")
