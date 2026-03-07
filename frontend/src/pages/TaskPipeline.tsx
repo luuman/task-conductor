@@ -204,6 +204,9 @@ function ArtifactCard({ artifact }: {
 
 // ── Main Component ───────────────────────────────────────────────
 export default function TaskPipeline({ taskId, onBack }: TaskPipelineProps) {
+  const { t } = useTranslation();
+  const STAGE_LABEL = useTPStageLabelMap();
+  const STATUS_LABEL = useTPStatusLabelMap();
   const [task, setTask] = useState<Task | null>(null);
   const [artifacts, setArtifacts] = useState<StageArtifact[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
