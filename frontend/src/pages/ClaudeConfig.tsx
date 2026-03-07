@@ -1454,7 +1454,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
         </div>} />
       {showCreate && (
         <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
-          <p className="text-xs font-semibold text-app">新建规则</p>
+          <p className="text-xs font-semibold text-app">{t("claudeConfig.rules.newRule")}</p>
           <div className="flex gap-2">
             <input value={newName} onChange={e => { setNewName(e.target.value); setCreateErr(""); }} placeholder="规则名称（如 no-console-log）"
               className="flex-1 px-3 py-2 text-xs bg-app border border-app rounded-lg outline-none focus:border-accent/60 text-app placeholder:text-app-tertiary"
