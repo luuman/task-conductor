@@ -198,7 +198,9 @@
       "cancelTestMark": "取消测试标记",
       "markAsTest": "标记为测试项目",
       "deleteProject": "删除项目",
-      "deleteConfirm": "确定删除此项目及其所有任务？"
+      "deleteConfirm": "确定删除此项目及其所有任务？",
+      "feishuSyncOn": "飞书同步已开启（点击关闭）",
+      "feishuSyncOff": "开启飞书会话同步"
     },
     "overview": {
       "title": "概览",
