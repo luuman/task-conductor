@@ -191,10 +191,10 @@ function ClaudeMetricsPanel() {
 
         {/* ── 性能指标 ── */}
         <div className="p-4 border-t lg:border-t-0 border-app space-y-2">
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">性能</p>
+          <p className="text-[9px] font-semibold uppercase tracking-widest text-app-tertiary">{t('dashboard.claudeMetrics.performance')}</p>
           <div className="space-y-1">
-            <StatRow label="调用次数" value={String(performance.call_count)} />
-            <StatRow label="TTFT"
+            <StatRow label={t('dashboard.claudeMetrics.callCount')} value={String(performance.call_count)} />
+            <StatRow label={t('dashboard.claudeMetrics.ttft')}
               value={performance.avg_ttft_ms != null ? `${performance.avg_ttft_ms} ms` : "—"}
               accent={performance.avg_ttft_ms != null && performance.avg_ttft_ms < 1000 ? "text-green-400" : "text-app-secondary"}
             />
