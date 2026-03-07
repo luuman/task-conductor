@@ -504,7 +504,7 @@ function StageDetailPanel({
                       (c.score ?? 0) >= 6 ? "text-yellow-400" : "text-red-400"
                     )}>{c.score}/10</span>
                     <span className={cn("text-[10px]", c.pass_review ? "text-green-400" : "text-red-400")}>
-                      {c.pass_review ? "通过" : "未通过"}
+                      {c.pass_review ? t('taskWorkflow.stageDetailPanel.criticPass') : t('taskWorkflow.stageDetailPanel.criticFail')}
                     </span>
                   </div>
                 );
