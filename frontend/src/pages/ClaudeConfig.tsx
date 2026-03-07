@@ -837,8 +837,8 @@ function ActivityChart({ data }: { data: ClaudeOverview["daily_activity"] }) {
         })}
       </svg>
       <div className="flex gap-4 mt-1.5">
-        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary"><div className="w-2 h-2 rounded-sm" style={{ background: "#4477ff", opacity: 0.7 }} />消息</div>
-        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary"><div className="w-2 h-2 rounded-sm" style={{ background: "#f59e0b", opacity: 0.5 }} />工具调用</div>
+        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary"><div className="w-2 h-2 rounded-sm" style={{ background: "#4477ff", opacity: 0.7 }} />{t("claudeConfig.shared.message")}</div>
+        <div className="flex items-center gap-1.5 text-[9px] text-app-tertiary"><div className="w-2 h-2 rounded-sm" style={{ background: "#f59e0b", opacity: 0.5 }} />{t("claudeConfig.shared.toolCall")}</div>
       </div>
     </div>
   );
