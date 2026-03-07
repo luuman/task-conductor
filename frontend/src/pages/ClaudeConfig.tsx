@@ -1568,7 +1568,7 @@ function SecEnvVars() {
               <span className="text-[9px] text-app-tertiary">{env.desc}</span>
             </div>
             <div className="text-[11px] font-mono text-app-secondary bg-app border border-app rounded-lg px-3 py-2">
-              {env.pw ? "••••••••" : <span className="text-app-tertiary">（从环境读取）</span>}
+              {env.pw ? "••••••••" : <span className="text-app-tertiary">(env)</span>}
             </div>
           </div>
         ))}
