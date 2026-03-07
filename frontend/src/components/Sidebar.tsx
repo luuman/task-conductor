@@ -179,7 +179,7 @@ export function Sidebar({
                   <span className="flex-1">{t('sidebar.liveMonitor')}</span>
                   {active && (
                     <span className="text-[9px] font-mono font-semibold tracking-widest text-emerald-400">
-                      LIVE
+                      {t('sidebar.live')}
                     </span>
                   )}
                 </>
