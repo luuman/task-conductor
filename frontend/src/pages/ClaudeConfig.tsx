@@ -1197,7 +1197,7 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
         </div>} />
       {showCreate && (
         <div className="bg-app-secondary border border-accent/30 rounded-xl p-4 space-y-3">
-          <p className="text-xs font-semibold text-app">新建自定义命令</p>
+          <p className="text-xs font-semibold text-app">{t("claudeConfig.commands.newCommand")}</p>
           <div className="flex gap-2">
             <div className="flex items-center flex-1 px-3 py-2 bg-app border border-app rounded-lg focus-within:border-accent/60">
               <span className="text-xs text-app-tertiary font-mono">/</span>
