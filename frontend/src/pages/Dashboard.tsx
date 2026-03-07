@@ -303,7 +303,7 @@ function KPICard({
 }
 
 // 半圆仪表盘（High Availability Gauge）
-function GaugeChart({ pct }: { pct: number }) {
+function GaugeChart({ pct, label }: { pct: number; label?: string }) {
   const cx = 150, cy = 155, r = 110;
   const totalArc = Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
