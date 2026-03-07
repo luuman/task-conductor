@@ -1509,6 +1509,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
 // Sec: Permissions
 // ═══════════════════════════════════════════════════════════════════
 function SecPermissions({ config, onUpdate }: { config: ClaudeConfig; onUpdate: (c: ClaudeConfig) => void }) {
+  const { t } = useTranslation();
   const [jsonText, setJsonText] = useState(() => JSON.stringify(config.permissions, null, 2));
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
