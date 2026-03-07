@@ -1,5 +1,6 @@
 // frontend/src/pages/TaskPipeline.tsx
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type Task, type StageArtifact, getWsUrl } from "../lib/api";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
