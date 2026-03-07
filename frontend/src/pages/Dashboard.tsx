@@ -816,7 +816,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
           {testProjects.length > 0 && (
             <>
               <h2 className="text-[11px] font-semibold uppercase tracking-wider text-purple-400/70 mb-2 flex items-center gap-1.5">
-                <FlaskConical size={11} /> 测试项目 ({testProjects.length})
+                <FlaskConical size={11} /> {t('dashboard.overview.testProjects')} ({testProjects.length})
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {testProjects.map((p) => (
