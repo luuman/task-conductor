@@ -420,7 +420,7 @@ function Tooltip({ stats, state, color, mouse }: {
             }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, marginTop: 3, color: "var(--text-tertiary)" }}>
-            <span>完成进度</span><span style={{ color: meta.base, fontWeight: 600 }}>{pct}%</span>
+            <span>{t('projectsCanvas.tooltip.progress')}</span><span style={{ color: meta.base, fontWeight: 600 }}>{pct}%</span>
           </div>
         </>
       )}
