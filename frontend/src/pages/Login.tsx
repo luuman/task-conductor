@@ -156,7 +156,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               <Input value={tunnelUrl} onChange={(e) => setTunnelUrl(e.target.value)}
                 placeholder="https://abc123.trycloudflare.com" autoFocus />
               <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
-                在服务器运行 <code className="px-1 rounded" style={{ background: "var(--background-tertiary)" }}>./start.sh</code> 获取此 URL
+                {t('login.tunnel.runOnServer')} <code className="px-1 rounded" style={{ background: "var(--background-tertiary)" }}>./start.sh</code>
               </p>
             </div>
             <div className="space-y-1.5">
