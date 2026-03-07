@@ -153,7 +153,7 @@ export default function TaskManager({ projects }: { projects: Project[] }) {
         title: item.title,
         description: item.description,
         projectId: selectedProjectId,
-        projectName: proj?.name ?? "未知项目",
+        projectName: proj?.name ?? t('taskManager.queue.unknownProject'),
         taskId: task.id,
       }]);
       setInbox((prev) => prev.filter((i) => i.id !== analysis.id));
