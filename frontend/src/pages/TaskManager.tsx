@@ -27,15 +27,16 @@ const COMPLEXITY_COLOR: Record<string, string> = {
   L:  "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
   XL: "bg-red-500/15 text-red-400 border-red-500/20",
 };
-const COMPLEXITY_LABEL: Record<string, string> = { S: "S·1天内", M: "M·2-3天", L: "L·1周", XL: "XL·1周+" };
+const COMPLEXITY_KEYS: Record<string, string> = { S: "taskManager.complexityLabels.S", M: "taskManager.complexityLabels.M", L: "taskManager.complexityLabels.L", XL: "taskManager.complexityLabels.XL" };
 
 function ComplexityBadge({ c }: { c: string }) {
+  const { t } = useTranslation();
   return (
     <span className={cn(
       "text-[9px] px-1.5 py-0.5 rounded border font-mono font-medium",
       COMPLEXITY_COLOR[c] ?? "bg-gray-500/15 text-gray-400 border-gray-500/20"
     )}>
-      {COMPLEXITY_LABEL[c] ?? c}
+      {COMPLEXITY_KEYS[c] ? t(COMPLEXITY_KEYS[c]) : c}
     </span>
   );
 }
