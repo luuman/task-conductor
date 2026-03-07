@@ -319,7 +319,9 @@
     "eventCount": "条事件",
     "viewTabs": {
       "realtime": "● 实时",
-      "history": "◷ 历史"
+      "history": "◷ 历史",
+      "allSessions": "全部会话",
+      "showAll": "显示全部"
     },
     "filter": "过滤工具 / 内容...",
     "controls": {
