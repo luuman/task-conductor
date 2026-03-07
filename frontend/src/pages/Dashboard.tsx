@@ -642,12 +642,13 @@ function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated:
   );
 }
 
-function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest }: {
+function ProjectCard({ project, onSelect, onOpenTask, onDelete, onToggleTest, onToggleFeishuSync }: {
   project: Project;
   onSelect: () => void;
   onOpenTask: (id: number) => void;
   onDelete?: (id: number) => void;
   onToggleTest?: (id: number, isTest: boolean) => void;
+  onToggleFeishuSync?: (id: number, enabled: boolean) => void;
 }) {
   const { t } = useTranslation();
   const [tasks, setTasks] = useState<Task[]>([]);
