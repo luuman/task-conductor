@@ -201,7 +201,7 @@ export function PerfBar({ connectionStatus, onDisconnect }: PerfBarProps) {
                 className="text-[10px] px-1.5 py-0.5 rounded transition-colors hover:text-red-400 hover:bg-red-400/10"
                 style={{ color: "#636366" }}
               >
-                断开
+                {t('perfBar.disconnectedAlt')}
               </button>
             )}
           </div>
