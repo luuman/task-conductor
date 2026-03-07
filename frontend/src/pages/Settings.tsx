@@ -174,6 +174,30 @@ export default function Settings({ onDisconnect }: SettingsProps) {
           </div>
         </section>
 
+        {/* ── 语言切换 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.language.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.language.hint')}</p>
+          </div>
+          <div className="px-4 py-3 flex gap-2">
+            {(["zh", "en"] as const).map(lng => (
+              <button
+                key={lng}
+                onClick={() => setLanguage(lng)}
+                className={cn(
+                  "px-4 py-2 text-xs rounded-md font-medium transition-all",
+                  getLanguage() === lng
+                    ? "bg-accent text-white"
+                    : "bg-app border border-app text-app-secondary hover:text-app"
+                )}
+              >
+                {t(`settings.language.${lng}`)}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* ── 性能模块 ── */}
         <div className="rounded-xl overflow-hidden" style={{ background: "var(--background-secondary)", border: "1px solid var(--border)" }}>
           <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
