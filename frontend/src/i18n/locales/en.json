@@ -319,7 +319,9 @@
     "eventCount": "events",
     "viewTabs": {
       "realtime": "● Realtime",
-      "history": "◷ History"
+      "history": "◷ History",
+      "allSessions": "All Sessions",
+      "showAll": "Show all"
     },
     "filter": "Filter tool / content...",
     "controls": {
