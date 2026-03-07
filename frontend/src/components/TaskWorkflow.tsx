@@ -422,9 +422,9 @@ function StageDetailPanel({
                     disabled={acting || !rejectReason.trim()}
                     className="flex-1 py-1.5 text-xs bg-red-600 hover:bg-red-500 text-white rounded-lg font-medium disabled:opacity-40"
                   >
-                    确认驳回
+                    {t('taskWorkflow.stageDetailPanel.confirmReject')}
                   </button>
-                  <button onClick={() => setShowReject(false)} className="text-xs text-white/40 hover:text-white/60 px-2">取消</button>
+                  <button onClick={() => setShowReject(false)} className="text-xs text-white/40 hover:text-white/60 px-2">{t('common.cancel')}</button>
                 </div>
               </div>
             )}
