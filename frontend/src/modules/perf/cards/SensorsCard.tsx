@@ -88,7 +88,7 @@ export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
         </div>
       )}
 
-      {/* ── 风扇 ── */}
+      {/* ── Fan ── */}
       <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 2 }}>
         <SectionLabel label={t('perf.sensors.fan')} />
         {fans.length > 0
