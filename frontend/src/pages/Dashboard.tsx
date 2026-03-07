@@ -793,8 +793,8 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
       <MetricsPanel />
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-40 space-y-2">
-          <p className="text-app-tertiary text-sm">暂无项目</p>
-          <p className="text-app-tertiary text-xs">点击「扫描本地项目」自动发现 git 仓库，或侧边栏 + 手动创建</p>
+          <p className="text-app-tertiary text-sm">{t('dashboard.overview.noProjects')}</p>
+          <p className="text-app-tertiary text-xs">{t('dashboard.overview.scanHint')}</p>
         </div>
       ) : (
         <>
