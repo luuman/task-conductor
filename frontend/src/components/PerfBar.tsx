@@ -1,6 +1,7 @@
 // frontend/src/components/PerfBar.tsx
 // iStatMenus menu-bar 风格的紧凑性能底栏
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Cpu, Database, Wifi, HardDrive, Zap } from "lucide-react";
 import { api, type SystemMetrics } from "../lib/api";
 
