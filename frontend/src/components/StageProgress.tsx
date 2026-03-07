@@ -1,14 +1,6 @@
-const STAGES = [
-  { key: "input", label: "需求" },
-  { key: "analysis", label: "分析" },
-  { key: "prd", label: "PRD" },
-  { key: "ui", label: "UI" },
-  { key: "plan", label: "方案" },
-  { key: "dev", label: "开发" },
-  { key: "test", label: "测试" },
-  { key: "deploy", label: "发布" },
-  { key: "monitor", label: "监控" },
-];
+import { useTranslation } from "react-i18next";
+
+const STAGE_KEYS = ["input", "analysis", "prd", "ui", "plan", "dev", "test", "deploy", "monitor"];
 
 export function StageProgress({
   currentStage,
@@ -17,6 +9,8 @@ export function StageProgress({
   currentStage: string;
   status: string;
 }) {
+  const { t } = useTranslation();
+  const STAGES = STAGE_KEYS.map(key => ({ key, label: t(`stageProgress.labels.${key}`) }));
   const currentIdx = STAGES.findIndex((s) => s.key === currentStage);
 
   return (

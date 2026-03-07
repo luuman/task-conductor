@@ -189,7 +189,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
           </div>
 
           <div className="divide-y divide-app">
-            <Row label="连接地址">
+            <Row label={t('settings.connection.address')}>
               <div className="flex items-center gap-2 min-w-0">
                 <span className="font-mono text-[11px] text-accent truncate">{baseUrl}</span>
                 <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full border border-app text-app-tertiary">
