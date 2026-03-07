@@ -36,4 +36,10 @@ export function getLanguage(): string {
   return i18n.language || "zh";
 }
 
+const LOCALE_MAP: Record<string, string> = { zh: "zh-CN", en: "en-US" };
+
+export function getDateLocale(): string {
+  return LOCALE_MAP[getLanguage()] || "zh-CN";
+}
+
 export default i18n;
