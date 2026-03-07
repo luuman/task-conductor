@@ -1,6 +1,7 @@
 // frontend/src/App.tsx
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FolderOpen } from "lucide-react";
 import Login from "./pages/Login";
 import { AppShell } from "./components/AppShell";
 import Dashboard from "./pages/Dashboard";
