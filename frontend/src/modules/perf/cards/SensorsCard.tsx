@@ -33,6 +33,7 @@ function Row({ name, value, color }: { name: string; value: string; color?: stri
 }
 
 export function SensorsCard({ sys, colors = {}, showTitle }: SensorsCardProps) {
+  const { t } = useTranslation();
   const cNvme = colors.nvme ?? "#FF9F0A";
 
   const temps = sys?.sensors?.temperatures ?? [];
