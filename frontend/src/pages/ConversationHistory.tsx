@@ -145,7 +145,7 @@ export default function ConversationHistory({ projects }: Props) {
     URL.revokeObjectURL(url);
   }, [isNewChat, chatMessages, transcript]);
 
-  const handleChatSend = (message: string, model: string) => {
+  const handleChatSend = (message: string, model: string, options?: import("../hooks/useChatWs").ChatOptions) => {
     // 追加用户消息
     setChatMessages(prev => [
       ...prev,
@@ -155,7 +155,7 @@ export default function ConversationHistory({ projects }: Props) {
         blocks: [{ type: "text" as const, text: message }],
       },
     ]);
-    chatSend(message, model);
+    chatSend(message, model, options);
   };
 
   // 自动滚动到底部（新消息或流式输出时）
