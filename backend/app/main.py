@@ -53,13 +53,17 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
 
     # 飞书字段迁移
-    try:
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE projects ADD COLUMN feishu_chat_id VARCHAR(100)"))
-            conn.commit()
-    except Exception:
-        pass  # 列已存在
+    from sqlalchemy import text
+    for col_sql in [
+        "ALTER TABLE projects ADD COLUMN feishu_chat_id VARCHAR(100)",
+        "ALTER TABLE projects ADD COLUMN feishu_sync BOOLEAN DEFAULT 0",
+    ]:
+        try:
+            with engine.connect() as conn:
+                conn.execute(text(col_sql))
+                conn.commit()
+        except Exception:
+            pass  # 列已存在
 
     pin = pin_session.generate_pin()
     fixed = os.getenv("TC_PIN", "")
