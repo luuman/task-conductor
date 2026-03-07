@@ -162,13 +162,14 @@ function buildTree(items: FileItem[]): TreeNode[] {
     // Strip "docs/" prefix for tree display
     const rel = item.path.replace(/^docs\//, "");
     const parts = rel.split("/");
+    const display = item.title || item.name;
     if (parts.length === 1) {
-      root.push({ name: item.name, path: item.path, isDir: false, children: [], item });
+      root.push({ name: item.name, displayName: display, path: item.path, isDir: false, children: [], item });
     } else {
       const dirParts = parts.slice(0, -1);
       const dirPath = dirParts.join("/");
       const parent = getOrCreateDir(dirParts, dirPath);
-      parent.children.push({ name: item.name, path: item.path, isDir: false, children: [], item });
+      parent.children.push({ name: item.name, displayName: display, path: item.path, isDir: false, children: [], item });
     }
   }
 
