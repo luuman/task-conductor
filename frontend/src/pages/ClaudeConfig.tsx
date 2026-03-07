@@ -1124,7 +1124,7 @@ function SecAgents({ agents, onToggle, onCreate, onDelete }: {
                   <p className="text-xs font-semibold text-app">{a.name}</p>
                   <div className="flex items-center gap-1.5">
                     <button onClick={e => handleDelete(a.name, e)} disabled={deleting === a.name}
-                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors" title="删除">
+                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors">
                       <Trash2 size={11} />
                     </button>
                     <ToggleSwitch enabled={a.enabled} loading={toggling === a.name} onClick={e => toggle(a.name, !a.enabled, e)} />
@@ -1228,7 +1228,7 @@ function SecCommands({ commands, onToggle, onCreate, onDelete }: {
                   <p className="text-xs font-semibold text-app font-mono">/{c.name}</p>
                   <div className="flex items-center gap-1.5">
                     <button onClick={e => handleDelete(c.name, e)} disabled={deleting === c.name}
-                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors" title="删除">
+                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors">
                       <Trash2 size={11} />
                     </button>
                     <ToggleSwitch enabled={c.enabled} loading={toggling === c.name} onClick={e => toggle(c.name, !c.enabled, e)} />
@@ -1482,7 +1482,7 @@ function SecRules({ rules, onToggle, onCreate, onDelete }: {
                   <p className="text-xs font-semibold text-app">{r.name}</p>
                   <div className="flex items-center gap-1.5">
                     <button onClick={e => handleDelete(r.name, e)} disabled={deleting === r.name}
-                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors" title="删除">
+                      className="p-1 rounded hover:bg-red-500/10 text-app-tertiary hover:text-red-400 transition-colors">
                       <Trash2 size={11} />
                     </button>
                     <ToggleSwitch enabled={r.enabled} loading={toggling === r.name} onClick={e => toggle(r.name, !r.enabled, e)} />
