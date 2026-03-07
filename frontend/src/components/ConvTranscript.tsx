@@ -506,9 +506,12 @@ export function ConvTranscript({ messages, loading, fileFound }: Props) {
   return (
     <div className="py-4 space-y-1">
       {messages.map((msg, i) => (
-        msg.role === "user"
-          ? <UserCard key={i} msg={msg} />
-          : <AssistantCard key={i} msg={msg} />
+        <div key={i} data-msg-index={i}>
+          {msg.role === "user"
+            ? <UserCard msg={msg} />
+            : <AssistantCard msg={msg} />
+          }
+        </div>
       ))}
       <div ref={bottomRef} />
     </div>
