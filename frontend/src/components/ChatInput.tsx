@@ -550,7 +550,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           disabled={isGenerating || disabled}
           className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:brightness-125 disabled:opacity-30"
           style={{ color: "var(--text-tertiary)" }}
-          title="上传文件"
+          title={t('chatInput.uploadFile')}
         >
           <Paperclip size={14} />
         </button>
