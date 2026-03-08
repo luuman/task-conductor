@@ -554,7 +554,7 @@ export default function ConversationHistory({ projects }: Props) {
               onClick={handleExport}
               className="w-full flex items-center justify-center gap-1.5 text-[10px] py-1.5 rounded-md transition-colors hover:brightness-125"
               style={{ color: "var(--text-tertiary)", background: "var(--background-tertiary)" }}
-              title="导出为 Markdown"
+              title={t('conversationHistory.exportAsMarkdown')}
             >
               <Download size={11} />
               <span>导出对话</span>
