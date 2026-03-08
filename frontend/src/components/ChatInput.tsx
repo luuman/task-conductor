@@ -638,8 +638,8 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           onSelect={(v) => setChatOptions(prev => ({ ...prev, permission_mode: v === "__clear__" ? undefined : v }))}
         />
 
-        {dragOver && <span className="text-[10px]" style={{ color: "var(--accent)" }}>松开以上传文件</span>}
-        <span className="ml-auto text-[9px] opacity-30">/ 更多命令</span>
+        {dragOver && <span className="text-[10px]" style={{ color: "var(--accent)" }}>{t('chatInput.dropToUpload')}</span>}
+        <span className="ml-auto text-[9px] opacity-30">{t('chatInput.moreCommands')}</span>
       </div>
     </div>
   );
