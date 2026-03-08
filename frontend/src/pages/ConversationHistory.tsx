@@ -224,16 +224,14 @@ export default function ConversationHistory({ projects }: Props) {
     return () => clearInterval(id);
   }, [selectedSession]);
 
-  // 渲染后恢复滚动位置：补偿新增内容导致的 scrollHeight 变化
+  // 渲染后恢复滚动位置：新内容追加在底部，scrollTop 不变即可保持当前位置
   useEffect(() => {
     if (!pendingScrollLock.current) return;
     pendingScrollLock.current = false;
     const container = transcriptRef.current;
-    if (!container) return;
-    const delta = container.scrollHeight - savedScrollHeight.current;
-    container.scrollTop = savedScrollTop.current + delta * 0;
-    // delta * 0 = 保持原 scrollTop，新内容在底部不影响当前位置
-    container.scrollTop = savedScrollTop.current;
+    if (container) {
+      container.scrollTop = savedScrollTop.current;
+    }
   }, [transcript]);
 
   // 展示的消息：历史会话模式用 transcript，新对话模式用 chatMessages
