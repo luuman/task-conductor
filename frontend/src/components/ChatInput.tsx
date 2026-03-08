@@ -561,7 +561,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={inputMode ? inputPlaceholder : "输入消息，/ 打开命令..."}
+          placeholder={inputMode ? inputPlaceholder : t('chatInput.inputPlaceholder')}
           disabled={disabled}
           rows={1}
           className="flex-1 resize-none text-[12.5px] leading-[20px] outline-none placeholder:opacity-40"
