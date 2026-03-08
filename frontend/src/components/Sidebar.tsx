@@ -1,5 +1,5 @@
 // frontend/src/components/Sidebar.tsx
-import { LayoutDashboard, CheckSquare, Settings, MessageSquare, ChevronLeft, ChevronRight, Layers, Cpu, FolderSearch, FlaskConical } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Settings, MessageSquare, ChevronLeft, ChevronRight, Layers, Cpu, FolderSearch } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../lib/utils";
 import { PerfBottomBar } from "../modules/perf/bar/PerfBottomBar";
