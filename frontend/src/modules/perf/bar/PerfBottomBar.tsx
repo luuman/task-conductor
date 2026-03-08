@@ -118,9 +118,6 @@ export function PerfBottomBar({ connectionStatus, vertical, compact }: PerfBotto
             <TileLines id={m.id} sys={sys} />
           </div>
         ))}
-        {connectionStatus !== undefined && (
-          <div className="w-2 h-2 rounded-full mt-0.5" style={{ background: connColor }} title={connText} />
-        )}
       </div>
     );
   }
