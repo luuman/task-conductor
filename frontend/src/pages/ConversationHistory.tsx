@@ -364,6 +364,24 @@ export default function ConversationHistory({ projects }: Props) {
           <div ref={chatBottomRef} />
         </div>
 
+        {/* 回到最新按钮 */}
+        {!isAtBottom && (
+          <div className="absolute bottom-16 right-6 z-10">
+            <button
+              onClick={scrollToBottom}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono shadow-lg transition-all hover:scale-105"
+              style={{
+                background: "var(--accent)",
+                color: "#fff",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+              }}
+            >
+              <ArrowDown size={13} />
+              {hasNewMessages && <span>新消息</span>}
+            </button>
+          </div>
+        )}
+
         {/* 聊天输入框 */}
         <ChatInput
           onSend={handleChatSend}
