@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from ..database import engine
 from ..models import ClaudeSession, ClaudeEvent, ConversationNote
+from .settings_router import _load as _load_settings
 
 router = APIRouter(prefix="/api/sessions", tags=["会话"])
 
