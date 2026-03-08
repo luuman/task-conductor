@@ -140,8 +140,9 @@ class StageExecutor(ABC):
         errors: list[str] = []
         retry_count = 0
         critic_notes = ""
+        max_retries = _get_max_retries()
 
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(max_retries):
             retry_count = attempt
             log_file = f"{log_dir}/task-{task_id}-{self.stage_name}-{attempt}.log"
 
