@@ -342,12 +342,12 @@ export default function ConversationHistory({ projects }: Props) {
 
           {/* 历史 transcript */}
           {!isNewChat && (
-            <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} autoExpand={autoExpand} />
+            <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} autoExpand={autoExpand} onOpenFile={handleOpenFile} />
           )}
 
           {/* 新对话已完成的消息 */}
           {isNewChat && chatMessages.length > 0 && (
-            <ConvTranscript messages={chatMessages} loading={false} fileFound={true} scrollRef={transcriptRef} autoExpand={autoExpand} />
+            <ConvTranscript messages={chatMessages} loading={false} fileFound={true} scrollRef={transcriptRef} autoExpand={autoExpand} onOpenFile={handleOpenFile} />
           )}
 
           {/* 流式回复气泡（新对话 & 历史会话共用） */}
