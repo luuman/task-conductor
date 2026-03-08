@@ -375,7 +375,7 @@ export default function ConversationHistory({ projects }: Props) {
             title={t('conversationHistory.newChatTitle')}
           >
             <Plus size={12} />
-            <span>新对话</span>
+            <span>{t('conversationHistory.newChat')}</span>
           </button>
         </div>
         <ConvSessionList
