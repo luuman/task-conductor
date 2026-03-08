@@ -417,6 +417,65 @@
       "hint": "Stop the backend process",
       "shuttingDown": "Shutting down...",
       "confirmShutdown": "Are you sure you want to shut down the backend?"
+    },
+    "notification": {
+      "title": "Notifications",
+      "hint": "Configure task approval notification channels",
+      "ttsEnabled": "TTS Voice Alert",
+      "ttsPipePath": "speak-pipe Path",
+      "webhookEnabled": "Webhook Notification",
+      "webhookUrl": "Webhook URL",
+      "browserEnabled": "Browser Notification"
+    },
+    "pipeline": {
+      "title": "Pipeline Config",
+      "hint": "Adjust pipeline execution parameters and approval workflow",
+      "approvalStages": "Stages Requiring Approval",
+      "maxRetries": "Max Retries",
+      "confidenceThreshold": "Confidence Threshold"
+    },
+    "observe": {
+      "title": "Observation Layer",
+      "hint": "Control session and event retention policies",
+      "sessionLimit": "Session Display Limit",
+      "eventLimit": "Event Display Limit",
+      "autoCleanup": "Auto Cleanup Old Data",
+      "cleanupDays": "Cleanup Period (days)"
+    },
+    "ui": {
+      "title": "UI Preferences",
+      "hint": "Customize interface display and interaction behavior",
+      "theme": "Theme",
+      "themes": {
+        "dark": "Dark",
+        "light": "Light",
+        "system": "System"
+      },
+      "defaultPage": "Default Page",
+      "sidebarCollapsed": "Sidebar Collapsed by Default",
+      "logMaxLines": "Log Max Lines"
+    },
+    "data": {
+      "title": "Data Management",
+      "hint": "Export, backup or clean up system data",
+      "exportDb": "Export Database",
+      "exportDbHint": "Export SQLite database file path",
+      "export": "Export",
+      "clearSessions": "Clear Session Data",
+      "clearSessionsHint": "Delete all Claude sessions and event records",
+      "clearTasks": "Clear Completed Tasks",
+      "clearTasksHint": "Delete all completed tasks and their artifacts",
+      "clear": "Clear"
+    },
+    "security": {
+      "title": "Security",
+      "hint": "Manage authentication and access control",
+      "changePin": "Change PIN",
+      "newPinPlaceholder": "Enter new PIN (min 4 digits)",
+      "updatePin": "Update",
+      "pinUpdated": "PIN updated successfully",
+      "pinUpdateFailed": "Failed to update PIN",
+      "tunnelEnabled": "Enable Cloudflare Tunnel"
     }
   },
 
