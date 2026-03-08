@@ -594,7 +594,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
         <ToolbarDropdown
           label={currentModelName}
           icon={<Cpu size={11} />}
-          options={models.map(m => ({ label: m.name + (m.default ? " (默认)" : ""), value: m.id, active: m.id === selectedModel }))}
+          options={models.map(m => ({ label: m.name + (m.default ? ` (${t('chatInput.default')})` : ""), value: m.id, active: m.id === selectedModel }))}
           onSelect={(v) => setSelectedModel(v)}
         />
 
