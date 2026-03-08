@@ -419,6 +419,40 @@ function AgentResultView({ result, description }: { result: string; description:
   );
 }
 
+// ── AskUserQuestion 视图 ──────────────────────────────────────
+function AskUserQuestionView({ input, result }: { input: Record<string, unknown>; result?: string | null }) {
+  const question = String(input.question || "");
+
+  return (
+    <div className="rounded-lg overflow-hidden mt-2"
+         style={{ border: "1px solid rgba(234,179,8,0.25)" }}>
+      <div className="flex items-center gap-2 px-3 py-2"
+           style={{ background: "rgba(234,179,8,0.06)", borderBottom: "1px solid rgba(234,179,8,0.15)" }}>
+        <MessageCircleQuestion size={14} strokeWidth={1.75} style={{ color: "var(--warning)" }} />
+        <span className="text-[11px] font-semibold" style={{ color: "var(--warning)" }}>
+          AskUserQuestion
+        </span>
+      </div>
+      <div className="px-4 py-3" style={{ background: "var(--background)" }}>
+        <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+          {question}
+        </p>
+      </div>
+      {result && (
+        <div className="px-4 py-2.5"
+             style={{ borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
+          <div className="flex items-start gap-2">
+            <User size={12} className="shrink-0 mt-0.5" style={{ color: "var(--text-tertiary)" }} />
+            <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              {result}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── 通用输出（markdown 渲染） ────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
   const { t } = useTranslation();
