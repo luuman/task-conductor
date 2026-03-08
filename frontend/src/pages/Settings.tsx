@@ -119,6 +119,14 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   // generic setting update (auto-save to backend)
   const updateSetting = async (key: string, value: unknown) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    // 主题变更立即生效
+    if (key === "ui_theme") applyTheme(value as string);
+    // 同步到 localStorage 缓存供 App 级读取
+    try {
+      const cached = JSON.parse(localStorage.getItem("tc_app_settings") || "{}");
+      cached[key] = value;
+      localStorage.setItem("tc_app_settings", JSON.stringify(cached));
+    } catch { /* ignore */ }
     try {
       await api.settings.update({ [key]: value });
     } catch {
