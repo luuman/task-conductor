@@ -49,9 +49,11 @@ export function useAppSettings() {
   const [settings, setSettings] = useState<AppSettings>(loadCached);
   const [loaded, setLoaded] = useState(false);
 
-  // 启动时从后端拉取最新设置
+  // 启动时立即用缓存应用主题，然后从后端同步
   useEffect(() => {
+    // 立即应用缓存的主题（避免闪烁）
     applyTheme(settings.ui_theme);
+
     api.settings.get()
       .then((s: Record<string, unknown>) => {
         const merged: AppSettings = {
@@ -65,7 +67,10 @@ export function useAppSettings() {
         applyTheme(merged.ui_theme);
         setLoaded(true);
       })
-      .catch(() => setLoaded(true));
+      .catch(() => {
+        // 后端不可用时，仍使用 localStorage 缓存值
+        setLoaded(true);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
