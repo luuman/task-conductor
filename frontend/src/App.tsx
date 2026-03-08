@@ -201,6 +201,7 @@ if (page === "tasks") {
       onProjectCreated={handleProjectCreated}
       onRefreshProjects={refreshProjects}
       connectionStatus={connectionStatus}
+      initialSidebarCollapsed={appSettings.ui_sidebar_collapsed}
     >
       {renderContent()}
     </AppShell>
