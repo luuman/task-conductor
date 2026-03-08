@@ -85,9 +85,9 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     setSaveStatus("saving");
     setSaveError("");
     try {
-      const res = await api.settings.update(path);
-      setWorkspaceRoot(res.workspace_root);
-      setWorkspaceInput(res.workspace_root);
+      const res = await api.settings.update({ workspace_root: path });
+      setWorkspaceRoot(res.workspace_root as string);
+      setWorkspaceInput(res.workspace_root as string);
       setSaveStatus("ok");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (e: unknown) {
