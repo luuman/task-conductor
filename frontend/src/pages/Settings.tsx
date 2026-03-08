@@ -118,7 +118,8 @@ export default function Settings({ onDisconnect }: SettingsProps) {
 
   // generic setting update (auto-save to backend)
   const updateSetting = async (key: string, value: unknown) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    const prev = { ...settings };
+    setSettings(p => ({ ...p, [key]: value }));
     // 主题变更立即生效
     if (key === "ui_theme") applyTheme(value as string);
     // 同步到 localStorage 缓存供 App 级读取
@@ -130,7 +131,9 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     try {
       await api.settings.update({ [key]: value });
     } catch {
-      // silent fail
+      // 保存失败时回滚状态和主题
+      setSettings(prev);
+      if (key === "ui_theme") applyTheme(prev.ui_theme);
     }
   };
 
