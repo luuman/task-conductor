@@ -417,6 +417,65 @@
       "hint": "停止后端进程",
       "shuttingDown": "正在关闭...",
       "confirmShutdown": "确定要关闭后端服务吗？"
+    },
+    "notification": {
+      "title": "通知设置",
+      "hint": "配置任务审批通知方式",
+      "ttsEnabled": "TTS 语音播报",
+      "ttsPipePath": "speak-pipe 路径",
+      "webhookEnabled": "Webhook 通知",
+      "webhookUrl": "Webhook URL",
+      "browserEnabled": "浏览器通知"
+    },
+    "pipeline": {
+      "title": "流水线配置",
+      "hint": "调整流水线执行参数和审批流程",
+      "approvalStages": "需审批的阶段",
+      "maxRetries": "最大重试次数",
+      "confidenceThreshold": "置信度阈值"
+    },
+    "observe": {
+      "title": "观测层设置",
+      "hint": "控制会话和事件的保留策略",
+      "sessionLimit": "会话显示数量",
+      "eventLimit": "事件显示数量",
+      "autoCleanup": "自动清理旧数据",
+      "cleanupDays": "清理周期（天）"
+    },
+    "ui": {
+      "title": "界面偏好",
+      "hint": "自定义界面显示和交互行为",
+      "theme": "主题",
+      "themes": {
+        "dark": "深色",
+        "light": "浅色",
+        "system": "跟随系统"
+      },
+      "defaultPage": "默认首页",
+      "sidebarCollapsed": "侧边栏默认折叠",
+      "logMaxLines": "日志最大行数"
+    },
+    "data": {
+      "title": "数据管理",
+      "hint": "导出、备份或清理系统数据",
+      "exportDb": "导出数据库",
+      "exportDbHint": "导出 SQLite 数据库文件路径",
+      "export": "导出",
+      "clearSessions": "清空会话数据",
+      "clearSessionsHint": "删除所有 Claude 会话和事件记录",
+      "clearTasks": "清空已完成任务",
+      "clearTasksHint": "删除所有已完成的任务及其产物",
+      "clear": "清空"
+    },
+    "security": {
+      "title": "安全设置",
+      "hint": "管理认证和访问控制",
+      "changePin": "修改 PIN 码",
+      "newPinPlaceholder": "输入新 PIN（至少 4 位）",
+      "updatePin": "更新",
+      "pinUpdated": "PIN 码已更新",
+      "pinUpdateFailed": "PIN 码更新失败",
+      "tunnelEnabled": "启用 Cloudflare Tunnel"
     }
   },
 
