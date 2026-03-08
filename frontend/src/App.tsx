@@ -13,7 +13,7 @@ import ConversationHistory from "./pages/ConversationHistory";
 import ProjectsCanvas from "./pages/ProjectsCanvas";
 import ClaudeConfig from "./pages/ClaudeConfig";
 import ProjectFiles from "./pages/ProjectFiles";
-type Page = "dashboard" | "project" | "task" | "sessions" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files";
+type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files";
 
 export default function App() {
   const { t } = useTranslation();
