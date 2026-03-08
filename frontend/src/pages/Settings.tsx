@@ -470,17 +470,21 @@ export default function Settings({ onDisconnect }: SettingsProps) {
             <div>
               <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1.5">{t('settings.ui.defaultPage')}</label>
               <div className="flex gap-2">
-                {(["dashboard", "sessions", "canvas"] as const).map(page => (
-                  <button key={page}
-                    onClick={() => updateSetting('ui_default_page', page)}
+                {([
+                  { id: "dashboard", labelKey: "sidebar.nav.dashboard" },
+                  { id: "sessions", labelKey: "sidebar.liveMonitor" },
+                  { id: "canvas", labelKey: "sidebar.nav.canvas" },
+                ] as const).map(({ id, labelKey }) => (
+                  <button key={id}
+                    onClick={() => updateSetting('ui_default_page', id)}
                     className={cn(
                       "px-3 py-1.5 text-[11px] rounded-md border transition-all",
-                      settings.ui_default_page === page
+                      settings.ui_default_page === id
                         ? "bg-accent text-white border-accent"
                         : "bg-app border-app text-app-secondary hover:text-app"
                     )}
                   >
-                    {t(`sidebar.nav.${page}`, page)}
+                    {t(labelKey)}
                   </button>
                 ))}
               </div>
