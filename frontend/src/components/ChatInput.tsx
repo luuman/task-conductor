@@ -2,6 +2,7 @@
 // Discord 风格聊天输入：/ 命令面板 + 模型选择 + 文件上传
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   SendHorizontal, Square, Paperclip, X, Hash,
   Cpu, Download, Trash2, Plus, HelpCircle,
