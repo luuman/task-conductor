@@ -15,6 +15,7 @@ interface AppShellProps {
   onProjectCreated: (p: Project) => void;
   onRefreshProjects?: () => void;
   connectionStatus: "connected" | "disconnected" | "connecting";
+  initialSidebarCollapsed?: boolean;
 }
 
 export function AppShell({
