@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from .database import engine
 from .models import Task, Project
 from .ws.manager import manager
+from .worktree import create_worktree, remove_worktree, generate_branch_name, is_git_repo
 
 logger = logging.getLogger(__name__)
 
