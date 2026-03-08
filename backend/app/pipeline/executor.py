@@ -232,8 +232,8 @@ class StageExecutor(ABC):
         self.save_knowledge(
             project_id, task_id, "error_pattern",
             f"{self.stage_name} 超出最大重试次数",
-            f"连续 {MAX_RETRIES} 次失败，最后错误: {'; '.join(errors)}",
+            f"连续 {max_retries} 次失败，最后错误: {'; '.join(errors)}",
         )
         raise RuntimeError(
-            f"Stage '{self.stage_name}' failed after {MAX_RETRIES} retries: {'; '.join(errors)}"
+            f"Stage '{self.stage_name}' failed after {max_retries} retries: {'; '.join(errors)}"
         )
