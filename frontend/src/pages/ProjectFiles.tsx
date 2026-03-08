@@ -828,36 +828,42 @@ export default function ProjectFiles({
 
       {/* 双栏 */}
       <div className="flex flex-1 min-h-0">
-        {/* 左：文件树 */}
-        <div
-          className="flex flex-col shrink-0"
-          style={{
-            width: selectedFile ? "280px" : "100%",
-            maxWidth: selectedFile ? "360px" : undefined,
-            borderRight: selectedFile ? "1px solid var(--border)" : undefined,
-            transition: "width 200ms",
-          }}
-        >
-          <FileTree
-            projectId={project.id}
-            currentPath={currentPath}
-            selectedFile={selectedFile}
-            gitFiles={gitFiles}
-            onNavigate={setCurrentPath}
-            onSelectFile={setSelectedFile}
-          />
-        </div>
+        {activeTab === "files" ? (
+          <>
+            {/* 左：文件树 */}
+            <div
+              className="flex flex-col shrink-0"
+              style={{
+                width: selectedFile ? "280px" : "100%",
+                maxWidth: selectedFile ? "360px" : undefined,
+                borderRight: selectedFile ? "1px solid var(--border)" : undefined,
+                transition: "width 200ms",
+              }}
+            >
+              <FileTree
+                projectId={project.id}
+                currentPath={currentPath}
+                selectedFile={selectedFile}
+                gitFiles={gitFiles}
+                onNavigate={setCurrentPath}
+                onSelectFile={setSelectedFile}
+              />
+            </div>
 
-        {/* 右：代码查看/编辑 */}
-        {selectedFile && (
-          <div className="flex-1 min-w-0">
-            <CodeViewer
-              projectId={project.id}
-              filePath={selectedFile}
-              gitStatus={gitFiles[selectedFile]}
-              onClose={() => setSelectedFile(null)}
-            />
-          </div>
+            {/* 右：代码查看/编辑 */}
+            {selectedFile && (
+              <div className="flex-1 min-w-0">
+                <CodeViewer
+                  projectId={project.id}
+                  filePath={selectedFile}
+                  gitStatus={gitFiles[selectedFile]}
+                  onClose={() => setSelectedFile(null)}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <SourceControl project={project} />
         )}
       </div>
     </div>
