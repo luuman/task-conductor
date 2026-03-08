@@ -485,7 +485,9 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
 function ToolWidget({ block }: { block: TranscriptBlock }) {
   const signal = useContext(ExpandSignalCtx);
   const autoExpand = useContext(AutoExpandCtx);
-  const [open, setOpen] = useState(autoExpand);
+  const toolName = block.tool_name || "Tool";
+  const isAskUserInit = toolName === "AskUserQuestion";
+  const [open, setOpen] = useState(autoExpand || isAskUserInit);
   const toggle = useCallback(() => setOpen(v => !v), []);
 
   // 响应全局展开/折叠信号
