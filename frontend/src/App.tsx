@@ -159,8 +159,6 @@ if (page === "tasks") {
         projects={projects}
         projectsLoaded={projectsLoaded}
         onOpenTask={handleOpenTask}
-        onSelectProject={handleSelectProject}
-        onRefreshProjects={refreshProjects}
         onOpenFiles={(pid) => {
           setActiveProjectId(pid);
           setPage("files");
