@@ -34,8 +34,6 @@ class ClaudePool:
 
         cmd = self.build_command(prompt, worktree_path)
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        # 确保 worktree 目录存在（scheduler 只分配路径，不实际创建）
-        os.makedirs(worktree_path, exist_ok=True)
 
         metric = metrics_store.start_call(task_id)
 
