@@ -34,8 +34,6 @@ export function Sidebar({
   activePage,
   onSelectProject,
   onSelectPage,
-  onNewProject: _onNewProject,
-  onScanProjects: _onScanProjects,
   collapsed,
   onToggle,
   connectionStatus,
