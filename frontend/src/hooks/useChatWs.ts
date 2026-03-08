@@ -75,7 +75,7 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
             replyBuf.current = "";
             onCompleteRef.current?.(full);
           } else if (msg.type === "chat_error") {
-            setError(msg.data?.error || "未知错误");
+            setError(msg.data?.error || "Unknown error");
             setIsGenerating(false);
             setCurrentReply("");
             replyBuf.current = "";
