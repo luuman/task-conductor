@@ -824,7 +824,50 @@
 
   "conversationHistory": {
     "header": "Conversations",
-    "eventCount": "events"
+    "eventCount": "events",
+    "newChat": "New Chat",
+    "newChatTitle": "New Chat",
+    "startNewChat": "Start a new conversation",
+    "startNewChatHint": "Type a message to chat with Claude",
+    "loading": "Loading...",
+    "fileReadFail": "Cannot read file",
+    "fileReadError": "Read failed",
+    "newMessages": "New messages",
+    "questionNav": "Question Nav",
+    "expandMode": "Expand",
+    "collapseMode": "Collapse",
+    "switchToCollapse": "Switch to collapse mode",
+    "switchToExpand": "Switch to expand mode",
+    "exportChat": "Export Chat",
+    "exportAsMarkdown": "Export as Markdown"
+  },
+
+  "convTranscript": {
+    "unchangedLines": "unchanged lines",
+    "collapse": "▲ Collapse",
+    "expandLines": "▼ {{count}} lines",
+    "expandChars": "▼ Expand ({{count}} chars)"
+  },
+
+  "convSessionList": {
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}}d ago"
+  },
+
+  "chatInput": {
+    "switchModel": "Switch Claude model",
+    "effortDesc": "Set reasoning effort (low/medium/high)",
+    "effortLow": "Low — Quick short reply",
+    "effortMedium": "Medium — Balanced",
+    "effortHigh": "High — Deep thinking"
+  },
+
+  "chatWs": {
+    "connectFailed": "WebSocket connection failed",
+    "unknownError": "Unknown error",
+    "disconnected": "Connection lost",
+    "timeout": "Connection timeout",
+    "sendFailed": "Send failed"
   },
 
   "projectsCanvas": {
