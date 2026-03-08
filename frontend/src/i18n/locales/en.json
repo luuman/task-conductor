@@ -60,8 +60,7 @@
       "projects": "Projects",
       "test": "Test"
     },
-    "liveMonitor": "Live Monitor",
-    "live": "LIVE",
+    "liveMonitor": "Sessions",
     "expandSidebar": "Expand Sidebar",
     "collapseSidebar": "Collapse Sidebar",
     "scanLocalProjects": "Scan Local Projects",
