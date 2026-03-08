@@ -432,7 +432,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
                style={{ color: "var(--text-tertiary)", background: "var(--background-secondary)", borderBottom: "1px solid var(--border)" }}>
             <Hash size={10} className="inline mr-1 -mt-0.5" />
-            {inputMode && activeCmd ? `/${activeCmd.name}` : activeCmd ? activeCmd.name : "命令"}
+            {inputMode && activeCmd ? `/${activeCmd.name}` : activeCmd ? activeCmd.name : t('chatInput.commands')}
           </div>
 
           {/* 输入参数模式 */}
