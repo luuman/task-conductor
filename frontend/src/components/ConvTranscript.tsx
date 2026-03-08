@@ -571,7 +571,8 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
           {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
           {isRead && hasResult && <ReadFileView filePath={String(block.tool_input?.file_path ?? "")} result={block.tool_result!} />}
           {isAgent && hasResult && <AgentResultView result={block.tool_result!} description={String(block.tool_input?.description ?? "")} />}
-          {!isEdit && !isBash && !isRead && !isAgent && hasResult && <OutputBlock result={block.tool_result!} isError={isError} />}
+          {isAskUser && <AskUserQuestionView input={block.tool_input || {}} result={block.tool_result} />}
+          {!isEdit && !isBash && !isRead && !isAgent && !isAskUser && hasResult && <OutputBlock result={block.tool_result!} isError={isError} />}
         </div>
       )}
     </div>
