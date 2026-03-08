@@ -39,40 +39,6 @@ export function Sidebar({
   connectionStatus,
 }: SidebarProps) {
   const { t } = useTranslation();
-  const realProjects = projects.filter(p => !p.is_test);
-  const testProjects = projects.filter(p => p.is_test);
-
-  const renderProjectItem = (p: Project) => {
-    const active = activeProjectId === p.id && activePage === "project";
-    return (
-      <button key={p.id}
-        onClick={() => { onSelectProject(p.id); onSelectPage("project"); }}
-        title={collapsed ? p.name : undefined}
-        className={cn(
-          "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left",
-          collapsed ? "justify-center py-1.5 px-0" : "gap-2.5 px-3 py-1.5",
-          active ? "font-medium" : "hover:bg-white/[0.03]"
-        )}
-        style={{
-          background: active ? "var(--accent-subtle)" : undefined,
-          color: active ? "var(--accent)" : "var(--text-secondary)",
-        }}
-      >
-        {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
-                style={{ background: "var(--accent)" }} />
-        )}
-        <span className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0"
-              style={{
-                background: active ? "var(--accent)" : p.is_test ? "rgba(168,85,247,0.15)" : "var(--background-tertiary)",
-                color: active ? "#fff" : p.is_test ? "#a855f7" : "var(--text-secondary)",
-              }}>
-          {p.is_test ? <FlaskConical size={10} /> : p.name[0].toUpperCase()}
-        </span>
-        {!collapsed && <span className="truncate">{p.name}</span>}
-      </button>
-    );
-  };
 
   return (
     <div
