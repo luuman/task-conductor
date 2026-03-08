@@ -38,6 +38,69 @@ const streamMdComponents = {
   pre: ({ children }: { children?: React.ReactNode }) => <pre className="my-1 overflow-x-auto">{children}</pre>,
 };
 
+function guessLang(filePath: string): string {
+  const ext = filePath.split(".").pop()?.toLowerCase() || "";
+  const map: Record<string, string> = {
+    ts: "typescript", tsx: "typescript", js: "javascript", jsx: "javascript",
+    py: "python", rs: "rust", go: "go", java: "java",
+    sh: "bash", zsh: "bash", bash: "bash",
+    css: "css", html: "xml", xml: "xml", svg: "xml",
+    json: "json", yaml: "yaml", yml: "yaml", md: "markdown",
+    sql: "sql", c: "c", cpp: "cpp", h: "c", hpp: "cpp",
+  };
+  return map[ext] || "";
+}
+
+/** 文件查看面板 */
+function FileViewPanel({ file, onClose }: { file: { path: string; name: string; content: string }; onClose: () => void }) {
+  const lang = guessLang(file.path);
+  const highlighted = useMemo(() => {
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(file.content, { language: lang }).value;
+      }
+      return hljs.highlightAuto(file.content).value;
+    } catch {
+      return null;
+    }
+  }, [file.content, lang]);
+
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col"
+         style={{ background: "var(--background)" }}>
+      {/* 头部 */}
+      <div className="flex items-center gap-2 px-4 py-2.5 shrink-0"
+           style={{ borderBottom: "1px solid var(--border)", background: "var(--background-secondary)" }}>
+        <FileText size={14} style={{ color: "var(--accent)" }} />
+        <span className="text-[12px] font-mono flex-1 truncate"
+              style={{ color: "var(--text-primary)" }} title={file.path}>
+          {file.path}
+        </span>
+        <button
+          onClick={onClose}
+          className="w-6 h-6 flex items-center justify-center rounded-md transition-colors hover:bg-white/[0.06]"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          <X size={14} />
+        </button>
+      </div>
+      {/* 代码内容 */}
+      <div className="flex-1 overflow-auto">
+        {highlighted ? (
+          <pre className="hljs px-4 py-3 text-[11px] font-mono leading-[1.7]"
+               style={{ margin: 0, background: "var(--background)" }}
+               dangerouslySetInnerHTML={{ __html: highlighted }} />
+        ) : (
+          <pre className="px-4 py-3 text-[11px] font-mono whitespace-pre-wrap break-words leading-[1.7]"
+               style={{ color: "var(--text-secondary)", margin: 0, background: "var(--background)" }}>
+            {file.content}
+          </pre>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ConversationHistory({ projects }: Props) {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<ClaudeSession[]>([]);
