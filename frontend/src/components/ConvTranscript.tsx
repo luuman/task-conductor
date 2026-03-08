@@ -498,7 +498,6 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
     setOpen(signal > 0);
   }, [signal]);
 
-  const toolName = block.tool_name || "Tool";
   const detail = getToolDetail(block.tool_name, block.tool_input);
   const hasFilePath = ["Read", "Write", "Edit", "MultiEdit"].includes(toolName) && block.tool_input?.file_path;
   const filePath = hasFilePath ? String(block.tool_input!.file_path) : "";
