@@ -101,9 +101,10 @@ class ProjectScheduler:
 
                 if can_run and running_count < project.max_parallel:
                     # 直接启动
-                    worktree = self._allocate_worktree(task, project)
+                    worktree, branch = await self._allocate_worktree(task, project)
                     task.status = "running"
                     task.worktree_path = worktree
+                    task.branch_name = branch
                     task.started_at = datetime.utcnow()
                     db.commit()
                     self._running.setdefault(project.id, set()).add(task_id)
