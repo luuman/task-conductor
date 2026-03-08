@@ -84,7 +84,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
   const commands: SlashCommand[] = useMemo(() => [
     {
       name: "model",
-      description: "切换 Claude 模型",
+      description: t('chatInput.switchModel'),
       icon: <Cpu size={14} />,
       action: { type: "select", options: models.map(m => ({ label: m.name + (m.default ? " (默认)" : ""), value: m.id, current: m.id === selectedModel })) },
       execute: (v) => { if (v) setSelectedModel(v); },
