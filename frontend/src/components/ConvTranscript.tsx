@@ -160,6 +160,7 @@ function ToolIcon({ name, size = 14 }: { name: string; size?: number }) {
     case "Grep": return <Search {...props} style={{ color: "var(--warning)" }} />;
     case "Glob": return <FolderSearch {...props} style={{ color: "var(--info)" }} />;
     case "WebSearch": case "WebFetch": return <Globe {...props} style={{ color: "var(--info)" }} />;
+    case "AskUserQuestion": return <MessageCircleQuestion {...props} style={{ color: "var(--warning)" }} />;
     default: return <Terminal {...props} style={{ color: "var(--text-tertiary)" }} />;
   }
 }
