@@ -59,10 +59,24 @@ class ProjectScheduler:
                 return False
         return True
 
-    def _allocate_worktree(self, task: Task, project: Project) -> str:
-        """分配 git worktree 路径（目录由执行层实际创建）"""
+    async def _allocate_worktree(self, task: Task, project: Project) -> tuple[str, str]:
+        """分配 git worktree，返回 (worktree_path, branch_name)
+
+        如果 project.repo_url 指向有效 git 仓库，则创建真正的 git worktree；
+        否则降级为 os.makedirs 创建空目录。
+        """
         base = project.worktree_base or f"/tmp/tc-worktrees/project-{project.id}"
-        return os.path.join(base, f"task-{task.id}")
+        wt_path = os.path.join(base, f"task-{task.id}")
+        branch = generate_branch_name(task)
+
+        repo_path = project.repo_url
+        if repo_path and await is_git_repo(repo_path):
+            await create_worktree(repo_path, wt_path, branch)
+        else:
+            os.makedirs(wt_path, exist_ok=True)
+            branch = ""
+
+        return wt_path, branch
 
     def get_running_count(self, project_id: int) -> int:
         return len(self._running.get(project_id, set()))
