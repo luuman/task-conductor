@@ -562,6 +562,17 @@ export const api = {
       }),
     restart: () =>
       request<void>("/api/settings/restart", { method: "POST" }),
+    exportDb: () =>
+      request<{ path: string; size_mb: number }>("/api/settings/data/export-db", { method: "POST" }),
+    clearSessions: () =>
+      request<{ ok: boolean; message: string }>("/api/settings/data/clear-sessions", { method: "POST" }),
+    clearCompletedTasks: () =>
+      request<{ ok: boolean; count: number }>("/api/settings/data/clear-completed-tasks", { method: "POST" }),
+    updatePin: (new_pin: string) =>
+      request<{ ok: boolean }>("/api/settings/security/pin", {
+        method: "PUT",
+        body: JSON.stringify({ new_pin }),
+      }),
   },
   claudeConfig: {
     get: () => request<ClaudeConfig>("/api/claude-config"),
