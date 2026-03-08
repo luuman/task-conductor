@@ -441,7 +441,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
               <p className="text-[10px] mb-2" style={{ color: "var(--text-tertiary)" }}>{activeCmd.description}</p>
               <div className="text-[11px] px-2 py-1.5 rounded"
                    style={{ color: "var(--text-secondary)", background: "var(--background-secondary)", border: "1px solid var(--border)" }}>
-                在下方输入框键入值后按 Enter 确认
+                {t('chatInput.enterToConfirm')}
               </div>
             </div>
           )}
