@@ -497,7 +497,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
                 ))
               )}
               {!activeCmd && filteredCommands.length === 0 && (
-                <div className="px-3 py-4 text-center text-[11px]" style={{ color: "var(--text-tertiary)" }}>没有匹配的命令</div>
+                <div className="px-3 py-4 text-center text-[11px]" style={{ color: "var(--text-tertiary)" }}>{t('chatInput.noMatch')}</div>
               )}
             </div>
           )}
