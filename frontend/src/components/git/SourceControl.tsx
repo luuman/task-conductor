@@ -182,7 +182,7 @@ export default function SourceControl({ project }: SourceControlProps) {
                   projectId={project.id}
                   selectedCommit={selectedCommit}
                   onSelectCommit={handleSelectCommit}
-                  refreshKey={refreshKey}
+                  onRefresh={handleRefresh}
                 />
               </div>
 
