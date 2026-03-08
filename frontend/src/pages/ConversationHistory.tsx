@@ -395,7 +395,7 @@ export default function ConversationHistory({ projects }: Props) {
         {fileLoading && (
           <div className="absolute inset-0 z-30 flex items-center justify-center"
                style={{ background: "rgba(0,0,0,0.5)" }}>
-            <span className="text-[12px] font-mono" style={{ color: "var(--text-tertiary)" }}>加载中...</span>
+            <span className="text-[12px] font-mono" style={{ color: "var(--text-tertiary)" }}>{t('conversationHistory.loading')}</span>
           </div>
         )}
         {/* 对话内容 */}
