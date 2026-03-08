@@ -508,7 +508,7 @@ export default function ConversationHistory({ projects }: Props) {
           <div className="h-11 flex items-center gap-1.5 px-3 shrink-0 text-[11px] font-medium"
                style={{ borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
             <List size={12} />
-            <span>问题导航</span>
+            <span>{t('conversationHistory.questionNav')}</span>
             <span className="ml-auto flex items-center gap-1.5">
               <span className="text-[9px]">{autoExpand ? "展开" : "折叠"}</span>
               <button
