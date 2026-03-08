@@ -137,20 +137,26 @@ def _mask_secret(secret: str) -> str:
 
 
 @router.put("", response_model=SettingsOut, summary="更新全局设置")
-def update_settings(body: SettingsUpdate):
+def update_settings(body: SettingsUpdateAll):
     """
-    更新全局设置。
+    更新全局设置（部分更新，只更新传入的非 None 字段）。
 
     - `workspace_root`: 项目根目录，新项目将创建在此目录下。
       路径必须已存在于服务器文件系统中。
     """
-    path = body.workspace_root.strip().rstrip("/")
-    if not path:
-        raise HTTPException(400, "路径不能为空")
-    if not os.path.isdir(path):
-        raise HTTPException(400, f"路径不存在或不是目录: {path}")
     data = _load()
-    data["workspace_root"] = path
+    update_dict = body.model_dump(exclude_none=True)
+
+    # workspace_root 路径验证
+    if "workspace_root" in update_dict:
+        path = update_dict["workspace_root"].strip().rstrip("/")
+        if not path:
+            raise HTTPException(400, "路径不能为空")
+        if not os.path.isdir(path):
+            raise HTTPException(400, f"路径不存在或不是目录: {path}")
+        update_dict["workspace_root"] = path
+
+    data.update(update_dict)
     _save(data)
     return get_settings()
 
