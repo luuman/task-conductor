@@ -264,11 +264,11 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
           return (
             <div key={idx} className="flex group"
                  style={{ background: isAdd ? "rgba(34,197,94,0.07)" : isDel ? "rgba(244,63,94,0.07)" : "transparent" }}>
-              <span className="w-[38px] text-right pr-2 select-none shrink-0 tabular-nums"
+              <span className="w-[20px] text-right pr-1 select-none shrink-0 tabular-nums"
                     style={{ color: "var(--text-tertiary)", opacity: isDel ? 0.6 : 0.25 }}>
                 {isDel ? item.oldNum : item.type === "ctx" ? item.oldNum : ""}
               </span>
-              <span className="w-[38px] text-right pr-2 select-none shrink-0 tabular-nums"
+              <span className="w-[20px] text-right pr-1 select-none shrink-0 tabular-nums"
                     style={{ color: "var(--text-tertiary)", opacity: isAdd ? 0.6 : 0.25 }}>
                 {isAdd ? item.newNum : item.type === "ctx" ? item.newNum : ""}
               </span>
