@@ -671,6 +671,13 @@ export const api = {
     uninstall: (id: string) =>
       request<{ ok: boolean }>(`/api/mcp/servers/${id}/uninstall`, { method: "DELETE" }),
   },
+
+  file: {
+    read: (path: string) =>
+      request<{ path: string; name: string; content: string | null; size?: number; error?: string }>(
+        `/api/file/read?path=${encodeURIComponent(path)}`
+      ),
+  },
 };
 
 export function getWsUrl(path: string): string {
