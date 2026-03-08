@@ -442,6 +442,24 @@ export interface GitStatusResponse {
   summary: Record<string, number>;
 }
 
+export interface GitFileEntry { path: string; status: string }
+export interface GitStatus {
+  branch: string | null;
+  staged: GitFileEntry[];
+  unstaged: GitFileEntry[];
+  untracked: GitFileEntry[];
+}
+export interface GitCommit {
+  hash: string;
+  parents: string[];
+  author: string;
+  date: string;
+  refs: string[];
+  message: string;
+}
+export interface GitBranch { name: string; current: boolean; remote: boolean }
+export interface GitStashEntry { index: string; message: string; date: string }
+
 export interface ChatModel {
   id: string;
   name: string;
