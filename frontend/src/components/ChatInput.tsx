@@ -571,7 +571,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
         {isGenerating ? (
           <button onClick={onStop}
             className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md hover:brightness-125"
-            style={{ background: "var(--danger)", color: "#fff" }} title="停止生成">
+            style={{ background: "var(--danger)", color: "#fff" }} title={t('chatInput.stopGenerate')}>
             <Square size={13} fill="currentColor" />
           </button>
         ) : (
