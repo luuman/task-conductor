@@ -408,8 +408,8 @@ export default function ConversationHistory({ projects }: Props) {
                    style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
                 <BotIcon size={20} style={{ color: "var(--accent)" }} />
               </div>
-              <p className="text-[12px]">开始新对话</p>
-              <p className="text-[10px] opacity-50">输入消息与 Claude 交流</p>
+              <p className="text-[12px]">{t('conversationHistory.startNewChat')}</p>
+              <p className="text-[10px] opacity-50">{t('conversationHistory.startNewChatHint')}</p>
             </div>
           )}
 
