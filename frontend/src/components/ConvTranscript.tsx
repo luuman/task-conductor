@@ -418,6 +418,7 @@ function AgentResultView({ result, description }: { result: string; description:
 
 // ── 通用输出（markdown 渲染） ────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const isLong = result.length > 800;
   const displayed = open || !isLong ? result : result.slice(0, 800) + "\n\n…";
