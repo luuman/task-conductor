@@ -625,7 +625,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
 
         {/* 权限模式 */}
         <ToolbarDropdown
-          label={chatOptions.permission_mode && chatOptions.permission_mode !== "plan" ? chatOptions.permission_mode : "权限"}
+          label={chatOptions.permission_mode && chatOptions.permission_mode !== "plan" ? chatOptions.permission_mode : t('chatInput.permission')}
           icon={<Zap size={11} />}
           active={!!chatOptions.permission_mode && chatOptions.permission_mode !== "plan"}
           options={[
