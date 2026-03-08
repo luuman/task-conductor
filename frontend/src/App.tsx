@@ -30,28 +30,6 @@ export default function App() {
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
 
-  // Global live Claude events (always listening, regardless of Sessions page state)
-  const [liveEvents, setLiveEvents] = useState<ClaudeHookEvent[]>([]);
-  const liveEventsRef = useRef<ClaudeHookEvent[]>([]);
-  const [monitorStatus, setMonitorStatus] = useState<WsStatus>("disconnected");
-
-  const handleMonitorEvent = useCallback((event: ClaudeHookEvent) => {
-    liveEventsRef.current = [...liveEventsRef.current, event].slice(-MAX_LIVE_EVENTS);
-    setLiveEvents([...liveEventsRef.current]);
-  }, []);
-
-  const clearLiveEvents = useCallback(() => {
-    liveEventsRef.current = [];
-    setLiveEvents([]);
-  }, []);
-
-  const { status: wsMonitorStatus } = useClaudeMonitor(authed, handleMonitorEvent);
-
-  // Sync WS status
-  useEffect(() => {
-    setMonitorStatus(wsMonitorStatus);
-  }, [wsMonitorStatus]);
-
   useEffect(() => {
     if (!authed) return;
     api.projects.list()
