@@ -175,6 +175,7 @@ function getToolDetail(name: string | null | undefined, input: Record<string, un
     case "WebSearch": return String(input.query || "");
     case "WebFetch": return String(input.url || "").slice(0, 80);
     case "Agent": return String(input.description || input.prompt || "").slice(0, 80);
+    case "AskUserQuestion": return String(input.question || "").slice(0, 120);
     default: return "";
   }
 }
