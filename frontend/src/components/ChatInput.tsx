@@ -582,7 +582,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
               background: (hasContent || inputMode) && !showCommands ? "var(--accent)" : "var(--background-tertiary)",
               color: (hasContent || inputMode) && !showCommands ? "#fff" : "var(--text-tertiary)",
             }}
-            title={inputMode ? "确认 (Enter)" : "发送 (Enter)"}>
+            title={inputMode ? t('chatInput.confirmInput') : t('chatInput.sendMessage')}>
             <SendHorizontal size={14} />
           </button>
         )}
