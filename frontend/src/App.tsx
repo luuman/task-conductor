@@ -42,6 +42,17 @@ export default function App() {
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
 
+  // 后端设置加载完成后，如果用户还没手动切换过页面，应用默认首页
+  useEffect(() => {
+    if (settingsLoaded && !pageInitialized) {
+      setPageInitialized(true);
+      const defaultPage = appSettings.ui_default_page as Page;
+      if (defaultPage && defaultPage !== page) {
+        setPage(defaultPage);
+      }
+    }
+  }, [settingsLoaded, appSettings.ui_default_page, pageInitialized, page]);
+
   useEffect(() => {
     if (!authed) return;
     api.projects.list()
