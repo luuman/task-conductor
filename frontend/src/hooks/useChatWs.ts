@@ -59,7 +59,7 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
       ws.onopen = () => resolve(ws);
 
       ws.onerror = () => {
-        reject(new Error("WebSocket 连接失败"));
+        reject(new Error("WebSocket connection failed"));
       };
 
       ws.onmessage = (e) => {
