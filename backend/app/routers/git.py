@@ -164,3 +164,379 @@ def git_diff(
         raise HTTPException(500, f"git diff 失败: {result.stderr.strip()}")
 
     return {"diff": result.stdout}
+
+
+# ── Request Bodies ─────────────────────────────────────────────
+
+
+class GitFilesBody(BaseModel):
+    files: list[str] = []
+    all: bool = False
+
+
+class GitCommitBody(BaseModel):
+    message: str
+
+
+class GitCheckoutBody(BaseModel):
+    branch: str
+    create: bool = False
+
+
+class GitStashSaveBody(BaseModel):
+    message: str = ""
+
+
+class GitStashIndexBody(BaseModel):
+    index: int = 0
+
+
+# ── Task 2: Stage / Unstage / Discard / Commit ────────────────
+
+
+@router.post("/{project_id}/git/stage", summary="暂存文件")
+def git_stage(
+    project_id: int,
+    body: GitFilesBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    if body.all:
+        result = _run_git(cwd, "add", "-A")
+        if result.returncode != 0:
+            raise HTTPException(400, f"git add -A 失败: {result.stderr.strip()}")
+    else:
+        for f in body.files:
+            result = _run_git(cwd, "add", "--", f)
+            if result.returncode != 0:
+                raise HTTPException(400, f"git add 失败 ({f}): {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/unstage", summary="取消暂存")
+def git_unstage(
+    project_id: int,
+    body: GitFilesBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    if body.all:
+        result = _run_git(cwd, "reset", "HEAD")
+        if result.returncode != 0:
+            raise HTTPException(400, f"git reset HEAD 失败: {result.stderr.strip()}")
+    else:
+        for f in body.files:
+            result = _run_git(cwd, "reset", "HEAD", "--", f)
+            if result.returncode != 0:
+                raise HTTPException(400, f"git reset 失败 ({f}): {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/discard", summary="丢弃工作区更改")
+def git_discard(
+    project_id: int,
+    body: GitFilesBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    if not body.files:
+        raise HTTPException(400, "必须指定要丢弃的文件列表")
+
+    for f in body.files:
+        result = _run_git(cwd, "checkout", "--", f)
+        if result.returncode != 0:
+            raise HTTPException(400, f"git checkout 失败 ({f}): {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/commit", summary="提交更改")
+def git_commit(
+    project_id: int,
+    body: GitCommitBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "commit", "-m", body.message)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git commit 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+# ── Task 3: Log / Branches / Checkout / Push / Pull / Fetch / Commit Detail ──
+
+
+@router.get("/{project_id}/git/log", summary="获取提交历史")
+def git_log(
+    project_id: int,
+    limit: int = Query(100, ge=1, le=5000),
+    branch: str | None = Query(None),
+    all_branches: bool = Query(True),
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    args: list[str] = ["log", f"--format=%H|%P|%an|%aI|%D|%s", f"-{limit}"]
+
+    if all_branches:
+        args.append("--all")
+    elif branch:
+        args.append(branch)
+
+    result = _run_git(cwd, *args, timeout=15)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git log 失败: {result.stderr.strip()}")
+
+    commits = []
+    for line in result.stdout.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("|", 5)
+        if len(parts) < 6:
+            continue
+        hash_, parents_str, author, date, refs_str, message = parts
+        parents = parents_str.split() if parents_str.strip() else []
+        refs = [r.strip() for r in refs_str.split(",") if r.strip()] if refs_str.strip() else []
+        commits.append({
+            "hash": hash_,
+            "parents": parents,
+            "author": author,
+            "date": date,
+            "refs": refs,
+            "message": message,
+        })
+
+    return {"commits": commits}
+
+
+@router.get("/{project_id}/git/branches", summary="获取分支列表")
+def git_branches(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "branch", "-a", "--format=%(refname:short)|%(HEAD)")
+    if result.returncode != 0:
+        raise HTTPException(400, f"git branch 失败: {result.stderr.strip()}")
+
+    branches = []
+    for line in result.stdout.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("|", 1)
+        name = parts[0].strip()
+        current = parts[1].strip() == "*" if len(parts) > 1 else False
+        remote = name.startswith("origin/") or "/" in name
+        branches.append({"name": name, "current": current, "remote": remote})
+
+    return {"branches": branches}
+
+
+@router.post("/{project_id}/git/checkout", summary="切换分支")
+def git_checkout(
+    project_id: int,
+    body: GitCheckoutBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    args = ["checkout"]
+    if body.create:
+        args.append("-b")
+    args.append(body.branch)
+
+    result = _run_git(cwd, *args)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git checkout 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/push", summary="推送到远程")
+def git_push(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "push", timeout=60)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git push 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/pull", summary="拉取远程更新")
+def git_pull(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "pull", timeout=60)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git pull 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/fetch", summary="获取远程引用")
+def git_fetch(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "fetch", "--all", timeout=60)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git fetch 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.get("/{project_id}/git/commit/{sha}", summary="获取单个提交详情")
+def git_commit_detail(
+    project_id: int,
+    sha: str,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    # 提交元信息
+    meta_result = _run_git(cwd, "log", "-1", f"--format=%H|%P|%an|%aI|%D|%s", sha)
+    if meta_result.returncode != 0:
+        raise HTTPException(400, f"git log 失败: {meta_result.stderr.strip()}")
+
+    line = meta_result.stdout.strip()
+    parts = line.split("|", 5)
+    if len(parts) < 6:
+        raise HTTPException(400, "无法解析提交信息")
+
+    hash_, parents_str, author, date, refs_str, message = parts
+    parents = parents_str.split() if parents_str.strip() else []
+    refs = [r.strip() for r in refs_str.split(",") if r.strip()] if refs_str.strip() else []
+
+    # 变更文件列表
+    files_result = _run_git(cwd, "diff-tree", "--no-commit-id", "-r", "--name-status", sha)
+    changed_files = []
+    if files_result.returncode == 0:
+        for fline in files_result.stdout.splitlines():
+            if not fline.strip():
+                continue
+            fparts = fline.split("\t", 1)
+            if len(fparts) == 2:
+                changed_files.append({
+                    "status": _parse_status_code(fparts[0].strip()),
+                    "path": fparts[1].strip(),
+                })
+
+    return {
+        "hash": hash_,
+        "parents": parents,
+        "author": author,
+        "date": date,
+        "refs": refs,
+        "message": message,
+        "files": changed_files,
+    }
+
+
+# ── Task 4: Stash ─────────────────────────────────────────────
+
+
+@router.get("/{project_id}/git/stash", summary="获取 Stash 列表")
+def git_stash_list(
+    project_id: int,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "stash", "list", "--format=%gd|%gs|%aI")
+    if result.returncode != 0:
+        raise HTTPException(400, f"git stash list 失败: {result.stderr.strip()}")
+
+    stashes = []
+    for line in result.stdout.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("|", 2)
+        if len(parts) >= 3:
+            stashes.append({
+                "ref": parts[0].strip(),
+                "message": parts[1].strip(),
+                "date": parts[2].strip(),
+            })
+
+    return {"stashes": stashes}
+
+
+@router.post("/{project_id}/git/stash/save", summary="保存 Stash")
+def git_stash_save(
+    project_id: int,
+    body: GitStashSaveBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    args = ["stash", "push"]
+    if body.message:
+        args.extend(["-m", body.message])
+
+    result = _run_git(cwd, *args)
+    if result.returncode != 0:
+        raise HTTPException(400, f"git stash push 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/stash/apply", summary="应用 Stash")
+def git_stash_apply(
+    project_id: int,
+    body: GitStashIndexBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "stash", "apply", f"stash@{{{body.index}}}")
+    if result.returncode != 0:
+        raise HTTPException(400, f"git stash apply 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
+
+
+@router.post("/{project_id}/git/stash/drop", summary="删除 Stash")
+def git_stash_drop(
+    project_id: int,
+    body: GitStashIndexBody,
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    result = _run_git(cwd, "stash", "drop", f"stash@{{{body.index}}}")
+    if result.returncode != 0:
+        raise HTTPException(400, f"git stash drop 失败: {result.stderr.strip()}")
+
+    return {"ok": True}
