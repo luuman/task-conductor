@@ -545,10 +545,10 @@ export const api = {
       feishu_owner_id: string;
       feishu_default_chat_id: string;
     }>("/api/settings"),
-    update: (workspace_root: string) =>
-      request<{ workspace_root: string }>("/api/settings", {
+    update: (body: Record<string, unknown>) =>
+      request<Record<string, unknown>>("/api/settings", {
         method: "PUT",
-        body: JSON.stringify({ workspace_root }),
+        body: JSON.stringify(body),
       }),
     updateFeishu: (body: {
       feishu_app_id?: string;
