@@ -167,32 +167,6 @@ export function Sidebar({
           );
         })}
 
-        {/* 会话记录 */}
-        {(() => {
-          const active = activePage === "sessions";
-          const label = t('sidebar.liveMonitor');
-          return (
-            <button onClick={() => onSelectPage("sessions")}
-              title={collapsed ? label : undefined}
-              className={cn(
-                "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left group",
-                collapsed ? "justify-center py-2 px-0" : "gap-2.5 px-3 py-2",
-                active ? "font-medium" : "hover:bg-white/[0.03]"
-              )}
-              style={{
-                background: active ? "var(--accent-subtle)" : undefined,
-                color: active ? "var(--accent)" : "var(--text-secondary)",
-              }}
-            >
-              {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
-                      style={{ background: "var(--accent)" }} />
-              )}
-              <Radio size={14} className="shrink-0" strokeWidth={active ? 2 : 1.75} />
-              {!collapsed && label}
-            </button>
-          );
-        })()}
       </nav>
 
       {/* ── Spacer ─────────────────────────────────────── */}
