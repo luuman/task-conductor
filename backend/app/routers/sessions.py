@@ -74,7 +74,7 @@ def list_sessions(db: Session = Depends(get_db)):
         .outerjoin(event_count_sq, ClaudeSession.id == event_count_sq.c.claude_session_id)
         .outerjoin(ConversationNote, ClaudeSession.id == ConversationNote.claude_session_id)
         .order_by(ClaudeSession.last_seen_at.desc())
-        .limit(50)
+        .limit(_load_settings().get("observe_session_limit", 50))
         .all()
     )
 
