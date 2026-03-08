@@ -43,6 +43,7 @@ export interface ChatInputProps {
 // ── 组件 ────────────────────────────────────────────────────────
 
 export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, onExport, onClear }: ChatInputProps) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [models, setModels] = useState<ChatModel[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
