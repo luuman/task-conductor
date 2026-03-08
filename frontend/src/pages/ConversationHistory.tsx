@@ -54,6 +54,27 @@ export default function ConversationHistory({ projects }: Props) {
   const [isNewChat, setIsNewChat] = useState(false);
   const [chatMessages, setChatMessages] = useState<TranscriptMessage[]>([]);
 
+  // 文件查看面板
+  const [viewingFile, setViewingFile] = useState<{ path: string; name: string; content: string } | null>(null);
+  const [fileLoading, setFileLoading] = useState(false);
+
+  const handleOpenFile = useCallback((filePath: string) => {
+    setFileLoading(true);
+    api.file.read(filePath)
+      .then(r => {
+        if (r.content != null) {
+          setViewingFile({ path: r.path, name: r.name, content: r.content });
+        } else {
+          setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: r.error || "无法读取文件" });
+        }
+        setFileLoading(false);
+      })
+      .catch(() => {
+        setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: "读取失败" });
+        setFileLoading(false);
+      });
+  }, []);
+
   const transcriptRef = useRef<HTMLDivElement>(null);
   const transcriptCache = useRef<Map<string, { messages: TranscriptMessage[]; fileFound: boolean }>>(new Map());
 
