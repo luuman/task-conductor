@@ -47,6 +47,7 @@ import {
   User,
   ChevronDown,
   ChevronRight,
+  MessageCircleQuestion,
 } from "lucide-react";
 
 // ── Context ─────────────────────────────────────────────────
