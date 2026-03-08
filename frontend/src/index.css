@@ -28,6 +28,29 @@
   --info:    #38bdf8;
 }
 
+/* ── Light theme tokens ─────────────────────────────────────── */
+[data-theme="light"] {
+  --background:           #f8f8fc;
+  --background-secondary: #ffffff;
+  --background-tertiary:  #f0f0f6;
+
+  --border:        #d8d8e8;
+  --border-subtle: #e4e4f0;
+
+  --text-primary:   #1a1a2e;
+  --text-secondary: #6060a0;
+  --text-tertiary:  #a0a0c0;
+
+  --accent:        #3366ee;
+  --accent-hover:  #2255dd;
+  --accent-subtle: rgba(51, 102, 238, 0.08);
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger:  #dc2626;
+  --info:    #0284c7;
+}
+
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
