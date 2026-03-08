@@ -377,10 +377,6 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
 
 // ── Agent markdown 输出 ──────────────────────────────────────
 function AgentResultView({ result, description }: { result: string; description: string }) {
-  const [open, setOpen] = useState(false);
-  const isLong = result.length > 1000;
-  const displayed = open || !isLong ? result : result.slice(0, 1000) + "\n\n…";
-
   return (
     <div className="rounded-lg overflow-hidden mt-2"
          style={{ border: "1px solid var(--border)" }}>
@@ -392,20 +388,12 @@ function AgentResultView({ result, description }: { result: string; description:
                 style={{ color: "var(--text-secondary)" }}>{description}</span>
         </div>
       )}
-      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto "
+      <div className="px-4 py-3 text-[12px] leading-relaxed"
            style={{ color: "var(--text-primary)", background: "var(--background)" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-          {displayed}
+          {result}
         </ReactMarkdown>
       </div>
-      {isLong && (
-        <button
-          onClick={() => setOpen(v => !v)}
-          className="w-full h-6 text-[10px] font-mono transition-colors"
-          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? "▲ 收起" : `▼ 展开全部 (${result.length} 字)`}
-        </button>
-      )}
     </div>
   );
 }
