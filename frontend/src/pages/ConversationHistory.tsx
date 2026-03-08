@@ -386,8 +386,18 @@ export default function ConversationHistory({ projects }: Props) {
         />
       </div>
 
-      {/* ── 中栏：对话内容 + 聊天输入 ── */}
+      {/* ── 中栏：对话内容 + 聊天输入 + 文件查看 ── */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
+        {/* 文件查看面板 */}
+        {viewingFile && (
+          <FileViewPanel file={viewingFile} onClose={() => setViewingFile(null)} />
+        )}
+        {fileLoading && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center"
+               style={{ background: "rgba(0,0,0,0.5)" }}>
+            <span className="text-[12px] font-mono" style={{ color: "var(--text-tertiary)" }}>加载中...</span>
+          </div>
+        )}
         {/* 对话内容 */}
         <div ref={transcriptRef} className="flex-1 overflow-y-auto">
           {/* 新对话欢迎页（无消息时） */}
