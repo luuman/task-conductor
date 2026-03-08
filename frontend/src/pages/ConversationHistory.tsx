@@ -133,7 +133,7 @@ export default function ConversationHistory({ projects }: Props) {
         setFileLoading(false);
       })
       .catch(() => {
-        setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: "读取失败" });
+        setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: t('conversationHistory.fileReadError') });
         setFileLoading(false);
       });
   }, []);
