@@ -359,7 +359,7 @@ export default function ConversationHistory({ projects }: Props) {
          style={{ background: "var(--background)" }}>
 
       {/* ── 左栏：会话列表 ── */}
-      <div className="w-[260px] shrink-0 flex flex-col"
+      <div className="w-[260px] shrink-0 flex flex-col overflow-hidden"
            style={{ borderRight: "1px solid var(--border)" }}>
         <div className="h-11 flex items-center px-3 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
