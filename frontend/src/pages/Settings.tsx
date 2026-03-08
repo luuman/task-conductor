@@ -13,6 +13,8 @@ interface SettingsProps {
 type TokenStatus = "checking" | "valid" | "invalid";
 type SaveStatus = "idle" | "saving" | "ok" | "error";
 
+const ALL_STAGES = ["input", "analysis", "prd", "ui", "plan", "dev", "test", "deploy", "monitor"];
+
 export default function Settings({ onDisconnect }: SettingsProps) {
   const { t } = useTranslation();
   const config = getConfig();
@@ -33,6 +35,28 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const [feishu, setFeishu] = useState({ app_id: "", app_secret: "", owner_id: "", default_chat_id: "" });
   const [feishuInput, setFeishuInput] = useState({ app_id: "", app_secret: "", owner_id: "", default_chat_id: "" });
   const [feishuSaveStatus, setFeishuSaveStatus] = useState<SaveStatus>("idle");
+
+  // general settings state
+  const [settings, setSettings] = useState({
+    notify_tts_enabled: true,
+    notify_tts_pipe_path: "/home/sichengli/Documents/code2/speak-pipe",
+    notify_webhook_url: "",
+    notify_webhook_enabled: false,
+    notify_browser_enabled: true,
+    pipeline_approval_stages: ["analysis", "prd", "ui", "plan", "test", "deploy"] as string[],
+    pipeline_max_retries: 3,
+    pipeline_confidence_threshold: 0.5,
+    observe_session_limit: 50,
+    observe_event_limit: 200,
+    observe_auto_cleanup: false,
+    observe_cleanup_days: 30,
+    ui_theme: "dark",
+    ui_sidebar_collapsed: false,
+    ui_default_page: "dashboard",
+    ui_log_max_lines: 500,
+    security_tunnel_enabled: false,
+  });
+  const [newPin, setNewPin] = useState("");
 
   const baseUrl = (() => {
     const isLocal =
@@ -65,6 +89,16 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     }
   };
 
+  const pickSettingsFields = (s: Record<string, unknown>) => {
+    const picked: Record<string, unknown> = {};
+    for (const key of Object.keys(settings)) {
+      if (key in s && s[key] !== undefined && s[key] !== null) {
+        picked[key] = s[key];
+      }
+    }
+    return picked;
+  };
+
   useEffect(() => {
     checkToken();
     api.agentInfo()
@@ -75,9 +109,59 @@ export default function Settings({ onDisconnect }: SettingsProps) {
         setWorkspaceRoot(s.workspace_root); setWorkspaceInput(s.workspace_root);
         const fs = { app_id: s.feishu_app_id || "", app_secret: s.feishu_app_secret || "", owner_id: s.feishu_owner_id || "", default_chat_id: s.feishu_default_chat_id || "" };
         setFeishu(fs); setFeishuInput(fs);
+        setSettings(prev => ({ ...prev, ...pickSettingsFields(s as unknown as Record<string, unknown>) }));
       })
       .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // generic setting update (auto-save to backend)
+  const updateSetting = async (key: string, value: unknown) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+    try {
+      await api.settings.update({ [key]: value });
+    } catch {
+      // silent fail
+    }
+  };
+
+  const toggleApprovalStage = (stage: string) => {
+    const current = settings.pipeline_approval_stages;
+    const next = current.includes(stage)
+      ? current.filter(s => s !== stage)
+      : [...current, stage];
+    updateSetting('pipeline_approval_stages', next);
+  };
+
+  const handleExportDb = async () => {
+    try {
+      const res = await api.settings.exportDb();
+      alert(`${t('settings.data.exportDb')}: ${res.path}\n${res.size_mb} MB`);
+    } catch { /* */ }
+  };
+
+  const handleClearSessions = async () => {
+    try {
+      await api.settings.clearSessions();
+    } catch { /* */ }
+  };
+
+  const handleClearTasks = async () => {
+    try {
+      await api.settings.clearCompletedTasks();
+    } catch { /* */ }
+  };
+
+  const handleChangePin = async () => {
+    if (!newPin || newPin.length < 4) return;
+    try {
+      await api.settings.updatePin(newPin);
+      setNewPin("");
+      alert(t('settings.security.pinUpdated'));
+    } catch {
+      alert(t('settings.security.pinUpdateFailed'));
+    }
+  };
 
   const handleSaveWorkspace = async () => {
     const path = workspaceInput.trim();
@@ -104,7 +188,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     try {
       await api.shutdown();
     } catch {
-      // 服务关闭后请求会失败，属于正常情况
+      // expected after shutdown
     }
   };
 
@@ -132,9 +216,8 @@ export default function Settings({ onDisconnect }: SettingsProps) {
     try {
       await api.settings.restart();
     } catch {
-      // 重启后连接会断开，属于正常情况
+      // expected after restart
     }
-    // 等待后端重启后刷新页面
     setTimeout(() => window.location.reload(), 3000);
   };
 
@@ -208,12 +291,12 @@ export default function Settings({ onDisconnect }: SettingsProps) {
             <div className="bg-app rounded-lg px-3 py-2.5 space-y-1.5">
               <p className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium">{t('settings.workspace.pathPreview')}</p>
               <div className="flex items-center gap-1.5 text-[11px] font-mono">
-                <span className="text-app-secondary">{workspaceRoot || "…"}</span>
+                <span className="text-app-secondary">{workspaceRoot || "..."}</span>
                 <span className="text-app-tertiary">/</span>
                 <span className="text-accent">{t('settings.workspace.projectName')}</span>
               </div>
               <p className="text-[10px] text-app-tertiary">
-                {t('settings.workspace.example')}{workspaceRoot || "…"}/my-app
+                {t('settings.workspace.example')}{workspaceRoot || "..."}/my-app
               </p>
             </div>
           </div>
@@ -280,25 +363,121 @@ export default function Settings({ onDisconnect }: SettingsProps) {
           </div>
         </section>
 
-        {/* ── 重启服务 ── */}
-        <section className="bg-app-secondary border border-amber-500/20 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 flex items-center justify-between">
+        {/* ── 通知设置 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.notification.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.notification.hint')}</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            <ToggleRow label={t('settings.notification.ttsEnabled')} value={settings.notify_tts_enabled} onChange={v => updateSetting('notify_tts_enabled', v)} />
+            {settings.notify_tts_enabled && (
+              <FieldInput label={t('settings.notification.ttsPipePath')} value={settings.notify_tts_pipe_path} onChange={v => updateSetting('notify_tts_pipe_path', v)} placeholder="/path/to/speak-pipe" />
+            )}
+            <ToggleRow label={t('settings.notification.webhookEnabled')} value={settings.notify_webhook_enabled} onChange={v => updateSetting('notify_webhook_enabled', v)} />
+            {settings.notify_webhook_enabled && (
+              <FieldInput label={t('settings.notification.webhookUrl')} value={settings.notify_webhook_url} onChange={v => updateSetting('notify_webhook_url', v)} placeholder="https://hooks.example.com/..." />
+            )}
+            <ToggleRow label={t('settings.notification.browserEnabled')} value={settings.notify_browser_enabled} onChange={v => updateSetting('notify_browser_enabled', v)} />
+          </div>
+        </section>
+
+        {/* ── 流水线配置 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.pipeline.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.pipeline.hint')}</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            {/* 审批阶段多选 */}
             <div>
-              <p className="text-xs text-app font-semibold">{t('settings.restart.title')}</p>
-              <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.restart.hint')}</p>
+              <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1.5">
+                {t('settings.pipeline.approvalStages')}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {ALL_STAGES.map(stage => (
+                  <button key={stage}
+                    onClick={() => toggleApprovalStage(stage)}
+                    className={cn(
+                      "px-2.5 py-1 text-[11px] rounded-md border transition-all",
+                      settings.pipeline_approval_stages.includes(stage)
+                        ? "bg-accent/15 border-accent/40 text-accent"
+                        : "bg-app border-app text-app-tertiary hover:text-app"
+                    )}
+                  >
+                    {stage}
+                  </button>
+                ))}
+              </div>
             </div>
-            <button
-              onClick={handleRestart}
-              disabled={restarting}
-              className={cn(
-                "text-xs px-3 py-1.5 rounded-md font-medium transition-colors",
-                restarting
-                  ? "bg-amber-500/20 text-amber-300 cursor-not-allowed"
-                  : "bg-amber-600 hover:bg-amber-500 text-white"
-              )}
-            >
-              {restarting ? t('settings.restart.restarting') : t('settings.restart.title')}
-            </button>
+            <NumberInput label={t('settings.pipeline.maxRetries')} value={settings.pipeline_max_retries} onChange={v => updateSetting('pipeline_max_retries', v)} min={1} max={10} />
+            <NumberInput label={t('settings.pipeline.confidenceThreshold')} value={settings.pipeline_confidence_threshold} onChange={v => updateSetting('pipeline_confidence_threshold', v)} min={0} max={1} step={0.1} />
+          </div>
+        </section>
+
+        {/* ── 观测层设置 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.observe.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.observe.hint')}</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            <NumberInput label={t('settings.observe.sessionLimit')} value={settings.observe_session_limit} onChange={v => updateSetting('observe_session_limit', v)} min={10} max={500} />
+            <NumberInput label={t('settings.observe.eventLimit')} value={settings.observe_event_limit} onChange={v => updateSetting('observe_event_limit', v)} min={50} max={1000} />
+            <ToggleRow label={t('settings.observe.autoCleanup')} value={settings.observe_auto_cleanup} onChange={v => updateSetting('observe_auto_cleanup', v)} />
+            {settings.observe_auto_cleanup && (
+              <NumberInput label={t('settings.observe.cleanupDays')} value={settings.observe_cleanup_days} onChange={v => updateSetting('observe_cleanup_days', v)} min={1} max={365} />
+            )}
+          </div>
+        </section>
+
+        {/* ── 界面偏好 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.ui.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.ui.hint')}</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            {/* 主题 */}
+            <div>
+              <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1.5">{t('settings.ui.theme')}</label>
+              <div className="flex gap-2">
+                {(["dark", "light", "system"] as const).map(theme => (
+                  <button key={theme}
+                    onClick={() => updateSetting('ui_theme', theme)}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] rounded-md border transition-all",
+                      settings.ui_theme === theme
+                        ? "bg-accent text-white border-accent"
+                        : "bg-app border-app text-app-secondary hover:text-app"
+                    )}
+                  >
+                    {t(`settings.ui.themes.${theme}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* 默认页面 */}
+            <div>
+              <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1.5">{t('settings.ui.defaultPage')}</label>
+              <div className="flex gap-2">
+                {(["dashboard", "sessions", "canvas"] as const).map(page => (
+                  <button key={page}
+                    onClick={() => updateSetting('ui_default_page', page)}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] rounded-md border transition-all",
+                      settings.ui_default_page === page
+                        ? "bg-accent text-white border-accent"
+                        : "bg-app border-app text-app-secondary hover:text-app"
+                    )}
+                  >
+                    {t(`sidebar.nav.${page}`, page)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <ToggleRow label={t('settings.ui.sidebarCollapsed')} value={settings.ui_sidebar_collapsed} onChange={v => updateSetting('ui_sidebar_collapsed', v)} />
+            <NumberInput label={t('settings.ui.logMaxLines')} value={settings.ui_log_max_lines} onChange={v => updateSetting('ui_log_max_lines', v)} min={100} max={5000} step={100} />
           </div>
         </section>
 
@@ -310,6 +489,45 @@ export default function Settings({ onDisconnect }: SettingsProps) {
           </div>
           <PerfSettings />
         </div>
+
+        {/* ── 数据管理 ── */}
+        <section className="bg-app-secondary border border-amber-500/20 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.data.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.data.hint')}</p>
+          </div>
+          <div className="divide-y divide-app">
+            <ActionRow label={t('settings.data.exportDb')} hint={t('settings.data.exportDbHint')} buttonText={t('settings.data.export')} buttonColor="blue" onClick={handleExportDb} />
+            <ActionRow label={t('settings.data.clearSessions')} hint={t('settings.data.clearSessionsHint')} buttonText={t('settings.data.clear')} buttonColor="amber" onClick={handleClearSessions} confirm />
+            <ActionRow label={t('settings.data.clearTasks')} hint={t('settings.data.clearTasksHint')} buttonText={t('settings.data.clear')} buttonColor="amber" onClick={handleClearTasks} confirm />
+          </div>
+        </section>
+
+        {/* ── 安全设置 ── */}
+        <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-app">
+            <h2 className="text-xs font-semibold text-app">{t('settings.security.title')}</h2>
+            <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.security.hint')}</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            <div>
+              <label className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium block mb-1.5">{t('settings.security.changePin')}</label>
+              <div className="flex gap-2">
+                <input type="password" value={newPin} onChange={e => setNewPin(e.target.value)}
+                  placeholder={t('settings.security.newPinPlaceholder')}
+                  className="flex-1 bg-app border border-app rounded-md px-3 py-2 text-xs font-mono text-app outline-none transition-colors focus:border-accent/60" />
+                <button onClick={handleChangePin} disabled={!newPin || newPin.length < 4}
+                  className={cn("px-3 py-2 text-xs rounded-md font-medium transition-all",
+                    !newPin || newPin.length < 4 ? "bg-app-tertiary/30 text-app-tertiary cursor-not-allowed"
+                      : "bg-accent hover:bg-accent-hover text-white"
+                  )}>
+                  {t('settings.security.updatePin')}
+                </button>
+              </div>
+            </div>
+            <ToggleRow label={t('settings.security.tunnelEnabled')} value={settings.security_tunnel_enabled} onChange={v => updateSetting('security_tunnel_enabled', v)} />
+          </div>
+        </section>
 
         {/* 连接与认证 */}
         <section className="bg-app-secondary border border-app rounded-xl overflow-hidden">
@@ -389,6 +607,28 @@ export default function Settings({ onDisconnect }: SettingsProps) {
           </div>
         </section>
 
+        {/* ── 重启服务 ── */}
+        <section className="bg-app-secondary border border-amber-500/20 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-app font-semibold">{t('settings.restart.title')}</p>
+              <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.restart.hint')}</p>
+            </div>
+            <button
+              onClick={handleRestart}
+              disabled={restarting}
+              className={cn(
+                "text-xs px-3 py-1.5 rounded-md font-medium transition-colors",
+                restarting
+                  ? "bg-amber-500/20 text-amber-300 cursor-not-allowed"
+                  : "bg-amber-600 hover:bg-amber-500 text-white"
+              )}
+            >
+              {restarting ? t('settings.restart.restarting') : t('settings.restart.title')}
+            </button>
+          </div>
+        </section>
+
         {/* 关闭服务 */}
         <section className="bg-app-secondary border border-red-500/20 rounded-xl overflow-hidden">
           <div className="px-4 py-3 flex items-center justify-between">
@@ -442,6 +682,61 @@ function FieldInput({ label, value, onChange, placeholder, type = "text" }: {
         spellCheck={false}
         className="w-full bg-app border border-app rounded-md px-3 py-2 text-xs font-mono text-app outline-none transition-colors focus:border-accent/60"
       />
+    </div>
+  );
+}
+
+function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-app">{label}</span>
+      <button onClick={() => onChange(!value)}
+        className={cn("w-9 h-5 rounded-full transition-colors relative",
+          value ? "bg-accent" : "bg-app-tertiary/40"
+        )}>
+        <span className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform",
+          value ? "left-[18px]" : "left-0.5"
+        )} />
+      </button>
+    </div>
+  );
+}
+
+function NumberInput({ label, value, onChange, min, max, step = 1 }: {
+  label: string; value: number; onChange: (v: number) => void; min: number; max: number; step?: number;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-xs text-app">{label}</span>
+      <input type="number" value={value} onChange={e => onChange(Number(e.target.value))}
+        min={min} max={max} step={step}
+        className="w-20 bg-app border border-app rounded-md px-2 py-1.5 text-xs font-mono text-app text-right outline-none transition-colors focus:border-accent/60" />
+    </div>
+  );
+}
+
+function ActionRow({ label, hint, buttonText, buttonColor, onClick, confirm: needConfirm }: {
+  label: string; hint: string; buttonText: string; buttonColor: "blue" | "amber" | "red";
+  onClick: () => void; confirm?: boolean;
+}) {
+  const colorMap = {
+    blue: "bg-blue-600 hover:bg-blue-500 text-white",
+    amber: "bg-amber-600 hover:bg-amber-500 text-white",
+    red: "bg-red-600 hover:bg-red-500 text-white",
+  };
+  const handleClick = () => {
+    if (needConfirm && !window.confirm(`${label}?`)) return;
+    onClick();
+  };
+  return (
+    <div className="px-4 py-3 flex items-center justify-between">
+      <div>
+        <p className="text-xs text-app">{label}</p>
+        <p className="text-[10px] text-app-tertiary mt-0.5">{hint}</p>
+      </div>
+      <button onClick={handleClick} className={cn("text-xs px-3 py-1.5 rounded-md font-medium transition-colors", colorMap[buttonColor])}>
+        {buttonText}
+      </button>
     </div>
   );
 }
