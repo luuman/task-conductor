@@ -1,5 +1,5 @@
 // frontend/src/App.tsx
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FolderOpen } from "lucide-react";
 import Login from "./pages/Login";
