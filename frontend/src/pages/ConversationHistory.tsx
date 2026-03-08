@@ -510,7 +510,7 @@ export default function ConversationHistory({ projects }: Props) {
             <List size={12} />
             <span>{t('conversationHistory.questionNav')}</span>
             <span className="ml-auto flex items-center gap-1.5">
-              <span className="text-[9px]">{autoExpand ? "展开" : "折叠"}</span>
+              <span className="text-[9px]">{autoExpand ? t('conversationHistory.expandMode') : t('conversationHistory.collapseMode')}</span>
               <button
                 onClick={() => setAutoExpand(v => !v)}
                 className="relative w-7 h-[16px] rounded-full transition-colors shrink-0"
