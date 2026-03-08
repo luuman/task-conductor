@@ -98,7 +98,7 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
       const timer = setTimeout(() => {
         if (ws.readyState !== WebSocket.OPEN) {
           ws.close();
-          reject(new Error("连接超时"));
+          reject(new Error("Connection timeout"));
         }
       }, 5000);
 
