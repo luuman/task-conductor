@@ -742,19 +742,54 @@ export default function ProjectFiles({
         className="h-11 flex items-center gap-3 px-4 shrink-0"
         style={{ borderBottom: "1px solid var(--border)" }}
       >
+        {/* 返回按钮 */}
         <button
-          onClick={() => selectedFile ? setSelectedFile(null) : onBack()}
+          onClick={() => activeTab === "files" && selectedFile ? setSelectedFile(null) : onBack()}
           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white/[0.06]"
           style={{ color: "var(--text-tertiary)" }}
         >
           <ArrowLeft size={14} />
         </button>
-        <Folder size={15} style={{ color: "var(--accent)" }} />
+
+        {/* Tab 切换 */}
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => setActiveTab("files")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-md transition-colors",
+              activeTab === "files"
+                ? "font-medium"
+                : "hover:bg-white/[0.04]"
+            )}
+            style={{
+              color: activeTab === "files" ? "var(--accent)" : "var(--text-tertiary)",
+              background: activeTab === "files" ? "var(--accent-subtle)" : undefined,
+            }}
+          >
+            <Folder size={13} />
+            Files
+          </button>
+          <button
+            onClick={() => setActiveTab("source-control")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-md transition-colors",
+              activeTab === "source-control"
+                ? "font-medium"
+                : "hover:bg-white/[0.04]"
+            )}
+            style={{
+              color: activeTab === "source-control" ? "var(--accent)" : "var(--text-tertiary)",
+              background: activeTab === "source-control" ? "var(--accent-subtle)" : undefined,
+            }}
+          >
+            <GitBranch size={13} />
+            Source Control
+          </button>
+        </div>
+
+        {/* 项目名 */}
         <span className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>
           {project.name}
-        </span>
-        <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
-          {t("files.title")}
         </span>
         {/* git branch badge */}
         {gitInfo?.is_git && gitInfo.branch && (
