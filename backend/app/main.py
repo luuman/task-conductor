@@ -290,6 +290,24 @@ app.include_router(feishu_router)
 
 # ── 基础 endpoints ─────────────────────────────────────────────
 
+@app.get("/api/file/read", tags=["文件"], summary="读取本地文件内容")
+def read_local_file(path: str = Query(..., description="文件绝对路径")):
+    """根据绝对路径读取本地文件内容（用于会话记录中点击文件名查看）。"""
+    target = FilePath(path)
+    if not target.is_absolute():
+        return {"error": "需要绝对路径", "content": None}
+    if not target.is_file():
+        return {"error": "文件不存在", "content": None}
+    size = target.stat().st_size
+    if size > 2 * 1024 * 1024:
+        return {"error": f"文件过大 ({size} bytes)", "content": None}
+    try:
+        content = target.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return {"error": "二进制文件，无法显示", "content": None}
+    return {"path": path, "name": target.name, "content": content, "size": size}
+
+
 @app.get("/health", tags=["认证"], summary="健康检查")
 def health():
     """检查后端服务是否正常运行。"""
