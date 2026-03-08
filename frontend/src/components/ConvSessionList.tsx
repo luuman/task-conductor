@@ -19,7 +19,7 @@ function projectName(cwd: string): string {
 }
 
 /** 相对时间显示 */
-function relativeTime(isoStr: string): string {
+function relativeTime(isoStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const d = new Date(isoStr);
   const now = new Date();
   const locale = getDateLocale();
@@ -30,8 +30,8 @@ function relativeTime(isoStr: string): string {
   const diffDays = Math.floor((today.getTime() - target.getTime()) / 86400000);
 
   if (diffDays === 0) return timeStr;
-  if (diffDays === 1) return `昨天 ${timeStr}`;
-  if (diffDays < 7) return `${diffDays}天前`;
+  if (diffDays === 1) return `${t('convSessionList.yesterday')} ${timeStr}`;
+  if (diffDays < 7) return t('convSessionList.daysAgo', { count: diffDays });
   return d.toLocaleDateString(locale, { month: "numeric", day: "numeric" });
 }
 
