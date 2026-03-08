@@ -158,13 +158,69 @@ export default function ConversationHistory({ projects }: Props) {
     chatSend(message, model, options);
   };
 
-  // 自动滚动到底部（新消息或流式输出时）
+  // 滚动状态追踪
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
+  const prevMsgCountRef = useRef(0);
+
+  // 监听滚动位置
   useEffect(() => {
-    if (chatMessages.length > 0 || currentReply || isGenerating) {
+    const container = transcriptRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const atBottom = scrollHeight - scrollTop - clientHeight < 60;
+      setIsAtBottom(atBottom);
+      if (atBottom) setHasNewMessages(false);
+    };
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [selectedSession, isNewChat]);
+
+  // 新消息到达时：在底部则自动滚动，否则显示提示
+  const totalMsgCount = chatMessages.length + transcript.length;
+  useEffect(() => {
+    if (totalMsgCount <= prevMsgCountRef.current) {
+      prevMsgCountRef.current = totalMsgCount;
+      return;
+    }
+    prevMsgCountRef.current = totalMsgCount;
+    if (isAtBottom) {
+      chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      setHasNewMessages(true);
+    }
+  }, [totalMsgCount, isAtBottom]);
+
+  // 流式输出时：在底部则跟随滚动
+  useEffect(() => {
+    if ((currentReply || isGenerating) && isAtBottom) {
       chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [chatMessages, currentReply, isGenerating]);
+  }, [currentReply, isGenerating, isAtBottom]);
+
+  const scrollToBottom = useCallback(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    setHasNewMessages(false);
+  }, []);
+
+  // 实时轮询：选中 active 会话时定时刷新 transcript
+  useEffect(() => {
+    if (!selectedSession || selectedSession.status !== "active") return;
+    const sid = selectedSession.session_id;
+    const poll = () => {
+      api.sessions.transcript(sid)
+        .then(r => {
+          transcriptCache.current.set(sid, { messages: r.messages, fileFound: r.file_found });
+          setTranscript(r.messages);
+          setFileFound(r.file_found);
+        })
+        .catch(() => {});
+    };
+    const id = setInterval(poll, 3000);
+    return () => clearInterval(id);
+  }, [selectedSession]);
 
   // 展示的消息：历史会话模式用 transcript，新对话模式用 chatMessages
   const displayMessages = isNewChat ? chatMessages : transcript;
