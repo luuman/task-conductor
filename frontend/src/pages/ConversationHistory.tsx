@@ -485,7 +485,7 @@ export default function ConversationHistory({ projects }: Props) {
               }}
             >
               <ArrowDown size={13} />
-              {hasNewMessages && <span>新消息</span>}
+              {hasNewMessages && <span>{t('conversationHistory.newMessages')}</span>}
             </button>
           </div>
         )}
