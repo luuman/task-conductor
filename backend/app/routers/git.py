@@ -1,9 +1,10 @@
-"""Git 操作 API：状态查询与 Diff 查看"""
+"""Git 操作 API：状态查询、Diff、Stage/Commit、Log/Branch、Stash"""
 
 import subprocess
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..database import engine
