@@ -70,6 +70,23 @@ const mdComponents: Components = {
   em:     ({ children }) => <em className="italic" style={{ color: "var(--text-secondary)" }}>{children}</em>,
   code:   ({ children, className }) => {
     if (className?.includes("language-")) {
+      const lang = className.replace("language-", "");
+      const code = String(children).replace(/\n$/, "");
+      let highlighted: string | null = null;
+      try {
+        if (hljs.getLanguage(lang)) {
+          highlighted = hljs.highlight(code, { language: lang }).value;
+        } else {
+          highlighted = hljs.highlightAuto(code).value;
+        }
+      } catch { /* fallback */ }
+      if (highlighted) {
+        return (
+          <code className="hljs block text-[11px] font-mono px-3 py-2 rounded-md my-1.5 overflow-x-auto whitespace-pre"
+                style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+                dangerouslySetInnerHTML={{ __html: highlighted }} />
+        );
+      }
       return (
         <code className="block text-[11px] font-mono px-3 py-2 rounded-md my-1.5 overflow-x-auto whitespace-pre"
               style={{ background: "var(--background)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
