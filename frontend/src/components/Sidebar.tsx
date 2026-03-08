@@ -11,7 +11,7 @@ interface SidebarProps {
   activePage: string;
   onSelectProject: (id: number) => void;
   onSelectPage: (page: string) => void;
-  onNewProject: () => void;
+  onNewProject?: () => void;
   onScanProjects?: () => void;
   collapsed: boolean;
   onToggle: () => void;
