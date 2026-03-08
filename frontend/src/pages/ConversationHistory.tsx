@@ -178,7 +178,7 @@ export default function ConversationHistory({ projects }: Props) {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [selectedSession, isNewChat]);
 
-  // 新消息到达时：在底部则自动滚动，否则显示提示
+  // 新消息到达时：不滚动，仅标记有新消息
   const totalMsgCount = chatMessages.length + transcript.length;
   useEffect(() => {
     if (totalMsgCount <= prevMsgCountRef.current) {
@@ -186,19 +186,10 @@ export default function ConversationHistory({ projects }: Props) {
       return;
     }
     prevMsgCountRef.current = totalMsgCount;
-    if (isAtBottom) {
-      chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    } else {
+    if (!isAtBottom) {
       setHasNewMessages(true);
     }
   }, [totalMsgCount, isAtBottom]);
-
-  // 流式输出时：在底部则跟随滚动
-  useEffect(() => {
-    if ((currentReply || isGenerating) && isAtBottom) {
-      chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [currentReply, isGenerating, isAtBottom]);
 
   const scrollToBottom = useCallback(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
