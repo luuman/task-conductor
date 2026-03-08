@@ -15,7 +15,15 @@ from ..ws.manager import manager
 T = TypeVar("T", bound=BaseModel)
 logger = logging.getLogger(__name__)
 pool = ClaudePool()
-MAX_RETRIES = 3
+MAX_RETRIES = 3  # 静态 fallback，实际运行时通过 _get_max_retries() 动态读取
+
+
+def _get_max_retries() -> int:
+    try:
+        from ..routers.settings_router import _load
+        return _load().get("pipeline_max_retries", 3)
+    except Exception:
+        return 3
 
 CRITIC_PROMPT = """你是严格的技术评审专家。评审以下"{stage}"阶段输出：
 
