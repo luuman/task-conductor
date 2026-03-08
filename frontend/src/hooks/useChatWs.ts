@@ -90,7 +90,7 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
         // 如果正在生成中断开，标记错误
         if (replyBuf.current && isGenerating) {
           setIsGenerating(false);
-          setError("连接断开");
+          setError("Connection lost");
         }
       };
 
