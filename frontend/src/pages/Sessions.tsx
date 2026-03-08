@@ -437,17 +437,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
           </div>
         </div>
 
-        {/* 列头 */}
-        <div className="flex px-3 py-1.5 shrink-0"
-             style={{ borderBottom: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          <span className="text-[10px] font-mono w-[58px]" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.time')}</span>
-          <span className="text-[10px] font-mono w-4"      style={{ color: "var(--text-tertiary)" }}> </span>
-          <span className="text-[10px] font-mono w-[96px]" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.tool')}</span>
-          <span className="text-[10px] font-mono flex-1"   style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.content')}</span>
-          <span className="text-[10px] font-mono w-[64px] text-right" style={{ color: "var(--text-tertiary)" }}>{t('sessions.tableHeaders.session')}</span>
-        </div>
-
-        {/* 内容区：统一时间线 */}
+        {/* 内容区：气泡消息流 */}
         <div className="flex-1 overflow-y-auto">
           {historyLoading ? (
             <div className="flex items-center justify-center h-full text-[12px] font-mono"
@@ -455,7 +445,7 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               {t('sessions.statusBar.loadingHistory')}
             </div>
           ) : (
-            <EventTable
+            <ChatBubbles
               rows={displayRows}
               filter={filter}
               emptyHint={
