@@ -91,12 +91,12 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
     },
     {
       name: "effort",
-      description: "设置推理努力程度 (low/medium/high)",
+      description: t('chatInput.effortDesc'),
       icon: <Gauge size={14} />,
       action: { type: "select", options: [
-        { label: "Low — 快速简短回复", value: "low", current: chatOptions.effort === "low" },
-        { label: "Medium — 均衡模式", value: "medium", current: chatOptions.effort === "medium" },
-        { label: "High — 深度思考", value: "high", current: chatOptions.effort === "high" },
+        { label: t('chatInput.effortLow'), value: "low", current: chatOptions.effort === "low" },
+        { label: t('chatInput.effortMedium'), value: "medium", current: chatOptions.effort === "medium" },
+        { label: t('chatInput.effortHigh'), value: "high", current: chatOptions.effort === "high" },
       ]},
       execute: (v) => setChatOptions(prev => ({ ...prev, effort: v })),
     },
