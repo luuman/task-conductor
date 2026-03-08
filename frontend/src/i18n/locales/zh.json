@@ -51,7 +51,7 @@
       "dashboard": "仪表盘",
       "canvas": "项目视图",
       "tasks": "任务管理",
-      "conversations": "对话历史",
+      "conversations": "会话记录",
       "files": "文件浏览",
       "claudeConfig": "Claude 配置",
       "settings": "设置"
@@ -764,7 +764,7 @@
   },
 
   "conversationHistory": {
-    "header": "对话历史",
+    "header": "会话记录",
     "eventCount": "条事件"
   },
 
