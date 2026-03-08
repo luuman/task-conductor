@@ -125,9 +125,21 @@ class ProjectScheduler:
         )
 
     async def on_task_done(self, task_id: int, project_id: int):
-        """任务完成/失败回调：释放运行槽，触发等待中的任务"""
+        """任务完成/失败回调：释放运行槽，清理 worktree，触发等待中的任务"""
         async with self._get_lock():
             self._running.get(project_id, set()).discard(task_id)
+
+        # 清理 git worktree（仅 done/failed 时清理，waiting_review 保留）
+        with Session(engine) as db:
+            task = db.get(Task, task_id)
+            project = db.get(Project, project_id)
+            if (task and task.worktree_path and task.status in ("done", "failed")
+                    and project and project.repo_url):
+                try:
+                    if await is_git_repo(project.repo_url):
+                        await remove_worktree(project.repo_url, task.worktree_path)
+                except Exception as e:
+                    logger.warning(f"Worktree cleanup failed for task {task_id}: {e}")
 
         # 检查排队中且依赖已满足的任务
         with Session(engine) as db:
