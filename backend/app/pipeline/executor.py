@@ -212,7 +212,12 @@ class StageExecutor(ABC):
             # Step 4: 检查 blockers / 低置信度 → 通知人工介入
             blockers = getattr(output, "blockers", [])
             confidence = getattr(output, "confidence", 0.8)
-            if blockers or confidence < 0.5:
+            try:
+                from ..routers.settings_router import _load as _load_cfg
+                confidence_threshold = _load_cfg().get("pipeline_confidence_threshold", 0.5)
+            except Exception:
+                confidence_threshold = 0.5
+            if blockers or confidence < confidence_threshold:
                 await manager.broadcast(f"task:{task_id}", "needs_human", {
                     "stage": self.stage_name,
                     "reason": "blockers" if blockers else "low_confidence",
