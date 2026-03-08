@@ -149,45 +149,29 @@ export function Sidebar({
           );
         })}
 
-        {/* 实时监听 */}
+        {/* 会话记录 */}
         {(() => {
           const active = activePage === "sessions";
+          const label = t('sidebar.liveMonitor');
           return (
             <button onClick={() => onSelectPage("sessions")}
-              title={collapsed ? t('sidebar.liveMonitor') : undefined}
+              title={collapsed ? label : undefined}
               className={cn(
-                "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left",
+                "relative w-full flex items-center rounded-lg text-[12.5px] transition-all text-left group",
                 collapsed ? "justify-center py-2 px-0" : "gap-2.5 px-3 py-2",
                 active ? "font-medium" : "hover:bg-white/[0.03]"
               )}
               style={{
-                background: active ? "rgba(34,197,94,0.08)" : undefined,
-                color: active ? "#22c55e" : "var(--text-secondary)",
+                background: active ? "var(--accent-subtle)" : undefined,
+                color: active ? "var(--accent)" : "var(--text-secondary)",
               }}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-emerald-400" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
+                      style={{ background: "var(--accent)" }} />
               )}
-              <span className="relative flex items-center justify-center w-3.5 h-3.5 shrink-0">
-                {active ? (
-                  <>
-                    <span className="absolute w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping opacity-50" />
-                    <span className="relative w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  </>
-                ) : (
-                  <Radio size={14} strokeWidth={1.75} />
-                )}
-              </span>
-              {!collapsed && (
-                <>
-                  <span className="flex-1">{t('sidebar.liveMonitor')}</span>
-                  {active && (
-                    <span className="text-[9px] font-mono font-semibold tracking-widest text-emerald-400">
-                      {t('sidebar.live')}
-                    </span>
-                  )}
-                </>
-              )}
+              <Radio size={14} className="shrink-0" strokeWidth={active ? 2 : 1.75} />
+              {!collapsed && label}
             </button>
           );
         })()}
