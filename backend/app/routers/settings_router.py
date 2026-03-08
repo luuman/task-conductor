@@ -112,15 +112,21 @@ class FeishuConfigUpdate(BaseModel):
 
 @router.get("", response_model=SettingsOut, summary="获取全局设置")
 def get_settings():
-    """返回全局设置（工作区根目录 + 飞书配置）。"""
+    """返回全局设置（工作区根目录 + 飞书配置 + 通知/流水线/观测/界面/安全设置）。"""
     data = _load()
-    return {
+    defaults = SettingsOut(workspace_root=DEFAULT_WORKSPACE_ROOT)
+    result = {
         "workspace_root": data.get("workspace_root", DEFAULT_WORKSPACE_ROOT),
         "feishu_app_id": os.getenv("FEISHU_APP_ID", ""),
         "feishu_app_secret": _mask_secret(os.getenv("FEISHU_APP_SECRET", "")),
         "feishu_owner_id": os.getenv("FEISHU_OWNER_ID", ""),
         "feishu_default_chat_id": data.get("feishu_default_chat_id", ""),
     }
+    # 从持久化数据中读取扩展字段，使用 SettingsOut 默认值作为 fallback
+    for field_name, field_info in SettingsOut.model_fields.items():
+        if field_name not in result:
+            result[field_name] = data.get(field_name, getattr(defaults, field_name))
+    return result
 
 
 def _mask_secret(secret: str) -> str:
