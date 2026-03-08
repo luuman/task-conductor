@@ -51,13 +51,39 @@ class StageExecutor(ABC):
 
     def extract_json(self, raw: str) -> str:
         """从 Claude 输出中提取 JSON，去除 markdown 代码块等干扰"""
+        # 1. 尝试 markdown 代码块
         m = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", raw)
         if m:
             return m.group(1)
-        m = re.search(r"\{[\s\S]*\}", raw)
-        if m:
-            return m.group(0)
-        return raw
+        # 2. 用括号平衡法提取第一个完整 JSON 对象
+        start = raw.find("{")
+        if start == -1:
+            return raw
+        depth = 0
+        in_string = False
+        escape = False
+        for i in range(start, len(raw)):
+            ch = raw[i]
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                if in_string:
+                    escape = True
+                continue
+            if ch == '"' and not escape:
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    return raw[start:i + 1]
+        # fallback：返回从第一个 { 开始的内容
+        return raw[start:]
 
     def _load_knowledge(self, project_id: int) -> list[str]:
         """从知识库加载本阶段的历史错误经验（最近5条）"""

@@ -19,6 +19,7 @@ from .routers import claude_config as claude_config_router
 from .routers import mcp as mcp_router
 from .routers import tc_config as tc_config_router
 from .routers import files as files_router
+from .routers import git as git_router
 from .routers import chat as chat_router
 from .feishu.dispatcher import router as feishu_router
 from .session import pin_session
@@ -284,6 +285,7 @@ app.include_router(claude_config_router.router)  # GET/PUT /api/claude-config
 app.include_router(mcp_router.router)            # GET/POST/DELETE /api/mcp/servers
 app.include_router(tc_config_router.router)      # GET/PUT /api/tc-config
 app.include_router(files_router.router)          # GET /api/projects/{id}/files, /file
+app.include_router(git_router.router)            # GET /api/projects/{id}/git/status, /git/diff
 app.include_router(chat_router.router)            # GET /api/chat/models
 app.include_router(feishu_router)
 
