@@ -103,10 +103,7 @@ export default function App() {
     if (page === "settings") {
       return <Settings onDisconnect={() => setAuthed(false)} />;
     }
-    if (page === "sessions") {
-      return <Sessions />;
-    }
-    if (page === "tasks") {
+if (page === "tasks") {
       return <TaskManager projects={projects} />;
     }
     if (page === "conversations") {
