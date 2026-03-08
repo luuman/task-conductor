@@ -701,6 +701,55 @@ export const api = {
       request<{ ok: boolean }>(`/api/mcp/servers/${id}/uninstall`, { method: "DELETE" }),
   },
 
+  git: {
+    status: (projectId: number) =>
+      request<GitStatus>(`/api/projects/${projectId}/git/status`),
+    diff: (projectId: number, params: { file?: string; staged?: boolean; commit?: string }) => {
+      const q = new URLSearchParams();
+      if (params.file) q.set("file", params.file);
+      if (params.staged !== undefined) q.set("staged", String(params.staged));
+      if (params.commit) q.set("commit", params.commit);
+      const qs = q.toString();
+      return request<{ diff: string }>(`/api/projects/${projectId}/git/diff${qs ? `?${qs}` : ""}`);
+    },
+    stage: (projectId: number, body: { files?: string[]; all?: boolean }) =>
+      request(`/api/projects/${projectId}/git/stage`, { method: "POST", body: JSON.stringify(body) }),
+    unstage: (projectId: number, body: { files?: string[]; all?: boolean }) =>
+      request(`/api/projects/${projectId}/git/unstage`, { method: "POST", body: JSON.stringify(body) }),
+    discard: (projectId: number, body: { files: string[] }) =>
+      request(`/api/projects/${projectId}/git/discard`, { method: "POST", body: JSON.stringify(body) }),
+    commit: (projectId: number, body: { message: string }) =>
+      request(`/api/projects/${projectId}/git/commit`, { method: "POST", body: JSON.stringify(body) }),
+    log: (projectId: number, params?: { limit?: number; branch?: string; all_branches?: boolean }) => {
+      const q = new URLSearchParams();
+      if (params?.limit !== undefined) q.set("limit", String(params.limit));
+      if (params?.branch) q.set("branch", params.branch);
+      if (params?.all_branches !== undefined) q.set("all_branches", String(params.all_branches));
+      const qs = q.toString();
+      return request<{ commits: GitCommit[] }>(`/api/projects/${projectId}/git/log${qs ? `?${qs}` : ""}`);
+    },
+    branches: (projectId: number) =>
+      request<{ branches: GitBranch[] }>(`/api/projects/${projectId}/git/branches`),
+    checkout: (projectId: number, body: { branch: string; create?: boolean }) =>
+      request(`/api/projects/${projectId}/git/checkout`, { method: "POST", body: JSON.stringify(body) }),
+    push: (projectId: number) =>
+      request(`/api/projects/${projectId}/git/push`, { method: "POST" }),
+    pull: (projectId: number) =>
+      request(`/api/projects/${projectId}/git/pull`, { method: "POST" }),
+    fetch: (projectId: number) =>
+      request(`/api/projects/${projectId}/git/fetch`, { method: "POST" }),
+    stashList: (projectId: number) =>
+      request<{ stashes: GitStashEntry[] }>(`/api/projects/${projectId}/git/stash`),
+    stashSave: (projectId: number, body?: { message?: string }) =>
+      request(`/api/projects/${projectId}/git/stash/save`, { method: "POST", body: JSON.stringify(body || {}) }),
+    stashApply: (projectId: number, index: number) =>
+      request(`/api/projects/${projectId}/git/stash/apply`, { method: "POST", body: JSON.stringify({ index }) }),
+    stashDrop: (projectId: number, index: number) =>
+      request(`/api/projects/${projectId}/git/stash/drop`, { method: "POST", body: JSON.stringify({ index }) }),
+    commitDetail: (projectId: number, sha: string) =>
+      request<{ commit: GitCommit; files: GitFileEntry[] }>(`/api/projects/${projectId}/git/commit/${sha}`),
+  },
+
   file: {
     read: (path: string) =>
       request<{ path: string; name: string; content: string | null; size?: number; error?: string }>(
