@@ -901,7 +901,12 @@
     "inputPlaceholder": "输入消息，/ 打开命令...",
     "stopGenerate": "停止生成",
     "confirmInput": "确认 (Enter)",
-    "sendMessage": "发送 (Enter)"
+    "sendMessage": "发送 (Enter)",
+    "enterToConfirm": "在下方输入框键入值后按 Enter 确认",
+    "current": "当前",
+    "noMatch": "没有匹配的命令",
+    "dropToUpload": "松开以上传文件",
+    "moreCommands": "/ 更多命令"
   },
 
   "chatWs": {
