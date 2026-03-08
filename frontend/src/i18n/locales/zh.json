@@ -824,7 +824,50 @@
 
   "conversationHistory": {
     "header": "会话记录",
-    "eventCount": "条事件"
+    "eventCount": "条事件",
+    "newChat": "新对话",
+    "newChatTitle": "新建对话",
+    "startNewChat": "开始新对话",
+    "startNewChatHint": "输入消息与 Claude 交流",
+    "loading": "加载中...",
+    "fileReadFail": "无法读取文件",
+    "fileReadError": "读取失败",
+    "newMessages": "新消息",
+    "questionNav": "问题导航",
+    "expandMode": "展开",
+    "collapseMode": "折叠",
+    "switchToCollapse": "切换为折叠模式",
+    "switchToExpand": "切换为展开模式",
+    "exportChat": "导出对话",
+    "exportAsMarkdown": "导出为 Markdown"
+  },
+
+  "convTranscript": {
+    "unchangedLines": "unchanged lines",
+    "collapse": "▲ 收起",
+    "expandLines": "▼ {{count}} 行",
+    "expandChars": "▼ 展开 ({{count}} 字)"
+  },
+
+  "convSessionList": {
+    "yesterday": "昨天",
+    "daysAgo": "{{count}}天前"
+  },
+
+  "chatInput": {
+    "switchModel": "切换 Claude 模型",
+    "effortDesc": "设置推理努力程度 (low/medium/high)",
+    "effortLow": "Low — 快速简短回复",
+    "effortMedium": "Medium — 均衡模式",
+    "effortHigh": "High — 深度思考"
+  },
+
+  "chatWs": {
+    "connectFailed": "WebSocket 连接失败",
+    "unknownError": "未知错误",
+    "disconnected": "连接断开",
+    "timeout": "连接超时",
+    "sendFailed": "发送失败"
   },
 
   "projectsCanvas": {
