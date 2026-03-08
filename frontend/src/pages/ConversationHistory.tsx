@@ -372,7 +372,7 @@ export default function ConversationHistory({ projects }: Props) {
               color: isNewChat ? "var(--accent)" : "var(--text-tertiary)",
               background: isNewChat ? "var(--accent-subtle)" : "transparent",
             }}
-            title="新建对话"
+            title={t('conversationHistory.newChatTitle')}
           >
             <Plus size={12} />
             <span>新对话</span>
