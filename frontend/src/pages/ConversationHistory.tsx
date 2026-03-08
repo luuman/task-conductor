@@ -128,7 +128,7 @@ export default function ConversationHistory({ projects }: Props) {
         if (r.content != null) {
           setViewingFile({ path: r.path, name: r.name, content: r.content });
         } else {
-          setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: r.error || "无法读取文件" });
+          setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: r.error || t('conversationHistory.fileReadFail') });
         }
         setFileLoading(false);
       })
