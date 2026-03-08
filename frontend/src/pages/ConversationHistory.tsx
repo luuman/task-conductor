@@ -289,7 +289,7 @@ export default function ConversationHistory({ projects }: Props) {
       </div>
 
       {/* ── 中栏：对话内容 + 聊天输入 ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* 对话内容 */}
         <div ref={transcriptRef} className="flex-1 overflow-y-auto">
           {/* 新对话欢迎页（无消息时） */}
