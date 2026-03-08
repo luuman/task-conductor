@@ -464,7 +464,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
                   >
                     <span className="text-[12px] flex-1">{opt.label}</span>
                     {opt.current && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--accent)", color: "#fff" }}>当前</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--accent)", color: "#fff" }}>{t('chatInput.current')}</span>
                     )}
                   </button>
                 ))
