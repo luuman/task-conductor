@@ -629,11 +629,11 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           icon={<Zap size={11} />}
           active={!!chatOptions.permission_mode && chatOptions.permission_mode !== "plan"}
           options={[
-            { label: "default — 默认", value: "default", active: chatOptions.permission_mode === "default" },
-            { label: "auto — 自动批准", value: "auto", active: chatOptions.permission_mode === "auto" },
-            { label: "acceptEdits — 接受编辑", value: "acceptEdits", active: chatOptions.permission_mode === "acceptEdits" },
-            { label: "bypassPermissions — 跳过所有", value: "bypassPermissions", active: chatOptions.permission_mode === "bypassPermissions" },
-            ...(chatOptions.permission_mode && chatOptions.permission_mode !== "plan" ? [{ label: "清除", value: "__clear__", active: false }] : []),
+            { label: t('chatInput.permDefaultShort'), value: "default", active: chatOptions.permission_mode === "default" },
+            { label: t('chatInput.permAutoShort'), value: "auto", active: chatOptions.permission_mode === "auto" },
+            { label: t('chatInput.permAcceptEditsShort'), value: "acceptEdits", active: chatOptions.permission_mode === "acceptEdits" },
+            { label: t('chatInput.permBypassShort'), value: "bypassPermissions", active: chatOptions.permission_mode === "bypassPermissions" },
+            ...(chatOptions.permission_mode && chatOptions.permission_mode !== "plan" ? [{ label: t('chatInput.clear'), value: "__clear__", active: false }] : []),
           ]}
           onSelect={(v) => setChatOptions(prev => ({ ...prev, permission_mode: v === "__clear__" ? undefined : v }))}
         />
