@@ -299,6 +299,7 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
 
 // ── Bash 输出 ────────────────────────────────────────────────
 function BashOutput({ command, result, isError }: { command: string; result: string; isError: boolean }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const lines = result.split("\n");
   const isLong = lines.length > 10;
