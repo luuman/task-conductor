@@ -1,8 +1,7 @@
 // frontend/src/pages/Sessions.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api, type ClaudeSession, type ClaudeEvent } from "../lib/api";
-import type { ClaudeHookEvent, WsStatus } from "../hooks/useClaudeMonitor";
+import { api, getWsUrl, type ClaudeSession, type ClaudeEvent } from "../lib/api";
 import { cn } from "../lib/utils";
 import { getDateLocale } from "../i18n";
 
@@ -41,59 +40,72 @@ interface EventRow {
   sessionId: string;
 }
 
-let rowCounter = 0;
-
-function hookEventToRow(event: ClaudeHookEvent): EventRow {
-  const { type, tool, tool_input, session_id, raw } = event.data;
-  const ts = new Date(event.ts + "Z").toLocaleTimeString(getDateLocale(), { hour12: false });
+function applyEventStyle(eventType: string) {
   let icon = "·", iconColor = "text-gray-500";
-  let displayTool = tool || type;
-  let detail = getToolDetail(tool, tool_input);
-
-  switch (type) {
+  switch (eventType) {
     case "PreToolUse":    icon = "→"; iconColor = "text-blue-400";   break;
     case "PostToolUse":   icon = "✓"; iconColor = "text-green-400";  break;
-    case "Notification":  icon = "◆"; iconColor = "text-yellow-400";
-      displayTool = "Notify";
-      detail = String(raw?.message || raw?.notification || "").slice(0, 160); break;
-    case "Stop":          icon = "■"; iconColor = "text-red-400";
-      displayTool = "Stop"; break;
-    case "SessionStart":  icon = "▶"; iconColor = "text-purple-400";
-      displayTool = "SessionStart"; break;
-    case "SessionEnd":    icon = "◀"; iconColor = "text-purple-300";
-      displayTool = "SessionEnd";   break;
+    case "Notification":  icon = "◆"; iconColor = "text-yellow-400"; break;
+    case "Stop":          icon = "■"; iconColor = "text-red-400";    break;
+    case "SessionStart":  icon = "▶"; iconColor = "text-purple-400"; break;
+    case "SessionEnd":    icon = "◀"; iconColor = "text-purple-300"; break;
   }
-
-  return {
-    id: `live-${rowCounter++}`,
-    ts, icon, iconColor, eventType: type,
-    tool: displayTool || "", detail,
-    sessionId: (session_id || "").slice(0, 8),
-  };
+  return { icon, iconColor };
 }
 
 function dbEventToRow(e: ClaudeEvent): EventRow {
   const ts = new Date(e.created_at).toLocaleTimeString(getDateLocale(), { hour12: false });
-  let icon = "·", iconColor = "text-gray-500";
+  const { icon, iconColor } = applyEventStyle(e.event_type);
   let displayTool = e.tool_name || e.event_type;
   let detail = getToolDetail(e.tool_name, e.tool_input ?? undefined);
 
-  switch (e.event_type) {
-    case "PreToolUse":   icon = "→"; iconColor = "text-blue-400";  break;
-    case "PostToolUse":  icon = "✓"; iconColor = "text-green-400"; break;
-    case "Notification": icon = "◆"; iconColor = "text-yellow-400";
-      displayTool = "Notify";
-      detail = String((e.extra as Record<string, unknown>)?.message || "").slice(0, 160); break;
-    case "Stop":         icon = "■"; iconColor = "text-red-400"; displayTool = "Stop"; break;
-    case "SessionStart": icon = "▶"; iconColor = "text-purple-400"; displayTool = "SessionStart"; break;
-    case "SessionEnd":   icon = "◀"; iconColor = "text-purple-300"; displayTool = "SessionEnd";   break;
+  if (e.event_type === "Notification") {
+    displayTool = "Notify";
+    detail = String((e.extra as Record<string, unknown>)?.message || "").slice(0, 160);
   }
+  if (e.event_type === "Stop") displayTool = "Stop";
+  if (e.event_type === "SessionStart") displayTool = "SessionStart";
+  if (e.event_type === "SessionEnd") displayTool = "SessionEnd";
 
   return {
     id: `db-${e.id}`,
     ts, icon, iconColor, eventType: e.event_type,
     tool: displayTool || "", detail,
     sessionId: e.session_id.slice(0, 8),
+  };
+}
+
+let wsRowCounter = 0;
+
+function wsEventToRow(data: Record<string, unknown>): EventRow {
+  const eventType = String(data.event_type || "");
+  const toolName = data.tool_name as string | null;
+  const toolInput = data.tool_input as Record<string, unknown> | null;
+  const extra = data.extra as Record<string, unknown> | null;
+  const rawTs = data.ts as string | undefined;
+  const sessionId = String(data.session_id || "").slice(0, 8);
+
+  const ts = rawTs
+    ? new Date(rawTs.endsWith("Z") ? rawTs : rawTs + "Z").toLocaleTimeString(getDateLocale(), { hour12: false })
+    : new Date().toLocaleTimeString(getDateLocale(), { hour12: false });
+
+  const { icon, iconColor } = applyEventStyle(eventType);
+  let displayTool = toolName || eventType;
+  let detail = getToolDetail(toolName, toolInput ?? undefined);
+
+  if (eventType === "Notification") {
+    displayTool = "Notify";
+    detail = String(extra?.message || "").slice(0, 160);
+  }
+  if (eventType === "Stop") displayTool = "Stop";
+  if (eventType === "SessionStart") displayTool = "SessionStart";
+  if (eventType === "SessionEnd") displayTool = "SessionEnd";
+
+  return {
+    id: `ws-${wsRowCounter++}`,
+    ts, icon, iconColor, eventType,
+    tool: displayTool || "", detail,
+    sessionId,
   };
 }
 
@@ -150,7 +162,6 @@ function ChatBubbles({ rows, filter, emptyHint }: {
       {filtered.map((line) => {
         const isSystem = SYSTEM_EVENTS.has(line.eventType);
         const isOutgoing = line.eventType === "PreToolUse";
-        // PostToolUse / PostToolUseFailure → right side (tool response)
 
         if (isSystem) {
           return (
@@ -190,7 +201,7 @@ function ChatBubbles({ rows, filter, emptyHint }: {
                 </span>
                 <span className="text-[9px] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{ color: "var(--text-tertiary)" }}>
-                  {line.ts} · {line.sessionId}
+                  {line.ts}
                 </span>
               </div>
               {/* 内容 */}
@@ -209,15 +220,55 @@ function ChatBubbles({ rows, filter, emptyHint }: {
   );
 }
 
-// ── 主页面 ──────────────────────────────────────────────────
+// ── Per-session WebSocket hook ───────────────────────────────
 
-interface SessionsProps {
-  liveEvents: ClaudeHookEvent[];
-  wsStatus: WsStatus;
-  onClearLive: () => void;
+type SessionWsStatus = "disconnected" | "connecting" | "connected";
+
+function useSessionWs(
+  sessionId: string | null,
+  onEvent: (row: EventRow) => void,
+) {
+  const [status, setStatus] = useState<SessionWsStatus>("disconnected");
+  const wsRef = useRef<WebSocket | null>(null);
+  const onEventRef = useRef(onEvent);
+  onEventRef.current = onEvent;
+
+  useEffect(() => {
+    if (!sessionId) {
+      setStatus("disconnected");
+      return;
+    }
+
+    setStatus("connecting");
+    const wsUrl = getWsUrl(`/ws/session/${sessionId}`);
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => setStatus("connected");
+    ws.onclose = () => setStatus("disconnected");
+    ws.onerror = () => setStatus("disconnected");
+
+    ws.onmessage = (msg) => {
+      try {
+        const parsed = JSON.parse(msg.data);
+        if (parsed.type === "claude_event" && parsed.data) {
+          onEventRef.current(wsEventToRow(parsed.data));
+        }
+      } catch { /* ignore */ }
+    };
+
+    return () => {
+      ws.close();
+      wsRef.current = null;
+    };
+  }, [sessionId]);
+
+  return status;
 }
 
-export default function Sessions({ liveEvents, wsStatus, onClearLive }: SessionsProps) {
+// ── 主页面 ──────────────────────────────────────────────────
+
+export default function Sessions() {
   const { t } = useTranslation();
   // 会话列表
   const [sessions, setSessions] = useState<ClaudeSession[]>([]);
@@ -228,33 +279,16 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
   const [historyRows, setHistoryRows] = useState<EventRow[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const [filter, setFilter] = useState("");
-  const [paused, setPaused] = useState(false);
-  const pausedRef = useRef(false);
-  pausedRef.current = paused;
-
-  // 将全局传入的实时事件转为行（跳过 paused 状态下的新事件）
-  const prevLiveEventsLen = useRef(0);
+  // 实时事件（通过 per-session WebSocket 接收）
   const [liveRows, setLiveRows] = useState<EventRow[]>([]);
 
-  useEffect(() => {
-    const newEvents = liveEvents.slice(prevLiveEventsLen.current);
-    prevLiveEventsLen.current = liveEvents.length;
-    if (newEvents.length === 0) return;
-    if (pausedRef.current) return;
-    setLiveRows((prev) => [...prev, ...newEvents.map(hookEventToRow)].slice(-500));
+  const [filter, setFilter] = useState("");
 
-    // 同步刷新会话列表状态
-    for (const event of newEvents) {
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.session_id === event.data.session_id
-            ? { ...s, status: (event.data.status as ClaudeSession["status"]) || s.status }
-            : s
-        )
-      );
-    }
-  }, [liveEvents]);
+  const handleWsEvent = useCallback((row: EventRow) => {
+    setLiveRows((prev) => [...prev, row].slice(-500));
+  }, []);
+
+  const sessionWsStatus = useSessionWs(selectedId, handleWsEvent);
 
   // 加载会话列表
   const loadSessions = () => {
@@ -269,14 +303,16 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
     return () => clearInterval(id);
   }, []);
 
-  // 点击会话：加载历史并过滤
+  // 点击会话：加载历史 + 连接 WS 实时流
   const handleSelectSession = (sid: string) => {
     if (selectedId === sid) {
       setSelectedId(null);
       setHistoryRows([]);
+      setLiveRows([]);
       return;
     }
     setSelectedId(sid);
+    setLiveRows([]);
     setHistoryLoading(true);
     api.sessions.events(sid)
       .then((evs) => {
@@ -286,21 +322,13 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
       .catch(() => setHistoryLoading(false));
   };
 
-  // 合并时间线：选中会话时 = 历史 + 该会话的实时新事件（去重）；未选中 = 全部实时
+  // 合并：历史 + 实时新事件（去重）
   const displayRows = useMemo(() => {
-    if (!selectedId) return liveRows;
-    const shortId = selectedId.slice(0, 8);
-    const sessionLive = liveRows.filter(r => r.sessionId === shortId);
+    if (!selectedId) return [];
     const seen = new Set(historyRows.map(r => `${r.ts}|${r.tool}|${r.eventType}`));
-    const newLive = sessionLive.filter(r => !seen.has(`${r.ts}|${r.tool}|${r.eventType}`));
+    const newLive = liveRows.filter(r => !seen.has(`${r.ts}|${r.tool}|${r.eventType}`));
     return [...historyRows, ...newLive];
   }, [selectedId, liveRows, historyRows]);
-
-  const handleClearLive = () => {
-    setLiveRows([]);
-    prevLiveEventsLen.current = liveEvents.length;
-    onClearLive();
-  };
 
   const cwd = (path: string) => {
     const parts = path.replace(/\\/g, "/").split("/");
@@ -319,16 +347,6 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
              style={{ borderBottom: "1px solid var(--border)" }}>
           <span className="text-[11px] font-semibold"
                 style={{ color: "var(--text-primary)" }}>{t('sessions.sessionList.title')}</span>
-          <div className="flex items-center gap-1.5">
-            <div className={cn(
-              "w-1.5 h-1.5 rounded-full",
-              wsStatus === "connected"  ? "bg-green-400 animate-pulse" :
-              wsStatus === "connecting" ? "bg-yellow-400 animate-pulse" : "bg-red-400"
-            )} />
-            <span className="text-[9px] font-mono" style={{ color: "var(--text-tertiary)" }}>
-              {wsStatus === "connected" ? t('sessions.sessionList.realtime') : wsStatus === "connecting" ? t('sessions.sessionList.connecting') : t('sessions.sessionList.disconnected')}
-            </span>
-          </div>
         </div>
 
         {/* 列表 */}
@@ -376,23 +394,34 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
         </div>
       </div>
 
-      {/* ── 右侧：实时流 / 历史事件 ── */}
+      {/* ── 右侧：会话事件流 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* 工具栏 */}
         <div className="flex items-center justify-between px-4 py-2 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
-          {/* 当前视图指示 */}
           <div className="flex items-center gap-2">
             {selectedId ? (
-              <button
-                onClick={() => { setSelectedId(null); setHistoryRows([]); }}
-                className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded font-mono transition-colors"
-                style={{ background: "var(--background-tertiary)", color: "var(--text-primary)" }}
-                title={t('sessions.viewTabs.showAll')}
-              >
-                <span style={{ color: "var(--accent)" }}>{selectedId.slice(0, 8)}</span>
-                <span style={{ color: "var(--text-tertiary)" }}>✕</span>
-              </button>
+              <>
+                <button
+                  onClick={() => { setSelectedId(null); setHistoryRows([]); setLiveRows([]); }}
+                  className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded font-mono transition-colors"
+                  style={{ background: "var(--background-tertiary)", color: "var(--text-primary)" }}
+                >
+                  <span style={{ color: "var(--accent)" }}>{selectedId.slice(0, 8)}</span>
+                  <span style={{ color: "var(--text-tertiary)" }}>✕</span>
+                </button>
+                {/* WS 连接状态 */}
+                <div className="flex items-center gap-1.5">
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    sessionWsStatus === "connected"  ? "bg-green-400 animate-pulse" :
+                    sessionWsStatus === "connecting" ? "bg-yellow-400 animate-pulse" : "bg-red-400"
+                  )} />
+                  <span className="text-[9px] font-mono" style={{ color: "var(--text-tertiary)" }}>
+                    {sessionWsStatus === "connected" ? t('sessions.sessionList.realtime') : sessionWsStatus === "connecting" ? t('sessions.sessionList.connecting') : t('sessions.sessionList.disconnected')}
+                  </span>
+                </div>
+              </>
             ) : (
               <span className="text-[11px] px-2.5 py-1 font-mono"
                     style={{ color: "var(--text-secondary)" }}>
@@ -415,25 +444,6 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               onFocus={e => e.currentTarget.style.borderColor = "var(--accent)"}
               onBlur={e => e.currentTarget.style.borderColor = "var(--border)"}
             />
-            <button
-              onClick={() => setPaused((p) => !p)}
-              className={cn(
-                "text-[11px] px-2.5 py-1 rounded font-mono transition-colors border",
-                paused
-                  ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/40"
-                  : "border-transparent"
-              )}
-              style={!paused ? { color: "var(--text-secondary)" } : undefined}
-            >
-              {paused ? t('sessions.controls.resume') : t('sessions.controls.pause')}
-            </button>
-            <button
-              onClick={handleClearLive}
-              className="text-[11px] px-2.5 py-1 rounded font-mono border border-transparent transition-colors hover:bg-white/[0.04]"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              {t('sessions.controls.clear')}
-            </button>
           </div>
         </div>
 
@@ -449,11 +459,17 @@ export default function Sessions({ liveEvents, wsStatus, onClearLive }: Sessions
               rows={displayRows}
               filter={filter}
               emptyHint={
-                <>
-                  <span className="text-3xl">⌗</span>
-                  <p className="text-[12px]">{t('sessions.emptyHints.waitingEvents')}</p>
-                  <p className="text-[10px]">{t('sessions.emptyHints.selectSession')}</p>
-                </>
+                selectedId ? (
+                  <>
+                    <span className="text-3xl">⌗</span>
+                    <p className="text-[12px]">{t('sessions.emptyHints.waitingEvents')}</p>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl">⌗</span>
+                    <p className="text-[12px]">{t('sessions.emptyHints.selectSession')}</p>
+                  </>
+                )
               }
             />
           )}
