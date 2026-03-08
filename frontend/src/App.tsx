@@ -23,7 +23,19 @@ export default function App() {
     const config = getConfig();
     return !!(config?.token);
   });
-  const [page, setPage] = useState<Page>("dashboard");
+  const { settings: appSettings, loaded: settingsLoaded } = useAppSettings();
+  const [page, setPage] = useState<Page>(() => {
+    // 从 localStorage 缓存快速读取默认页面
+    try {
+      const raw = localStorage.getItem("tc_app_settings");
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached.ui_default_page) return cached.ui_default_page as Page;
+      }
+    } catch { /* ignore */ }
+    return "dashboard";
+  });
+  const [pageInitialized, setPageInitialized] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
