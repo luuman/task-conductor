@@ -153,7 +153,7 @@ class StageExecutor(ABC):
 
             await manager.broadcast(
                 f"task:{task_id}", "log",
-                f"[{self.stage_name}] 第 {attempt + 1}/{MAX_RETRIES} 次尝试..."
+                f"[{self.stage_name}] 第 {attempt + 1}/{max_retries} 次尝试..."
             )
 
             # Step 1: 执行 Claude
