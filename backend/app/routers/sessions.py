@@ -97,7 +97,7 @@ def list_sessions(db: Session = Depends(get_db)):
 
 
 @router.get("/{session_id}/events", summary="获取会话事件历史")
-def get_session_events(session_id: str, limit: int = 200, db: Session = Depends(get_db)):
+def get_session_events(session_id: str, limit: Optional[int] = None, db: Session = Depends(get_db)):
     """
     获取指定 Claude Code 会话的历史事件列表。
 
