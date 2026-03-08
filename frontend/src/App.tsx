@@ -105,13 +105,7 @@ export default function App() {
       return <Settings onDisconnect={() => setAuthed(false)} />;
     }
     if (page === "sessions") {
-      return (
-        <Sessions
-          liveEvents={liveEvents}
-          wsStatus={monitorStatus}
-          onClearLive={clearLiveEvents}
-        />
-      );
+      return <Sessions />;
     }
     if (page === "tasks") {
       return <TaskManager projects={projects} />;
