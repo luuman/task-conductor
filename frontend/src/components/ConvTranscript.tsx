@@ -437,7 +437,7 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
           onClick={() => setOpen(v => !v)}
           className="w-full h-6 text-[10px] font-mono transition-colors"
           style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? "▲ 收起" : `▼ 展开 (${result.length} 字)`}
+          {open ? t('convTranscript.collapse') : t('convTranscript.expandChars', { count: result.length })}
         </button>
       )}
     </div>
