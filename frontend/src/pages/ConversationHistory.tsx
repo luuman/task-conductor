@@ -1,7 +1,9 @@
 // frontend/src/pages/ConversationHistory.tsx
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { List, Plus, Bot as BotIcon, Download, ArrowDown } from "lucide-react";
+import { List, Plus, Bot as BotIcon, Download, ArrowDown, X, FileText } from "lucide-react";
+import hljs from "highlight.js/lib/core";
+import "../styles/hljs-ayu-dark.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api, type ClaudeSession, type TranscriptMessage, type Project } from "../lib/api";
