@@ -8,7 +8,6 @@ import Dashboard from "./pages/Dashboard";
 import TaskPipeline from "./pages/TaskPipeline";
 import { api, getConfig, checkAuth, clearConfig, type Project } from "./lib/api";
 import Settings from "./pages/Settings";
-import Sessions from "./pages/Sessions";
 import TaskManager from "./pages/TaskManager";
 import ConversationHistory from "./pages/ConversationHistory";
 import ProjectsCanvas from "./pages/ProjectsCanvas";
