@@ -322,7 +322,7 @@ function BashOutput({ command, result, isError }: { command: string; result: str
           onClick={() => setOpen(v => !v)}
           className="w-full h-6 text-[10px] font-mono transition-colors"
           style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? "▲ 收起" : `▼ ${lines.length} 行`}
+          {open ? t('convTranscript.collapse') : t('convTranscript.expandLines', { count: lines.length })}
         </button>
       )}
     </div>
