@@ -193,3 +193,59 @@ def restart_service():
     # uvicorn --reload 模式下，修改文件即可触发重启
     # 但显式重启更可靠：用新进程替换当前进程
     os.execv(sys.executable, [sys.executable] + sys.argv)
+
+
+# ── 数据管理端点 ───────────────────────────────────────────────
+
+@router.post("/data/export-db", summary="导出数据库")
+def export_db():
+    """返回数据库文件路径，前端可下载"""
+    db_path = Path(__file__).parent.parent.parent / "task_conductor.db"
+    if not db_path.exists():
+        raise HTTPException(404, "数据库文件不存在")
+    return {"path": str(db_path), "size_mb": round(db_path.stat().st_size / 1024 / 1024, 2)}
+
+
+@router.post("/data/clear-sessions", summary="清空会话数据")
+def clear_sessions():
+    """清空所有 ClaudeSession 和 ClaudeEvent 记录"""
+    from ..models import ClaudeSession, ClaudeEvent, ConversationNote
+    from ..database import engine
+    from sqlalchemy.orm import Session as DBSession
+    with DBSession(engine) as db:
+        db.query(ConversationNote).delete()
+        db.query(ClaudeEvent).delete()
+        db.query(ClaudeSession).delete()
+        db.commit()
+    return {"ok": True, "message": "已清空所有会话数据"}
+
+
+@router.post("/data/clear-completed-tasks", summary="清空已完成任务")
+def clear_completed_tasks():
+    """删除所有 stage='done' 的任务及其产物"""
+    from ..models import Task, StageArtifact
+    from ..database import engine
+    from sqlalchemy.orm import Session as DBSession
+    with DBSession(engine) as db:
+        done_tasks = db.query(Task).filter(Task.stage == "done").all()
+        task_ids = [t.id for t in done_tasks]
+        if task_ids:
+            db.query(StageArtifact).filter(StageArtifact.task_id.in_(task_ids)).delete(synchronize_session=False)
+            db.query(Task).filter(Task.id.in_(task_ids)).delete(synchronize_session=False)
+            db.commit()
+        return {"ok": True, "count": len(task_ids)}
+
+
+# ── 安全设置端点 ───────────────────────────────────────────────
+
+@router.put("/security/pin", summary="修改 PIN 码")
+def update_pin(body: dict):
+    """修改认证 PIN 码"""
+    new_pin = body.get("new_pin", "").strip()
+    if not new_pin or len(new_pin) < 4:
+        raise HTTPException(400, "PIN 码至少 4 位")
+    from ..session import pin_session
+    pin_session.pin = new_pin
+    # 同时更新环境变量（如果设置了 TC_PIN）
+    os.environ["TC_PIN"] = new_pin
+    return {"ok": True}
