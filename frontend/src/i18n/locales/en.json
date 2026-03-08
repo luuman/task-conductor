@@ -901,7 +901,12 @@
     "inputPlaceholder": "Type a message, / for commands...",
     "stopGenerate": "Stop generating",
     "confirmInput": "Confirm (Enter)",
-    "sendMessage": "Send (Enter)"
+    "sendMessage": "Send (Enter)",
+    "enterToConfirm": "Type value below and press Enter to confirm",
+    "current": "Current",
+    "noMatch": "No matching commands",
+    "dropToUpload": "Drop to upload",
+    "moreCommands": "/ more commands"
   },
 
   "chatWs": {
