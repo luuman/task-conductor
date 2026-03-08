@@ -127,7 +127,7 @@ export function useChatWs(onComplete?: (fullText: string) => void): UseChatWsRet
         ws.send(JSON.stringify(payload));
       })
       .catch((err) => {
-        setError(err.message || "发送失败");
+        setError(err.message || "Send failed");
         setIsGenerating(false);
       });
   }, [ensureConnected]);
