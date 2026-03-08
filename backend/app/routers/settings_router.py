@@ -36,9 +36,71 @@ class SettingsOut(BaseModel):
     feishu_owner_id: str = ""
     feishu_default_chat_id: str = ""
 
+    # 通知设置
+    notify_tts_enabled: bool = True
+    notify_tts_pipe_path: str = "/home/sichengli/Documents/code2/speak-pipe"
+    notify_webhook_url: str = ""
+    notify_webhook_enabled: bool = False
+    notify_browser_enabled: bool = True
+
+    # 流水线配置
+    pipeline_approval_stages: list[str] = ["analysis", "prd", "ui", "plan", "test", "deploy"]
+    pipeline_max_retries: int = 3
+    pipeline_confidence_threshold: float = 0.5
+
+    # 观测层设置
+    observe_session_limit: int = 50
+    observe_event_limit: int = 200
+    observe_auto_cleanup: bool = False
+    observe_cleanup_days: int = 30
+
+    # 界面偏好
+    ui_theme: str = "dark"
+    ui_sidebar_collapsed: bool = False
+    ui_default_page: str = "dashboard"
+    ui_log_max_lines: int = 500
+
+    # 安全设置
+    security_tunnel_enabled: bool = False
+
 
 class SettingsUpdate(BaseModel):
     workspace_root: str
+
+
+class SettingsUpdateAll(BaseModel):
+    workspace_root: Optional[str] = None
+    feishu_app_id: Optional[str] = None
+    feishu_app_secret: Optional[str] = None
+    feishu_owner_id: Optional[str] = None
+    feishu_default_chat_id: Optional[str] = None
+
+    # 通知设置
+    notify_tts_enabled: Optional[bool] = None
+    notify_tts_pipe_path: Optional[str] = None
+    notify_webhook_url: Optional[str] = None
+    notify_webhook_enabled: Optional[bool] = None
+    notify_browser_enabled: Optional[bool] = None
+
+    # 流水线配置
+    pipeline_approval_stages: Optional[list[str]] = None
+    pipeline_max_retries: Optional[int] = None
+    pipeline_confidence_threshold: Optional[float] = None
+
+    # 观测层设置
+    observe_session_limit: Optional[int] = None
+    observe_event_limit: Optional[int] = None
+    observe_auto_cleanup: Optional[bool] = None
+    observe_cleanup_days: Optional[int] = None
+
+    # 界面偏好
+    ui_theme: Optional[str] = None
+    ui_sidebar_collapsed: Optional[bool] = None
+    ui_default_page: Optional[str] = None
+    ui_log_max_lines: Optional[int] = None
+
+    # 安全设置
+    security_tunnel_enabled: Optional[bool] = None
 
 
 class FeishuConfigUpdate(BaseModel):
