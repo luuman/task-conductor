@@ -145,6 +145,24 @@ export function Sidebar({
               )}
               <Icon size={14} className="shrink-0" strokeWidth={active ? 2 : 1.75} />
               {!collapsed && label}
+              {!collapsed && id === "dashboard" && connectionStatus && (
+                <span className="ml-auto flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{
+                      background: connectionStatus === "connected" ? "#22c55e"
+                        : connectionStatus === "connecting" ? "#f59e0b" : "#636366"
+                    }} />
+                  <span className="text-[9px] font-mono"
+                    style={{
+                      color: connectionStatus === "connected" ? "#22c55e"
+                        : connectionStatus === "connecting" ? "#f59e0b" : "#636366"
+                    }}>
+                    {connectionStatus === "connected" ? t('perfBar.connected')
+                      : connectionStatus === "connecting" ? t('perfBar.connecting')
+                      : t('perfBar.disconnected')}
+                  </span>
+                </span>
+              )}
             </button>
           );
         })}
