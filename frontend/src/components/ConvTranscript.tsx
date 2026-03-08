@@ -333,23 +333,20 @@ function stripLineNumbers(text: string): string {
 }
 
 function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
-  const [open, setOpen] = useState(false);
   const stripped = stripLineNumbers(result);
   const lines = stripped.split("\n");
-  const isLong = lines.length > 30;
-  const displayed = open || !isLong ? stripped : lines.slice(0, 20).join("\n") + "\n…";
   const lang = guessLang(filePath);
 
   const highlighted = useMemo(() => {
     try {
       if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(displayed, { language: lang }).value;
+        return hljs.highlight(stripped, { language: lang }).value;
       }
-      return hljs.highlightAuto(displayed).value;
+      return hljs.highlightAuto(stripped).value;
     } catch {
       return null;
     }
-  }, [displayed, lang]);
+  }, [stripped, lang]);
 
   return (
     <div className="rounded-lg overflow-hidden mt-2"
@@ -365,22 +362,14 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
         </span>
       </div>
       {highlighted ? (
-        <pre className="hljs px-3 py-2 text-[11px] font-mono overflow-x-auto overflow-y-auto leading-[1.7]"
+        <pre className="hljs px-3 py-2 text-[11px] font-mono overflow-x-auto leading-[1.7]"
              style={{ margin: 0, background: "var(--background)" }}
              dangerouslySetInnerHTML={{ __html: highlighted }} />
       ) : (
-        <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto overflow-y-auto leading-[1.7]"
+        <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto leading-[1.7]"
              style={{ color: "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
-          {displayed}
+          {stripped}
         </pre>
-      )}
-      {isLong && (
-        <button
-          onClick={() => setOpen(v => !v)}
-          className="w-full h-6 text-[10px] font-mono transition-colors"
-          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? "▲ 收起" : `▼ ${lines.length} lines`}
-        </button>
       )}
     </div>
   );
