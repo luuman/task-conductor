@@ -87,7 +87,7 @@ function SessionItem({ s, active, onSelect }: {
   const { t } = useTranslation();
   const title = s.note?.alias || s.summary || s.session_id.slice(0, 8);
   const tags = s.note?.tags ?? [];
-  const time = relativeTime(s.started_at);
+  const time = relativeTime(s.started_at, t);
 
   return (
     <button
