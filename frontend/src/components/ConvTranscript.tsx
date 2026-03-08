@@ -334,9 +334,16 @@ function guessLang(filePath: string): string {
   return map[ext] || "";
 }
 
+/** 去掉 cat -n 风格的行号前缀，如 "     1→" */
+function stripLineNumbers(text: string): string {
+  // 匹配每行开头的  空格+数字+→ 或 空格+数字+\t 格式
+  return text.replace(/^ *\d+[→\t]/gm, "");
+}
+
 function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
   const [open, setOpen] = useState(false);
-  const lines = result.split("\n");
+  const stripped = stripLineNumbers(result);
+  const lines = stripped.split("\n");
   const isLong = lines.length > 30;
   const displayed = open || !isLong ? result : lines.slice(0, 20).join("\n") + "\n…";
   const lang = guessLang(filePath);
