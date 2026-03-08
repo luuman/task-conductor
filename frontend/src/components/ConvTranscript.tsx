@@ -345,7 +345,7 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
   const stripped = stripLineNumbers(result);
   const lines = stripped.split("\n");
   const isLong = lines.length > 30;
-  const displayed = open || !isLong ? result : lines.slice(0, 20).join("\n") + "\n…";
+  const displayed = open || !isLong ? stripped : lines.slice(0, 20).join("\n") + "\n…";
   const lang = guessLang(filePath);
 
   const highlighted = useMemo(() => {
