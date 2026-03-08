@@ -25,6 +25,7 @@ import hljs from "highlight.js";
 import "../styles/hljs-ayu-dark.css";
 import { api, type FileItem, type Project, type GitStatusResponse } from "../lib/api";
 import { cn } from "../lib/utils";
+import SourceControl from "../components/git/SourceControl";
 
 /* ── 文件图标映射 ─────────────────────────────── */
 const CODE_EXTS = new Set([
