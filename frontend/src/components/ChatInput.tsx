@@ -615,10 +615,10 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled, onNewChat, o
           icon={<Gauge size={11} />}
           active={!!chatOptions.effort}
           options={[
-            { label: "Low — 快速", value: "low", active: chatOptions.effort === "low" },
-            { label: "Medium — 均衡", value: "medium", active: chatOptions.effort === "medium" },
-            { label: "High — 深度", value: "high", active: chatOptions.effort === "high" },
-            ...(chatOptions.effort ? [{ label: "清除", value: "__clear__", active: false }] : []),
+            { label: t('chatInput.effortLowShort'), value: "low", active: chatOptions.effort === "low" },
+            { label: t('chatInput.effortMediumShort'), value: "medium", active: chatOptions.effort === "medium" },
+            { label: t('chatInput.effortHighShort'), value: "high", active: chatOptions.effort === "high" },
+            ...(chatOptions.effort ? [{ label: t('chatInput.clear'), value: "__clear__", active: false }] : []),
           ]}
           onSelect={(v) => setChatOptions(prev => ({ ...prev, effort: v === "__clear__" ? undefined : v }))}
         />
