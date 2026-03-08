@@ -557,7 +557,7 @@ export default function ConversationHistory({ projects }: Props) {
               title={t('conversationHistory.exportAsMarkdown')}
             >
               <Download size={11} />
-              <span>导出对话</span>
+              <span>{t('conversationHistory.exportChat')}</span>
             </button>
           </div>
         </div>
