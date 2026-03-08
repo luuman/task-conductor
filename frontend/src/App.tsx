@@ -7,6 +7,7 @@ import { AppShell } from "./components/AppShell";
 import Dashboard from "./pages/Dashboard";
 import TaskPipeline from "./pages/TaskPipeline";
 import { api, getConfig, checkAuth, clearConfig, type Project } from "./lib/api";
+import { useAppSettings } from "./hooks/useAppSettings";
 import Settings from "./pages/Settings";
 import TaskManager from "./pages/TaskManager";
 import ConversationHistory from "./pages/ConversationHistory";
