@@ -717,6 +717,7 @@ export default function ProjectFiles({
   const [currentPath, setCurrentPath] = useState("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [gitInfo, setGitInfo] = useState<GitStatusResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<"files" | "source-control">("files");
 
   // 加载 git status
   const loadGitStatus = useCallback(async () => {
