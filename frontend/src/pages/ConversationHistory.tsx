@@ -197,12 +197,23 @@ export default function ConversationHistory({ projects }: Props) {
   }, []);
 
   // 实时轮询：选中 active 会话时定时刷新 transcript
+  // 更新前记录滚动锚点，更新后恢复，确保当前阅读位置不动
+  const pendingScrollLock = useRef(false);
+  const savedScrollTop = useRef(0);
+  const savedScrollHeight = useRef(0);
+
   useEffect(() => {
     if (!selectedSession || selectedSession.status !== "active") return;
     const sid = selectedSession.session_id;
     const poll = () => {
       api.sessions.transcript(sid)
         .then(r => {
+          const container = transcriptRef.current;
+          if (container) {
+            savedScrollTop.current = container.scrollTop;
+            savedScrollHeight.current = container.scrollHeight;
+            pendingScrollLock.current = true;
+          }
           transcriptCache.current.set(sid, { messages: r.messages, fileFound: r.file_found });
           setTranscript(r.messages);
           setFileFound(r.file_found);
@@ -212,6 +223,18 @@ export default function ConversationHistory({ projects }: Props) {
     const id = setInterval(poll, 3000);
     return () => clearInterval(id);
   }, [selectedSession]);
+
+  // 渲染后恢复滚动位置：补偿新增内容导致的 scrollHeight 变化
+  useEffect(() => {
+    if (!pendingScrollLock.current) return;
+    pendingScrollLock.current = false;
+    const container = transcriptRef.current;
+    if (!container) return;
+    const delta = container.scrollHeight - savedScrollHeight.current;
+    container.scrollTop = savedScrollTop.current + delta * 0;
+    // delta * 0 = 保持原 scrollTop，新内容在底部不影响当前位置
+    container.scrollTop = savedScrollTop.current;
+  }, [transcript]);
 
   // 展示的消息：历史会话模式用 transcript，新对话模式用 chatMessages
   const displayMessages = isNewChat ? chatMessages : transcript;
