@@ -29,10 +29,11 @@ export function AppShell({
   onProjectCreated,
   onRefreshProjects,
   connectionStatus,
+  initialSidebarCollapsed,
 }: AppShellProps) {
   const { t } = useTranslation();
   const [showNewProject, setShowNewProject] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(initialSidebarCollapsed ?? false);
   const [newProjName, setNewProjName] = useState("");
   const [workspaceRoot, setWorkspaceRoot] = useState("");
 
