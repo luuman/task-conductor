@@ -472,7 +472,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               <div className="flex gap-2">
                 {([
                   { id: "dashboard", labelKey: "sidebar.nav.dashboard" },
-                  { id: "sessions", labelKey: "sidebar.liveMonitor" },
+                  { id: "conversations", labelKey: "sidebar.nav.conversations" },
                   { id: "canvas", labelKey: "sidebar.nav.canvas" },
                 ] as const).map(({ id, labelKey }) => (
                   <button key={id}
