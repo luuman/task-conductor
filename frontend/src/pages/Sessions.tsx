@@ -113,9 +113,13 @@ function StatusBadge({ status }: { status: ClaudeSession["status"] }) {
   );
 }
 
-// ── 事件日志表格 ─────────────────────────────────────────────
+// ── 系统消息类型 ─────────────────────────────────────────────
 
-function EventTable({ rows, filter, emptyHint }: {
+const SYSTEM_EVENTS = new Set(["SessionStart", "SessionEnd", "Stop", "Notification", "SubagentStart", "SubagentStop"]);
+
+// ── 气泡消息流 ──────────────────────────────────────────────
+
+function ChatBubbles({ rows, filter, emptyHint }: {
   rows: EventRow[];
   filter: string;
   emptyHint: React.ReactNode;
@@ -142,41 +146,64 @@ function EventTable({ rows, filter, emptyHint }: {
   }
 
   return (
-    <div className="py-1">
-      {filtered.map((line) => (
-        <div
-          key={line.id}
-          className={cn(
-            "flex px-3 py-[2px] hover:bg-white/[0.03] transition-colors group text-[11px] font-mono",
-            line.eventType === "Stop" && "opacity-50",
-            line.eventType === "PostToolUse" && "opacity-75"
-          )}
-        >
-          <span className="w-[58px] shrink-0 text-[10px] pt-px"
-                style={{ color: "var(--text-tertiary)" }}>{line.ts}</span>
-          <span className={cn("w-4 shrink-0", line.iconColor)}>{line.icon}</span>
-          <span className={cn(
-            "w-[96px] shrink-0 truncate",
-            line.eventType === "PreToolUse"  ? "text-[#79c0ff]" :
-            line.eventType === "PostToolUse" ? "text-[#56d364]" :
-            line.eventType === "Notification"? "text-[#e3b341]" :
-            line.eventType === "SessionStart"? "text-[#bc8cff]" :
-            line.eventType === "SessionEnd"  ? "text-[#d2a8ff]" :
-                                               ""
-          )}
-          style={
-            !["PreToolUse","PostToolUse","Notification","SessionStart","SessionEnd"].includes(line.eventType)
-              ? { color: "var(--text-secondary)" }
-              : undefined
-          }>{line.tool}</span>
-          <span className="flex-1 truncate" style={{ color: "var(--text-primary)" }}
-                title={line.detail}>{line.detail}</span>
-          <span className="w-[64px] shrink-0 text-right text-[9px] opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ color: "var(--text-tertiary)" }}>
-            {line.sessionId}
-          </span>
-        </div>
-      ))}
+    <div className="py-3 px-4 space-y-2">
+      {filtered.map((line) => {
+        const isSystem = SYSTEM_EVENTS.has(line.eventType);
+        const isOutgoing = line.eventType === "PreToolUse";
+        // PostToolUse / PostToolUseFailure → right side (tool response)
+
+        if (isSystem) {
+          return (
+            <div key={line.id} className="flex justify-center">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono"
+                   style={{ background: "var(--background-tertiary)", color: "var(--text-tertiary)" }}>
+                <span className={line.iconColor}>{line.icon}</span>
+                <span>{line.tool}</span>
+                {line.detail && <span className="opacity-70">· {line.detail}</span>}
+                <span className="ml-1 opacity-50">{line.ts}</span>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={line.id}
+               className={cn("flex", isOutgoing ? "justify-start" : "justify-end")}>
+            <div className={cn(
+              "max-w-[75%] min-w-[120px] rounded-xl px-3 py-2 font-mono text-[11px] group relative",
+              isOutgoing
+                ? "rounded-tl-sm"
+                : "rounded-tr-sm",
+            )}
+            style={{
+              background: isOutgoing ? "var(--background-tertiary)" : "rgba(86, 211, 100, 0.08)",
+              border: `1px solid ${isOutgoing ? "var(--border)" : "rgba(86, 211, 100, 0.15)"}`,
+            }}>
+              {/* 头部：工具名 + 时间 */}
+              <div className="flex items-center justify-between gap-3 mb-1">
+                <span className={cn(
+                  "text-[10px] font-semibold",
+                  isOutgoing ? "text-[#79c0ff]" : "text-[#56d364]"
+                )}>
+                  <span className={cn("mr-1", line.iconColor)}>{line.icon}</span>
+                  {line.tool}
+                </span>
+                <span className="text-[9px] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ color: "var(--text-tertiary)" }}>
+                  {line.ts} · {line.sessionId}
+                </span>
+              </div>
+              {/* 内容 */}
+              {line.detail && (
+                <p className="break-all leading-relaxed" style={{ color: "var(--text-primary)" }}
+                   title={line.detail}>
+                  {line.detail}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })}
       <div ref={bottomRef} />
     </div>
   );
