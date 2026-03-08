@@ -105,6 +105,9 @@ def get_session_events(session_id: str, limit: Optional[int] = None, db: Session
     - 事件类型包括 PreToolUse / PostToolUse / Stop / Notification 等
     - `tool_input` / `tool_result` 字段为 JSON 对象
     """
+    if limit is None:
+        limit = _load_settings().get("observe_event_limit", 200)
+
     session = db.query(ClaudeSession).filter_by(session_id=session_id).first()
     if not session:
         return []
