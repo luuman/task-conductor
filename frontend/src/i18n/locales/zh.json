@@ -60,8 +60,7 @@
       "projects": "项目",
       "test": "测试"
     },
-    "liveMonitor": "实时监听",
-    "live": "LIVE",
+    "liveMonitor": "会话记录",
     "expandSidebar": "展开侧边栏",
     "collapseSidebar": "折叠侧边栏",
     "scanLocalProjects": "扫描本地项目",
