@@ -151,13 +151,6 @@ export function PerfBottomBar({ connectionStatus, vertical, compact }: PerfBotto
           })}
         </div>
 
-        {/* Connection status */}
-        {connectionStatus !== undefined && (
-          <div className="flex items-center gap-1.5 px-3 pb-2">
-            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: connColor }} />
-            <span className="text-[9px] font-mono" style={{ color: connColor }}>{connText}</span>
-          </div>
-        )}
       </div>
     );
   }
