@@ -47,7 +47,6 @@ function computeGraph(commits: GitCommit[]) {
   const lanes: (string | null)[] = [];
   // map hash -> { lane, color }
   const commitLaneMap = new Map<string, LaneInfo>();
-  const edges: Edge[] = [];
   // track which lane color index to assign next
   let nextColorIdx = 0;
 
