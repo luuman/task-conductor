@@ -197,7 +197,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
                  style={{ background: "var(--background-tertiary)", border: "1px solid var(--border-subtle)" }}>
               <p className="font-medium" style={{ color: "var(--text-secondary)" }}>{t('login.ssh.setupHint')}</p>
               <code className="block font-mono" style={{ color: "var(--accent)" }}>
-                ssh -L 7070:localhost:7070 -L 8765:localhost:8765 {sshUser || "user"}@{sshHost || "server"} -p {sshPort}
+                ssh -L 8765:localhost:8765 {sshUser || "user"}@{sshHost || "server"} -p {sshPort}
               </code>
             </div>
             {error && <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>}
