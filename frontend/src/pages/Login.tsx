@@ -1,5 +1,5 @@
 // frontend/src/pages/Login.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -22,6 +22,25 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   const [sshUser, setSshUser]     = useState("");
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
+
+  // 解析连接链接参数
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connectParam = params.get("connect");
+    if (!connectParam) return;
+    try {
+      const config = JSON.parse(atob(connectParam));
+      if (config.type === "tunnel" && config.tunnelUrl) {
+        setMode("tunnel");
+        setTunnelUrl(config.tunnelUrl);
+      } else if (config.type === "ssh") {
+        setMode("ssh");
+        if (config.sshHost) setSshHost(config.sshHost);
+        if (config.sshPort) setSshPort(String(config.sshPort));
+        if (config.sshUser) setSshUser(config.sshUser);
+      }
+    } catch { /* 参数损坏则忽略 */ }
+  }, []);
 
   const handleTunnelConnect = async (e: React.FormEvent) => {
     e.preventDefault();
