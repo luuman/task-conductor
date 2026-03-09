@@ -237,7 +237,7 @@ export default function GitGraph({ commits, selectedCommit, onSelectCommit }: Gi
         </svg>
 
         {/* Commit rows */}
-        {commits.map((commit, i) => {
+        {commits.map((commit, _i) => {
           const info = commitLaneMap.get(commit.hash);
           if (!info) return null;
           const cy = ROW_HEIGHT / 2;
