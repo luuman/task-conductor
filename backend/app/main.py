@@ -323,9 +323,17 @@ def agent_info(request: Request):
     host = request.headers.get("host", "")
     scheme = request.headers.get("x-forwarded-proto", "https")
     detect_tunnel_url_from_request(host, scheme)
+    # SSH 连接信息（由环境变量配置）
+    ssh_host = os.getenv("TC_SSH_HOST", "")
+    ssh_port = os.getenv("TC_SSH_PORT", "22")
+    ssh_user = os.getenv("TC_SSH_USER", "")
     return {
         "tunnel_url": get_tunnel_url(),
         "version": "2.0.0",
+        "ssh_host": ssh_host or None,
+        "ssh_port": int(ssh_port) if ssh_port.isdigit() else 22,
+        "ssh_user": ssh_user or None,
+        "pin": pin_session.get_current_pin(),
     }
 
 
