@@ -575,7 +575,6 @@ function PresetGallery({ presets, onInstall, itemLabel }: {
     setInstalling(p.name);
     try { await onInstall(p.name, p.content); } finally { setInstalling(null); }
   };
-  const _available = presets.filter(p => !p.installed);
   const installed = presets.filter(p => p.installed);
   if (!presets.length) return null;
   return (
