@@ -540,7 +540,7 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
       </button>
       {open && (
         <div className="pt-1 pb-1">
-          {hasEditData && <EditDiffView input={block.tool_input!} />}
+          {!!hasEditData && <EditDiffView input={block.tool_input!} />}
           {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
           {isRead && hasResult && <ReadFileView filePath={String(block.tool_input?.file_path ?? "")} result={block.tool_result!} />}
           {isAgent && hasResult && <AgentResultView result={block.tool_result!} description={String(block.tool_input?.description ?? "")} />}
