@@ -240,7 +240,6 @@ export default function GitGraph({ commits, selectedCommit, onSelectCommit }: Gi
         {commits.map((commit, i) => {
           const info = commitLaneMap.get(commit.hash);
           if (!info) return null;
-          const _y = i * ROW_HEIGHT;
           const cy = ROW_HEIGHT / 2;
           const cx = laneX(info.lane);
           const isSelected = selectedCommit === commit.hash;
