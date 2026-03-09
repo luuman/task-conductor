@@ -123,10 +123,30 @@ class FeishuClient:
             return data.get("message_id", "")
 
     async def send_card(self, chat_id: str, card: dict) -> str:
-        """发送交互卡片，返回 message_id。"""
+        """发送交互卡片到群聊，返回 message_id。"""
         import json as _json
 
         return await self.send_message(chat_id, "interactive", _json.dumps(card))
+
+    async def send_card_to_user(self, user_id: str, card: dict) -> str:
+        """发送交互卡片到个人，返回 message_id。"""
+        import json as _json
+
+        headers = await self._headers()
+        async with _client() as client:
+            resp = await client.post(
+                f"{FEISHU_API_BASE}/im/v1/messages",
+                headers=headers,
+                params={"receive_id_type": "open_id"},
+                json={
+                    "receive_id": user_id,
+                    "msg_type": "interactive",
+                    "content": _json.dumps(card),
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json().get("data", {})
+            return data.get("message_id", "")
 
     async def update_card(self, message_id: str, card: dict) -> dict:
         """更新已发送的交互卡片。"""
