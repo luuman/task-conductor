@@ -103,6 +103,36 @@ async def _start_tunnel_bg(pin: str):
             ("PIN",        pin),
             ("登录方式",   f"打开前端 → Tunnel 模式 → 填入上方信息"),
         ], title="Cloudflare Tunnel 已就绪")
+        await _send_startup_card(pin, url)
+
+
+async def _send_startup_card(pin: str, backend_url: str):
+    """向飞书默认群发送启动通知卡片。"""
+    from .feishu.client import feishu_client
+    from .feishu.cards import build_startup_card
+    from .feishu.dispatcher import get_default_chat_id
+
+    if not feishu_client.enabled:
+        return
+    chat_id = get_default_chat_id()
+    if not chat_id:
+        return
+
+    ssh_host = os.getenv("TC_SSH_HOST", "")
+    ssh_port = int(os.getenv("TC_SSH_PORT", "22"))
+    ssh_user = os.getenv("TC_SSH_USER", "")
+
+    try:
+        card = build_startup_card(
+            pin=pin,
+            backend_url=backend_url,
+            ssh_host=ssh_host,
+            ssh_port=ssh_port,
+            ssh_user=ssh_user,
+        )
+        await feishu_client.send_card(chat_id, card)
+    except Exception as e:
+        print(f"  [Feishu] 启动卡片发送失败: {e}")
 
 
 async def _init_feishu():
