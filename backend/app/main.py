@@ -112,20 +112,11 @@ async def _start_tunnel_bg(pin: str):
 
 
 async def _send_startup_card(pin: str, backend_url: str):
-    """向飞书默认群发送启动通知卡片。"""
+    """向飞书个人账号发送启动通知卡片。"""
     from .feishu.client import feishu_client
     from .feishu.cards import build_startup_card
-    from .feishu.dispatcher import get_default_chat_id
 
-    if not feishu_client.enabled:
-        return
-    # 等待 feishu 初始化完成（最多 30s）
-    for _ in range(30):
-        chat_id = get_default_chat_id()
-        if chat_id:
-            break
-        await asyncio.sleep(1)
-    else:
+    if not feishu_client.enabled or not feishu_client.owner_id:
         return
 
     ssh_host = os.getenv("TC_SSH_HOST", "")
@@ -140,7 +131,8 @@ async def _send_startup_card(pin: str, backend_url: str):
             ssh_port=ssh_port,
             ssh_user=ssh_user,
         )
-        await feishu_client.send_card(chat_id, card)
+        await feishu_client.send_card_to_user(feishu_client.owner_id, card)
+        print(f"  [Feishu] 启动卡片已发送至个人: {feishu_client.owner_id}")
     except Exception as e:
         print(f"  [Feishu] 启动卡片发送失败: {e}")
 
