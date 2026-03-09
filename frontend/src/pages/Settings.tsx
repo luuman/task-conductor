@@ -664,6 +664,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                     sshHost: config.sshHost,
                     sshPort: config.sshPort,
                     sshUser: config.sshUser,
+                    pin: sshInfo.pin,
                   };
                   const encoded = btoa(JSON.stringify(linkData));
                   const base = "https://luuman.github.io/task-conductor/";
