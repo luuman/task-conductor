@@ -71,8 +71,6 @@ function computeGraph(commits: GitCommit[]) {
 
   for (let i = 0; i < commits.length; i++) {
     const commit = commits[i];
-    const _y = i * ROW_HEIGHT + ROW_HEIGHT / 2;
-
     // Find this commit's lane
     let myLane = lanes.indexOf(commit.hash);
     if (myLane === -1) {
