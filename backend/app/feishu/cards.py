@@ -189,6 +189,52 @@ def build_task_created_card(task_id: int, title: str, project_name: str) -> dict
     ])
 
 
+def build_startup_card(
+    pin: str,
+    backend_url: str,
+    frontend_url: str = "https://luuman.github.io/task-conductor/",
+    ssh_host: str = "",
+    ssh_port: int = 22,
+    ssh_user: str = "",
+) -> dict:
+    """服务启动通知卡片，含一键连接链接。"""
+    import base64
+
+    config: dict = {"type": "tunnel", "tunnelUrl": backend_url, "pin": pin}
+    encoded = base64.b64encode(json.dumps(config).encode()).decode()
+    connect_url = f"{frontend_url}?connect={encoded}"
+
+    lines = [
+        f"**后端地址**: `{backend_url}`",
+        f"**PIN 码**: `{pin}`",
+    ]
+    if ssh_host:
+        lines.append(
+            f"**SSH 隧道**: `ssh -L 8765:localhost:8765 {ssh_user}@{ssh_host} -p {ssh_port}`"
+        )
+
+    buttons = [
+        {
+            "tag": "button",
+            "text": {"tag": "plain_text", "content": "一键连接"},
+            "type": "primary",
+            "url": connect_url,
+        },
+        {
+            "tag": "button",
+            "text": {"tag": "plain_text", "content": "打开仪表板"},
+            "type": "default",
+            "url": frontend_url,
+        },
+    ]
+
+    return _card("TaskConductor 已启动 🚀", GREEN, [
+        _markdown("\n".join(lines)),
+        _divider(),
+        {"tag": "action", "actions": buttons},
+    ])
+
+
 def build_welcome_card(project_name: str) -> dict:
     """项目群欢迎卡片。"""
     return _card(f"欢迎加入 {project_name}", BLUE, [
