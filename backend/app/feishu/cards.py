@@ -189,10 +189,16 @@ def build_task_created_card(task_id: int, title: str, project_name: str) -> dict
     ])
 
 
+FRONTEND_URLS = [
+    "https://luuman.github.io/task-conductor/",
+    "https://192.168.1.12/task-conductor/",
+]
+
+
 def build_startup_card(
     pin: str,
     backend_url: str,
-    frontend_url: str = "https://luuman.github.io/task-conductor/",
+    frontend_urls: list[str] | None = None,
     ssh_host: str = "",
     ssh_port: int = 22,
     ssh_user: str = "",
@@ -200,9 +206,11 @@ def build_startup_card(
     """服务启动通知卡片，含一键连接链接。"""
     import base64
 
+    if frontend_urls is None:
+        frontend_urls = FRONTEND_URLS
+
     config: dict = {"type": "tunnel", "tunnelUrl": backend_url, "pin": pin}
     encoded = base64.b64encode(json.dumps(config).encode()).decode()
-    connect_url = f"{frontend_url}?connect={encoded}"
 
     lines = [
         f"**后端地址**: `{backend_url}`",
@@ -213,19 +221,15 @@ def build_startup_card(
             f"**SSH 隧道**: `ssh -L 8765:localhost:8765 {ssh_user}@{ssh_host} -p {ssh_port}`"
         )
 
+    labels = ["一键连接（外网）", "一键连接（局域网）"]
     buttons = [
         {
             "tag": "button",
-            "text": {"tag": "plain_text", "content": "一键连接"},
-            "type": "primary",
-            "url": connect_url,
-        },
-        {
-            "tag": "button",
-            "text": {"tag": "plain_text", "content": "打开仪表板"},
-            "type": "default",
-            "url": frontend_url,
-        },
+            "text": {"tag": "plain_text", "content": labels[i] if i < len(labels) else "一键连接"},
+            "type": "primary" if i == 0 else "default",
+            "url": f"{url}?connect={encoded}",
+        }
+        for i, url in enumerate(frontend_urls)
     ]
 
     return _card("TaskConductor 已启动 🚀", GREEN, [
