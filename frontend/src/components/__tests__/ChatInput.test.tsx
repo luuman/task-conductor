@@ -66,7 +66,7 @@ const defaultProps = {
   isGenerating: false,
 };
 
-async function renderChatInput(overrides: Partial<typeof defaultProps> = {}) {
+async function renderChatInput(overrides: Partial<typeof defaultProps> & { disabled?: boolean } = {}) {
   let result: ReturnType<typeof render>;
   await act(async () => {
     result = render(<ChatInput {...defaultProps} {...overrides} />);
