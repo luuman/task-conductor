@@ -455,28 +455,15 @@ function AskUserQuestionView({ input, result }: { input: Record<string, unknown>
 
 // ── 通用输出（markdown 渲染） ────────────────────────────────
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const isLong = result.length > 800;
-  const displayed = open || !isLong ? result : result.slice(0, 800) + "\n\n…";
-
   return (
     <div className="rounded-lg overflow-hidden mt-2"
          style={{ border: `1px solid ${isError ? "rgba(244,63,94,0.3)" : "var(--border)"}` }}>
-      <div className="px-4 py-3 text-[12px] leading-relaxed overflow-y-auto "
+      <div className="px-4 py-3 text-[12px] leading-relaxed"
            style={{ color: isError ? "var(--danger)" : "var(--text-primary)", background: "var(--background)" }}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-          {displayed}
+          {result}
         </ReactMarkdown>
       </div>
-      {isLong && (
-        <button
-          onClick={() => setOpen(v => !v)}
-          className="w-full h-6 text-[10px] font-mono transition-colors"
-          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? t('convTranscript.collapse') : t('convTranscript.expandChars', { count: result.length })}
-        </button>
-      )}
     </div>
   );
 }
