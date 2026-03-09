@@ -86,6 +86,11 @@ async def lifespan(app: FastAPI):
 
     if os.getenv("TC_TUNNEL", "1") == "1":
         asyncio.create_task(_start_tunnel_bg(pin))
+    else:
+        # 无 Tunnel 时用固定后端 URL 发启动卡片
+        fixed_backend = os.getenv("TC_AGENT_URL", "")
+        if fixed_backend:
+            asyncio.create_task(_send_startup_card(pin, fixed_backend))
 
     # 飞书初始化
     from .feishu.client import feishu_client as _fc
