@@ -651,6 +651,34 @@ export default function Settings({ onDisconnect }: SettingsProps) {
 
             <div className="px-4 py-3 flex items-center justify-between">
               <div>
+                <p className="text-xs text-app">连接链接</p>
+                <p className="text-[10px] text-app-tertiary mt-0.5">生成可分享的连接链接，打开后自动填写连接信息</p>
+              </div>
+              <button
+                onClick={() => {
+                  const config = getConfig();
+                  if (!config) return;
+                  const linkData = {
+                    type: config.type,
+                    tunnelUrl: config.tunnelUrl,
+                    sshHost: config.sshHost,
+                    sshPort: config.sshPort,
+                    sshUser: config.sshUser,
+                  };
+                  const encoded = btoa(JSON.stringify(linkData));
+                  const base = "https://luuman.github.io/task-conductor/";
+                  navigator.clipboard.writeText(`${base}?connect=${encoded}`);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="text-xs px-3 py-1.5 rounded-md border border-accent/30 text-accent hover:bg-accent/10 transition-colors shrink-0"
+              >
+                {linkCopied ? "已复制" : "复制链接"}
+              </button>
+            </div>
+
+            <div className="px-4 py-3 flex items-center justify-between">
+              <div>
                 <p className="text-xs text-app">{t('settings.connection.reconfigure')}</p>
                 <p className="text-[10px] text-app-tertiary mt-0.5">{t('settings.connection.clearCredentials')}</p>
               </div>
