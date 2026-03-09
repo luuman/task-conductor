@@ -822,7 +822,7 @@ function SectionPanel({ section, data, onChange }: {
       <div className="flex items-center gap-3 px-4 py-3.5">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: `${section.color}15`, border: `1px solid ${section.color}30` }}>
-          <Icon size={15} style={{ color: section.color }} />
+          <span style={{ color: section.color }}><Icon size={15} /></span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
