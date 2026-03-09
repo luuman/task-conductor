@@ -23,6 +23,15 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
 
+  // localhost 自动登录（无需 PIN）
+  useEffect(() => {
+    if (!isLocal) return;
+    authLocal()
+      .then(token => { saveConfig({ type: "tunnel", tunnelUrl: "", token }); onLogin(); })
+      .catch(() => { /* 自动登录失败则降级到手动 PIN */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 解析连接链接参数，有 PIN 则自动登录
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
