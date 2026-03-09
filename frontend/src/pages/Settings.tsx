@@ -631,11 +631,11 @@ export default function Settings({ onDisconnect }: SettingsProps) {
                   <p className="text-[10px] text-app-tertiary">使用前请在本地终端建立 SSH 隧道：</p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 text-[11px] font-mono text-green-400 break-all">
-                      {`ssh -L 8000:localhost:8765 ${sshInfo.user}@${sshInfo.host} -p ${sshInfo.port}`}
+                      {`ssh -L 7070:localhost:7070 -L 8765:localhost:8765 ${sshInfo.user}@${sshInfo.host} -p ${sshInfo.port}`}
                     </code>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`ssh -L 8000:localhost:8765 ${sshInfo.user}@${sshInfo.host} -p ${sshInfo.port}`);
+                        navigator.clipboard.writeText(`ssh -L 7070:localhost:7070 -L 8765:localhost:8765 ${sshInfo.user}@${sshInfo.host} -p ${sshInfo.port}`);
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
