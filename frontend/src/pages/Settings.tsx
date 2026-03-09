@@ -22,6 +22,8 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>("checking");
   const [agentVersion, setAgentVersion] = useState<string | null>(null);
   const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
+  const [sshInfo, setSshInfo] = useState<{ host: string | null; port: number; user: string | null; pin: string | null }>({ host: null, port: 22, user: null, pin: null });
+  const [copied, setCopied] = useState(false);
   const [checking, setChecking] = useState(false);
   const [shuttingDown, setShuttingDown] = useState(false);
   const [restarting, setRestarting] = useState(false);
