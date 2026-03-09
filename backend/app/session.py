@@ -30,6 +30,10 @@ class PinSession:
         """校验 JWT token，后端重启后仍有效（只要 SECRET_KEY 不变）。"""
         return _verify_jwt(token) is not None
 
+    def get_current_pin(self) -> Optional[str]:
+        """返回当前 PIN（仅用于本机显示）。"""
+        return self._pin
+
     def revoke_all(self):
         """重新生成 PIN（JWT 无法服务端主动吊销，通过换 PIN 让旧 token 功能上失效）。"""
         self._pin = None
