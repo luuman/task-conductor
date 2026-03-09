@@ -40,8 +40,8 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     e.preventDefault();
     setLoading(true); setError("");
     try {
-      const token = await authWithPin("", pin);
-      saveConfig({ type: "ssh", tunnelUrl: "", sshHost, sshPort: parseInt(sshPort), sshUser, token });
+      const token = await authWithPin("http://localhost:8765", pin);
+      saveConfig({ type: "ssh", tunnelUrl: "http://localhost:8765", sshHost, sshPort: parseInt(sshPort), sshUser, token });
       onLogin();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('login.errors.sshConnectionFailed'));
