@@ -44,7 +44,6 @@ import {
   Calendar,
   BarChart3,
   Link,
-  Unplug,
   Cpu,
   FileText,
   BookOpen,
