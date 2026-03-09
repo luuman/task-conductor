@@ -614,6 +614,40 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               )}
             </Row>
 
+            {sshInfo.host && (
+              <div className="px-4 py-3 space-y-2.5">
+                <p className="text-[10px] text-app-tertiary uppercase tracking-wider font-medium">SSH 隧道访问</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                  <span className="text-app-tertiary">主机</span>
+                  <span className="font-mono text-app">{sshInfo.host}</span>
+                  <span className="text-app-tertiary">端口</span>
+                  <span className="font-mono text-app">{sshInfo.port}</span>
+                  <span className="text-app-tertiary">用户名</span>
+                  <span className="font-mono text-app">{sshInfo.user || "—"}</span>
+                  <span className="text-app-tertiary">PIN 码</span>
+                  <span className="font-mono text-accent font-semibold">{sshInfo.pin || "—"}</span>
+                </div>
+                <div className="bg-app rounded-lg p-2.5 space-y-1.5">
+                  <p className="text-[10px] text-app-tertiary">使用前请在本地终端建立 SSH 隧道：</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-[11px] font-mono text-green-400 break-all">
+                      {`ssh -L 8000:localhost:8765 ${sshInfo.user}@${sshInfo.host} -p ${sshInfo.port}`}
+                    </code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`ssh -L 8000:localhost:8765 ${sshInfo.user}@${sshInfo.host} -p ${sshInfo.port}`);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="shrink-0 text-[10px] px-2 py-1 rounded border border-app text-app-tertiary hover:text-app hover:border-accent/40 transition-colors"
+                    >
+                      {copied ? "已复制" : "复制"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-xs text-app">{t('settings.connection.reconfigure')}</p>
