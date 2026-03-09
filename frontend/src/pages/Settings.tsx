@@ -24,7 +24,7 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
   const [sshInfo, setSshInfo] = useState<{ host: string | null; port: number; user: string | null; pin: string | null }>({ host: null, port: 22, user: null, pin: null });
   const [copied, setCopied] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [shuttingDown, setShuttingDown] = useState(false);
   const [restarting, setRestarting] = useState(false);
