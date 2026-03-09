@@ -302,12 +302,6 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
 
 // ── Bash 输出 ────────────────────────────────────────────────
 function BashOutput({ command, result, isError }: { command: string; result: string; isError: boolean }) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const lines = result.split("\n");
-  const isLong = lines.length > 10;
-  const displayed = open || !isLong ? result : lines.slice(0, 6).join("\n") + "\n…";
-
   return (
     <div className="rounded-lg overflow-hidden mt-2"
          style={{ border: `1px solid ${isError ? "rgba(244,63,94,0.3)" : "var(--border)"}` }}>
@@ -316,18 +310,10 @@ function BashOutput({ command, result, isError }: { command: string; result: str
         <span className="text-[11px] font-mono font-bold" style={{ color: "var(--accent)" }}>$</span>
         <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--text-secondary)" }}>{command}</span>
       </div>
-      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto overflow-y-auto leading-[1.6]"
+      <pre className="px-3 py-2 text-[11px] font-mono whitespace-pre-wrap break-words overflow-x-auto leading-[1.6]"
            style={{ color: isError ? "var(--danger)" : "var(--text-tertiary)", margin: 0, background: "var(--background)" }}>
-        {displayed}
+        {result}
       </pre>
-      {isLong && (
-        <button
-          onClick={() => setOpen(v => !v)}
-          className="w-full h-6 text-[10px] font-mono transition-colors"
-          style={{ color: "var(--accent)", borderTop: "1px solid var(--border)", background: "var(--background-secondary)" }}>
-          {open ? t('convTranscript.collapse') : t('convTranscript.expandLines', { count: lines.length })}
-        </button>
-      )}
     </div>
   );
 }
