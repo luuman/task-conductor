@@ -29,10 +29,10 @@ const NAV_ITEMS = [
 ];
 
 export function Sidebar({
-  projects,
-  activeProjectId,
+  projects: _projects,
+  activeProjectId: _activeProjectId,
   activePage,
-  onSelectProject,
+  onSelectProject: _onSelectProject,
   onSelectPage,
   collapsed,
   onToggle,
