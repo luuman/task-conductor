@@ -649,33 +649,44 @@ export default function Settings({ onDisconnect }: SettingsProps) {
               </div>
             )}
 
-            <div className="px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-app">连接链接</p>
-                <p className="text-[10px] text-app-tertiary mt-0.5">生成可分享的连接链接，打开后自动填写连接信息</p>
+            <div className="px-4 py-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-app">连接链接</p>
+                  <p className="text-[10px] text-app-tertiary mt-0.5">生成可分享的连接链接，打开后自动登录</p>
+                </div>
               </div>
-              <button
-                onClick={() => {
+              <div className="flex gap-2">
+                {[
+                  { label: "外网", base: "https://luuman.github.io/task-conductor/" },
+                  { label: "局域网", base: "https://192.168.1.12/task-conductor/" },
+                ].map(({ label, base }) => {
                   const config = getConfig();
-                  if (!config) return;
-                  const linkData = {
+                  const linkData = config ? {
                     type: config.type,
                     tunnelUrl: config.tunnelUrl,
                     sshHost: config.sshHost,
                     sshPort: config.sshPort,
                     sshUser: config.sshUser,
                     pin: sshInfo.pin,
-                  };
-                  const encoded = btoa(JSON.stringify(linkData));
-                  const base = "https://luuman.github.io/task-conductor/";
-                  navigator.clipboard.writeText(`${base}?connect=${encoded}`);
-                  setLinkCopied(true);
-                  setTimeout(() => setLinkCopied(false), 2000);
-                }}
-                className="text-xs px-3 py-1.5 rounded-md border border-accent/30 text-accent hover:bg-accent/10 transition-colors shrink-0"
-              >
-                {linkCopied ? "已复制" : "复制链接"}
-              </button>
+                  } : null;
+                  const encoded = linkData ? btoa(JSON.stringify(linkData)) : "";
+                  return (
+                    <button
+                      key={label}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${base}?connect=${encoded}`);
+                        setLinkCopied(label);
+                        setTimeout(() => setLinkCopied(null), 2000);
+                      }}
+                      disabled={!encoded}
+                      className="flex-1 text-xs px-3 py-1.5 rounded-md border border-accent/30 text-accent hover:bg-accent/10 transition-colors disabled:opacity-40"
+                    >
+                      {linkCopied === label ? "已复制" : `复制${label}链接`}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="px-4 py-3 flex items-center justify-between">
