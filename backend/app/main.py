@@ -114,8 +114,13 @@ async def _send_startup_card(pin: str, backend_url: str):
 
     if not feishu_client.enabled:
         return
-    chat_id = get_default_chat_id()
-    if not chat_id:
+    # 等待 feishu 初始化完成（最多 30s）
+    for _ in range(30):
+        chat_id = get_default_chat_id()
+        if chat_id:
+            break
+        await asyncio.sleep(1)
+    else:
         return
 
     ssh_host = os.getenv("TC_SSH_HOST", "")
