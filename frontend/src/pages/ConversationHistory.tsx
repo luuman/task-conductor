@@ -101,7 +101,7 @@ function FileViewPanel({ file, onClose }: { file: { path: string; name: string; 
   );
 }
 
-export default function ConversationHistory({ projects }: Props) {
+export default function ConversationHistory({ projects: _projects }: Props) {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<ClaudeSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
