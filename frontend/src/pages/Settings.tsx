@@ -105,7 +105,11 @@ export default function Settings({ onDisconnect }: SettingsProps) {
   useEffect(() => {
     checkToken();
     api.agentInfo()
-      .then((info) => { setAgentVersion(info.version); setTunnelUrl(info.tunnel_url); })
+      .then((info) => {
+        setAgentVersion(info.version);
+        setTunnelUrl(info.tunnel_url);
+        setSshInfo({ host: info.ssh_host, port: info.ssh_port, user: info.ssh_user, pin: info.pin });
+      })
       .catch(() => {});
     api.settings.get()
       .then((s) => {
