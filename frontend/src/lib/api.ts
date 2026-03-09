@@ -479,7 +479,7 @@ export interface ItemAnalysis {
 export const api = {
   health: () => request<{ status: string }>("/health"),
   shutdown: () => request<{ status: string }>("/api/shutdown", { method: "POST" }),
-  agentInfo: () => request<{ tunnel_url: string | null; version: string }>("/agent/info"),
+  agentInfo: () => request<{ tunnel_url: string | null; version: string; ssh_host: string | null; ssh_port: number; ssh_user: string | null; pin: string | null }>("/agent/info"),
   projects: {
     list: () => request<Project[]>("/api/projects"),
     create: (body: { name: string; repo_url: string; max_parallel?: number; execution_mode?: string; is_test?: boolean }) =>
