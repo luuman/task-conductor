@@ -23,7 +23,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
 
-  // 解析连接链接参数
+  // 解析连接链接参数，有 PIN 则自动登录
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const connectParam = params.get("connect");
@@ -33,13 +33,28 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       if (config.type === "tunnel" && config.tunnelUrl) {
         setMode("tunnel");
         setTunnelUrl(config.tunnelUrl);
+        if (config.pin) {
+          setPin(config.pin);
+          setLoading(true);
+          authWithPin(config.tunnelUrl, config.pin)
+            .then(token => { saveConfig({ type: "tunnel", tunnelUrl: config.tunnelUrl, token }); onLogin(); })
+            .catch(() => { setLoading(false); setError(t('login.errors.connectionFailed')); });
+        }
       } else if (config.type === "ssh") {
         setMode("ssh");
         if (config.sshHost) setSshHost(config.sshHost);
         if (config.sshPort) setSshPort(String(config.sshPort));
         if (config.sshUser) setSshUser(config.sshUser);
+        if (config.pin) {
+          setPin(config.pin);
+          setLoading(true);
+          authWithPin("http://localhost:8765", config.pin)
+            .then(token => { saveConfig({ type: "ssh", tunnelUrl: "http://localhost:8765", sshHost: config.sshHost, sshPort: config.sshPort, sshUser: config.sshUser, token }); onLogin(); })
+            .catch(() => { setLoading(false); setError(t('login.errors.sshConnectionFailed')); });
+        }
       }
     } catch { /* 参数损坏则忽略 */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTunnelConnect = async (e: React.FormEvent) => {
