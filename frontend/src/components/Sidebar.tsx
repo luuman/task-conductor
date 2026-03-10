@@ -21,6 +21,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { id: "dashboard",     labelKey: "sidebar.nav.dashboard",      Icon: LayoutDashboard },
   { id: "canvas",        labelKey: "sidebar.nav.canvas",         Icon: Layers          },
+  { id: "pencil",        labelKey: "sidebar.nav.pencil",         Icon: PenLine         },
   { id: "tasks",         labelKey: "sidebar.nav.tasks",          Icon: CheckSquare     },
   { id: "files",         labelKey: "sidebar.nav.files",          Icon: FolderSearch    },
   { id: "conversations", labelKey: "sidebar.nav.conversations",  Icon: MessageSquare   },
