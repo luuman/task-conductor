@@ -239,6 +239,13 @@ def build_startup_card(
     ])
 
 
+def build_shutdown_card() -> dict:
+    """服务关闭通知卡片。"""
+    return _card("TaskConductor 已关闭 🔴", RED, [
+        _markdown("服务已正常关闭。"),
+    ])
+
+
 def build_welcome_card(project_name: str) -> dict:
     """项目群欢迎卡片。"""
     return _card(f"欢迎加入 {project_name}", BLUE, [
