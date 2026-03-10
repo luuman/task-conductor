@@ -101,6 +101,22 @@ async def lifespan(app: FastAPI):
     await _send_shutdown_card()
 
 
+async def _send_shutdown_card():
+    """向飞书个人账号发送关闭通知卡片。"""
+    from .feishu.client import feishu_client
+    from .feishu.cards import build_shutdown_card
+
+    if not feishu_client.enabled or not feishu_client.owner_id:
+        return
+
+    try:
+        card = build_shutdown_card()
+        await feishu_client.send_card_to_user(feishu_client.owner_id, card)
+        print("  [Feishu] 关闭通知已发送")
+    except Exception as e:
+        print(f"  [Feishu] 关闭通知发送失败: {e}")
+
+
 async def _start_tunnel_bg(pin: str):
     url = await start_cloudflare_tunnel(8765)
     if url:
