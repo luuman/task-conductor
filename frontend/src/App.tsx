@@ -169,6 +169,9 @@ if (page === "tasks") {
         </div>
       );
     }
+    if (page === "pencil") {
+      return <PencilCanvas className="w-full h-full" />;
+    }
     if (page === "canvas") {
       return (
         <ProjectsCanvas
