@@ -50,6 +50,7 @@
     "nav": {
       "dashboard": "Dashboard",
       "canvas": "Project Canvas",
+      "pencil": "Design Canvas",
       "tasks": "Task Manager",
       "conversations": "Conversations",
       "files": "Files",
