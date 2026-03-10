@@ -50,6 +50,7 @@
     "nav": {
       "dashboard": "仪表盘",
       "canvas": "项目视图",
+      "pencil": "设计画布",
       "tasks": "任务管理",
       "conversations": "会话记录",
       "files": "文件浏览",
