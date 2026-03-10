@@ -19,11 +19,14 @@ echo ""
 
 # ── 清理残留进程 ───────────────────────────────────────────────
 for port in 8765 7070; do
-  pids=$(lsof -ti:$port 2>/dev/null || true)
-  if [ -n "$pids" ]; then
-    echo "  清理端口 $port（PID: $pids）..."
-    kill $pids 2>/dev/null || true
-    sleep 0.5
+  if lsof -ti:$port &>/dev/null; then
+    echo "  清理端口 $port..."
+    fuser -k ${port}/tcp 2>/dev/null || true
+    # 等待端口实际释放（最多 5s）
+    for i in $(seq 1 10); do
+      sleep 0.5
+      lsof -ti:$port &>/dev/null || break
+    done
   fi
 done
 
