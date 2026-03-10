@@ -17,6 +17,16 @@ else
 fi
 echo ""
 
+# ── 清理残留进程 ───────────────────────────────────────────────
+for port in 8765 7070; do
+  pid=$(lsof -ti:$port 2>/dev/null)
+  if [ -n "$pid" ]; then
+    echo "  清理端口 $port（PID: $pid）..."
+    kill "$pid" 2>/dev/null
+    sleep 0.5
+  fi
+done
+
 # ── 2. 启动后端 ───────────────────────────────────────────────
 echo "[2/3] 启动 FastAPI 后端..."
 cd "$ROOT_DIR/backend"
