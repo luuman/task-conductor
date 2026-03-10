@@ -98,6 +98,7 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(_init_feishu())
     yield
     stop_tunnel()
+    await _send_shutdown_card()
 
 
 async def _start_tunnel_bg(pin: str):
