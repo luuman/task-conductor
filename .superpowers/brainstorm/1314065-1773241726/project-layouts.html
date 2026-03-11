@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目展示布局方案</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f13;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; font-weight: 600; color: #f8fafc; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+
+  /* Layout grid */
+  .layouts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .layout-option {
+    border: 2px solid #1e2030;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    background: #13141a;
+  }
+  .layout-option:hover { border-color: #6366f1; transform: translateY(-2px); }
+  .layout-option.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+
+  .layout-label {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: #1a1b26;
+    border-bottom: 1px solid #1e2030;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .layout-label .tag {
+    font-size: 10px;
+    background: #6366f1;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .layout-label .tag.green { background: #10b981; }
+  .layout-label .tag.orange { background: #f59e0b; }
+
+  .mockup-area {
+    padding: 14px;
+    min-height: 260px;
+  }
+
+  /* ===== LAYOUT A: Bento Grid ===== */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px;
+  }
+  .bento-cell {
+    background: #1e2030;
+    border-radius: 8px;
+    padding: 10px;
+    position: relative;
+  }
+  .bento-cell.featured {
+    grid-row: span 2;
+    background: linear-gradient(135deg, #1e2040 0%, #1a1b30 100%);
+    border: 1px solid #2d2f4a;
+  }
+  .bento-cell.featured::before {
+    content: 'ACTIVE';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #10b981;
+    background: rgba(16,185,129,0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .proj-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white;
+    margin-bottom: 8px;
+  }
+  .proj-name { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+  .proj-meta { font-size: 11px; color: #475569; margin-bottom: 8px; }
+  .stage-bar {
+    display: flex; gap: 2px; margin-top: 6px;
+  }
+  .stage-dot {
+    height: 4px; flex: 1; border-radius: 2px; background: #2d3748;
+  }
+  .stage-dot.done { background: #10b981; }
+  .stage-dot.active { background: #6366f1; }
+  .stage-dot.pending { background: #2d3748; }
+  .bento-stat { font-size: 22px; font-weight: 700; color: #6366f1; }
+  .bento-stat-label { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .mini-proj-name { font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 2px; }
+  .mini-proj-stage { font-size: 10px; color: #64748b; }
+  .pulse {
+    display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #10b981;
+    margin-right: 5px;
+    box-shadow: 0 0 6px #10b981;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ===== LAYOUT B: Heatmap Matrix ===== */
+  .matrix-table { width: 100%; border-collapse: collapse; }
+  .matrix-table th {
+    font-size: 9px; font-weight: 600; color: #475569;
+    padding: 4px 3px; text-align: center; letter-spacing: 0.3px;
+  }
+  .matrix-table td { padding: 3px; }
+  .matrix-table .proj-col {
+    font-size: 10px; font-weight: 600; color: #94a3b8;
+    padding-right: 8px; white-space: nowrap;
+  }
+  .matrix-cell {
+    width: 20px; height: 20px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: rgba(255,255,255,0.5);
+    cursor: pointer;
+  }
+  .mc-done    { background: #064e3b; color: #34d399; }
+  .mc-active  { background: #312e81; color: #a5b4fc; }
+  .mc-waiting { background: #78350f; color: #fcd34d; }
+  .mc-pending { background: #1e293b; }
+  .mc-skip    { background: transparent; }
+  .matrix-legend {
+    display: flex; gap: 12px; margin-top: 10px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* ===== LAYOUT C: Timeline ===== */
+  .timeline { position: relative; padding-left: 20px; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 7px; top: 0; bottom: 0;
+    width: 2px; background: linear-gradient(to bottom, #6366f1, #1e2030);
+  }
+  .tl-item { position: relative; margin-bottom: 14px; }
+  .tl-dot {
+    position: absolute; left: -16px; top: 3px;
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 2px solid #6366f1; background: #0f0f13;
+  }
+  .tl-dot.active { background: #6366f1; box-shadow: 0 0 8px #6366f1; }
+  .tl-dot.done { background: #10b981; border-color: #10b981; }
+  .tl-header { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .tl-name { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+  .tl-time { font-size: 10px; color: #475569; margin-left: auto; }
+  .tl-stage-pill {
+    display: inline-block;
+    font-size: 9px; padding: 1px 5px; border-radius: 3px;
+    background: #1e2030; color: #6366f1; font-weight: 600;
+  }
+  .tl-progress {
+    height: 3px; background: #1e2030; border-radius: 2px; margin-top: 6px;
+  }
+  .tl-progress-bar {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(to right, #6366f1, #10b981);
+  }
+
+  /* ===== LAYOUT D: Spotlight ===== */
+  .spotlight {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    height: 240px;
+  }
+  .spotlight-list {
+    display: flex; flex-direction: column; gap: 2px;
+    overflow-y: auto;
+  }
+  .sp-item {
+    padding: 7px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .sp-item.active {
+    background: #1e2040;
+    border-color: #6366f1;
+  }
+  .sp-item:not(.active):hover { background: #1a1b26; }
+  .sp-item-name { font-size: 11px; font-weight: 600; color: #cbd5e1; }
+  .sp-item-sub { font-size: 9px; color: #475569; margin-top: 1px; }
+  .sp-item-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    display: inline-block; margin-right: 4px;
+  }
+  .dot-green { background: #10b981; }
+  .dot-blue { background: #6366f1; }
+  .dot-yellow { background: #f59e0b; }
+  .dot-gray { background: #475569; }
+
+  .spotlight-detail {
+    background: #1a1b26;
+    border-radius: 8px;
+    padding: 14px;
+    border: 1px solid #1e2030;
+    overflow: hidden;
+  }
+  .sp-detail-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .sp-detail-title { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+  .sp-detail-subtitle { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .sp-badge {
+    font-size: 9px; padding: 3px 7px; border-radius: 4px;
+    background: rgba(16,185,129,0.15); color: #10b981; font-weight: 600;
+  }
+  .sp-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 10px;
+  }
+  .sp-stat {
+    background: #13141a; border-radius: 6px; padding: 8px;
+    text-align: center;
+  }
+  .sp-stat-val { font-size: 18px; font-weight: 700; color: #6366f1; }
+  .sp-stat-label { font-size: 9px; color: #64748b; margin-top: 2px; }
+  .sp-pipeline {
+    display: flex; gap: 3px; align-items: center; margin-top: 8px;
+  }
+  .sp-stage {
+    flex: 1; height: 24px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 600; color: rgba(255,255,255,0.5);
+  }
+  .sp-stage.s-done { background: #064e3b; color: #34d399; }
+  .sp-stage.s-active { background: #312e81; color: #a5b4fc; position: relative; }
+  .sp-stage.s-active::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 3px;
+    border: 1px solid #6366f1;
+    animation: borderPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes borderPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .sp-stage.s-pending { background: #1e293b; }
+  .sp-stage.s-review { background: #451a03; color: #fbbf24; }
+
+  /* Selection state */
+  .layout-option.selected .layout-label { color: #a5b4fc; }
+  .check-badge {
+    display: none; position: absolute; top: 10px; right: 10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #6366f1; color: white;
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .layout-option.selected .check-badge { display: flex; }
+
+  .hint { font-size: 12px; color: #475569; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>项目展示布局方案</h1>
+<p class="subtitle">点击方案选择偏好 · 可多选</p>
+
+<div class="layouts-grid">
+
+  <!-- A: Bento Grid -->
+  <div class="layout-option" data-choice="bento" onclick="toggleSelect(this)" style="position:relative">
+    <div class="check-badge">✓</div>
+    <div class="layout-label">
+      方案 A：Bento 网格
+      <span class="tag">推荐</span>
+    </div>
+    <div class="mockup-area">
+      <div class="bento-grid">
+        <!-- Featured project -->
+        <div class="bento-cell featured">
+          <div class="proj-icon" style="background: linear-gradient(135deg,#6366f1,#8b5cf6)">TC</div>
+          <div class="proj-name"><span class="pulse"></span>TaskConductor</div>
+          <div class="proj-meta">最后更新 2小时前 · 12 个任务</div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">AI 驱动的任务流水线系统</div>
+          <div class="stage-bar">
+            <div class="stage-dot done"></div>
+            <div class="stage-dot done"></div>
+            <div class="stage-dot done"></div>
+            <div class="stage-dot active"></div>
+            <div class="stage-dot pending"></div>
+            <div class="stage-dot pending"></div>
+            <div class="stage-dot pending"></div>
+            <div class="stage-dot pending"></div>
+            <div class="stage-dot pending"></div>
+            <div class="stage-dot pending"></div>
+          </div>
+          <div style="font-size:10px;color:#64748b;margin-top:5px">阶段 4/10 · Plan</div>
+        </div>
+        <!-- Stats cell -->
+        <div class="bento-cell" style="text-align:center">
+          <div class="bento-stat">6</div>
+          <div class="bento-stat-label">进行中项目</div>
+        </div>
+        <!-- Mini project -->
+        <div class="bento-cell">
+          <div class="mini-proj-name">DataVault API</div>
+          <div class="mini-proj-stage" style="color:#f59e0b">⏳ 待审批 · PRD</div>
+        </div>
+      </div>
+      <!-- Second row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
+        <div class="bento-cell">
+          <div class="mini-proj-name">Auth Service</div>
+          <div class="mini-proj-stage" style="color:#10b981">✓ Done</div>
+        </div>
+        <div class="bento-cell">
+          <div class="mini-proj-name">Dashboard v2</div>
+          <div class="mini-proj-stage" style="color:#6366f1">→ Dev</div>
+        </div>
+        <div class="bento-cell" style="background:#1a1b26;border:1px dashed #2d3748;display:flex;align-items:center;justify-content:center">
+          <span style="font-size:18px;color:#2d3748">+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B: Heatmap Matrix -->
+  <div class="layout-option" data-choice="matrix" onclick="toggleSelect(this)" style="position:relative">
+    <div class="check-badge">✓</div>
+    <div class="layout-label">
+      方案 B：阶段热力矩阵
+      <span class="tag orange">信息密度高</span>
+    </div>
+    <div class="mockup-area">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">项目</th>
+            <th>input</th><th>analysis</th><th>prd</th><th>ui</th><th>plan</th>
+            <th>dev</th><th>test</th><th>deploy</th><th>monitor</th><th>done</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="proj-col">TaskConductor</td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-active">●</div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+          </tr>
+          <tr>
+            <td class="proj-col">DataVault API</td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-waiting">⏳</div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+          </tr>
+          <tr>
+            <td class="proj-col">Auth Service</td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+          </tr>
+          <tr>
+            <td class="proj-col">Dashboard v2</td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-active">●</div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+          </tr>
+          <tr>
+            <td class="proj-col">Search Engine</td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-done">✓</div></td>
+            <td><div class="matrix-cell mc-waiting">⏳</div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+            <td><div class="matrix-cell mc-pending"></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="matrix-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#064e3b"></div>已完成</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#312e81"></div>进行中</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#78350f"></div>待审批</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1e293b"></div>未开始</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C: Timeline -->
+  <div class="layout-option" data-choice="timeline" onclick="toggleSelect(this)" style="position:relative">
+    <div class="check-badge">✓</div>
+    <div class="layout-label">
+      方案 C：活动时间轴
+      <span class="tag orange">适合追踪历史</span>
+    </div>
+    <div class="mockup-area">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot active"></div>
+          <div class="tl-header">
+            <div class="tl-name">TaskConductor</div>
+            <span class="tl-stage-pill">UI Design</span>
+            <span class="tl-time">2h ago</span>
+          </div>
+          <div style="font-size:10px;color:#64748b">Claude 正在分析需求 · 12 个任务</div>
+          <div class="tl-progress"><div class="tl-progress-bar" style="width:40%"></div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot active"></div>
+          <div class="tl-header">
+            <div class="tl-name">Dashboard v2</div>
+            <span class="tl-stage-pill" style="color:#10b981">Dev</span>
+            <span class="tl-time">5h ago</span>
+          </div>
+          <div style="font-size:10px;color:#64748b">开发中 · 等待代码审查</div>
+          <div class="tl-progress"><div class="tl-progress-bar" style="width:60%"></div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="border-color:#f59e0b;background:#f59e0b"></div>
+          <div class="tl-header">
+            <div class="tl-name">DataVault API</div>
+            <span class="tl-stage-pill" style="color:#f59e0b">PRD 审批</span>
+            <span class="tl-time">1d ago</span>
+          </div>
+          <div style="font-size:10px;color:#f59e0b">⏳ 等待人工审批</div>
+          <div class="tl-progress"><div class="tl-progress-bar" style="width:25%;background:linear-gradient(to right,#f59e0b,#fcd34d)"></div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-header">
+            <div class="tl-name">Auth Service</div>
+            <span class="tl-stage-pill" style="color:#10b981">Done ✓</span>
+            <span class="tl-time">3d ago</span>
+          </div>
+          <div style="font-size:10px;color:#64748b">全部完成 · 已部署</div>
+          <div class="tl-progress"><div class="tl-progress-bar" style="width:100%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D: Spotlight -->
+  <div class="layout-option" data-choice="spotlight" onclick="toggleSelect(this)" style="position:relative">
+    <div class="check-badge">✓</div>
+    <div class="layout-label">
+      方案 D：Spotlight 聚焦面板
+      <span class="tag green">交互体验最佳</span>
+    </div>
+    <div class="mockup-area" style="padding:10px">
+      <div class="spotlight">
+        <!-- Left: project list -->
+        <div class="spotlight-list">
+          <div class="sp-item active">
+            <div class="sp-item-name"><span class="sp-item-dot dot-green"></span>TaskConductor</div>
+            <div class="sp-item-sub">UI Stage</div>
+          </div>
+          <div class="sp-item">
+            <div class="sp-item-name"><span class="sp-item-dot dot-blue"></span>Dashboard v2</div>
+            <div class="sp-item-sub">Dev Stage</div>
+          </div>
+          <div class="sp-item">
+            <div class="sp-item-name"><span class="sp-item-dot dot-yellow"></span>DataVault API</div>
+            <div class="sp-item-sub">审批中</div>
+          </div>
+          <div class="sp-item">
+            <div class="sp-item-name"><span class="sp-item-dot dot-gray"></span>Auth Service</div>
+            <div class="sp-item-sub">完成</div>
+          </div>
+          <div class="sp-item">
+            <div class="sp-item-name"><span class="sp-item-dot dot-blue"></span>Search Engine</div>
+            <div class="sp-item-sub">Plan Stage</div>
+          </div>
+        </div>
+        <!-- Right: detail -->
+        <div class="spotlight-detail">
+          <div class="sp-detail-header">
+            <div>
+              <div class="sp-detail-title">TaskConductor</div>
+              <div class="sp-detail-subtitle">AI 驱动任务流水线 · 更新于 2小时前</div>
+            </div>
+            <span class="sp-badge">ACTIVE</span>
+          </div>
+          <div class="sp-stats">
+            <div class="sp-stat">
+              <div class="sp-stat-val">12</div>
+              <div class="sp-stat-label">任务总数</div>
+            </div>
+            <div class="sp-stat">
+              <div class="sp-stat-val" style="color:#10b981">8</div>
+              <div class="sp-stat-label">已完成</div>
+            </div>
+            <div class="sp-stat">
+              <div class="sp-stat-val" style="color:#f59e0b">1</div>
+              <div class="sp-stat-label">待审批</div>
+            </div>
+          </div>
+          <!-- Pipeline stages -->
+          <div style="font-size:9px;color:#475569;margin-bottom:4px;letter-spacing:0.5px">PIPELINE PROGRESS</div>
+          <div class="sp-pipeline">
+            <div class="sp-stage s-done" style="font-size:7px">IN</div>
+            <div class="sp-stage s-done" style="font-size:7px">AN</div>
+            <div class="sp-stage s-done" style="font-size:7px">PRD</div>
+            <div class="sp-stage s-active" style="font-size:7px">UI</div>
+            <div class="sp-stage s-pending" style="font-size:7px">PL</div>
+            <div class="sp-stage s-pending" style="font-size:7px">DEV</div>
+            <div class="sp-stage s-pending" style="font-size:7px">TS</div>
+            <div class="sp-stage s-pending" style="font-size:7px">DP</div>
+            <div class="sp-stage s-pending" style="font-size:7px">MN</div>
+            <div class="sp-stage s-pending" style="font-size:7px">✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="hint">点击方案选择 · 可多选 · 也可在终端告诉我你的想法</p>
+
+<script>
+function toggleSelect(el) {
+  el.classList.toggle('selected');
+  const choice = el.dataset.choice;
+  const selected = el.classList.contains('selected');
+  // Record for .events
+  const event = { type: 'click', choice, selected, timestamp: Date.now() };
+  fetch('/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(event)
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
