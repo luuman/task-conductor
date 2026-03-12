@@ -30,15 +30,15 @@ task-conductor/
 │   │       └── plan.py          # 技术规划阶段
 │   │
 │   ├── routers/                 # 各功能路由
-│   │   ├── projects.py
-│   │   ├── tasks.py
+│   │   ├── projects.py          # GET/POST /api/projects
+│   │   ├── tasks.py             # GET/POST /api/tasks, approve, advance
 │   │   ├── sessions.py          # Claude 观测层 API
-│   │   ├── pipeline.py
-│   │   ├── metrics.py
-│   │   ├── knowledge.py
-│   │   ├── task_manager.py
-│   │   ├── settings_router.py
-│   │   └── claude_config.py     # Claude Code 配置可视化 API
+│   │   ├── pipeline.py          # POST /api/pipeline/{id}/run-*
+│   │   ├── metrics.py           # GET /api/metrics（KPI + Claude 性能 + 周报）
+│   │   ├── knowledge.py         # GET/DELETE /api/projects/{id}/knowledge
+│   │   ├── task_manager.py      # 任务管理增强端点（批量操作/过滤/排序）
+│   │   ├── settings_router.py   # GET/POST /api/settings（tc_settings.json）
+│   │   └── claude_config.py     # Claude Code 配置可视化 API（CLAUDE.md + settings）
 │   │
 │   ├── ws/manager.py            # ConnectionManager：频道订阅 + 广播
 │   └── notify/
