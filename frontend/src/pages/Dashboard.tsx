@@ -726,10 +726,6 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
         )}
       </div>
 
-      {/* Docs Knowledge Panel */}
-      {docsOpen && (
-        <DocsPanel projectId={projectId} onClose={() => setDocsOpen(false)} />
-      )}
     </div>
   );
 }
