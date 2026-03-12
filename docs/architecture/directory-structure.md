@@ -76,5 +76,28 @@ task-conductor/
 │
 ├── scripts/install-hooks.sh     # 向 ~/.claude/settings.json 注册 9 种 Hook 事件
 ├── start.sh                     # 一键启动（安装 Hook → 启动后端 → 启动前端）
+├── ROADMAP.md                   # 项目路图（Phase 1/2/3）
 └── docs/                        # 本文档目录
+    ├── architecture/            # 架构设计文档
+    ├── operations/              # 运维与状态文档
+    ├── development/             # 开发者指南
+    │   └── how-to-add-stage.md  # 如何添加新的 Pipeline Stage
+    └── plans/                   # 功能设计文档
+        ├── 2026-03-07-feishu-integration.md
+        ├── 2026-03-08-git-source-control-design.md
+        └── 2026-03-08-task-creation-workflow-design.md
 ```
+
+---
+
+## 计划中的未来模块
+
+以下模块已完成设计，尚未实现：
+
+| 模块路径 | 功能 | 设计文档 |
+|---------|------|---------|
+| `backend/app/feishu/` | 飞书消息集成（client/cards/handler/dispatcher） | [feishu-integration](../plans/2026-03-07-feishu-integration.md) |
+| `backend/app/routers/git.py` | Git 源码控制 API（14 个端点） | [git-source-control-design](../plans/2026-03-08-git-source-control-design.md) |
+| `backend/app/routers/task_creation.py` | AI 驱动的智能任务创建 API | [task-creation-workflow-design](../plans/2026-03-08-task-creation-workflow-design.md) |
+| `backend/app/routers/templates.py` | 任务模板 CRUD + 推荐 | [task-creation-workflow-design](../plans/2026-03-08-task-creation-workflow-design.md) |
+| `backend/app/routers/voice.py` | 语音转文字（Whisper） | [task-creation-workflow-design](../plans/2026-03-08-task-creation-workflow-design.md) |
