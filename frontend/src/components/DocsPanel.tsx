@@ -507,16 +507,27 @@ export function DocsPanel({ projectId, onClose, onBack, fullPage }: DocsPanelPro
   const hasContent = selectedPath && docContent != null && !docLoading;
   const showOutline = hasContent && headings.length > 0;
 
+  const containerClass = fullPage
+    ? "flex flex-col h-full"
+    : "fixed inset-y-0 right-0 flex flex-col shadow-2xl z-50";
+  const containerStyle = fullPage
+    ? { background: "var(--background-primary)" }
+    : { width: "min(90vw, 900px)", background: "var(--background-primary)", borderLeft: "1px solid var(--border)" };
+
   return (
-    <div className="fixed inset-y-0 right-0 flex flex-col shadow-2xl z-50"
-         style={{
-           width: "min(90vw, 900px)",
-           background: "var(--background-primary)",
-           borderLeft: "1px solid var(--border)",
-         }}>
+    <div className={containerClass} style={containerStyle}>
       {/* Header */}
       <div className="h-10 flex items-center gap-2 px-3 shrink-0"
            style={{ borderBottom: "1px solid var(--border)" }}>
+        {fullPage && onBack ? (
+          <button
+            onClick={onBack}
+            className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06] mr-1"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            <ChevronRight size={14} className="rotate-180" />
+          </button>
+        ) : null}
         <BookOpen size={15} style={{ color: "var(--accent)" }} />
         <span className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>
           {t("docsPanel.header.title")}
@@ -530,13 +541,15 @@ export function DocsPanel({ projectId, onClose, onBack, fullPage }: DocsPanelPro
           </span>
         )}
         <span className="flex-1" />
-        <button
-          onClick={onClose}
-          className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          <X size={14} />
-        </button>
+        {!fullPage && (
+          <button
+            onClick={onClose}
+            className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/[0.06]"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       {/* Three-column body */}
