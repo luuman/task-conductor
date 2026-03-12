@@ -106,6 +106,11 @@ export default function App() {
     setPage("task");
   };
 
+  const handleOpenKnowledge = (projectId: number) => {
+    setActiveProjectId(projectId);
+    setPage("knowledge");
+  };
+
   const handleProjectCreated = (p: Project) => {
     setProjects((prev) => [...prev, p]);
   };
