@@ -223,6 +223,7 @@ if (page === "tasks") {
           setPage("files");
         }}
         onOpenKnowledge={handleOpenKnowledge}
+        onOpenDocs={handleOpenDocs}
       />
     );
   };
