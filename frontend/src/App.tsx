@@ -15,7 +15,8 @@ import ProjectsCanvas from "./pages/ProjectsCanvas";
 import ClaudeConfig from "./pages/ClaudeConfig";
 import ProjectFiles from "./pages/ProjectFiles";
 import PencilCanvas from "./components/PencilCanvas";
-type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files" | "pencil";
+import KnowledgePage from "./pages/KnowledgePage";
+type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files" | "pencil" | "knowledge";
 
 export default function App() {
   const { t } = useTranslation();
