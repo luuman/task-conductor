@@ -15,6 +15,7 @@ interface DashboardProps {
   projectsLoaded: boolean;
   onOpenTask: (id: number) => void;
   onOpenFiles?: (projectId: number) => void;
+  onOpenKnowledge?: (projectId: number) => void;
 }
 
 // ── 工具函数 ─────────────────────────────────────────────────────
