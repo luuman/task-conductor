@@ -25,9 +25,14 @@ task-conductor/
 │   │   ├── runner.py            # run_pipeline() 串行驱动主循环
 │   │   ├── schemas.py           # 结构化输出 Pydantic 模型
 │   │   └── stages/
-│   │       ├── analysis.py      # 需求分析阶段（3方案 A/B/C）
-│   │       ├── prd.py           # PRD 生成阶段
-│   │       └── plan.py          # 技术规划阶段
+│   │       ├── analysis.py      # ✅ 需求分析阶段（3方案 A/B/C）
+│   │       ├── prd.py           # ✅ PRD 生成阶段
+│   │       ├── plan.py          # ✅ 技术规划阶段
+│   │       ├── ui.py            # ⏳ UI设计阶段（待实现）
+│   │       ├── dev.py           # ⏳ 编码实现阶段（待实现）
+│   │       ├── test.py          # ⏳ 测试阶段（待实现）
+│   │       ├── deploy.py        # ⏳ 部署阶段（待实现）
+│   │       └── monitor.py       # ⏳ 监控阶段（待实现）
 │   │
 │   ├── routers/                 # 各功能路由
 │   │   ├── projects.py          # GET/POST /api/projects
