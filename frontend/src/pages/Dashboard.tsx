@@ -694,7 +694,7 @@ export default function Dashboard({ projectId, projects, projectsLoaded, onOpenT
               <FolderOpen size={13} className="mr-1" />{t('files.title')}
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={() => setDocsOpen(true)}>{t('dashboard.projectTaskList.docsKnowledge')}</Button>
+          <Button variant="ghost" size="sm" onClick={() => onOpenDocs?.(projectId)}>{t('dashboard.projectTaskList.docsKnowledge')}</Button>
           <Button variant="ghost" size="sm" onClick={() => onOpenKnowledge?.(projectId)}>{t('dashboard.projectTaskList.errorBook')}</Button>
           <NewTaskButton projectId={projectId} onCreated={(t) => { setTasks((p) => [t, ...p]); onOpenTask(t.id); }} />
         </div>
