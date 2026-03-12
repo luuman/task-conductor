@@ -207,6 +207,7 @@ if (page === "tasks") {
           setActiveProjectId(pid);
           setPage("files");
         }}
+        onOpenKnowledge={handleOpenKnowledge}
       />
     );
   };
