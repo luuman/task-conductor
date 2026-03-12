@@ -184,6 +184,15 @@ if (page === "tasks") {
     if (page === "pencil") {
       return <PencilCanvas className="w-full h-full" />;
     }
+    if (page === "docs" && activeProjectId) {
+      return (
+        <DocsPanel
+          projectId={activeProjectId}
+          fullPage
+          onBack={() => setPage(activeProjectId ? "project" : "dashboard")}
+        />
+      );
+    }
     if (page === "knowledge" && activeProjectId) {
       const proj = projects.find(p => p.id === activeProjectId);
       return (
