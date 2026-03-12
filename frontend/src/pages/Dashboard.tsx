@@ -643,12 +643,11 @@ function NewTaskButton({ projectId, onCreated }: { projectId: number; onCreated:
   );
 }
 
-export default function Dashboard({ projectId, projects, projectsLoaded, onOpenTask, onOpenFiles }: DashboardProps) {
+export default function Dashboard({ projectId, projects, projectsLoaded, onOpenTask, onOpenFiles, onOpenKnowledge }: DashboardProps) {
   const { t } = useTranslation();
   const STAGE_LABEL = useStageLabelMap();
   const STATUS_LABEL = useStatusLabelMap();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [knowledgeOpen, setKnowledgeOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
 
   useEffect(() => {
