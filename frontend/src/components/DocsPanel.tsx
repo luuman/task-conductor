@@ -409,7 +409,7 @@ interface DocsPanelProps {
   fullPage?: boolean;
 }
 
-export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
+export function DocsPanel({ projectId, onClose, onBack, fullPage }: DocsPanelProps) {
   const { t } = useTranslation();
   const [items, setItems] = useState<FileItem[]>([]);
   const [hasDocs, setHasDocs] = useState(true);
