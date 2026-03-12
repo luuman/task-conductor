@@ -112,6 +112,11 @@ export default function App() {
     setPage("knowledge");
   };
 
+  const handleOpenDocs = (projectId: number) => {
+    setActiveProjectId(projectId);
+    setPage("docs");
+  };
+
   const handleProjectCreated = (p: Project) => {
     setProjects((prev) => [...prev, p]);
   };
