@@ -141,8 +141,19 @@ input → analysis* → prd* → ui* → plan* → dev → test* → deploy* →
 
 `*` = 需人工审批（`APPROVAL_REQUIRED` 集合）
 
-- 当前**只有 analysis** 阶段有完整实现（`pipeline/stages/analysis.py`）
-- 其余阶段的 engine 状态机已就绪，需要补充各阶段的 stage handler
+| 阶段 | Executor | 状态 |
+|------|----------|------|
+| analysis | pipeline/stages/analysis.py | ✅ 完整 |
+| prd | pipeline/stages/prd.py | ✅ 完整 |
+| plan | pipeline/stages/plan.py | ✅ 完整 |
+| ui | — | ⏳ 待实现 |
+| dev | — | ⏳ 待实现 |
+| test | — | ⏳ 待实现 |
+| deploy | — | ⏳ 待实现 |
+| monitor | — | ⏳ 待实现 |
+
+扩展指南：`docs/development/how-to-add-stage.md`
+
 - 审批流：`POST /api/tasks/{id}/approve` → `POST /api/tasks/{id}/advance`
 
 ## API 端点速查
