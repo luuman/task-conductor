@@ -404,7 +404,9 @@ function MarkdownViewer({
 
 interface DocsPanelProps {
   projectId: number;
-  onClose: () => void;
+  onClose?: () => void;
+  onBack?: () => void;
+  fullPage?: boolean;
 }
 
 export function DocsPanel({ projectId, onClose }: DocsPanelProps) {
