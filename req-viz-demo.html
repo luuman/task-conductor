@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>User Flow — TaskConductor</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --canvas-bg:#eef0f5;
+  --card:#fff;--card-bd:#e2e6ed;
+  --tx:#1e2130;--dim:#6b7280;--dim2:#9ca3af;
+  --ln:#e5e7eb;--ln2:#d1d5db;
+  --blue:#2563eb;--blue-lt:#dbeafe;
+  --green:#10b981;--green-lt:#d1fae5;
+  --red:#ef4444;--red-lt:#fee2e2;
+  --amb:#f59e0b;--amb-lt:#fef3c7;
+  --pur:#8b5cf6;--pur-lt:#ede9fe;
+  --arr:#adb5c8;
+  --ph1:#6366f1;--ph2:#3b82f6;--ph3:#8b5cf6;
+  --ph4:#06b6d4;--ph5:#8b5cf6;--ph6:#f59e0b;--ph7:#10b981;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
+  background:var(--canvas-bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;
+  color:var(--tx)}
+
+/* ── HEADER ── */
+.hd{height:48px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--card-bd);
+  display:flex;align-items:center;padding:0 20px;gap:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.logo{font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px;
+  border-right:1px solid var(--ln);padding-right:16px;margin-right:16px}
+.phase-nav{display:flex;align-items:center;gap:0;flex:1}
+.ph-item{display:flex;align-items:center;gap:0}
+.ph-lbl{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:99px;
+  white-space:nowrap;cursor:pointer;transition:all .15s}
+.ph-lbl:hover{filter:brightness(.9)}
+.ph-arr{font-size:10px;color:var(--dim2);margin:0 2px;padding:0 2px}
+.zoom-ctrl{margin-left:auto;display:flex;align-items:center;gap:6px;border-left:1px solid var(--ln);padding-left:16px}
+.zbtn{background:#f8f9fa;border:1px solid var(--card-bd);color:var(--dim);
+  border-radius:5px;padding:4px 11px;font-size:12px;cursor:pointer;transition:all .1s}
+.zbtn:hover{background:var(--ln)}
+.zval{font-size:12px;color:var(--dim);min-width:38px;text-align:center}
+
+/* ── CANVAS WRAP ── */
+.wrap{flex:1;overflow:hidden;position:relative;cursor:grab}
+.wrap.drag{cursor:grabbing}
+.canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+
+/* ── PHASE HEADERS ON CANVAS ── */
+.ph-head{position:absolute;top:0;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.ph-head-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  display:flex;align-items:center;gap:5px}
+.ph-num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:900}
+.ph-vline{position:absolute;top:0;width:1px;border-left:1.5px dashed;opacity:.15}
+
+/* ── NODE ── */
+.node{position:absolute;cursor:pointer}
+.node-lbl{font-size:10.5px;font-weight:600;color:var(--dim);text-align:center;
+  margin-bottom:5px;letter-spacing:.01em}
+.node-card{background:var(--card);border:1px solid var(--card-bd);border-radius:8px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
+  transition:box-shadow .15s,transform .15s,border-color .15s;width:155px}
+.node:hover .node-card{box-shadow:0 4px 16px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.08);
+  transform:translateY(-2px);border-color:#c8cbd4}
+.node.sel .node-card{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.2),0 4px 16px rgba(0,0,0,.1)}
+
+/* ── SCREEN CHROME ── */
+.sc-bar{height:22px;background:#f8f9fc;border-bottom:1px solid var(--ln);
+  display:flex;align-items:center;padding:0 8px;gap:5px}
+.sc-dot{width:5px;height:5px;border-radius:50%}
+.sc-title{font-size:8.5px;color:var(--dim);font-weight:600;margin:0 auto;letter-spacing:.02em}
+.sc-body{padding:8px}
+
+/* ── WIREFRAME PRIMITIVES ── */
+.ln{height:7px;background:var(--ln);border-radius:3px;margin:3px 0}
+.ln.sm{height:6px}.ln.xs{height:5px}
+.ln.dark{background:var(--ln2)}
+.btn{height:21px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:700;margin:4px 0}
+.btn.pri{background:var(--blue);color:#fff}
+.btn.sec{background:var(--ln);color:var(--dim)}
+.btn.grn{background:var(--green);color:#fff}
+.btn.red{background:var(--red-lt);color:var(--red)}
+.inp{height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fafbfc;
+  margin:3px 0;display:flex;align-items:center;padding:0 6px}
+.inp.focus{border-color:var(--blue)}
+.inp-txt{height:5px;background:var(--ln);border-radius:2px;width:60%}
+.inp-ph{height:5px;background:var(--ln2);border-radius:2px;width:45%}
+.chip{display:inline-flex;align-items:center;height:14px;border-radius:99px;
+  padding:0 6px;font-size:7.5px;font-weight:700;margin:1px 2px 1px 0}
+.card-sm{background:#f8f9fc;border:1px solid var(--ln);border-radius:5px;padding:5px 6px;margin:2px 0}
+.avatar{width:20px;height:20px;border-radius:50%;background:var(--ln)}
+.avatar.sm{width:14px;height:14px}
+.row{display:flex;gap:4px;align-items:center;margin:2px 0}
+.col{display:flex;flex-direction:column;gap:0}
+.sep{height:1px;background:var(--ln);margin:5px 0}
+.stage-box{flex:1;height:12px;border-radius:3px;display:flex;align-items:center;
+  justify-content:center;font-size:5.5px;font-weight:700}
+.mini-chart{display:flex;align-items:flex-end;gap:2px;height:26px}
+.mini-bar{flex:1;border-radius:2px 2px 0 0}
+.gauge-wrap{display:flex;align-items:center;justify-content:center;padding:4px 0}
+.log-line{height:8px;border-radius:2px;margin:2px 0;background:var(--ln)}
+.kpi-card{background:#f8f9fc;border:1px solid var(--ln);border-radius:4px;
+  flex:1;padding:4px 5px;text-align:center}
+.option-card{background:#f8f9fc;border:1px solid var(--ln);border-radius:4px;flex:1;padding:4px;text-align:center}
+.option-card.sel{background:var(--blue-lt);border-color:var(--blue)}
+.list-row{display:flex;align-items:center;gap:4px;height:16px;padding:0 2px;
+  border-bottom:1px solid var(--ln)}
+.nav-item{height:6px;background:var(--ln2);border-radius:2px}
+.tag{height:10px;border-radius:99px;padding:0 5px;display:inline-flex;align-items:center}
+
+/* ── SVG ARROWS ── */
+.arr-path{fill:none;stroke:var(--arr);stroke-width:1.5;marker-end:url(#arrowhead)}
+.arr-label-bg{fill:#fff;stroke:var(--ln);stroke-width:.8}
+.arr-label-txt{font-size:9px;font-family:system-ui;fill:var(--dim2)}
+
+/* ── DETAIL PANEL ── */
+.panel{position:fixed;right:0;top:48px;bottom:0;width:320px;background:#fff;
+  border-left:1px solid var(--card-bd);box-shadow:-4px 0 16px rgba(0,0,0,.08);
+  transform:translateX(100%);transition:transform .22s ease;
+  display:flex;flex-direction:column;z-index:100}
+.panel.open{transform:translateX(0)}
+.panel-hd{padding:14px 16px 12px;border-bottom:1px solid var(--ln);
+  display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
+.panel-title{font-size:15px;font-weight:800;flex:1;color:var(--tx)}
+.panel-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--dim2);padding:0 2px}
+.panel-body{overflow-y:auto;flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.p-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--dim2);margin-bottom:7px}
+.p-story{background:#f8f9ff;border-left:3px solid var(--blue);padding:9px 12px;
+  border-radius:0 6px 6px 0;font-size:12px;color:var(--dim);font-style:italic;line-height:1.65}
+.p-story strong{color:var(--tx);font-style:normal}
+.p-ac-item{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;
+  border-radius:6px;border:1px solid var(--ln);margin-bottom:4px;
+  font-size:11.5px;color:#374151;line-height:1.45}
+.p-ac-item .ck{color:var(--green);font-weight:700;font-size:10px;flex-shrink:0;margin-top:1px}
+.p-tech{background:#f8faff;border:1px solid #e0e7ff;border-radius:6px;padding:9px 11px;
+  font-size:11px;color:var(--dim);font-family:monospace;line-height:1.7}
+.p-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:6px;
+  border:1px solid var(--ln);margin-bottom:4px;font-size:12px;color:var(--dim);
+  cursor:pointer;transition:all .15s}
+.p-nav-item:hover{background:#f8f9ff;border-color:#c7d2fe;color:var(--tx)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:99px}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="logo">🗺 TaskConductor <span style="font-size:10px;background:#dbeafe;color:var(--blue);padding:2px 8px;border-radius:99px;font-weight:700">User Flow</span></div>
+  <div class="phase-nav" id="phase-nav"></div>
+  <div class="zoom-ctrl">
+    <button class="zbtn" onclick="Z(-0.12)">−</button>
+    <span class="zval" id="zval">75%</span>
+    <button class="zbtn" onclick="Z(0.12)">+</button>
+    <button class="zbtn" onclick="R()">重置</button>
+  </div>
+</div>
+
+<div class="wrap" id="wrap">
+  <div class="canvas" id="canvas">
+
+    <!-- SVG arrows layer -->
+    <svg id="svgL" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none">
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0.5 L0,5.5 L7,3 z" fill="#adb5c8"/>
+        </marker>
+      </defs>
+    </svg>
+
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="panel" id="panel">
+  <div class="panel-hd">
+    <div>
+      <div class="panel-title" id="p-title">—</div>
+      <div style="font-size:11px;margin-top:3px" id="p-phase">—</div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">×</button>
+  </div>
+  <div class="panel-body" id="p-body"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+
+const PHASES = [
+  {id:1,label:'① 未登录',       color:'#6366f1',bg:'#eef2ff'},
+  {id:2,label:'② 认证',         color:'#3b82f6',bg:'#dbeafe'},
+  {id:3,label:'③ 工作台',       color:'#8b5cf6',bg:'#ede9fe'},
+  {id:4,label:'④ 任务管理',     color:'#06b6d4',bg:'#cffafe'},
+  {id:5,label:'⑤ 流水线',       color:'#8b5cf6',bg:'#ede9fe'},
+  {id:6,label:'⑥ 审批',         color:'#f59e0b',bg:'#fef3c7'},
+  {id:7,label:'⑦ Claude 观测', color:'#10b981',bg:'#d1fae5'},
+];
+
+const DETAILS = {
+  splash:{ph:1,title:'未登录首页',story:'作为访客，我希望看到产品简介并快速导航到登录页面。',
+    ac:['展示 TaskConductor 品牌和核心功能介绍','「立即登录」按钮跳转到 PIN 登录页','未登录状态下所有功能页面重定向到此页'],
+    tech:'静态页面，无 API 调用',nav:[{l:'→ 点击登录',to:'n-login'}]},
+  login:{ph:2,title:'PIN 登录',story:'作为用户，我希望通过 6 位 PIN 快速安全地登录系统。',
+    ac:['6 位数字 PIN，每位独立显示','正确后写入 token 跳转仪表盘','错误显示红色提示','5 次失败锁定 30 分钟'],
+    tech:'POST /auth/pin → {token, expires_in}',nav:[{l:'✓ PIN 正确',to:'n-dash'},{l:'✗ PIN 错误',to:'n-loginerr'}]},
+  loginerr:{ph:2,title:'登录错误状态',story:'当 PIN 错误时，清晰反馈错误信息。',
+    ac:['输入框变红色边框','显示「PIN 码不正确」提示','显示剩余尝试次数','第 5 次错误显示锁定提示'],
+    tech:'POST /auth/pin → 401 Unauthorized',nav:[{l:'重试',to:'n-login'},{l:'锁定后等待',to:'n-login'}]},
+  dash:{ph:3,title:'项目仪表盘',story:'作为项目负责人，我希望一眼看到整体 KPI 和项目进度。',
+    ac:['4 个 KPI 卡片：总任务/进行中/完成/失败','成功率 Gauge 图','本周 7 日活动柱状图','项目列表按活动时间排序'],
+    tech:'GET /api/metrics → {total_tasks, success_rate, weekly_stats}',nav:[{l:'→ 新建项目',to:'n-newproj'},{l:'→ 点击项目',to:'n-projview'},{l:'→ 打开监控',to:'n-monitor'}]},
+  newproj:{ph:4,title:'新建项目',story:'作为负责人，我希望快速创建新项目，填写名称即可。',
+    ac:['项目名称必填 2-50 字','描述可选 ≤ 500 字','名称唯一性实时校验','创建后跳转到项目视图'],
+    tech:'POST /api/projects → {id, name, ...}',nav:[{l:'✓ 创建成功',to:'n-projview'},{l:'✗ 取消',to:'n-dash'}]},
+  projview:{ph:4,title:'项目视图',story:'作为开发者，我希望在项目下查看所有任务并快速创建新任务。',
+    ac:['任务列表按更新时间排序','每项显示标题/阶段/状态 Badge','「新建任务」按钮右上角固定','项目 KPI 摘要在顶部'],
+    tech:'GET /api/projects/{id}/tasks',nav:[{l:'→ 点击任务',to:'n-taskview'},{l:'→ 新建任务',to:'n-newtask'}]},
+  newtask:{ph:4,title:'创建任务',story:'作为开发者，我希望通过填写需求描述来创建可自动执行的任务。',
+    ac:['标题必填，描述必填 50-2000 字','必须绑定到已有项目','字数计数实时显示','创建后状态为 input'],
+    tech:'POST /api/projects/{id}/tasks → {id, status:"input"}',nav:[{l:'✓ 提交',to:'n-taskview'}]},
+  taskview:{ph:5,title:'任务详情',story:'作为开发者，我希望查看任务状态并一键启动自动化流水线。',
+    ac:['顶部 9 阶段流程图，当前阶段高亮','仅 input 状态可启动流水线','展示完整需求描述','已完成阶段可查看产出物'],
+    tech:'GET /api/tasks/{id}\nPOST /api/pipeline/{id}/run-analysis',nav:[{l:'▶ 启动流水线',to:'n-running'},{l:'→ 实时监控',to:'n-monitor'}]},
+  running:{ph:5,title:'流水线执行中',story:'作为开发者，我希望通过流程图和实时日志看到 Claude 执行进度。',
+    ac:['当前阶段节点脉冲动画','日志区域实时滚动','INFO/WARN/SUCCESS 颜色区分','右上角显示运行时长'],
+    tech:'WS /ws/task/{id} → {type:"log"|"status", data}',nav:[{l:'→ Analysis 完成',to:'n-analysis'},{l:'→ 工具调用推送',to:'n-monitor'}]},
+  analysis:{ph:6,title:'Analysis 审批',story:'作为产品经理，我希望对比 AI 生成的方案并选择最合适的一个。',
+    ac:['展示 A/B/C 三个方案，各有置信度评分','Critic 评审意见可折叠展示','选中方案高亮，「通过」按钮激活','拒绝时填写要求，系统自动重新生成'],
+    tech:'POST /api/tasks/{id}/approve\n{action, chosen_option?, reason?}',nav:[{l:'✓ 通过',to:'n-prd'},{l:'✗ 拒绝重试',to:'n-running'}]},
+  prd:{ph:6,title:'PRD 生成',story:'作为产品经理，我希望 AI 根据批准的分析自动生成结构化需求文档。',
+    ac:['包含用户故事/验收标准/技术规格','生成过程展示结构进度','完成后需审批才进入下一阶段','保存为 StageArtifact 可随时查看'],
+    tech:'POST /api/tasks/{id}/advance (stage=prd)',nav:[{l:'→ PRD 完成待审批',to:'n-planappr'},{l:'✗ 失败重试',to:'n-prd'}]},
+  planappr:{ph:6,title:'计划审批',story:'作为技术负责人，我希望审批实施计划，确保开发方向正确。',
+    ac:['展示分阶段实施计划和里程碑','可展开每阶段的子任务列表','通过后进入 dev 自动执行','拒绝时提供修改意见'],
+    tech:'POST /api/tasks/{id}/approve (stage=plan)',nav:[{l:'✓ 批准→dev',to:'n-taskview'},{l:'✗ 拒绝',to:'n-prd'}]},
+  monitor:{ph:7,title:'实时工具监控',story:'作为 AI 工程师，我希望实时看到 Claude 调用了哪些工具，方便监控调试。',
+    ac:['展示最近 100 条工具调用','新事件插入顶部带淡入动画','展开查看完整 JSON 输入/输出','PreTool 蓝/PostTool 绿/Stop 灰'],
+    tech:'WS /ws/sessions → {type:"session_update", data}',nav:[{l:'→ 查看会话历史',to:'n-sessions'}]},
+  sessions:{ph:7,title:'会话历史',story:'作为 AI 工程师，我希望查看所有历史 Claude 会话并回放操作记录。',
+    ac:['左栏：最近 50 个会话（调用数/时长）','点击加载右栏完整事件时间线','实时/历史 Tab 切换','按日期范围过滤'],
+    tech:'GET /api/sessions\nGET /api/sessions/{id}/events',nav:[{l:'← 返回工作台',to:'n-dash'}]},
+};
+
+// Node definitions
+const NODES = [
+  // Phase 1
+  {id:'n-splash',   key:'splash',  label:'未登录首页',   x:24,  y:155, dark:true},
+  // Phase 2
+  {id:'n-login',    key:'login',   label:'PIN 登录',     x:222, y:105},
+  {id:'n-loginerr', key:'loginerr',label:'登录错误',     x:222, y:370},
+  // Phase 3
+  {id:'n-dash',     key:'dash',    label:'项目仪表盘',   x:430, y:105},
+  // Phase 4
+  {id:'n-newproj',  key:'newproj', label:'新建项目',     x:660, y:105},
+  {id:'n-projview', key:'projview',label:'项目视图',     x:660, y:355},
+  {id:'n-newtask',  key:'newtask', label:'创建任务',     x:660, y:560},
+  // Phase 5
+  {id:'n-taskview', key:'taskview',label:'任务详情',     x:900, y:105},
+  {id:'n-running',  key:'running', label:'流水线运行中', x:900, y:370},
+  // Phase 6
+  {id:'n-analysis', key:'analysis',label:'Analysis 审批',x:1130,y:105},
+  {id:'n-prd',      key:'prd',     label:'PRD 生成',     x:1130,y:370},
+  {id:'n-planappr', key:'planappr',label:'计划审批',     x:1360,y:105},
+  // Phase 7
+  {id:'n-monitor',  key:'monitor', label:'实时监控',     x:1590,y:105},
+  {id:'n-sessions', key:'sessions',label:'会话历史',     x:1590,y:370},
+];
+
+// Arrow connections
+const ARROWS = [
+  {f:'n-splash',  t:'n-login',    lb:'点击登录',   fx:'r', fy:.5, tx:'l', ty:.5},
+  {f:'n-login',   t:'n-dash',     lb:'PIN 正确',   fx:'r', fy:.5, tx:'l', ty:.5},
+  {f:'n-login',   t:'n-loginerr', lb:'PIN 错误',   fx:'b', fy:1,  tx:'t', ty:0},
+  {f:'n-loginerr',t:'n-login',    lb:'重试',        fx:'t', fy:0,  tx:'b', ty:1, curve:'left'},
+  {f:'n-dash',    t:'n-newproj',  lb:'新建项目',   fx:'r', fy:.35,tx:'l', ty:.35},
+  {f:'n-dash',    t:'n-projview', lb:'打开项目',   fx:'r', fy:.65,tx:'l', ty:.35},
+  {f:'n-newproj', t:'n-projview', lb:'创建成功',   fx:'b', fy:1,  tx:'t', ty:0},
+  {f:'n-projview',t:'n-newtask',  lb:'新建任务',   fx:'b', fy:1,  tx:'t', ty:0},
+  {f:'n-projview',t:'n-taskview', lb:'点击任务',   fx:'r', fy:.5, tx:'l', ty:.65},
+  {f:'n-newtask', t:'n-taskview', lb:'提交',        fx:'r', fy:.5, tx:'l', ty:.85},
+  {f:'n-taskview',t:'n-running',  lb:'启动流水线', fx:'b', fy:1,  tx:'t', ty:0},
+  {f:'n-running', t:'n-analysis', lb:'Analysis完成',fx:'r',fy:.4, tx:'l', ty:.5},
+  {f:'n-analysis',t:'n-prd',      lb:'通过',        fx:'b', fy:1,  tx:'t', ty:0},
+  {f:'n-analysis',t:'n-running',  lb:'拒绝重试',   fx:'l', fy:.7, tx:'r', ty:.7, curve:'up'},
+  {f:'n-prd',     t:'n-planappr', lb:'PRD完成',    fx:'r', fy:.5, tx:'l', ty:.7},
+  {f:'n-planappr',t:'n-taskview', lb:'批准→dev',   fx:'t', fy:0,  tx:'t', ty:0, curve:'up'},
+  {f:'n-planappr',t:'n-monitor',  lb:'',           fx:'r', fy:.5, tx:'l', ty:.5},
+  {f:'n-taskview',t:'n-monitor',  lb:'实时监控',   fx:'r', fy:.25,tx:'l', ty:.25},
+  {f:'n-running', t:'n-monitor',  lb:'工具调用',   fx:'r', fy:.5, tx:'l', ty:.7},
+  {f:'n-monitor', t:'n-sessions', lb:'查看历史',   fx:'b', fy:1,  tx:'t', ty:0},
+];
+
+// ════════════════════════════════════════════
+// WIREFRAME RENDERS
+// ════════════════════════════════════════════
+
+function ln(w='100%',dark=false){ return `<div class="ln${dark?' dark':''}" style="width:${w}"></div>`; }
+function lns(...ws){ return ws.map(w=>ln(w)).join(''); }
+function btn(txt,type='pri'){ return `<div class="btn ${type}">${txt}</div>`; }
+function inp(ph=false){ return `<div class="inp ${ph?'focus':''}"><div class="${ph?'inp-txt':'inp-ph'}"></div></div>`; }
+function sep(){ return '<div class="sep"></div>'; }
+function chip(txt,color='#e5e7eb',tc='#374151'){ return `<div class="chip" style="background:${color};color:${tc}">${txt}</div>`; }
+
+const WF = {
+  // ── Splash (dark style) ──
+  splash: () => `
+    <div style="background:#0f172a;color:#fff;padding:8px">
+      <div style="font-size:10px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:5px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#6366f1;display:flex;align-items:center;justify-content:center;font-size:7px">TC</div>
+        TaskConductor
+      </div>
+      <div style="height:40px;background:#1e293b;border-radius:5px;margin-bottom:6px;
+        display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          ${ln('70%')}
+          <div class="ln sm dark" style="width:45%;margin:3px auto;background:#334155"></div>
+        </div>
+      </div>
+      <div style="font-size:8px;color:#94a3b8;margin-bottom:5px;text-align:center">AI 驱动的任务流水线</div>
+      ${lns('100%','80%','60%')}
+      <div class="btn pri" style="margin-top:6px;background:#6366f1">立即登录 →</div>
+    </div>`,
+
+  // ── Login ──
+  login: () => `
+    <div class="sc-body">
+      <div style="text-align:center;margin-bottom:6px">
+        <div style="width:24px;height:24px;border-radius:6px;background:#6366f1;margin:0 auto 4px;
+          display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700">TC</div>
+        <div class="ln" style="width:55%;margin:0 auto"></div>
+        <div class="ln sm" style="width:40%;margin:3px auto"></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:4px;margin:8px 0 6px">
+        ${[1,2,3,4,5,6].map((i,idx)=>`
+          <div style="width:16px;height:16px;border-radius:50%;
+            border:1.5px solid ${idx<2?'#2563eb':'#d1d5db'};
+            background:${idx<2?'#dbeafe':'transparent'};
+            display:flex;align-items:center;justify-content:center">
+            <div style="width:5px;height:5px;border-radius:50%;background:${idx<2?'#2563eb':'#e5e7eb'}"></div>
+          </div>`).join('')}
+      </div>
+      ${btn('登录')}
+      <div style="height:8px;margin-top:2px"></div>
+    </div>`,
+
+  // ── Login Error ──
+  loginerr: () => `
+    <div class="sc-body">
+      <div style="text-align:center;margin-bottom:6px">
+        <div style="width:24px;height:24px;border-radius:6px;background:#6366f1;margin:0 auto 4px;
+          display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700">TC</div>
+        <div class="ln" style="width:55%;margin:0 auto"></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:4px;margin:8px 0 4px">
+        ${[1,2,3,4,5,6].map(()=>`
+          <div style="width:16px;height:16px;border-radius:50%;
+            border:1.5px solid #ef4444;background:#fee2e2;
+            display:flex;align-items:center;justify-content:center">
+            <div style="width:5px;height:5px;border-radius:50%;background:#ef4444"></div>
+          </div>`).join('')}
+      </div>
+      <div style="background:#fee2e2;border-radius:4px;padding:4px 6px;margin-bottom:5px;
+        font-size:8px;color:#ef4444;text-align:center">✕ PIN 码不正确，还剩 2 次</div>
+      ${btn('重试','red')}
+    </div>`,
+
+  // ── Dashboard ──
+  dash: () => `
+    <div style="background:#f8f9fc;padding:5px 6px 3px;border-bottom:1px solid var(--ln)">
+      <div class="row" style="margin:0">
+        <div style="font-size:8px;font-weight:700">🏠 工作台</div>
+        <div class="avatar sm" style="margin-left:auto"></div>
+      </div>
+    </div>
+    <div class="sc-body">
+      <div class="row">
+        ${['24','7','15','2'].map((v,i)=>`
+          <div class="kpi-card">
+            <div style="font-size:10px;font-weight:800;color:${['#6366f1','#06b6d4','#10b981','#ef4444'][i]}">${v}</div>
+            <div class="ln xs" style="width:80%;margin:2px auto"></div>
+          </div>`).join('')}
+      </div>
+      <div class="row" style="margin-top:4px">
+        <div class="kpi-card" style="flex:none;width:42px">
+          <div class="gauge-wrap">
+            <svg width="34" height="22" viewBox="0 0 34 22">
+              <path d="M4,18 A13,13 0 0,1 30,18" fill="none" stroke="#e5e7eb" stroke-width="4" stroke-linecap="round"/>
+              <path d="M4,18 A13,13 0 0,1 30,18" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-dasharray="${Math.PI*13*0.78} ${Math.PI*13}"/>
+              <text x="17" y="19" text-anchor="middle" font-size="6" font-weight="800" fill="#10b981">78%</text>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-card" style="padding-top:6px">
+          <div class="mini-chart">
+            ${[3,5,2,6,4,1,3].map((v,i)=>`<div class="mini-bar" style="height:${v*4}px;background:${i===3?'#6366f1':'#c7d2fe'}"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      ${sep()}
+      ${[['TaskConductor','8','70%','#10b981'],['项目 Alpha','3','40%','#f59e0b']].map(([n,c,p,pc])=>`
+        <div class="list-row">
+          <div class="avatar sm"></div>
+          <div class="ln xs" style="width:40%;margin:0 2px"></div>
+          <div style="margin-left:auto;font-size:7.5px;font-weight:700;color:${pc}">${p}</div>
+        </div>`).join('')}
+      ${btn('+ 新建项目','sec')}
+    </div>`,
+
+  // ── New Project ──
+  newproj: () => `
+    <div class="sc-body">
+      <div style="background:#f8f9fc;border:1px solid var(--ln);border-radius:6px;padding:7px">
+        <div style="font-size:9px;font-weight:700;margin-bottom:5px">新建项目</div>
+        <div style="font-size:7.5px;color:var(--dim2);margin-bottom:2px">项目名称 *</div>
+        ${inp(true)}
+        <div style="font-size:7.5px;color:var(--dim2);margin-bottom:2px;margin-top:3px">项目描述</div>
+        <div style="border:1px solid #93c5fd;border-radius:4px;height:26px;background:#f8faff;padding:3px 6px">
+          ${ln('70%')}${ln('40%')}
+        </div>
+        ${btn('创建项目')}
+        ${btn('取消','sec')}
+      </div>
+    </div>`,
+
+  // ── Project View ──
+  projview: () => `
+    <div style="background:#f8f9fc;padding:5px 7px 4px;border-bottom:1px solid var(--ln)">
+      <div class="row" style="margin:0">
+        <div style="font-size:8.5px;font-weight:700;color:#8b5cf6">TaskConductor</div>
+        <div class="btn pri" style="margin:0;margin-left:auto;height:15px;padding:0 6px;font-size:7px;border-radius:3px;display:flex;align-items:center;background:#2563eb;color:#fff;font-weight:700">+ 新建</div>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:6px 7px">
+      ${[['实现PRD可视化','分析中','#06b6d4'],['优化流水线性能','待审批','#f59e0b'],['修复Hook问题','完成','#10b981'],['撰写API文档','待开始','#9ca3af']].map(([t,s,c])=>`
+        <div class="list-row">
+          <div style="width:5px;height:5px;border-radius:50%;background:${c};flex-shrink:0"></div>
+          <div class="ln xs" style="width:50%;margin:0 3px"></div>
+          <div style="margin-left:auto" class="chip" style="background:${c}18;color:${c};font-size:7px;padding:1px 5px;border-radius:99px;height:12px;display:flex;align-items:center;font-weight:600">${s}</div>
+        </div>`).join('')}
+      <div style="height:3px"></div>
+    </div>`,
+
+  // ── New Task ──
+  newtask: () => `
+    <div class="sc-body">
+      <div style="font-size:9px;font-weight:700;margin-bottom:6px">创建任务</div>
+      ${inp(true)}
+      <div style="border:1px solid #93c5fd;border-radius:4px;height:32px;background:#f8faff;
+        padding:4px 6px;margin-bottom:4px">
+        ${ln('80%')}${ln('55%')}
+      </div>
+      <div style="border:1px solid var(--ln);border-radius:4px;height:18px;background:#fafbfc;
+        margin-bottom:4px;display:flex;align-items:center;padding:0 6px;">
+        <div class="ln xs" style="width:50%;margin:0"></div>
+        <div style="margin-left:auto;font-size:7px;color:var(--dim2)">▾</div>
+      </div>
+      <div style="font-size:7.5px;color:var(--dim2);text-align:right;margin-bottom:4px">234 / 2000</div>
+      ${btn('提交任务')}
+    </div>`,
+
+  // ── Task View ──
+  taskview: () => `
+    <div style="background:#f8f9fc;padding:4px 7px;border-bottom:1px solid var(--ln)">
+      <div class="ln" style="width:65%;margin:2px 0"></div>
+      <div style="display:flex;gap:2px;margin-top:3px">
+        ${['in','an','prd','ui','pl','dev','ts','dp','✓'].map((s,i)=>`
+          <div class="stage-box" style="background:${i===0?'#dbeafe':i===5?'#f3f4f6':'#f3f4f6'};
+            border:1px solid ${i===0?'#93c5fd':'#e5e7eb'};
+            color:${i===0?'#2563eb':'#9ca3af'};font-size:5px">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div class="sc-body">
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;padding:4px 6px;margin-bottom:5px">
+        <div style="font-size:7.5px;color:#16a34a;font-weight:600">状态：等待启动</div>
+      </div>
+      ${lns('90%','70%','50%')}
+      ${btn('▶ 启动流水线')}
+      ${btn('查看详情','sec')}
+    </div>`,
+
+  // ── Running ──
+  running: () => `
+    <div style="background:#f8f9fc;padding:4px 7px;border-bottom:1px solid var(--ln)">
+      <div style="display:flex;gap:2px;margin-bottom:2px">
+        ${['✓in','▶an','prd','ui','pl','dev','ts','dp',''].map((s,i)=>`
+          <div class="stage-box" style="background:${i===0?'#d1fae5':i===1?'#dbeafe':'#f3f4f6'};
+            border:1px solid ${i===0?'#6ee7b7':i===1?'#93c5fd':'#e5e7eb'};
+            color:${i===0?'#059669':i===1?'#2563eb':'#9ca3af'}">${s}</div>`).join('')}
+      </div>
+      <div class="row" style="margin:0">
+        <div style="width:5px;height:5px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
+        <div class="ln xs" style="width:50%;margin:0 4px"></div>
+        <div style="font-size:7px;color:#2563eb;font-weight:600;margin-left:auto">01:24</div>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:6px 7px">
+      ${['[INFO] 调用 Claude Pool...','[INFO] 流式输出 1.2k tokens','[SUCCESS] 方案 A 生成完成'].map((t,i)=>`
+        <div class="log-line" style="background:${i===2?'#d1fae5':'#f3f4f6'}"></div>`).join('')}
+      <div style="display:flex;align-items:center;gap:3px;margin-top:3px">
+        <div style="width:4px;height:4px;border-radius:50%;background:#2563eb"></div>
+        <div class="ln xs" style="width:50%;margin:0"></div>
+      </div>
+    </div>`,
+
+  // ── Analysis Approval ──
+  analysis: () => `
+    <div style="background:#fffbeb;padding:4px 7px;border-bottom:1px solid #fde68a">
+      <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 等待审批 — Analysis</div>
+    </div>
+    <div class="sc-body">
+      <div class="row" style="align-items:stretch;gap:3px">
+        ${[{t:'方案A',s:87,sel:false},{t:'方案B',s:91,sel:true},{t:'方案C',s:62,sel:false}].map(o=>`
+          <div class="option-card ${o.sel?'sel':''}">
+            <div style="font-size:8px;font-weight:700;color:${o.sel?'#2563eb':'#374151'}">${o.t}</div>
+            <div style="font-size:9px;font-weight:800;color:${o.s>=80?'#10b981':'#f59e0b'}">${o.s}</div>
+            ${ln('80%')}${ln('60%')}
+          </div>`).join('')}
+      </div>
+      <div style="font-size:7.5px;color:var(--dim2);margin:4px 0 3px">${ln('90%')}${ln('70%')}</div>
+      <div class="row" style="gap:4px">
+        ${btn('✓ 通过')}
+        ${btn('✕ 拒绝','red')}
+      </div>
+    </div>`,
+
+  // ── PRD Running ──
+  prd: () => `
+    <div style="background:#faf5ff;padding:4px 7px;border-bottom:1px solid #e9d5ff">
+      <div style="display:flex;gap:2px">
+        ${['✓an','▶prd','ui','pl','dev','ts','dp',''].map((s,i)=>`
+          <div class="stage-box" style="background:${i===0?'#d1fae5':i===1?'#ede9fe':'#f3f4f6'};
+            border:1px solid ${i===0?'#6ee7b7':i===1?'#c4b5fd':'#e5e7eb'};
+            color:${i===0?'#059669':i===1?'#7c3aed':'#9ca3af'}">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div class="sc-body">
+      <div style="font-size:8px;font-weight:600;color:#7c3aed;margin-bottom:5px">生成产品需求文档</div>
+      ${['✓ 用户故事','✓ 验收标准','⏳ 技术规格'].map((t,i)=>`
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+          <div class="log-line" style="flex:1;background:${i<2?'#d1fae5':'#f3f4f6'}"></div>
+          <div style="font-size:7px;color:${i<2?'#10b981':'#9ca3af'};flex-shrink:0">${t.slice(0,1)}</div>
+        </div>`).join('')}
+      <div style="display:flex;align-items:center;gap:3px;margin-top:3px">
+        <div style="width:4px;height:4px;border-radius:50%;background:#7c3aed"></div>
+        <div class="ln xs" style="width:55%;margin:0"></div>
+        <div style="font-size:7px;color:#7c3aed;margin-left:auto">02:11</div>
+      </div>
+    </div>`,
+
+  // ── Plan Approval ──
+  planappr: () => `
+    <div style="background:#fffbeb;padding:4px 7px;border-bottom:1px solid #fde68a">
+      <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 等待审批 — Plan</div>
+    </div>
+    <div class="sc-body" style="padding:6px 7px">
+      ${['阶段1: 数据模型','阶段2: API 接口','阶段3: 前端实现','阶段4: 集成测试'].map((t,i)=>`
+        <div class="list-row">
+          <div style="width:6px;height:6px;border-radius:2px;background:${i<2?'#10b981':'#e5e7eb'};flex-shrink:0"></div>
+          <div class="ln xs" style="width:65%;margin:0 4px"></div>
+          <div style="font-size:7px;color:${i<2?'#10b981':'#9ca3af'}">${i<2?'✓':''}</div>
+        </div>`).join('')}
+      ${btn('✓ 批准计划','grn')}
+      ${btn('✕ 拒绝','red')}
+    </div>`,
+
+  // ── Monitor ──
+  monitor: () => `
+    <div style="background:#f0fdf4;padding:4px 7px;border-bottom:1px solid #bbf7d0">
+      <div class="row" style="margin:0">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10b981;flex-shrink:0"></div>
+        <div style="font-size:7.5px;color:#059669;margin-left:3px">已连接 · 3 活跃会话</div>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:5px 7px">
+      ${[['Bash','Post','#10b981','142ms'],['Read','Pre','#2563eb','-'],['Write','Post','#10b981','89ms'],['Glob','Post','#10b981','34ms']].map(([tool,type,c,ms])=>`
+        <div class="list-row">
+          <div style="font-size:7px;font-weight:700;color:${c};background:${c}18;padding:0 4px;border-radius:2px;flex-shrink:0">${type}</div>
+          <div style="font-size:8px;font-weight:600;color:#374151;margin-left:4px">${tool}</div>
+          <div style="margin-left:auto;font-size:7px;color:${c}">${ms}</div>
+        </div>`).join('')}
+      ${btn('查看会话历史','sec')}
+    </div>`,
+
+  // ── Sessions ──
+  sessions: () => `
+    <div style="background:#f8f9fc;padding:4px 7px 3px;border-bottom:1px solid var(--ln)">
+      <div class="row" style="margin:0;gap:0">
+        ${['实时','历史'].map((t,i)=>`
+          <div style="font-size:8px;font-weight:${i===1?700:500};padding:3px 8px 2px;
+            color:${i===1?'#2563eb':'var(--dim2)'};
+            border-bottom:${i===1?'2px solid #2563eb':'none'};cursor:pointer">${t}</div>`).join('')}
+      </div>
+    </div>
+    <div class="sc-body" style="padding:5px 0">
+      <div style="display:flex;min-height:0">
+        <div style="width:45%;border-right:1px solid var(--ln);padding:0 6px">
+          ${['#a3f9 47','#b7d2 23','#c1a5 8'].map((t,i)=>`
+            <div style="padding:3px 4px;border-bottom:1px solid var(--ln);
+              border-left:${i===0?'2px solid #2563eb':'2px solid transparent'}">
+              <div class="ln xs" style="width:80%;margin:0 0 2px"></div>
+              <div class="ln" style="width:50%;height:5px;margin:0"></div>
+            </div>`).join('')}
+        </div>
+        <div style="flex:1;padding:0 5px">
+          ${['▶','→','✓','→','■'].map((ico,i)=>`
+            <div style="display:flex;align-items:center;gap:3px;height:13px">
+              <div style="width:9px;height:9px;border-radius:50%;background:${['#d1fae5','#dbeafe','#d1fae5','#dbeafe','#f3f4f6'][i]};
+                display:flex;align-items:center;justify-content:center;font-size:5.5px;
+                color:${['#059669','#2563eb','#059669','#2563eb','#9ca3af'][i]};flex-shrink:0">${ico}</div>
+              <div class="ln xs" style="width:60%;margin:0"></div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`,
+};
+
+// ════════════════════════════════════════════
+// BUILD NODES
+// ════════════════════════════════════════════
+
+function buildNodes() {
+  const canvas = document.getElementById('canvas');
+  NODES.forEach(n => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'node';
+    wrapper.id = n.id;
+    wrapper.style.cssText = `left:${n.x}px;top:${n.y}px`;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'node-lbl';
+    lbl.textContent = n.label;
+    wrapper.appendChild(lbl);
+
+    const card = document.createElement('div');
+    card.className = 'node-card';
+
+    if(!n.dark) {
+      const bar = document.createElement('div');
+      bar.className = 'sc-bar';
+      const ph = PHASES.find(p=>p.id===DETAILS[n.key].ph);
+      bar.innerHTML = `
+        <div class="sc-dot" style="background:#ef4444"></div>
+        <div class="sc-dot" style="background:#f59e0b"></div>
+        <div class="sc-dot" style="background:#22c55e"></div>
+        <div class="sc-title">${n.label}</div>`;
+      card.appendChild(bar);
+    }
+
+    card.insertAdjacentHTML('beforeend', WF[n.key]());
+    wrapper.appendChild(card);
+    wrapper.addEventListener('click', () => showPanel(n.key, n.id));
+    canvas.appendChild(wrapper);
+  });
+
+  // Phase headers
+  const phaseX = {1:24,2:222,3:430,4:660,5:900,6:1130,7:1590};
+  PHASES.forEach(ph => {
+    const x = phaseX[ph.id];
+    if(!x) return;
+    const el = document.createElement('div');
+    el.className = 'ph-head';
+    el.style.cssText = `left:${x}px`;
+    el.innerHTML = `<div class="ph-head-lbl" style="color:${ph.color}">
+      <div class="ph-num" style="background:${ph.bg};color:${ph.color}">${ph.id}</div>
+      ${ph.label.slice(2)}
+    </div>`;
+    canvas.appendChild(el);
+
+    if(ph.id < 7) {
+      const vl = document.createElement('div');
+      vl.className = 'ph-vline';
+      const nextPh = phaseX[ph.id+1];
+      vl.style.cssText = `left:${nextPh-10}px;height:680px;border-color:${ph.color}`;
+      canvas.appendChild(vl);
+    }
+  });
+}
+
+// ════════════════════════════════════════════
+// DRAW ARROWS
+// ════════════════════════════════════════════
+
+function getEdgePt(id, side, frac) {
+  const el = document.getElementById(id);
+  if(!el) return {x:0,y:0};
+  const l=parseInt(el.style.left), t=parseInt(el.style.top);
+  const w=el.offsetWidth, h=el.offsetHeight;
+  switch(side){
+    case 'r': return {x:l+w,    y:t+h*frac};
+    case 'l': return {x:l,      y:t+h*frac};
+    case 't': return {x:l+w*frac,y:t};
+    case 'b': return {x:l+w*frac,y:t+h};
+    default:  return {x:l+w/2,  y:t+h/2};
+  }
+}
+
+function drawArrows() {
+  const svg = document.getElementById('svgL');
+  svg.innerHTML = `<defs>
+    <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6.5" refY="3" orient="auto">
+      <path d="M0,0.5 L0,5.5 L7,3 z" fill="#adb5c8"/>
+    </marker>
+  </defs>`;
+
+  ARROWS.forEach((a, idx) => {
+    const fs = a.fx==='r'?'r':a.fx==='l'?'l':a.fx==='t'?'t':'b';
+    const ts = a.tx==='r'?'r':a.tx==='l'?'l':a.tx==='t'?'t':'b';
+    const p1 = getEdgePt(a.f, fs, a.fy||0.5);
+    const p2 = getEdgePt(a.t, ts, a.ty||0.5);
+    if(!p1||!p2||(!p1.x&&!p1.y)) return;
+
+    const dx=p2.x-p1.x, dy=p2.y-p1.y;
+    let cx1=p1.x, cy1=p1.y, cx2=p2.x, cy2=p2.y;
+
+    if(a.curve==='up') {
+      const miny = Math.min(p1.y,p2.y) - 50;
+      cx1=p1.x; cy1=miny; cx2=p2.x; cy2=miny;
+    } else if(a.curve==='left') {
+      const minx = Math.min(p1.x,p2.x) - 50;
+      cx1=minx; cy1=p1.y; cx2=minx; cy2=p2.y;
+    } else if(fs==='r'||fs==='l') {
+      cx1=p1.x+dx*0.45; cy1=p1.y; cx2=p2.x-dx*0.45; cy2=p2.y;
+    } else {
+      cx1=p1.x; cy1=p1.y+dy*0.45; cx2=p2.x; cy2=p2.y-dy*0.45;
+    }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','arr-path');
+    path.setAttribute('d',`M${p1.x},${p1.y} C${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`);
+    svg.appendChild(path);
+
+    if(a.lb) {
+      const mx=(p1.x+p2.x)/2+(cx1+cx2)/2*.1, my=(p1.y+p2.y)/2+(cy1+cy2)/2*.1;
+      const rw=a.lb.length*5.5+8;
+      const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bg.setAttribute('class','arr-label-bg');
+      bg.setAttribute('x',mx-rw/2); bg.setAttribute('y',my-8);
+      bg.setAttribute('width',rw); bg.setAttribute('height',14); bg.setAttribute('rx',3);
+      svg.appendChild(bg);
+      const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('class','arr-label-txt'); txt.setAttribute('x',mx); txt.setAttribute('y',my+2);
+      txt.setAttribute('text-anchor','middle'); txt.textContent=a.lb;
+      svg.appendChild(txt);
+    }
+  });
+}
+
+// ════════════════════════════════════════════
+// DETAIL PANEL
+// ════════════════════════════════════════════
+
+function showPanel(key, nodeId) {
+  const d = DETAILS[key]; if(!d) return;
+  const ph = PHASES.find(p=>p.id===d.ph);
+
+  document.getElementById('p-title').textContent = d.title;
+  const phEl = document.getElementById('p-phase');
+  phEl.textContent = ph.label;
+  phEl.style.color = ph.color;
+  phEl.style.background = ph.bg;
+  phEl.style.padding = '2px 8px';
+  phEl.style.borderRadius = '99px';
+  phEl.style.display = 'inline-block';
+  phEl.style.fontSize = '11px';
+  phEl.style.fontWeight = '700';
+
+  document.getElementById('p-body').innerHTML = `
+    <div><div class="p-lbl">👤 用户故事</div>
+      <div class="p-story">${d.story}</div></div>
+    <div><div class="p-lbl">✅ 验收标准</div>
+      ${d.ac.map(a=>`<div class="p-ac-item"><span class="ck">✓</span><span>${a}</span></div>`).join('')}</div>
+    <div><div class="p-lbl">🔌 接口定义</div>
+      <div class="p-tech">${d.tech}</div></div>
+    <div><div class="p-lbl">🔗 导航路径</div>
+      ${d.nav.map(n=>`<div class="p-nav-item" onclick="jumpTo('${n.to}')">
+        <span style="color:var(--dim2);font-size:11px">→</span>
+        <span>${n.l}</span></div>`).join('')}</div>`;
+
+  document.querySelectorAll('.node').forEach(el=>el.classList.remove('sel'));
+  document.getElementById(nodeId)?.classList.add('sel');
+  document.getElementById('panel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.querySelectorAll('.node').forEach(el=>el.classList.remove('sel'));
+}
+
+function jumpTo(id) {
+  const el=document.getElementById(id); if(!el) return;
+  const l=parseInt(el.style.left), t=parseInt(el.style.top);
+  const wrap=document.getElementById('wrap');
+  tx=wrap.clientWidth*0.3-(l+80)*scale;
+  ty=wrap.clientHeight/2-(t+80)*scale;
+  applyT();
+}
+
+// ════════════════════════════════════════════
+// PAN / ZOOM
+// ════════════════════════════════════════════
+
+let scale=0.75, tx=40, ty=55, drag=false, mx=0, my=0;
+
+function applyT() {
+  document.getElementById('canvas').style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+  document.getElementById('zval').textContent=Math.round(scale*100)+'%';
+}
+function Z(d, cx, cy) {
+  const wrap=document.getElementById('wrap');
+  const ox=cx??wrap.clientWidth/2, oy=cy??wrap.clientHeight/2;
+  const ns=Math.min(2,Math.max(0.2,scale+d));
+  tx=ox-(ox-tx)*(ns/scale); ty=oy-(oy-ty)*(ns/scale); scale=ns; applyT();
+}
+function R(){ scale=0.75;tx=40;ty=55;applyT(); }
+
+const wrap=document.getElementById('wrap');
+wrap.addEventListener('mousedown',e=>{ if(e.target.closest('.node'))return; drag=true;mx=e.clientX-tx;my=e.clientY-ty;wrap.classList.add('drag'); });
+window.addEventListener('mousemove',e=>{ if(!drag)return; tx=e.clientX-mx;ty=e.clientY-my;applyT(); });
+window.addEventListener('mouseup',()=>{ drag=false;wrap.classList.remove('drag'); });
+wrap.addEventListener('wheel',e=>{ e.preventDefault(); const r=wrap.getBoundingClientRect(); Z(e.deltaY<0?.1:-.1,e.clientX-r.left,e.clientY-r.top); },{passive:false});
+
+// ════════════════════════════════════════════
+// PHASE NAV (header)
+// ════════════════════════════════════════════
+
+function buildPhaseNav() {
+  const nav=document.getElementById('phase-nav');
+  PHASES.forEach((ph,i) => {
+    const item=document.createElement('div'); item.className='ph-item';
+    item.innerHTML = `<span class="ph-lbl" style="background:${ph.bg};color:${ph.color}" onclick="focusPhase(${ph.id})">${ph.label}</span>`;
+    if(i<PHASES.length-1) item.insertAdjacentHTML('beforeend',`<span class="ph-arr">——→</span>`);
+    nav.appendChild(item);
+  });
+}
+
+const phaseXMap={1:24,2:222,3:430,4:660,5:900,6:1130,7:1590};
+function focusPhase(id) {
+  const x=phaseXMap[id]; if(!x) return;
+  const wrap=document.getElementById('wrap');
+  tx=60-x*scale; ty=55; applyT();
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+
+buildPhaseNav();
+buildNodes();
+applyT();
+window.addEventListener('load', () => { setTimeout(drawArrows, 80); });
+window.addEventListener('resize', applyT);
+</script>
+</body>
+</html>
