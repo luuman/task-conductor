@@ -1410,48 +1410,27 @@ document.addEventListener('keydown',e=>{
 });
 
 // ══════════════════════════════════════════
-// DETAIL PANEL
+// PREVIEW MODE
 // ══════════════════════════════════════════
 
-function showPanel(key, nodeId){
-  const d=DETAILS[key]; if(!d) return;
-  const ph=PHASES.find(p=>p.id===d.ph);
-
-  document.getElementById('p-title').textContent=d.title;
-  const phEl=document.getElementById('p-phase');
-  phEl.textContent=ph.label; phEl.style.color=ph.color; phEl.style.background=ph.bg;
-  phEl.style.cssText+=';padding:2px 8px;border-radius:99px;display:inline-block;font-size:11px;font-weight:700';
-
-  const wfSection=d.wf?`
-    <div>
-      <div class="p-lbl">📐 线稿预览</div>
-      <div class="wf-preview-wrap">
-        <iframe src="${d.wf}" scrolling="no" loading="lazy"></iframe>
-      </div>
-      <a href="${d.wf}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border:1px solid var(--ln);border-radius:6px;margin-top:6px;font-size:12px;color:var(--blue);text-decoration:none;font-weight:600;">
-        🔗 全屏查看线稿 ↗
-      </a>
-    </div>` : '';
-
-  document.getElementById('p-body').innerHTML=`
-    ${wfSection}
-    <div><div class="p-lbl">👤 用户故事</div><div class="p-story">${d.story}</div></div>
-    <div><div class="p-lbl">✅ 验收标准</div>
-      ${d.ac.map(a=>`<div class="p-ac-item"><span class="ck">✓</span><span>${a}</span></div>`).join('')}</div>
-    <div><div class="p-lbl">🔌 技术规格</div><div class="p-tech">${d.tech}</div></div>
-    <div><div class="p-lbl">🔗 导航路径</div>
-      ${d.nav.map(n=>`<div class="p-nav-item" onclick="jumpTo('${n.to}')">
-        <span style="color:var(--dim2)">→</span><span>${n.l}</span></div>`).join('')}</div>`;
-
-  document.querySelectorAll('.node').forEach(el=>el.classList.remove('sel'));
-  document.getElementById(nodeId)?.classList.add('sel');
-  document.getElementById('panel').classList.add('open');
+function togglePreviewMode(){
+  isPreviewMode=!isPreviewMode;
+  document.body.classList.toggle('preview-mode', isPreviewMode);
+  document.getElementById('t-preview').classList.toggle('active', isPreviewMode);
+  // In preview mode, expand ALL nodes to show full requirements
+  if(isPreviewMode){
+    NODES.forEach(n=>{ expandedNodes.add(n.id); document.querySelector(`#${n.id} .node-card`)?.classList.add('expanded'); });
+  } else {
+    // Collapse all on exit
+    NODES.forEach(n=>{ expandedNodes.delete(n.id); document.querySelector(`#${n.id} .node-card`)?.classList.remove('expanded'); });
+  }
+  drawArrows(); updateMinimap();
+  toast(isPreviewMode?'预览模式：位置锁定，可点击内部按钮':'编辑模式：可拖拽卡片');
 }
 
-function closePanel(){
-  document.getElementById('panel').classList.remove('open');
-  clearSelection();
-}
+// Legacy stubs (no-op — panel removed)
+function showPanel(){}
+function closePanel(){}
 
 function jumpTo(id){
   const el=document.getElementById(id); if(!el) return;
