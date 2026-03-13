@@ -888,8 +888,8 @@ function buildNodes(){
         window.removeEventListener('mouseup',onUp);
         wrapper.classList.remove('dragging');
         document.body.style.userSelect='';
-        if(!moved) showPanel(n.key, n.id);
-        else saveState();
+        if(!moved && !isPreviewMode) toggleExpand(n.id, n.key);
+        else if(moved) saveState();
       }
 
       window.addEventListener('mousemove', onMove);
