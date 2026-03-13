@@ -21,7 +21,7 @@
 
 1. 从零重写前端，feature-based 结构，每个模块独立可理解
 2. 搭建 Tauri 桌面端基础框架，与 Web 共用一个仓库
-3. 用 Rust 实现共用的 WebSocket 核心（ws-core），编译为 WASM（浏览器）和原生库（Tauri），防止消息堆积阻塞 UI
+3. 用 Rust 实现共用的 WebSocket 核心（ws-core），编译为 WASM（浏览器 Web Worker）和原生库（Tauri tokio），防止消息阻塞 UI
 4. 预留多 AI Provider 扩展点，现阶段只实现 Claude
 
 ---
@@ -32,12 +32,13 @@
 |---|---|---|
 | 前端框架 | React 19 + Vite + TypeScript | 保持现有熟悉度 |
 | UI 组件 | shadcn/ui（基于 Radix UI） | 高质量预制组件，完全可定制 |
-| 样式 | Tailwind CSS 4 | 原子化 CSS |
+| 样式 | Tailwind CSS 4 | 原子化 CSS（已在 package.json 中） |
 | 服务端状态 | TanStack Query | API 数据缓存 + 后台刷新 |
 | 客户端状态 | Zustand | 轻量全局 UI 状态 |
-| WebSocket 核心 | Rust（ws-core crate） | WASM（浏览器 Web Worker）+ 原生（Tauri tokio） |
+| 路由 | TanStack Router | 类型安全路由；Tauri 使用 hash 模式 |
+| WebSocket 核心 | Rust（ws-core crate） | WASM + Web Worker（浏览器）/ tokio（Tauri）|
 | 桌面端 | Tauri 2.x | WebView 壳 + Rust 系统层 |
-| 路由 | TanStack Router | 类型安全路由 |
+| 国际化 | react-i18next | 保留 en/zh 双语支持 |
 
 ---
 
@@ -45,128 +46,175 @@
 
 ```
 task-conductor/
-├── backend/              # Python FastAPI（不动）
-├── frontend/             # React Web 前端（重写）
+├── backend/                  # Python FastAPI（不动）
+│
+├── frontend/                 # React Web 前端（重写）
 │   ├── src/
-│   │   ├── features/     # 按功能模块组织
-│   │   │   ├── dashboard/
-│   │   │   ├── tasks/
-│   │   │   ├── sessions/
-│   │   │   ├── settings/
-│   │   │   └── auth/
-│   │   ├── components/ui/  # shadcn 纯 UI 组件
+│   │   ├── features/
+│   │   │   ├── dashboard/    # KPI、项目列表、周报
+│   │   │   ├── tasks/        # 任务流水线详情、审批
+│   │   │   ├── sessions/     # Claude 会话监控
+│   │   │   ├── claude-config/# Hooks、MCP、rules、commands 管理
+│   │   │   ├── knowledge/    # 项目知识库
+│   │   │   ├── mcp-market/   # MCP 市场
+│   │   │   ├── git/          # Git 操作面板
+│   │   │   ├── chat/         # 交互式 AI 对话（/ws/chat）
+│   │   │   ├── settings/     # 应用设置、连接配置
+│   │   │   └── auth/         # PIN 登录、token 管理
+│   │   ├── components/ui/    # shadcn 纯 UI 组件（无业务逻辑）
 │   │   ├── lib/
-│   │   │   ├── api/        # HTTP Adapter（Web 实现）
-│   │   │   ├── ws/         # WsManager 接口 + 浏览器实现（调用 ws-core WASM）
-│   │   │   ├── store/      # Zustand stores
+│   │   │   ├── api/          # HTTP Adapter（HttpAdapter 实现）
+│   │   │   ├── ws/           # WsManager 接口 + BrowserWsManager
+│   │   │   ├── store/        # Zustand store slices
 │   │   │   └── utils.ts
-│   │   └── app/            # 路由、布局、Provider
+│   │   ├── app/              # 路由定义、布局、全局 Provider
+│   │   └── i18n/             # en.json / zh.json 翻译文件
 │   ├── package.json
-│   └── vite.config.ts
+│   └── vite.config.ts        # 含 @vitejs/plugin-wasm 配置
 │
-├── tauri/                # Tauri 桌面端（新建）
-│   ├── src/              # React 入口（复用 frontend/src 代码）
-│   ├── src-tauri/        # Rust 代码
-│   │   ├── src/
-│   │   │   ├── main.rs
-│   │   │   ├── ws/       # Tauri WS 命令（调用 ws-core 原生库）
-│   │   │   └── api/      # Tauri IPC 命令（可选，现阶段转发给 FastAPI）
-│   │   └── Cargo.toml
-│   └── tauri.conf.json
+├── tauri/                    # Tauri 桌面端（新建）
+│   ├── package.json          # 独立入口，依赖 frontend（workspace 引用）
+│   ├── index.html            # Tauri WebView 入口
+│   ├── src/
+│   │   └── main.tsx          # Tauri 专属入口（hash 路由）
+│   └── src-tauri/
+│       ├── src/
+│       │   ├── main.rs
+│       │   ├── ws/           # Tauri WS 命令（调用 ws-core 原生库）
+│       │   └── api/          # Tauri IPC 命令（现阶段转发 FastAPI，预留）
+│       └── Cargo.toml        # 依赖 ws-core 本地 crate
 │
-└── ws-core/              # 共用 Rust WebSocket 核心（新建）
-    ├── src/
-    │   ├── lib.rs          # 公共接口
-    │   ├── manager.rs      # 订阅管理、重连状态机
-    │   ├── message.rs      # 消息格式定义、解析（serde）
-    │   ├── transport/
-    │   │   ├── browser.rs  # cfg(wasm32)：web-sys WebSocket
-    │   │   └── native.rs   # cfg(not(wasm32))：tokio-tungstenite
-    │   └── worker.rs       # WASM Web Worker 胶水代码
-    ├── Cargo.toml
-    └── pkg/                # wasm-pack 编译输出（gitignore）
+├── ws-core/                  # 共用 Rust WebSocket 核心（新建）
+│   ├── src/
+│   │   ├── lib.rs            # 公共接口 + wasm_bindgen exports
+│   │   ├── manager.rs        # 订阅管理、重连状态机
+│   │   ├── message.rs        # AiStreamEvent 消息格式（serde）
+│   │   └── transport/
+│   │       ├── browser.rs    # cfg(wasm32)：web-sys WebSocket + Closure<dyn Fn(MessageEvent)>
+│   │       └── native.rs     # cfg(not(wasm32))：tokio-tungstenite
+│   ├── ws-worker.js          # Web Worker 入口（加载 WASM，中转 postMessage）
+│   └── Cargo.toml
+│
+└── Cargo.toml                # workspace root（ws-core + tauri/src-tauri）
 ```
 
 ---
 
-## 四、WebSocket 架构（优先实现）
+## 四、WebSocket 架构（P0 优先实现）
 
-### 核心设计
+### 整体数据流
 
 ```
-ws-core（Rust）
-     ↓ 条件编译
-┌─────────────┬─────────────────┐
-│  WASM 目标   │   原生目标       │
-│（浏览器）    │  （Tauri）       │
-│             │                 │
-│ web-sys WS  │ tokio-tungstenite│
-│ Web Worker  │ tokio task       │
-└─────────────┴─────────────────┘
-     ↓                ↓
-  postMessage      emit event
-     ↓                ↓
- 前端主线程       WebView JS
-（只管渲染）      （只管渲染）
+后端 FastAPI WS
+      ↓
+┌─────────────────────────────────────────┐
+│            浏览器场景                    │
+│  Web Worker（独立线程）                  │
+│  └── ws-core WASM                       │
+│       ├── web-sys WebSocket             │
+│       ├── 消息解析（serde_json）         │
+│       └── 重连状态机                    │
+│              ↓ postMessage              │
+│  主线程（UI 线程）                       │
+│  └── BrowserWsManager.onmessage         │
+│       └── Zustand store.update          │
+│            ↓ React re-render            │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│            Tauri 场景                   │
+│  tokio async task（独立线程）           │
+│  └── ws-core native                     │
+│       ├── tokio-tungstenite WS          │
+│       ├── 消息解析（serde_json）         │
+│       └── 重连状态机                    │
+│              ↓ tauri::emit              │
+│  WebView JS                             │
+│  └── TauriWsManager（listen）           │
+│       └── Zustand store.update          │
+└─────────────────────────────────────────┘
 ```
 
-### 共用部分（ws-core/src/manager.rs）
+### ws-core 核心接口（WASM export）
 
 ```rust
-pub struct WsManager {
-    subscriptions: HashMap<String, Vec<Box<dyn Fn(AiStreamEvent)>>>,
-    retry_count: u32,
-    state: ConnectionState,
+// ws-core/src/lib.rs
+#[wasm_bindgen]
+pub struct WsHandle {
+    // 内部持有连接状态，不暴露 Fn trait（WASM 不兼容）
 }
 
-impl WsManager {
-    pub fn on_message(&mut self, raw: &str) {
-        if let Ok(event) = serde_json::from_str::<AiStreamEvent>(raw) {
-            self.dispatch(event);
-        }
-    }
+#[wasm_bindgen]
+impl WsHandle {
+    /// 建立连接，消息通过 on_message_cb JS 回调接收
+    #[wasm_bindgen(constructor)]
+    pub fn new(url: &str, on_message_cb: &js_sys::Function) -> WsHandle { ... }
 
-    pub fn reconnect_delay_ms(&self) -> u64 {
-        (500 * 2u64.pow(self.retry_count)).min(30_000)
-    }
-}
-```
+    /// 发送消息（支持双向，如 chat 功能）
+    pub fn send(&self, data: &str) -> Result<(), JsValue> { ... }
 
-### 统一消息格式（provider-agnostic）
-
-```rust
-// ws-core/src/message.rs
-#[derive(Serialize, Deserialize)]
-pub struct AiStreamEvent {
-    pub event_type: String,       // "tool_call" | "chunk" | "done" | "session_update"
-    pub provider: String,         // "claude" | "openai"（预留）
-    pub session_id: String,
-    pub payload: serde_json::Value,
-    pub ts: String,
+    /// 主动断开
+    pub fn close(&self) { ... }
 }
 ```
 
-### 前端调用接口（TypeScript）
+**WASM 兼容说明**：不使用 `Box<dyn Fn(...)>`，改用 `js_sys::Function` 回调，避免 WASM 不支持 trait object 的问题。
+
+### Web Worker 胶水层（ws-worker.js）
+
+```javascript
+// ws-core/ws-worker.js
+import init, { WsHandle } from './pkg/ws_core.js'
+
+let handle = null
+
+self.onmessage = async (e) => {
+  const { type, url, data } = e.data
+  if (type === 'connect') {
+    await init()
+    handle = new WsHandle(url, (msg) => {
+      self.postMessage({ type: 'message', payload: msg })
+    })
+  }
+  if (type === 'send' && handle) handle.send(data)
+  if (type === 'close' && handle) handle.close()
+}
+```
+
+### 前端统一接口（TypeScript）
 
 ```typescript
-// lib/ws/index.ts
-interface WsManager {
+// lib/ws/types.ts
+export interface WsManager {
   subscribe(channel: string, handler: (event: AiStreamEvent) => void): () => void
   send(channel: string, data: unknown): void
   status(channel: string): 'connected' | 'disconnected' | 'reconnecting'
 }
 
-// 自动选择实现
+// lib/ws/index.ts — 自动选择实现
 export const ws: WsManager = window.__TAURI__
-  ? new TauriWsManager()    // 调用 Tauri emit/listen
-  : new BrowserWsManager()  // 调用 ws-core WASM in Web Worker
+  ? new TauriWsManager()    // Tauri：调用 listen/emit
+  : new BrowserWsManager()  // Web：调用 Web Worker + ws-core WASM
+```
+
+### 统一消息格式（provider-agnostic）
+
+```typescript
+// lib/ws/types.ts
+export interface AiStreamEvent {
+  event_type: string        // "tool_call" | "chunk" | "done" | "session_update"
+  provider: string          // "claude"（现阶段）| "openai"（预留）
+  session_id: string
+  payload: unknown
+  ts: string
+}
 ```
 
 ---
 
-## 五、API 适配器（Adapter 模式）
+## 五、API 适配器
 
-支持三种模式，自动探测：
+### 模式探测
 
 ```typescript
 // lib/api/index.ts
@@ -178,59 +226,177 @@ function detectMode(): ApiMode {
   return 'remote-http'
 }
 
-// 现阶段只实现 HttpAdapter
-// TauriAdapter 预留接口，Tauri 阶段填充
 export const api: ApiAdapter = new HttpAdapter(detectMode())
+// TauriAdapter 预留，Tauri 阶段填充
+```
+
+### 认证 & Token 注入
+
+```typescript
+// lib/api/http.ts
+class HttpAdapter {
+  private baseUrl: string
+
+  constructor(mode: ApiMode) {
+    this.baseUrl = mode === 'local-http'
+      ? 'http://localhost:8765'
+      : getStoredTunnelUrl()  // 从 localStorage 读取远程地址
+  }
+
+  private headers(): HeadersInit {
+    const token = localStorage.getItem('tc_token')
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+}
+```
+
+**认证模式**：
+- `localhost` → 自动免密（`POST /auth/local`）
+- 远程 tunnel → PIN 输入 → `POST /auth/pin` → 存 Bearer token
+
+---
+
+## 六、路由设计
+
+```typescript
+// app/routes.tsx（TanStack Router）
+const router = createRouter({
+  history: window.__TAURI__
+    ? createHashHistory()    // Tauri：hash 路由（file:// 协议）
+    : createBrowserHistory(), // Web：history 路由
+
+  routes: [
+    { path: '/login',    component: lazy(() => import('../features/auth')) },
+    { path: '/',         component: lazy(() => import('../features/dashboard')) },
+    { path: '/tasks/:id',component: lazy(() => import('../features/tasks')) },
+    { path: '/sessions', component: lazy(() => import('../features/sessions')) },
+    { path: '/chat',     component: lazy(() => import('../features/chat')) },
+    { path: '/config',   component: lazy(() => import('../features/claude-config')) },
+    { path: '/knowledge',component: lazy(() => import('../features/knowledge')) },
+    { path: '/mcp',      component: lazy(() => import('../features/mcp-market')) },
+    { path: '/git',      component: lazy(() => import('../features/git')) },
+    { path: '/settings', component: lazy(() => import('../features/settings')) },
+  ]
+})
 ```
 
 ---
 
-## 六、状态分层
+## 七、Zustand Store 结构
 
-| 状态类型 | 工具 | 范围 |
-|---|---|---|
-| 服务端数据 | TanStack Query | projects、tasks、sessions、metrics |
-| 全局 UI | Zustand | 主题、侧栏、当前项目 |
-| 实时推送 | ws-core → Zustand | WS 消息写入 store，组件订阅 |
-| 表单/局部 | React useState | 单组件内 |
+```typescript
+// lib/store/app.ts — 全局 UI 状态
+interface AppStore {
+  theme: 'dark' | 'light' | 'system'
+  sidebarCollapsed: boolean
+  activeProjectId: string | null
+}
+
+// lib/store/sessions.ts — 实时会话状态（WS 写入）
+interface SessionStore {
+  sessions: AiSession[]
+  events: Record<string, AiStreamEvent[]>  // sessionId → events
+  update(event: AiStreamEvent): void
+}
+
+// lib/store/tasks.ts — 任务状态（TanStack Query + WS 同步）
+interface TaskStore {
+  activeTaskId: string | null
+  logBuffer: Record<string, string[]>      // taskId → log lines
+  appendLog(taskId: string, line: string): void
+}
+```
 
 ---
 
-## 七、性能策略
+## 八、每个 feature 目录规范
 
-| 策略 | 工具 | 解决的问题 |
+```
+features/dashboard/
+├── index.tsx          # 页面入口（路由组件）
+├── components/        # 只属于 dashboard 的组件
+│   ├── KpiCard.tsx
+│   └── ProjectList.tsx
+├── hooks/             # 只属于 dashboard 的 hooks
+│   └── useMetrics.ts  # 调用 TanStack Query
+└── types.ts           # 本模块的局部类型（可选）
+```
+
+---
+
+## 九、Tauri 代码共享方案
+
+`tauri/` 和 `frontend/` 通过 **npm workspace** 共享组件代码：
+
+```json
+// 根 package.json
+{
+  "workspaces": ["frontend", "tauri"]
+}
+
+// tauri/package.json
+{
+  "dependencies": {
+    "task-conductor-frontend": "workspace:*"  // 引用 frontend 包
+  }
+}
+```
+
+`tauri/src/main.tsx` 复用 `frontend/src/app/` 下的路由和组件，仅替换：
+- 路由 history 模式（hash）
+- WsManager 实现（TauriWsManager）
+- ApiAdapter 实现（TauriAdapter，未来）
+
+---
+
+## 十、国际化
+
+保留现有 `react-i18next` 方案，翻译文件迁移到 `frontend/src/i18n/`：
+```
+i18n/
+├── en.json
+└── zh.json
+```
+组件使用 `const { t } = useTranslation()` 不变。
+
+---
+
+## 十一、性能策略
+
+| 策略 | 工具 | 解决问题 |
 |---|---|---|
 | 路由级懒加载 | React.lazy + Suspense | 首屏体积 |
 | 虚拟滚动 | @tanstack/virtual | 日志/事件长列表 |
 | WS 非阻塞 | Web Worker + WASM / tokio | 消息多时不卡 UI |
-| API 缓存 | TanStack Query staleTime | 切页零 loading |
+| API 缓存 | TanStack Query `staleTime` | 切页零 loading |
 
 ---
 
-## 八、多 AI 扩展预留
+## 十二、多 AI 扩展预留
 
-- 所有消息类型使用 `provider` 字段而非写死 `"claude"`
-- API 接口参数预留 `provider?: string`（默认 `"claude"`）
-- 组件命名用通用词：`AiSession`、`AiEvent` 而非 `ClaudeSession`
+- 所有消息类型包含 `provider` 字段，默认 `"claude"`
+- API 接口参数预留 `provider?: string`
+- 组件命名用通用词：`AiSession`、`AiEvent`，不写死 Claude
 
 **现阶段只实现 Claude，不实现其他 Provider。**
 
 ---
 
-## 九、实现优先级
+## 十三、实现优先级
 
 | 阶段 | 内容 |
 |---|---|
-| **P0（先做）** | ws-core Rust crate + WASM 编译 + Web Worker 集成 |
-| **P1** | Tauri 基础框架（tauri/ 目录）+ TauriWsManager |
-| **P2** | 前端框架（frontend/ 重写）+ API Adapter + Zustand store |
-| **P3** | 各 feature 页面（dashboard、tasks、sessions、settings） |
+| **P0（先做）** | `ws-core` Rust crate：transport + manager + message + WASM export + ws-worker.js |
+| **P1** | Tauri 基础框架（`tauri/` 目录）+ `TauriWsManager` + Cargo workspace |
+| **P2** | 前端框架重写：shadcn/ui、路由、布局、API Adapter、Zustand stores、i18n 迁移 |
+| **P3** | feature 页面：dashboard、tasks、sessions、chat |
+| **P4** | feature 页面：claude-config、mcp-market、knowledge、git、settings |
 
 ---
 
-## 十、不在本次范围内
+## 十四、不在本次范围内
 
-- 后端（backend/）不做任何改动
-- 多 AI Provider 实现（预留接口即可）
+- `backend/` 不做任何改动
+- 多 AI Provider 实现（仅预留接口）
 - Tauri 原生系统功能（托盘、文件系统等）
 - Rust 重写 FastAPI 后端
