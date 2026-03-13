@@ -446,6 +446,7 @@ i18n/
 ## 十四、不在本次范围内
 
 - `backend/` 不做任何改动
+- `frontend/` 不做任何改动（仅保留作历史参考）
 - 多 AI Provider 实现（仅预留接口）
 - Tauri 原生系统功能（托盘、文件系统等）
 - Rust 重写 FastAPI 后端
