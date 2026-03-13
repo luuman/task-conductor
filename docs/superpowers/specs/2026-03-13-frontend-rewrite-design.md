@@ -48,12 +48,14 @@
 task-conductor/
 ├── backend/                  # Python FastAPI（不动）
 │
-├── frontend/                 # React Web 前端（重写）
-│   ├── src/
+├── frontend/                 # 旧前端（不动，仅作参考）
+│
+├── tauri/                    # 新前端 + Tauri 桌面端（一体，所有新开发在此）
+│   ├── src/                  # React 前端代码（feature-based）
 │   │   ├── features/
 │   │   │   ├── dashboard/           # KPI、项目列表、周报
 │   │   │   ├── tasks/               # 任务流水线详情、审批
-│   │   │   ├── task-manager/        # 任务收件箱（TaskManager）
+│   │   │   ├── task-manager/        # 任务收件箱
 │   │   │   ├── sessions/            # Claude 会话监控
 │   │   │   ├── conversation-history/# 对话历史
 │   │   │   ├── claude-config/       # Hooks、MCP、rules、commands 管理
@@ -61,32 +63,29 @@ task-conductor/
 │   │   │   ├── mcp-market/          # MCP 市场
 │   │   │   ├── project-files/       # 项目文件浏览
 │   │   │   ├── git/                 # Git 操作面板
-│   │   │   ├── canvas/              # 项目看板（ProjectsCanvas）
+│   │   │   ├── canvas/              # 项目看板
 │   │   │   ├── chat/                # 交互式 AI 对话（/ws/chat）
 │   │   │   ├── settings/            # 应用设置、连接配置
 │   │   │   └── auth/                # PIN 登录、token 管理
-│   │   ├── components/ui/    # shadcn 纯 UI 组件（无业务逻辑）
+│   │   ├── components/ui/           # shadcn 纯 UI 组件（无业务逻辑）
 │   │   ├── lib/
-│   │   │   ├── api/          # HTTP Adapter（HttpAdapter 实现）
-│   │   │   ├── ws/           # WsManager 接口 + BrowserWsManager
-│   │   │   ├── store/        # Zustand store slices
+│   │   │   ├── api/                 # HTTP Adapter（HttpAdapter 实现）
+│   │   │   ├── ws/                  # WsManager 接口 + BrowserWsManager + TauriWsManager
+│   │   │   ├── store/               # Zustand store slices
+│   │   │   ├── tauri.ts             # isTauri() 工具函数 + 类型声明
 │   │   │   └── utils.ts
-│   │   ├── app/              # 路由定义、布局、全局 Provider
-│   │   └── i18n/             # en.json / zh.json 翻译文件
+│   │   ├── app/                     # 路由定义、布局、全局 Provider
+│   │   └── i18n/                    # en.json / zh.json 翻译文件
+│   ├── public/
+│   ├── index.html
 │   ├── package.json
-│   └── vite.config.ts        # 含 @vitejs/plugin-wasm 配置
-│
-├── tauri/                    # Tauri 桌面端（新建）
-│   ├── package.json          # 独立入口，依赖 frontend（workspace 引用）
-│   ├── index.html            # Tauri WebView 入口
-│   ├── src/
-│   │   └── main.tsx          # Tauri 专属入口（hash 路由）
-│   └── src-tauri/
+│   ├── vite.config.ts               # 含 @vitejs/plugin-wasm，dev 代理 :8765
+│   └── src-tauri/                   # Rust Tauri 代码
 │       ├── src/
 │       │   ├── main.rs
-│       │   ├── ws/           # Tauri WS 命令（调用 ws-core 原生库）
-│       │   └── api/          # Tauri IPC 命令（现阶段转发 FastAPI，预留）
-│       └── Cargo.toml        # 依赖 ws-core 本地 crate
+│       │   ├── ws/                  # Tauri WS 命令（调用 ws-core 原生库）
+│       │   └── api/                 # Tauri IPC 命令（预留，现阶段空实现）
+│       └── Cargo.toml               # 依赖 ws-core 本地 crate
 │
 ├── ws-core/                  # 共用 Rust WebSocket 核心（新建）
 │   ├── src/
@@ -94,13 +93,19 @@ task-conductor/
 │   │   ├── manager.rs        # 订阅管理、重连状态机
 │   │   ├── message.rs        # AiStreamEvent 消息格式（serde）
 │   │   └── transport/
-│   │       ├── browser.rs    # cfg(wasm32)：web-sys WebSocket + Closure<dyn Fn(MessageEvent)>
+│   │       ├── browser.rs    # cfg(wasm32)：web-sys WebSocket + js_sys::Function 回调
 │   │       └── native.rs     # cfg(not(wasm32))：tokio-tungstenite
 │   ├── ws-worker.js          # Web Worker 入口（加载 WASM，中转 postMessage）
 │   └── Cargo.toml
 │
 └── Cargo.toml                # workspace root（ws-core + tauri/src-tauri）
 ```
+
+**关键说明**：
+- `tauri/` 同时服务两个运行模式：
+  - **Web 模式**：`npm run dev` → Vite dev server → 浏览器访问，WS 走 BrowserWsManager（WASM + Web Worker）
+  - **桌面模式**：`tauri dev` / `tauri build` → Tauri WebView，WS 走 TauriWsManager（Rust tokio）
+- 两种模式共用 100% 的 React 组件代码，仅 `lib/ws/` 和 `lib/api/` 运行时切换实现
 
 ---
 
