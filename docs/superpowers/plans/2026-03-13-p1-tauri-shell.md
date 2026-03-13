@@ -77,7 +77,7 @@ npm install \
 
 ```bash
 npm install -D \
-  @vitejs/plugin-wasm \
+  vite-plugin-wasm \
   vite-plugin-top-level-await \
   tailwindcss @tailwindcss/vite \
   @types/react @types/react-dom
