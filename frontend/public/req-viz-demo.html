@@ -738,6 +738,53 @@ function saveState(){
 // BUILD NODES
 // ══════════════════════════════════════════
 
+let expandedNodes=new Set();
+let isPreviewMode=false;
+
+function buildReqContent(key){
+  const d=DETAILS[key]; if(!d) return '';
+  const ph=PHASES.find(p=>p.id===d.ph);
+  const wfSection=d.wf?`
+    <div class="req-section">
+      <div class="req-lbl">📐 界面预览
+        <a href="${d.wf}" target="_blank" style="margin-left:auto;font-size:9px;color:var(--blue);text-decoration:none">全屏 ↗</a>
+      </div>
+      <div class="wf-inline-wrap"><iframe src="${d.wf}" scrolling="no" loading="lazy"></iframe></div>
+    </div>`:'';
+  const acHtml=d.ac.map(a=>`<div class="req-ac-item"><span class="req-ck">✓</span><span>${a}</span></div>`).join('');
+  const navHtml=d.nav.map(nv=>`<button class="req-nav-btn" onclick="jumpTo('${nv.to}');event.stopPropagation()">→ ${nv.l}</button>`).join('');
+  return `
+    ${wfSection}
+    <div class="req-section">
+      <div class="req-lbl">👤 用户故事</div>
+      <div class="req-story">${d.story}</div>
+    </div>
+    <div class="req-section">
+      <div class="req-lbl">✅ 验收标准</div>
+      ${acHtml}
+    </div>
+    <div class="req-section">
+      <div class="req-lbl">🔌 接口规格</div>
+      <div class="req-tech">${d.tech}</div>
+    </div>
+    <div class="req-section" style="background:#f8f9ff">
+      <div class="req-lbl">🔗 导航路径</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0">${navHtml}</div>
+    </div>`;
+}
+
+function toggleExpand(id, key){
+  const card=document.querySelector(`#${id} .node-card`); if(!card) return;
+  if(expandedNodes.has(id)){
+    expandedNodes.delete(id);
+    card.classList.remove('expanded');
+  } else {
+    expandedNodes.add(id);
+    card.classList.add('expanded');
+  }
+  drawArrows(); updateMinimap();
+}
+
 function buildNodes(){
   const canvas=document.getElementById('canvas');
   NODES.forEach(n=>{
@@ -753,11 +800,19 @@ function buildNodes(){
 
     const card=document.createElement('div');
     card.className='node-card';
+
+    // sc-bar with expand button
     const bar=document.createElement('div');
     bar.className='sc-bar';
-    bar.innerHTML=`<div class="sc-dot" style="background:#ef4444"></div><div class="sc-dot" style="background:#f59e0b"></div><div class="sc-dot" style="background:#22c55e"></div><div class="sc-title">${n.label}</div>`;
+    bar.innerHTML=`<div class="sc-dot" style="background:#ef4444"></div><div class="sc-dot" style="background:#f59e0b"></div><div class="sc-dot" style="background:#22c55e"></div><div class="sc-title">${n.label}</div><button class="expand-btn" title="展开需求详情" onclick="toggleExpand('${n.id}','${n.key}');event.stopPropagation()">▾</button>`;
     card.appendChild(bar);
     card.insertAdjacentHTML('beforeend', WF[n.key]());
+
+    // Inline requirements section (initially hidden)
+    const reqDiv=document.createElement('div');
+    reqDiv.className='node-req';
+    reqDiv.innerHTML=buildReqContent(n.key);
+    card.appendChild(reqDiv);
 
     // Connectors for connect tool
     ['top','right','bottom','left'].forEach(side=>{
