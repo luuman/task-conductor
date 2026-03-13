@@ -397,23 +397,26 @@ const DETAILS = {
     nav:[{l:'← 插件市场', to:'n-plugin'}]},
 };
 
-// Default node positions
+// Default node positions — 3-row grid layout
+// Row A (y=80):  proj, aiwork, mgmt, layout
+// Row B (y=400): entry/onboard, stages, prd, approve, projects, plugin
+// Row C (y=720): onboard(lower), prddoc, retry, monitor, pluginapi
 const DEFAULT_POS = {
-  'n-entry':    {x:30,   y:80},
-  'n-onboard':  {x:30,   y:380},
-  'n-proj':     {x:380,  y:80},
-  'n-stages':   {x:380,  y:380},
-  'n-prd':      {x:730,  y:80},
-  'n-prddoc':   {x:730,  y:380},
-  'n-aiwork':   {x:1090, y:80},
-  'n-approve':  {x:1090, y:360},
-  'n-retry':    {x:1090, y:620},
-  'n-mgmt':     {x:1450, y:80},
-  'n-projects': {x:1450, y:380},
-  'n-monitor':  {x:1450, y:650},
-  'n-layout':   {x:1810, y:80},
-  'n-plugin':   {x:1810, y:380},
-  'n-pluginapi':{x:1810, y:650},
+  'n-entry':    {x:30,   y:200},  // between A and B
+  'n-onboard':  {x:30,   y:520},  // below entry
+  'n-proj':     {x:380,  y:80},   // Row A
+  'n-stages':   {x:380,  y:400},  // Row B
+  'n-prd':      {x:730,  y:400},  // Row B — aligns with stages ✓
+  'n-prddoc':   {x:730,  y:720},  // Row C
+  'n-aiwork':   {x:1090, y:80},   // Row A
+  'n-approve':  {x:1090, y:400},  // Row B — aligns with prd ✓
+  'n-retry':    {x:1090, y:720},  // Row C
+  'n-mgmt':     {x:1450, y:80},   // Row A
+  'n-projects': {x:1450, y:400},  // Row B
+  'n-monitor':  {x:1450, y:720},  // Row C
+  'n-layout':   {x:1810, y:80},   // Row A
+  'n-plugin':   {x:1810, y:400},  // Row B
+  'n-pluginapi':{x:1810, y:720},  // Row C
 };
 
 const NODES = [
