@@ -326,6 +326,8 @@ interface TaskStore {
   activeTaskId: string | null
   logBuffer: Record<string, string[]>      // taskId → log lines
   appendLog(taskId: string, line: string): void
+  // WS 推送任务状态变更时，同步 invalidate TanStack Query 缓存
+  // 使用方式：wsEvent 'task_status_change' → queryClient.invalidateQueries(['tasks', taskId])
 }
 ```
 
