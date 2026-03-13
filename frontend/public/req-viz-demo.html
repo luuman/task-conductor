@@ -1491,7 +1491,7 @@ function updateMinimap(){
   NODES.forEach(n=>{
     const p=nodePos[n.id]; if(!p) return;
     const mm=toMM(p.x, p.y);
-    const w=170*mmScale, h=160*mmScale;
+    const w=290*mmScale, h=260*mmScale;
     ctx.fillStyle=selectedNodeIds.has(n.id)?'rgba(37,99,235,.3)':'rgba(255,255,255,.12)';
     ctx.strokeStyle=phColors[n.id]||'#6b7280';
     ctx.lineWidth=selectedNodeIds.has(n.id)?2:0.8;
