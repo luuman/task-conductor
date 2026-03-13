@@ -436,30 +436,52 @@ const NODES = [
   {id:'n-pluginapi',key:'pluginapi',label:'插件 API'},
 ];
 
-// 14 clean arrows — mostly vertical (same column) or horizontal (same row)
+// ─────────────────────────────────────────────────────────────
+// 14 CLEAN ARROWS — 无交叉设计
+//
+// 节点布局（3行×6列）：
+//   Row A (y≈80):  proj(col2)  aiwork(col4)  mgmt(col5)  layout(col6)
+//   Row B (y≈400): stages(col2) prd(col3) approve(col4) projects(col5) plugin(col6)
+//   Row C (y≈720): prddoc(col3) retry(col4) monitor(col5) pluginapi(col6)
+//   特殊: entry(col1,y=200) onboard(col1,y=520)
+//
+// 箭头类型：
+//   ↔ 水平 = 同行节点，y相同，无交叉
+//   ↕ 垂直 = 同列节点，x相同，无交叉
+//   ↗ 小斜 = 短距对角，角度<30°，可接受
+// ─────────────────────────────────────────────────────────────
 const DEFAULT_ARROWS = [
-  // ── Column 1: Entry flow ──
-  {f:'n-entry',    t:'n-proj',     lb:'有项目',    fx:'r',fy:.4,  tx:'l',ty:.4},
-  {f:'n-entry',    t:'n-onboard',  lb:'无项目',    fx:'b',fy:.5,  tx:'t',ty:.5},
-  // ── Onboard → stages (new project enters pipeline) ──
-  {f:'n-onboard',  t:'n-stages',   lb:'新建项目',  fx:'r',fy:.45, tx:'l',ty:.6},
-  // ── Column 2: Project workspace ──
-  {f:'n-proj',     t:'n-stages',   lb:'侧边导航',  fx:'b',fy:.5,  tx:'t',ty:.5},
-  // ── Row B horizontal: stages → prd → approve ──
-  {f:'n-stages',   t:'n-prd',      lb:'PRD 阶段',  fx:'r',fy:.5,  tx:'l',ty:.5},
-  {f:'n-prd',      t:'n-approve',  lb:'完成提交',  fx:'r',fy:.5,  tx:'l',ty:.5},
-  // ── Column 3: PRD detail ──
-  {f:'n-prd',      t:'n-prddoc',   lb:'实时同步',  fx:'b',fy:.5,  tx:'t',ty:.5},
-  // ── Column 4: AI execution chain ──
-  {f:'n-stages',   t:'n-aiwork',   lb:'自动阶段',  fx:'r',fy:.25, tx:'l',ty:.75},
-  {f:'n-aiwork',   t:'n-approve',  lb:'AI 完成',   fx:'b',fy:.5,  tx:'t',ty:.5},
-  {f:'n-approve',  t:'n-retry',    lb:'✗ 拒绝',    fx:'b',fy:.5,  tx:'t',ty:.5},
-  // ── Column 5: Management center ──
-  {f:'n-mgmt',     t:'n-projects', lb:'项目列表',  fx:'b',fy:.5,  tx:'t',ty:.5},
-  {f:'n-projects', t:'n-monitor',  lb:'监控',      fx:'b',fy:.5,  tx:'t',ty:.5},
-  // ── Column 6: Plugin system ──
-  {f:'n-layout',   t:'n-plugin',   lb:'插件安装',  fx:'b',fy:.5,  tx:'t',ty:.5},
-  {f:'n-plugin',   t:'n-pluginapi',lb:'开发 API',  fx:'b',fy:.5,  tx:'t',ty:.5},
+  // ── ↗ 入口分叉（col1 → col2/col1）──
+  {f:'n-entry',    t:'n-proj',     lb:'有项目',   fx:'r',fy:.4,  tx:'l',ty:.4},   // ↗ 小斜
+  {f:'n-entry',    t:'n-onboard',  lb:'无项目',   fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↗ 新建→流水线入口 ──
+  {f:'n-onboard',  t:'n-stages',   lb:'新建项目', fx:'r',fy:.45, tx:'l',ty:.6},   // ↗ 小斜
+
+  // ── ↕ col2 纵向链 ──
+  {f:'n-proj',     t:'n-stages',   lb:'阶段导航', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↔ Row A 水平：proj 直连 aiwork（自动阶段，跳过PRD）──
+  {f:'n-proj',     t:'n-aiwork',   lb:'自动执行', fx:'r',fy:.5,  tx:'l',ty:.5},   // ↔ 水平 Row A
+
+  // ── ↔ Row B 水平主流程：stages → prd → approve ──
+  {f:'n-stages',   t:'n-prd',      lb:'PRD 阶段', fx:'r',fy:.5,  tx:'l',ty:.5},   // ↔ 水平 Row B
+  {f:'n-prd',      t:'n-approve',  lb:'完成提交', fx:'r',fy:.5,  tx:'l',ty:.5},   // ↔ 水平 Row B
+
+  // ── ↕ col3 纵向：文档同步 ──
+  {f:'n-prd',      t:'n-prddoc',   lb:'实时同步', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↕ col4 纵向链：AI执行 → 审批 → 重试 ──
+  {f:'n-aiwork',   t:'n-approve',  lb:'AI 完成',  fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+  {f:'n-approve',  t:'n-retry',    lb:'✗ 拒绝',   fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↕ col5 纵向链：管理中心 ──
+  {f:'n-mgmt',     t:'n-projects', lb:'项目列表', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+  {f:'n-projects', t:'n-monitor',  lb:'监控',     fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↕ col6 纵向链：插件系统 ──
+  {f:'n-layout',   t:'n-plugin',   lb:'插件安装', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+  {f:'n-plugin',   t:'n-pluginapi',lb:'开发 API', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
 ];
 
 // ══════════════════════════════════════════
