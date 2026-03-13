@@ -375,28 +375,26 @@ features/dashboard/
 
 ---
 
-## 九、Tauri 代码共享方案
+## 九、Web / 桌面双模式运行
 
-`tauri/` 和 `frontend/` 通过 **npm workspace** 共享组件代码：
+`tauri/` 是一个标准 Vite + React 项目，同时也是一个 Tauri 应用，无需 npm workspace：
 
-```json
-// 根 package.json
-{
-  "workspaces": ["frontend", "tauri"]
-}
+```
+# Web 模式（浏览器访问）
+cd tauri && npm run dev        # → http://localhost:7071
 
-// tauri/package.json
-{
-  "dependencies": {
-    "task-conductor-frontend": "workspace:*"  // 引用 frontend 包
-  }
-}
+# 桌面模式（Tauri 窗口）
+cd tauri && npm run tauri dev  # → 原生窗口
+cd tauri && npm run tauri build # → 打包安装包
 ```
 
-`tauri/src/main.tsx` 复用 `frontend/src/app/` 下的路由和组件，仅替换：
-- 路由 history 模式（hash）
-- WsManager 实现（TauriWsManager）
-- ApiAdapter 实现（TauriAdapter，未来）
+运行时通过 `isTauri()` 自动切换实现，组件代码完全不感知：
+
+| 层 | Web 模式 | 桌面模式 |
+|---|---|---|
+| WebSocket | BrowserWsManager（WASM + Worker）| TauriWsManager（Rust tokio emit）|
+| API | HttpAdapter（fetch）| HttpAdapter（现阶段仍 fetch，未来切 TauriAdapter）|
+| 路由 | BrowserRouter | HashRouter |
 
 ---
 
