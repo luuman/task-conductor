@@ -635,19 +635,23 @@ const WF = {
         <div style="font-size:9px;font-weight:600;color:#374151;margin-left:5px;flex:1">${tool}</div>
         <div style="font-size:8px;color:#9ca3af">${extra}</div></div>`).join('')}</div>`,
 
-  layout:()=>`<div style="display:flex;height:110px">
-    <div style="width:13px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:3px 0;gap:4px">
-      ${['🗂','💬','🔌','⚙'].map((i,idx)=>`<div style="font-size:7.5px;opacity:${idx===0?1:0.4}">${i}</div>`).join('')}
+  layout:()=>`<div style="display:flex;height:180px">
+    <div style="width:18px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:5px 0;gap:6px">
+      ${['🗂','💬','🔌','⚙','🔍'].map((i,idx)=>`<div style="font-size:10px;opacity:${idx===0?1:0.4}">${i}</div>`).join('')}
     </div>
-    <div style="width:32px;background:#111827;border-right:1px solid rgba(255,255,255,.06);padding:3px 2px">
-      ${[{t:'概览',a:true},{t:'PRD'},{t:'Dev'}].map(i=>`<div style="font-size:5.5px;color:${i.a?'#93c5fd':'#4b5563'};background:${i.a?'rgba(37,99,235,.2)':'transparent'};border-radius:2px;padding:2px 3px;margin-bottom:1px">${i.t}</div>`).join('')}
+    <div style="width:50px;background:#111827;border-right:1px solid rgba(255,255,255,.06);padding:5px 3px">
+      <div style="font-size:8px;color:#6b7280;margin-bottom:4px;padding:0 2px">My Project</div>
+      ${[{t:'📋 概览',a:true},{t:'📄 PRD'},{t:'⚙ Dev'},{t:'🔖 Logs'}].map(i=>`<div style="font-size:8px;color:${i.a?'#93c5fd':'#4b5563'};background:${i.a?'rgba(37,99,235,.2)':'transparent'};border-radius:3px;padding:3px 4px;margin-bottom:2px;white-space:nowrap;overflow:hidden">${i.t}</div>`).join('')}
     </div>
-    <div style="flex:1;padding:3px;overflow:hidden">${lns('80%','60%','45%')}
-      <div style="background:#fffbeb;border-left:2px solid #f59e0b;padding:2px 4px;margin-top:3px;font-size:6px;color:#d97706">待审批</div></div>
-    <div style="width:3px;background:#e5e7eb;cursor:col-resize"></div>
-    <div style="width:32px;background:#f8f9fc;border-left:1px solid var(--ln);padding:3px 2px">
-      <div style="font-size:6px;color:#6b7280;font-weight:600;margin-bottom:3px">工具</div>
-      ${[1,2,3].map(()=>`<div class="log-line" style="height:5px"></div>`).join('')}
+    <div style="flex:1;padding:5px;overflow:hidden">
+      <div style="font-size:10px;font-weight:700;color:#1e2130;margin-bottom:4px">项目概览</div>
+      ${lns('80%','60%','45%')}
+      <div style="background:#fffbeb;border-left:2px solid #f59e0b;padding:3px 6px;margin-top:5px;font-size:9px;color:#d97706">⏸ Design 待审批</div>
+    </div>
+    <div style="width:4px;background:#e5e7eb;cursor:col-resize"></div>
+    <div style="width:45px;background:#f8f9fc;border-left:1px solid var(--ln);padding:4px 3px">
+      <div style="font-size:9px;color:#6b7280;font-weight:600;margin-bottom:4px">工具调用</div>
+      ${[1,2,3,4].map(()=>`<div class="log-line" style="height:7px"></div>`).join('')}
     </div></div>`,
 
   plugin:()=>`<div class="sc-body" style="padding:5px">
