@@ -51,16 +51,20 @@ task-conductor/
 ├── frontend/                 # React Web 前端（重写）
 │   ├── src/
 │   │   ├── features/
-│   │   │   ├── dashboard/    # KPI、项目列表、周报
-│   │   │   ├── tasks/        # 任务流水线详情、审批
-│   │   │   ├── sessions/     # Claude 会话监控
-│   │   │   ├── claude-config/# Hooks、MCP、rules、commands 管理
-│   │   │   ├── knowledge/    # 项目知识库
-│   │   │   ├── mcp-market/   # MCP 市场
-│   │   │   ├── git/          # Git 操作面板
-│   │   │   ├── chat/         # 交互式 AI 对话（/ws/chat）
-│   │   │   ├── settings/     # 应用设置、连接配置
-│   │   │   └── auth/         # PIN 登录、token 管理
+│   │   │   ├── dashboard/           # KPI、项目列表、周报
+│   │   │   ├── tasks/               # 任务流水线详情、审批
+│   │   │   ├── task-manager/        # 任务收件箱（TaskManager）
+│   │   │   ├── sessions/            # Claude 会话监控
+│   │   │   ├── conversation-history/# 对话历史
+│   │   │   ├── claude-config/       # Hooks、MCP、rules、commands 管理
+│   │   │   ├── knowledge/           # 项目知识库
+│   │   │   ├── mcp-market/          # MCP 市场
+│   │   │   ├── project-files/       # 项目文件浏览
+│   │   │   ├── git/                 # Git 操作面板
+│   │   │   ├── canvas/              # 项目看板（ProjectsCanvas）
+│   │   │   ├── chat/                # 交互式 AI 对话（/ws/chat）
+│   │   │   ├── settings/            # 应用设置、连接配置
+│   │   │   └── auth/                # PIN 登录、token 管理
 │   │   ├── components/ui/    # shadcn 纯 UI 组件（无业务逻辑）
 │   │   ├── lib/
 │   │   │   ├── api/          # HTTP Adapter（HttpAdapter 实现）
