@@ -596,19 +596,21 @@ const WF = {
     <div style="font-size:9px;color:#6b7280;margin-bottom:6px">📚 经验已写入知识库 · 下轮注入</div>
     ${btn('🔄 重新执行 (第3轮)','pri')}</div>`,
 
-  mgmt:()=>`<div style="background:#0f172a;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.08)">
-    <div class="row" style="margin:0"><div style="font-size:7px;color:#e5e7eb;font-weight:700">管理中心</div>
-    <div style="display:flex;gap:3px;margin-left:auto">
-      ${['仪表盘','项目','监控'].map((t,i)=>`<div style="font-size:6px;padding:2px 4px;border-radius:3px;background:${i===0?'rgba(37,99,235,.3)':'transparent'};color:${i===0?'#93c5fd':'#6b7280'}">${t}</div>`).join('')}
+  mgmt:()=>`<div style="background:#0f172a;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.08)">
+    <div class="row" style="margin:0"><div style="font-size:11px;color:#e5e7eb;font-weight:700">管理中心</div>
+    <div style="display:flex;gap:4px;margin-left:auto">
+      ${['仪表盘','所有项目','监控','设置'].map((t,i)=>`<div style="font-size:9px;padding:2px 6px;border-radius:3px;background:${i===0?'rgba(37,99,235,.3)':'transparent'};color:${i===0?'#93c5fd':'#6b7280'}">${t}</div>`).join('')}
     </div></div></div>
-    <div class="sc-body" style="padding:5px 6px;background:#f8faff">
-      <div class="row">${['7','3','97%','1.8s'].map((v,i)=>`
-        <div class="kpi-card"><div style="font-size:10px;font-weight:800;color:${['#6366f1','#10b981','#10b981','#f59e0b'][i]}">${v}</div>
-        <div style="height:4px;background:${['#eef2ff','#d1fae5','#d1fae5','#fef3c7'][i]};border-radius:2px;margin-top:2px"></div></div>`).join('')}
-      </div>${sep()}<div style="font-size:7px;color:var(--dim2);margin-bottom:3px;font-weight:600">待审批</div>
-      ${['E-Commerce · Design','AI客服 · Dev PR'].map(()=>`<div class="list-row">
-        <div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
-        <div class="ln xs" style="flex:1;margin:0 4px"></div></div>`).join('')}</div>`,
+    <div class="sc-body" style="padding:7px 8px;background:#f8faff">
+      <div class="row">${[{v:'7',l:'项目',c:'#6366f1',bg:'#eef2ff'},{v:'3',l:'进行中',c:'#10b981',bg:'#d1fae5'},{v:'97%',l:'成功率',c:'#10b981',bg:'#d1fae5'},{v:'1.8s',l:'TTFT',c:'#f59e0b',bg:'#fef3c7'}].map((item)=>`
+        <div class="kpi-card"><div style="font-size:13px;font-weight:800;color:${item.c}">${item.v}</div>
+        <div style="font-size:8px;color:#6b7280;margin-top:1px">${item.l}</div>
+        <div style="height:4px;background:${item.bg};border-radius:2px;margin-top:3px"></div></div>`).join('')}
+      </div>${sep()}<div style="font-size:10px;color:var(--dim2);margin-bottom:4px;font-weight:600">待审批 (2)</div>
+      ${[{n:'E-Commerce · Design',p:'方案A'},{ n:'AI客服 · Dev PR',p:'PR #42'}].map(item=>`<div class="list-row">
+        <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+        <div style="font-size:9px;font-weight:500;color:#374151;flex:1">${item.n}</div>
+        <div style="font-size:8px;color:#9ca3af">${item.p}</div></div>`).join('')}</div>`,
 
   projects:()=>`<div style="background:#f8f9fc;padding:5px 7px 4px;border-bottom:1px solid var(--ln)">
     <div class="row" style="margin:0"><div style="font-size:8px;font-weight:700">所有项目</div>
