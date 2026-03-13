@@ -654,25 +654,27 @@ const WF = {
       ${[1,2,3,4].map(()=>`<div class="log-line" style="height:7px"></div>`).join('')}
     </div></div>`,
 
-  plugin:()=>`<div class="sc-body" style="padding:5px">
-    <div style="font-size:8.5px;font-weight:700;margin-bottom:5px">插件市场</div>
-    ${[{n:'Jira 同步',i:'🎯',s:true},{n:'GitHub PR',i:'🔗',s:false},{n:'Figma',i:'🎨',s:false}].map(p=>`
-    <div style="display:flex;align-items:center;gap:4px;padding:3px;border:1px solid var(--ln);border-radius:4px;margin-bottom:2px;background:${p.s?'#f8faff':'#fff'}">
-      <div style="font-size:11px">${p.i}</div>
-      <div style="flex:1"><div style="font-size:7.5px;font-weight:600">${p.n}</div>${ln('70%')}</div>
-      <div style="${p.s?'background:#ecfdf5;color:#059669':'background:#2563eb;color:#fff'};font-size:6.5px;font-weight:700;padding:2px 5px;border-radius:3px">${p.s?'已装':'装'}</div>
+  plugin:()=>`<div class="sc-body" style="padding:7px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:7px">🔌 插件市场</div>
+    ${[{n:'Jira 同步',i:'🎯',s:true,star:'⭐ 2.3k'},{n:'GitHub PR',i:'🔗',s:false,star:'⭐ 1.8k'},{n:'Figma 导入',i:'🎨',s:false,star:'⭐ 956'},{n:'自定义 AI 模型',i:'🤖',s:false,star:'⭐ 732'}].map(p=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:5px;border:1px solid var(--ln);border-radius:5px;margin-bottom:3px;background:${p.s?'#f8faff':'#fff'}">
+      <div style="font-size:14px">${p.i}</div>
+      <div style="flex:1"><div style="font-size:10px;font-weight:600">${p.n}</div>
+        <div style="font-size:8px;color:#9ca3af">${p.star}</div></div>
+      <div style="${p.s?'background:#ecfdf5;color:#059669':'background:#2563eb;color:#fff'};font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px">${p.s?'已安装':'安装'}</div>
     </div>`).join('')}</div>`,
 
-  pluginapi:()=>`<div class="sc-body" style="padding:5px">
-    <div style="font-size:8px;font-weight:700;color:#8b5cf6;margin-bottom:4px">插件开发 API</div>
-    <div style="background:#0f172a;border-radius:5px;padding:5px;font-size:6px;color:#a3e635;font-family:monospace;line-height:1.6">
+  pluginapi:()=>`<div class="sc-body" style="padding:7px">
+    <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:6px">⚡ 插件开发 API</div>
+    <div style="background:#0f172a;border-radius:6px;padding:8px;font-size:9px;color:#a3e635;font-family:monospace;line-height:1.8">
       <span style="color:#7c3aed">export function</span> <span style="color:#60a5fa">activate</span>(ctx) {<br>
-      &nbsp; ctx.<span style="color:#fbbf24">registerPanelView</span>(...);<br>
-      &nbsp; ctx.<span style="color:#fbbf24">registerStageHook</span>(...);<br>}
+      &nbsp; ctx.<span style="color:#fbbf24">registerPanelView</span>("jira", {...});<br>
+      &nbsp; ctx.<span style="color:#fbbf24">registerStageHook</span>("prd", fn);<br>
+      &nbsp; ctx.<span style="color:#fbbf24">registerCommand</span>("sync", fn);<br>}
     </div>
-    <div style="display:flex;gap:3px;margin-top:4px">
-      <div style="flex:1;background:#f3e8ff;border-radius:3px;padding:3px 4px"><div style="font-size:6.5px;font-weight:700;color:#7c3aed">Panel API</div>${ln('80%')}</div>
-      <div style="flex:1;background:#ecfdf5;border-radius:3px;padding:3px 4px"><div style="font-size:6.5px;font-weight:700;color:#059669">Hook API</div>${ln('70%')}</div>
+    <div style="display:flex;gap:5px;margin-top:6px">
+      <div style="flex:1;background:#f3e8ff;border-radius:4px;padding:5px 6px"><div style="font-size:10px;font-weight:700;color:#7c3aed">Panel API</div>${ln('80%')}</div>
+      <div style="flex:1;background:#ecfdf5;border-radius:4px;padding:5px 6px"><div style="font-size:10px;font-weight:700;color:#059669">Hook API</div>${ln('70%')}</div>
     </div></div>`,
 };
 
