@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>User Flow — TaskConductor</title>
+<title>需求文档 — TaskConductor 新 IA</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,43 +15,44 @@
   --red:#ef4444;--red-lt:#fee2e2;
   --amb:#f59e0b;--amb-lt:#fef3c7;
   --pur:#8b5cf6;--pur-lt:#ede9fe;
+  --cyan:#06b6d4;--cyan-lt:#cffafe;
   --arr:#adb5c8;
-  --ph1:#6366f1;--ph2:#3b82f6;--ph3:#8b5cf6;
-  --ph4:#06b6d4;--ph5:#8b5cf6;--ph6:#f59e0b;--ph7:#10b981;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   background:var(--canvas-bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;
   color:var(--tx)}
 
 /* ── HEADER ── */
-.hd{height:48px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--card-bd);
-  display:flex;align-items:center;padding:0 20px;gap:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.logo{font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px;
-  border-right:1px solid var(--ln);padding-right:16px;margin-right:16px}
+.hd{height:48px;flex-shrink:0;background:#0f172a;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;padding:0 20px;gap:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.logo{font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;
+  border-right:1px solid rgba(255,255,255,.1);padding-right:16px;margin-right:16px;color:#e5e7eb}
+.logo-icon{width:24px;height:24px;background:linear-gradient(135deg,#2563eb,#7c3aed);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff}
 .phase-nav{display:flex;align-items:center;gap:0;flex:1}
 .ph-item{display:flex;align-items:center;gap:0}
-.ph-lbl{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:99px;
+.ph-lbl{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;
   white-space:nowrap;cursor:pointer;transition:all .15s}
-.ph-lbl:hover{filter:brightness(.9)}
-.ph-arr{font-size:10px;color:var(--dim2);margin:0 2px;padding:0 2px}
-.zoom-ctrl{margin-left:auto;display:flex;align-items:center;gap:6px;border-left:1px solid var(--ln);padding-left:16px}
-.zbtn{background:#f8f9fa;border:1px solid var(--card-bd);color:var(--dim);
+.ph-lbl:hover{filter:brightness(.85)}
+.ph-arr{font-size:9px;color:#4b5563;margin:0 2px;padding:0 2px}
+.zoom-ctrl{margin-left:auto;display:flex;align-items:center;gap:6px;border-left:1px solid rgba(255,255,255,.1);padding-left:16px}
+.zbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#9ca3af;
   border-radius:5px;padding:4px 11px;font-size:12px;cursor:pointer;transition:all .1s}
-.zbtn:hover{background:var(--ln)}
-.zval{font-size:12px;color:var(--dim);min-width:38px;text-align:center}
+.zbtn:hover{background:rgba(255,255,255,.12);color:#e5e7eb}
+.zval{font-size:12px;color:#6b7280;min-width:38px;text-align:center}
 
 /* ── CANVAS WRAP ── */
 .wrap{flex:1;overflow:hidden;position:relative;cursor:grab}
 .wrap.drag{cursor:grabbing}
 .canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
 
-/* ── PHASE HEADERS ON CANVAS ── */
+/* ── PHASE HEADERS ── */
 .ph-head{position:absolute;top:0;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .ph-head-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
   display:flex;align-items:center;gap:5px}
 .ph-num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:10px;font-weight:900}
-.ph-vline{position:absolute;top:0;width:1px;border-left:1.5px dashed;opacity:.15}
+.ph-vline{position:absolute;top:0;width:1px;border-left:1.5px dashed;opacity:.12}
 
 /* ── NODE ── */
 .node{position:absolute;cursor:pointer}
@@ -59,7 +60,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   margin-bottom:5px;letter-spacing:.01em}
 .node-card{background:var(--card);border:1px solid var(--card-bd);border-radius:8px;
   overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
-  transition:box-shadow .15s,transform .15s,border-color .15s;width:155px}
+  transition:box-shadow .15s,transform .15s,border-color .15s;width:160px}
 .node:hover .node-card{box-shadow:0 4px 16px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.08);
   transform:translateY(-2px);border-color:#c8cbd4}
 .node.sel .node-card{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.2),0 4px 16px rgba(0,0,0,.1)}
@@ -81,6 +82,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .btn.sec{background:var(--ln);color:var(--dim)}
 .btn.grn{background:var(--green);color:#fff}
 .btn.red{background:var(--red-lt);color:var(--red)}
+.btn.pur{background:var(--pur-lt);color:var(--pur)}
 .inp{height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fafbfc;
   margin:3px 0;display:flex;align-items:center;padding:0 6px}
 .inp.focus{border-color:var(--blue)}
@@ -108,6 +110,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   border-bottom:1px solid var(--ln)}
 .nav-item{height:6px;background:var(--ln2);border-radius:2px}
 .tag{height:10px;border-radius:99px;padding:0 5px;display:inline-flex;align-items:center}
+.sidebar-mini{width:28px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);
+  padding:4px 0;display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.sidebar-item{height:20px;display:flex;align-items:center;justify-content:center;
+  font-size:7px;border-radius:3px;margin:0 2px;color:#6b7280}
+.sidebar-item.active{background:rgba(37,99,235,.2);color:#93c5fd}
+.sidebar-item.done{color:#10b981}
+.resize-hint{width:3px;background:#e5e7eb;border-radius:99px;margin:0 1px}
 
 /* ── SVG ARROWS ── */
 .arr-path{fill:none;stroke:var(--arr);stroke-width:1.5;marker-end:url(#arrowhead)}
@@ -115,7 +124,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .arr-label-txt{font-size:9px;font-family:system-ui;fill:var(--dim2)}
 
 /* ── DETAIL PANEL ── */
-.panel{position:fixed;right:0;top:48px;bottom:0;width:320px;background:#fff;
+.panel{position:fixed;right:0;top:48px;bottom:0;width:340px;background:#fff;
   border-left:1px solid var(--card-bd);box-shadow:-4px 0 16px rgba(0,0,0,.08);
   transform:translateX(100%);transition:transform .22s ease;
   display:flex;flex-direction:column;z-index:100}
@@ -134,8 +143,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   border-radius:6px;border:1px solid var(--ln);margin-bottom:4px;
   font-size:11.5px;color:#374151;line-height:1.45}
 .p-ac-item .ck{color:var(--green);font-weight:700;font-size:10px;flex-shrink:0;margin-top:1px}
-.p-tech{background:#f8faff;border:1px solid #e0e7ff;border-radius:6px;padding:9px 11px;
-  font-size:11px;color:var(--dim);font-family:monospace;line-height:1.7}
+.p-tech{background:#0f172a;border-radius:6px;padding:9px 11px;
+  font-size:10.5px;color:#a3e635;font-family:monospace;line-height:1.7;white-space:pre}
 .p-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:6px;
   border:1px solid var(--ln);margin-bottom:4px;font-size:12px;color:var(--dim);
   cursor:pointer;transition:all .15s}
@@ -147,11 +156,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 <body>
 
 <div class="hd">
-  <div class="logo">🗺 TaskConductor <span style="font-size:10px;background:#dbeafe;color:var(--blue);padding:2px 8px;border-radius:99px;font-weight:700">User Flow</span></div>
+  <div class="logo">
+    <div class="logo-icon">TC</div>
+    TaskConductor
+    <span style="font-size:10px;background:rgba(37,99,235,.2);color:#93c5fd;padding:2px 8px;border-radius:99px;font-weight:700">新 IA 需求文档</span>
+  </div>
   <div class="phase-nav" id="phase-nav"></div>
   <div class="zoom-ctrl">
     <button class="zbtn" onclick="Z(-0.12)">−</button>
-    <span class="zval" id="zval">75%</span>
+    <span class="zval" id="zval">72%</span>
     <button class="zbtn" onclick="Z(0.12)">+</button>
     <button class="zbtn" onclick="R()">重置</button>
   </div>
@@ -159,8 +172,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 
 <div class="wrap" id="wrap">
   <div class="canvas" id="canvas">
-
-    <!-- SVG arrows layer -->
     <svg id="svgL" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none">
       <defs>
         <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
@@ -168,7 +179,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
         </marker>
       </defs>
     </svg>
-
   </div>
 </div>
 
@@ -190,107 +200,179 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 // ════════════════════════════════════════════
 
 const PHASES = [
-  {id:1,label:'① 未登录',       color:'#6366f1',bg:'#eef2ff'},
-  {id:2,label:'② 认证',         color:'#3b82f6',bg:'#dbeafe'},
-  {id:3,label:'③ 工作台',       color:'#8b5cf6',bg:'#ede9fe'},
-  {id:4,label:'④ 任务管理',     color:'#06b6d4',bg:'#cffafe'},
-  {id:5,label:'⑤ 流水线',       color:'#8b5cf6',bg:'#ede9fe'},
-  {id:6,label:'⑥ 审批',         color:'#f59e0b',bg:'#fef3c7'},
-  {id:7,label:'⑦ Claude 观测', color:'#10b981',bg:'#d1fae5'},
+  {id:1, label:'① 入口',       color:'#6366f1', bg:'#eef2ff'},
+  {id:2, label:'② 项目工作区', color:'#2563eb', bg:'#dbeafe'},
+  {id:3, label:'③ PRD 访谈',   color:'#06b6d4', bg:'#cffafe'},
+  {id:4, label:'④ 阶段状态机', color:'#f59e0b', bg:'#fef3c7'},
+  {id:5, label:'⑤ 管理中心',   color:'#10b981', bg:'#d1fae5'},
+  {id:6, label:'⑥ 插件系统',   color:'#8b5cf6', bg:'#ede9fe'},
 ];
 
 const DETAILS = {
-  splash:{ph:1,title:'未登录首页',story:'作为访客，我希望看到产品简介并快速导航到登录页面。',
-    ac:['展示 TaskConductor 品牌和核心功能介绍','「立即登录」按钮跳转到 PIN 登录页','未登录状态下所有功能页面重定向到此页'],
-    tech:'静态页面，无 API 调用',nav:[{l:'→ 点击登录',to:'n-login'}]},
-  login:{ph:2,title:'PIN 登录',story:'作为用户，我希望通过 6 位 PIN 快速安全地登录系统。',
-    ac:['6 位数字 PIN，每位独立显示','正确后写入 token 跳转仪表盘','错误显示红色提示','5 次失败锁定 30 分钟'],
-    tech:'POST /auth/pin → {token, expires_in}',nav:[{l:'✓ PIN 正确',to:'n-dash'},{l:'✗ PIN 错误',to:'n-loginerr'}]},
-  loginerr:{ph:2,title:'登录错误状态',story:'当 PIN 错误时，清晰反馈错误信息。',
-    ac:['输入框变红色边框','显示「PIN 码不正确」提示','显示剩余尝试次数','第 5 次错误显示锁定提示'],
-    tech:'POST /auth/pin → 401 Unauthorized',nav:[{l:'重试',to:'n-login'},{l:'锁定后等待',to:'n-login'}]},
-  dash:{ph:3,title:'项目仪表盘',story:'作为项目负责人，我希望一眼看到整体 KPI 和项目进度。',
-    ac:['4 个 KPI 卡片：总任务/进行中/完成/失败','成功率 Gauge 图','本周 7 日活动柱状图','项目列表按活动时间排序'],
-    tech:'GET /api/metrics → {total_tasks, success_rate, weekly_stats}',nav:[{l:'→ 新建项目',to:'n-newproj'},{l:'→ 点击项目',to:'n-projview'},{l:'→ 打开监控',to:'n-monitor'}]},
-  newproj:{ph:4,title:'新建项目',story:'作为负责人，我希望快速创建新项目，填写名称即可。',
-    ac:['项目名称必填 2-50 字','描述可选 ≤ 500 字','名称唯一性实时校验','创建后跳转到项目视图'],
-    tech:'POST /api/projects → {id, name, ...}',nav:[{l:'✓ 创建成功',to:'n-projview'},{l:'✗ 取消',to:'n-dash'}]},
-  projview:{ph:4,title:'项目视图',story:'作为开发者，我希望在项目下查看所有任务并快速创建新任务。',
-    ac:['任务列表按更新时间排序','每项显示标题/阶段/状态 Badge','「新建任务」按钮右上角固定','项目 KPI 摘要在顶部'],
-    tech:'GET /api/projects/{id}/tasks',nav:[{l:'→ 点击任务',to:'n-taskview'},{l:'→ 新建任务',to:'n-newtask'}]},
-  newtask:{ph:4,title:'创建任务',story:'作为开发者，我希望通过填写需求描述来创建可自动执行的任务。',
-    ac:['标题必填，描述必填 50-2000 字','必须绑定到已有项目','字数计数实时显示','创建后状态为 input'],
-    tech:'POST /api/projects/{id}/tasks → {id, status:"input"}',nav:[{l:'✓ 提交',to:'n-taskview'}]},
-  taskview:{ph:5,title:'任务详情',story:'作为开发者，我希望查看任务状态并一键启动自动化流水线。',
-    ac:['顶部 9 阶段流程图，当前阶段高亮','仅 input 状态可启动流水线','展示完整需求描述','已完成阶段可查看产出物'],
-    tech:'GET /api/tasks/{id}\nPOST /api/pipeline/{id}/run-analysis',nav:[{l:'▶ 启动流水线',to:'n-running'},{l:'→ 实时监控',to:'n-monitor'}]},
-  running:{ph:5,title:'流水线执行中',story:'作为开发者，我希望通过流程图和实时日志看到 Claude 执行进度。',
-    ac:['当前阶段节点脉冲动画','日志区域实时滚动','INFO/WARN/SUCCESS 颜色区分','右上角显示运行时长'],
-    tech:'WS /ws/task/{id} → {type:"log"|"status", data}',nav:[{l:'→ Analysis 完成',to:'n-analysis'},{l:'→ 工具调用推送',to:'n-monitor'}]},
-  analysis:{ph:6,title:'Analysis 审批',story:'作为产品经理，我希望对比 AI 生成的方案并选择最合适的一个。',
-    ac:['展示 A/B/C 三个方案，各有置信度评分','Critic 评审意见可折叠展示','选中方案高亮，「通过」按钮激活','拒绝时填写要求，系统自动重新生成'],
-    tech:'POST /api/tasks/{id}/approve\n{action, chosen_option?, reason?}',nav:[{l:'✓ 通过',to:'n-prd'},{l:'✗ 拒绝重试',to:'n-running'}]},
-  prd:{ph:6,title:'PRD 生成',story:'作为产品经理，我希望 AI 根据批准的分析自动生成结构化需求文档。',
-    ac:['包含用户故事/验收标准/技术规格','生成过程展示结构进度','完成后需审批才进入下一阶段','保存为 StageArtifact 可随时查看'],
-    tech:'POST /api/tasks/{id}/advance (stage=prd)',nav:[{l:'→ PRD 完成待审批',to:'n-planappr'},{l:'✗ 失败重试',to:'n-prd'}]},
-  planappr:{ph:6,title:'计划审批',story:'作为技术负责人，我希望审批实施计划，确保开发方向正确。',
-    ac:['展示分阶段实施计划和里程碑','可展开每阶段的子任务列表','通过后进入 dev 自动执行','拒绝时提供修改意见'],
-    tech:'POST /api/tasks/{id}/approve (stage=plan)',nav:[{l:'✓ 批准→dev',to:'n-taskview'},{l:'✗ 拒绝',to:'n-prd'}]},
-  monitor:{ph:7,title:'实时工具监控',story:'作为 AI 工程师，我希望实时看到 Claude 调用了哪些工具，方便监控调试。',
-    ac:['展示最近 100 条工具调用','新事件插入顶部带淡入动画','展开查看完整 JSON 输入/输出','PreTool 蓝/PostTool 绿/Stop 灰'],
-    tech:'WS /ws/sessions → {type:"session_update", data}',nav:[{l:'→ 查看会话历史',to:'n-sessions'}]},
-  sessions:{ph:7,title:'会话历史',story:'作为 AI 工程师，我希望查看所有历史 Claude 会话并回放操作记录。',
-    ac:['左栏：最近 50 个会话（调用数/时长）','点击加载右栏完整事件时间线','实时/历史 Tab 切换','按日期范围过滤'],
-    tech:'GET /api/sessions\nGET /api/sessions/{id}/events',nav:[{l:'← 返回工作台',to:'n-dash'}]},
+  entry: {ph:1, title:'应用入口',
+    story:'作为用户，打开应用时希望自动进入最近的工作状态，而非每次从首页重新导航。',
+    ac:['检查 localStorage 中的 lastProjectId','有历史项目：直接进入该项目「项目概览」页','无历史项目：进入「新建项目引导」页','PWA 启动画面 1.5s 渐入过渡'],
+    tech:'GET /api/projects?limit=1&sort=lastOpenedAt\n→ 有结果: navigate(/projects/{id}/overview)\n→ 无结果: navigate(/onboarding)',
+    nav:[{l:'→ 有项目→项目概览', to:'n-proj'},{l:'→ 无项目→新建引导', to:'n-onboard'}]},
+
+  onboard: {ph:1, title:'新建项目引导',
+    story:'作为新用户，我希望通过友好的向导快速创建第一个项目，立即感受到平台价值。',
+    ac:['两步表单：第 1 步填写项目名（2-50字，必填）+ 简介（可选）','第 2 步确认创建后，自动进入 PRD 访谈流程','侧边展示「接下来会发生什么」的步骤预览卡片','创建后的欢迎 Toast：「项目已创建，AI 正在准备 PRD 访谈…」'],
+    tech:'POST /api/projects {name, description}\n→ {id, name, status:"input"}\nnav: /projects/{id}/prd',
+    nav:[{l:'✓ 创建→PRD 访谈', to:'n-prd'},{l:'← 已有项目→工作区', to:'n-proj'}]},
+
+  proj: {ph:2, title:'项目工作区（概览）',
+    story:'作为项目负责人，我希望有一个以项目为核心的工作台，清晰展示当前进度和最紧急的待办。',
+    ac:['左侧固定侧边栏（224px）：Logo + 项目切换器 + 阶段导航（7项）+ 管理中心入口','项目概览主区：阶段时间线 + 当前阶段详情卡片 + 统计数据 + 最近活动流','当前阶段显示醒目状态横幅（AI执行中 / 待您审批 / 已完成）','侧边栏底部固定「管理中心」按钮，点击进入独立全屏页面','面板支持拖拽调整宽度（VSCode 式 resize handle）'],
+    tech:'GET /api/projects/{id}\nGET /api/projects/{id}/tasks\nGET /api/projects/{id}/stages',
+    nav:[{l:'→ 进入阶段导航', to:'n-stages'},{l:'→ 管理中心', to:'n-mgmt'},{l:'→ 布局定制', to:'n-layout'}]},
+
+  stages: {ph:2, title:'侧边栏阶段导航',
+    story:'作为开发者，我希望通过清晰的侧边栏了解各阶段状态，并快速跳转到目标阶段。',
+    ac:['7 个固定阶段：项目概览 / PRD 需求 / Design 设计 / Tech Stack / Development / Versions / Logs','已完成阶段：✓ 图标 + 绿色文字','当前活跃阶段：蓝色高亮 + 左边框','等待审批阶段：橙色 + badge「待审批」','未开始阶段：灰色（可点击，跳转时提示"需先完成前置阶段"）'],
+    tech:'GET /api/projects/{id}/stages\n→ [{name, status:"done"|"active"|"pending"|"locked"}]',
+    nav:[{l:'→ PRD 阶段', to:'n-prd'},{l:'→ AI执行阶段', to:'n-aiwork'}]},
+
+  prd: {ph:3, title:'PRD 访谈（对话区）',
+    story:'作为产品经理，我希望通过与 AI 的对话逐步构建需求文档，而非从空白模板开始。',
+    ac:['三栏布局：左目录树（200px）+ 中对话区（flex）+ 右文档预览（380px）','目录树展示文档章节，标注完成状态（✓ 进行中 ○ 待开始）','对话区：AI 提问（左气泡）+ 用户回答（右气泡）+ 快捷操作栏','快捷操作：跳过此问题 / 使用行业模板 / AI 自动填充','三栏均支持拖拽调整宽度（VSCode 式 resize handle）'],
+    tech:'POST /api/prd/{id}/chat {message}\nWS /ws/prd/{id}\n→ {type:"doc_update", diff:[{op,path,value}]}',
+    nav:[{l:'→ 文档实时预览', to:'n-prddoc'},{l:'→ 完成访谈→审批', to:'n-approve'}]},
+
+  prddoc: {ph:3, title:'PRD 文档预览（Diff 高亮）',
+    story:'作为产品经理，我希望在访谈过程中实时看到文档变化，确认 AI 正确理解了我的意图。',
+    ac:['右侧面板实时渲染 Markdown 文档','绿色左边框 + 浅绿背景：新增内容','黄色左边框 + 浅黄背景：修改内容','顶部 Diff 提示条：「已更新 N 处内容」（可展开查看变更列表）','底部状态栏：字数 + 完成度进度条 + 「提交审批」按钮'],
+    tech:'WS /ws/prd/{id} → {type:"doc_update",\n  diff:[{op:"add"|"change",\n    section, content}]}\n文档 schema: Markdown with frontmatter',
+    nav:[{l:'→ 提交审批', to:'n-approve'}]},
+
+  aiwork: {ph:4, title:'AI 阶段执行中',
+    story:'作为开发者，我希望执行过程是透明的，能看到 AI 正在做什么，而非黑盒等待。',
+    ac:['阶段顶部状态横幅：「🤖 AI 工作中 · 01:24」带脉冲动画','实时日志流：INFO（灰）/ WARN（黄）/ SUCCESS（绿）/ ERROR（红）','流程图中当前子步骤节点高亮 + 脉冲','右侧可折叠「Claude 工具调用」面板（来自 WS）','可终止按钮（需二次确认弹窗）'],
+    tech:'WS /ws/task/{id}\n→ {type:"log"|"status"|"tool_call", data}\nPOST /api/tasks/{id}/cancel\n{confirmed: true}',
+    nav:[{l:'→ AI完成→阶段审批', to:'n-approve'}]},
+
+  approve: {ph:4, title:'阶段审批（通用）',
+    story:'作为产品/技术负责人，我希望在关键阶段对 AI 输出进行审批，而且审批界面要足够清晰。',
+    ac:['阶段页面顶部显示醒目审批横幅，不能被忽视','AI 置信度 + Critic 评分对用户可见','支持方案选择（如 Design 阶段的 A/B/C 方案卡片）','三个操作：✓ 批准 / ✏️ 提出修改 / ✗ 拒绝','拒绝时需填写原因（≥10字），AI 据此迭代重生成'],
+    tech:'POST /api/tasks/{id}/approve\n{\n  action: "approve"|"modify"|"reject",\n  choice?: "A"|"B"|"C",\n  reason?: string  // 拒绝时必填\n}',
+    nav:[{l:'✓ 批准→进入下一阶段', to:'n-stages'},{l:'✗ 拒绝→AI 重新迭代', to:'n-retry'}]},
+
+  retry: {ph:4, title:'拒绝重新迭代',
+    story:'当我不满意 AI 输出时，我的反馈应被完整记录并有效用于改进下一轮生成结果。',
+    ac:['拒绝原因自动注入下轮 Prompt 上下文','经验存入 ProjectKnowledge 知识库（防止重犯）','页面显示「第 N 次迭代」计数器','超过 3 次失败触发推送通知到管理员','知识库可在侧边栏「项目概览」查看和管理'],
+    tech:'POST /api/tasks/{id}/advance\n内部：\n  1. 写入 ProjectKnowledge\n  2. 重建 Prompt（注入拒绝原因）\n  3. 重启 ClaudePool.run()',
+    nav:[{l:'→ 重新执行', to:'n-aiwork'}]},
+
+  mgmt: {ph:5, title:'管理中心 Dashboard',
+    story:'作为团队负责人，我希望有一个全局视角，一眼看到跨项目进度、AI 使用情况和紧急待办。',
+    ac:['从侧边栏底部进入，覆盖全屏（独立层级）','5 个 KPI 卡片：总项目/进行中/AI调用数/成功率/TTFT均值','AI 成功率 Gauge 图 + 本周活动趋势图','跨项目待审批列表（按紧急度排序）','最近 AI 修改记录流（类似 GitHub 活动流）','本周周报摘要（自动生成）'],
+    tech:'GET /api/metrics\n→ {kpi:{}, gauge:{}, weekly:[], activity[]}\nGET /api/tasks?status=pending_approval&limit=10',
+    nav:[{l:'→ 所有项目列表', to:'n-projects'},{l:'→ 监控', to:'n-monitor'},{l:'← 返回项目', to:'n-proj'}]},
+
+  projects: {ph:5, title:'所有项目列表',
+    story:'作为负责人，我希望在一个表格中看到所有项目的整体状态，快速识别问题和进度。',
+    ac:['表格列：项目名/当前阶段/进度条/AI调用数/状态 badge','默认按「最近更新」排序，支持切换','搜索 + 状态过滤（进行中/待审批/完成/异常）','项目行点击进入项目工作区','表格右上角「+ 新建项目」按钮'],
+    tech:'GET /api/projects?sort=updatedAt&filter={status}\n→ [{id,name,currentStage,progress,aiCalls,status}]',
+    nav:[{l:'→ 进入项目工作区', to:'n-proj'},{l:'→ 监控', to:'n-monitor'}]},
+
+  monitor: {ph:5, title:'实时监控（Claude 观测）',
+    story:'作为 AI 工程师，我希望实时看到所有 Claude 会话的工具调用，方便监控和调试。',
+    ac:['左栏：最近 50 条会话（含 event_count/时长/关联项目）','右栏实时/历史 Tab：实时 WS 推送工具调用事件','事件类型颜色区分：PreTool 蓝/PostTool 绿/Error 红/Stop 灰','点击事件展开完整 JSON 输入/输出','性能面板：TTFT 分布 + 调用时长 P50/P95'],
+    tech:'WS /ws/sessions → {type:"session_update"}\nGET /api/sessions\nGET /api/sessions/{id}/events\nGET /api/metrics',
+    nav:[{l:'→ 跳转关联项目', to:'n-proj'}]},
+
+  layout: {ph:6, title:'灵活面板布局（VSCode 式）',
+    story:'作为高级用户，我希望像在 VSCode 中一样自由定制工作区的面板布局，提升工作效率。',
+    ac:['侧边栏 + 主内容区 + 辅助面板均可拖拽调整宽度（resize handle）','活动栏（Activity Bar）左侧图标控制各功能面板的显隐','面板可独立折叠/展开（Cmd+B 折叠侧边栏，Cmd+J 折叠底部面板）','布局状态持久化到 localStorage["tc-layout"]','支持「布局预设」：PRD模式（三栏）/ 开发模式（左侧导航+宽内容）/ 监控模式（双屏）'],
+    tech:'Layout State Schema:\n{\n  sidebar: {width:224, collapsed:false},\n  panels: {[id]: {width,height,visible}},\n  preset: "prd"|"dev"|"monitor"|"custom"\n}\npersist: localStorage["tc-layout"]',
+    nav:[{l:'→ 插件市场', to:'n-plugin'}]},
+
+  plugin: {ph:6, title:'插件市场',
+    story:'作为用户，我希望能够发现和安装社区开发的插件，为自己的工作流增加特定能力。',
+    ac:['插件卡片：名称/图标/作者/Star数/版本/简介/安装状态','内置插件：Jira 同步 / GitHub PR 联动 / Figma 设计稿导入 / 自定义 AI 模型接入','已安装管理：启用/禁用/配置/更新/卸载','插件权限说明（何种 API 访问权限）','开发者上传入口：「开发自己的插件 →」'],
+    tech:'GET /api/plugins?category={cat}&q={query}\nPOST /api/plugins/{id}/install\nPOST /api/plugins/{id}/uninstall\n沙箱隔离执行（iframe 或 worker）',
+    nav:[{l:'→ 开发插件 API', to:'n-pluginapi'},{l:'← 返回工作区', to:'n-proj'}]},
+
+  pluginapi: {ph:6, title:'插件开发 API',
+    story:'作为开发者，我希望有简洁明确的扩展 API，能在 1 天内开发出有用的 TaskConductor 插件。',
+    ac:['registerPanelView(id, config) — 注册自定义面板视图','registerStageHook(stage, fn) — 在流水线阶段注入逻辑','registerCommand(id, fn) — 注册命令面板（Cmd+K）命令','plugin.storage.get/set(key) — 持久化插件配置','事件订阅：ctx.on("stageChange" | "approval" | "aiOutput")'],
+    tech:`// 插件入口文件 plugin.ts
+export function activate(ctx: PluginContext) {
+
+  // 注册侧边面板
+  ctx.registerPanelView("jira-panel", {
+    icon: "🎯",
+    title: "Jira Sync",
+    render: (el) => ReactDOM.render(<JiraPanel />, el)
+  });
+
+  // 钩入 PRD 阶段完成事件
+  ctx.registerStageHook("prd", async (data) => {
+    await syncPrdToJira(data.artifact);
+  });
+
+  // 注册命令
+  ctx.registerCommand("jira.sync", async () => {
+    await manualSync();
+  });
+}`,
+    nav:[{l:'← 插件市场', to:'n-plugin'}]},
 };
 
 // Node definitions
 const NODES = [
-  // Phase 1
-  {id:'n-splash',   key:'splash',  label:'未登录首页',   x:24,  y:155, dark:true},
-  // Phase 2
-  {id:'n-login',    key:'login',   label:'PIN 登录',     x:222, y:105},
-  {id:'n-loginerr', key:'loginerr',label:'登录错误',     x:222, y:370},
-  // Phase 3
-  {id:'n-dash',     key:'dash',    label:'项目仪表盘',   x:430, y:105},
-  // Phase 4
-  {id:'n-newproj',  key:'newproj', label:'新建项目',     x:660, y:105},
-  {id:'n-projview', key:'projview',label:'项目视图',     x:660, y:355},
-  {id:'n-newtask',  key:'newtask', label:'创建任务',     x:660, y:560},
-  // Phase 5
-  {id:'n-taskview', key:'taskview',label:'任务详情',     x:900, y:105},
-  {id:'n-running',  key:'running', label:'流水线运行中', x:900, y:370},
-  // Phase 6
-  {id:'n-analysis', key:'analysis',label:'Analysis 审批',x:1130,y:105},
-  {id:'n-prd',      key:'prd',     label:'PRD 生成',     x:1130,y:370},
-  {id:'n-planappr', key:'planappr',label:'计划审批',     x:1360,y:105},
-  // Phase 7
-  {id:'n-monitor',  key:'monitor', label:'实时监控',     x:1590,y:105},
-  {id:'n-sessions', key:'sessions',label:'会话历史',     x:1590,y:370},
+  // Phase 1: 入口
+  {id:'n-entry',    key:'entry',    label:'应用入口',      x:24,  y:170},
+  {id:'n-onboard',  key:'onboard',  label:'新建项目引导',  x:24,  y:460},
+  // Phase 2: 项目工作区
+  {id:'n-proj',     key:'proj',     label:'项目工作区',    x:250, y:110},
+  {id:'n-stages',   key:'stages',   label:'侧边栏阶段导航',x:250, y:420},
+  // Phase 3: PRD 访谈
+  {id:'n-prd',      key:'prd',      label:'PRD 访谈',      x:490, y:110},
+  {id:'n-prddoc',   key:'prddoc',   label:'文档预览 Diff', x:490, y:420},
+  // Phase 4: 阶段状态机
+  {id:'n-aiwork',   key:'aiwork',   label:'AI 执行中',     x:730, y:110},
+  {id:'n-approve',  key:'approve',  label:'阶段审批',      x:730, y:380},
+  {id:'n-retry',    key:'retry',    label:'拒绝重新迭代',  x:730, y:580},
+  // Phase 5: 管理中心
+  {id:'n-mgmt',     key:'mgmt',     label:'管理中心',      x:970, y:110},
+  {id:'n-projects', key:'projects', label:'项目列表',      x:970, y:390},
+  {id:'n-monitor',  key:'monitor',  label:'实时监控',      x:970, y:590},
+  // Phase 6: 插件系统
+  {id:'n-layout',   key:'layout',   label:'灵活布局定制',  x:1210,y:110},
+  {id:'n-plugin',   key:'plugin',   label:'插件市场',      x:1210,y:380},
+  {id:'n-pluginapi',key:'pluginapi',label:'插件 API',       x:1210,y:590},
 ];
 
-// Arrow connections
+// Arrows
 const ARROWS = [
-  {f:'n-splash',  t:'n-login',    lb:'点击登录',   fx:'r', fy:.5, tx:'l', ty:.5},
-  {f:'n-login',   t:'n-dash',     lb:'PIN 正确',   fx:'r', fy:.5, tx:'l', ty:.5},
-  {f:'n-login',   t:'n-loginerr', lb:'PIN 错误',   fx:'b', fy:1,  tx:'t', ty:0},
-  {f:'n-loginerr',t:'n-login',    lb:'重试',        fx:'t', fy:0,  tx:'b', ty:1, curve:'left'},
-  {f:'n-dash',    t:'n-newproj',  lb:'新建项目',   fx:'r', fy:.35,tx:'l', ty:.35},
-  {f:'n-dash',    t:'n-projview', lb:'打开项目',   fx:'r', fy:.65,tx:'l', ty:.35},
-  {f:'n-newproj', t:'n-projview', lb:'创建成功',   fx:'b', fy:1,  tx:'t', ty:0},
-  {f:'n-projview',t:'n-newtask',  lb:'新建任务',   fx:'b', fy:1,  tx:'t', ty:0},
-  {f:'n-projview',t:'n-taskview', lb:'点击任务',   fx:'r', fy:.5, tx:'l', ty:.65},
-  {f:'n-newtask', t:'n-taskview', lb:'提交',        fx:'r', fy:.5, tx:'l', ty:.85},
-  {f:'n-taskview',t:'n-running',  lb:'启动流水线', fx:'b', fy:1,  tx:'t', ty:0},
-  {f:'n-running', t:'n-analysis', lb:'Analysis完成',fx:'r',fy:.4, tx:'l', ty:.5},
-  {f:'n-analysis',t:'n-prd',      lb:'通过',        fx:'b', fy:1,  tx:'t', ty:0},
-  {f:'n-analysis',t:'n-running',  lb:'拒绝重试',   fx:'l', fy:.7, tx:'r', ty:.7, curve:'up'},
-  {f:'n-prd',     t:'n-planappr', lb:'PRD完成',    fx:'r', fy:.5, tx:'l', ty:.7},
-  {f:'n-planappr',t:'n-taskview', lb:'批准→dev',   fx:'t', fy:0,  tx:'t', ty:0, curve:'up'},
-  {f:'n-planappr',t:'n-monitor',  lb:'',           fx:'r', fy:.5, tx:'l', ty:.5},
-  {f:'n-taskview',t:'n-monitor',  lb:'实时监控',   fx:'r', fy:.25,tx:'l', ty:.25},
-  {f:'n-running', t:'n-monitor',  lb:'工具调用',   fx:'r', fy:.5, tx:'l', ty:.7},
-  {f:'n-monitor', t:'n-sessions', lb:'查看历史',   fx:'b', fy:1,  tx:'t', ty:0},
+  // 入口 flows
+  {f:'n-entry',    t:'n-proj',     lb:'有历史项目',   fx:'r', fy:.4,  tx:'l', ty:.35},
+  {f:'n-entry',    t:'n-onboard',  lb:'无项目',       fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-onboard',  t:'n-prd',      lb:'创建成功',     fx:'r', fy:.5,  tx:'l', ty:.75},
+  // 项目工作区
+  {f:'n-proj',     t:'n-stages',   lb:'侧边栏导航',   fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-proj',     t:'n-mgmt',     lb:'管理中心',     fx:'r', fy:.3,  tx:'l', ty:.3},
+  {f:'n-proj',     t:'n-layout',   lb:'布局定制',     fx:'r', fy:.65, tx:'l', ty:.65},
+  {f:'n-stages',   t:'n-prd',      lb:'PRD 阶段',     fx:'r', fy:.45, tx:'l', ty:.7},
+  {f:'n-stages',   t:'n-aiwork',   lb:'其他阶段',     fx:'r', fy:.3,  tx:'l', ty:.7},
+  // PRD 访谈
+  {f:'n-prd',      t:'n-prddoc',   lb:'实时更新',     fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-prd',      t:'n-approve',  lb:'完成访谈',     fx:'r', fy:.5,  tx:'l', ty:.3},
+  {f:'n-prddoc',   t:'n-approve',  lb:'提交审批',     fx:'r', fy:.5,  tx:'l', ty:.55},
+  // 阶段状态机
+  {f:'n-aiwork',   t:'n-approve',  lb:'AI完成',       fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-approve',  t:'n-stages',   lb:'✓ 通过→下一步',fx:'l', fy:.4,  tx:'r', ty:.4, curve:'up'},
+  {f:'n-approve',  t:'n-retry',    lb:'✗ 拒绝',       fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-retry',    t:'n-aiwork',   lb:'重新执行',     fx:'l', fy:.5,  tx:'l', ty:.85, curve:'left'},
+  // 管理中心
+  {f:'n-mgmt',     t:'n-projects', lb:'项目列表',     fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-projects', t:'n-monitor',  lb:'监控',         fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-mgmt',     t:'n-monitor',  lb:'快速跳转',     fx:'r', fy:.65, tx:'l', ty:.3},
+  {f:'n-monitor',  t:'n-proj',     lb:'跳转项目',     fx:'t', fy:0,   tx:'r', ty:.45, curve:'up'},
+  // 插件系统
+  {f:'n-layout',   t:'n-plugin',   lb:'插件安装',     fx:'b', fy:1,   tx:'t', ty:0},
+  {f:'n-plugin',   t:'n-pluginapi',lb:'开发插件',     fx:'b', fy:1,   tx:'t', ty:0},
 ];
 
 // ════════════════════════════════════════════
@@ -302,268 +384,228 @@ function lns(...ws){ return ws.map(w=>ln(w)).join(''); }
 function btn(txt,type='pri'){ return `<div class="btn ${type}">${txt}</div>`; }
 function inp(ph=false){ return `<div class="inp ${ph?'focus':''}"><div class="${ph?'inp-txt':'inp-ph'}"></div></div>`; }
 function sep(){ return '<div class="sep"></div>'; }
-function chip(txt,color='#e5e7eb',tc='#374151'){ return `<div class="chip" style="background:${color};color:${tc}">${txt}</div>`; }
 
 const WF = {
-  // ── Splash (dark style) ──
-  splash: () => `
-    <div style="background:#0f172a;color:#fff;padding:8px">
-      <div style="font-size:10px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:5px">
-        <div style="width:14px;height:14px;border-radius:4px;background:#6366f1;display:flex;align-items:center;justify-content:center;font-size:7px">TC</div>
-        TaskConductor
+  // ── App Entry ──
+  entry: () => `
+    <div style="background:#0f172a;padding:8px;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:7px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff">TC</div>
+      ${ln('55%')}
+      <div style="display:flex;gap:5px;margin-top:5px;width:85%">
+        <div style="flex:1;height:16px;background:#1e293b;border:1px solid #2563eb;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#60a5fa;font-weight:600">有项目→</div>
+        <div style="flex:1;height:16px;background:#1e293b;border:1px solid #374151;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#4b5563">无项目↓</div>
       </div>
-      <div style="height:40px;background:#1e293b;border-radius:5px;margin-bottom:6px;
-        display:flex;align-items:center;justify-content:center">
-        <div style="text-align:center">
-          ${ln('70%')}
-          <div class="ln sm dark" style="width:45%;margin:3px auto;background:#334155"></div>
-        </div>
-      </div>
-      <div style="font-size:8px;color:#94a3b8;margin-bottom:5px;text-align:center">AI 驱动的任务流水线</div>
-      ${lns('100%','80%','60%')}
-      <div class="btn pri" style="margin-top:6px;background:#6366f1">立即登录 →</div>
     </div>`,
 
-  // ── Login ──
-  login: () => `
+  // ── Onboarding ──
+  onboard: () => `
     <div class="sc-body">
-      <div style="text-align:center;margin-bottom:6px">
-        <div style="width:24px;height:24px;border-radius:6px;background:#6366f1;margin:0 auto 4px;
-          display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700">TC</div>
-        <div class="ln" style="width:55%;margin:0 auto"></div>
-        <div class="ln sm" style="width:40%;margin:3px auto"></div>
-      </div>
-      <div style="display:flex;justify-content:center;gap:4px;margin:8px 0 6px">
-        ${[1,2,3,4,5,6].map((i,idx)=>`
-          <div style="width:16px;height:16px;border-radius:50%;
-            border:1.5px solid ${idx<2?'#2563eb':'#d1d5db'};
-            background:${idx<2?'#dbeafe':'transparent'};
-            display:flex;align-items:center;justify-content:center">
-            <div style="width:5px;height:5px;border-radius:50%;background:${idx<2?'#2563eb':'#e5e7eb'}"></div>
-          </div>`).join('')}
-      </div>
-      ${btn('登录')}
-      <div style="height:8px;margin-top:2px"></div>
-    </div>`,
-
-  // ── Login Error ──
-  loginerr: () => `
-    <div class="sc-body">
-      <div style="text-align:center;margin-bottom:6px">
-        <div style="width:24px;height:24px;border-radius:6px;background:#6366f1;margin:0 auto 4px;
-          display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700">TC</div>
-        <div class="ln" style="width:55%;margin:0 auto"></div>
-      </div>
-      <div style="display:flex;justify-content:center;gap:4px;margin:8px 0 4px">
-        ${[1,2,3,4,5,6].map(()=>`
-          <div style="width:16px;height:16px;border-radius:50%;
-            border:1.5px solid #ef4444;background:#fee2e2;
-            display:flex;align-items:center;justify-content:center">
-            <div style="width:5px;height:5px;border-radius:50%;background:#ef4444"></div>
-          </div>`).join('')}
-      </div>
-      <div style="background:#fee2e2;border-radius:4px;padding:4px 6px;margin-bottom:5px;
-        font-size:8px;color:#ef4444;text-align:center">✕ PIN 码不正确，还剩 2 次</div>
-      ${btn('重试','red')}
-    </div>`,
-
-  // ── Dashboard ──
-  dash: () => `
-    <div style="background:#f8f9fc;padding:5px 6px 3px;border-bottom:1px solid var(--ln)">
-      <div class="row" style="margin:0">
-        <div style="font-size:8px;font-weight:700">🏠 工作台</div>
-        <div class="avatar sm" style="margin-left:auto"></div>
-      </div>
-    </div>
-    <div class="sc-body">
-      <div class="row">
-        ${['24','7','15','2'].map((v,i)=>`
-          <div class="kpi-card">
-            <div style="font-size:10px;font-weight:800;color:${['#6366f1','#06b6d4','#10b981','#ef4444'][i]}">${v}</div>
-            <div class="ln xs" style="width:80%;margin:2px auto"></div>
-          </div>`).join('')}
-      </div>
-      <div class="row" style="margin-top:4px">
-        <div class="kpi-card" style="flex:none;width:42px">
-          <div class="gauge-wrap">
-            <svg width="34" height="22" viewBox="0 0 34 22">
-              <path d="M4,18 A13,13 0 0,1 30,18" fill="none" stroke="#e5e7eb" stroke-width="4" stroke-linecap="round"/>
-              <path d="M4,18 A13,13 0 0,1 30,18" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-dasharray="${Math.PI*13*0.78} ${Math.PI*13}"/>
-              <text x="17" y="19" text-anchor="middle" font-size="6" font-weight="800" fill="#10b981">78%</text>
-            </svg>
-          </div>
-        </div>
-        <div class="kpi-card" style="padding-top:6px">
-          <div class="mini-chart">
-            ${[3,5,2,6,4,1,3].map((v,i)=>`<div class="mini-bar" style="height:${v*4}px;background:${i===3?'#6366f1':'#c7d2fe'}"></div>`).join('')}
-          </div>
-        </div>
-      </div>
-      ${sep()}
-      ${[['TaskConductor','8','70%','#10b981'],['项目 Alpha','3','40%','#f59e0b']].map(([n,c,p,pc])=>`
-        <div class="list-row">
-          <div class="avatar sm"></div>
-          <div class="ln xs" style="width:40%;margin:0 2px"></div>
-          <div style="margin-left:auto;font-size:7.5px;font-weight:700;color:${pc}">${p}</div>
-        </div>`).join('')}
-      ${btn('+ 新建项目','sec')}
-    </div>`,
-
-  // ── New Project ──
-  newproj: () => `
-    <div class="sc-body">
-      <div style="background:#f8f9fc;border:1px solid var(--ln);border-radius:6px;padding:7px">
-        <div style="font-size:9px;font-weight:700;margin-bottom:5px">新建项目</div>
-        <div style="font-size:7.5px;color:var(--dim2);margin-bottom:2px">项目名称 *</div>
-        ${inp(true)}
-        <div style="font-size:7.5px;color:var(--dim2);margin-bottom:2px;margin-top:3px">项目描述</div>
-        <div style="border:1px solid #93c5fd;border-radius:4px;height:26px;background:#f8faff;padding:3px 6px">
-          ${ln('70%')}${ln('40%')}
-        </div>
-        ${btn('创建项目')}
-        ${btn('取消','sec')}
-      </div>
-    </div>`,
-
-  // ── Project View ──
-  projview: () => `
-    <div style="background:#f8f9fc;padding:5px 7px 4px;border-bottom:1px solid var(--ln)">
-      <div class="row" style="margin:0">
-        <div style="font-size:8.5px;font-weight:700;color:#8b5cf6">TaskConductor</div>
-        <div class="btn pri" style="margin:0;margin-left:auto;height:15px;padding:0 6px;font-size:7px;border-radius:3px;display:flex;align-items:center;background:#2563eb;color:#fff;font-weight:700">+ 新建</div>
-      </div>
-    </div>
-    <div class="sc-body" style="padding:6px 7px">
-      ${[['实现PRD可视化','分析中','#06b6d4'],['优化流水线性能','待审批','#f59e0b'],['修复Hook问题','完成','#10b981'],['撰写API文档','待开始','#9ca3af']].map(([t,s,c])=>`
-        <div class="list-row">
-          <div style="width:5px;height:5px;border-radius:50%;background:${c};flex-shrink:0"></div>
-          <div class="ln xs" style="width:50%;margin:0 3px"></div>
-          <div style="margin-left:auto" class="chip" style="background:${c}18;color:${c};font-size:7px;padding:1px 5px;border-radius:99px;height:12px;display:flex;align-items:center;font-weight:600">${s}</div>
-        </div>`).join('')}
-      <div style="height:3px"></div>
-    </div>`,
-
-  // ── New Task ──
-  newtask: () => `
-    <div class="sc-body">
-      <div style="font-size:9px;font-weight:700;margin-bottom:6px">创建任务</div>
+      <div style="font-size:9px;font-weight:700;margin-bottom:6px;color:#6366f1">✨ 创建您的第一个项目</div>
+      <div style="font-size:7.5px;color:var(--dim2);margin-bottom:2px">项目名称 *</div>
       ${inp(true)}
-      <div style="border:1px solid #93c5fd;border-radius:4px;height:32px;background:#f8faff;
-        padding:4px 6px;margin-bottom:4px">
-        ${ln('80%')}${ln('55%')}
-      </div>
-      <div style="border:1px solid var(--ln);border-radius:4px;height:18px;background:#fafbfc;
-        margin-bottom:4px;display:flex;align-items:center;padding:0 6px;">
-        <div class="ln xs" style="width:50%;margin:0"></div>
-        <div style="margin-left:auto;font-size:7px;color:var(--dim2)">▾</div>
-      </div>
-      <div style="font-size:7.5px;color:var(--dim2);text-align:right;margin-bottom:4px">234 / 2000</div>
-      ${btn('提交任务')}
+      <div style="font-size:7.5px;color:var(--dim2);margin:3px 0 2px">项目描述（可选）</div>
+      <div style="border:1px solid #c7d2fe;border-radius:4px;height:22px;background:#f8f9ff;margin-bottom:4px;padding:3px 6px">${ln('65%')}</div>
+      ${btn('创建项目并开始访谈 →')}
+      <div style="font-size:7px;color:var(--dim2);text-align:center;margin-top:3px">接下来：AI 将引导您完成 PRD 需求访谈</div>
     </div>`,
 
-  // ── Task View ──
-  taskview: () => `
-    <div style="background:#f8f9fc;padding:4px 7px;border-bottom:1px solid var(--ln)">
-      <div class="ln" style="width:65%;margin:2px 0"></div>
-      <div style="display:flex;gap:2px;margin-top:3px">
-        ${['in','an','prd','ui','pl','dev','ts','dp','✓'].map((s,i)=>`
-          <div class="stage-box" style="background:${i===0?'#dbeafe':i===5?'#f3f4f6':'#f3f4f6'};
-            border:1px solid ${i===0?'#93c5fd':'#e5e7eb'};
-            color:${i===0?'#2563eb':'#9ca3af'};font-size:5px">${s}</div>`).join('')}
+  // ── Project Workspace ──
+  proj: () => `
+    <div style="display:flex;height:110px">
+      <div class="sidebar-mini">
+        <div style="width:20px;height:20px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:5px;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#fff">TC</div>
+        <div style="height:1px;background:rgba(255,255,255,.06);margin:2px 0"></div>
+        <div class="sidebar-item active" style="font-size:6px">🏠</div>
+        <div class="sidebar-item done" style="font-size:6px">✓</div>
+        <div class="sidebar-item" style="color:#f59e0b;font-size:6px">◑</div>
+        <div class="sidebar-item" style="font-size:6px">○</div>
+        <div class="sidebar-item" style="font-size:6px">○</div>
+        <div style="flex:1"></div>
+        <div class="sidebar-item" style="font-size:6px;border:1px dashed rgba(255,255,255,.1)">⊞</div>
       </div>
-    </div>
-    <div class="sc-body">
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;padding:4px 6px;margin-bottom:5px">
-        <div style="font-size:7.5px;color:#16a34a;font-weight:600">状态：等待启动</div>
+      <div style="flex:1;padding:5px 6px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+          <div class="ln" style="width:60%;margin:0"></div>
+          <div style="font-size:7px;color:#f59e0b;background:#fef3c7;padding:1px 5px;border-radius:99px;font-weight:700;white-space:nowrap">审批中</div>
+        </div>
+        <div style="display:flex;gap:2px;margin-bottom:4px">
+          ${['✓','◑','3','4','5','6','7'].map((s,i)=>`<div style="flex:1;height:11px;border-radius:3px;background:${i===0?'#d1fae5':i===1?'#fef3c7':'#f3f4f6'};border:1px solid ${i===0?'#6ee7b7':i===1?'#fde68a':'#e5e7eb'};display:flex;align-items:center;justify-content:center;font-size:5px;color:${i===0?'#059669':i===1?'#d97706':'#9ca3af'}">${s}</div>`).join('')}
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:3px 6px;margin-bottom:3px">
+          <div style="font-size:7px;color:#d97706;font-weight:600">⏳ Design 待您审批</div>
+        </div>
+        <div class="row">${btn('批准','grn')}${btn('拒绝','red')}</div>
       </div>
-      ${lns('90%','70%','50%')}
-      ${btn('▶ 启动流水线')}
-      ${btn('查看详情','sec')}
     </div>`,
 
-  // ── Running ──
-  running: () => `
-    <div style="background:#f8f9fc;padding:4px 7px;border-bottom:1px solid var(--ln)">
-      <div style="display:flex;gap:2px;margin-bottom:2px">
-        ${['✓in','▶an','prd','ui','pl','dev','ts','dp',''].map((s,i)=>`
-          <div class="stage-box" style="background:${i===0?'#d1fae5':i===1?'#dbeafe':'#f3f4f6'};
-            border:1px solid ${i===0?'#6ee7b7':i===1?'#93c5fd':'#e5e7eb'};
-            color:${i===0?'#059669':i===1?'#2563eb':'#9ca3af'}">${s}</div>`).join('')}
+  // ── Stage Nav ──
+  stages: () => `
+    <div style="display:flex;height:110px">
+      <div class="sidebar-mini" style="width:36px">
+        <div style="height:8px;background:rgba(255,255,255,.04);margin:1px 2px;border-radius:2px"></div>
+        ${[{t:'✓',c:'#10b981'},{t:'PRD',c:'#4b5563'},{t:'◑',c:'#f59e0b',a:true},{t:'○',c:'#374151'},{t:'○',c:'#374151'}].map(i=>`
+          <div style="display:flex;align-items:center;gap:2px;padding:2px 3px;margin:0 1px;border-radius:2px;background:${i.a?'rgba(245,158,11,.1)':'transparent'}">
+            <div style="font-size:6px;color:${i.c};flex-shrink:0">${i.t}</div>
+            <div style="height:5px;background:${i.c}22;border-radius:1px;flex:1"></div>
+            ${i.a?`<div style="width:4px;height:4px;background:#f59e0b;border-radius:50%"></div>`:''}
+          </div>`).join('')}
+        <div style="flex:1"></div>
+        <div style="padding:2px 3px;border-top:1px solid rgba(255,255,255,.06);margin-top:2px">
+          <div style="font-size:6px;color:#4b5563;text-align:center">⊞ 管理</div>
+        </div>
       </div>
+      <div style="flex:1;padding:4px 5px">
+        ${lns('80%','55%','40%')}
+        <div style="display:flex;gap:3px;margin-top:4px">
+          <div style="flex:1;background:#fffbeb;border:1px solid #fde68a;border-radius:3px;padding:3px 4px">
+            <div style="font-size:6px;color:#d97706;font-weight:700">Design 待审批</div>
+            ${ln('70%')}
+          </div>
+        </div>
+      </div>
+    </div>`,
+
+  // ── PRD Chat ──
+  prd: () => `
+    <div style="display:flex;height:110px;overflow:hidden">
+      <div style="width:28px;background:#fafbfc;border-right:1px solid var(--ln);padding:3px 2px">
+        ${['✓','●','○','○','○','○'].map((s,i)=>`<div style="font-size:7px;color:${i===0?'#10b981':i===1?'#2563eb':'#d1d5db'};padding:2px;text-align:center;border-left:${i===1?'2px solid #2563eb':'2px solid transparent'}">${s}</div>`).join('')}
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;padding:4px;gap:3px;overflow:hidden">
+        <div style="background:#f8f9ff;border:1px solid #e0e7ff;border-radius:4px 4px 4px 2px;padding:3px 5px">
+          <div style="font-size:6.5px;color:#374151;line-height:1.4">AI：您的平台是否支持多商户入驻？</div>
+        </div>
+        <div style="background:#2563eb;border-radius:4px 4px 2px 4px;padding:3px 5px;align-self:flex-end;max-width:80%">
+          <div style="font-size:6.5px;color:#fff;line-height:1.4">是，类似淘宝模式</div>
+        </div>
+        <div style="background:#f3f4f6;border-radius:4px;padding:3px 5px;width:60%">
+          <div style="display:flex;gap:2px">${[0,1,2].map(()=>`<div style="width:4px;height:4px;background:#9ca3af;border-radius:50%"></div>`).join('')}</div>
+        </div>
+      </div>
+      <div style="width:2px;background:#e5e7eb;margin:2px 0"></div>
+      <div style="width:38px;padding:3px 2px">
+        <div style="font-size:6px;color:#2563eb;margin-bottom:2px;font-weight:600">预览</div>
+        <div style="background:#dcfce7;border-left:2px solid #16a34a;padding:2px;margin-bottom:2px;font-size:5.5px;color:#166534">✦ 多商户…</div>
+        ${lns('90%','70%','80%')}
+      </div>
+    </div>`,
+
+  // ── PRD Doc Diff ──
+  prddoc: () => `
+    <div class="sc-body" style="padding:5px">
+      <div style="background:#fef3c7;border-bottom:1px solid #fde68a;padding:3px 6px;margin:-5px -5px 5px;font-size:7px;color:#d97706;font-weight:600">⚡ 已更新 3 处</div>
+      <div style="font-size:8px;font-weight:700;margin-bottom:4px">PRD 文档 v0.4</div>
+      <div style="background:#dcfce7;border-left:2px solid #16a34a;padding:2px 4px;margin-bottom:2px;font-size:6.5px;color:#166534">✦ 新增：多商户入驻支持</div>
+      ${ln('85%')}
+      <div style="background:#fef3c7;border-left:2px solid #f59e0b;padding:2px 4px;margin:2px 0;font-size:6.5px;color:#92400e">↻ 修改：图片上限 5→10</div>
+      ${lns('70%','55%')}
+      <div style="font-size:7px;color:var(--dim2);margin-top:4px;display:flex;justify-content:space-between">
+        <span>2184字 · 50%</span>
+        ${btn('提交审批','pri')}
+      </div>
+    </div>`,
+
+  // ── AI Working ──
+  aiwork: () => `
+    <div style="background:#eff6ff;padding:4px 7px;border-bottom:1px solid #bfdbfe">
       <div class="row" style="margin:0">
         <div style="width:5px;height:5px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
-        <div class="ln xs" style="width:50%;margin:0 4px"></div>
-        <div style="font-size:7px;color:#2563eb;font-weight:600;margin-left:auto">01:24</div>
+        <div style="font-size:7.5px;color:#1d4ed8;margin-left:3px;font-weight:600">🤖 AI 工作中</div>
+        <div style="font-size:7px;color:#3b82f6;margin-left:auto;font-family:monospace">01:24</div>
       </div>
     </div>
-    <div class="sc-body" style="padding:6px 7px">
-      ${['[INFO] 调用 Claude Pool...','[INFO] 流式输出 1.2k tokens','[SUCCESS] 方案 A 生成完成'].map((t,i)=>`
-        <div class="log-line" style="background:${i===2?'#d1fae5':'#f3f4f6'}"></div>`).join('')}
+    <div class="sc-body" style="padding:5px 7px">
+      ${[['INFO','#6b7280','#f3f4f6'],['INFO','#6b7280','#f3f4f6'],['SUCCESS','#059669','#dcfce7']].map(([t,c,bg])=>`
+        <div style="display:flex;align-items:center;gap:3px;margin-bottom:2px">
+          <div style="font-size:6px;font-weight:700;color:${c};background:${bg};padding:0 3px;border-radius:2px;flex-shrink:0">${t}</div>
+          <div class="log-line" style="flex:1;background:${bg}"></div>
+        </div>`).join('')}
       <div style="display:flex;align-items:center;gap:3px;margin-top:3px">
         <div style="width:4px;height:4px;border-radius:50%;background:#2563eb"></div>
-        <div class="ln xs" style="width:50%;margin:0"></div>
+        <div class="ln xs" style="width:45%;margin:0"></div>
       </div>
     </div>`,
 
-  // ── Analysis Approval ──
-  analysis: () => `
+  // ── Approval ──
+  approve: () => `
     <div style="background:#fffbeb;padding:4px 7px;border-bottom:1px solid #fde68a">
-      <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 等待审批 — Analysis</div>
+      <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 待您审批 — Design</div>
     </div>
     <div class="sc-body">
       <div class="row" style="align-items:stretch;gap:3px">
-        ${[{t:'方案A',s:87,sel:false},{t:'方案B',s:91,sel:true},{t:'方案C',s:62,sel:false}].map(o=>`
-          <div class="option-card ${o.sel?'sel':''}">
-            <div style="font-size:8px;font-weight:700;color:${o.sel?'#2563eb':'#374151'}">${o.t}</div>
-            <div style="font-size:9px;font-weight:800;color:${o.s>=80?'#10b981':'#f59e0b'}">${o.s}</div>
-            ${ln('80%')}${ln('60%')}
+        ${[{t:'方案A',v:92,s:true},{t:'方案B',v:84,s:false},{t:'方案C',v:76,s:false}].map(o=>`
+          <div class="option-card ${o.s?'sel':''}">
+            <div style="font-size:7.5px;font-weight:700;color:${o.s?'#2563eb':'#374151'}">${o.t}</div>
+            <div style="font-size:9px;font-weight:800;color:${o.v>=90?'#10b981':'#6b7280'}">${o.v}</div>
+            ${ln('75%')}
           </div>`).join('')}
       </div>
-      <div style="font-size:7.5px;color:var(--dim2);margin:4px 0 3px">${ln('90%')}${ln('70%')}</div>
-      <div class="row" style="gap:4px">
-        ${btn('✓ 通过')}
-        ${btn('✕ 拒绝','red')}
+      <div style="font-size:7px;color:var(--dim2);margin:3px 0">${ln('90%')}</div>
+      <div class="row" style="gap:3px">
+        ${btn('✓ 批准','grn')}${btn('✏️修改','sec')}${btn('✗','red')}
       </div>
     </div>`,
 
-  // ── PRD Running ──
-  prd: () => `
-    <div style="background:#faf5ff;padding:4px 7px;border-bottom:1px solid #e9d5ff">
-      <div style="display:flex;gap:2px">
-        ${['✓an','▶prd','ui','pl','dev','ts','dp',''].map((s,i)=>`
-          <div class="stage-box" style="background:${i===0?'#d1fae5':i===1?'#ede9fe':'#f3f4f6'};
-            border:1px solid ${i===0?'#6ee7b7':i===1?'#c4b5fd':'#e5e7eb'};
-            color:${i===0?'#059669':i===1?'#7c3aed':'#9ca3af'}">${s}</div>`).join('')}
-      </div>
+  // ── Retry ──
+  retry: () => `
+    <div style="background:#fef2f2;padding:4px 7px;border-bottom:1px solid #fecaca">
+      <div style="font-size:8px;color:#dc2626;font-weight:700">✗ 已拒绝 · 第 2 次迭代</div>
     </div>
     <div class="sc-body">
-      <div style="font-size:8px;font-weight:600;color:#7c3aed;margin-bottom:5px">生成产品需求文档</div>
-      ${['✓ 用户故事','✓ 验收标准','⏳ 技术规格'].map((t,i)=>`
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
-          <div class="log-line" style="flex:1;background:${i<2?'#d1fae5':'#f3f4f6'}"></div>
-          <div style="font-size:7px;color:${i<2?'#10b981':'#9ca3af'};flex-shrink:0">${t.slice(0,1)}</div>
-        </div>`).join('')}
-      <div style="display:flex;align-items:center;gap:3px;margin-top:3px">
-        <div style="width:4px;height:4px;border-radius:50%;background:#7c3aed"></div>
-        <div class="ln xs" style="width:55%;margin:0"></div>
-        <div style="font-size:7px;color:#7c3aed;margin-left:auto">02:11</div>
+      <div style="font-size:7.5px;color:var(--dim2);margin-bottom:3px">拒绝原因（已记录到知识库）</div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:4px 6px;margin-bottom:5px">
+        ${lns('90%','70%')}
       </div>
+      <div style="font-size:7px;color:#6b7280;margin-bottom:4px">📚 知识库已更新，防止重犯</div>
+      ${btn('🔄 重新执行 AI','pri')}
     </div>`,
 
-  // ── Plan Approval ──
-  planappr: () => `
-    <div style="background:#fffbeb;padding:4px 7px;border-bottom:1px solid #fde68a">
-      <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 等待审批 — Plan</div>
+  // ── Management Dashboard ──
+  mgmt: () => `
+    <div style="background:#0f172a;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <div class="row" style="margin:0">
+        <div style="font-size:7.5px;color:#e5e7eb;font-weight:700">管理中心</div>
+        <div style="display:flex;gap:4px;margin-left:auto">
+          ${['仪表盘','项目','监控'].map((t,i)=>`<div style="font-size:6.5px;padding:2px 5px;border-radius:3px;background:${i===0?'rgba(37,99,235,.3)':'transparent'};color:${i===0?'#93c5fd':'#6b7280'};font-weight:${i===0?700:500}">${t}</div>`).join('')}
+        </div>
+      </div>
     </div>
-    <div class="sc-body" style="padding:6px 7px">
-      ${['阶段1: 数据模型','阶段2: API 接口','阶段3: 前端实现','阶段4: 集成测试'].map((t,i)=>`
+    <div class="sc-body" style="padding:5px 6px;background:#f8faff">
+      <div class="row">
+        ${['7','3','97%','1.8s'].map((v,i)=>`
+          <div class="kpi-card">
+            <div style="font-size:10px;font-weight:800;color:${['#6366f1','#10b981','#10b981','#f59e0b'][i]}">${v}</div>
+            <div style="height:4px;background:${['#eef2ff','#d1fae5','#d1fae5','#fef3c7'][i]};border-radius:2px;margin-top:2px"></div>
+          </div>`).join('')}
+      </div>
+      ${sep()}
+      <div style="font-size:7px;color:var(--dim2);margin-bottom:3px;font-weight:600">待审批</div>
+      ${['E-Commerce · Design','AI客服 · Dev PR'].map(t=>`
         <div class="list-row">
-          <div style="width:6px;height:6px;border-radius:2px;background:${i<2?'#10b981':'#e5e7eb'};flex-shrink:0"></div>
-          <div class="ln xs" style="width:65%;margin:0 4px"></div>
-          <div style="font-size:7px;color:${i<2?'#10b981':'#9ca3af'}">${i<2?'✓':''}</div>
+          <div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+          <div class="ln xs" style="flex:1;margin:0 4px"></div>
         </div>`).join('')}
-      ${btn('✓ 批准计划','grn')}
-      ${btn('✕ 拒绝','red')}
+    </div>`,
+
+  // ── Projects list ──
+  projects: () => `
+    <div style="background:#f8f9fc;padding:5px 7px 4px;border-bottom:1px solid var(--ln)">
+      <div class="row" style="margin:0">
+        <div style="font-size:8px;font-weight:700">所有项目</div>
+        <div style="margin-left:auto;background:#2563eb;color:#fff;font-size:7px;font-weight:700;padding:2px 7px;border-radius:3px">+ 新建</div>
+      </div>
+    </div>
+    <div class="sc-body" style="padding:4px 6px">
+      ${[['E-Commerce','Design','#f59e0b',29],['AI客服','Dev','#2563eb',57],['数据平台','PRD','#9ca3af',14]].map(([n,s,c,p])=>`
+        <div class="list-row">
+          <div style="font-size:7px;font-weight:600;color:#374151;width:45%">${n}</div>
+          <div style="font-size:6.5px;color:${c};background:${c}18;padding:0 4px;border-radius:3px;white-space:nowrap">${s}</div>
+          <div style="flex:1;margin-left:4px">
+            <div style="background:#e5e7eb;border-radius:99px;height:4px;overflow:hidden">
+              <div style="width:${p}%;height:100%;background:${c};border-radius:99px"></div>
+            </div>
+          </div>
+        </div>`).join('')}
     </div>`,
 
   // ── Monitor ──
@@ -571,47 +613,74 @@ const WF = {
     <div style="background:#f0fdf4;padding:4px 7px;border-bottom:1px solid #bbf7d0">
       <div class="row" style="margin:0">
         <div style="width:5px;height:5px;border-radius:50%;background:#10b981;flex-shrink:0"></div>
-        <div style="font-size:7.5px;color:#059669;margin-left:3px">已连接 · 3 活跃会话</div>
+        <div style="font-size:7.5px;color:#059669;margin-left:3px">已连接 · 3 会话</div>
       </div>
     </div>
     <div class="sc-body" style="padding:5px 7px">
-      ${[['Bash','Post','#10b981','142ms'],['Read','Pre','#2563eb','-'],['Write','Post','#10b981','89ms'],['Glob','Post','#10b981','34ms']].map(([tool,type,c,ms])=>`
+      ${[['Post','Bash','#10b981','142ms'],['Pre','Read','#2563eb','-'],['Post','Write','#10b981','89ms'],['Stop','—','#9ca3af','—']].map(([type,tool,c,ms])=>`
         <div class="list-row">
-          <div style="font-size:7px;font-weight:700;color:${c};background:${c}18;padding:0 4px;border-radius:2px;flex-shrink:0">${type}</div>
-          <div style="font-size:8px;font-weight:600;color:#374151;margin-left:4px">${tool}</div>
-          <div style="margin-left:auto;font-size:7px;color:${c}">${ms}</div>
+          <div style="font-size:6px;font-weight:700;color:${c};background:${c}18;padding:0 3px;border-radius:2px;flex-shrink:0">${type}</div>
+          <div style="font-size:7.5px;font-weight:600;color:#374151;margin-left:4px">${tool}</div>
+          <div style="margin-left:auto;font-size:6.5px;color:${c};font-family:monospace">${ms}</div>
         </div>`).join('')}
-      ${btn('查看会话历史','sec')}
     </div>`,
 
-  // ── Sessions ──
-  sessions: () => `
-    <div style="background:#f8f9fc;padding:4px 7px 3px;border-bottom:1px solid var(--ln)">
-      <div class="row" style="margin:0;gap:0">
-        ${['实时','历史'].map((t,i)=>`
-          <div style="font-size:8px;font-weight:${i===1?700:500};padding:3px 8px 2px;
-            color:${i===1?'#2563eb':'var(--dim2)'};
-            border-bottom:${i===1?'2px solid #2563eb':'none'};cursor:pointer">${t}</div>`).join('')}
+  // ── Layout ──
+  layout: () => `
+    <div style="display:flex;height:110px">
+      <div style="width:14px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:3px 0;gap:4px">
+        ${['🗂','💬','🔌','⚙'].map((i,idx)=>`<div style="font-size:8px;opacity:${idx===0?1:0.4}">${i}</div>`).join('')}
       </div>
-    </div>
-    <div class="sc-body" style="padding:5px 0">
-      <div style="display:flex;min-height:0">
-        <div style="width:45%;border-right:1px solid var(--ln);padding:0 6px">
-          ${['#a3f9 47','#b7d2 23','#c1a5 8'].map((t,i)=>`
-            <div style="padding:3px 4px;border-bottom:1px solid var(--ln);
-              border-left:${i===0?'2px solid #2563eb':'2px solid transparent'}">
-              <div class="ln xs" style="width:80%;margin:0 0 2px"></div>
-              <div class="ln" style="width:50%;height:5px;margin:0"></div>
-            </div>`).join('')}
+      <div style="width:32px;background:#111827;border-right:1px solid rgba(255,255,255,.06);padding:3px 2px">
+        ${[{t:'概览',a:true},{t:'PRD'},{t:'Design'}].map(i=>`<div style="font-size:5.5px;color:${i.a?'#93c5fd':'#4b5563'};background:${i.a?'rgba(37,99,235,.2)':'transparent'};border-radius:2px;padding:2px 3px;margin-bottom:1px;font-weight:${i.a?700:400}">${i.t}</div>`).join('')}
+      </div>
+      <div style="flex:1;padding:3px;overflow:hidden">
+        ${lns('80%','60%','45%')}
+        <div style="background:#fffbeb;border-left:2px solid #f59e0b;padding:2px 4px;margin-top:3px;font-size:6px;color:#d97706">Design 待审批</div>
+      </div>
+      <div style="width:3px;background:#e5e7eb;cursor:col-resize;position:relative">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:20px;background:#d1d5db;border-radius:99px"></div>
+      </div>
+      <div style="width:36px;background:#f8f9fc;border-left:1px solid var(--ln);padding:3px 2px">
+        <div style="font-size:6px;color:#6b7280;font-weight:600;margin-bottom:3px">工具调用</div>
+        ${[1,2,3].map(()=>`<div class="log-line" style="height:6px"></div>`).join('')}
+      </div>
+    </div>`,
+
+  // ── Plugin Market ──
+  plugin: () => `
+    <div class="sc-body" style="padding:5px">
+      <div style="font-size:8.5px;font-weight:700;margin-bottom:5px">插件市场</div>
+      ${[{n:'Jira 同步',i:'🎯',s:true},{n:'GitHub PR',i:'🔗',s:false},{n:'Figma 导入',i:'🎨',s:false}].map(p=>`
+        <div style="display:flex;align-items:center;gap:5px;padding:4px;border:1px solid var(--ln);border-radius:5px;margin-bottom:3px;background:${p.s?'#f8faff':'#fff'}">
+          <div style="font-size:12px">${p.i}</div>
+          <div style="flex:1">
+            <div style="font-size:8px;font-weight:600;color:#111827">${p.n}</div>
+            <div style="height:5px;background:var(--ln);border-radius:2px;width:70%;margin-top:2px"></div>
+          </div>
+          <div style="${p.s?'background:#ecfdf5;color:#059669':'background:var(--blue);color:#fff'};font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px">${p.s?'已安装':'安装'}</div>
+        </div>`).join('')}
+    </div>`,
+
+  // ── Plugin API ──
+  pluginapi: () => `
+    <div class="sc-body" style="padding:5px">
+      <div style="font-size:8px;font-weight:700;color:#8b5cf6;margin-bottom:5px">插件开发 API</div>
+      <div style="background:#0f172a;border-radius:5px;padding:6px;font-size:6.5px;color:#a3e635;font-family:monospace;line-height:1.6">
+        <span style="color:#7c3aed">export function</span> <span style="color:#60a5fa">activate</span>(ctx) {<br>
+        &nbsp; ctx.<span style="color:#fbbf24">registerPanelView</span>(<span style="color:#34d399">"jira"</span>, {…});<br>
+        &nbsp; ctx.<span style="color:#fbbf24">registerStageHook</span>(<span style="color:#34d399">"prd"</span>, fn);<br>
+        &nbsp; ctx.<span style="color:#fbbf24">registerCommand</span>(id, fn);<br>
+        }
+      </div>
+      <div style="display:flex;gap:3px;margin-top:5px">
+        <div style="flex:1;background:#f3e8ff;border-radius:4px;padding:3px 4px">
+          <div style="font-size:6.5px;font-weight:700;color:#7c3aed">Panel API</div>
+          ${ln('80%')}
         </div>
-        <div style="flex:1;padding:0 5px">
-          ${['▶','→','✓','→','■'].map((ico,i)=>`
-            <div style="display:flex;align-items:center;gap:3px;height:13px">
-              <div style="width:9px;height:9px;border-radius:50%;background:${['#d1fae5','#dbeafe','#d1fae5','#dbeafe','#f3f4f6'][i]};
-                display:flex;align-items:center;justify-content:center;font-size:5.5px;
-                color:${['#059669','#2563eb','#059669','#2563eb','#9ca3af'][i]};flex-shrink:0">${ico}</div>
-              <div class="ln xs" style="width:60%;margin:0"></div>
-            </div>`).join('')}
+        <div style="flex:1;background:#ecfdf5;border-radius:4px;padding:3px 4px">
+          <div style="font-size:6.5px;font-weight:700;color:#059669">Hook API</div>
+          ${ln('70%')}
         </div>
       </div>
     </div>`,
@@ -637,17 +706,14 @@ function buildNodes() {
     const card = document.createElement('div');
     card.className = 'node-card';
 
-    if(!n.dark) {
-      const bar = document.createElement('div');
-      bar.className = 'sc-bar';
-      const ph = PHASES.find(p=>p.id===DETAILS[n.key].ph);
-      bar.innerHTML = `
-        <div class="sc-dot" style="background:#ef4444"></div>
-        <div class="sc-dot" style="background:#f59e0b"></div>
-        <div class="sc-dot" style="background:#22c55e"></div>
-        <div class="sc-title">${n.label}</div>`;
-      card.appendChild(bar);
-    }
+    const bar = document.createElement('div');
+    bar.className = 'sc-bar';
+    bar.innerHTML = `
+      <div class="sc-dot" style="background:#ef4444"></div>
+      <div class="sc-dot" style="background:#f59e0b"></div>
+      <div class="sc-dot" style="background:#22c55e"></div>
+      <div class="sc-title">${n.label}</div>`;
+    card.appendChild(bar);
 
     card.insertAdjacentHTML('beforeend', WF[n.key]());
     wrapper.appendChild(card);
@@ -656,10 +722,9 @@ function buildNodes() {
   });
 
   // Phase headers
-  const phaseX = {1:24,2:222,3:430,4:660,5:900,6:1130,7:1590};
+  const phaseX = {1:24, 2:250, 3:490, 4:730, 5:970, 6:1210};
   PHASES.forEach(ph => {
-    const x = phaseX[ph.id];
-    if(!x) return;
+    const x = phaseX[ph.id]; if(!x) return;
     const el = document.createElement('div');
     el.className = 'ph-head';
     el.style.cssText = `left:${x}px`;
@@ -668,12 +733,11 @@ function buildNodes() {
       ${ph.label.slice(2)}
     </div>`;
     canvas.appendChild(el);
-
-    if(ph.id < 7) {
+    if(ph.id < 6) {
       const vl = document.createElement('div');
       vl.className = 'ph-vline';
-      const nextPh = phaseX[ph.id+1];
-      vl.style.cssText = `left:${nextPh-10}px;height:680px;border-color:${ph.color}`;
+      const nextX = phaseX[ph.id+1];
+      vl.style.cssText = `left:${nextX-8}px;height:750px;border-color:${ph.color}`;
       canvas.appendChild(vl);
     }
   });
@@ -684,16 +748,15 @@ function buildNodes() {
 // ════════════════════════════════════════════
 
 function getEdgePt(id, side, frac) {
-  const el = document.getElementById(id);
-  if(!el) return {x:0,y:0};
+  const el = document.getElementById(id); if(!el) return {x:0,y:0};
   const l=parseInt(el.style.left), t=parseInt(el.style.top);
   const w=el.offsetWidth, h=el.offsetHeight;
   switch(side){
-    case 'r': return {x:l+w,    y:t+h*frac};
-    case 'l': return {x:l,      y:t+h*frac};
-    case 't': return {x:l+w*frac,y:t};
-    case 'b': return {x:l+w*frac,y:t+h};
-    default:  return {x:l+w/2,  y:t+h/2};
+    case 'r': return {x:l+w, y:t+h*frac};
+    case 'l': return {x:l,   y:t+h*frac};
+    case 't': return {x:l+w*frac, y:t};
+    case 'b': return {x:l+w*frac, y:t+h};
+    default:  return {x:l+w/2, y:t+h/2};
   }
 }
 
@@ -704,37 +767,31 @@ function drawArrows() {
       <path d="M0,0.5 L0,5.5 L7,3 z" fill="#adb5c8"/>
     </marker>
   </defs>`;
-
-  ARROWS.forEach((a, idx) => {
-    const fs = a.fx==='r'?'r':a.fx==='l'?'l':a.fx==='t'?'t':'b';
-    const ts = a.tx==='r'?'r':a.tx==='l'?'l':a.tx==='t'?'t':'b';
+  ARROWS.forEach(a => {
+    const fs = a.fx, ts = a.tx;
     const p1 = getEdgePt(a.f, fs, a.fy||0.5);
     const p2 = getEdgePt(a.t, ts, a.ty||0.5);
     if(!p1||!p2||(!p1.x&&!p1.y)) return;
-
     const dx=p2.x-p1.x, dy=p2.y-p1.y;
     let cx1=p1.x, cy1=p1.y, cx2=p2.x, cy2=p2.y;
-
     if(a.curve==='up') {
-      const miny = Math.min(p1.y,p2.y) - 50;
+      const miny = Math.min(p1.y,p2.y)-55;
       cx1=p1.x; cy1=miny; cx2=p2.x; cy2=miny;
     } else if(a.curve==='left') {
-      const minx = Math.min(p1.x,p2.x) - 50;
+      const minx = Math.min(p1.x,p2.x)-55;
       cx1=minx; cy1=p1.y; cx2=minx; cy2=p2.y;
     } else if(fs==='r'||fs==='l') {
       cx1=p1.x+dx*0.45; cy1=p1.y; cx2=p2.x-dx*0.45; cy2=p2.y;
     } else {
       cx1=p1.x; cy1=p1.y+dy*0.45; cx2=p2.x; cy2=p2.y-dy*0.45;
     }
-
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('class','arr-path');
     path.setAttribute('d',`M${p1.x},${p1.y} C${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`);
     svg.appendChild(path);
-
     if(a.lb) {
       const mx=(p1.x+p2.x)/2+(cx1+cx2)/2*.1, my=(p1.y+p2.y)/2+(cy1+cy2)/2*.1;
-      const rw=a.lb.length*5.5+8;
+      const rw=a.lb.length*5+8;
       const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
       bg.setAttribute('class','arr-label-bg');
       bg.setAttribute('x',mx-rw/2); bg.setAttribute('y',my-8);
@@ -755,7 +812,6 @@ function drawArrows() {
 function showPanel(key, nodeId) {
   const d = DETAILS[key]; if(!d) return;
   const ph = PHASES.find(p=>p.id===d.ph);
-
   document.getElementById('p-title').textContent = d.title;
   const phEl = document.getElementById('p-phase');
   phEl.textContent = ph.label;
@@ -772,7 +828,7 @@ function showPanel(key, nodeId) {
       <div class="p-story">${d.story}</div></div>
     <div><div class="p-lbl">✅ 验收标准</div>
       ${d.ac.map(a=>`<div class="p-ac-item"><span class="ck">✓</span><span>${a}</span></div>`).join('')}</div>
-    <div><div class="p-lbl">🔌 接口定义</div>
+    <div><div class="p-lbl">🔌 技术规格 / API</div>
       <div class="p-tech">${d.tech}</div></div>
     <div><div class="p-lbl">🔗 导航路径</div>
       ${d.nav.map(n=>`<div class="p-nav-item" onclick="jumpTo('${n.to}')">
@@ -802,7 +858,7 @@ function jumpTo(id) {
 // PAN / ZOOM
 // ════════════════════════════════════════════
 
-let scale=0.75, tx=40, ty=55, drag=false, mx=0, my=0;
+let scale=0.72, tx=40, ty=60, drag=false, mx=0, my=0;
 
 function applyT() {
   document.getElementById('canvas').style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
@@ -814,7 +870,7 @@ function Z(d, cx, cy) {
   const ns=Math.min(2,Math.max(0.2,scale+d));
   tx=ox-(ox-tx)*(ns/scale); ty=oy-(oy-ty)*(ns/scale); scale=ns; applyT();
 }
-function R(){ scale=0.75;tx=40;ty=55;applyT(); }
+function R(){ scale=0.72;tx=40;ty=60;applyT(); }
 
 const wrap=document.getElementById('wrap');
 wrap.addEventListener('mousedown',e=>{ if(e.target.closest('.node'))return; drag=true;mx=e.clientX-tx;my=e.clientY-ty;wrap.classList.add('drag'); });
@@ -836,11 +892,11 @@ function buildPhaseNav() {
   });
 }
 
-const phaseXMap={1:24,2:222,3:430,4:660,5:900,6:1130,7:1590};
+const phaseXMap={1:24,2:250,3:490,4:730,5:970,6:1210};
 function focusPhase(id) {
   const x=phaseXMap[id]; if(!x) return;
   const wrap=document.getElementById('wrap');
-  tx=60-x*scale; ty=55; applyT();
+  tx=60-x*scale; ty=60; applyT();
 }
 
 // ════════════════════════════════════════════
