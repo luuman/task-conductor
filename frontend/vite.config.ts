@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react()],
   base: process.env.NODE_ENV === 'production' ? '/task-conductor/' : '/',
   server: {
+    host: '0.0.0.0',
     port: 7070,
     strictPort: true,
     proxy: {
