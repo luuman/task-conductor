@@ -266,27 +266,49 @@ class HttpAdapter {
 
 ```typescript
 // app/Router.tsx
-const RouterComponent = window.__TAURI__ ? HashRouter : BrowserRouter
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom'
+import { isTauri } from '../lib/tauri'
+
+// 路由级懒加载（每个 feature 独立 chunk）
+const AuthPage             = lazy(() => import('../features/auth'))
+const DashboardPage        = lazy(() => import('../features/dashboard'))
+const TaskPipelinePage     = lazy(() => import('../features/tasks'))
+const TaskManagerPage      = lazy(() => import('../features/task-manager'))
+const SessionsPage         = lazy(() => import('../features/sessions'))
+const ConversationHistory  = lazy(() => import('../features/conversation-history'))
+const ChatPage             = lazy(() => import('../features/chat'))
+const ClaudeConfigPage     = lazy(() => import('../features/claude-config'))
+const KnowledgePage        = lazy(() => import('../features/knowledge'))
+const McpMarketPage        = lazy(() => import('../features/mcp-market'))
+const ProjectFilesPage     = lazy(() => import('../features/project-files'))
+const GitPage              = lazy(() => import('../features/git'))
+const CanvasPage           = lazy(() => import('../features/canvas'))
+const SettingsPage         = lazy(() => import('../features/settings'))
+
+const RouterComponent = isTauri() ? HashRouter : BrowserRouter
 
 export function AppRouter() {
   return (
     <RouterComponent>
-      <Routes>
-        <Route path="/login"        element={<lazy(() => import('../features/auth')) />} />
-        <Route path="/"             element={<lazy(() => import('../features/dashboard')) />} />
-        <Route path="/tasks/:id"    element={<lazy(() => import('../features/tasks')) />} />
-        <Route path="/task-manager" element={<lazy(() => import('../features/task-manager')) />} />
-        <Route path="/sessions"     element={<lazy(() => import('../features/sessions')) />} />
-        <Route path="/history"      element={<lazy(() => import('../features/conversation-history')) />} />
-        <Route path="/chat"         element={<lazy(() => import('../features/chat')) />} />
-        <Route path="/config"       element={<lazy(() => import('../features/claude-config')) />} />
-        <Route path="/knowledge"    element={<lazy(() => import('../features/knowledge')) />} />
-        <Route path="/mcp"          element={<lazy(() => import('../features/mcp-market')) />} />
-        <Route path="/files"        element={<lazy(() => import('../features/project-files')) />} />
-        <Route path="/git"          element={<lazy(() => import('../features/git')) />} />
-        <Route path="/canvas"       element={<lazy(() => import('../features/canvas')) />} />
-        <Route path="/settings"     element={<lazy(() => import('../features/settings')) />} />
-      </Routes>
+      <Suspense fallback={<PageLoading />}>
+        <Routes>
+          <Route path="/login"        element={<AuthPage />} />
+          <Route path="/"             element={<DashboardPage />} />
+          <Route path="/tasks/:id"    element={<TaskPipelinePage />} />
+          <Route path="/task-manager" element={<TaskManagerPage />} />
+          <Route path="/sessions"     element={<SessionsPage />} />
+          <Route path="/history"      element={<ConversationHistory />} />
+          <Route path="/chat"         element={<ChatPage />} />
+          <Route path="/config"       element={<ClaudeConfigPage />} />
+          <Route path="/knowledge"    element={<KnowledgePage />} />
+          <Route path="/mcp"          element={<McpMarketPage />} />
+          <Route path="/files"        element={<ProjectFilesPage />} />
+          <Route path="/git"          element={<GitPage />} />
+          <Route path="/canvas"       element={<CanvasPage />} />
+          <Route path="/settings"     element={<SettingsPage />} />
+        </Routes>
+      </Suspense>
     </RouterComponent>
   )
 }
