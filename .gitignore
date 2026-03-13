@@ -17,3 +17,4 @@ build/
 htmlcov/
 .worktrees/
 ws-core/pkg/
+ws-core/target/
