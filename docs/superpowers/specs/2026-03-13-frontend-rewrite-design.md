@@ -35,7 +35,7 @@
 | 样式 | Tailwind CSS 4 | 原子化 CSS（已在 package.json 中） |
 | 服务端状态 | TanStack Query | API 数据缓存 + 后台刷新 |
 | 客户端状态 | Zustand | 轻量全局 UI 状态 |
-| 路由 | TanStack Router | 类型安全路由；Tauri 使用 hash 模式 |
+| 路由 | React Router v6 | 生态成熟；Tauri 使用 HashRouter |
 | WebSocket 核心 | Rust（ws-core crate） | WASM + Web Worker（浏览器）/ tokio（Tauri）|
 | 桌面端 | Tauri 2.x | WebView 壳 + Rust 系统层 |
 | 国际化 | react-i18next | 保留 en/zh 双语支持 |
