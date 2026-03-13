@@ -400,7 +400,7 @@ cd tauri && npm run tauri build # → 打包安装包
 
 ## 十、国际化
 
-保留现有 `react-i18next` 方案，翻译文件迁移到 `frontend/src/i18n/`：
+保留现有 `react-i18next` 方案，翻译文件放在 `tauri/src/i18n/`：
 ```
 i18n/
 ├── en.json
