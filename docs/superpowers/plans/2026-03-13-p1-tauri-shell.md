@@ -87,7 +87,7 @@ npm install -D \
 
 ```bash
 cd /home/sichengli/Documents/code2/task-conductor/tauri
-npx shadcn@latest init --yes --defaults
+npx shadcn@latest init -y
 ```
 
 预期：`components/ui/` 目录创建，`tailwind.config.js` 和 `components.json` 生成
