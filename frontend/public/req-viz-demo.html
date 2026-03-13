@@ -131,25 +131,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 #sel-box{position:absolute;border:1.5px solid #2563eb;background:rgba(37,99,235,.06);
   border-radius:3px;pointer-events:none;display:none;z-index:50}
 
-/* ── DETAIL PANEL ── */
-.panel{position:fixed;right:0;top:48px;bottom:0;width:360px;background:#fff;
-  border-left:1px solid var(--card-bd);box-shadow:-4px 0 16px rgba(0,0,0,.08);
-  transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;z-index:100}
-.panel.open{transform:translateX(0)}
-.panel-hd{padding:14px 16px 12px;border-bottom:1px solid var(--ln);display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
-.panel-title{font-size:15px;font-weight:800;flex:1;color:var(--tx)}
-.panel-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--dim2);padding:0 2px}
-.panel-body{overflow-y:auto;flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
-.p-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--dim2);margin-bottom:7px}
-.p-story{background:#f8f9ff;border-left:3px solid var(--blue);padding:9px 12px;border-radius:0 6px 6px 0;font-size:12px;color:var(--dim);font-style:italic;line-height:1.65}
-.p-story strong{color:var(--tx);font-style:normal}
-.p-ac-item{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;border-radius:6px;border:1px solid var(--ln);margin-bottom:4px;font-size:11.5px;color:#374151;line-height:1.45}
-.p-ac-item .ck{color:var(--green);font-weight:700;font-size:10px;flex-shrink:0;margin-top:1px}
-.p-tech{background:#0f172a;border-radius:6px;padding:9px 11px;font-size:10.5px;color:#a3e635;font-family:monospace;line-height:1.7;white-space:pre}
-.p-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:6px;border:1px solid var(--ln);margin-bottom:4px;font-size:12px;color:var(--dim);cursor:pointer;transition:all .15s}
-.p-nav-item:hover{background:#f8f9ff;border-color:#c7d2fe;color:var(--tx)}
-.wf-preview-wrap{position:relative;width:100%;height:200px;overflow:hidden;border-radius:8px;border:1px solid var(--ln);background:#f3f4f6}
-.wf-preview-wrap iframe{width:1440px;height:900px;border:none;transform:scale(0.218);transform-origin:0 0;pointer-events:none}
+/* ── INLINE EXPANDED CARD ── */
+.node-req{display:none;border-top:1px solid var(--ln);padding:0;background:#fff}
+.node-card.expanded .node-req{display:block}
+.req-section{padding:10px 12px;border-bottom:1px solid #f3f4f6}
+.req-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--dim2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.req-story{background:#f0f4ff;border-left:3px solid var(--blue);padding:8px 10px;border-radius:0 5px 5px 0;font-size:10px;color:#374151;line-height:1.6;font-style:italic}
+.req-ac-item{display:flex;align-items:flex-start;gap:6px;padding:5px 0;font-size:10px;color:#374151;line-height:1.45;border-bottom:1px solid #f9fafb}
+.req-ac-item:last-child{border-bottom:none}
+.req-ck{color:var(--green);font-weight:700;font-size:10px;flex-shrink:0;margin-top:1px}
+.req-tech{background:#0f172a;border-radius:5px;padding:8px 10px;font-size:9px;color:#a3e635;font-family:monospace;line-height:1.7;white-space:pre;overflow-x:auto;max-height:80px}
+.req-nav-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;border:1px solid var(--ln);font-size:9.5px;color:var(--blue);cursor:pointer;transition:all .12s;background:#fff;margin:2px 3px 2px 0}
+.req-nav-btn:hover{background:#f0f4ff;border-color:#93c5fd}
+.expand-btn{background:none;border:none;cursor:pointer;font-size:11px;color:#9ca3af;padding:2px 4px;border-radius:3px;transition:all .1s;line-height:1;flex-shrink:0}
+.expand-btn:hover{background:rgba(0,0,0,.06);color:var(--tx)}
+/* ── PREVIEW MODE ── */
+body.preview-mode .node{cursor:default}
+body.preview-mode .node .connector{display:none!important}
+body.preview-mode .node-card iframe{pointer-events:auto!important}
+/* ── WIREFRAME PREVIEW (inside detail popup) ── */
+.wf-inline-wrap{position:relative;width:100%;height:190px;overflow:hidden;border-radius:6px;border:1px solid var(--ln);background:#f3f4f6;margin-bottom:6px}
+.wf-inline-wrap iframe{width:1440px;height:900px;border:none;transform:scale(0.185);transform-origin:0 0;pointer-events:none}
+body.preview-mode .wf-inline-wrap iframe{pointer-events:auto}
 
 /* ── CONTEXT MENU ── */
 #ctx-menu{position:fixed;background:#fff;border:1px solid var(--card-bd);border-radius:9px;
