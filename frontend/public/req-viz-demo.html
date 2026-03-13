@@ -585,10 +585,16 @@ const WF = {
     </div>
     <div class="row" style="gap:4px;margin-top:4px">${btn('✓ 批准','grn')}${btn('✏️ 修改','sec')}${btn('✗ 拒绝','red')}</div></div>`,
 
-  retry:()=>`<div style="background:#fef2f2;padding:4px 7px;border-bottom:1px solid #fecaca">
-    <div style="font-size:8px;color:#dc2626;font-weight:700">✗ 已拒绝 · 第2次迭代</div></div>
-    <div class="sc-body"><div style="background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:4px 6px;margin-bottom:5px">${lns('90%','70%')}</div>
-    <div style="font-size:7px;color:#6b7280;margin-bottom:4px">📚 知识库已更新</div>${btn('🔄 重新执行','pri')}</div>`,
+  retry:()=>`<div style="background:#fef2f2;padding:6px 10px;border-bottom:1px solid #fecaca">
+    <div style="font-size:11px;color:#dc2626;font-weight:700">✗ 已拒绝 · 第 2 次迭代</div>
+    <div style="font-size:9px;color:#b91c1c;margin-top:2px">需优化：布局层级不够清晰</div></div>
+    <div class="sc-body">
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:6px 8px;margin-bottom:6px">
+      <div style="font-size:9px;font-weight:700;color:#dc2626;margin-bottom:3px">拒绝原因</div>
+      ${lns('90%','70%')}
+    </div>
+    <div style="font-size:9px;color:#6b7280;margin-bottom:6px">📚 经验已写入知识库 · 下轮注入</div>
+    ${btn('🔄 重新执行 (第3轮)','pri')}</div>`,
 
   mgmt:()=>`<div style="background:#0f172a;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.08)">
     <div class="row" style="margin:0"><div style="font-size:7px;color:#e5e7eb;font-weight:700">管理中心</div>
