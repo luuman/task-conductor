@@ -729,7 +729,8 @@ export const useAuthStore = create<AuthStore>()((set) => ({
 
 // 监听其他窗口的 auth 变化（应用启动时调用一次）
 export function initAuthSync() {
-  return windowBus.on('auth_changed', ({ token }: { token: string | null }) => {
+  return windowBus.on('auth_changed', (data) => {
+    const { token } = data as { token: string | null }
     useAuthStore.getState()._syncFrom(token)
   })
 }
