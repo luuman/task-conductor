@@ -1396,7 +1396,13 @@ document.addEventListener('keydown',e=>{
   if(e.key==='c'||e.key==='C') setTool('connect');
   if(e.key==='g'||e.key==='G') toggleGrid();
   if(e.key==='n'||e.key==='N') addStickyNote();
-  if(e.key==='Escape'){ clearSelection(); cancelConnect(); closePanel(); hideCtx(); }
+  if(e.key==='p'||e.key==='P') togglePreviewMode();
+  if(e.key==='Escape'){
+    clearSelection(); cancelConnect(); hideCtx();
+    // Collapse all expanded nodes on Esc
+    NODES.forEach(nd=>{ expandedNodes.delete(nd.id); document.querySelector(`#${nd.id} .node-card`)?.classList.remove('expanded'); });
+    if(isPreviewMode) togglePreviewMode();
+  }
   if((e.key==='Delete'||e.key==='Backspace')&&!e.metaKey){
     e.preventDefault();
     if(selectedArrowIdx!==null) deleteSelectedArrow();
