@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskConductor — 项目概览</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    body { margin: 0; background: #F1F3F8; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 224px;
+      min-height: 100vh;
+      background: linear-gradient(175deg, #0C1322 0%, #0F172A 60%, #111827 100%);
+      border-right: 1px solid rgba(255,255,255,0.055);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #374151;
+      padding: 6px 14px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 12px;
+      margin: 1px 6px;
+      border-radius: 7px;
+      color: #6B7280;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.13s ease;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: #D1D5DB; }
+    .nav-item.active {
+      background: rgba(37,99,235,0.18);
+      color: #93C5FD;
+    }
+    .nav-item.done { color: #4B5563; }
+    .nav-item.pending { color: #6B7280; }
+    .nav-item.waiting { color: #D97706; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.055);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
+    }
+
+    /* ── Stage badges ── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600; }
+    .badge-green { background: #DCFCE7; color: #16A34A; }
+    .badge-amber { background: #FEF3C7; color: #B45309; }
+    .badge-gray { background: #F3F4F6; color: #6B7280; }
+    .badge-blue { background: #DBEAFE; color: #1D4ED8; }
+    .badge-red { background: #FEE2E2; color: #DC2626; }
+
+    /* ── Pulse ── */
+    @keyframes pulseRing {
+      0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      50% { box-shadow: 0 0 0 7px rgba(245,158,11,0); }
+    }
+    .pulse-amber { animation: pulseRing 2.2s ease-in-out infinite; }
+
+    /* ── Divider ── */
+    .sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.055); margin: 6px 0; }
+
+    /* ── Stage timeline connector ── */
+    .stage-connector {
+      flex: 1;
+      height: 2px;
+      min-width: 24px;
+      margin-top: -22px;
+      position: relative;
+      top: -1px;
+    }
+  </style>
+</head>
+<body>
+<div style="display:flex; min-height:100vh;">
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div style="padding: 18px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.055);">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px;">
+        <div style="width:30px; height:30px; background:linear-gradient(135deg,#2563EB,#7C3AED); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; letter-spacing:-0.5px; flex-shrink:0;">TC</div>
+        <span style="color:#E5E7EB; font-size:14px; font-weight:700; letter-spacing:-0.3px;">TaskConductor</span>
+      </div>
+      <!-- Project switcher -->
+      <button style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:rgba(255,255,255,0.06); border-radius:8px; border:1px solid rgba(255,255,255,0.09); cursor:pointer; transition: background 0.13s;">
+        <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+          <div style="width:7px; height:7px; background:#F59E0B; border-radius:50%; flex-shrink:0;"></div>
+          <span style="color:#E5E7EB; font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">My E-Commerce App</span>
+        </div>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2.5" style="flex-shrink:0; margin-left:4px;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+
+    <!-- Project nav -->
+    <nav style="flex:1; padding:10px 0 6px;">
+      <div class="nav-section-label">项目阶段</div>
+
+      <a class="nav-item active">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        项目概览
+      </a>
+
+      <a class="nav-item done">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        PRD 需求
+        <span class="badge badge-green" style="margin-left:auto; font-size:10px; padding:1px 7px;">完成</span>
+      </a>
+
+      <a class="nav-item waiting">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Design 设计
+        <span class="badge badge-amber" style="margin-left:auto; font-size:10px; padding:1px 7px;">审批中</span>
+      </a>
+
+      <a class="nav-item pending" style="opacity:0.55;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        Tech Stack
+      </a>
+
+      <a class="nav-item pending" style="opacity:0.55;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        Development
+      </a>
+
+      <a class="nav-item pending" style="opacity:0.55;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        Versions
+      </a>
+
+      <a class="nav-item pending" style="opacity:0.55;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        Logs
+      </a>
+    </nav>
+
+    <!-- Management Center button -->
+    <div style="padding:10px 8px 16px; border-top:1px solid rgba(255,255,255,0.055);">
+      <a class="nav-item" style="border:1px solid rgba(255,255,255,0.08); border-radius:8px; margin:0; padding:8px 12px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        管理中心
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:auto;"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ════════════ MAIN ════════════ -->
+  <main style="flex:1; padding:32px 36px; overflow:auto; min-width:0;">
+
+    <!-- Page header -->
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+          <h1 style="margin:0; font-size:26px; font-weight:800; color:#0F172A; letter-spacing:-0.6px;">My E-Commerce App</h1>
+          <span class="badge badge-amber">◑ Design 审批中</span>
+        </div>
+        <p style="margin:0; color:#6B7280; font-size:13.5px;">一个完整的 B2C 电商平台，支持多商户、AI 智能推荐、实时库存管理</p>
+      </div>
+      <div style="display:flex; gap:8px; flex-shrink:0;">
+        <button style="padding:8px 16px; background:#fff; border:1px solid #E5E7EB; border-radius:8px; font-size:13px; font-weight:600; color:#374151; cursor:pointer; font-family:inherit;">导出报告</button>
+        <button style="padding:8px 16px; background:#2563EB; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px;">继续开发 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Pipeline timeline card -->
+    <div class="card" style="padding:24px; margin-bottom:20px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;">
+        <h2 style="margin:0; font-size:14px; font-weight:700; color:#111827;">开发流水线</h2>
+        <span style="font-size:12px; color:#9CA3AF; font-weight:500;">2 / 7 阶段 · 预计剩余 12 天</span>
+      </div>
+
+      <div style="display:flex; align-items:flex-start; gap:0; overflow-x:auto; padding-bottom:4px;">
+
+        <!-- PRD ✓ -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:72px;">
+          <div style="width:42px; height:42px; background:#DCFCE7; border:2.5px solid #16A34A; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; color:#16A34A;">✓</div>
+          <span style="font-size:11px; font-weight:700; color:#16A34A; text-align:center;">PRD</span>
+          <span class="badge badge-green" style="font-size:10px; padding:1px 7px;">完成</span>
+        </div>
+
+        <div class="stage-connector" style="background:#16A34A;"></div>
+
+        <!-- Design ◑ (current) -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:80px;">
+          <div class="pulse-amber" style="width:42px; height:42px; background:#FEF3C7; border:2.5px solid #F59E0B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#B45309;">◑</div>
+          <span style="font-size:11px; font-weight:700; color:#B45309; text-align:center;">Design</span>
+          <span class="badge badge-amber" style="font-size:10px; padding:1px 7px;">待审批</span>
+        </div>
+
+        <div class="stage-connector" style="background:#E5E7EB;"></div>
+
+        <!-- Tech Stack -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:80px; opacity:0.5;">
+          <div style="width:42px; height:42px; background:#F9FAFB; border:2px solid #D1D5DB; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#9CA3AF;">3</div>
+          <span style="font-size:11px; color:#9CA3AF; text-align:center;">Tech Stack</span>
+        </div>
+
+        <div class="stage-connector" style="background:#E5E7EB; opacity:0.5;"></div>
+
+        <!-- Development -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:90px; opacity:0.5;">
+          <div style="width:42px; height:42px; background:#F9FAFB; border:2px solid #D1D5DB; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#9CA3AF;">4</div>
+          <span style="font-size:11px; color:#9CA3AF; text-align:center;">Dev</span>
+        </div>
+
+        <div class="stage-connector" style="background:#E5E7EB; opacity:0.5;"></div>
+
+        <!-- Testing -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:72px; opacity:0.5;">
+          <div style="width:42px; height:42px; background:#F9FAFB; border:2px solid #D1D5DB; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#9CA3AF;">5</div>
+          <span style="font-size:11px; color:#9CA3AF; text-align:center;">Test</span>
+        </div>
+
+        <div class="stage-connector" style="background:#E5E7EB; opacity:0.5;"></div>
+
+        <!-- Deploy -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:72px; opacity:0.5;">
+          <div style="width:42px; height:42px; background:#F9FAFB; border:2px solid #D1D5DB; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#9CA3AF;">6</div>
+          <span style="font-size:11px; color:#9CA3AF; text-align:center;">Deploy</span>
+        </div>
+
+        <div class="stage-connector" style="background:#E5E7EB; opacity:0.5;"></div>
+
+        <!-- Monitor -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; min-width:72px; opacity:0.5;">
+          <div style="width:42px; height:42px; background:#F9FAFB; border:2px solid #D1D5DB; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#9CA3AF;">7</div>
+          <span style="font-size:11px; color:#9CA3AF; text-align:center;">Monitor</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Stage detail + stats -->
+    <div style="display:grid; grid-template-columns:1fr 260px; gap:16px; margin-bottom:16px;">
+
+      <!-- Current stage detail -->
+      <div class="card" style="padding:24px;">
+        <!-- Status bar -->
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#FFFBEB; border-radius:9px; border:1px solid #FDE68A; margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:8px; height:8px; background:#F59E0B; border-radius:50%;"></div>
+            <span style="font-size:13px; font-weight:700; color:#92400E;">Design 阶段 · 待您审批</span>
+          </div>
+          <span style="font-size:12px; color:#B45309;">已等待 10 分钟</span>
+        </div>
+
+        <p style="color:#4B5563; font-size:13.5px; line-height:1.65; margin:0 0 20px;">
+          AI 已完成 3 套设计方案（A / B / C），基于 PRD 需求分析与竞品调研。请审阅后选择方案，或提出修改意见以进入下一轮迭代。
+        </p>
+
+        <!-- Option cards A/B/C -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px;">
+          <!-- Option A - selected -->
+          <div style="padding:14px; border:2px solid #2563EB; border-radius:10px; background:#EFF6FF; cursor:pointer; position:relative;">
+            <div style="position:absolute; top:8px; right:8px; width:16px; height:16px; background:#2563EB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div style="font-size:11px; font-weight:800; color:#1D4ED8; margin-bottom:5px; letter-spacing:0.05em;">方案 A</div>
+            <div style="font-size:12px; font-weight:600; color:#1E40AF; margin-bottom:4px;">极简现代</div>
+            <div style="font-size:11.5px; color:#3B82F6; line-height:1.5;">白底蓝调，高端品质感，适合中高端用户</div>
+          </div>
+          <!-- Option B -->
+          <div style="padding:14px; border:1px solid #E5E7EB; border-radius:10px; cursor:pointer;">
+            <div style="font-size:11px; font-weight:800; color:#6B7280; margin-bottom:5px; letter-spacing:0.05em;">方案 B</div>
+            <div style="font-size:12px; font-weight:600; color:#374151; margin-bottom:4px;">深色时尚</div>
+            <div style="font-size:11.5px; color:#6B7280; line-height:1.5;">深色主题，视觉冲击力强，品牌辨识度高</div>
+          </div>
+          <!-- Option C -->
+          <div style="padding:14px; border:1px solid #E5E7EB; border-radius:10px; cursor:pointer;">
+            <div style="font-size:11px; font-weight:800; color:#6B7280; margin-bottom:5px; letter-spacing:0.05em;">方案 C</div>
+            <div style="font-size:12px; font-weight:600; color:#374151; margin-bottom:4px;">活泼插画</div>
+            <div style="font-size:11.5px; color:#6B7280; line-height:1.5;">色彩丰富，年轻化定位，适合大众用户</div>
+          </div>
+        </div>
+
+        <!-- AI confidence -->
+        <div style="background:#F8FAFF; border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; gap:16px;">
+          <div style="font-size:12px; color:#6B7280;">
+            <span style="font-weight:600; color:#374151;">AI 置信度：</span> 方案 A 92% · 方案 B 84% · 方案 C 76%
+          </div>
+          <div style="font-size:12px; color:#6B7280; margin-left:auto;">
+            <span style="font-weight:600; color:#374151;">Critic 评分：</span> A 9.2 / 10
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button style="flex:1; padding:10px; background:#2563EB; border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;">✓ 批准方案 A，进入下一阶段</button>
+          <button style="padding:10px 16px; background:#fff; border:1px solid #E5E7EB; border-radius:8px; color:#374151; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;">提出修改 →</button>
+          <button style="padding:10px 14px; background:#FEE2E2; border:none; border-radius:8px; color:#DC2626; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;">拒绝</button>
+        </div>
+      </div>
+
+      <!-- Right stats column -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+
+        <div class="card" style="padding:18px;">
+          <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.09em; margin-bottom:10px;">项目进度</div>
+          <div style="font-size:30px; font-weight:800; color:#0F172A; letter-spacing:-1px; margin-bottom:8px;">29%</div>
+          <div style="background:#F3F4F6; border-radius:99px; height:7px; overflow:hidden; margin-bottom:6px;">
+            <div style="width:29%; height:100%; background:linear-gradient(90deg,#2563EB,#7C3AED); border-radius:99px;"></div>
+          </div>
+          <div style="font-size:11.5px; color:#9CA3AF;">2 / 7 阶段完成</div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.09em; margin-bottom:10px;">AI 调用统计</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div>
+              <div style="font-size:24px; font-weight:800; color:#0F172A; letter-spacing:-0.5px;">47</div>
+              <div style="font-size:11px; color:#9CA3AF; margin-top:1px;">总调用次数</div>
+            </div>
+            <div>
+              <div style="font-size:24px; font-weight:800; color:#10B981; letter-spacing:-0.5px;">98%</div>
+              <div style="font-size:11px; color:#9CA3AF; margin-top:1px;">成功率</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div style="font-size:10.5px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.09em; margin-bottom:8px;">项目信息</div>
+          <div style="font-size:12.5px; color:#374151; font-weight:600; margin-bottom:2px;">2026-03-10 创建</div>
+          <div style="font-size:11.5px; color:#9CA3AF;">3 天前启动</div>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid #F3F4F6;">
+            <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">知识库</div>
+            <div style="font-size:12.5px; font-weight:600; color:#2563EB; cursor:pointer;">4 条积累经验 →</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Activity feed -->
+    <div class="card" style="padding:20px;">
+      <h3 style="margin:0 0 14px; font-size:14px; font-weight:700; color:#111827;">最近活动</h3>
+
+      <div style="display:flex; flex-direction:column; gap:0;">
+
+        <div style="display:flex; align-items:flex-start; gap:12px; padding:11px 0; border-bottom:1px solid #F3F4F6;">
+          <div style="width:30px; height:30px; background:#FEF3C7; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">⏳</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; color:#111827; font-weight:600;">Design 阶段等待审批</div>
+            <div style="font-size:12px; color:#6B7280; margin-top:2px;">AI 已生成 3 套设计方案，等待人工选择</div>
+          </div>
+          <span style="font-size:11px; color:#9CA3AF; white-space:nowrap; flex-shrink:0;">10 分钟前</span>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:12px; padding:11px 0; border-bottom:1px solid #F3F4F6;">
+          <div style="width:30px; height:30px; background:#DCFCE7; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">✓</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; color:#111827; font-weight:600;">PRD 文档审批通过</div>
+            <div style="font-size:12px; color:#6B7280; margin-top:2px;">已批准 v1.2 版本需求文档，包含 23 个功能点</div>
+          </div>
+          <span style="font-size:11px; color:#9CA3AF; white-space:nowrap; flex-shrink:0;">2 小时前</span>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:12px; padding:11px 0; border-bottom:1px solid #F3F4F6;">
+          <div style="width:30px; height:30px; background:#DBEAFE; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">🤖</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; color:#111827; font-weight:600;">AI 完成 PRD 访谈</div>
+            <div style="font-size:12px; color:#6B7280; margin-top:2px;">12 轮对话，生成 2,500 字需求文档，置信度 94%</div>
+          </div>
+          <span style="font-size:11px; color:#9CA3AF; white-space:nowrap; flex-shrink:0;">昨天 16:42</span>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:12px; padding:11px 0;">
+          <div style="width:30px; height:30px; background:#F3F4F6; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">🚀</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; color:#111827; font-weight:600;">项目创建</div>
+            <div style="font-size:12px; color:#6B7280; margin-top:2px;">由用户新建项目，进入 PRD 访谈流程</div>
+          </div>
+          <span style="font-size:11px; color:#9CA3AF; white-space:nowrap; flex-shrink:0;">3 天前</span>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
