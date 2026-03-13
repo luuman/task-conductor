@@ -1463,7 +1463,7 @@ function updateMinimap(){
   NODES.forEach(n=>{
     const p=nodePos[n.id]; if(!p) return;
     minX=Math.min(minX,p.x); minY=Math.min(minY,p.y);
-    maxX=Math.max(maxX,p.x+170); maxY=Math.max(maxY,p.y+160);
+    maxX=Math.max(maxX,p.x+290); maxY=Math.max(maxY,p.y+260);
   });
   if(minX===Infinity) return;
   const pad=20;
