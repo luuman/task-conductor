@@ -573,15 +573,17 @@ const WF = {
         <div class="ln xs" style="width:45%;margin:0"></div>
         <div style="font-size:8px;color:#9ca3af">生成中…</div></div></div>`,
 
-  approve:()=>`<div style="background:#fffbeb;padding:4px 7px;border-bottom:1px solid #fde68a">
-    <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 待审批 — Design</div></div>
-    <div class="sc-body"><div class="row" style="align-items:stretch;gap:3px">
-      ${[{t:'方案A',v:92,s:true},{t:'方案B',v:84,s:false},{t:'方案C',v:76,s:false}].map(o=>`
+  approve:()=>`<div style="background:#fffbeb;padding:6px 10px;border-bottom:1px solid #fde68a">
+    <div style="font-size:11px;color:#d97706;font-weight:700">⏸ 待您审批 — Design 阶段</div>
+    <div style="font-size:9px;color:#92400e;margin-top:2px">AI 置信度高 · Critic 已通过</div></div>
+    <div class="sc-body"><div class="row" style="align-items:stretch;gap:5px">
+      ${[{t:'方案 A',v:92,s:true,desc:'清晰布局'},{t:'方案 B',v:84,s:false,desc:'极简风格'},{t:'方案 C',v:76,s:false,desc:'丰富功能'}].map(o=>`
       <div class="option-card ${o.s?'sel':''}">
-        <div style="font-size:7px;font-weight:700;color:${o.s?'#2563eb':'#374151'}">${o.t}</div>
-        <div style="font-size:9px;font-weight:800;color:${o.v>=90?'#10b981':'#6b7280'}">${o.v}</div>${ln('75%')}</div>`).join('')}
+        <div style="font-size:9px;font-weight:700;color:${o.s?'#2563eb':'#374151'}">${o.t}</div>
+        <div style="font-size:14px;font-weight:800;color:${o.v>=90?'#10b981':'#6b7280'};line-height:1.4">${o.v}</div>
+        <div style="font-size:8px;color:#6b7280">${o.desc}</div></div>`).join('')}
     </div>
-    <div class="row" style="gap:3px">${btn('✓ 批准','grn')}${btn('✏️','sec')}${btn('✗','red')}</div></div>`,
+    <div class="row" style="gap:4px;margin-top:4px">${btn('✓ 批准','grn')}${btn('✏️ 修改','sec')}${btn('✗ 拒绝','red')}</div></div>`,
 
   retry:()=>`<div style="background:#fef2f2;padding:4px 7px;border-bottom:1px solid #fecaca">
     <div style="font-size:8px;color:#dc2626;font-weight:700">✗ 已拒绝 · 第2次迭代</div></div>
