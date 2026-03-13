@@ -725,7 +725,8 @@ function loadState(){
     const savedArrows=localStorage.getItem('tc-req-arrows');
     if(savedArrows){ const d=JSON.parse(savedArrows); deletedBuiltinArrows=new Set(d.deleted||[]); customArrows=d.custom||[]; }
   }catch(e){}
-  NODES.forEach(n=>{ if(!nodePos[n.id]) nodePos[n.id]={...DEFAULT_POS[n.id]}; });
+  // Always use fresh DEFAULT_POS for new layout (clear old stale positions)
+  NODES.forEach(n=>{ nodePos[n.id]={...DEFAULT_POS[n.id]}; });
 }
 
 function saveState(){
