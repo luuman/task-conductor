@@ -468,11 +468,13 @@ function inp(ph=false){return`<div class="inp ${ph?'focus':''}"><div class="${ph
 function sep(){return'<div class="sep"></div>'}
 
 const WF = {
-  entry:()=>`<div style="background:#0f172a;padding:8px;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-    <div style="width:26px;height:26px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:6px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff">TC</div>
-    ${ln('55%')}<div style="display:flex;gap:4px;margin-top:5px;width:85%">
-    <div style="flex:1;height:15px;background:#1e293b;border:1px solid #2563eb;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:6.5px;color:#60a5fa;font-weight:600">有项目→</div>
-    <div style="flex:1;height:15px;background:#1e293b;border:1px solid #374151;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:6.5px;color:#4b5563">无项目↓</div></div></div>`,
+  entry:()=>`<div style="background:#0f172a;padding:14px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div style="width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:10px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff">TC</div>
+    <div style="font-size:12px;font-weight:700;color:#e5e7eb;margin-bottom:4px">TaskConductor</div>
+    <div style="font-size:10px;color:#6b7280;margin-bottom:10px">AI 全流程开发协作平台</div>
+    <div style="display:flex;gap:6px;width:90%">
+    <div style="flex:1;height:26px;background:#1e293b;border:1px solid #2563eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#60a5fa;font-weight:600">有项目 →</div>
+    <div style="flex:1;height:26px;background:#1e293b;border:1px solid #374151;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#4b5563">新建 ↓</div></div></div>`,
 
   onboard:()=>`<div class="sc-body"><div style="font-size:8.5px;font-weight:700;margin-bottom:5px;color:#6366f1">✨ 创建第一个项目</div>
     <div style="font-size:7px;color:var(--dim2);margin-bottom:2px">项目名称 *</div>${inp(true)}
