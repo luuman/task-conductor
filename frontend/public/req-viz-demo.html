@@ -866,7 +866,8 @@ function buildPhaseHeaders(){
     const x=phaseX[ph.id]; if(!x) return;
     const el=document.createElement('div');
     el.className='ph-head';
-    el.style.cssText=`left:${x}px`;
+    const ty0=phaseTopY[ph.id]||60;
+    el.style.cssText=`left:${x}px;top:${ty0}px`;
     el.innerHTML=`<div class="ph-head-lbl" style="color:${ph.color}">
       <div class="ph-num" style="background:${ph.bg};color:${ph.color}">${ph.id}</div>
       ${ph.label.slice(2)}</div>`;
