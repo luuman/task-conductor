@@ -258,26 +258,44 @@ class HttpAdapter {
 
 ## 六、路由设计
 
-```typescript
-// app/routes.tsx（TanStack Router）
-const router = createRouter({
-  history: window.__TAURI__
-    ? createHashHistory()    // Tauri：hash 路由（file:// 协议）
-    : createBrowserHistory(), // Web：history 路由
+路由库使用 **React Router v6**（语法更简洁，生态成熟）。Tauri 使用 `HashRouter`，Web 使用 `BrowserRouter`。
 
-  routes: [
-    { path: '/login',    component: lazy(() => import('../features/auth')) },
-    { path: '/',         component: lazy(() => import('../features/dashboard')) },
-    { path: '/tasks/:id',component: lazy(() => import('../features/tasks')) },
-    { path: '/sessions', component: lazy(() => import('../features/sessions')) },
-    { path: '/chat',     component: lazy(() => import('../features/chat')) },
-    { path: '/config',   component: lazy(() => import('../features/claude-config')) },
-    { path: '/knowledge',component: lazy(() => import('../features/knowledge')) },
-    { path: '/mcp',      component: lazy(() => import('../features/mcp-market')) },
-    { path: '/git',      component: lazy(() => import('../features/git')) },
-    { path: '/settings', component: lazy(() => import('../features/settings')) },
-  ]
-})
+```typescript
+// app/Router.tsx
+const RouterComponent = window.__TAURI__ ? HashRouter : BrowserRouter
+
+export function AppRouter() {
+  return (
+    <RouterComponent>
+      <Routes>
+        <Route path="/login"        element={<lazy(() => import('../features/auth')) />} />
+        <Route path="/"             element={<lazy(() => import('../features/dashboard')) />} />
+        <Route path="/tasks/:id"    element={<lazy(() => import('../features/tasks')) />} />
+        <Route path="/task-manager" element={<lazy(() => import('../features/task-manager')) />} />
+        <Route path="/sessions"     element={<lazy(() => import('../features/sessions')) />} />
+        <Route path="/history"      element={<lazy(() => import('../features/conversation-history')) />} />
+        <Route path="/chat"         element={<lazy(() => import('../features/chat')) />} />
+        <Route path="/config"       element={<lazy(() => import('../features/claude-config')) />} />
+        <Route path="/knowledge"    element={<lazy(() => import('../features/knowledge')) />} />
+        <Route path="/mcp"          element={<lazy(() => import('../features/mcp-market')) />} />
+        <Route path="/files"        element={<lazy(() => import('../features/project-files')) />} />
+        <Route path="/git"          element={<lazy(() => import('../features/git')) />} />
+        <Route path="/canvas"       element={<lazy(() => import('../features/canvas')) />} />
+        <Route path="/settings"     element={<lazy(() => import('../features/settings')) />} />
+      </Routes>
+    </RouterComponent>
+  )
+}
+```
+
+**`window.__TAURI__` 类型声明：**
+```typescript
+// lib/tauri.ts
+declare global {
+  interface Window { __TAURI__?: unknown }
+}
+export const isTauri = (): boolean => typeof window.__TAURI__ !== 'undefined'
+```
 ```
 
 ---
