@@ -8,694 +8,482 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #06080a;
-  --surface: rgba(255,255,255,0.04);
+  --bg: #080a0d;
+  --green: #22c55e;
   --border: rgba(255,255,255,0.08);
   --text: #eef0f2;
-  --dim: rgba(238,240,242,0.35);
-  --green: #22c55e;
-  --green-glow: rgba(34,197,94,0.25);
-  --card-w: 140px;
-  --card-h: 190px;
+  --dim: rgba(238,240,242,0.38);
+  /* card dims */
+  --cw: 152px;
+  --ch: 212px;
 }
 
 html, body {
-  height: 100%;
-  overflow: hidden;
+  height: 100%; overflow: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   user-select: none;
+  display: flex; flex-direction: column;
 }
 
-/* ── NAV ──────────────────────────────────── */
+/* ─── NAV ─────────────────────────────── */
 .nav {
-  height: 52px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-  gap: 10px;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 20;
-}
-
-.nav-logo {
-  width: 28px; height: 28px;
-  border-radius: 7px;
-  background: rgba(255,255,255,0.08);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; flex-shrink: 0;
-}
-
-.nav-icon-btn {
-  width: 28px; height: 28px;
-  border-radius: 6px;
-  background: transparent;
-  border: none; cursor: pointer; color: var(--dim);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; transition: background 0.15s;
-}
-.nav-icon-btn:hover { background: rgba(255,255,255,0.06); }
-
-.nav-date {
-  font-size: 12px; color: var(--dim);
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  display: flex; align-items: center; gap: 5px;
-}
-
-.meeting-pill {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 11px; color: var(--dim);
-  display: flex; align-items: center; gap: 6px;
-  cursor: pointer; transition: all 0.15s;
-}
-.meeting-pill:hover { background: rgba(255,255,255,0.08); }
-.meeting-pill.live {
-  background: rgba(34,197,94,0.08);
-  border-color: rgba(34,197,94,0.25);
-  color: rgba(134,239,172,0.9);
-}
-
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: blink 2s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
-
-.nav-sep { flex: 1; }
-
-.btn {
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--dim);
-  display: flex; align-items: center; gap: 5px;
-  transition: all 0.15s; white-space: nowrap;
-}
-.btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
-.btn.primary {
-  background: rgba(34,197,94,0.1);
-  border-color: rgba(34,197,94,0.3);
-  color: #86efac;
-}
-.btn.primary:hover { background: rgba(34,197,94,0.18); }
-
-/* ── TOOLBAR ──────────────────────────────── */
-.toolbar {
-  height: 40px;
+  height: 50px;
   display: flex; align-items: center;
-  padding: 0 20px; gap: 6px;
+  padding: 0 18px; gap: 8px;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  flex-shrink: 0; z-index: 20;
 }
+.logo { width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:center;font-size:12px; }
+.nav-ico { width:26px;height:26px;border-radius:5px;background:transparent;border:none;cursor:pointer;color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:13px; }
+.date-pill { font-size:11px;color:var(--dim);padding:3px 9px;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:5px; }
+.meet { background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px; }
+.meet.live { background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.28);color:rgba(167,243,208,0.9); }
+.ldot { width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.sp { flex:1; }
+.btn { padding:4px 11px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);display:flex;align-items:center;gap:4px;white-space:nowrap; }
+.btn.g { background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#86efac; }
+.notif { position:relative; }
+.notif-badge { position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:1.5px solid var(--bg); }
+.ava-pill { width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0; }
 
-.pill {
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--dim);
-  cursor: pointer;
-  display: flex; align-items: center; gap: 5px;
-  transition: all 0.15s;
-}
-.pill:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-.pill.active {
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.15);
-  color: var(--text);
-}
+/* ─── TOOLBAR ─────────────────────────── */
+.toolbar { height:38px;display:flex;align-items:center;padding:0 18px;gap:6px;border-bottom:1px solid var(--border);flex-shrink:0; }
+.pill { padding:3px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:4px; }
+.pill.on { background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.16);color:var(--text); }
 
-/* ── STAGE ────────────────────────────────── */
+/* ─── STAGE ───────────────────────────── */
 .stage {
   position: relative;
-  flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-  min-height: 0;
+  flex: 1; overflow: hidden; min-height: 0;
+  /* Radial green glow from center-left */
+  background: radial-gradient(ellipse 55% 70% at 40% 55%, rgba(34,197,94,0.04) 0%, transparent 65%);
 }
 
-.stage-bg {
+/* CSS 3D perspective container */
+.scene {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 50% 60%, rgba(34,197,94,0.04) 0%, transparent 70%);
-  pointer-events: none;
+  perspective: 1100px;
+  perspective-origin: 48% 46%;
 }
 
-/* SVG arc guide */
-#arcSvg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-}
-
-/* Fan root — all cards are absolutely positioned relative to this center point */
-.fan-root {
-  position: relative;
-  width: 1px; height: 1px;
-  z-index: 1;
-}
-
-/* ── CARDS ────────────────────────────────── */
-.card-wrapper {
+/* 3D fan anchor — centered, tilted slightly overhead */
+#fan {
   position: absolute;
-  left: 0; top: 0;
-  will-change: transform, opacity, filter;
-  transition:
-    transform 0.55s cubic-bezier(0.34, 1.25, 0.64, 1),
-    opacity   0.45s ease,
-    filter    0.45s ease;
+  /* shift left so active card sits at ~38% of screen width */
+  left: calc(50% - 80px);
+  top: 50%;
+  width: 1px; height: 1px;
+  transform-style: preserve-3d;
+  /* Slight overhead tilt for the dramatic looking-down-at-spread-cards effect */
+  transform: rotateX(-14deg);
 }
 
-.card {
-  width: var(--card-w);
-  height: var(--card-h);
-  border-radius: 11px;
-  background: rgba(18, 21, 27, 0.92);
-  border: 1px solid rgba(255,255,255,0.09);
+/* ─── CARD WRAPPER (3D positioned) ────── */
+.cw {
+  position: absolute;
+  left: calc(var(--cw) / -2);
+  top: calc(var(--ch) / -2);
+  width: var(--cw);
+  height: var(--ch);
+  transform-style: preserve-3d;
+  transition:
+    transform  0.58s cubic-bezier(0.34, 1.18, 0.64, 1),
+    opacity    0.42s ease;
   cursor: pointer;
+}
+
+/* ─── CARD VISUAL ─────────────────────── */
+.card {
+  width: 100%; height: 100%;
+  border-radius: 11px;
+  /* BRIGHT WHITE FROSTED appearance (no backdrop-filter — breaks preserve-3d) */
+  background: linear-gradient(
+    158deg,
+    rgba(230, 238, 250, 0.16) 0%,
+    rgba(200, 215, 235, 0.08) 60%,
+    rgba(180, 200, 225, 0.05) 100%
+  );
+  border: 1px solid rgba(255,255,255,0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    inset 0 0 24px rgba(255,255,255,0.04),
+    0 8px 32px rgba(0,0,0,0.5);
   overflow: hidden;
   position: relative;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
-.card:hover { border-color: rgba(255,255,255,0.18); }
 
+/* Light reflection sheen on inactive cards */
+.card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    145deg,
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.06) 35%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* Active card — solid green */
 .card.active {
-  background: linear-gradient(148deg, #1b5e38 0%, #1a7240 50%, #15803d 100%);
-  border-color: rgba(74,222,128,0.45);
+  background: linear-gradient(150deg, #1a5c38 0%, #1e7845 40%, #178040 100%);
+  border-color: rgba(134,239,172,0.55);
   box-shadow:
-    0 0 0 1px rgba(74,222,128,0.15),
-    0 8px 32px rgba(0,0,0,0.7),
-    0 0 60px rgba(34,197,94,0.2);
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 0  70px rgba(34,197,94,0.32),
+    0 12px 48px rgba(0,0,0,0.7);
+}
+.card.active::before {
+  background: linear-gradient(145deg, rgba(255,255,255,0.18) 0%, transparent 50%);
 }
 
-/* Inactive card wireframe lines */
-.card-lines {
-  padding: 16px 14px;
-  display: flex; flex-direction: column; gap: 7px;
+/* Wireframe lines on inactive cards */
+.lines { padding: 16px 13px 0; display:flex;flex-direction:column;gap:8px; }
+.ln { height: 2px; border-radius: 2px; background: rgba(0,8,30,0.22); }
+
+/* Card footer — small avatars */
+.card-footer {
+  position: absolute; bottom: 10px; left: 13px; right: 13px;
+  display:flex; align-items:center; gap:4px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 7px;
 }
-.line {
-  height: 2px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.09);
+.av { width:13px;height:13px;border-radius:50%;background:rgba(0,0,0,0.15); }
+.av:nth-child(2) { background:rgba(0,0,0,0.1); }
+.av-dot { width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.12);margin-left:auto; }
+
+/* Card short label */
+.card-lbl {
+  position: absolute; bottom: 10px; left: 0; right: 0;
+  text-align: center;
+  font-size: 8px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  pointer-events: none;
 }
 
-/* Active card content */
-.card-content {
-  padding: 14px;
-  height: 100%;
-  display: flex; flex-direction: column;
-  position: relative;
-}
-.card-tag {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255,255,255,0.45);
-  margin-bottom: 5px;
-}
-.card-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 2px;
-}
-.card-date {
-  font-size: 10px;
-  color: rgba(255,255,255,0.45);
-}
-.card-metric {
+/* ─── ACTIVE CARD CONTENT ─────────────── */
+.ac { padding:14px; height:100%; display:flex;flex-direction:column; position:relative; }
+.ac-tag { font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.5);margin-bottom:5px; }
+.ac-name { font-size:14px;font-weight:600;color:#fff;margin-bottom:2px; }
+.ac-date { font-size:10px;color:rgba(255,255,255,0.45); }
+.ac-num {
   margin-top: auto;
-  font-size: 46px;
-  font-weight: 800;
-  line-height: 1;
-  color: #fff;
-  letter-spacing: -2px;
+  font-size: 48px; font-weight: 800; line-height: 1;
+  color: #fff; letter-spacing: -2px;
   font-variant-numeric: tabular-nums;
 }
-.card-metric-pct {
-  font-size: 20px;
-  letter-spacing: 0;
-  font-weight: 700;
-}
-.card-metric-label {
-  font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  margin-top: 3px;
-}
-.card-arrow {
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; color: rgba(255,255,255,0.7);
+.ac-pct { font-size:22px;letter-spacing:0;font-weight:700; }
+.ac-lbl2 { font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px; }
+.ac-arr {
+  position:absolute; top:12px; right:12px;
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(255,255,255,0.14);
+  display:flex;align-items:center;justify-content:center;font-size:10px;
 }
 
-/* Footer avatars (inactive) */
-.card-footer {
-  position: absolute;
-  bottom: 10px; left: 14px; right: 14px;
-  display: flex; align-items: center; gap: 4px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding-top: 8px;
-}
-.avatar {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-}
-.avatar:nth-child(2) { background: rgba(255,255,255,0.07); }
+/* ─── ARC SVG ─────────────────────────── */
+#arcSvg { position:absolute;inset:0;width:100%;height:100%;pointer-events:none; }
 
-/* Label below each card */
-.card-label {
-  position: absolute;
-  bottom: -22px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  color: rgba(255,255,255,0.25);
-  white-space: nowrap;
-  letter-spacing: 0.5px;
-  pointer-events: none;
-  transition: color 0.4s;
-}
-.card-label.active-label {
-  color: rgba(134,239,172,0.8);
-  font-weight: 600;
-}
+/* ─── KEY HINT ────────────────────────── */
+.hint { position:absolute;bottom:10px;right:16px;font-size:9px;color:rgba(255,255,255,0.13);display:flex;gap:5px;align-items:center;pointer-events:none; }
+.key { padding:1px 5px;border:1px solid rgba(255,255,255,0.1);border-radius:3px;font-size:9px; }
 
-/* ── DETAIL PANEL ─────────────────────────── */
-.detail-wrap {
-  padding: 0 20px 16px;
-  flex-shrink: 0;
-}
-
-.detail-panel {
+/* ─── DETAIL PANEL ────────────────────── */
+.detail-wrap { padding: 0 18px 16px; flex-shrink:0; }
+.dp {
+  height: 162px;
   border-radius: 14px;
-  background: rgba(15, 32, 22, 0.6);
-  border: 1px solid rgba(34,197,94,0.18);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  /* Bright green-tinted frosted glass */
+  background: linear-gradient(
+    135deg,
+    rgba(22, 101, 52, 0.45) 0%,
+    rgba(15, 60, 35, 0.55) 100%
+  );
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   padding: 18px 20px;
   display: grid;
-  grid-template-columns: 1fr 1px 180px;
+  grid-template-columns: 1fr 1px 185px;
   gap: 0 18px;
   overflow: hidden;
   position: relative;
-  height: 150px;
-  transition: all 0.4s ease;
 }
-
-.detail-panel::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(34,197,94,0.06) 0%, transparent 55%);
-  pointer-events: none;
+.dp::before {
+  content:'';position:absolute;inset:0;
+  background: linear-gradient(135deg, rgba(74,222,128,0.08) 0%, transparent 55%);
+  pointer-events:none;
 }
-
-.detail-main {}
-.detail-title {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-.detail-sub {
-  font-size: 10px;
-  color: var(--dim);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.detail-progress-row {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 10px; color: rgba(255,255,255,0.4);
-  margin-bottom: 10px;
-}
-.progress-track {
-  flex: 1; height: 3px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 2px;
-  position: relative; overflow: hidden;
-}
-.progress-fill {
-  position: absolute; left: 0; top: 0; height: 100%;
-  background: linear-gradient(90deg, #16a34a, #4ade80);
-  border-radius: 2px;
-  transition: width 0.5s ease;
-}
-.detail-doc {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px; font-size: 11px;
-}
-.doc-icon {
-  width: 26px; height: 26px;
-  border-radius: 6px;
-  background: rgba(34,197,94,0.12);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; flex-shrink: 0;
-}
-.doc-name { font-weight: 500; font-size: 11px; color: rgba(255,255,255,0.85); }
-.doc-meta { font-size: 10px; color: rgba(255,255,255,0.3); }
-.doc-time { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.25); flex-shrink: 0; }
-
-.divider { background: rgba(255,255,255,0.06); }
-
-.detail-right { padding-left: 0; }
-.kv { margin-bottom: 10px; }
-.kv-label {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-  color: rgba(255,255,255,0.25);
-  margin-bottom: 3px;
-}
-.kv-value {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.8);
-}
-.here-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--green);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.here-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.6);
-}
-
-/* ── KEYBOARD HINT ───────────────────────── */
-.key-hint {
-  position: absolute;
-  bottom: 14px; right: 24px;
-  font-size: 10px; color: rgba(255,255,255,0.15);
-  display: flex; gap: 6px; align-items: center;
-  pointer-events: none;
-}
-.key {
-  padding: 1px 6px;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 4px;
-  font-size: 10px;
-}
-
-/* ── LAYOUT ───────────────────────────────── */
-body { display: flex; flex-direction: column; height: 100%; }
+/* Tags floating above title */
+.dp-tags { display:flex;gap:5px;margin-bottom:8px; }
+.dp-tag { padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);font-size:9px;color:rgba(255,255,255,0.5); }
+.dp-title { font-size:18px;font-weight:600;margin-bottom:2px; }
+.dp-sub { font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px; }
+.dp-row { display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:8px; }
+.dp-track { flex:1;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;overflow:hidden; }
+.dp-fill { position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:2px;transition:width .5s ease; }
+.dp-file { display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px; }
+.dp-fi { width:24px;height:24px;border-radius:5px;background:rgba(34,197,94,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+.dp-div { background:rgba(255,255,255,0.07); }
+.dp-r {}
+.kv { margin-bottom:8px; }
+.kv-l { font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.22);margin-bottom:2px; }
+.kv-v { font-size:12px;font-weight:500;color:rgba(255,255,255,0.78); }
+.here { display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600; }
+.here-d { width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.55); }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo">⚡</div>
-  <button class="nav-icon-btn">☰</button>
-  <button class="nav-icon-btn">⌕</button>
-  <div class="nav-date">📅 January 12</div>
-  <div class="meeting-pill">
-    <div class="live-dot" style="background:rgba(255,255,255,0.3)"></div>
+  <div class="logo">⚡</div>
+  <button class="nav-ico">☰</button>
+  <button class="nav-ico">⌕</button>
+  <div class="date-pill">📅 January 12</div>
+  <div class="meet">
+    <div class="ldot" style="background:rgba(255,255,255,0.22)"></div>
     09:00 AM · Standup
   </div>
-  <div class="meeting-pill live">
-    <div class="live-dot"></div>
+  <div class="meet live">
+    <div class="ldot"></div>
     11:00 AM · Audit Committee Review
   </div>
-  <div class="nav-sep"></div>
-  <div style="display:flex;gap:6px">
-    <button class="btn">↑ Export</button>
-    <button class="btn">☑ View tasks</button>
-    <button class="btn primary">+ Add Contracts</button>
-  </div>
-  <button class="nav-icon-btn">⚙</button>
-  <button class="nav-icon-btn" style="position:relative">
-    🔔
-    <span style="position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:1px solid var(--bg)"></span>
-  </button>
-  <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">EV</div>
+  <div class="sp"></div>
+  <button class="btn">↑ Export</button>
+  <button class="btn">☑ View tasks</button>
+  <button class="btn g">+ Add Contracts</button>
+  <button class="nav-ico notif">🔔<span class="notif-badge"></span></button>
+  <div class="ava-pill">EV</div>
 </nav>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <div class="pill active">📁 Folders (14)</div>
+  <div class="pill on">📁 Folders (14)</div>
   <div class="pill">🏷 Tags (44)</div>
   <div class="pill">□ Small ▾</div>
 </div>
 
 <!-- STAGE -->
-<div class="stage" id="stage">
-  <div class="stage-bg"></div>
-  <svg id="arcSvg"></svg>
-  <div class="fan-root" id="fanRoot"></div>
-  <div class="key-hint">
-    <span class="key">←</span> <span class="key">→</span> Navigate
+<div class="stage">
+  <div class="scene">
+    <svg id="arcSvg"></svg>
+    <div id="fan"></div>
   </div>
+  <div class="hint"><span class="key">←</span><span class="key">→</span></div>
 </div>
 
 <!-- DETAIL PANEL -->
 <div class="detail-wrap">
-  <div class="detail-panel" id="detailPanel"></div>
+  <div class="dp" id="dp"></div>
 </div>
 
 <script>
+/* ─── Data ──────────────────────────────── */
 const DATA = [
-  { short:'FOLIO', name:'Portfolio',   date:'Jan 01 – Mar 31', progress:72, doc:'Portfolio_Q1_Review.pdf',         email:'portfolio@legal.io',     event:'Portfolio Review',   due:'2 Weeks'   },
-  { short:'LIC',   name:'Licensing',   date:'Jan 15 – Apr 15', progress:62, doc:'License_Agreement_v3.pdf',        email:'license@legal.io',       event:'Renewal Deadline',   due:'3 Weeks'   },
-  { short:'FIN',   name:'Finance',     date:'Feb 01 – May 31', progress:88, doc:'Finance_Report_Q1.pdf',           email:'finance@corp.io',        event:'Audit Session',      due:'1 Month'   },
-  { short:'CON',   name:'Contracts',   date:'Jan 01 – Jun 30', progress:78, doc:'Contract_Bundle_2025.pdf',        email:'contracts@legal.io',     event:'Signature Required', due:'3 Weeks'   },
-  { short:'LEG',   name:'Legal',       date:'Jan 10 – Mar 10', progress:91, doc:'Legal_Brief_Memo.pdf',            email:'legal@corp.io',          event:'Court Hearing',      due:'5 Days'    },
-  { short:'TRA',   name:'Transaction', date:'Feb 15 – Apr 15', progress:33, doc:'Transaction_Log_Feb.pdf',         email:'trans@finance.io',       event:'Closing',            due:'6 Weeks'   },
-  { short:'COMP',  name:'Compliance',  date:'Jan 01 – Mar 31', progress:87, doc:'GDPR_Compliance_Report_v4.pdf',   email:'compliance@legal.io',    event:'Risk Assessment',    due:'Final Validation' },
-  { short:'VEN',   name:'Vendor',      date:'Mar 01 – May 30', progress:54, doc:'Vendor_Terms_Conditions.pdf',     email:'vendor@ops.io',          event:'Onboarding',         due:'2 Months'  },
-  { short:'TAX',   name:'Tax',         date:'Jan 15 – Apr 15', progress:29, doc:'Tax_Filing_Q1_2025.pdf',          email:'tax@finance.io',         event:'Filing Deadline',    due:'5 Weeks'   },
-  { short:'IP',    name:'IP Rights',   date:'Feb 01 – Mar 31', progress:66, doc:'IP_Registration_Bundle.pdf',      email:'ip@legal.io',            event:'Registration',       due:'3 Weeks'   },
-  { short:'HR',    name:'HR Docs',     date:'Jan 01 – Dec 31', progress:73, doc:'HR_Policy_Handbook_2025.pdf',     email:'hr@corp.io',             event:'Policy Update',      due:'1 Quarter' },
-  { short:'REG',   name:'Regulatory',  date:'Feb 15 – May 15', progress:41, doc:'Regulatory_Submission.pdf',       email:'reg@compliance.io',      event:'Submission',         due:'7 Weeks'   },
-  { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', progress:17, doc:'MA_Term_Sheet_Draft.pdf',         email:'ma@finance.io',          event:'Due Diligence',      due:'3 Months'  },
-  { short:'ESG',   name:'ESG Report',  date:'Jan 01 – Dec 31', progress:55, doc:'ESG_Annual_Report_2025.pdf',      email:'esg@corp.io',            event:'Publication',        due:'6 Months'  },
+  { short:'FOLIO', name:'Portfolio',   date:'Jan 01 – Mar 31', p:72,  doc:'Portfolio_Q1.pdf',          email:'portfolio@legal.io',  ev:'Portfolio Review',   due:'2 Weeks'   },
+  { short:'LIC',   name:'Licensing',   date:'Jan 15 – Apr 15', p:62,  doc:'License_Agreement_v3.pdf',  email:'license@legal.io',    ev:'Renewal Deadline',   due:'3 Weeks'   },
+  { short:'CON',   name:'Contracts',   date:'Jan 01 – Jun 30', p:78,  doc:'Contract_Bundle.pdf',       email:'contracts@legal.io',  ev:'Signature',          due:'3 Weeks'   },
+  { short:'CORP',  name:'Corporate',   date:'Jan 01 – Mar 31', p:57,  doc:'Corporate_Report_Q1.pdf',   email:'corp@legal.io',       ev:'Board Review',       due:'Final'     },
+  { short:'LEG',   name:'Legal',       date:'Jan 10 – Mar 10', p:91,  doc:'Legal_Brief_Memo.pdf',      email:'legal@corp.io',       ev:'Court Hearing',      due:'5 Days'    },
+  { short:'TRA',   name:'Transaction', date:'Feb 15 – Apr 15', p:33,  doc:'Transaction_Log.pdf',       email:'trans@finance.io',    ev:'Closing',            due:'6 Weeks'   },
+  { short:'COMP',  name:'Compliance',  date:'Jan 01 – Mar 31', p:87,  doc:'GDPR_Report_v4.pdf',        email:'compliance@legal.io', ev:'Risk Assessment',    due:'Final Val.'},
+  { short:'VEN',   name:'Vendor',      date:'Mar 01 – May 30', p:54,  doc:'Vendor_Terms.pdf',          email:'vendor@ops.io',       ev:'Onboarding',         due:'2 Months'  },
+  { short:'TAX',   name:'Tax',         date:'Jan 15 – Apr 15', p:29,  doc:'Tax_Filing_Q1.pdf',         email:'tax@finance.io',      ev:'Filing',             due:'5 Weeks'   },
+  { short:'IP',    name:'IP Rights',   date:'Feb 01 – Mar 31', p:66,  doc:'IP_Registration.pdf',       email:'ip@legal.io',         ev:'Registration',       due:'3 Weeks'   },
+  { short:'HR',    name:'HR Docs',     date:'Jan 01 – Dec 31', p:73,  doc:'HR_Policy_2025.pdf',        email:'hr@corp.io',          ev:'Policy Update',      due:'Q2 2025'   },
+  { short:'FIN',   name:'Finance',     date:'Feb 01 – May 31', p:88,  doc:'Finance_Report_Q1.pdf',     email:'finance@corp.io',     ev:'Audit',              due:'1 Month'   },
+  { short:'REG',   name:'Regulatory',  date:'Feb 15 – May 15', p:41,  doc:'Regulatory_Sub.pdf',        email:'reg@compliance.io',   ev:'Submission',         due:'7 Weeks'   },
+  { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', p:17,  doc:'MA_Term_Sheet.pdf',         email:'ma@finance.io',       ev:'Due Diligence',      due:'3 Months'  },
 ];
 
-let activeIdx = 6; // Compliance
+/* ─── Fan constants ──────────────────── */
+// Active card at index 3 ("Corporate"), so 3 cards on left, 10 on right
+// matching the design: left side more open, right side densely packed
+const ACTIVE_START = 3;
+const ARC_R        = 490;   // arc radius
+const ANGLE        = 10.5;  // degrees between cards
+const PERSP        = 1100;  // must match CSS perspective
 
-// ─── Layout math ─────────────────────────────────────
-const ANGLE_STEP = 9.5;  // degrees between cards
-const ARC_R      = 490;  // arc radius in px
-const FOV        = 880;  // perspective distance for scale sim
+let active = ACTIVE_START;
 
-function getState(i) {
-  const off    = i - activeIdx;
-  const deg    = off * ANGLE_STEP;
-  const rad    = deg * Math.PI / 180;
-  const isAct  = i === activeIdx;
-
-  // Position along circular arc
-  const x  = Math.sin(rad) * ARC_R;
-  const dz = (Math.cos(rad) - 1) * ARC_R;     // 0 at center, -ve at edges (depth)
-  const y  = dz * 0.10;                        // slight vertical dip for far cards
-
-  // Perspective-simulated scale
-  const pScale = FOV / (FOV - dz * 0.28);
-  const scale  = pScale * (isAct ? 1.22 : 0.88);
-
-  // Tilt facing the arc's focal point
-  const rotY   = -deg * 0.52;
-
-  // Depth-based aesthetics
-  const absOff = Math.abs(off);
-  const blur   = Math.max(0, absOff * 1.1 - 0.6);
-  const opacity = isAct ? 1 : Math.max(0.1, 1 - absOff * 0.085);
-  const zIdx   = 200 - absOff * 10;
-
-  return { x, y, scale, rotY, blur, opacity, zIdx };
-}
-
-// ─── Render fan ──────────────────────────────────────
+/* ─── Render fan ────────────────────── */
 function renderFan() {
-  const root = document.getElementById('fanRoot');
-  root.innerHTML = '';
+  const fan = document.getElementById('fan');
+  fan.innerHTML = '';
 
   DATA.forEach((d, i) => {
-    const s = getState(i);
-    const isAct = i === activeIdx;
+    const off   = i - active;
+    const isAct = off === 0;
+    const theta = off * ANGLE * (Math.PI / 180);
 
-    // Wrapper handles position + depth scale
-    const wrap = document.createElement('div');
-    wrap.className = 'card-wrapper';
-    wrap.style.cssText = `
-      transform: translate(calc(-50% + ${s.x}px), calc(-50% + ${s.y}px)) scale(${s.scale});
-      opacity: ${s.opacity};
-      filter: blur(${s.blur}px);
-      z-index: ${s.zIdx};
+    // Circular arc position
+    const x  = Math.sin(theta) * ARC_R;
+    const z0 = (Math.cos(theta) - 1) * ARC_R; // 0 at active, negative elsewhere
+    const z  = z0 + (isAct ? 115 : 0);         // active card pops forward
+
+    const rotY  = off * ANGLE;
+    const absOff = Math.abs(off);
+
+    // Opacity — active full, nearby slightly less, far very faint
+    const opacity = isAct ? 1 : Math.max(0.12, 1 - absOff * 0.085);
+
+    /* wrapper — handles 3D position */
+    const cw = document.createElement('div');
+    cw.className = 'cw';
+    cw.style.cssText = `
+      transform: translateX(${x.toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(1)}deg);
+      opacity: ${opacity.toFixed(2)};
     `;
 
-    // Card handles tilt (perspective applied per-card)
+    /* card — the visual element */
     const card = document.createElement('div');
     card.className = 'card' + (isAct ? ' active' : '');
-    card.style.transform = `perspective(700px) rotateY(${s.rotY}deg)`;
 
     if (isAct) {
       card.innerHTML = `
-        <div class="card-content">
-          <div class="card-tag">Folder</div>
-          <div class="card-name">${d.name}</div>
-          <div class="card-date">${d.date}</div>
-          <div class="card-metric">${d.progress}<span class="card-metric-pct">%</span></div>
-          <div class="card-metric-label">completion</div>
-          <div class="card-arrow">→</div>
+        <div class="ac">
+          <div class="ac-tag">Folder</div>
+          <div class="ac-name">${d.name}</div>
+          <div class="ac-date">${d.date}</div>
+          <div class="ac-num">${d.p}<span class="ac-pct">%</span></div>
+          <div class="ac-lbl2">completion</div>
+          <div class="ac-arr">→</div>
         </div>`;
     } else {
       card.innerHTML = `
-        <div class="card-lines">
-          <div class="line" style="width:85%"></div>
-          <div class="line" style="width:60%"></div>
-          <div class="line" style="width:100%;margin-top:5px"></div>
-          <div class="line" style="width:75%"></div>
-          <div class="line" style="width:40%"></div>
-          <div class="line" style="width:90%;margin-top:5px"></div>
-          <div class="line" style="width:55%"></div>
+        <div class="lines">
+          <div class="ln" style="width:82%"></div>
+          <div class="ln" style="width:60%"></div>
+          <div class="ln" style="width:95%;margin-top:4px"></div>
+          <div class="ln" style="width:70%"></div>
+          <div class="ln" style="width:44%"></div>
+          <div class="ln" style="width:85%;margin-top:4px"></div>
+          <div class="ln" style="width:52%"></div>
         </div>
         <div class="card-footer">
-          <div class="avatar"></div>
-          <div class="avatar"></div>
-        </div>`;
+          <div class="av"></div><div class="av"></div>
+          <div class="av-dot"></div>
+        </div>
+        <div class="card-lbl">${d.short}</div>`;
     }
 
-    // Label below card (lives outside card so not clipped)
-    const lbl = document.createElement('div');
-    lbl.className = 'card-label' + (isAct ? ' active-label' : '');
-    lbl.textContent = d.short;
-
-    card.addEventListener('click', () => { activeIdx = i; renderAll(); });
-
-    wrap.appendChild(card);
-    wrap.appendChild(lbl);
-    root.appendChild(wrap);
+    cw.addEventListener('click', () => { active = i; renderAll(); });
+    cw.appendChild(card);
+    fan.appendChild(cw);
   });
 }
 
-// ─── Render detail panel ─────────────────────────────
+/* ─── Render detail ─────────────────── */
 function renderDetail() {
-  const d = DATA[activeIdx];
-  document.getElementById('detailPanel').innerHTML = `
-    <div class="detail-main">
-      <div class="detail-title">${d.name}</div>
-      <div class="detail-sub">Recent activity</div>
-      <div class="detail-progress-row">
-        <span style="white-space:nowrap">Annual Data Privacy Audit</span>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:${d.progress}%"></div>
-        </div>
-        <span style="white-space:nowrap">${d.due}</span>
+  const d = DATA[active];
+  document.getElementById('dp').innerHTML = `
+    <div>
+      <div class="dp-tags">
+        <span class="dp-tag">Incident</span>
+        <span class="dp-tag">Vendor</span>
+        <span class="dp-tag">DPIA</span>
       </div>
-      <div class="detail-doc">
-        <div class="doc-icon">📄</div>
+      <div class="dp-title">${d.name}</div>
+      <div class="dp-sub">Recent activity</div>
+      <div class="dp-row">
+        <span>Annual Data Privacy Audit</span>
+        <div class="dp-track" style="max-width:220px">
+          <div class="dp-fill" style="width:${d.p}%"></div>
+        </div>
+        <span>${d.due}</span>
+      </div>
+      <div class="dp-file">
+        <div class="dp-fi">📄</div>
         <div>
-          <div class="doc-name">${d.doc}</div>
-          <div class="doc-meta">${d.email}</div>
+          <div style="font-weight:500;color:rgba(255,255,255,0.85);font-size:11px">${d.doc}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3)">${d.email}</div>
         </div>
-        <div class="doc-time">09:00 AM</div>
+        <div style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.25)">09:00 AM</div>
       </div>
     </div>
-    <div class="divider"></div>
-    <div class="detail-right">
-      <div class="kv">
-        <div class="kv-label">Event</div>
-        <div class="kv-value">${d.event}</div>
-      </div>
-      <div class="kv">
-        <div class="kv-label">Deliverable Due</div>
-        <div class="kv-value">${d.due}</div>
-      </div>
-      <div>
-        <div class="here-badge">
-          <div class="here-dot"></div>
-          We're Here
-        </div>
-      </div>
-    </div>
-  `;
+    <div class="dp-div"></div>
+    <div class="dp-r">
+      <div class="kv"><div class="kv-l">Event</div><div class="kv-v">${d.ev}</div></div>
+      <div class="kv"><div class="kv-l">Deliverable Due</div><div class="kv-v">${d.due}</div></div>
+      <div><div class="here"><div class="here-d"></div>We're Here</div></div>
+    </div>`;
 }
 
-// ─── Render arc guide (SVG) ───────────────────────────
+/* ─── Render arc guide (SVG) ─────────── */
 function renderArc() {
-  const stage = document.getElementById('stage');
+  const stage = document.querySelector('.stage');
   const svg   = document.getElementById('arcSvg');
-  const W = stage.offsetWidth;
-  const H = stage.offsetHeight;
-  const cx = W / 2;
-  const cy = H / 2;
+  if (!stage || !svg) return;
+  const W = stage.offsetWidth, H = stage.offsetHeight;
 
-  // Compute screen-space top-center of each card
+  // The fan root is at (W/2 - 80, H/2) on screen
+  // rotateX(-14deg) on the fan modifies Y projection
+  // We approximate the arc guide using the same math + manual perspective projection
+
+  const fanX = W / 2 - 80;
+  const fanY = H / 2;
+  const rx = -14 * Math.PI / 180; // fan's rotateX
+
+  const CARD_H = 212;
   const pts = DATA.map((_, i) => {
-    const s = getState(i);
-    const isAct = i === activeIdx;
-    const CARD_H = 190;
-    const cardScale = s.scale;
-    // screen x/y of card center
-    const sx = cx + s.x * 1;     // already screen px (no additional proj needed)
-    const sy = cy + s.y * 1;
-    // top edge of card in screen space
-    const topY = sy - (CARD_H * cardScale * 0.5);
-    return { x: sx, y: topY };
+    const off   = i - active;
+    const isAct = off === 0;
+    const theta = off * ANGLE * (Math.PI / 180);
+
+    const x3  = Math.sin(theta) * ARC_R;
+    const z0  = (Math.cos(theta) - 1) * ARC_R;
+    const z3  = z0 + (isAct ? 115 : 0);
+    const y3  = -CARD_H / 2; // top of card in card-local Y
+
+    // Apply fan's rotateX(-14deg) to (x3, y3, z3)
+    const y3r = y3 * Math.cos(rx) - z3 * Math.sin(rx);
+    const z3r = y3 * Math.sin(rx) + z3 * Math.cos(rx);
+
+    // Perspective projection
+    const d  = PERSP - z3r;
+    const sx = fanX + x3 * (PERSP / d);
+    const sy = fanY + y3r * (PERSP / d);
+
+    return { x: sx, y: sy };
   });
 
-  // Build smooth SVG path through the top-edge points
-  let path = '';
-  if (pts.length >= 2) {
-    path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
-    for (let i = 1; i < pts.length; i++) {
-      const p  = pts[i-1];
-      const c  = pts[i];
-      const cx2 = (p.x + c.x) / 2;
-      const minY = Math.min(p.y, c.y);
-      path += ` Q ${cx2.toFixed(1)} ${(minY - 18).toFixed(1)} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`;
-    }
+  // Build smooth bezier path
+  let path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 1; i < pts.length; i++) {
+    const p = pts[i-1], c = pts[i];
+    const mx = (p.x + c.x) / 2;
+    const my = Math.min(p.y, c.y) - 14;
+    path += ` Q ${mx.toFixed(1)} ${my.toFixed(1)} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`;
   }
 
-  const acp = pts[activeIdx]; // active card point
-
+  const ap = pts[active];
   svg.innerHTML = `
     <defs>
-      <linearGradient id="arcG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%"   stop-color="rgba(34,197,94,0)"  />
-        <stop offset="25%"  stop-color="rgba(34,197,94,0.3)"/>
-        <stop offset="50%"  stop-color="rgba(34,197,94,0.6)"/>
-        <stop offset="75%"  stop-color="rgba(34,197,94,0.3)"/>
+        <stop offset="20%"  stop-color="rgba(34,197,94,0.35)"/>
+        <stop offset="50%"  stop-color="rgba(34,197,94,0.7)" />
+        <stop offset="80%"  stop-color="rgba(34,197,94,0.35)"/>
         <stop offset="100%" stop-color="rgba(34,197,94,0)"  />
       </linearGradient>
     </defs>
-    <path d="${path}" fill="none"
-          stroke="url(#arcG)"
-          stroke-width="1.2"
-          stroke-dasharray="3 5"
-          stroke-linecap="round" />
-    <circle cx="${acp.x.toFixed(1)}" cy="${acp.y.toFixed(1)}" r="4"
-            fill="rgba(34,197,94,0.85)" />
-    <circle cx="${acp.x.toFixed(1)}" cy="${acp.y.toFixed(1)}" r="9"
-            fill="none" stroke="rgba(34,197,94,0.25)" stroke-width="1" />
-    <circle cx="${acp.x.toFixed(1)}" cy="${acp.y.toFixed(1)}" r="15"
-            fill="none" stroke="rgba(34,197,94,0.1)" stroke-width="1" />
-  `;
+    <path d="${path}" fill="none" stroke="url(#ag)"
+          stroke-width="1.3" stroke-dasharray="3 5" stroke-linecap="round"/>
+    <circle cx="${ap.x.toFixed(1)}" cy="${ap.y.toFixed(1)}" r="4.5"
+            fill="rgba(34,197,94,0.92)"/>
+    <circle cx="${ap.x.toFixed(1)}" cy="${ap.y.toFixed(1)}" r="9"
+            fill="none" stroke="rgba(34,197,94,0.35)" stroke-width="1.2"/>
+    <circle cx="${ap.x.toFixed(1)}" cy="${ap.y.toFixed(1)}" r="15"
+            fill="none" stroke="rgba(34,197,94,0.12)" stroke-width="1"/>`;
 }
 
 function renderAll() {
@@ -704,18 +492,15 @@ function renderAll() {
   renderArc();
 }
 
-// ─── Boot ─────────────────────────────────────────────
+/* ─── Boot ──────────────────────────── */
 renderAll();
 
-// Keyboard navigation
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft'  && activeIdx > 0)               { activeIdx--; renderAll(); }
-  if (e.key === 'ArrowRight' && activeIdx < DATA.length - 1) { activeIdx++; renderAll(); }
+  if (e.key === 'ArrowLeft'  && active > 0)              { active--; renderAll(); }
+  if (e.key === 'ArrowRight' && active < DATA.length-1)  { active++; renderAll(); }
 });
 
-// Resize
-const ro = new ResizeObserver(renderArc);
-ro.observe(document.getElementById('stage'));
+new ResizeObserver(renderArc).observe(document.querySelector('.stage'));
 </script>
 </body>
 </html>
