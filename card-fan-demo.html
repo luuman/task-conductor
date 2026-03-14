@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Folder Fan — Three.js | TaskConductor</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #07090c; --border: rgba(255,255,255,0.08);
+  --text: #eef0f2; --dim: rgba(238,240,242,0.38); --green: #22c55e;
+}
+html, body {
+  height:100%; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;
+  -webkit-font-smoothing:antialiased; user-select:none;
+  display:flex; flex-direction:column;
+}
+/* NAV */
+.nav { height:50px; flex-shrink:0; display:flex; align-items:center; padding:0 18px; gap:8px; border-bottom:1px solid var(--border); z-index:20; }
+.logo { width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:center;font-size:12px; }
+.ni { width:26px;height:26px;border-radius:5px;border:none;cursor:pointer;color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:13px;background:transparent; }
+.dp2 { font-size:11px;color:var(--dim);padding:3px 9px;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:5px; }
+.mp { background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px; }
+.mp.live { background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.28);color:rgba(167,243,208,0.9); }
+.ld { width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.sp2 { flex:1; }
+.btn { padding:4px 11px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);display:flex;align-items:center;gap:4px;white-space:nowrap; }
+.btn.g { background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#86efac; }
+.nr { position:relative; }
+.nrb { position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:1.5px solid var(--bg); }
+.avp { width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0; }
+/* TOOLBAR */
+.tb { height:38px;flex-shrink:0;display:flex;align-items:center;padding:0 18px;gap:6px;border-bottom:1px solid var(--border); }
+.pill { padding:3px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:4px; }
+.pill.on { background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.16);color:var(--text); }
+/* STAGE */
+.stage { position:relative;flex:1;overflow:hidden;min-height:0; }
+.stage canvas { position:absolute;inset:0; }
+.hint { position:absolute;bottom:10px;right:16px;font-size:9px;color:rgba(255,255,255,0.13);display:flex;gap:5px;align-items:center;pointer-events:none;z-index:5; }
+.key { padding:1px 5px;border:1px solid rgba(255,255,255,0.1);border-radius:3px; }
+/* DETAIL */
+.dw { padding:0 18px 14px;flex-shrink:0; }
+.dp {
+  height:158px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(20,95,50,0.50) 0%,rgba(12,50,30,0.60) 100%);
+  border:1px solid rgba(74,222,128,0.22);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  padding:16px 20px;display:grid;grid-template-columns:1fr 1px 182px;gap:0 16px;
+  overflow:hidden;position:relative;
+}
+.dp::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,222,128,0.07) 0%,transparent 55%);pointer-events:none; }
+.dtags { display:flex;gap:5px;margin-bottom:7px; }
+.dtag { padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);font-size:9px;color:rgba(255,255,255,0.45); }
+.dttl { font-size:17px;font-weight:600;margin-bottom:2px; }
+.dsub { font-size:10px;color:rgba(255,255,255,0.38);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px; }
+.drow { display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,0.33);margin-bottom:8px; }
+.dtrk { flex:1;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;overflow:hidden; }
+.dfl { position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:2px;transition:width .5s ease; }
+.dfile { display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px; }
+.dfi { width:24px;height:24px;border-radius:5px;background:rgba(34,197,94,0.14);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+.ddv { background:rgba(255,255,255,0.07); }
+.kv { margin-bottom:8px; }
+.kvl { font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,0.22);margin-bottom:2px; }
+.kvv { font-size:12px;font-weight:500;color:rgba(255,255,255,0.76); }
+.here { display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600; }
+.hd { width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="logo">⚡</div>
+  <button class="ni">☰</button><button class="ni">⌕</button>
+  <div class="dp2">📅 January 12</div>
+  <div class="mp"><div class="ld" style="background:rgba(255,255,255,0.22)"></div>09:00 AM · Standup</div>
+  <div class="mp live"><div class="ld"></div>11:00 AM · Audit Committee Review</div>
+  <div class="sp2"></div>
+  <button class="btn">↑ Export</button>
+  <button class="btn">☑ View tasks</button>
+  <button class="btn g">+ Add Contracts</button>
+  <button class="ni nr">🔔<span class="nrb"></span></button>
+  <div class="avp">EV</div>
+</nav>
+<div class="tb">
+  <div class="pill on">📁 Folders (14)</div>
+  <div class="pill">🏷 Tags (44)</div>
+  <div class="pill">□ Small ▾</div>
+</div>
+<div class="stage" id="stage">
+  <div class="hint"><span class="key">←</span><span class="key">→</span></div>
+</div>
+<div class="dw"><div class="dp" id="dpanel"></div></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer }  from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }      from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }      from 'three/addons/postprocessing/OutputPass.js';
+/* eslint-disable */
+
+/* ─── Data ─────────────────────────────────────────── */
+const DATA = [
+  { short:'FOLIO', name:'Portfolio',   date:'Jan 01 – Mar 31', p:72, doc:'Portfolio_Q1.pdf',        email:'portfolio@legal.io',  ev:'Portfolio Review',  due:'2 Weeks'  },
+  { short:'LIC',   name:'Licensing',   date:'Jan 15 – Apr 15', p:62, doc:'License_Agreement_v3.pdf',email:'license@legal.io',    ev:'Renewal Deadline',  due:'3 Weeks'  },
+  { short:'CON',   name:'Contracts',   date:'Jan 01 – Jun 30', p:78, doc:'Contract_Bundle.pdf',     email:'contracts@legal.io',  ev:'Signature',         due:'3 Weeks'  },
+  { short:'CORP',  name:'Corporate',   date:'Jan 01 – Mar 31', p:57, doc:'Corporate_Report_Q1.pdf', email:'corp@legal.io',       ev:'Board Review',      due:'Final'    },
+  { short:'LEG',   name:'Legal',       date:'Jan 10 – Mar 10', p:91, doc:'Legal_Brief_Memo.pdf',    email:'legal@corp.io',       ev:'Court Hearing',     due:'5 Days'   },
+  { short:'TRA',   name:'Transaction', date:'Feb 15 – Apr 15', p:33, doc:'Transaction_Log.pdf',     email:'trans@finance.io',    ev:'Closing',           due:'6 Weeks'  },
+  { short:'COMP',  name:'Compliance',  date:'Jan 01 – Mar 31', p:87, doc:'GDPR_Report_v4.pdf',      email:'compliance@legal.io', ev:'Risk Assessment',   due:'Final Val'},
+  { short:'VEN',   name:'Vendor',      date:'Mar 01 – May 30', p:54, doc:'Vendor_Terms.pdf',        email:'vendor@ops.io',       ev:'Onboarding',        due:'2 Months' },
+  { short:'TAX',   name:'Tax',         date:'Jan 15 – Apr 15', p:29, doc:'Tax_Filing_Q1.pdf',       email:'tax@finance.io',      ev:'Filing',            due:'5 Weeks'  },
+  { short:'IP',    name:'IP Rights',   date:'Feb 01 – Mar 31', p:66, doc:'IP_Registration.pdf',     email:'ip@legal.io',         ev:'Registration',      due:'3 Weeks'  },
+  { short:'HR',    name:'HR Docs',     date:'Jan 01 – Dec 31', p:73, doc:'HR_Policy_2025.pdf',      email:'hr@corp.io',          ev:'Policy Update',     due:'Q2 2025'  },
+  { short:'FIN',   name:'Finance',     date:'Feb 01 – May 31', p:88, doc:'Finance_Report_Q1.pdf',   email:'finance@corp.io',     ev:'Audit',             due:'1 Month'  },
+  { short:'REG',   name:'Regulatory',  date:'Feb 15 – May 15', p:41, doc:'Regulatory_Sub.pdf',      email:'reg@compliance.io',   ev:'Submission',        due:'7 Weeks'  },
+  { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', p:17, doc:'MA_Term_Sheet.pdf',       email:'ma@finance.io',       ev:'Due Diligence',     due:'3 Months' },
+];
+
+/* ─── Card geometry constants ───────────────────────── */
+const CW           = 220;   // card width
+const CH           = 175;   // card height
+const DEPTH        = 16;    // physical card thickness
+const ANGLE        = 10;    // degrees between adjacent cards
+const POP_Z        = 160;   // active card pops forward
+const EXTRA_OFFSET = 380;   // 轴心到卡片左边缘的额外距离 → 扇形半径 = EXTRA_OFFSET + CW/2 = 490
+
+let activeIdx = 3;   // "Corporate" — 3 on left, 10 on right
+
+/* ─── Shared spine-pivot geometry ───────────────────── */
+// Translate so the LEFT EDGE of the card is at local origin.
+// All cards share this geometry and rotate around the spine (x=0).
+const cardGeo = new THREE.BoxGeometry(CW, CH, DEPTH);
+// 卡片左边缘距轴心 EXTRA_OFFSET，让扇形半径 = EXTRA_OFFSET + CW/2
+cardGeo.translate(EXTRA_OFFSET + CW / 2, 0, 0);
+
+/* ─── Canvas helpers ─────────────────────────────────── */
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function makeInactiveTex(data, blurPx) {
+  const S=2, cw=CW, ch=CH;
+  const src = document.createElement('canvas');
+  src.width=cw*S; src.height=ch*S;
+  const c = src.getContext('2d'); c.scale(S,S);
+
+  // 纯白/米白文件夹背景
+  rrect(c, 0, 0, cw, ch, 9);
+  const bg = c.createLinearGradient(0, 0, cw*0.4, ch);
+  bg.addColorStop(0, 'rgba(255,255,255,0.98)');
+  bg.addColorStop(0.5, 'rgba(249,250,252,0.97)');
+  bg.addColorStop(1, 'rgba(241,245,250,0.96)');
+  c.fillStyle = bg; c.fill();
+  c.strokeStyle = 'rgba(200,210,225,0.75)'; c.lineWidth = 1; c.stroke();
+
+  // 顶部 sheen
+  rrect(c, 0, 0, cw, ch*0.4, 9);
+  const sh = c.createLinearGradient(0, 0, 0, ch*0.4);
+  sh.addColorStop(0, 'rgba(255,255,255,0.60)');
+  sh.addColorStop(1, 'rgba(255,255,255,0)');
+  c.fillStyle = sh; c.fill();
+
+  // 文件夹标签页（顶部左侧小突出）
+  const TAB_W = Math.round(cw * 0.38);
+  c.fillStyle = 'rgba(230,237,246,0.98)';
+  c.strokeStyle = 'rgba(190,205,225,0.7)';
+  c.lineWidth = 0.8;
+  c.beginPath();
+  c.roundRect(10, -10, TAB_W, 16, [4,4,0,0]);
+  c.fill(); c.stroke();
+  // 标签文字
+  c.fillStyle = 'rgba(50,70,120,0.58)';
+  c.font = '600 7px -apple-system,sans-serif';
+  c.textAlign = 'left';
+  c.fillText(data.short, 16, -1);
+
+  // 文档内容线条
+  [{y:22,w:.82},{y:32,w:.55},{y:47,w:.90},{y:57,w:.65},
+   {y:67,w:.40},{y:80,w:.76},{y:90,w:.48},{y:100,w:.60}]
+  .forEach(({y,w},i)=>{
+    c.fillStyle = i<2 ? 'rgba(10,20,60,0.18)' : 'rgba(10,20,60,0.10)';
+    c.beginPath(); c.roundRect(14, y, (cw-28)*w, 2, 1); c.fill();
+  });
+
+  // 底部小装饰点
+  c.fillStyle = 'rgba(10,20,60,0.14)';
+  c.beginPath(); c.arc(16, ch-12, 5, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'rgba(10,20,60,0.09)';
+  c.beginPath(); c.arc(30, ch-12, 5, 0, Math.PI*2); c.fill();
+
+  if (blurPx<=0) {
+    const t=new THREE.CanvasTexture(src); t.colorSpace=THREE.SRGBColorSpace; return t;
+  }
+  // DOF blur
+  const dst=document.createElement('canvas'); dst.width=cw*S; dst.height=ch*S;
+  const dc=dst.getContext('2d');
+  dc.filter=`blur(${(blurPx*S).toFixed(1)}px)`;
+  dc.drawImage(src,0,0);
+  const t=new THREE.CanvasTexture(dst); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+
+function makeActiveTex(data) {
+  const S=2, cw=CW, ch=CH;
+  const cv=document.createElement('canvas'); cv.width=cw*S; cv.height=ch*S;
+  const c=cv.getContext('2d'); c.scale(S,S);
+
+  rrect(c,0,0,cw,ch,10);
+  const bg=c.createLinearGradient(0,0,cw,ch);
+  bg.addColorStop(0,'#1d5f3a'); bg.addColorStop(0.4,'#207944'); bg.addColorStop(1,'#17823f');
+  c.fillStyle=bg; c.fill();
+  c.strokeStyle='rgba(134,239,172,0.52)'; c.lineWidth=1.5; c.stroke();
+
+  rrect(c,0,0,cw,ch,10);
+  const sh=c.createLinearGradient(0,0,cw*0.65,ch*0.44);
+  sh.addColorStop(0,'rgba(255,255,255,0.24)'); sh.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=sh; c.fill();
+
+  c.fillStyle='rgba(255,255,255,0.45)'; c.font='600 9px -apple-system,sans-serif';
+  c.textAlign='left'; c.fillText('FOLDER',14,25);
+  c.fillStyle='#fff'; c.font='600 14px -apple-system,sans-serif'; c.fillText(data.name,14,46);
+  c.fillStyle='rgba(255,255,255,0.43)'; c.font='10px -apple-system,sans-serif'; c.fillText(data.date,14,63);
+
+  c.fillStyle='#fff'; c.font='800 40px -apple-system,sans-serif';
+  const nw=c.measureText(String(data.p)).width;
+  c.fillText(String(data.p),14,138);
+  c.font='700 17px -apple-system,sans-serif'; c.fillText('%',16+nw,131);
+  c.fillStyle='rgba(255,255,255,0.38)'; c.font='9.5px -apple-system,sans-serif';
+  c.fillText('completion',14,151);
+
+  c.fillStyle='rgba(255,255,255,0.14)';
+  c.beginPath(); c.arc(cw-19,18,11,0,Math.PI*2); c.fill();
+  c.fillStyle='rgba(255,255,255,0.72)'; c.font='13px -apple-system,sans-serif';
+  c.textAlign='center'; c.fillText('→',cw-19,23);
+
+  const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+
+/* ─── Material factory ───────────────────────────────── */
+// BoxGeometry face order: +X(right), -X(left/spine), +Y(top), -Y(bot), +Z(front), -Z(back)
+function makeMats(tex, isActive) {
+  // 非激活卡片：浅灰白色边缘（像真实纸质文件夹）；激活卡片：深绿色边缘
+  const edgeC = isActive ? new THREE.Color(0x1a5c34) : new THREE.Color(0xbfcdd9);
+  const edge = new THREE.MeshStandardMaterial({ color:edgeC, roughness:0.30, metalness:0.04 });
+  const front = new THREE.MeshStandardMaterial({
+    map:tex, transparent:true, alphaTest:0.01, roughness:0.10, metalness:0.04,
+    ...(isActive ? { emissiveMap:tex, emissive:new THREE.Color(0x1a5c38), emissiveIntensity:0.30 } : {})
+  });
+  // 背面：非激活改为浅色（白色文件夹背面）
+  const back = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(isActive ? 0x0e2416 : 0xd0dbe8), roughness:0.8,
+    transparent:true, opacity:isActive ? 0.85 : 0.92,
+  });
+  // +X, -X, +Y, -Y, +Z(FRONT/tex), -Z(back)
+  return [edge, edge, edge, edge, front, back];
+}
+
+/* ─── Three.js scene setup ───────────────────────────── */
+const stage = document.getElementById('stage');
+const getSize = () => ({ w:stage.clientWidth, h:stage.clientHeight });
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.setClearColor(0x000000, 0);
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+let { w, h } = getSize();
+renderer.setSize(w, h);
+
+/* Camera — 以扇形视觉中心为目标，FOV 加宽以显示完整扇形 */
+const camera = new THREE.PerspectiveCamera(58, w/h, 1, 6000);
+// 活跃卡片在 x=490，扇形向右展开（卡片到 x≈-100）
+// 视觉中心约 x=200；相机稍偏左上方
+camera.position.set(200, 420, 820);
+camera.lookAt(200, -40, -80);
+
+/* Fan group — slight backward tilt for the overhead/dramatic look */
+const fanGroup = new THREE.Group();
+fanGroup.rotation.x = -0.30;   // ≈ -17° tilt: 大俯视角展示扇形深度
+scene.add(fanGroup);
+
+/* Lights */
+scene.add(new THREE.AmbientLight(0x5a78a0, 2.0));
+const key = new THREE.DirectionalLight(0xffffff, 1.8);
+key.position.set(300, 400, 400); scene.add(key);
+const fill = new THREE.DirectionalLight(0x8899cc, 0.6);
+fill.position.set(-250, 120, 200); scene.add(fill);
+const gLight = new THREE.PointLight(0x22c55e, 7, 800);
+scene.add(gLight);   // follows active card each frame
+
+/* Post-processing */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.70, 0.50, 0.58);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ─── Card meshes ────────────────────────────────────── */
+const cards = DATA.map((d, i) => {
+  const mesh = new THREE.Mesh(cardGeo, []);
+  fanGroup.add(mesh);
+  return { mesh, data:d, tRY:0, tZ:0 };
+});
+
+/* ─── Arc slider (above cards) ───────────────────────── */
+// The slider sits above the card tops, following the arc of card-spine tops.
+// Each card's top-spine is at local (0, CH/2, 0) before rotation.
+// After rotateY=theta: top = (0, CH/2, 0) → same point (spine doesn't move by rotateY).
+// So ALL card spines share the same top point (0, CH/2, 0)!
+// The actual card TOP EDGE center sweeps an arc:
+//   cardTopCenter = (CW/2 * cos(theta), CH/2, -CW/2 * sin(theta))  [Three.js rotateY sign]
+
+let arcLine = null;
+let arcDot  = null;   // glowing indicator sphere
+
+const dotGeo = new THREE.SphereGeometry(5, 16, 16);
+const dotMat = new THREE.MeshStandardMaterial({
+  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:2.5,
+  roughness:0, metalness:0,
+});
+arcDot = new THREE.Mesh(dotGeo, dotMat);
+fanGroup.add(arcDot);
+
+// Outer halo ring around dot
+const haloGeo = new THREE.TorusGeometry(10, 1.2, 8, 32);
+const haloMat = new THREE.MeshStandardMaterial({
+  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:1.2,
+  transparent:true, opacity:0.55, roughness:0, metalness:0,
+});
+const haloDot = new THREE.Mesh(haloGeo, haloMat);
+fanGroup.add(haloDot);
+
+function buildArcSlider() {
+  // Remove old arc line
+  if (arcLine) { fanGroup.remove(arcLine); arcLine.geometry.dispose(); arcLine = null; }
+
+  // Compute top-center of each card's visible face in local fanGroup space
+  // Card i: rotateY = tRY[i], card center is at (CW/2 after geo.translate)
+  // Top-center of card i = rotate (CW/2, CH/2, 0) by tRY around Y axis at origin
+  // Three.js rotateY(theta): x' = x*cos(theta) + z*sin(theta), z' = -x*sin(theta) + z*cos(theta)
+
+  const YARC = CH / 2 + 30;  // above card tops
+  const R = EXTRA_OFFSET + CW / 2;  // 扇形半径
+  const pts = cards.map((_, i) => {
+    const theta = cards[i].tRY;
+    const x = R * Math.cos(theta);
+    const z = -R * Math.sin(theta);
+    return new THREE.Vector3(x, YARC, z);
+  });
+
+  // Smooth the arc with CatmullRomCurve3
+  const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
+  const smoothPts = curve.getPoints(120);
+  const geo = new THREE.BufferGeometry().setFromPoints(smoothPts);
+
+  const mat = new THREE.LineDashedMaterial({
+    color: 0x22c55e,
+    linewidth: 1,
+    dashSize: 5,
+    gapSize: 7,
+    transparent: true,
+    opacity: 0.55,
+  });
+  arcLine = new THREE.Line(geo, mat);
+  arcLine.computeLineDistances();
+  fanGroup.add(arcLine);
+
+  // Position the indicator dot at the active card's top center
+  const atRY = cards[activeIdx].tRY;
+  const R2 = EXTRA_OFFSET + CW / 2;
+  const dotX = R2 * Math.cos(atRY);
+  const dotZ = -R2 * Math.sin(atRY);
+  arcDot.position.set(dotX, YARC, dotZ);
+  haloDot.position.set(dotX, YARC, dotZ);
+  haloDot.rotation.x = Math.PI / 2;  // lay flat in XZ plane
+}
+
+/* ─── Compute target angles and positions ────────────── */
+function computeTargets(ai) {
+  cards.forEach((c, i) => {
+    const off = i - ai;
+    c.tRY = off * ANGLE * (Math.PI / 180);
+    c.tZ  = (i === ai) ? POP_Z : 0;   // active card pops forward (spine moves too — like pulling a book out)
+  });
+}
+
+/* ─── Rebuild all card textures ──────────────────────── */
+function rebuildTextures(ai) {
+  cards.forEach((c, i) => {
+    // Dispose previous materials
+    if (Array.isArray(c.mesh.material)) {
+      c.mesh.material.forEach(m => { if (m.map) m.map.dispose(); if (m.emissiveMap) m.emissiveMap.dispose(); m.dispose(); });
+    }
+    const off = Math.abs(i - ai);
+    const blurPx = Math.max(0, off * 1.3 - 0.7);
+    const isAct  = (i === ai);
+
+    const tex  = isAct ? makeActiveTex(c.data) : makeInactiveTex(c.data, blurPx);
+    const mats = makeMats(tex, isAct);
+
+    // Apply distance-based opacity to front + back faces
+    const opacity = isAct ? 1.0 : Math.max(0.08, 1 - off * 0.092);
+    mats[4].opacity = opacity;
+    mats[5].opacity = Math.min(opacity, 0.75);
+    mats.forEach(m => m.needsUpdate = true);
+
+    c.mesh.material  = mats;
+    c.mesh.renderOrder = 100 - off;  // closer cards on top
+  });
+}
+
+/* ─── Initial setup ──────────────────────────────────── */
+computeTargets(activeIdx);
+rebuildTextures(activeIdx);
+
+// Snap immediately (no animation on first frame)
+cards.forEach(c => {
+  c.mesh.rotation.y = c.tRY;
+  c.mesh.position.set(0, 0, c.tZ);
+});
+buildArcSlider();
+
+/* ─── Change active ──────────────────────────────────── */
+function changeActive(idx) {
+  activeIdx = idx;
+  computeTargets(activeIdx);
+  rebuildTextures(activeIdx);
+  buildArcSlider();
+  renderDetail();
+}
+
+/* ─── Raycasting (click detection) ──────────────────── */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+stage.addEventListener('click', e => {
+  const r = stage.getBoundingClientRect();
+  mouse.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
+  mouse.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(cards.map(c => c.mesh));
+  if (!hits.length) return;
+  const idx = cards.findIndex(c => c.mesh === hits[0].object);
+  if (idx !== -1 && idx !== activeIdx) changeActive(idx);
+});
+
+/* ─── Keyboard ────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowLeft'  && activeIdx>0)              changeActive(activeIdx-1);
+  if (e.key==='ArrowRight' && activeIdx<DATA.length-1)  changeActive(activeIdx+1);
+});
+
+/* ─── Animation loop ──────────────────────────────────── */
+const LERP = 0.10;
+function animate() {
+  requestAnimationFrame(animate);
+
+  cards.forEach(c => {
+    // Lerp rotation (spine-pivot fan)
+    c.mesh.rotation.y += (c.tRY - c.mesh.rotation.y) * LERP;
+    // Lerp active card pop in Z
+    c.mesh.position.z += (c.tZ - c.mesh.position.z) * LERP;
+  });
+
+  // Green point light: follows active card in world space
+  // Active card center in local fanGroup: (CW/2, 0, POP_Z)
+  // After fanGroup.rotation.x tilt, approximate world position:
+  const acPos = new THREE.Vector3(EXTRA_OFFSET + CW/2, 80, cards[activeIdx].mesh.position.z + 200);
+  acPos.applyMatrix4(fanGroup.matrixWorld);
+  gLight.position.copy(acPos);
+
+  composer.render();
+}
+animate();
+
+/* ─── Detail panel ────────────────────────────────────── */
+function renderDetail() {
+  const d = DATA[activeIdx];
+  document.getElementById('dpanel').innerHTML = `
+    <div>
+      <div class="dtags"><span class="dtag">Incident</span><span class="dtag">Vendor</span><span class="dtag">DPIA</span></div>
+      <div class="dttl">${d.name}</div>
+      <div class="dsub">Recent activity</div>
+      <div class="drow">
+        <span>Annual Data Privacy Audit</span>
+        <div class="dtrk" style="max-width:210px"><div class="dfl" style="width:${d.p}%"></div></div>
+        <span>${d.due}</span>
+      </div>
+      <div class="dfile">
+        <div class="dfi">📄</div>
+        <div>
+          <div style="font-weight:500;color:rgba(255,255,255,0.84);font-size:11px">${d.doc}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3)">${d.email}</div>
+        </div>
+        <div style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.24)">09:00 AM</div>
+      </div>
+    </div>
+    <div class="ddv"></div>
+    <div>
+      <div class="kv"><div class="kvl">Event</div><div class="kvv">${d.ev}</div></div>
+      <div class="kv"><div class="kvl">Deliverable Due</div><div class="kvv">${d.due}</div></div>
+      <div><div class="here"><div class="hd"></div>We're Here</div></div>
+    </div>`;
+}
+renderDetail();
+
+/* ─── Resize ──────────────────────────────────────────── */
+function onResize() {
+  const { w:nw, h:nh } = getSize();
+  renderer.setSize(nw, nh);
+  composer.setSize(nw, nh);
+  bloom.resolution.set(nw, nh);
+  camera.aspect = nw / nh;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+new ResizeObserver(onResize).observe(stage);
+</script>
+</body>
+</html>

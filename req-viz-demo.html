@@ -6,149 +6,186 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --canvas-bg:#eef0f5;
-  --card:#fff;--card-bd:#e2e6ed;
-  --tx:#1e2130;--dim:#6b7280;--dim2:#9ca3af;
-  --ln:#e5e7eb;--ln2:#d1d5db;
-  --blue:#2563eb;--blue-lt:#dbeafe;
-  --green:#10b981;--green-lt:#d1fae5;
-  --red:#ef4444;--red-lt:#fee2e2;
-  --amb:#f59e0b;--amb-lt:#fef3c7;
-  --pur:#8b5cf6;--pur-lt:#ede9fe;
-  --cyan:#06b6d4;--cyan-lt:#cffafe;
+  --canvas-bg:#eef0f5; --card:#fff; --card-bd:#e2e6ed;
+  --tx:#1e2130; --dim:#6b7280; --dim2:#9ca3af;
+  --ln:#e5e7eb; --ln2:#d1d5db;
+  --blue:#2563eb; --blue-lt:#dbeafe;
+  --green:#10b981; --red:#ef4444; --red-lt:#fee2e2;
+  --amb:#f59e0b; --amb-lt:#fef3c7;
+  --pur:#8b5cf6; --pur-lt:#ede9fe;
   --arr:#adb5c8;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
-  background:var(--canvas-bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;
-  color:var(--tx)}
+  background:var(--canvas-bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;color:var(--tx)}
 
 /* ── HEADER ── */
 .hd{height:48px;flex-shrink:0;background:#0f172a;border-bottom:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;padding:0 20px;gap:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  display:flex;align-items:center;padding:0 16px;gap:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .logo{font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;
-  border-right:1px solid rgba(255,255,255,.1);padding-right:16px;margin-right:16px;color:#e5e7eb}
+  border-right:1px solid rgba(255,255,255,.1);padding-right:14px;margin-right:14px;color:#e5e7eb;flex-shrink:0}
 .logo-icon{width:24px;height:24px;background:linear-gradient(135deg,#2563eb,#7c3aed);
-  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff}
-.phase-nav{display:flex;align-items:center;gap:0;flex:1}
-.ph-item{display:flex;align-items:center;gap:0}
-.ph-lbl{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;
-  white-space:nowrap;cursor:pointer;transition:all .15s}
+  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0}
+.phase-nav{display:flex;align-items:center;gap:0;flex:1;overflow:hidden}
+.ph-item{display:flex;align-items:center}
+.ph-lbl{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;cursor:pointer;transition:all .15s}
 .ph-lbl:hover{filter:brightness(.85)}
-.ph-arr{font-size:9px;color:#4b5563;margin:0 2px;padding:0 2px}
-.zoom-ctrl{margin-left:auto;display:flex;align-items:center;gap:6px;border-left:1px solid rgba(255,255,255,.1);padding-left:16px}
-.zbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#9ca3af;
-  border-radius:5px;padding:4px 11px;font-size:12px;cursor:pointer;transition:all .1s}
-.zbtn:hover{background:rgba(255,255,255,.12);color:#e5e7eb}
-.zval{font-size:12px;color:#6b7280;min-width:38px;text-align:center}
+.ph-arr{font-size:9px;color:#374151;margin:0 1px;padding:0 1px}
 
-/* ── CANVAS WRAP ── */
-.wrap{flex:1;overflow:hidden;position:relative;cursor:grab}
-.wrap.drag{cursor:grabbing}
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:3px;border-left:1px solid rgba(255,255,255,.1);
+  padding-left:12px;margin-left:8px;flex-shrink:0}
+.tbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#9ca3af;
+  border-radius:6px;padding:5px 9px;font-size:11px;cursor:pointer;transition:all .1s;
+  display:flex;align-items:center;gap:4px;white-space:nowrap}
+.tbtn:hover{background:rgba(255,255,255,.14);color:#e5e7eb}
+.tbtn.active{background:rgba(37,99,235,.3);border-color:rgba(37,99,235,.5);color:#93c5fd}
+.tbtn-sep{width:1px;height:20px;background:rgba(255,255,255,.1);margin:0 2px}
+.zoom-ctrl{display:flex;align-items:center;gap:4px;border-left:1px solid rgba(255,255,255,.1);
+  padding-left:12px;margin-left:4px;flex-shrink:0}
+.zbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#9ca3af;
+  border-radius:5px;padding:4px 9px;font-size:12px;cursor:pointer}
+.zbtn:hover{background:rgba(255,255,255,.14);color:#e5e7eb}
+.zval{font-size:12px;color:#6b7280;min-width:36px;text-align:center}
+
+/* ── CANVAS ── */
+.wrap{flex:1;overflow:hidden;position:relative}
+.wrap.tool-select{cursor:default}
+.wrap.tool-connect{cursor:crosshair}
+.wrap.panning{cursor:grabbing !important}
 .canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+
+/* ── GRID ── */
+.wrap.grid-on{
+  background-image:radial-gradient(circle,#c8cbd4 1px,transparent 1px);
+  background-size:20px 20px;
+}
 
 /* ── PHASE HEADERS ── */
 .ph-head{position:absolute;top:0;display:flex;align-items:center;gap:6px;white-space:nowrap}
-.ph-head-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  display:flex;align-items:center;gap:5px}
-.ph-num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:10px;font-weight:900}
-.ph-vline{position:absolute;top:0;width:1px;border-left:1.5px dashed;opacity:.12}
+.ph-head-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px}
+.ph-num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}
+.ph-vline{position:absolute;top:0;width:1px;border-left:1.5px dashed;opacity:.1}
 
 /* ── NODE ── */
-.node{position:absolute;cursor:pointer}
-.node-lbl{font-size:10.5px;font-weight:600;color:var(--dim);text-align:center;
-  margin-bottom:5px;letter-spacing:.01em}
-.node-card{background:var(--card);border:1px solid var(--card-bd);border-radius:8px;
-  overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
-  transition:box-shadow .15s,transform .15s,border-color .15s;width:160px}
-.node:hover .node-card{box-shadow:0 4px 16px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.08);
-  transform:translateY(-2px);border-color:#c8cbd4}
-.node.sel .node-card{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.2),0 4px 16px rgba(0,0,0,.1)}
+.node{position:absolute;user-select:none}
+.node-lbl{font-size:10.5px;font-weight:600;color:var(--dim);text-align:center;margin-bottom:5px;letter-spacing:.01em;pointer-events:none}
+.node-card{background:var(--card);border:1px solid var(--card-bd);border-radius:8px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
+  transition:box-shadow .15s,border-color .15s;width:280px;cursor:pointer}
+.node:hover .node-card{box-shadow:0 4px 16px rgba(0,0,0,.12);border-color:#c8cbd4}
+.node.sel .node-card{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.25),0 4px 16px rgba(0,0,0,.1)}
+.node.dragging .node-card{box-shadow:0 12px 40px rgba(0,0,0,.2);opacity:.92}
 
-/* ── SCREEN CHROME ── */
-.sc-bar{height:22px;background:#f8f9fc;border-bottom:1px solid var(--ln);
-  display:flex;align-items:center;padding:0 8px;gap:5px}
-.sc-dot{width:5px;height:5px;border-radius:50%}
-.sc-title{font-size:8.5px;color:var(--dim);font-weight:600;margin:0 auto;letter-spacing:.02em}
-.sc-body{padding:8px}
+/* ── CONNECTORS (visible in connect mode) ── */
+.connector{position:absolute;width:10px;height:10px;background:#2563eb;border:2px solid #fff;
+  border-radius:50%;opacity:0;transition:opacity .12s;cursor:crosshair;z-index:10}
+.connector.top{left:50%;top:-5px;transform:translateX(-50%)}
+.connector.right{right:-5px;top:50%;transform:translateY(-50%)}
+.connector.bottom{left:50%;bottom:-5px;transform:translateX(-50%)}
+.connector.left{left:-5px;top:50%;transform:translateY(-50%)}
+.wrap.tool-connect .node:hover .connector{opacity:1}
+.connector:hover{background:#7c3aed;transform:translateX(-50%) scale(1.3)}
+.connector.right:hover,.connector.left:hover{transform:translateY(-50%) scale(1.3)}
 
-/* ── WIREFRAME PRIMITIVES ── */
-.ln{height:7px;background:var(--ln);border-radius:3px;margin:3px 0}
-.ln.sm{height:6px}.ln.xs{height:5px}
-.ln.dark{background:var(--ln2)}
-.btn{height:21px;border-radius:5px;display:flex;align-items:center;justify-content:center;
-  font-size:8px;font-weight:700;margin:4px 0}
-.btn.pri{background:var(--blue);color:#fff}
-.btn.sec{background:var(--ln);color:var(--dim)}
-.btn.grn{background:var(--green);color:#fff}
-.btn.red{background:var(--red-lt);color:var(--red)}
-.btn.pur{background:var(--pur-lt);color:var(--pur)}
-.inp{height:18px;border:1px solid var(--ln2);border-radius:4px;background:#fafbfc;
-  margin:3px 0;display:flex;align-items:center;padding:0 6px}
+/* ── SC elements ── */
+.sc-bar{height:30px;background:#f8f9fc;border-bottom:1px solid var(--ln);display:flex;align-items:center;padding:0 10px;gap:6px}
+.sc-dot{width:7px;height:7px;border-radius:50%}
+.sc-title{font-size:11px;color:var(--dim);font-weight:600;margin:0 auto;letter-spacing:.02em}
+.sc-body{padding:10px}
+.ln{height:9px;background:var(--ln);border-radius:3px;margin:4px 0}
+.ln.sm{height:8px}.ln.xs{height:6px}.ln.dark{background:var(--ln2)}
+.btn{height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin:5px 0}
+.btn.pri{background:var(--blue);color:#fff}.btn.sec{background:var(--ln);color:var(--dim)}
+.btn.grn{background:var(--green);color:#fff}.btn.red{background:var(--red-lt);color:var(--red)}
+.inp{height:22px;border:1px solid var(--ln2);border-radius:4px;background:#fafbfc;margin:4px 0;display:flex;align-items:center;padding:0 8px}
 .inp.focus{border-color:var(--blue)}
-.inp-txt{height:5px;background:var(--ln);border-radius:2px;width:60%}
-.inp-ph{height:5px;background:var(--ln2);border-radius:2px;width:45%}
-.chip{display:inline-flex;align-items:center;height:14px;border-radius:99px;
-  padding:0 6px;font-size:7.5px;font-weight:700;margin:1px 2px 1px 0}
-.card-sm{background:#f8f9fc;border:1px solid var(--ln);border-radius:5px;padding:5px 6px;margin:2px 0}
-.avatar{width:20px;height:20px;border-radius:50%;background:var(--ln)}
-.avatar.sm{width:14px;height:14px}
-.row{display:flex;gap:4px;align-items:center;margin:2px 0}
-.col{display:flex;flex-direction:column;gap:0}
-.sep{height:1px;background:var(--ln);margin:5px 0}
-.stage-box{flex:1;height:12px;border-radius:3px;display:flex;align-items:center;
-  justify-content:center;font-size:5.5px;font-weight:700}
-.mini-chart{display:flex;align-items:flex-end;gap:2px;height:26px}
+.inp-txt{height:7px;background:var(--ln);border-radius:2px;width:60%}
+.inp-ph{height:7px;background:var(--ln2);border-radius:2px;width:45%}
+.chip{display:inline-flex;align-items:center;height:18px;border-radius:99px;padding:0 8px;font-size:9px;font-weight:700;margin:1px 2px 1px 0}
+.row{display:flex;gap:5px;align-items:center;margin:3px 0}
+.sep{height:1px;background:var(--ln);margin:6px 0}
+.stage-box{flex:1;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700}
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:36px}
 .mini-bar{flex:1;border-radius:2px 2px 0 0}
-.gauge-wrap{display:flex;align-items:center;justify-content:center;padding:4px 0}
-.log-line{height:8px;border-radius:2px;margin:2px 0;background:var(--ln)}
-.kpi-card{background:#f8f9fc;border:1px solid var(--ln);border-radius:4px;
-  flex:1;padding:4px 5px;text-align:center}
-.option-card{background:#f8f9fc;border:1px solid var(--ln);border-radius:4px;flex:1;padding:4px;text-align:center}
+.gauge-wrap{display:flex;align-items:center;justify-content:center;padding:5px 0}
+.log-line{height:10px;border-radius:2px;margin:3px 0;background:var(--ln)}
+.kpi-card{background:#f8f9fc;border:1px solid var(--ln);border-radius:5px;flex:1;padding:6px 8px;text-align:center}
+.option-card{background:#f8f9fc;border:1px solid var(--ln);border-radius:5px;flex:1;padding:6px;text-align:center}
 .option-card.sel{background:var(--blue-lt);border-color:var(--blue)}
-.list-row{display:flex;align-items:center;gap:4px;height:16px;padding:0 2px;
-  border-bottom:1px solid var(--ln)}
-.nav-item{height:6px;background:var(--ln2);border-radius:2px}
-.tag{height:10px;border-radius:99px;padding:0 5px;display:inline-flex;align-items:center}
-.sidebar-mini{width:28px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);
-  padding:4px 0;display:flex;flex-direction:column;gap:1px;flex-shrink:0}
-.sidebar-item{height:20px;display:flex;align-items:center;justify-content:center;
-  font-size:7px;border-radius:3px;margin:0 2px;color:#6b7280}
+.list-row{display:flex;align-items:center;gap:5px;height:22px;padding:0 3px;border-bottom:1px solid var(--ln)}
+.sidebar-mini{width:40px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);padding:5px 0;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.sidebar-item{height:26px;display:flex;align-items:center;justify-content:center;font-size:9px;border-radius:3px;margin:0 3px;color:#6b7280}
 .sidebar-item.active{background:rgba(37,99,235,.2);color:#93c5fd}
 .sidebar-item.done{color:#10b981}
-.resize-hint{width:3px;background:#e5e7eb;border-radius:99px;margin:0 1px}
 
 /* ── SVG ARROWS ── */
-.arr-path{fill:none;stroke:var(--arr);stroke-width:1.5;marker-end:url(#arrowhead)}
+.arr-path{fill:none;stroke:var(--arr);stroke-width:1.5;marker-end:url(#arrowhead);cursor:pointer;transition:stroke .15s}
+.arr-path:hover{stroke:#6366f1;stroke-width:2.5}
+.arr-path.sel-arrow{stroke:#2563eb;stroke-width:2.5}
+.arr-path.custom{stroke:#8b5cf6}
 .arr-label-bg{fill:#fff;stroke:var(--ln);stroke-width:.8}
 .arr-label-txt{font-size:9px;font-family:system-ui;fill:var(--dim2)}
+#temp-connect-line{stroke:#2563eb;stroke-width:1.5;stroke-dasharray:5 3;fill:none;pointer-events:none}
 
-/* ── DETAIL PANEL ── */
-.panel{position:fixed;right:0;top:48px;bottom:0;width:340px;background:#fff;
-  border-left:1px solid var(--card-bd);box-shadow:-4px 0 16px rgba(0,0,0,.08);
-  transform:translateX(100%);transition:transform .22s ease;
-  display:flex;flex-direction:column;z-index:100}
-.panel.open{transform:translateX(0)}
-.panel-hd{padding:14px 16px 12px;border-bottom:1px solid var(--ln);
-  display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
-.panel-title{font-size:15px;font-weight:800;flex:1;color:var(--tx)}
-.panel-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--dim2);padding:0 2px}
-.panel-body{overflow-y:auto;flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
-.p-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
-  color:var(--dim2);margin-bottom:7px}
-.p-story{background:#f8f9ff;border-left:3px solid var(--blue);padding:9px 12px;
-  border-radius:0 6px 6px 0;font-size:12px;color:var(--dim);font-style:italic;line-height:1.65}
-.p-story strong{color:var(--tx);font-style:normal}
-.p-ac-item{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;
-  border-radius:6px;border:1px solid var(--ln);margin-bottom:4px;
-  font-size:11.5px;color:#374151;line-height:1.45}
-.p-ac-item .ck{color:var(--green);font-weight:700;font-size:10px;flex-shrink:0;margin-top:1px}
-.p-tech{background:#0f172a;border-radius:6px;padding:9px 11px;
-  font-size:10.5px;color:#a3e635;font-family:monospace;line-height:1.7;white-space:pre}
-.p-nav-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:6px;
-  border:1px solid var(--ln);margin-bottom:4px;font-size:12px;color:var(--dim);
-  cursor:pointer;transition:all .15s}
-.p-nav-item:hover{background:#f8f9ff;border-color:#c7d2fe;color:var(--tx)}
+/* ── SELECTION BOX ── */
+#sel-box{position:absolute;border:1.5px solid #2563eb;background:rgba(37,99,235,.06);
+  border-radius:3px;pointer-events:none;display:none;z-index:50}
+
+/* ── INLINE EXPANDED CARD ── */
+.node-req{display:none;border-top:1px solid var(--ln);padding:0;background:#fff}
+.node-card.expanded .node-req{display:block}
+.req-section{padding:10px 12px;border-bottom:1px solid #f3f4f6}
+.req-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--dim2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.req-story{background:#f0f4ff;border-left:3px solid var(--blue);padding:8px 10px;border-radius:0 5px 5px 0;font-size:10px;color:#374151;line-height:1.6;font-style:italic}
+.req-ac-item{display:flex;align-items:flex-start;gap:6px;padding:5px 0;font-size:10px;color:#374151;line-height:1.45;border-bottom:1px solid #f9fafb}
+.req-ac-item:last-child{border-bottom:none}
+.req-ck{color:var(--green);font-weight:700;font-size:10px;flex-shrink:0;margin-top:1px}
+.req-tech{background:#0f172a;border-radius:5px;padding:8px 10px;font-size:9px;color:#a3e635;font-family:monospace;line-height:1.7;white-space:pre;overflow-x:auto;max-height:80px}
+.req-nav-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;border:1px solid var(--ln);font-size:9.5px;color:var(--blue);cursor:pointer;transition:all .12s;background:#fff;margin:2px 3px 2px 0}
+.req-nav-btn:hover{background:#f0f4ff;border-color:#93c5fd}
+.expand-btn{background:none;border:none;cursor:pointer;font-size:11px;color:#9ca3af;padding:2px 4px;border-radius:3px;transition:all .1s;line-height:1;flex-shrink:0}
+.expand-btn:hover{background:rgba(0,0,0,.06);color:var(--tx)}
+/* ── PREVIEW MODE ── */
+body.preview-mode .node{cursor:default}
+body.preview-mode .node .connector{display:none!important}
+body.preview-mode .node-card iframe{pointer-events:auto!important}
+/* ── WIREFRAME PREVIEW (inside detail popup) ── */
+.wf-inline-wrap{position:relative;width:100%;height:190px;overflow:hidden;border-radius:6px;border:1px solid var(--ln);background:#f3f4f6;margin-bottom:6px}
+.wf-inline-wrap iframe{width:1440px;height:900px;border:none;transform:scale(0.185);transform-origin:0 0;pointer-events:none}
+body.preview-mode .wf-inline-wrap iframe{pointer-events:auto}
+
+/* ── CONTEXT MENU ── */
+#ctx-menu{position:fixed;background:#fff;border:1px solid var(--card-bd);border-radius:9px;
+  box-shadow:0 8px 32px rgba(0,0,0,.14);padding:5px;z-index:500;display:none;min-width:160px}
+.ctx-item{padding:7px 12px;font-size:12.5px;color:#374151;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;font-weight:500}
+.ctx-item:hover{background:#f3f4f6}
+.ctx-item.danger{color:#ef4444}
+.ctx-item.danger:hover{background:#fef2f2}
+.ctx-sep{height:1px;background:var(--ln);margin:4px 0}
+.ctx-label{font-size:10px;font-weight:700;color:#9ca3af;padding:4px 12px 2px;text-transform:uppercase;letter-spacing:.07em}
+
+/* ── MINI MAP ── */
+#minimap{position:fixed;bottom:16px;right:16px;width:160px;height:100px;
+  background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  overflow:hidden;z-index:150;backdrop-filter:blur(4px)}
+#minimap canvas{width:100%;height:100%}
+#minimap-vp{position:absolute;border:1.5px solid #2563eb;background:rgba(37,99,235,.08);border-radius:2px;pointer-events:none}
+.minimap-toggle{position:fixed;bottom:124px;right:16px;background:rgba(15,23,42,.85);
+  border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#6b7280;font-size:11px;
+  padding:4px 8px;cursor:pointer;z-index:151}
+.minimap-toggle:hover{color:#e5e7eb}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:#0f172a;color:#e5e7eb;padding:7px 14px;border-radius:8px;font-size:12px;
+  opacity:0;transition:all .2s;pointer-events:none;z-index:600;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SHORTCUTS HINT ── */
+#shortcuts{position:fixed;bottom:16px;left:16px;font-size:10.5px;color:#6b7280;line-height:1.7;
+  background:rgba(15,23,42,.7);padding:8px 12px;border-radius:7px;backdrop-filter:blur(4px)}
+
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:99px}
 </style>
@@ -159,45 +196,89 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   <div class="logo">
     <div class="logo-icon">TC</div>
     TaskConductor
-    <span style="font-size:10px;background:rgba(37,99,235,.2);color:#93c5fd;padding:2px 8px;border-radius:99px;font-weight:700">新 IA 需求文档</span>
+    <span style="font-size:10px;background:rgba(37,99,235,.2);color:#93c5fd;padding:2px 8px;border-radius:99px;font-weight:700;flex-shrink:0">需求文档</span>
   </div>
   <div class="phase-nav" id="phase-nav"></div>
+
+  <div class="toolbar">
+    <button class="tbtn active" id="t-select" onclick="setTool('select')" title="选择 (V)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-7 1-4 7-3-17z"/></svg> 选择
+    </button>
+    <button class="tbtn" id="t-connect" onclick="setTool('connect')" title="连线 (C)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 连线
+    </button>
+    <div class="tbtn-sep"></div>
+    <button class="tbtn" id="t-grid" onclick="toggleGrid()" title="网格 (G)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </button>
+    <button class="tbtn" id="t-snap" onclick="toggleSnap()" title="吸附网格">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+    </button>
+    <div class="tbtn-sep"></div>
+    <button class="tbtn" onclick="addStickyNote()" title="便签 (N)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 便签
+    </button>
+    <button class="tbtn" onclick="resetLayout()" title="重置位置">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+    <div class="tbtn-sep"></div>
+    <button class="tbtn" id="t-preview" onclick="togglePreviewMode()" title="预览模式 (P) — 锁定位置，可交互内部">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 预览
+    </button>
+  </div>
+
   <div class="zoom-ctrl">
     <button class="zbtn" onclick="Z(-0.12)">−</button>
-    <span class="zval" id="zval">72%</span>
+    <span class="zval" id="zval">48%</span>
     <button class="zbtn" onclick="Z(0.12)">+</button>
     <button class="zbtn" onclick="R()">重置</button>
   </div>
 </div>
 
-<div class="wrap" id="wrap">
+<div class="wrap grid-on tool-select" id="wrap">
   <div class="canvas" id="canvas">
     <svg id="svgL" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none">
       <defs>
-        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+        <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6.5" refY="3" orient="auto">
           <path d="M0,0.5 L0,5.5 L7,3 z" fill="#adb5c8"/>
         </marker>
+        <marker id="arrowhead-blue" markerWidth="7" markerHeight="7" refX="6.5" refY="3" orient="auto">
+          <path d="M0,0.5 L0,5.5 L7,3 z" fill="#2563eb"/>
+        </marker>
+        <marker id="arrowhead-purple" markerWidth="7" markerHeight="7" refX="6.5" refY="3" orient="auto">
+          <path d="M0,0.5 L0,5.5 L7,3 z" fill="#8b5cf6"/>
+        </marker>
       </defs>
+      <line id="temp-connect-line" x1="0" y1="0" x2="0" y2="0" style="display:none"/>
     </svg>
   </div>
+  <div id="sel-box"></div>
 </div>
 
-<!-- Detail Panel -->
-<div class="panel" id="panel">
-  <div class="panel-hd">
-    <div>
-      <div class="panel-title" id="p-title">—</div>
-      <div style="font-size:11px;margin-top:3px" id="p-phase">—</div>
-    </div>
-    <button class="panel-close" onclick="closePanel()">×</button>
-  </div>
-  <div class="panel-body" id="p-body"></div>
+<!-- side panel removed — requirements are shown inline in expanded cards -->
+
+<div id="ctx-menu"></div>
+
+<div id="minimap">
+  <canvas id="mm-canvas" width="320" height="200"></canvas>
+  <div id="minimap-vp"></div>
+</div>
+<button class="minimap-toggle" onclick="document.getElementById('minimap').style.display=document.getElementById('minimap').style.display==='none'?'block':'none'">迷你地图</button>
+
+<div id="toast"></div>
+
+<div id="shortcuts">
+  <b style="color:#e5e7eb">快捷键</b><br>
+  V 选择 · C 连线 · G 网格<br>
+  P 预览模式 · N 便签<br>
+  点击卡片 展开需求 · Esc 收起<br>
+  Delete 删除 · Cmd+A 全选
 </div>
 
 <script>
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
 // DATA
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
 
 const PHASES = [
   {id:1, label:'① 入口',       color:'#6366f1', bg:'#eef2ff'},
@@ -209,705 +290,1307 @@ const PHASES = [
 ];
 
 const DETAILS = {
-  entry: {ph:1, title:'应用入口',
-    story:'作为用户，打开应用时希望自动进入最近的工作状态，而非每次从首页重新导航。',
-    ac:['检查 localStorage 中的 lastProjectId','有历史项目：直接进入该项目「项目概览」页','无历史项目：进入「新建项目引导」页','PWA 启动画面 1.5s 渐入过渡'],
-    tech:'GET /api/projects?limit=1&sort=lastOpenedAt\n→ 有结果: navigate(/projects/{id}/overview)\n→ 无结果: navigate(/onboarding)',
-    nav:[{l:'→ 有项目→项目概览', to:'n-proj'},{l:'→ 无项目→新建引导', to:'n-onboard'}]},
+  entry:{ph:1,title:'应用入口',
+    story:'作为用户，打开应用时希望自动进入最近的工作状态，无需每次从首页导航。',
+    ac:['检查 localStorage 中的 lastProjectId','有历史项目：直接进入该项目「项目概览」','无历史项目：进入「新建项目引导」','PWA 启动画面 1.5s 渐入过渡'],
+    tech:'GET /api/projects?limit=1&sort=lastOpenedAt\n→ 有: navigate(/projects/{id})\n→ 无: navigate(/onboarding)',
+    wf:null,
+    nav:[{l:'→ 有项目', to:'n-proj'},{l:'→ 无项目', to:'n-onboard'}]},
 
-  onboard: {ph:1, title:'新建项目引导',
+  onboard:{ph:1,title:'新建项目引导',
     story:'作为新用户，我希望通过友好的向导快速创建第一个项目，立即感受到平台价值。',
-    ac:['两步表单：第 1 步填写项目名（2-50字，必填）+ 简介（可选）','第 2 步确认创建后，自动进入 PRD 访谈流程','侧边展示「接下来会发生什么」的步骤预览卡片','创建后的欢迎 Toast：「项目已创建，AI 正在准备 PRD 访谈…」'],
+    ac:['填写项目名称（2-50字，必填）+ 简介','创建后自动进入 PRD 访谈流程','侧边展示「接下来会发生什么」步骤预览','欢迎 Toast：「AI 正在准备 PRD 访谈…」'],
     tech:'POST /api/projects {name, description}\n→ {id, name, status:"input"}\nnav: /projects/{id}/prd',
-    nav:[{l:'✓ 创建→PRD 访谈', to:'n-prd'},{l:'← 已有项目→工作区', to:'n-proj'}]},
+    wf:'/wireframes/wireframe-project-overview.html',
+    nav:[{l:'✓ 创建→PRD 访谈', to:'n-prd'},{l:'← 已有项目', to:'n-proj'}]},
 
-  proj: {ph:2, title:'项目工作区（概览）',
-    story:'作为项目负责人，我希望有一个以项目为核心的工作台，清晰展示当前进度和最紧急的待办。',
-    ac:['左侧固定侧边栏（224px）：Logo + 项目切换器 + 阶段导航（7项）+ 管理中心入口','项目概览主区：阶段时间线 + 当前阶段详情卡片 + 统计数据 + 最近活动流','当前阶段显示醒目状态横幅（AI执行中 / 待您审批 / 已完成）','侧边栏底部固定「管理中心」按钮，点击进入独立全屏页面','面板支持拖拽调整宽度（VSCode 式 resize handle）'],
-    tech:'GET /api/projects/{id}\nGET /api/projects/{id}/tasks\nGET /api/projects/{id}/stages',
-    nav:[{l:'→ 进入阶段导航', to:'n-stages'},{l:'→ 管理中心', to:'n-mgmt'},{l:'→ 布局定制', to:'n-layout'}]},
+  proj:{ph:2,title:'项目工作区（概览）',
+    story:'作为项目负责人，我希望有一个以项目为核心的工作台，清晰展示当前进度和最紧急待办。',
+    ac:['左侧固定侧边栏（224px）：Logo+项目切换器+阶段导航+管理中心','项目概览：阶段时间线+当前阶段详情+统计+活动流','当前阶段显示醒目状态横幅（AI执行中/待审批/完成）','面板支持拖拽调整宽度（VSCode式 resize handle）','侧边栏底部「管理中心」进入独立全屏页面'],
+    tech:'GET /api/projects/{id}\nGET /api/projects/{id}/stages',
+    wf:'/wireframes/wireframe-project-overview.html',
+    nav:[{l:'→ 阶段导航', to:'n-stages'},{l:'→ 管理中心', to:'n-mgmt'},{l:'→ 布局定制', to:'n-layout'}]},
 
-  stages: {ph:2, title:'侧边栏阶段导航',
-    story:'作为开发者，我希望通过清晰的侧边栏了解各阶段状态，并快速跳转到目标阶段。',
-    ac:['7 个固定阶段：项目概览 / PRD 需求 / Design 设计 / Tech Stack / Development / Versions / Logs','已完成阶段：✓ 图标 + 绿色文字','当前活跃阶段：蓝色高亮 + 左边框','等待审批阶段：橙色 + badge「待审批」','未开始阶段：灰色（可点击，跳转时提示"需先完成前置阶段"）'],
-    tech:'GET /api/projects/{id}/stages\n→ [{name, status:"done"|"active"|"pending"|"locked"}]',
+  stages:{ph:2,title:'侧边栏阶段导航',
+    story:'作为开发者，我希望通过清晰的侧边栏了解各阶段状态，快速跳转到目标阶段。',
+    ac:['7项固定：概览/PRD/Design/Tech Stack/Dev/Versions/Logs','已完成：✓绿色，当前：蓝色高亮+左边框','审批中：橙色+badge，未开始：灰色','锁定阶段点击提示「需先完成前置阶段」'],
+    tech:'GET /api/projects/{id}/stages\n→ [{name, status:"done"|"active"|"pending"}]',
+    wf:'/wireframes/wireframe-project-overview.html',
     nav:[{l:'→ PRD 阶段', to:'n-prd'},{l:'→ AI执行阶段', to:'n-aiwork'}]},
 
-  prd: {ph:3, title:'PRD 访谈（对话区）',
+  prd:{ph:3,title:'PRD 访谈（对话区）',
     story:'作为产品经理，我希望通过与 AI 的对话逐步构建需求文档，而非从空白模板开始。',
-    ac:['三栏布局：左目录树（200px）+ 中对话区（flex）+ 右文档预览（380px）','目录树展示文档章节，标注完成状态（✓ 进行中 ○ 待开始）','对话区：AI 提问（左气泡）+ 用户回答（右气泡）+ 快捷操作栏','快捷操作：跳过此问题 / 使用行业模板 / AI 自动填充','三栏均支持拖拽调整宽度（VSCode 式 resize handle）'],
-    tech:'POST /api/prd/{id}/chat {message}\nWS /ws/prd/{id}\n→ {type:"doc_update", diff:[{op,path,value}]}',
-    nav:[{l:'→ 文档实时预览', to:'n-prddoc'},{l:'→ 完成访谈→审批', to:'n-approve'}]},
+    ac:['三栏：左目录树(200px)+中对话区(flex)+右文档预览(380px)','AI提问→用户回答→文档实时更新','目录树显示章节状态（✓/进行中/○）','快捷操作：跳过/用模板/AI自动填充','三栏均可拖拽调整宽度'],
+    tech:'POST /api/prd/{id}/chat {message}\nWS /ws/prd/{id} → {type:"doc_update", diff}',
+    wf:'/wireframes/wireframe-prd.html',
+    nav:[{l:'→ 文档实时预览', to:'n-prddoc'},{l:'→ 完成→审批', to:'n-approve'}]},
 
-  prddoc: {ph:3, title:'PRD 文档预览（Diff 高亮）',
+  prddoc:{ph:3,title:'PRD 文档预览（Diff）',
     story:'作为产品经理，我希望在访谈过程中实时看到文档变化，确认 AI 正确理解了我的意图。',
-    ac:['右侧面板实时渲染 Markdown 文档','绿色左边框 + 浅绿背景：新增内容','黄色左边框 + 浅黄背景：修改内容','顶部 Diff 提示条：「已更新 N 处内容」（可展开查看变更列表）','底部状态栏：字数 + 完成度进度条 + 「提交审批」按钮'],
-    tech:'WS /ws/prd/{id} → {type:"doc_update",\n  diff:[{op:"add"|"change",\n    section, content}]}\n文档 schema: Markdown with frontmatter',
+    ac:['右侧面板实时渲染 Markdown','绿色：新增，黄色：修改','顶部 Diff 提示条：「已更新 N 处」','底部：字数+完成度+「提交审批」按钮'],
+    tech:'WS /ws/prd/{id}\n→ {type:"doc_update",\n  diff:[{op:"add"|"change", section, content}]}',
+    wf:'/wireframes/wireframe-prd.html',
     nav:[{l:'→ 提交审批', to:'n-approve'}]},
 
-  aiwork: {ph:4, title:'AI 阶段执行中',
+  aiwork:{ph:4,title:'AI 阶段执行中',
     story:'作为开发者，我希望执行过程是透明的，能看到 AI 正在做什么，而非黑盒等待。',
-    ac:['阶段顶部状态横幅：「🤖 AI 工作中 · 01:24」带脉冲动画','实时日志流：INFO（灰）/ WARN（黄）/ SUCCESS（绿）/ ERROR（红）','流程图中当前子步骤节点高亮 + 脉冲','右侧可折叠「Claude 工具调用」面板（来自 WS）','可终止按钮（需二次确认弹窗）'],
-    tech:'WS /ws/task/{id}\n→ {type:"log"|"status"|"tool_call", data}\nPOST /api/tasks/{id}/cancel\n{confirmed: true}',
-    nav:[{l:'→ AI完成→阶段审批', to:'n-approve'}]},
+    ac:['阶段顶部：「🤖 AI 工作中 · 01:24」脉冲动画','实时日志流：INFO灰/WARN黄/SUCCESS绿/ERROR红','流程图当前子步骤节点高亮','右侧可折叠 Claude 工具调用面板','终止按钮（需二次确认）'],
+    tech:'WS /ws/task/{id}\n→ {type:"log"|"status"|"tool_call", data}\nPOST /api/tasks/{id}/cancel',
+    wf:null,
+    nav:[{l:'→ AI完成→审批', to:'n-approve'}]},
 
-  approve: {ph:4, title:'阶段审批（通用）',
-    story:'作为产品/技术负责人，我希望在关键阶段对 AI 输出进行审批，而且审批界面要足够清晰。',
-    ac:['阶段页面顶部显示醒目审批横幅，不能被忽视','AI 置信度 + Critic 评分对用户可见','支持方案选择（如 Design 阶段的 A/B/C 方案卡片）','三个操作：✓ 批准 / ✏️ 提出修改 / ✗ 拒绝','拒绝时需填写原因（≥10字），AI 据此迭代重生成'],
-    tech:'POST /api/tasks/{id}/approve\n{\n  action: "approve"|"modify"|"reject",\n  choice?: "A"|"B"|"C",\n  reason?: string  // 拒绝时必填\n}',
-    nav:[{l:'✓ 批准→进入下一阶段', to:'n-stages'},{l:'✗ 拒绝→AI 重新迭代', to:'n-retry'}]},
+  approve:{ph:4,title:'阶段审批（通用）',
+    story:'作为产品/技术负责人，我希望在关键阶段对 AI 输出进行审批，确保方向正确。',
+    ac:['阶段顶部审批横幅（不可忽视）','AI 置信度 + Critic 评分对用户可见','支持方案选择（A/B/C for Design）','三操作：✓批准 / ✏️修改 / ✗拒绝','拒绝时必须填写原因（≥10字）'],
+    tech:'POST /api/tasks/{id}/approve\n{action:"approve"|"modify"|"reject",\n choice?:"A"|"B"|"C",\n reason?:string}',
+    wf:null,
+    nav:[{l:'✓ 批准→下一阶段', to:'n-stages'},{l:'✗ 拒绝→重试', to:'n-retry'}]},
 
-  retry: {ph:4, title:'拒绝重新迭代',
-    story:'当我不满意 AI 输出时，我的反馈应被完整记录并有效用于改进下一轮生成结果。',
-    ac:['拒绝原因自动注入下轮 Prompt 上下文','经验存入 ProjectKnowledge 知识库（防止重犯）','页面显示「第 N 次迭代」计数器','超过 3 次失败触发推送通知到管理员','知识库可在侧边栏「项目概览」查看和管理'],
-    tech:'POST /api/tasks/{id}/advance\n内部：\n  1. 写入 ProjectKnowledge\n  2. 重建 Prompt（注入拒绝原因）\n  3. 重启 ClaudePool.run()',
+  retry:{ph:4,title:'拒绝重新迭代',
+    story:'当我不满意 AI 输出时，我的反馈会被完整记录并有效用于改进下一轮生成结果。',
+    ac:['拒绝原因自动注入下轮 Prompt','经验存入知识库（防止重犯）','显示「第 N 次迭代」计数器','超过3次触发管理员告警'],
+    tech:'内部：\n  1. 写入 ProjectKnowledge\n  2. 重建 Prompt（注入拒绝原因）\n  3. 重启 ClaudePool.run()',
+    wf:null,
     nav:[{l:'→ 重新执行', to:'n-aiwork'}]},
 
-  mgmt: {ph:5, title:'管理中心 Dashboard',
-    story:'作为团队负责人，我希望有一个全局视角，一眼看到跨项目进度、AI 使用情况和紧急待办。',
-    ac:['从侧边栏底部进入，覆盖全屏（独立层级）','5 个 KPI 卡片：总项目/进行中/AI调用数/成功率/TTFT均值','AI 成功率 Gauge 图 + 本周活动趋势图','跨项目待审批列表（按紧急度排序）','最近 AI 修改记录流（类似 GitHub 活动流）','本周周报摘要（自动生成）'],
-    tech:'GET /api/metrics\n→ {kpi:{}, gauge:{}, weekly:[], activity[]}\nGET /api/tasks?status=pending_approval&limit=10',
-    nav:[{l:'→ 所有项目列表', to:'n-projects'},{l:'→ 监控', to:'n-monitor'},{l:'← 返回项目', to:'n-proj'}]},
+  mgmt:{ph:5,title:'管理中心 Dashboard',
+    story:'作为团队负责人，我希望有一个全局视角，一眼看到跨项目进度和紧急待办。',
+    ac:['从侧边栏底部进入，全屏覆盖','5个KPI卡片：总项目/进行中/AI调用/成功率/TTFT','AI成功率 Gauge + 本周活动趋势','跨项目待审批列表','最近 AI 修改记录流','本周周报摘要（自动生成）'],
+    tech:'GET /api/metrics\n→ {kpi, gauge, weekly, activity}\nGET /api/tasks?status=pending_approval',
+    wf:'/wireframes/wireframe-management.html',
+    nav:[{l:'→ 项目列表', to:'n-projects'},{l:'→ 监控', to:'n-monitor'},{l:'← 返回项目', to:'n-proj'}]},
 
-  projects: {ph:5, title:'所有项目列表',
-    story:'作为负责人，我希望在一个表格中看到所有项目的整体状态，快速识别问题和进度。',
-    ac:['表格列：项目名/当前阶段/进度条/AI调用数/状态 badge','默认按「最近更新」排序，支持切换','搜索 + 状态过滤（进行中/待审批/完成/异常）','项目行点击进入项目工作区','表格右上角「+ 新建项目」按钮'],
+  projects:{ph:5,title:'所有项目列表',
+    story:'作为负责人，我希望在一个表格中看到所有项目状态，快速识别问题和进度。',
+    ac:['列：名称/当前阶段/进度条/AI调用/状态badge','默认按「最近更新」排序','搜索+状态过滤','点击行进入项目工作区'],
     tech:'GET /api/projects?sort=updatedAt&filter={status}\n→ [{id,name,currentStage,progress,aiCalls,status}]',
-    nav:[{l:'→ 进入项目工作区', to:'n-proj'},{l:'→ 监控', to:'n-monitor'}]},
+    wf:'/wireframes/wireframe-management.html',
+    nav:[{l:'→ 进入工作区', to:'n-proj'},{l:'→ 监控', to:'n-monitor'}]},
 
-  monitor: {ph:5, title:'实时监控（Claude 观测）',
-    story:'作为 AI 工程师，我希望实时看到所有 Claude 会话的工具调用，方便监控和调试。',
-    ac:['左栏：最近 50 条会话（含 event_count/时长/关联项目）','右栏实时/历史 Tab：实时 WS 推送工具调用事件','事件类型颜色区分：PreTool 蓝/PostTool 绿/Error 红/Stop 灰','点击事件展开完整 JSON 输入/输出','性能面板：TTFT 分布 + 调用时长 P50/P95'],
-    tech:'WS /ws/sessions → {type:"session_update"}\nGET /api/sessions\nGET /api/sessions/{id}/events\nGET /api/metrics',
+  monitor:{ph:5,title:'实时监控（Claude 观测）',
+    story:'作为 AI 工程师，我希望实时看到所有 Claude 会话的工具调用，方便监控调试。',
+    ac:['左栏：最近50条会话（event_count/时长/项目）','右栏实时/历史 Tab','事件颜色：PreTool蓝/PostTool绿/Error红','展开查看完整 JSON','TTFT分布+P50/P95'],
+    tech:'WS /ws/sessions → {type:"session_update"}\nGET /api/sessions\nGET /api/sessions/{id}/events',
+    wf:'/wireframes/wireframe-management.html',
     nav:[{l:'→ 跳转关联项目', to:'n-proj'}]},
 
-  layout: {ph:6, title:'灵活面板布局（VSCode 式）',
-    story:'作为高级用户，我希望像在 VSCode 中一样自由定制工作区的面板布局，提升工作效率。',
-    ac:['侧边栏 + 主内容区 + 辅助面板均可拖拽调整宽度（resize handle）','活动栏（Activity Bar）左侧图标控制各功能面板的显隐','面板可独立折叠/展开（Cmd+B 折叠侧边栏，Cmd+J 折叠底部面板）','布局状态持久化到 localStorage["tc-layout"]','支持「布局预设」：PRD模式（三栏）/ 开发模式（左侧导航+宽内容）/ 监控模式（双屏）'],
-    tech:'Layout State Schema:\n{\n  sidebar: {width:224, collapsed:false},\n  panels: {[id]: {width,height,visible}},\n  preset: "prd"|"dev"|"monitor"|"custom"\n}\npersist: localStorage["tc-layout"]',
+  layout:{ph:6,title:'灵活面板布局（VSCode式）',
+    story:'作为高级用户，我希望像在 VSCode 中一样自由定制工作区面板布局，提升效率。',
+    ac:['所有面板均可拖拽调整宽高（resize handle）','Activity Bar控制各功能面板显隐','Cmd+B 折叠侧边栏，Cmd+J 折叠底部','布局存入 localStorage["tc-layout"]','布局预设：PRD模式/开发模式/监控模式'],
+    tech:'Layout State:\n{\n  sidebar: {width:224, collapsed:false},\n  panels: {[id]: {width,height,visible}},\n  preset: "prd"|"dev"|"monitor"|"custom"\n}',
+    wf:null,
     nav:[{l:'→ 插件市场', to:'n-plugin'}]},
 
-  plugin: {ph:6, title:'插件市场',
-    story:'作为用户，我希望能够发现和安装社区开发的插件，为自己的工作流增加特定能力。',
-    ac:['插件卡片：名称/图标/作者/Star数/版本/简介/安装状态','内置插件：Jira 同步 / GitHub PR 联动 / Figma 设计稿导入 / 自定义 AI 模型接入','已安装管理：启用/禁用/配置/更新/卸载','插件权限说明（何种 API 访问权限）','开发者上传入口：「开发自己的插件 →」'],
-    tech:'GET /api/plugins?category={cat}&q={query}\nPOST /api/plugins/{id}/install\nPOST /api/plugins/{id}/uninstall\n沙箱隔离执行（iframe 或 worker）',
-    nav:[{l:'→ 开发插件 API', to:'n-pluginapi'},{l:'← 返回工作区', to:'n-proj'}]},
+  plugin:{ph:6,title:'插件市场',
+    story:'作为用户，我希望能发现和安装社区插件，为自己的工作流增加特定能力。',
+    ac:['插件卡片：名称/图标/作者/Star/简介','内置：Jira同步/GitHub PR/Figma导入/自定义AI模型','管理：启用/禁用/更新/卸载','插件权限说明','开发者上传入口'],
+    tech:'GET /api/plugins?category={cat}\nPOST /api/plugins/{id}/install\n沙箱隔离执行（iframe/worker）',
+    wf:null,
+    nav:[{l:'→ 插件 API', to:'n-pluginapi'},{l:'← 返回工作区', to:'n-proj'}]},
 
-  pluginapi: {ph:6, title:'插件开发 API',
-    story:'作为开发者，我希望有简洁明确的扩展 API，能在 1 天内开发出有用的 TaskConductor 插件。',
-    ac:['registerPanelView(id, config) — 注册自定义面板视图','registerStageHook(stage, fn) — 在流水线阶段注入逻辑','registerCommand(id, fn) — 注册命令面板（Cmd+K）命令','plugin.storage.get/set(key) — 持久化插件配置','事件订阅：ctx.on("stageChange" | "approval" | "aiOutput")'],
-    tech:`// 插件入口文件 plugin.ts
-export function activate(ctx: PluginContext) {
-
-  // 注册侧边面板
-  ctx.registerPanelView("jira-panel", {
-    icon: "🎯",
-    title: "Jira Sync",
-    render: (el) => ReactDOM.render(<JiraPanel />, el)
-  });
-
-  // 钩入 PRD 阶段完成事件
-  ctx.registerStageHook("prd", async (data) => {
-    await syncPrdToJira(data.artifact);
-  });
-
-  // 注册命令
-  ctx.registerCommand("jira.sync", async () => {
-    await manualSync();
-  });
-}`,
+  pluginapi:{ph:6,title:'插件开发 API',
+    story:'作为开发者，我希望有简洁明确的扩展 API，能在 1 天内开发出有用的插件。',
+    ac:['registerPanelView(id,cfg) — 注册面板视图','registerStageHook(stage,fn) — 钩入流水线','registerCommand(id,fn) — 注册命令面板','plugin.storage.get/set(key) — 持久化配置','事件订阅：onStageChange / onApproval'],
+    tech:`export function activate(ctx) {\n  ctx.registerPanelView("jira", {\n    icon: "🎯",\n    render: (el) => mount(<JiraPanel/>, el)\n  });\n  ctx.registerStageHook("prd", async (d) => {\n    await syncToJira(d.artifact);\n  });\n}`,
+    wf:null,
     nav:[{l:'← 插件市场', to:'n-plugin'}]},
 };
 
-// Node definitions
-const NODES = [
-  // Phase 1: 入口
-  {id:'n-entry',    key:'entry',    label:'应用入口',      x:24,  y:170},
-  {id:'n-onboard',  key:'onboard',  label:'新建项目引导',  x:24,  y:460},
-  // Phase 2: 项目工作区
-  {id:'n-proj',     key:'proj',     label:'项目工作区',    x:250, y:110},
-  {id:'n-stages',   key:'stages',   label:'侧边栏阶段导航',x:250, y:420},
-  // Phase 3: PRD 访谈
-  {id:'n-prd',      key:'prd',      label:'PRD 访谈',      x:490, y:110},
-  {id:'n-prddoc',   key:'prddoc',   label:'文档预览 Diff', x:490, y:420},
-  // Phase 4: 阶段状态机
-  {id:'n-aiwork',   key:'aiwork',   label:'AI 执行中',     x:730, y:110},
-  {id:'n-approve',  key:'approve',  label:'阶段审批',      x:730, y:380},
-  {id:'n-retry',    key:'retry',    label:'拒绝重新迭代',  x:730, y:580},
-  // Phase 5: 管理中心
-  {id:'n-mgmt',     key:'mgmt',     label:'管理中心',      x:970, y:110},
-  {id:'n-projects', key:'projects', label:'项目列表',      x:970, y:390},
-  {id:'n-monitor',  key:'monitor',  label:'实时监控',      x:970, y:590},
-  // Phase 6: 插件系统
-  {id:'n-layout',   key:'layout',   label:'灵活布局定制',  x:1210,y:110},
-  {id:'n-plugin',   key:'plugin',   label:'插件市场',      x:1210,y:380},
-  {id:'n-pluginapi',key:'pluginapi',label:'插件 API',       x:1210,y:590},
-];
-
-// Arrows
-const ARROWS = [
-  // 入口 flows
-  {f:'n-entry',    t:'n-proj',     lb:'有历史项目',   fx:'r', fy:.4,  tx:'l', ty:.35},
-  {f:'n-entry',    t:'n-onboard',  lb:'无项目',       fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-onboard',  t:'n-prd',      lb:'创建成功',     fx:'r', fy:.5,  tx:'l', ty:.75},
-  // 项目工作区
-  {f:'n-proj',     t:'n-stages',   lb:'侧边栏导航',   fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-proj',     t:'n-mgmt',     lb:'管理中心',     fx:'r', fy:.3,  tx:'l', ty:.3},
-  {f:'n-proj',     t:'n-layout',   lb:'布局定制',     fx:'r', fy:.65, tx:'l', ty:.65},
-  {f:'n-stages',   t:'n-prd',      lb:'PRD 阶段',     fx:'r', fy:.45, tx:'l', ty:.7},
-  {f:'n-stages',   t:'n-aiwork',   lb:'其他阶段',     fx:'r', fy:.3,  tx:'l', ty:.7},
-  // PRD 访谈
-  {f:'n-prd',      t:'n-prddoc',   lb:'实时更新',     fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-prd',      t:'n-approve',  lb:'完成访谈',     fx:'r', fy:.5,  tx:'l', ty:.3},
-  {f:'n-prddoc',   t:'n-approve',  lb:'提交审批',     fx:'r', fy:.5,  tx:'l', ty:.55},
-  // 阶段状态机
-  {f:'n-aiwork',   t:'n-approve',  lb:'AI完成',       fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-approve',  t:'n-stages',   lb:'✓ 通过→下一步',fx:'l', fy:.4,  tx:'r', ty:.4, curve:'up'},
-  {f:'n-approve',  t:'n-retry',    lb:'✗ 拒绝',       fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-retry',    t:'n-aiwork',   lb:'重新执行',     fx:'l', fy:.5,  tx:'l', ty:.85, curve:'left'},
-  // 管理中心
-  {f:'n-mgmt',     t:'n-projects', lb:'项目列表',     fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-projects', t:'n-monitor',  lb:'监控',         fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-mgmt',     t:'n-monitor',  lb:'快速跳转',     fx:'r', fy:.65, tx:'l', ty:.3},
-  {f:'n-monitor',  t:'n-proj',     lb:'跳转项目',     fx:'t', fy:0,   tx:'r', ty:.45, curve:'up'},
-  // 插件系统
-  {f:'n-layout',   t:'n-plugin',   lb:'插件安装',     fx:'b', fy:1,   tx:'t', ty:0},
-  {f:'n-plugin',   t:'n-pluginapi',lb:'开发插件',     fx:'b', fy:1,   tx:'t', ty:0},
-];
-
-// ════════════════════════════════════════════
-// WIREFRAME RENDERS
-// ════════════════════════════════════════════
-
-function ln(w='100%',dark=false){ return `<div class="ln${dark?' dark':''}" style="width:${w}"></div>`; }
-function lns(...ws){ return ws.map(w=>ln(w)).join(''); }
-function btn(txt,type='pri'){ return `<div class="btn ${type}">${txt}</div>`; }
-function inp(ph=false){ return `<div class="inp ${ph?'focus':''}"><div class="${ph?'inp-txt':'inp-ph'}"></div></div>`; }
-function sep(){ return '<div class="sep"></div>'; }
-
-const WF = {
-  // ── App Entry ──
-  entry: () => `
-    <div style="background:#0f172a;padding:8px;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <div style="width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:7px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff">TC</div>
-      ${ln('55%')}
-      <div style="display:flex;gap:5px;margin-top:5px;width:85%">
-        <div style="flex:1;height:16px;background:#1e293b;border:1px solid #2563eb;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#60a5fa;font-weight:600">有项目→</div>
-        <div style="flex:1;height:16px;background:#1e293b;border:1px solid #374151;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#4b5563">无项目↓</div>
-      </div>
-    </div>`,
-
-  // ── Onboarding ──
-  onboard: () => `
-    <div class="sc-body">
-      <div style="font-size:9px;font-weight:700;margin-bottom:6px;color:#6366f1">✨ 创建您的第一个项目</div>
-      <div style="font-size:7.5px;color:var(--dim2);margin-bottom:2px">项目名称 *</div>
-      ${inp(true)}
-      <div style="font-size:7.5px;color:var(--dim2);margin:3px 0 2px">项目描述（可选）</div>
-      <div style="border:1px solid #c7d2fe;border-radius:4px;height:22px;background:#f8f9ff;margin-bottom:4px;padding:3px 6px">${ln('65%')}</div>
-      ${btn('创建项目并开始访谈 →')}
-      <div style="font-size:7px;color:var(--dim2);text-align:center;margin-top:3px">接下来：AI 将引导您完成 PRD 需求访谈</div>
-    </div>`,
-
-  // ── Project Workspace ──
-  proj: () => `
-    <div style="display:flex;height:110px">
-      <div class="sidebar-mini">
-        <div style="width:20px;height:20px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:5px;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#fff">TC</div>
-        <div style="height:1px;background:rgba(255,255,255,.06);margin:2px 0"></div>
-        <div class="sidebar-item active" style="font-size:6px">🏠</div>
-        <div class="sidebar-item done" style="font-size:6px">✓</div>
-        <div class="sidebar-item" style="color:#f59e0b;font-size:6px">◑</div>
-        <div class="sidebar-item" style="font-size:6px">○</div>
-        <div class="sidebar-item" style="font-size:6px">○</div>
-        <div style="flex:1"></div>
-        <div class="sidebar-item" style="font-size:6px;border:1px dashed rgba(255,255,255,.1)">⊞</div>
-      </div>
-      <div style="flex:1;padding:5px 6px;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
-          <div class="ln" style="width:60%;margin:0"></div>
-          <div style="font-size:7px;color:#f59e0b;background:#fef3c7;padding:1px 5px;border-radius:99px;font-weight:700;white-space:nowrap">审批中</div>
-        </div>
-        <div style="display:flex;gap:2px;margin-bottom:4px">
-          ${['✓','◑','3','4','5','6','7'].map((s,i)=>`<div style="flex:1;height:11px;border-radius:3px;background:${i===0?'#d1fae5':i===1?'#fef3c7':'#f3f4f6'};border:1px solid ${i===0?'#6ee7b7':i===1?'#fde68a':'#e5e7eb'};display:flex;align-items:center;justify-content:center;font-size:5px;color:${i===0?'#059669':i===1?'#d97706':'#9ca3af'}">${s}</div>`).join('')}
-        </div>
-        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:3px 6px;margin-bottom:3px">
-          <div style="font-size:7px;color:#d97706;font-weight:600">⏳ Design 待您审批</div>
-        </div>
-        <div class="row">${btn('批准','grn')}${btn('拒绝','red')}</div>
-      </div>
-    </div>`,
-
-  // ── Stage Nav ──
-  stages: () => `
-    <div style="display:flex;height:110px">
-      <div class="sidebar-mini" style="width:36px">
-        <div style="height:8px;background:rgba(255,255,255,.04);margin:1px 2px;border-radius:2px"></div>
-        ${[{t:'✓',c:'#10b981'},{t:'PRD',c:'#4b5563'},{t:'◑',c:'#f59e0b',a:true},{t:'○',c:'#374151'},{t:'○',c:'#374151'}].map(i=>`
-          <div style="display:flex;align-items:center;gap:2px;padding:2px 3px;margin:0 1px;border-radius:2px;background:${i.a?'rgba(245,158,11,.1)':'transparent'}">
-            <div style="font-size:6px;color:${i.c};flex-shrink:0">${i.t}</div>
-            <div style="height:5px;background:${i.c}22;border-radius:1px;flex:1"></div>
-            ${i.a?`<div style="width:4px;height:4px;background:#f59e0b;border-radius:50%"></div>`:''}
-          </div>`).join('')}
-        <div style="flex:1"></div>
-        <div style="padding:2px 3px;border-top:1px solid rgba(255,255,255,.06);margin-top:2px">
-          <div style="font-size:6px;color:#4b5563;text-align:center">⊞ 管理</div>
-        </div>
-      </div>
-      <div style="flex:1;padding:4px 5px">
-        ${lns('80%','55%','40%')}
-        <div style="display:flex;gap:3px;margin-top:4px">
-          <div style="flex:1;background:#fffbeb;border:1px solid #fde68a;border-radius:3px;padding:3px 4px">
-            <div style="font-size:6px;color:#d97706;font-weight:700">Design 待审批</div>
-            ${ln('70%')}
-          </div>
-        </div>
-      </div>
-    </div>`,
-
-  // ── PRD Chat ──
-  prd: () => `
-    <div style="display:flex;height:110px;overflow:hidden">
-      <div style="width:28px;background:#fafbfc;border-right:1px solid var(--ln);padding:3px 2px">
-        ${['✓','●','○','○','○','○'].map((s,i)=>`<div style="font-size:7px;color:${i===0?'#10b981':i===1?'#2563eb':'#d1d5db'};padding:2px;text-align:center;border-left:${i===1?'2px solid #2563eb':'2px solid transparent'}">${s}</div>`).join('')}
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;padding:4px;gap:3px;overflow:hidden">
-        <div style="background:#f8f9ff;border:1px solid #e0e7ff;border-radius:4px 4px 4px 2px;padding:3px 5px">
-          <div style="font-size:6.5px;color:#374151;line-height:1.4">AI：您的平台是否支持多商户入驻？</div>
-        </div>
-        <div style="background:#2563eb;border-radius:4px 4px 2px 4px;padding:3px 5px;align-self:flex-end;max-width:80%">
-          <div style="font-size:6.5px;color:#fff;line-height:1.4">是，类似淘宝模式</div>
-        </div>
-        <div style="background:#f3f4f6;border-radius:4px;padding:3px 5px;width:60%">
-          <div style="display:flex;gap:2px">${[0,1,2].map(()=>`<div style="width:4px;height:4px;background:#9ca3af;border-radius:50%"></div>`).join('')}</div>
-        </div>
-      </div>
-      <div style="width:2px;background:#e5e7eb;margin:2px 0"></div>
-      <div style="width:38px;padding:3px 2px">
-        <div style="font-size:6px;color:#2563eb;margin-bottom:2px;font-weight:600">预览</div>
-        <div style="background:#dcfce7;border-left:2px solid #16a34a;padding:2px;margin-bottom:2px;font-size:5.5px;color:#166534">✦ 多商户…</div>
-        ${lns('90%','70%','80%')}
-      </div>
-    </div>`,
-
-  // ── PRD Doc Diff ──
-  prddoc: () => `
-    <div class="sc-body" style="padding:5px">
-      <div style="background:#fef3c7;border-bottom:1px solid #fde68a;padding:3px 6px;margin:-5px -5px 5px;font-size:7px;color:#d97706;font-weight:600">⚡ 已更新 3 处</div>
-      <div style="font-size:8px;font-weight:700;margin-bottom:4px">PRD 文档 v0.4</div>
-      <div style="background:#dcfce7;border-left:2px solid #16a34a;padding:2px 4px;margin-bottom:2px;font-size:6.5px;color:#166534">✦ 新增：多商户入驻支持</div>
-      ${ln('85%')}
-      <div style="background:#fef3c7;border-left:2px solid #f59e0b;padding:2px 4px;margin:2px 0;font-size:6.5px;color:#92400e">↻ 修改：图片上限 5→10</div>
-      ${lns('70%','55%')}
-      <div style="font-size:7px;color:var(--dim2);margin-top:4px;display:flex;justify-content:space-between">
-        <span>2184字 · 50%</span>
-        ${btn('提交审批','pri')}
-      </div>
-    </div>`,
-
-  // ── AI Working ──
-  aiwork: () => `
-    <div style="background:#eff6ff;padding:4px 7px;border-bottom:1px solid #bfdbfe">
-      <div class="row" style="margin:0">
-        <div style="width:5px;height:5px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
-        <div style="font-size:7.5px;color:#1d4ed8;margin-left:3px;font-weight:600">🤖 AI 工作中</div>
-        <div style="font-size:7px;color:#3b82f6;margin-left:auto;font-family:monospace">01:24</div>
-      </div>
-    </div>
-    <div class="sc-body" style="padding:5px 7px">
-      ${[['INFO','#6b7280','#f3f4f6'],['INFO','#6b7280','#f3f4f6'],['SUCCESS','#059669','#dcfce7']].map(([t,c,bg])=>`
-        <div style="display:flex;align-items:center;gap:3px;margin-bottom:2px">
-          <div style="font-size:6px;font-weight:700;color:${c};background:${bg};padding:0 3px;border-radius:2px;flex-shrink:0">${t}</div>
-          <div class="log-line" style="flex:1;background:${bg}"></div>
-        </div>`).join('')}
-      <div style="display:flex;align-items:center;gap:3px;margin-top:3px">
-        <div style="width:4px;height:4px;border-radius:50%;background:#2563eb"></div>
-        <div class="ln xs" style="width:45%;margin:0"></div>
-      </div>
-    </div>`,
-
-  // ── Approval ──
-  approve: () => `
-    <div style="background:#fffbeb;padding:4px 7px;border-bottom:1px solid #fde68a">
-      <div style="font-size:8px;color:#d97706;font-weight:700">⏸ 待您审批 — Design</div>
-    </div>
-    <div class="sc-body">
-      <div class="row" style="align-items:stretch;gap:3px">
-        ${[{t:'方案A',v:92,s:true},{t:'方案B',v:84,s:false},{t:'方案C',v:76,s:false}].map(o=>`
-          <div class="option-card ${o.s?'sel':''}">
-            <div style="font-size:7.5px;font-weight:700;color:${o.s?'#2563eb':'#374151'}">${o.t}</div>
-            <div style="font-size:9px;font-weight:800;color:${o.v>=90?'#10b981':'#6b7280'}">${o.v}</div>
-            ${ln('75%')}
-          </div>`).join('')}
-      </div>
-      <div style="font-size:7px;color:var(--dim2);margin:3px 0">${ln('90%')}</div>
-      <div class="row" style="gap:3px">
-        ${btn('✓ 批准','grn')}${btn('✏️修改','sec')}${btn('✗','red')}
-      </div>
-    </div>`,
-
-  // ── Retry ──
-  retry: () => `
-    <div style="background:#fef2f2;padding:4px 7px;border-bottom:1px solid #fecaca">
-      <div style="font-size:8px;color:#dc2626;font-weight:700">✗ 已拒绝 · 第 2 次迭代</div>
-    </div>
-    <div class="sc-body">
-      <div style="font-size:7.5px;color:var(--dim2);margin-bottom:3px">拒绝原因（已记录到知识库）</div>
-      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:4px 6px;margin-bottom:5px">
-        ${lns('90%','70%')}
-      </div>
-      <div style="font-size:7px;color:#6b7280;margin-bottom:4px">📚 知识库已更新，防止重犯</div>
-      ${btn('🔄 重新执行 AI','pri')}
-    </div>`,
-
-  // ── Management Dashboard ──
-  mgmt: () => `
-    <div style="background:#0f172a;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.08)">
-      <div class="row" style="margin:0">
-        <div style="font-size:7.5px;color:#e5e7eb;font-weight:700">管理中心</div>
-        <div style="display:flex;gap:4px;margin-left:auto">
-          ${['仪表盘','项目','监控'].map((t,i)=>`<div style="font-size:6.5px;padding:2px 5px;border-radius:3px;background:${i===0?'rgba(37,99,235,.3)':'transparent'};color:${i===0?'#93c5fd':'#6b7280'};font-weight:${i===0?700:500}">${t}</div>`).join('')}
-        </div>
-      </div>
-    </div>
-    <div class="sc-body" style="padding:5px 6px;background:#f8faff">
-      <div class="row">
-        ${['7','3','97%','1.8s'].map((v,i)=>`
-          <div class="kpi-card">
-            <div style="font-size:10px;font-weight:800;color:${['#6366f1','#10b981','#10b981','#f59e0b'][i]}">${v}</div>
-            <div style="height:4px;background:${['#eef2ff','#d1fae5','#d1fae5','#fef3c7'][i]};border-radius:2px;margin-top:2px"></div>
-          </div>`).join('')}
-      </div>
-      ${sep()}
-      <div style="font-size:7px;color:var(--dim2);margin-bottom:3px;font-weight:600">待审批</div>
-      ${['E-Commerce · Design','AI客服 · Dev PR'].map(t=>`
-        <div class="list-row">
-          <div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
-          <div class="ln xs" style="flex:1;margin:0 4px"></div>
-        </div>`).join('')}
-    </div>`,
-
-  // ── Projects list ──
-  projects: () => `
-    <div style="background:#f8f9fc;padding:5px 7px 4px;border-bottom:1px solid var(--ln)">
-      <div class="row" style="margin:0">
-        <div style="font-size:8px;font-weight:700">所有项目</div>
-        <div style="margin-left:auto;background:#2563eb;color:#fff;font-size:7px;font-weight:700;padding:2px 7px;border-radius:3px">+ 新建</div>
-      </div>
-    </div>
-    <div class="sc-body" style="padding:4px 6px">
-      ${[['E-Commerce','Design','#f59e0b',29],['AI客服','Dev','#2563eb',57],['数据平台','PRD','#9ca3af',14]].map(([n,s,c,p])=>`
-        <div class="list-row">
-          <div style="font-size:7px;font-weight:600;color:#374151;width:45%">${n}</div>
-          <div style="font-size:6.5px;color:${c};background:${c}18;padding:0 4px;border-radius:3px;white-space:nowrap">${s}</div>
-          <div style="flex:1;margin-left:4px">
-            <div style="background:#e5e7eb;border-radius:99px;height:4px;overflow:hidden">
-              <div style="width:${p}%;height:100%;background:${c};border-radius:99px"></div>
-            </div>
-          </div>
-        </div>`).join('')}
-    </div>`,
-
-  // ── Monitor ──
-  monitor: () => `
-    <div style="background:#f0fdf4;padding:4px 7px;border-bottom:1px solid #bbf7d0">
-      <div class="row" style="margin:0">
-        <div style="width:5px;height:5px;border-radius:50%;background:#10b981;flex-shrink:0"></div>
-        <div style="font-size:7.5px;color:#059669;margin-left:3px">已连接 · 3 会话</div>
-      </div>
-    </div>
-    <div class="sc-body" style="padding:5px 7px">
-      ${[['Post','Bash','#10b981','142ms'],['Pre','Read','#2563eb','-'],['Post','Write','#10b981','89ms'],['Stop','—','#9ca3af','—']].map(([type,tool,c,ms])=>`
-        <div class="list-row">
-          <div style="font-size:6px;font-weight:700;color:${c};background:${c}18;padding:0 3px;border-radius:2px;flex-shrink:0">${type}</div>
-          <div style="font-size:7.5px;font-weight:600;color:#374151;margin-left:4px">${tool}</div>
-          <div style="margin-left:auto;font-size:6.5px;color:${c};font-family:monospace">${ms}</div>
-        </div>`).join('')}
-    </div>`,
-
-  // ── Layout ──
-  layout: () => `
-    <div style="display:flex;height:110px">
-      <div style="width:14px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:3px 0;gap:4px">
-        ${['🗂','💬','🔌','⚙'].map((i,idx)=>`<div style="font-size:8px;opacity:${idx===0?1:0.4}">${i}</div>`).join('')}
-      </div>
-      <div style="width:32px;background:#111827;border-right:1px solid rgba(255,255,255,.06);padding:3px 2px">
-        ${[{t:'概览',a:true},{t:'PRD'},{t:'Design'}].map(i=>`<div style="font-size:5.5px;color:${i.a?'#93c5fd':'#4b5563'};background:${i.a?'rgba(37,99,235,.2)':'transparent'};border-radius:2px;padding:2px 3px;margin-bottom:1px;font-weight:${i.a?700:400}">${i.t}</div>`).join('')}
-      </div>
-      <div style="flex:1;padding:3px;overflow:hidden">
-        ${lns('80%','60%','45%')}
-        <div style="background:#fffbeb;border-left:2px solid #f59e0b;padding:2px 4px;margin-top:3px;font-size:6px;color:#d97706">Design 待审批</div>
-      </div>
-      <div style="width:3px;background:#e5e7eb;cursor:col-resize;position:relative">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:20px;background:#d1d5db;border-radius:99px"></div>
-      </div>
-      <div style="width:36px;background:#f8f9fc;border-left:1px solid var(--ln);padding:3px 2px">
-        <div style="font-size:6px;color:#6b7280;font-weight:600;margin-bottom:3px">工具调用</div>
-        ${[1,2,3].map(()=>`<div class="log-line" style="height:6px"></div>`).join('')}
-      </div>
-    </div>`,
-
-  // ── Plugin Market ──
-  plugin: () => `
-    <div class="sc-body" style="padding:5px">
-      <div style="font-size:8.5px;font-weight:700;margin-bottom:5px">插件市场</div>
-      ${[{n:'Jira 同步',i:'🎯',s:true},{n:'GitHub PR',i:'🔗',s:false},{n:'Figma 导入',i:'🎨',s:false}].map(p=>`
-        <div style="display:flex;align-items:center;gap:5px;padding:4px;border:1px solid var(--ln);border-radius:5px;margin-bottom:3px;background:${p.s?'#f8faff':'#fff'}">
-          <div style="font-size:12px">${p.i}</div>
-          <div style="flex:1">
-            <div style="font-size:8px;font-weight:600;color:#111827">${p.n}</div>
-            <div style="height:5px;background:var(--ln);border-radius:2px;width:70%;margin-top:2px"></div>
-          </div>
-          <div style="${p.s?'background:#ecfdf5;color:#059669':'background:var(--blue);color:#fff'};font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px">${p.s?'已安装':'安装'}</div>
-        </div>`).join('')}
-    </div>`,
-
-  // ── Plugin API ──
-  pluginapi: () => `
-    <div class="sc-body" style="padding:5px">
-      <div style="font-size:8px;font-weight:700;color:#8b5cf6;margin-bottom:5px">插件开发 API</div>
-      <div style="background:#0f172a;border-radius:5px;padding:6px;font-size:6.5px;color:#a3e635;font-family:monospace;line-height:1.6">
-        <span style="color:#7c3aed">export function</span> <span style="color:#60a5fa">activate</span>(ctx) {<br>
-        &nbsp; ctx.<span style="color:#fbbf24">registerPanelView</span>(<span style="color:#34d399">"jira"</span>, {…});<br>
-        &nbsp; ctx.<span style="color:#fbbf24">registerStageHook</span>(<span style="color:#34d399">"prd"</span>, fn);<br>
-        &nbsp; ctx.<span style="color:#fbbf24">registerCommand</span>(id, fn);<br>
-        }
-      </div>
-      <div style="display:flex;gap:3px;margin-top:5px">
-        <div style="flex:1;background:#f3e8ff;border-radius:4px;padding:3px 4px">
-          <div style="font-size:6.5px;font-weight:700;color:#7c3aed">Panel API</div>
-          ${ln('80%')}
-        </div>
-        <div style="flex:1;background:#ecfdf5;border-radius:4px;padding:3px 4px">
-          <div style="font-size:6.5px;font-weight:700;color:#059669">Hook API</div>
-          ${ln('70%')}
-        </div>
-      </div>
-    </div>`,
+// Default node positions — 3-row grid layout
+// Row A (y=80):  proj, aiwork, mgmt, layout
+// Row B (y=400): entry/onboard, stages, prd, approve, projects, plugin
+// Row C (y=720): onboard(lower), prddoc, retry, monitor, pluginapi
+const DEFAULT_POS = {
+  'n-entry':    {x:30,   y:200},  // between A and B
+  'n-onboard':  {x:30,   y:520},  // below entry
+  'n-proj':     {x:380,  y:80},   // Row A
+  'n-stages':   {x:380,  y:400},  // Row B
+  'n-prd':      {x:730,  y:400},  // Row B — aligns with stages ✓
+  'n-prddoc':   {x:730,  y:720},  // Row C
+  'n-aiwork':   {x:1090, y:80},   // Row A
+  'n-approve':  {x:1090, y:400},  // Row B — aligns with prd ✓
+  'n-retry':    {x:1090, y:720},  // Row C
+  'n-mgmt':     {x:1450, y:80},   // Row A
+  'n-projects': {x:1450, y:400},  // Row B
+  'n-monitor':  {x:1450, y:720},  // Row C
+  'n-layout':   {x:1810, y:80},   // Row A
+  'n-plugin':   {x:1810, y:400},  // Row B
+  'n-pluginapi':{x:1810, y:720},  // Row C
 };
 
-// ════════════════════════════════════════════
+const NODES = [
+  {id:'n-entry',    key:'entry',    label:'应用入口'},
+  {id:'n-onboard',  key:'onboard',  label:'新建引导'},
+  {id:'n-proj',     key:'proj',     label:'项目工作区'},
+  {id:'n-stages',   key:'stages',   label:'阶段导航'},
+  {id:'n-prd',      key:'prd',      label:'PRD 访谈'},
+  {id:'n-prddoc',   key:'prddoc',   label:'文档 Diff 预览'},
+  {id:'n-aiwork',   key:'aiwork',   label:'AI 执行中'},
+  {id:'n-approve',  key:'approve',  label:'阶段审批'},
+  {id:'n-retry',    key:'retry',    label:'拒绝重新迭代'},
+  {id:'n-mgmt',     key:'mgmt',     label:'管理中心'},
+  {id:'n-projects', key:'projects', label:'项目列表'},
+  {id:'n-monitor',  key:'monitor',  label:'实时监控'},
+  {id:'n-layout',   key:'layout',   label:'灵活布局'},
+  {id:'n-plugin',   key:'plugin',   label:'插件市场'},
+  {id:'n-pluginapi',key:'pluginapi',label:'插件 API'},
+];
+
+// ─────────────────────────────────────────────────────────────
+// 14 CLEAN ARROWS — 无交叉设计
+//
+// 节点布局（3行×6列）：
+//   Row A (y≈80):  proj(col2)  aiwork(col4)  mgmt(col5)  layout(col6)
+//   Row B (y≈400): stages(col2) prd(col3) approve(col4) projects(col5) plugin(col6)
+//   Row C (y≈720): prddoc(col3) retry(col4) monitor(col5) pluginapi(col6)
+//   特殊: entry(col1,y=200) onboard(col1,y=520)
+//
+// 箭头类型：
+//   ↔ 水平 = 同行节点，y相同，无交叉
+//   ↕ 垂直 = 同列节点，x相同，无交叉
+//   ↗ 小斜 = 短距对角，角度<30°，可接受
+// ─────────────────────────────────────────────────────────────
+const DEFAULT_ARROWS = [
+  // ── ↗ 入口分叉（col1 → col2/col1）──
+  {f:'n-entry',    t:'n-proj',     lb:'有项目',   fx:'r',fy:.4,  tx:'l',ty:.4},   // ↗ 小斜
+  {f:'n-entry',    t:'n-onboard',  lb:'无项目',   fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↗ 新建→流水线入口 ──
+  {f:'n-onboard',  t:'n-stages',   lb:'新建项目', fx:'r',fy:.45, tx:'l',ty:.6},   // ↗ 小斜
+
+  // ── ↕ col2 纵向链 ──
+  {f:'n-proj',     t:'n-stages',   lb:'阶段导航', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↔ Row A 水平：proj 直连 aiwork（自动阶段，跳过PRD）──
+  {f:'n-proj',     t:'n-aiwork',   lb:'自动执行', fx:'r',fy:.5,  tx:'l',ty:.5},   // ↔ 水平 Row A
+
+  // ── ↔ Row B 水平主流程：stages → prd → approve ──
+  {f:'n-stages',   t:'n-prd',      lb:'PRD 阶段', fx:'r',fy:.5,  tx:'l',ty:.5},   // ↔ 水平 Row B
+  {f:'n-prd',      t:'n-approve',  lb:'完成提交', fx:'r',fy:.5,  tx:'l',ty:.5},   // ↔ 水平 Row B
+
+  // ── ↕ col3 纵向：文档同步 ──
+  {f:'n-prd',      t:'n-prddoc',   lb:'实时同步', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↕ col4 纵向链：AI执行 → 审批 → 重试 ──
+  {f:'n-aiwork',   t:'n-approve',  lb:'AI 完成',  fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+  {f:'n-approve',  t:'n-retry',    lb:'✗ 拒绝',   fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↕ col5 纵向链：管理中心 ──
+  {f:'n-mgmt',     t:'n-projects', lb:'项目列表', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+  {f:'n-projects', t:'n-monitor',  lb:'监控',     fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+
+  // ── ↕ col6 纵向链：插件系统 ──
+  {f:'n-layout',   t:'n-plugin',   lb:'插件安装', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+  {f:'n-plugin',   t:'n-pluginapi',lb:'开发 API', fx:'b',fy:.5,  tx:'t',ty:.5},   // ↕ 垂直
+];
+
+// ══════════════════════════════════════════
+// WIREFRAME RENDERS
+// ══════════════════════════════════════════
+function ln(w='100%',dark=false){return`<div class="ln${dark?' dark':''}" style="width:${w}"></div>`}
+function lns(...ws){return ws.map(w=>ln(w)).join('')}
+function btn(txt,type='pri'){return`<div class="btn ${type}">${txt}</div>`}
+function inp(ph=false){return`<div class="inp ${ph?'focus':''}"><div class="${ph?'inp-txt':'inp-ph'}"></div></div>`}
+function sep(){return'<div class="sep"></div>'}
+
+const WF = {
+  entry:()=>`<div style="background:#0f172a;padding:14px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div style="width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:10px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff">TC</div>
+    <div style="font-size:12px;font-weight:700;color:#e5e7eb;margin-bottom:4px">TaskConductor</div>
+    <div style="font-size:10px;color:#6b7280;margin-bottom:10px">AI 全流程开发协作平台</div>
+    <div style="display:flex;gap:6px;width:90%">
+    <div style="flex:1;height:26px;background:#1e293b;border:1px solid #2563eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#60a5fa;font-weight:600">有项目 →</div>
+    <div style="flex:1;height:26px;background:#1e293b;border:1px solid #374151;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#4b5563">新建 ↓</div></div></div>`,
+
+  onboard:()=>`<div class="sc-body"><div style="font-size:13px;font-weight:700;margin-bottom:8px;color:#6366f1">✨ 创建第一个项目</div>
+    <div style="font-size:10px;color:var(--dim2);margin-bottom:3px">项目名称 *</div>${inp(true)}
+    <div style="font-size:10px;color:var(--dim2);margin-bottom:3px;margin-top:5px">项目简介</div>
+    <div style="border:1px solid #c7d2fe;border-radius:5px;height:32px;background:#f8f9ff;margin-bottom:6px;padding:5px 8px">${ln('65%')}${ln('45%')}</div>
+    ${btn('创建并开始访谈 →')}<div style="font-size:10px;color:var(--dim2);text-align:center;margin-top:4px">接下来：AI 引导 PRD 访谈</div></div>`,
+
+  proj:()=>`<div style="display:flex;height:180px">
+    <div class="sidebar-mini">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:6px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff">TC</div>
+      <div style="height:1px;background:rgba(255,255,255,.06);margin:3px 0"></div>
+      <div class="sidebar-item active">🏠</div>
+      <div class="sidebar-item done">✓</div>
+      <div class="sidebar-item" style="color:#f59e0b">◑</div>
+      <div class="sidebar-item" style="opacity:.4">○</div>
+      <div class="sidebar-item" style="opacity:.4">○</div>
+      <div style="flex:1"></div>
+      <div class="sidebar-item" style="border:1px dashed rgba(255,255,255,.1)">⊞</div>
+    </div>
+    <div style="flex:1;padding:8px 10px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+        <div style="font-size:11px;font-weight:700;color:#1e2130;flex:1">E-Commerce 平台</div>
+        <div style="font-size:9px;color:#f59e0b;background:#fef3c7;padding:2px 6px;border-radius:99px;font-weight:700">审批中</div>
+      </div>
+      <div style="display:flex;gap:2px;margin-bottom:8px">
+        ${['✓','◑','3','4','5','6','7'].map((s,i)=>`<div style="flex:1;height:14px;border-radius:2px;background:${i===0?'#d1fae5':i===1?'#fef3c7':'#f3f4f6'};border:1px solid ${i===0?'#6ee7b7':i===1?'#fde68a':'#e5e7eb'};display:flex;align-items:center;justify-content:center;font-size:7px;color:${i===0?'#059669':i===1?'#d97706':'#9ca3af'}">${s}</div>`).join('')}
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:5px 7px;margin-bottom:6px">
+        <div style="font-size:10px;color:#d97706;font-weight:600">⏳ Design 待您审批</div>
+        <div style="font-size:9px;color:#92400e;margin-top:2px">AI 置信度 92分 · 方案 A/B/C</div>
+      </div>
+      <div class="row">${btn('批准','grn')}${btn('拒绝','red')}</div>
+    </div></div>`,
+
+  stages:()=>`<div style="display:flex;height:180px">
+    <div class="sidebar-mini" style="width:52px">
+      <div style="height:9px;background:rgba(255,255,255,.04);margin:2px 3px;border-radius:2px"></div>
+      ${[{t:'✓ 概览',c:'#10b981'},{t:'✓ PRD',c:'#10b981'},{t:'◑ Design',c:'#f59e0b',a:true},{t:'○ Tech',c:'#374151'},{t:'○ Dev',c:'#374151'},{t:'○ Logs',c:'#374151'}].map(i=>`
+      <div style="display:flex;align-items:center;gap:3px;padding:3px 4px;margin:0 2px;border-radius:3px;background:${i.a?'rgba(245,158,11,.12)':'transparent'};border-left:${i.a?'2px solid #f59e0b':'2px solid transparent'}">
+        <div style="font-size:8px;color:${i.c};font-weight:600;flex-shrink:0;width:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.t}</div>
+        ${i.a?`<div style="width:5px;height:5px;background:#f59e0b;border-radius:50%;flex-shrink:0"></div>`:''}
+      </div>`).join('')}
+      <div style="flex:1"></div>
+      <div style="padding:3px 4px;border-top:1px solid rgba(255,255,255,.06);margin-top:2px">
+        <div style="font-size:8px;color:#4b5563;text-align:center">⊞ 管理</div></div>
+    </div>
+    <div style="flex:1;padding:7px 8px">
+      <div style="font-size:10px;font-weight:700;color:#1e2130;margin-bottom:5px">当前：Design 阶段</div>
+      ${lns('75%','55%')}
+      <div style="display:flex;gap:4px;margin-top:6px">
+        <div style="flex:1;background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:5px 6px">
+          <div style="font-size:9px;color:#d97706;font-weight:700">Design 待审批</div>
+          <div style="font-size:8px;color:#92400e;margin-top:2px">3 个方案已生成</div>
+        </div></div></div></div>`,
+
+  prd:()=>`<div style="display:flex;height:180px;overflow:hidden">
+    <div style="width:40px;background:#fafbfc;border-right:1px solid var(--ln);padding:4px 3px">
+      <div style="font-size:8px;font-weight:700;color:#6b7280;margin-bottom:4px;text-align:center">目录</div>
+      ${[{s:'✓',t:'背景',c:'#10b981'},{s:'●',t:'功能',c:'#2563eb'},{s:'○',t:'UI',c:'#d1d5db'},{s:'○',t:'API',c:'#d1d5db'},{s:'○',t:'测试',c:'#d1d5db'}].map((i,idx)=>`<div style="font-size:8px;color:${i.c};padding:3px 2px;text-align:left;border-left:${idx===1?'2px solid #2563eb':'2px solid transparent'};white-space:nowrap;overflow:hidden">${i.s} ${i.t}</div>`).join('')}
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;padding:6px;gap:4px;overflow:hidden">
+      <div style="background:#f8f9ff;border:1px solid #e0e7ff;border-radius:6px 6px 6px 2px;padding:5px 7px">
+        <div style="font-size:9px;font-weight:600;color:#3b82f6;margin-bottom:2px">🤖 AI</div>
+        <div style="font-size:9px;color:#374151;line-height:1.4">是否需要支持多商户入驻模式？</div></div>
+      <div style="background:#2563eb;border-radius:6px 6px 2px 6px;padding:5px 7px;align-self:flex-end;max-width:85%">
+        <div style="font-size:9px;color:#fff;line-height:1.4">是，类似淘宝模式</div></div>
+      <div style="background:#f3f4f6;border-radius:6px;padding:5px 7px;width:50%">
+        <div style="display:flex;gap:3px">${[0,1,2].map(()=>`<div style="width:5px;height:5px;background:#9ca3af;border-radius:50%"></div>`).join('')}</div></div>
+    </div>
+    <div style="width:3px;background:#e5e7eb;margin:3px 0"></div>
+    <div style="width:54px;padding:5px 4px">
+      <div style="font-size:9px;color:#2563eb;margin-bottom:4px;font-weight:600">文档预览</div>
+      <div style="background:#dcfce7;border-left:2px solid #16a34a;padding:3px 4px;margin-bottom:3px;font-size:8px;color:#166534">✦ 新增段落</div>
+      ${lns('90%','70%','80%','60%')}</div></div>`,
+
+  prddoc:()=>`<div class="sc-body" style="padding:7px">
+    <div style="background:#fef3c7;padding:5px 8px;margin:-7px -7px 7px;font-size:10px;color:#d97706;font-weight:600">⚡ 已更新 3 处 · Diff 视图</div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:6px">PRD v0.4</div>
+    <div style="background:#dcfce7;border-left:3px solid #16a34a;padding:4px 6px;margin-bottom:4px;font-size:9px;color:#166534">✦ 新增：多商户入驻支持章节</div>${ln('85%')}
+    <div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:4px 6px;margin:4px 0;font-size:9px;color:#92400e">↻ 修改：图片上限 5→10MB</div>
+    ${lns('70%','55%','40%')}
+    <div style="font-size:10px;color:var(--dim2);margin-top:5px;display:flex;justify-content:space-between;align-items:center">
+      <span>2184字 · 完成度 50%</span>${btn('提交审批','pri')}</div></div>`,
+
+  aiwork:()=>`<div style="background:#eff6ff;padding:6px 10px;border-bottom:1px solid #bfdbfe">
+    <div class="row" style="margin:0"><div style="width:7px;height:7px;border-radius:50%;background:#2563eb;flex-shrink:0"></div>
+      <div style="font-size:11px;color:#1d4ed8;margin-left:5px;font-weight:600">🤖 AI 工作中</div>
+      <div style="font-size:11px;color:#3b82f6;margin-left:auto;font-family:monospace;font-weight:700">01:24</div></div></div>
+    <div class="sc-body" style="padding:7px 10px">
+      ${[['INFO','reading PRD artifact...','#6b7280','#f3f4f6'],['INFO','generating UI schemas...','#6b7280','#f3f4f6'],['SUCCESS','option A generated','#059669','#dcfce7'],['WARN','retry option B...','#d97706','#fef3c7']].map(([t,msg,c,bg])=>`
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <div style="font-size:8px;font-weight:700;color:${c};background:${bg};padding:1px 4px;border-radius:3px;flex-shrink:0">${t}</div>
+        <div style="font-size:8px;color:#6b7280;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${msg}</div></div>`).join('')}
+      <div style="display:flex;align-items:center;gap:4px;margin-top:5px">
+        <div style="width:6px;height:6px;border-radius:50%;background:#2563eb"></div>
+        <div class="ln xs" style="width:45%;margin:0"></div>
+        <div style="font-size:8px;color:#9ca3af">生成中…</div></div></div>`,
+
+  approve:()=>`<div style="background:#fffbeb;padding:6px 10px;border-bottom:1px solid #fde68a">
+    <div style="font-size:11px;color:#d97706;font-weight:700">⏸ 待您审批 — Design 阶段</div>
+    <div style="font-size:9px;color:#92400e;margin-top:2px">AI 置信度高 · Critic 已通过</div></div>
+    <div class="sc-body"><div class="row" style="align-items:stretch;gap:5px">
+      ${[{t:'方案 A',v:92,s:true,desc:'清晰布局'},{t:'方案 B',v:84,s:false,desc:'极简风格'},{t:'方案 C',v:76,s:false,desc:'丰富功能'}].map(o=>`
+      <div class="option-card ${o.s?'sel':''}">
+        <div style="font-size:9px;font-weight:700;color:${o.s?'#2563eb':'#374151'}">${o.t}</div>
+        <div style="font-size:14px;font-weight:800;color:${o.v>=90?'#10b981':'#6b7280'};line-height:1.4">${o.v}</div>
+        <div style="font-size:8px;color:#6b7280">${o.desc}</div></div>`).join('')}
+    </div>
+    <div class="row" style="gap:4px;margin-top:4px">${btn('✓ 批准','grn')}${btn('✏️ 修改','sec')}${btn('✗ 拒绝','red')}</div></div>`,
+
+  retry:()=>`<div style="background:#fef2f2;padding:6px 10px;border-bottom:1px solid #fecaca">
+    <div style="font-size:11px;color:#dc2626;font-weight:700">✗ 已拒绝 · 第 2 次迭代</div>
+    <div style="font-size:9px;color:#b91c1c;margin-top:2px">需优化：布局层级不够清晰</div></div>
+    <div class="sc-body">
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:6px 8px;margin-bottom:6px">
+      <div style="font-size:9px;font-weight:700;color:#dc2626;margin-bottom:3px">拒绝原因</div>
+      ${lns('90%','70%')}
+    </div>
+    <div style="font-size:9px;color:#6b7280;margin-bottom:6px">📚 经验已写入知识库 · 下轮注入</div>
+    ${btn('🔄 重新执行 (第3轮)','pri')}</div>`,
+
+  mgmt:()=>`<div style="background:#0f172a;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.08)">
+    <div class="row" style="margin:0"><div style="font-size:11px;color:#e5e7eb;font-weight:700">管理中心</div>
+    <div style="display:flex;gap:4px;margin-left:auto">
+      ${['仪表盘','所有项目','监控','设置'].map((t,i)=>`<div style="font-size:9px;padding:2px 6px;border-radius:3px;background:${i===0?'rgba(37,99,235,.3)':'transparent'};color:${i===0?'#93c5fd':'#6b7280'}">${t}</div>`).join('')}
+    </div></div></div>
+    <div class="sc-body" style="padding:7px 8px;background:#f8faff">
+      <div class="row">${[{v:'7',l:'项目',c:'#6366f1',bg:'#eef2ff'},{v:'3',l:'进行中',c:'#10b981',bg:'#d1fae5'},{v:'97%',l:'成功率',c:'#10b981',bg:'#d1fae5'},{v:'1.8s',l:'TTFT',c:'#f59e0b',bg:'#fef3c7'}].map((item)=>`
+        <div class="kpi-card"><div style="font-size:13px;font-weight:800;color:${item.c}">${item.v}</div>
+        <div style="font-size:8px;color:#6b7280;margin-top:1px">${item.l}</div>
+        <div style="height:4px;background:${item.bg};border-radius:2px;margin-top:3px"></div></div>`).join('')}
+      </div>${sep()}<div style="font-size:10px;color:var(--dim2);margin-bottom:4px;font-weight:600">待审批 (2)</div>
+      ${[{n:'E-Commerce · Design',p:'方案A'},{ n:'AI客服 · Dev PR',p:'PR #42'}].map(item=>`<div class="list-row">
+        <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+        <div style="font-size:9px;font-weight:500;color:#374151;flex:1">${item.n}</div>
+        <div style="font-size:8px;color:#9ca3af">${item.p}</div></div>`).join('')}</div>`,
+
+  projects:()=>`<div style="background:#f8f9fc;padding:7px 10px 5px;border-bottom:1px solid var(--ln)">
+    <div class="row" style="margin:0"><div style="font-size:12px;font-weight:700">所有项目</div>
+    <div style="background:#2563eb;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;cursor:pointer">+ 新建</div></div>
+    <div style="margin-top:5px;background:#f3f4f6;border-radius:4px;height:22px;display:flex;align-items:center;padding:0 8px"><div style="font-size:9px;color:#9ca3af">🔍 搜索项目…</div></div></div>
+    <div class="sc-body" style="padding:5px 8px">
+      ${[{n:'E-Commerce',s:'Design',c:'#f59e0b',p:29,st:'审批中'},{n:'AI 客服系统',s:'Dev',c:'#2563eb',p:57,st:'进行中'},{n:'数据分析平台',s:'PRD',c:'#9ca3af',p:14,st:'进行中'},{n:'移动端 App',s:'计划中',c:'#9ca3af',p:5,st:'待开始'}].map(({n,s,c,p,st})=>`
+      <div class="list-row"><div style="font-size:10px;font-weight:600;color:#374151;width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${n}</div>
+        <div style="font-size:9px;color:${c};padding:1px 5px;border-radius:3px;background:${c}18;white-space:nowrap">${s}</div>
+        <div style="flex:1;margin-left:5px"><div style="background:#e5e7eb;border-radius:99px;height:5px;overflow:hidden">
+          <div style="width:${p}%;height:100%;background:${c};border-radius:99px"></div></div></div>
+        <div style="font-size:8px;color:#9ca3af;margin-left:4px">${p}%</div></div>`).join('')}</div>`,
+
+  monitor:()=>`<div style="background:#f0fdf4;padding:6px 10px;border-bottom:1px solid #bbf7d0">
+    <div class="row" style="margin:0"><div style="width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0"></div>
+    <div style="font-size:11px;color:#059669;margin-left:5px;font-weight:600">已连接 · 3 会话活跃</div></div></div>
+    <div class="sc-body" style="padding:7px 10px">
+      <div style="display:flex;gap:8px;margin-bottom:7px;font-size:9px;color:#6b7280"><span>P50: <b style="color:#059669">1.2s</b></span><span>P95: <b style="color:#f59e0b">3.8s</b></span><span>成功率: <b style="color:#059669">97%</b></span></div>
+      ${[{type:'PostTool',tool:'Bash',c:'#10b981',extra:'exit:0'},{type:'PreTool',tool:'Read',c:'#2563eb',extra:'file.ts'},{type:'PostTool',tool:'Write',c:'#10b981',extra:'saved'},{type:'Stop',tool:'Session',c:'#9ca3af',extra:'2.4s'}].map(({type,tool,c,extra})=>`
+      <div class="list-row">
+        <div style="font-size:8px;font-weight:700;color:${c};background:${c}18;padding:1px 5px;border-radius:3px;flex-shrink:0">${type}</div>
+        <div style="font-size:9px;font-weight:600;color:#374151;margin-left:5px;flex:1">${tool}</div>
+        <div style="font-size:8px;color:#9ca3af">${extra}</div></div>`).join('')}</div>`,
+
+  layout:()=>`<div style="display:flex;height:180px">
+    <div style="width:18px;background:#0d1117;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:5px 0;gap:6px">
+      ${['🗂','💬','🔌','⚙','🔍'].map((i,idx)=>`<div style="font-size:10px;opacity:${idx===0?1:0.4}">${i}</div>`).join('')}
+    </div>
+    <div style="width:50px;background:#111827;border-right:1px solid rgba(255,255,255,.06);padding:5px 3px">
+      <div style="font-size:8px;color:#6b7280;margin-bottom:4px;padding:0 2px">My Project</div>
+      ${[{t:'📋 概览',a:true},{t:'📄 PRD'},{t:'⚙ Dev'},{t:'🔖 Logs'}].map(i=>`<div style="font-size:8px;color:${i.a?'#93c5fd':'#4b5563'};background:${i.a?'rgba(37,99,235,.2)':'transparent'};border-radius:3px;padding:3px 4px;margin-bottom:2px;white-space:nowrap;overflow:hidden">${i.t}</div>`).join('')}
+    </div>
+    <div style="flex:1;padding:5px;overflow:hidden">
+      <div style="font-size:10px;font-weight:700;color:#1e2130;margin-bottom:4px">项目概览</div>
+      ${lns('80%','60%','45%')}
+      <div style="background:#fffbeb;border-left:2px solid #f59e0b;padding:3px 6px;margin-top:5px;font-size:9px;color:#d97706">⏸ Design 待审批</div>
+    </div>
+    <div style="width:4px;background:#e5e7eb;cursor:col-resize"></div>
+    <div style="width:45px;background:#f8f9fc;border-left:1px solid var(--ln);padding:4px 3px">
+      <div style="font-size:9px;color:#6b7280;font-weight:600;margin-bottom:4px">工具调用</div>
+      ${[1,2,3,4].map(()=>`<div class="log-line" style="height:7px"></div>`).join('')}
+    </div></div>`,
+
+  plugin:()=>`<div class="sc-body" style="padding:7px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:7px">🔌 插件市场</div>
+    ${[{n:'Jira 同步',i:'🎯',s:true,star:'⭐ 2.3k'},{n:'GitHub PR',i:'🔗',s:false,star:'⭐ 1.8k'},{n:'Figma 导入',i:'🎨',s:false,star:'⭐ 956'},{n:'自定义 AI 模型',i:'🤖',s:false,star:'⭐ 732'}].map(p=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:5px;border:1px solid var(--ln);border-radius:5px;margin-bottom:3px;background:${p.s?'#f8faff':'#fff'}">
+      <div style="font-size:14px">${p.i}</div>
+      <div style="flex:1"><div style="font-size:10px;font-weight:600">${p.n}</div>
+        <div style="font-size:8px;color:#9ca3af">${p.star}</div></div>
+      <div style="${p.s?'background:#ecfdf5;color:#059669':'background:#2563eb;color:#fff'};font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px">${p.s?'已安装':'安装'}</div>
+    </div>`).join('')}</div>`,
+
+  pluginapi:()=>`<div class="sc-body" style="padding:7px">
+    <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:6px">⚡ 插件开发 API</div>
+    <div style="background:#0f172a;border-radius:6px;padding:8px;font-size:9px;color:#a3e635;font-family:monospace;line-height:1.8">
+      <span style="color:#7c3aed">export function</span> <span style="color:#60a5fa">activate</span>(ctx) {<br>
+      &nbsp; ctx.<span style="color:#fbbf24">registerPanelView</span>("jira", {...});<br>
+      &nbsp; ctx.<span style="color:#fbbf24">registerStageHook</span>("prd", fn);<br>
+      &nbsp; ctx.<span style="color:#fbbf24">registerCommand</span>("sync", fn);<br>}
+    </div>
+    <div style="display:flex;gap:5px;margin-top:6px">
+      <div style="flex:1;background:#f3e8ff;border-radius:4px;padding:5px 6px"><div style="font-size:10px;font-weight:700;color:#7c3aed">Panel API</div>${ln('80%')}</div>
+      <div style="flex:1;background:#ecfdf5;border-radius:4px;padding:5px 6px"><div style="font-size:10px;font-weight:700;color:#059669">Hook API</div>${ln('70%')}</div>
+    </div></div>`,
+};
+
+// ══════════════════════════════════════════
+// CANVAS STATE
+// ══════════════════════════════════════════
+
+let scale=0.48, tx=40, ty=60;
+let currentTool='select';
+let showGridFlag=true;
+let snapEnabled=false;
+const GRID_SIZE=20;
+
+let selectedNodeIds=new Set();
+let hoveredArrowIdx=null;
+let selectedArrowIdx=null;
+
+// Mutable arrows
+let arrows=[...DEFAULT_ARROWS];
+let deletedBuiltinArrows=new Set();
+let customArrows=[];
+
+// Node positions (mutable)
+let nodePos={};
+
+// Pan state
+let isPanning=false, panStartX=0, panStartY=0;
+
+// Drag state
+let isDragging=false;
+let dragInitPos={};
+
+// Selection box
+let isSelecting=false;
+let selStartX=0, selStartY=0;
+
+// Connect tool
+let connectFrom=null; // {id, side, x, y}
+
+// Load saved state
+function loadState(){
+  try{
+    const saved=localStorage.getItem('tc-req-pos');
+    if(saved) nodePos=JSON.parse(saved);
+    const savedArrows=localStorage.getItem('tc-req-arrows');
+    if(savedArrows){ const d=JSON.parse(savedArrows); deletedBuiltinArrows=new Set(d.deleted||[]); customArrows=d.custom||[]; }
+  }catch(e){}
+  // Always use fresh DEFAULT_POS for new layout (clear old stale positions)
+  NODES.forEach(n=>{ nodePos[n.id]={...DEFAULT_POS[n.id]}; });
+}
+
+function saveState(){
+  localStorage.setItem('tc-req-pos', JSON.stringify(nodePos));
+  localStorage.setItem('tc-req-arrows', JSON.stringify({deleted:[...deletedBuiltinArrows], custom:customArrows}));
+}
+
+// ══════════════════════════════════════════
 // BUILD NODES
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
 
-function buildNodes() {
-  const canvas = document.getElementById('canvas');
-  NODES.forEach(n => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'node';
-    wrapper.id = n.id;
-    wrapper.style.cssText = `left:${n.x}px;top:${n.y}px`;
+let expandedNodes=new Set();
+let isPreviewMode=false;
 
-    const lbl = document.createElement('div');
-    lbl.className = 'node-lbl';
-    lbl.textContent = n.label;
+function buildReqContent(key){
+  const d=DETAILS[key]; if(!d) return '';
+  const ph=PHASES.find(p=>p.id===d.ph);
+  const wfSection=d.wf?`
+    <div class="req-section">
+      <div class="req-lbl">📐 界面预览
+        <a href="${d.wf}" target="_blank" style="margin-left:auto;font-size:9px;color:var(--blue);text-decoration:none">全屏 ↗</a>
+      </div>
+      <div class="wf-inline-wrap"><iframe src="${d.wf}" scrolling="no" loading="lazy"></iframe></div>
+    </div>`:'';
+  const acHtml=d.ac.map(a=>`<div class="req-ac-item"><span class="req-ck">✓</span><span>${a}</span></div>`).join('');
+  const navHtml=d.nav.map(nv=>`<button class="req-nav-btn" onclick="jumpTo('${nv.to}');event.stopPropagation()">→ ${nv.l}</button>`).join('');
+  return `
+    ${wfSection}
+    <div class="req-section">
+      <div class="req-lbl">👤 用户故事</div>
+      <div class="req-story">${d.story}</div>
+    </div>
+    <div class="req-section">
+      <div class="req-lbl">✅ 验收标准</div>
+      ${acHtml}
+    </div>
+    <div class="req-section">
+      <div class="req-lbl">🔌 接口规格</div>
+      <div class="req-tech">${d.tech}</div>
+    </div>
+    <div class="req-section" style="background:#f8f9ff">
+      <div class="req-lbl">🔗 导航路径</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0">${navHtml}</div>
+    </div>`;
+}
+
+function toggleExpand(id, key){
+  const card=document.querySelector(`#${id} .node-card`); if(!card) return;
+  if(expandedNodes.has(id)){
+    expandedNodes.delete(id);
+    card.classList.remove('expanded');
+  } else {
+    expandedNodes.add(id);
+    card.classList.add('expanded');
+  }
+  drawArrows(); updateMinimap();
+}
+
+function buildNodes(){
+  const canvas=document.getElementById('canvas');
+  NODES.forEach(n=>{
+    const wrapper=document.createElement('div');
+    wrapper.className='node';
+    wrapper.id=n.id;
+    const pos=nodePos[n.id]||DEFAULT_POS[n.id];
+    wrapper.style.cssText=`left:${pos.x}px;top:${pos.y}px`;
+
+    const lbl=document.createElement('div');
+    lbl.className='node-lbl'; lbl.textContent=n.label;
     wrapper.appendChild(lbl);
 
-    const card = document.createElement('div');
-    card.className = 'node-card';
+    const card=document.createElement('div');
+    card.className='node-card';
 
-    const bar = document.createElement('div');
-    bar.className = 'sc-bar';
-    bar.innerHTML = `
-      <div class="sc-dot" style="background:#ef4444"></div>
-      <div class="sc-dot" style="background:#f59e0b"></div>
-      <div class="sc-dot" style="background:#22c55e"></div>
-      <div class="sc-title">${n.label}</div>`;
+    // sc-bar with expand button
+    const bar=document.createElement('div');
+    bar.className='sc-bar';
+    bar.innerHTML=`<div class="sc-dot" style="background:#ef4444"></div><div class="sc-dot" style="background:#f59e0b"></div><div class="sc-dot" style="background:#22c55e"></div><div class="sc-title">${n.label}</div><button class="expand-btn" title="展开需求详情" onclick="toggleExpand('${n.id}','${n.key}');event.stopPropagation()">▾</button>`;
     card.appendChild(bar);
-
     card.insertAdjacentHTML('beforeend', WF[n.key]());
+
+    // Inline requirements section (initially hidden)
+    const reqDiv=document.createElement('div');
+    reqDiv.className='node-req';
+    reqDiv.innerHTML=buildReqContent(n.key);
+    card.appendChild(reqDiv);
+
+    // Connectors for connect tool
+    ['top','right','bottom','left'].forEach(side=>{
+      const c=document.createElement('div');
+      c.className=`connector ${side}`;
+      c.addEventListener('mousedown',e=>{
+        e.stopPropagation(); e.preventDefault();
+        if(currentTool==='connect') startConnect(n.id, side, e);
+      });
+      wrapper.appendChild(c);
+    });
+
     wrapper.appendChild(card);
-    wrapper.addEventListener('click', () => showPanel(n.key, n.id));
+
+    // Drag + click handler
+    wrapper.addEventListener('mousedown', e=>{
+      if(e.button!==0) return;
+      if(e.target.classList.contains('connector')) return;
+
+      if(currentTool==='connect'){
+        e.stopPropagation();
+        const rect=wrapper.getBoundingClientRect();
+        startConnectFromCenter(n.id, e);
+        return;
+      }
+
+      e.stopPropagation();
+
+      // Selection
+      if(!e.shiftKey && !selectedNodeIds.has(n.id)){
+        clearSelection();
+        selectNode(n.id);
+      } else if(e.shiftKey){
+        if(selectedNodeIds.has(n.id)) deselectNode(n.id);
+        else selectNode(n.id);
+      } else if(!selectedNodeIds.has(n.id)){
+        selectNode(n.id);
+      }
+
+      // Record positions for drag
+      const clickX=e.clientX, clickY=e.clientY;
+      let moved=false;
+      dragInitPos={};
+      for(const id of selectedNodeIds){
+        dragInitPos[id]={x:nodePos[id].x, y:nodePos[id].y};
+      }
+      if(!dragInitPos[n.id]) dragInitPos[n.id]={x:nodePos[n.id].x, y:nodePos[n.id].y};
+
+      function onMove(ev){
+        const dx=(ev.clientX-clickX)/scale;
+        const dy=(ev.clientY-clickY)/scale;
+        if(!moved && Math.sqrt(dx*dx+dy*dy)>4){
+          moved=true;
+          wrapper.classList.add('dragging');
+          document.body.style.userSelect='none';
+        }
+        if(moved){
+          for(const id of Object.keys(dragInitPos)){
+            let nx=dragInitPos[id].x+dx;
+            let ny=dragInitPos[id].y+dy;
+            if(snapEnabled){ nx=Math.round(nx/GRID_SIZE)*GRID_SIZE; ny=Math.round(ny/GRID_SIZE)*GRID_SIZE; }
+            nodePos[id]={x:nx, y:ny};
+            const el=document.getElementById(id);
+            if(el){ el.style.left=nx+'px'; el.style.top=ny+'px'; }
+          }
+          drawArrows();
+          updateMinimap();
+        }
+      }
+
+      function onUp(){
+        window.removeEventListener('mousemove',onMove);
+        window.removeEventListener('mouseup',onUp);
+        wrapper.classList.remove('dragging');
+        document.body.style.userSelect='';
+        if(!moved && !isPreviewMode) toggleExpand(n.id, n.key);
+        else if(moved) saveState();
+      }
+
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    });
+
+    // Right-click
+    wrapper.addEventListener('contextmenu', e=>{
+      e.preventDefault();
+      showContextMenu(e.clientX, e.clientY, 'node', n);
+    });
+
     canvas.appendChild(wrapper);
   });
 
-  // Phase headers
-  const phaseX = {1:24, 2:250, 3:490, 4:730, 5:970, 6:1210};
-  PHASES.forEach(ph => {
-    const x = phaseX[ph.id]; if(!x) return;
-    const el = document.createElement('div');
-    el.className = 'ph-head';
-    el.style.cssText = `left:${x}px`;
-    el.innerHTML = `<div class="ph-head-lbl" style="color:${ph.color}">
+  // Sticky notes (loaded from storage)
+  const notes=JSON.parse(localStorage.getItem('tc-notes')||'[]');
+  notes.forEach(note=>createStickyNoteEl(note.id, note.x, note.y, note.text, note.color));
+
+  buildPhaseHeaders();
+}
+
+function buildPhaseHeaders(){
+  const canvas=document.getElementById('canvas');
+  const phaseX={1:30,2:380,3:730,4:1090,5:1450,6:1810};
+  const phaseTopY={1:150,2:38,3:360,4:38,5:38,6:38};
+  PHASES.forEach(ph=>{
+    const x=phaseX[ph.id]; if(!x) return;
+    const el=document.createElement('div');
+    el.className='ph-head';
+    const ty0=phaseTopY[ph.id]||60;
+    el.style.cssText=`left:${x}px;top:${ty0}px`;
+    el.innerHTML=`<div class="ph-head-lbl" style="color:${ph.color}">
       <div class="ph-num" style="background:${ph.bg};color:${ph.color}">${ph.id}</div>
-      ${ph.label.slice(2)}
-    </div>`;
+      ${ph.label.slice(2)}</div>`;
     canvas.appendChild(el);
-    if(ph.id < 6) {
-      const vl = document.createElement('div');
-      vl.className = 'ph-vline';
-      const nextX = phaseX[ph.id+1];
-      vl.style.cssText = `left:${nextX-8}px;height:750px;border-color:${ph.color}`;
+    if(ph.id<6){
+      const vl=document.createElement('div');
+      vl.className='ph-vline';
+      const nx=phaseX[ph.id+1];
+      vl.style.cssText=`left:${nx-8}px;height:1080px;border-color:${ph.color}`;
       canvas.appendChild(vl);
     }
   });
 }
 
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
 // DRAW ARROWS
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
 
-function getEdgePt(id, side, frac) {
-  const el = document.getElementById(id); if(!el) return {x:0,y:0};
-  const l=parseInt(el.style.left), t=parseInt(el.style.top);
+function getEdgePt(id, side, frac){
+  const el=document.getElementById(id); if(!el) return {x:0,y:0};
+  const pos=nodePos[id]||{x:0,y:0};
   const w=el.offsetWidth, h=el.offsetHeight;
   switch(side){
-    case 'r': return {x:l+w, y:t+h*frac};
-    case 'l': return {x:l,   y:t+h*frac};
-    case 't': return {x:l+w*frac, y:t};
-    case 'b': return {x:l+w*frac, y:t+h};
-    default:  return {x:l+w/2, y:t+h/2};
+    case'r': return{x:pos.x+w, y:pos.y+h*frac};
+    case'l': return{x:pos.x,   y:pos.y+h*frac};
+    case't': return{x:pos.x+w*frac, y:pos.y};
+    case'b': return{x:pos.x+w*frac, y:pos.y+h};
+    default: return{x:pos.x+w/2, y:pos.y+h/2};
   }
 }
 
-function drawArrows() {
-  const svg = document.getElementById('svgL');
-  svg.innerHTML = `<defs>
-    <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6.5" refY="3" orient="auto">
-      <path d="M0,0.5 L0,5.5 L7,3 z" fill="#adb5c8"/>
-    </marker>
-  </defs>`;
-  ARROWS.forEach(a => {
-    const fs = a.fx, ts = a.tx;
-    const p1 = getEdgePt(a.f, fs, a.fy||0.5);
-    const p2 = getEdgePt(a.t, ts, a.ty||0.5);
-    if(!p1||!p2||(!p1.x&&!p1.y)) return;
-    const dx=p2.x-p1.x, dy=p2.y-p1.y;
-    let cx1=p1.x, cy1=p1.y, cx2=p2.x, cy2=p2.y;
-    if(a.curve==='up') {
-      const miny = Math.min(p1.y,p2.y)-55;
-      cx1=p1.x; cy1=miny; cx2=p2.x; cy2=miny;
-    } else if(a.curve==='left') {
-      const minx = Math.min(p1.x,p2.x)-55;
-      cx1=minx; cy1=p1.y; cx2=minx; cy2=p2.y;
-    } else if(fs==='r'||fs==='l') {
-      cx1=p1.x+dx*0.45; cy1=p1.y; cx2=p2.x-dx*0.45; cy2=p2.y;
-    } else {
-      cx1=p1.x; cy1=p1.y+dy*0.45; cx2=p2.x; cy2=p2.y-dy*0.45;
-    }
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('class','arr-path');
-    path.setAttribute('d',`M${p1.x},${p1.y} C${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`);
-    svg.appendChild(path);
-    if(a.lb) {
-      const mx=(p1.x+p2.x)/2+(cx1+cx2)/2*.1, my=(p1.y+p2.y)/2+(cy1+cy2)/2*.1;
-      const rw=a.lb.length*5+8;
-      const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
-      bg.setAttribute('class','arr-label-bg');
-      bg.setAttribute('x',mx-rw/2); bg.setAttribute('y',my-8);
-      bg.setAttribute('width',rw); bg.setAttribute('height',14); bg.setAttribute('rx',3);
-      svg.appendChild(bg);
-      const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
-      txt.setAttribute('class','arr-label-txt'); txt.setAttribute('x',mx); txt.setAttribute('y',my+2);
-      txt.setAttribute('text-anchor','middle'); txt.textContent=a.lb;
-      svg.appendChild(txt);
-    }
-  });
+function drawArrowPath(svg, a, idx, isCustom=false){
+  const p1=getEdgePt(a.f, a.fx||'r', a.fy||0.5);
+  const p2=getEdgePt(a.t, a.tx||'l', a.ty||0.5);
+  if(!p1||!p2||(!p1.x&&!p1.y)) return;
+  const dx=p2.x-p1.x, dy=p2.y-p1.y;
+  let cx1=p1.x,cy1=p1.y,cx2=p2.x,cy2=p2.y;
+  if(a.curve==='up'){const m=Math.min(p1.y,p2.y)-55;cx1=p1.x;cy1=m;cx2=p2.x;cy2=m;}
+  else if(a.curve==='left'){const m=Math.min(p1.x,p2.x)-55;cx1=m;cy1=p1.y;cx2=m;cy2=p2.y;}
+  else if((a.fx||'r')==='r'||(a.fx||'r')==='l'){cx1=p1.x+dx*.45;cy1=p1.y;cx2=p2.x-dx*.45;cy2=p2.y;}
+  else{cx1=p1.x;cy1=p1.y+dy*.45;cx2=p2.x;cy2=p2.y-dy*.45;}
+
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  const isSel=(isCustom ? selectedArrowIdx===`c${idx}` : selectedArrowIdx===idx);
+  path.setAttribute('class',`arr-path${isCustom?' custom':''}${isSel?' sel-arrow':''}`);
+  path.setAttribute('d',`M${p1.x},${p1.y} C${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`);
+  path.setAttribute('marker-end',`url(#arrowhead${isSel?'-blue':isCustom?'-purple':''})`);
+  path.style.pointerEvents='stroke';
+  const key=isCustom?`c${idx}`:idx;
+  path.addEventListener('click', e=>{ e.stopPropagation(); selectedArrowIdx=isSel?null:key; drawArrows(); });
+  svg.appendChild(path);
+
+  if(a.lb){
+    const mx=(p1.x+p2.x)/2+(cx1+cx2)/2*.1;
+    const my=(p1.y+p2.y)/2+(cy1+cy2)/2*.1;
+    const rw=a.lb.length*5+8;
+    const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('class','arr-label-bg');
+    bg.setAttribute('x',mx-rw/2); bg.setAttribute('y',my-8); bg.setAttribute('width',rw); bg.setAttribute('height',14); bg.setAttribute('rx',3);
+    svg.appendChild(bg);
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('class','arr-label-txt'); txt.setAttribute('x',mx); txt.setAttribute('y',my+2); txt.setAttribute('text-anchor','middle');
+    txt.textContent=a.lb; svg.appendChild(txt);
+  }
 }
 
-// ════════════════════════════════════════════
-// DETAIL PANEL
-// ════════════════════════════════════════════
+function drawArrows(){
+  const svg=document.getElementById('svgL');
+  const tempLine=document.getElementById('temp-connect-line');
+  const defs=svg.querySelector('defs');
+  while(svg.lastChild && svg.lastChild!==defs && svg.lastChild!==tempLine) svg.removeChild(svg.lastChild);
 
-function showPanel(key, nodeId) {
-  const d = DETAILS[key]; if(!d) return;
-  const ph = PHASES.find(p=>p.id===d.ph);
-  document.getElementById('p-title').textContent = d.title;
-  const phEl = document.getElementById('p-phase');
-  phEl.textContent = ph.label;
-  phEl.style.color = ph.color;
-  phEl.style.background = ph.bg;
-  phEl.style.padding = '2px 8px';
-  phEl.style.borderRadius = '99px';
-  phEl.style.display = 'inline-block';
-  phEl.style.fontSize = '11px';
-  phEl.style.fontWeight = '700';
-
-  document.getElementById('p-body').innerHTML = `
-    <div><div class="p-lbl">👤 用户故事</div>
-      <div class="p-story">${d.story}</div></div>
-    <div><div class="p-lbl">✅ 验收标准</div>
-      ${d.ac.map(a=>`<div class="p-ac-item"><span class="ck">✓</span><span>${a}</span></div>`).join('')}</div>
-    <div><div class="p-lbl">🔌 技术规格 / API</div>
-      <div class="p-tech">${d.tech}</div></div>
-    <div><div class="p-lbl">🔗 导航路径</div>
-      ${d.nav.map(n=>`<div class="p-nav-item" onclick="jumpTo('${n.to}')">
-        <span style="color:var(--dim2);font-size:11px">→</span>
-        <span>${n.l}</span></div>`).join('')}</div>`;
-
-  document.querySelectorAll('.node').forEach(el=>el.classList.remove('sel'));
-  document.getElementById(nodeId)?.classList.add('sel');
-  document.getElementById('panel').classList.add('open');
+  DEFAULT_ARROWS.forEach((a,i)=>{ if(!deletedBuiltinArrows.has(i)) drawArrowPath(svg,a,i,false); });
+  customArrows.forEach((a,i)=>drawArrowPath(svg,a,i,true));
 }
 
-function closePanel() {
-  document.getElementById('panel').classList.remove('open');
-  document.querySelectorAll('.node').forEach(el=>el.classList.remove('sel'));
+// ══════════════════════════════════════════
+// CONNECT TOOL
+// ══════════════════════════════════════════
+
+function startConnect(nodeId, side, e){
+  connectFrom={nodeId, side};
+  const el=document.getElementById(nodeId);
+  const w=el.offsetWidth, h=el.offsetHeight;
+  const pos=nodePos[nodeId];
+  let sx=pos.x, sy=pos.y;
+  if(side==='r'){sx+=w; sy+=h*.5;}
+  else if(side==='l'){sy+=h*.5;}
+  else if(side==='t'){sx+=w*.5;}
+  else if(side==='b'){sx+=w*.5; sy+=h;}
+  connectFrom.sx=sx; connectFrom.sy=sy;
+
+  const tl=document.getElementById('temp-connect-line');
+  tl.setAttribute('x1',sx); tl.setAttribute('y1',sy);
+  tl.setAttribute('x2',sx); tl.setAttribute('y2',sy);
+  tl.style.display='block';
 }
 
-function jumpTo(id) {
-  const el=document.getElementById(id); if(!el) return;
-  const l=parseInt(el.style.left), t=parseInt(el.style.top);
+function startConnectFromCenter(nodeId, e){
+  const pos=nodePos[nodeId];
+  const el=document.getElementById(nodeId);
+  const w=el.offsetWidth, h=el.offsetHeight;
+  connectFrom={nodeId, side:'r', sx:pos.x+w, sy:pos.y+h*.5};
+  const tl=document.getElementById('temp-connect-line');
+  tl.setAttribute('x1',connectFrom.sx); tl.setAttribute('y1',connectFrom.sy);
+  tl.setAttribute('x2',connectFrom.sx); tl.setAttribute('y2',connectFrom.sy);
+  tl.style.display='block';
+}
+
+function updateTempLine(e){
+  if(!connectFrom) return;
   const wrap=document.getElementById('wrap');
-  tx=wrap.clientWidth*0.3-(l+80)*scale;
-  ty=wrap.clientHeight/2-(t+80)*scale;
+  const r=wrap.getBoundingClientRect();
+  const cx=(e.clientX-r.left-tx)/scale;
+  const cy=(e.clientY-r.top-ty)/scale;
+  const tl=document.getElementById('temp-connect-line');
+  tl.setAttribute('x2',cx); tl.setAttribute('y2',cy);
+}
+
+function finishConnect(targetId){
+  if(!connectFrom || connectFrom.nodeId===targetId) { cancelConnect(); return; }
+  const newArrow={f:connectFrom.nodeId, t:targetId, lb:'', fx:'r',fy:.5,tx:'l',ty:.5};
+  customArrows.push(newArrow); saveState();
+  cancelConnect(); drawArrows();
+  toast('已创建连线');
+}
+
+function cancelConnect(){
+  connectFrom=null;
+  const tl=document.getElementById('temp-connect-line');
+  tl.style.display='none';
+}
+
+// ══════════════════════════════════════════
+// SELECTION
+// ══════════════════════════════════════════
+
+function selectNode(id){
+  selectedNodeIds.add(id);
+  document.getElementById(id)?.classList.add('sel');
+}
+function deselectNode(id){
+  selectedNodeIds.delete(id);
+  document.getElementById(id)?.classList.remove('sel');
+}
+function clearSelection(){
+  selectedNodeIds.forEach(id=>document.getElementById(id)?.classList.remove('sel'));
+  selectedNodeIds.clear();
+  selectedArrowIdx=null;
+  drawArrows();
+}
+function selectAll(){
+  NODES.forEach(n=>selectNode(n.id));
+}
+
+// ══════════════════════════════════════════
+// CONTEXT MENU
+// ══════════════════════════════════════════
+
+function showContextMenu(x, y, type, data){
+  const menu=document.getElementById('ctx-menu');
+  let html='';
+
+  if(type==='node'){
+    html=`<div class="ctx-label">${data.label}</div>
+      <div class="ctx-item" onclick="duplicateNode('${data.id}');hideCtx()">⧉ 复制节点</div>
+      <div class="ctx-item" onclick="jumpTo('${data.id}');hideCtx()">🔍 居中定位</div>
+      <div class="ctx-sep"></div>
+      <div class="ctx-item" onclick="connectFromNode('${data.id}');hideCtx()">→ 从此节点连线</div>
+      <div class="ctx-sep"></div>
+      <div class="ctx-item danger" onclick="deleteSelected();hideCtx()">🗑 删除节点</div>`;
+  } else if(type==='arrow'){
+    html=`<div class="ctx-label">连线</div>
+      <div class="ctx-item danger" onclick="deleteSelectedArrow();hideCtx()">🗑 删除连线</div>`;
+  } else {
+    html=`<div class="ctx-item" onclick="addStickyNote(ctxPos.x, ctxPos.y);hideCtx()">📝 添加便签</div>
+      <div class="ctx-item" onclick="resetLayout();hideCtx()">↺ 重置所有位置</div>
+      <div class="ctx-sep"></div>
+      <div class="ctx-item" onclick="selectAll();hideCtx()">⊞ 全选 (⌘A)</div>
+      <div class="ctx-item" onclick="clearSelection();hideCtx()">✕ 取消选择</div>`;
+  }
+
+  menu.innerHTML=html;
+  const mw=200, mh=menu.scrollHeight||120;
+  const lx=Math.min(x, window.innerWidth-mw-8);
+  const ly=Math.min(y, window.innerHeight-mh-8);
+  menu.style.cssText=`left:${lx}px;top:${ly}px;display:block`;
+  ctxPos={x:(x-tx)/scale, y:(y-ty)/scale};
+}
+let ctxPos={x:0,y:0};
+function hideCtx(){ document.getElementById('ctx-menu').style.display='none'; }
+
+function deleteSelected(){
+  if(selectedNodeIds.size===0 && selectedArrowIdx===null){ toast('请先选中节点'); return; }
+  selectedNodeIds.forEach(id=>{
+    document.getElementById(id)?.remove();
+    const ni=NODES.findIndex(n=>n.id===id);
+    if(ni>=0) NODES.splice(ni,1);
+    delete nodePos[id];
+  });
+  selectedNodeIds.clear();
+  saveState(); drawArrows(); updateMinimap(); toast('已删除');
+}
+
+function deleteSelectedArrow(){
+  if(selectedArrowIdx===null) return;
+  if(typeof selectedArrowIdx==='string' && selectedArrowIdx.startsWith('c')){
+    const i=parseInt(selectedArrowIdx.slice(1));
+    customArrows.splice(i,1);
+  } else {
+    deletedBuiltinArrows.add(selectedArrowIdx);
+  }
+  selectedArrowIdx=null; saveState(); drawArrows(); toast('连线已删除');
+}
+
+function duplicateNode(id){
+  const n=NODES.find(n=>n.id===id); if(!n) return;
+  const newId=n.id+'_copy'+Date.now();
+  const newN={...n, id:newId, label:n.label+' (副本)'};
+  NODES.push(newN);
+  nodePos[newId]={x:(nodePos[id]?.x||0)+20, y:(nodePos[id]?.y||0)+20};
+  // rebuild just this node
+  const canvas=document.getElementById('canvas');
+  const wrapper=document.createElement('div');
+  wrapper.className='node'; wrapper.id=newN.id;
+  wrapper.style.cssText=`left:${nodePos[newId].x}px;top:${nodePos[newId].y}px`;
+  const lbl=document.createElement('div'); lbl.className='node-lbl'; lbl.textContent=newN.label;
+  wrapper.appendChild(lbl);
+  const card=document.createElement('div'); card.className='node-card';
+  const bar=document.createElement('div'); bar.className='sc-bar';
+  bar.innerHTML=`<div class="sc-dot" style="background:#ef4444"></div><div class="sc-dot" style="background:#f59e0b"></div><div class="sc-dot" style="background:#22c55e"></div><div class="sc-title">${newN.label}</div>`;
+  card.appendChild(bar);
+  card.insertAdjacentHTML('beforeend', WF[n.key]());
+  wrapper.appendChild(card);
+  wrapper.addEventListener('mousedown', e=>{ e.stopPropagation(); showPanel(n.key, newN.id); });
+  canvas.appendChild(wrapper);
+  saveState(); updateMinimap(); toast('节点已复制');
+}
+
+function connectFromNode(id){
+  setTool('connect'); toast('在目标节点上松开鼠标以创建连线');
+  const pos=nodePos[id];
+  const el=document.getElementById(id);
+  connectFrom={nodeId:id, side:'r', sx:pos.x+(el?.offsetWidth||160), sy:pos.y+(el?.offsetHeight||140)*.5};
+  const tl=document.getElementById('temp-connect-line');
+  tl.setAttribute('x1',connectFrom.sx); tl.setAttribute('y1',connectFrom.sy);
+  tl.setAttribute('x2',connectFrom.sx); tl.setAttribute('y2',connectFrom.sy);
+  tl.style.display='block';
+}
+
+// ══════════════════════════════════════════
+// STICKY NOTES
+// ══════════════════════════════════════════
+
+let noteCounter=0;
+function addStickyNote(cx, cy){
+  const id='note-'+(++noteCounter);
+  const x=cx||((-tx+300)/scale);
+  const y=cy||((-ty+200)/scale);
+  const colors=['#fef9c3','#dbeafe','#d1fae5','#fce7f3','#ede9fe'];
+  const color=colors[noteCounter%colors.length];
+  createStickyNoteEl(id, x, y, '双击编辑便签', color);
+  saveNotes(); updateMinimap();
+}
+
+function createStickyNoteEl(id, x, y, text, color){
+  const canvas=document.getElementById('canvas');
+  const note=document.createElement('div');
+  note.id=id;
+  note.style.cssText=`position:absolute;left:${x}px;top:${y}px;width:140px;min-height:80px;background:${color};border-radius:8px;padding:10px;font-size:12px;color:#374151;box-shadow:2px 3px 8px rgba(0,0,0,.12);cursor:grab;user-select:none;border:1px solid rgba(0,0,0,.05);z-index:5`;
+  note.textContent=text;
+  note.style.fontFamily='inherit';
+
+  // Drag
+  note.addEventListener('mousedown',e=>{
+    if(e.target===note && e.detail===2) return; // dblclick to edit
+    e.stopPropagation();
+    const startX=e.clientX, startY=e.clientY;
+    const ox=parseFloat(note.style.left), oy=parseFloat(note.style.top);
+    let moved=false;
+    function onMove(ev){
+      const dx=(ev.clientX-startX)/scale, dy=(ev.clientY-startY)/scale;
+      if(!moved && Math.sqrt(dx*dx+dy*dy)>4){ moved=true; note.style.cursor='grabbing'; }
+      if(moved){ note.style.left=(ox+dx)+'px'; note.style.top=(oy+dy)+'px'; }
+    }
+    function onUp(){ window.removeEventListener('mousemove',onMove); window.removeEventListener('mouseup',onUp); note.style.cursor='grab'; if(moved) saveNotes(); }
+    window.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
+  });
+
+  // Double click to edit
+  note.addEventListener('dblclick',e=>{
+    e.stopPropagation();
+    note.contentEditable='true';
+    note.focus();
+    note.style.cursor='text';
+    const onBlur=()=>{ note.contentEditable='false'; note.style.cursor='grab'; saveNotes(); note.removeEventListener('blur',onBlur); };
+    note.addEventListener('blur',onBlur);
+  });
+
+  // Right-click to delete
+  note.addEventListener('contextmenu',e=>{
+    e.preventDefault();
+    if(confirm('删除这个便签？')){ note.remove(); saveNotes(); }
+  });
+
+  canvas.appendChild(note);
+}
+
+function saveNotes(){
+  const canvas=document.getElementById('canvas');
+  const notes=[];
+  canvas.querySelectorAll('[id^="note-"]').forEach(n=>{
+    notes.push({id:n.id, x:parseFloat(n.style.left), y:parseFloat(n.style.top), text:n.textContent, color:n.style.background});
+  });
+  localStorage.setItem('tc-notes', JSON.stringify(notes));
+}
+
+// ══════════════════════════════════════════
+// TOOLS
+// ══════════════════════════════════════════
+
+function setTool(t){
+  currentTool=t;
+  document.querySelectorAll('.tbtn[id^="t-"]').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('t-'+t);
+  if(btn) btn.classList.add('active');
+  const wrap=document.getElementById('wrap');
+  wrap.className=wrap.className.replace(/tool-\S+/g,'').trim()+' tool-'+t;
+  if(t!=='connect') cancelConnect();
+}
+
+function toggleGrid(){
+  showGridFlag=!showGridFlag;
+  const wrap=document.getElementById('wrap');
+  if(showGridFlag) wrap.classList.add('grid-on'); else wrap.classList.remove('grid-on');
   applyT();
+  document.getElementById('t-grid').classList.toggle('active', showGridFlag);
 }
 
-// ════════════════════════════════════════════
+function toggleSnap(){
+  snapEnabled=!snapEnabled;
+  document.getElementById('t-snap').classList.toggle('active', snapEnabled);
+  toast(snapEnabled?'吸附已开启':'吸附已关闭');
+}
+
+function resetLayout(){
+  if(!confirm('重置所有节点位置？')) return;
+  NODES.forEach(n=>{ nodePos[n.id]={...DEFAULT_POS[n.id]}; const el=document.getElementById(n.id); if(el){el.style.left=nodePos[n.id].x+'px';el.style.top=nodePos[n.id].y+'px';} });
+  saveState(); drawArrows(); updateMinimap(); toast('位置已重置');
+}
+
+// ══════════════════════════════════════════
 // PAN / ZOOM
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
 
-let scale=0.72, tx=40, ty=60, drag=false, mx=0, my=0;
-
-function applyT() {
-  document.getElementById('canvas').style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+function applyT(){
+  const canvas=document.getElementById('canvas');
+  canvas.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
   document.getElementById('zval').textContent=Math.round(scale*100)+'%';
+  const wrap=document.getElementById('wrap');
+  if(showGridFlag){
+    const gs=GRID_SIZE*scale;
+    wrap.style.backgroundSize=`${gs}px ${gs}px`;
+    wrap.style.backgroundPosition=`${((tx%gs)+gs)%gs}px ${((ty%gs)+gs)%gs}px`;
+  }
+  updateMinimap();
 }
-function Z(d, cx, cy) {
+
+function Z(d,cx,cy){
   const wrap=document.getElementById('wrap');
   const ox=cx??wrap.clientWidth/2, oy=cy??wrap.clientHeight/2;
-  const ns=Math.min(2,Math.max(0.2,scale+d));
+  const ns=Math.min(3,Math.max(0.15,scale+d));
   tx=ox-(ox-tx)*(ns/scale); ty=oy-(oy-ty)*(ns/scale); scale=ns; applyT();
 }
-function R(){ scale=0.72;tx=40;ty=60;applyT(); }
+function R(){ scale=0.48; tx=40; ty=60; applyT(); }
+
+// ══════════════════════════════════════════
+// WRAP EVENTS
+// ══════════════════════════════════════════
 
 const wrap=document.getElementById('wrap');
-wrap.addEventListener('mousedown',e=>{ if(e.target.closest('.node'))return; drag=true;mx=e.clientX-tx;my=e.clientY-ty;wrap.classList.add('drag'); });
-window.addEventListener('mousemove',e=>{ if(!drag)return; tx=e.clientX-mx;ty=e.clientY-my;applyT(); });
-window.addEventListener('mouseup',()=>{ drag=false;wrap.classList.remove('drag'); });
-wrap.addEventListener('wheel',e=>{ e.preventDefault(); const r=wrap.getBoundingClientRect(); Z(e.deltaY<0?.1:-.1,e.clientX-r.left,e.clientY-r.top); },{passive:false});
 
-// ════════════════════════════════════════════
-// PHASE NAV (header)
-// ════════════════════════════════════════════
+wrap.addEventListener('mousedown',e=>{
+  if(e.button!==0) return;
+  hideCtx();
+  if(e.target.closest('.node') || e.target.closest('[id^="note-"]')) return;
 
-function buildPhaseNav() {
+  if(currentTool==='connect'){
+    if(connectFrom){ cancelConnect(); } return;
+  }
+
+  if(currentTool==='select'){
+    // Selection box
+    clearSelection();
+    const r=wrap.getBoundingClientRect();
+    selStartX=e.clientX-r.left; selStartY=e.clientY-r.top;
+    isSelecting=true;
+    const box=document.getElementById('sel-box');
+    box.style.cssText=`display:block;left:${selStartX}px;top:${selStartY}px;width:0;height:0`;
+  } else {
+    // Pan
+    isPanning=true; panStartX=e.clientX-tx; panStartY=e.clientY-ty;
+    wrap.classList.add('panning');
+  }
+});
+
+window.addEventListener('mousemove',e=>{
+  if(isPanning){ tx=e.clientX-panStartX; ty=e.clientY-panStartY; applyT(); }
+
+  if(isSelecting){
+    const r=wrap.getBoundingClientRect();
+    const cx=e.clientX-r.left, cy=e.clientY-r.top;
+    const x=Math.min(cx,selStartX), y=Math.min(cy,selStartY);
+    const w=Math.abs(cx-selStartX), h=Math.abs(cy-selStartY);
+    const box=document.getElementById('sel-box');
+    box.style.left=x+'px'; box.style.top=y+'px'; box.style.width=w+'px'; box.style.height=h+'px';
+  }
+
+  if(connectFrom) updateTempLine(e);
+});
+
+window.addEventListener('mouseup',e=>{
+  if(isPanning){ isPanning=false; wrap.classList.remove('panning'); }
+
+  if(isSelecting){
+    isSelecting=false;
+    document.getElementById('sel-box').style.display='none';
+    // Select nodes in box
+    const box=document.getElementById('sel-box');
+    const bx=parseFloat(box.style.left), by=parseFloat(box.style.top);
+    const bw=parseFloat(box.style.width), bh=parseFloat(box.style.height);
+    if(bw>4 && bh>4){
+      NODES.forEach(n=>{
+        const el=document.getElementById(n.id); if(!el) return;
+        const pos=nodePos[n.id];
+        const nx=(pos.x*scale+tx), ny=(pos.y*scale+ty);
+        if(nx>=bx&&nx<=bx+bw&&ny>=by&&ny<=by+bh) selectNode(n.id);
+      });
+    }
+  }
+
+  if(connectFrom && e.target.closest('.node')){
+    const nodeEl=e.target.closest('.node');
+    finishConnect(nodeEl.id);
+  } else if(connectFrom){
+    cancelConnect();
+  }
+});
+
+wrap.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=wrap.getBoundingClientRect();
+  Z(e.deltaY<0?.1:-.1, e.clientX-r.left, e.clientY-r.top);
+},{passive:false});
+
+wrap.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  if(e.target.closest('.node')||e.target.closest('[id^="note-"]')) return;
+  showContextMenu(e.clientX, e.clientY, 'canvas', null);
+});
+
+document.addEventListener('click', e=>{ if(!e.target.closest('#ctx-menu')) hideCtx(); });
+
+// ══════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════
+
+document.addEventListener('keydown',e=>{
+  if(e.target.contentEditable==='true' || e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+
+  if(e.key==='v'||e.key==='V') setTool('select');
+  if(e.key==='c'||e.key==='C') setTool('connect');
+  if(e.key==='g'||e.key==='G') toggleGrid();
+  if(e.key==='n'||e.key==='N') addStickyNote();
+  if(e.key==='p'||e.key==='P') togglePreviewMode();
+  if(e.key==='Escape'){
+    clearSelection(); cancelConnect(); hideCtx();
+    // Collapse all expanded nodes on Esc
+    NODES.forEach(nd=>{ expandedNodes.delete(nd.id); document.querySelector(`#${nd.id} .node-card`)?.classList.remove('expanded'); });
+    if(isPreviewMode) togglePreviewMode();
+  }
+  if((e.key==='Delete'||e.key==='Backspace')&&!e.metaKey){
+    e.preventDefault();
+    if(selectedArrowIdx!==null) deleteSelectedArrow();
+    else if(selectedNodeIds.size>0) deleteSelected();
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key==='a'){ e.preventDefault(); selectAll(); }
+  if((e.metaKey||e.ctrlKey)&&e.key==='d'){
+    e.preventDefault();
+    selectedNodeIds.forEach(id=>duplicateNode(id));
+  }
+});
+
+// ══════════════════════════════════════════
+// PREVIEW MODE
+// ══════════════════════════════════════════
+
+function togglePreviewMode(){
+  isPreviewMode=!isPreviewMode;
+  document.body.classList.toggle('preview-mode', isPreviewMode);
+  document.getElementById('t-preview').classList.toggle('active', isPreviewMode);
+  // In preview mode, expand ALL nodes to show full requirements
+  if(isPreviewMode){
+    NODES.forEach(n=>{ expandedNodes.add(n.id); document.querySelector(`#${n.id} .node-card`)?.classList.add('expanded'); });
+  } else {
+    // Collapse all on exit
+    NODES.forEach(n=>{ expandedNodes.delete(n.id); document.querySelector(`#${n.id} .node-card`)?.classList.remove('expanded'); });
+  }
+  drawArrows(); updateMinimap();
+  toast(isPreviewMode?'预览模式：位置锁定，可点击内部按钮':'编辑模式：可拖拽卡片');
+}
+
+// Legacy stubs (no-op — panel removed)
+function showPanel(){}
+function closePanel(){}
+
+function jumpTo(id){
+  const el=document.getElementById(id); if(!el) return;
+  const pos=nodePos[id]||{x:0,y:0};
+  const wrap=document.getElementById('wrap');
+  tx=wrap.clientWidth*.3-(pos.x+80)*scale;
+  ty=wrap.clientHeight/2-(pos.y+80)*scale;
+  applyT();
+  clearSelection(); selectNode(id);
+}
+
+// ══════════════════════════════════════════
+// MINI-MAP
+// ══════════════════════════════════════════
+
+function updateMinimap(){
+  const mm=document.getElementById('mm-canvas');
+  const ctx=mm.getContext('2d');
+  const W=mm.width, H=mm.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Find bounds
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  NODES.forEach(n=>{
+    const p=nodePos[n.id]; if(!p) return;
+    minX=Math.min(minX,p.x); minY=Math.min(minY,p.y);
+    maxX=Math.max(maxX,p.x+290); maxY=Math.max(maxY,p.y+260);
+  });
+  if(minX===Infinity) return;
+  const pad=20;
+  const bw=maxX-minX+pad*2, bh=maxY-minY+pad*2;
+  const mmScale=Math.min(W/bw, H/bh);
+
+  function toMM(x,y){ return{x:(x-minX+pad)*mmScale, y:(y-minY+pad)*mmScale}; }
+
+  // Draw arrows
+  ctx.strokeStyle='rgba(173,181,200,.5)'; ctx.lineWidth=1;
+  DEFAULT_ARROWS.forEach((a,i)=>{
+    if(deletedBuiltinArrows.has(i)) return;
+    const from=nodePos[a.f]; const to=nodePos[a.t]; if(!from||!to) return;
+    const p1=toMM(from.x+85, from.y+70);
+    const p2=toMM(to.x+85, to.y+70);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  });
+
+  // Draw nodes
+  const phColors={'n-entry':'#6366f1','n-onboard':'#6366f1','n-proj':'#2563eb','n-stages':'#2563eb',
+    'n-prd':'#06b6d4','n-prddoc':'#06b6d4','n-aiwork':'#f59e0b','n-approve':'#f59e0b','n-retry':'#f59e0b',
+    'n-mgmt':'#10b981','n-projects':'#10b981','n-monitor':'#10b981',
+    'n-layout':'#8b5cf6','n-plugin':'#8b5cf6','n-pluginapi':'#8b5cf6'};
+
+  NODES.forEach(n=>{
+    const p=nodePos[n.id]; if(!p) return;
+    const mm=toMM(p.x, p.y);
+    const w=290*mmScale, h=260*mmScale;
+    ctx.fillStyle=selectedNodeIds.has(n.id)?'rgba(37,99,235,.3)':'rgba(255,255,255,.12)';
+    ctx.strokeStyle=phColors[n.id]||'#6b7280';
+    ctx.lineWidth=selectedNodeIds.has(n.id)?2:0.8;
+    ctx.beginPath(); ctx.roundRect(mm.x,mm.y,w,h,2);
+    ctx.fill(); ctx.stroke();
+  });
+
+  // Viewport indicator
+  const wrap=document.getElementById('wrap');
+  const vpW=wrap.clientWidth, vpH=wrap.clientHeight;
+  const vpX=(-tx/scale-minX+pad)*mmScale;
+  const vpY=(-ty/scale-minY+pad)*mmScale;
+  const vpW2=(vpW/scale)*mmScale, vpH2=(vpH/scale)*mmScale;
+  const vp=document.getElementById('minimap-vp');
+  vp.style.cssText=`left:${vpX}px;top:${vpY}px;width:${vpW2}px;height:${vpH2}px`;
+}
+
+// Click on minimap to navigate
+document.getElementById('mm-canvas').addEventListener('click',e=>{
+  const mm=document.getElementById('mm-canvas');
+  const r=mm.getBoundingClientRect();
+  // rough center navigation
+  const fx=(e.clientX-r.left)/r.width;
+  const fy=(e.clientY-r.top)/r.height;
+  const wrap=document.getElementById('wrap');
+  // find approx canvas center from click ratio
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  NODES.forEach(n=>{ const p=nodePos[n.id]; if(!p) return; minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);maxX=Math.max(maxX,p.x+170);maxY=Math.max(maxY,p.y+160); });
+  const bw=maxX-minX+40, bh=maxY-minY+40;
+  const cx=minX-20+fx*bw, cy=minY-20+fy*bh;
+  tx=wrap.clientWidth/2-cx*scale; ty=wrap.clientHeight/2-cy*scale; applyT();
+});
+
+// ══════════════════════════════════════════
+// PHASE NAV
+// ══════════════════════════════════════════
+
+function buildPhaseNav(){
   const nav=document.getElementById('phase-nav');
-  PHASES.forEach((ph,i) => {
+  PHASES.forEach((ph,i)=>{
     const item=document.createElement('div'); item.className='ph-item';
-    item.innerHTML = `<span class="ph-lbl" style="background:${ph.bg};color:${ph.color}" onclick="focusPhase(${ph.id})">${ph.label}</span>`;
+    item.innerHTML=`<span class="ph-lbl" style="background:${ph.bg};color:${ph.color}" onclick="focusPhase(${ph.id})">${ph.label}</span>`;
     if(i<PHASES.length-1) item.insertAdjacentHTML('beforeend',`<span class="ph-arr">——→</span>`);
     nav.appendChild(item);
   });
 }
 
-const phaseXMap={1:24,2:250,3:490,4:730,5:970,6:1210};
-function focusPhase(id) {
+const phaseXMap={1:30,2:380,3:730,4:1090,5:1450,6:1810};
+function focusPhase(id){
   const x=phaseXMap[id]; if(!x) return;
   const wrap=document.getElementById('wrap');
   tx=60-x*scale; ty=60; applyT();
 }
 
-// ════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
 
+let toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+loadState();
 buildPhaseNav();
 buildNodes();
 applyT();
-window.addEventListener('load', () => { setTimeout(drawArrows, 80); });
-window.addEventListener('resize', applyT);
+window.addEventListener('load',()=>{ setTimeout(()=>{ drawArrows(); updateMinimap(); },100); });
+window.addEventListener('resize',()=>{ applyT(); updateMinimap(); });
 </script>
 </body>
 </html>
