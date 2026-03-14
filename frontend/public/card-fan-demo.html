@@ -382,9 +382,10 @@ function buildArcSlider() {
   fanGroup.add(arcLine);
 
   // Position the indicator dot at the active card's top center
-  const atRY = cards[activeIdx].tRY;  // should be 0 for active
-  const dotX = (CW/2) * Math.cos(atRY);
-  const dotZ = -(CW/2) * Math.sin(atRY);
+  const atRY = cards[activeIdx].tRY;
+  const R2 = EXTRA_OFFSET + CW / 2;
+  const dotX = R2 * Math.cos(atRY);
+  const dotZ = -R2 * Math.sin(atRY);
   arcDot.position.set(dotX, YARC, dotZ);
   haloDot.position.set(dotX, YARC, dotZ);
   haloDot.rotation.x = Math.PI / 2;  // lay flat in XZ plane
