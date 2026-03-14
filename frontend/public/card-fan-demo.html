@@ -305,7 +305,7 @@ scene.add(gLight);   // follows active card each frame
 /* Post-processing */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.55, 0.45, 0.65);
+const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.70, 0.50, 0.58);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
