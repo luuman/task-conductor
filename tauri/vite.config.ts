@@ -1,40 +1,46 @@
-import path from "path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
+// tauri/vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import wasm from 'vite-plugin-wasm'
+import topLevelAwait from 'vite-plugin-top-level-await'
+import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
-// @ts-expect-error process is a nodejs global
-const host = process.env.TAURI_DEV_HOST;
-
-// https://vite.dev/config/
-export default defineConfig(async () => ({
-  plugins: [react(), tailwindcss()],
+export default defineConfig({
+  plugins: [
+    react(),
+    wasm(),
+    topLevelAwait(),
+    tailwindcss(),
+  ],
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 
-  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-  //
-  // 1. prevent Vite from obscuring rust errors
-  clearScreen: false,
-  // 2. tauri expects a fixed port, fail if that port is not available
+  // Web 开发模式：代理到本地 FastAPI 后端
   server: {
-    port: 1420,
-    strictPort: true,
-    host: host || false,
-    hmr: host
-      ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
-      : undefined,
-    watch: {
-      // 3. tell Vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
+    port: 7071,
+    proxy: {
+      '/api':    { target: 'http://localhost:8765', changeOrigin: true },
+      '/auth':   { target: 'http://localhost:8765', changeOrigin: true },
+      '/health': { target: 'http://localhost:8765', changeOrigin: true },
+      '/ws': {
+        target: 'ws://localhost:8765',
+        ws: true,
+        changeOrigin: true,
+      },
     },
   },
-}));
+
+  // Tauri 生产构建配置
+  build: {
+    target: ['es2021', 'chrome105', 'safari15'],
+    minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
+    sourcemap: !!process.env.TAURI_DEBUG,
+  },
+
+  envPrefix: ['VITE_', 'TAURI_'],
+})
