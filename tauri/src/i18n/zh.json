@@ -1,0 +1,27 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "delete": "删除",
+    "create": "创建",
+    "back": "返回"
+  },
+  "nav": {
+    "dashboard": "仪表盘",
+    "sessions": "会话监控",
+    "chat": "对话",
+    "settings": "设置"
+  },
+  "auth": {
+    "title": "TaskConductor",
+    "pin_label": "访问码",
+    "pin_placeholder": "输入 6 位访问码",
+    "login_btn": "登录",
+    "connecting": "连接中...",
+    "error_invalid_pin": "访问码错误"
+  }
+}
