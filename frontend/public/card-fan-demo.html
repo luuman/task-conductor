@@ -283,10 +283,10 @@ const scene = new THREE.Scene();
 let { w, h } = getSize();
 renderer.setSize(w, h);
 
-/* Camera — above and slightly in front */
-const camera = new THREE.PerspectiveCamera(46, w/h, 1, 4000);
-camera.position.set(CW * 0.35, 310, 980);
-camera.lookAt(CW * 0.35, -10, 30);
+/* Camera — 拉近，角度更俯视，让扇形更铺开 */
+const camera = new THREE.PerspectiveCamera(50, w/h, 1, 4000);
+camera.position.set(CW * 0.32, 320, 680);
+camera.lookAt(CW * 0.32, -20, 10);
 
 /* Fan group — slight backward tilt for the overhead/dramatic look */
 const fanGroup = new THREE.Group();
