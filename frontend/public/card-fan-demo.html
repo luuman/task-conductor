@@ -361,14 +361,16 @@ function setFanRadius() {
 }
 
 /* ─── Camera: 自动居中扇形 ─── */
-// 活跃卡片(theta=0)在 x=R, 最右卡片(theta=100°)在 x≈-0.17R
-// 视觉加权中心 ≈ R*0.62
+// 视觉居中计算：
+// 左端卡片(off=-3, θ=-30°): x=R·cos(-30°)=R·0.866, z深度≈R·0.34（近）
+// 右端卡片(off=+10, θ=100°): x=R·cos(100°)=-R·0.174, z深度≈R·1.83（远）
+// 令两端屏幕 x 对称：(0.866-k)/0.34 = (0.174+k)/1.825 → k≈0.70
 function updateCamera() {
   const R  = getRFan();
-  const cx = R * 0.62;   // 视觉中心 X
-  camera.position.set(cx, R * 0.52, R * 0.84);
-  camera.lookAt(cx, -R * 0.05, -R * 0.12);
-  camera.fov    = 65;
+  const cx = R * 0.70;   // 视觉居中 X
+  camera.position.set(cx, R * 0.55, R * 1.0);   // 相机稍远，减少"靠前"感
+  camera.lookAt(cx, -R * 0.04, -R * 0.15);
+  camera.fov    = 63;
   camera.aspect = stage.clientWidth / stage.clientHeight;
   camera.updateProjectionMatrix();
 }
