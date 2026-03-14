@@ -127,11 +127,12 @@ const DATA = [
 ];
 
 /* ─── Card geometry constants ───────────────────────── */
-const CW    = 260;   // card width  (扇形半径 = CW/2 = 130, 比原来大73%)
-const CH    = 185;   // card height
-const DEPTH = 18;    // physical card thickness
-const ANGLE = 10;    // degrees between adjacent cards
-const POP_Z = 155;   // active card pops forward
+const CW           = 220;   // card width
+const CH           = 175;   // card height
+const DEPTH        = 16;    // physical card thickness
+const ANGLE        = 10;    // degrees between adjacent cards
+const POP_Z        = 160;   // active card pops forward
+const EXTRA_OFFSET = 380;   // 轴心到卡片左边缘的额外距离 → 扇形半径 = EXTRA_OFFSET + CW/2 = 490
 
 let activeIdx = 3;   // "Corporate" — 3 on left, 10 on right
 
