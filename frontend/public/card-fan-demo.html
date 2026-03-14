@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Folder Fan — TaskConductor</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #06080a;
+  --surface: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --text: #eef0f2;
+  --dim: rgba(238,240,242,0.35);
+  --green: #22c55e;
+  --green-glow: rgba(34,197,94,0.25);
+  --card-w: 140px;
+  --card-h: 190px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ── NAV ──────────────────────────────────── */
+.nav {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+.nav-logo {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+
+.nav-icon-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: none; cursor: pointer; color: var(--dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: background 0.15s;
+}
+.nav-icon-btn:hover { background: rgba(255,255,255,0.06); }
+
+.nav-date {
+  font-size: 12px; color: var(--dim);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.meeting-pill {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px; color: var(--dim);
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; transition: all 0.15s;
+}
+.meeting-pill:hover { background: rgba(255,255,255,0.08); }
+.meeting-pill.live {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.25);
+  color: rgba(134,239,172,0.9);
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.nav-sep { flex: 1; }
+
+.btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--dim);
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.btn.primary {
+  background: rgba(34,197,94,0.1);
+  border-color: rgba(34,197,94,0.3);
+  color: #86efac;
+}
+.btn.primary:hover { background: rgba(34,197,94,0.18); }
+
+/* ── TOOLBAR ──────────────────────────────── */
+.toolbar {
+  height: 40px;
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 6px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.pill {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+}
+.pill:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.pill.active {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.15);
+  color: var(--text);
+}
+
+/* ── STAGE ────────────────────────────────── */
+.stage {
+  position: relative;
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.stage-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 60%, rgba(34,197,94,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* SVG arc guide */
+#arcSvg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Fan root — all cards are absolutely positioned relative to this center point */
+.fan-root {
+  position: relative;
+  width: 1px; height: 1px;
+  z-index: 1;
+}
+
+/* ── CARDS ────────────────────────────────── */
+.card-wrapper {
+  position: absolute;
+  left: 0; top: 0;
+  will-change: transform, opacity, filter;
+  transition:
+    transform 0.55s cubic-bezier(0.34, 1.25, 0.64, 1),
+    opacity   0.45s ease,
+    filter    0.45s ease;
+}
+
+.card {
+  width: var(--card-w);
+  height: var(--card-h);
+  border-radius: 11px;
+  background: rgba(18, 21, 27, 0.92);
+  border: 1px solid rgba(255,255,255,0.09);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.card:hover { border-color: rgba(255,255,255,0.18); }
+
+.card.active {
+  background: linear-gradient(148deg, #1b5e38 0%, #1a7240 50%, #15803d 100%);
+  border-color: rgba(74,222,128,0.45);
+  box-shadow:
+    0 0 0 1px rgba(74,222,128,0.15),
+    0 8px 32px rgba(0,0,0,0.7),
+    0 0 60px rgba(34,197,94,0.2);
+}
+
+/* Inactive card wireframe lines */
+.card-lines {
+  padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.line {
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.09);
+}
+
+/* Active card content */
+.card-content {
+  padding: 14px;
+  height: 100%;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.card-tag {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 5px;
+}
+.card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.card-date {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+}
+.card-metric {
+  margin-top: auto;
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+.card-metric-pct {
+  font-size: 20px;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+.card-metric-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 3px;
+}
+.card-arrow {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: rgba(255,255,255,0.7);
+}
+
+/* Footer avatars (inactive) */
+.card-footer {
+  position: absolute;
+  bottom: 10px; left: 14px; right: 14px;
+  display: flex; align-items: center; gap: 4px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 8px;
+}
+.avatar {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+}
+.avatar:nth-child(2) { background: rgba(255,255,255,0.07); }
+
+/* Label below each card */
+.card-label {
+  position: absolute;
+  bottom: -22px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: rgba(255,255,255,0.25);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  transition: color 0.4s;
+}
+.card-label.active-label {
+  color: rgba(134,239,172,0.8);
+  font-weight: 600;
+}
+
+/* ── DETAIL PANEL ─────────────────────────── */
+.detail-wrap {
+  padding: 0 20px 16px;
+  flex-shrink: 0;
+}
+
+.detail-panel {
+  border-radius: 14px;
+  background: rgba(15, 32, 22, 0.6);
+  border: 1px solid rgba(34,197,94,0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1px 180px;
+  gap: 0 18px;
+  overflow: hidden;
+  position: relative;
+  height: 150px;
+  transition: all 0.4s ease;
+}
+
+.detail-panel::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(34,197,94,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.detail-main {}
+.detail-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.detail-sub {
+  font-size: 10px;
+  color: var(--dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.detail-progress-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; color: rgba(255,255,255,0.4);
+  margin-bottom: 10px;
+}
+.progress-track {
+  flex: 1; height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  position: relative; overflow: hidden;
+}
+.progress-fill {
+  position: absolute; left: 0; top: 0; height: 100%;
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.detail-doc {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px; font-size: 11px;
+}
+.doc-icon {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: rgba(34,197,94,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.doc-name { font-weight: 500; font-size: 11px; color: rgba(255,255,255,0.85); }
+.doc-meta { font-size: 10px; color: rgba(255,255,255,0.3); }
+.doc-time { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.25); flex-shrink: 0; }
+
+.divider { background: rgba(255,255,255,0.06); }
+
+.detail-right { padding-left: 0; }
+.kv { margin-bottom: 10px; }
+.kv-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 3px;
+}
+.kv-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+}
+.here-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.here-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+}
+
+/* ── KEYBOARD HINT ───────────────────────── */
+.key-hint {
+  position: absolute;
+  bottom: 14px; right: 24px;
+  font-size: 10px; color: rgba(255,255,255,0.15);
+  display: flex; gap: 6px; align-items: center;
+  pointer-events: none;
+}
+.key {
+  padding: 1px 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+/* ── LAYOUT ───────────────────────────────── */
+body { display: flex; flex-direction: column; height: 100%; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">⚡</div>
+  <button class="nav-icon-btn">☰</button>
+  <button class="nav-icon-btn">⌕</button>
+  <div class="nav-date">📅 January 12</div>
+  <div class="meeting-pill">
+    <div class="live-dot" style="background:rgba(255,255,255,0.3)"></div>
+    09:00 AM · Standup
+  </div>
+  <div class="meeting-pill live">
+    <div class="live-dot"></div>
+    11:00 AM · Audit Committee Review
+  </div>
+  <div class="nav-sep"></div>
+  <div style="display:flex;gap:6px">
+    <button class="btn">↑ Export</button>
+    <button class="btn">☑ View tasks</button>
+    <button class="btn primary">+ Add Contracts</button>
+  </div>
+  <button class="nav-icon-btn">⚙</button>
+  <button class="nav-icon-btn" style="position:relative">
+    🔔
+    <span style="position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:1px solid var(--bg)"></span>
+  </button>
+  <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">EV</div>
+</nav>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="pill active">📁 Folders (14)</div>
+  <div class="pill">🏷 Tags (44)</div>
+  <div class="pill">□ Small ▾</div>
+</div>
+
+<!-- STAGE -->
+<div class="stage" id="stage">
+  <div class="stage-bg"></div>
+  <svg id="arcSvg"></svg>
+  <div class="fan-root" id="fanRoot"></div>
+  <div class="key-hint">
+    <span class="key">←</span> <span class="key">→</span> Navigate
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-wrap">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<script>
+const DATA = [
+  { short:'FOLIO', name:'Portfolio',   date:'Jan 01 – Mar 31', progress:72, doc:'Portfolio_Q1_Review.pdf',         email:'portfolio@legal.io',     event:'Portfolio Review',   due:'2 Weeks'   },
+  { short:'LIC',   name:'Licensing',   date:'Jan 15 – Apr 15', progress:62, doc:'License_Agreement_v3.pdf',        email:'license@legal.io',       event:'Renewal Deadline',   due:'3 Weeks'   },
+  { short:'FIN',   name:'Finance',     date:'Feb 01 – May 31', progress:88, doc:'Finance_Report_Q1.pdf',           email:'finance@corp.io',        event:'Audit Session',      due:'1 Month'   },
+  { short:'CON',   name:'Contracts',   date:'Jan 01 – Jun 30', progress:78, doc:'Contract_Bundle_2025.pdf',        email:'contracts@legal.io',     event:'Signature Required', due:'3 Weeks'   },
+  { short:'LEG',   name:'Legal',       date:'Jan 10 – Mar 10', progress:91, doc:'Legal_Brief_Memo.pdf',            email:'legal@corp.io',          event:'Court Hearing',      due:'5 Days'    },
+  { short:'TRA',   name:'Transaction', date:'Feb 15 – Apr 15', progress:33, doc:'Transaction_Log_Feb.pdf',         email:'trans@finance.io',       event:'Closing',            due:'6 Weeks'   },
+  { short:'COMP',  name:'Compliance',  date:'Jan 01 – Mar 31', progress:87, doc:'GDPR_Compliance_Report_v4.pdf',   email:'compliance@legal.io',    event:'Risk Assessment',    due:'Final Validation' },
+  { short:'VEN',   name:'Vendor',      date:'Mar 01 – May 30', progress:54, doc:'Vendor_Terms_Conditions.pdf',     email:'vendor@ops.io',          event:'Onboarding',         due:'2 Months'  },
+  { short:'TAX',   name:'Tax',         date:'Jan 15 – Apr 15', progress:29, doc:'Tax_Filing_Q1_2025.pdf',          email:'tax@finance.io',         event:'Filing Deadline',    due:'5 Weeks'   },
+  { short:'IP',    name:'IP Rights',   date:'Feb 01 – Mar 31', progress:66, doc:'IP_Registration_Bundle.pdf',      email:'ip@legal.io',            event:'Registration',       due:'3 Weeks'   },
+  { short:'HR',    name:'HR Docs',     date:'Jan 01 – Dec 31', progress:73, doc:'HR_Policy_Handbook_2025.pdf',     email:'hr@corp.io',             event:'Policy Update',      due:'1 Quarter' },
+  { short:'REG',   name:'Regulatory',  date:'Feb 15 – May 15', progress:41, doc:'Regulatory_Submission.pdf',       email:'reg@compliance.io',      event:'Submission',         due:'7 Weeks'   },
+  { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', progress:17, doc:'MA_Term_Sheet_Draft.pdf',         email:'ma@finance.io',          event:'Due Diligence',      due:'3 Months'  },
+  { short:'ESG',   name:'ESG Report',  date:'Jan 01 – Dec 31', progress:55, doc:'ESG_Annual_Report_2025.pdf',      email:'esg@corp.io',            event:'Publication',        due:'6 Months'  },
+];
+
+let activeIdx = 6; // Compliance
+
+// ─── Layout math ─────────────────────────────────────
+const ANGLE_STEP = 9.5;  // degrees between cards
+const ARC_R      = 490;  // arc radius in px
+const FOV        = 880;  // perspective distance for scale sim
+
+function getState(i) {
+  const off    = i - activeIdx;
+  const deg    = off * ANGLE_STEP;
+  const rad    = deg * Math.PI / 180;
+  const isAct  = i === activeIdx;
+
+  // Position along circular arc
+  const x  = Math.sin(rad) * ARC_R;
+  const dz = (Math.cos(rad) - 1) * ARC_R;     // 0 at center, -ve at edges (depth)
+  const y  = dz * 0.10;                        // slight vertical dip for far cards
+
+  // Perspective-simulated scale
+  const pScale = FOV / (FOV - dz * 0.28);
+  const scale  = pScale * (isAct ? 1.22 : 0.88);
+
+  // Tilt facing the arc's focal point
+  const rotY   = -deg * 0.52;
+
+  // Depth-based aesthetics
+  const absOff = Math.abs(off);
+  const blur   = Math.max(0, absOff * 1.1 - 0.6);
+  const opacity = isAct ? 1 : Math.max(0.1, 1 - absOff * 0.085);
+  const zIdx   = 200 - absOff * 10;
+
+  return { x, y, scale, rotY, blur, opacity, zIdx };
+}
+
+// ─── Render fan ──────────────────────────────────────
+function renderFan() {
+  const root = document.getElementById('fanRoot');
+  root.innerHTML = '';
+
+  DATA.forEach((d, i) => {
+    const s = getState(i);
+    const isAct = i === activeIdx;
+
+    // Wrapper handles position + depth scale
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrapper';
+    wrap.style.cssText = `
+      transform: translate(calc(-50% + ${s.x}px), calc(-50% + ${s.y}px)) scale(${s.scale});
+      opacity: ${s.opacity};
+      filter: blur(${s.blur}px);
+      z-index: ${s.zIdx};
+    `;
+
+    // Card handles tilt (perspective applied per-card)
+    const card = document.createElement('div');
+    card.className = 'card' + (isAct ? ' active' : '');
+    card.style.transform = `perspective(700px) rotateY(${s.rotY}deg)`;
+
+    if (isAct) {
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="card-tag">Folder</div>
+          <div class="card-name">${d.name}</div>
+          <div class="card-date">${d.date}</div>
+          <div class="card-metric">${d.progress}<span class="card-metric-pct">%</span></div>
+          <div class="card-metric-label">completion</div>
+          <div class="card-arrow">→</div>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="card-lines">
+          <div class="line" style="width:85%"></div>
+          <div class="line" style="width:60%"></div>
+          <div class="line" style="width:100%;margin-top:5px"></div>
+          <div class="line" style="width:75%"></div>
+          <div class="line" style="width:40%"></div>
+          <div class="line" style="width:90%;margin-top:5px"></div>
+          <div class="line" style="width:55%"></div>
+        </div>
+        <div class="card-footer">
+          <div class="avatar"></div>
+          <div class="avatar"></div>
+        </div>`;
+    }
+
+    // Label below card (lives outside card so not clipped)
+    const lbl = document.createElement('div');
+    lbl.className = 'card-label' + (isAct ? ' active-label' : '');
+    lbl.textContent = d.short;
+
+    card.addEventListener('click', () => { activeIdx = i; renderAll(); });
+
+    wrap.appendChild(card);
+    wrap.appendChild(lbl);
+    root.appendChild(wrap);
+  });
+}
+
+// ─── Render detail panel ─────────────────────────────
+function renderDetail() {
+  const d = DATA[activeIdx];
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-main">
+      <div class="detail-title">${d.name}</div>
+      <div class="detail-sub">Recent activity</div>
+      <div class="detail-progress-row">
+        <span style="white-space:nowrap">Annual Data Privacy Audit</span>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${d.progress}%"></div>
+        </div>
+        <span style="white-space:nowrap">${d.due}</span>
+      </div>
+      <div class="detail-doc">
+        <div class="doc-icon">📄</div>
+        <div>
+          <div class="doc-name">${d.doc}</div>
+          <div class="doc-meta">${d.email}</div>
+        </div>
+        <div class="doc-time">09:00 AM</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="detail-right">
+      <div class="kv">
+        <div class="kv-label">Event</div>
+        <div class="kv-value">${d.event}</div>
+      </div>
+      <div class="kv">
+        <div class="kv-label">Deliverable Due</div>
+        <div class="kv-value">${d.due}</div>
+      </div>
+      <div>
+        <div class="here-badge">
+          <div class="here-dot"></div>
+          We're Here
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── Render arc guide (SVG) ───────────────────────────
+function renderArc() {
+  const stage = document.getElementById('stage');
+  const svg   = document.getElementById('arcSvg');
+  const W = stage.offsetWidth;
+  const H = stage.offsetHeight;
+  const cx = W / 2;
+  const cy = H / 2;
+
+  // Compute screen-space top-center of each card
+  const pts = DATA.map((_, i) => {
+    const s = getState(i);
+    const isAct = i === activeIdx;
+    const CARD_H = 190;
+    const cardScale = s.scale;
+    // screen x/y of card center
+    const sx = cx + s.x * 1;     // already screen px (no additional proj needed)
+    const sy = cy + s.y * 1;
+    // top edge of card in screen space
+    const topY = sy - (CARD_H * cardScale * 0.5);
+    return { x: sx, y: topY };
+  });
+
+  // Build smooth SVG path through the top-edge points
+  let path = '';
+  if (pts.length >= 2) {
+    path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p  = pts[i-1];
+      const c  = pts[i];
+      const cx2 = (p.x + c.x) / 2;
+      const minY = Math.min(p.y, c.y);
+      path += ` Q ${cx2.toFixed(1)} ${(minY - 18).toFixed(1)} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`;
+    }
+  }
+
+  const acp = pts[activeIdx]; // active card point
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="arcG" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="rgba(34,197,94,0)"  />
+        <stop offset="25%"  stop-color="rgba(34,197,94,0.3)"/>
+        <stop offset="50%"  stop-color="rgba(34,197,94,0.6)"/>
+        <stop offset="75%"  stop-color="rgba(34,197,94,0.3)"/>
+        <stop offset="100%" stop-color="rgba(34,197,94,0)"  />
+      </linearGradient>
+    </defs>
+    <path d="${path}" fill="none"
+          stroke="url(#arcG)"
+          stroke-width="1.2"
+          stroke-dasharray="3 5"
+          stroke-linecap="round" />
+    <circle cx="${acp.x.toFixed(1)}" cy="${acp.y.toFixed(1)}" r="4"
+            fill="rgba(34,197,94,0.85)" />
+    <circle cx="${acp.x.toFixed(1)}" cy="${acp.y.toFixed(1)}" r="9"
+            fill="none" stroke="rgba(34,197,94,0.25)" stroke-width="1" />
+    <circle cx="${acp.x.toFixed(1)}" cy="${acp.y.toFixed(1)}" r="15"
+            fill="none" stroke="rgba(34,197,94,0.1)" stroke-width="1" />
+  `;
+}
+
+function renderAll() {
+  renderFan();
+  renderDetail();
+  renderArc();
+}
+
+// ─── Boot ─────────────────────────────────────────────
+renderAll();
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft'  && activeIdx > 0)               { activeIdx--; renderAll(); }
+  if (e.key === 'ArrowRight' && activeIdx < DATA.length - 1) { activeIdx++; renderAll(); }
+});
+
+// Resize
+const ro = new ResizeObserver(renderArc);
+ro.observe(document.getElementById('stage'));
+</script>
+</body>
+</html>
