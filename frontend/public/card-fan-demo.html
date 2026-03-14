@@ -481,7 +481,7 @@ function animate() {
   // Green point light: follows active card in world space
   // Active card center in local fanGroup: (CW/2, 0, POP_Z)
   // After fanGroup.rotation.x tilt, approximate world position:
-  const acPos = new THREE.Vector3(CW/2, 80, cards[activeIdx].mesh.position.z + 200);
+  const acPos = new THREE.Vector3(EXTRA_OFFSET + CW/2, 80, cards[activeIdx].mesh.position.z + 200);
   acPos.applyMatrix4(fanGroup.matrixWorld);
   gLight.position.copy(acPos);
 
