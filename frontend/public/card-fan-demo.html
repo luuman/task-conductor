@@ -140,7 +140,8 @@ let activeIdx = 3;   // "Corporate" — 3 on left, 10 on right
 // Translate so the LEFT EDGE of the card is at local origin.
 // All cards share this geometry and rotate around the spine (x=0).
 const cardGeo = new THREE.BoxGeometry(CW, CH, DEPTH);
-cardGeo.translate(CW / 2, 0, 0);   // left edge → origin
+// 卡片左边缘距轴心 EXTRA_OFFSET，让扇形半径 = EXTRA_OFFSET + CW/2
+cardGeo.translate(EXTRA_OFFSET + CW / 2, 0, 0);
 
 /* ─── Canvas helpers ─────────────────────────────────── */
 function rrect(ctx, x, y, w, h, r) {
