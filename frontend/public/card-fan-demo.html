@@ -127,11 +127,11 @@ const DATA = [
 ];
 
 /* ─── Card geometry constants ───────────────────────── */
-const CW    = 150;   // card width
-const CH    = 210;   // card height
-const DEPTH = 14;    // physical card thickness  ← BoxGeometry depth
-const ANGLE = 14;    // degrees between adjacent cards (spine-pivot fan)
-const POP_Z = 105;   // active card pops forward by this amount
+const CW    = 260;   // card width  (扇形半径 = CW/2 = 130, 比原来大73%)
+const CH    = 185;   // card height
+const DEPTH = 18;    // physical card thickness
+const ANGLE = 10;    // degrees between adjacent cards
+const POP_Z = 155;   // active card pops forward
 
 let activeIdx = 3;   // "Corporate" — 3 on left, 10 on right
 
