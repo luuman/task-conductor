@@ -158,42 +158,49 @@ function makeInactiveTex(data, blurPx) {
   src.width=cw*S; src.height=ch*S;
   const c = src.getContext('2d'); c.scale(S,S);
 
-  // Frosted white-glass background
-  rrect(c,1.5,1.5,cw-3,ch-3,10);
-  const bg=c.createLinearGradient(0,0,cw,ch);
-  bg.addColorStop(0,'rgba(212,224,242,0.94)');
-  bg.addColorStop(0.5,'rgba(192,210,234,0.88)');
-  bg.addColorStop(1,'rgba(176,198,226,0.82)');
-  c.fillStyle=bg; c.fill();
-  c.strokeStyle='rgba(255,255,255,0.62)'; c.lineWidth=1.5; c.stroke();
+  // 纯白/米白文件夹背景
+  rrect(c, 0, 0, cw, ch, 9);
+  const bg = c.createLinearGradient(0, 0, cw*0.4, ch);
+  bg.addColorStop(0, 'rgba(255,255,255,0.98)');
+  bg.addColorStop(0.5, 'rgba(249,250,252,0.97)');
+  bg.addColorStop(1, 'rgba(241,245,250,0.96)');
+  c.fillStyle = bg; c.fill();
+  c.strokeStyle = 'rgba(200,210,225,0.75)'; c.lineWidth = 1; c.stroke();
 
-  // Sheen
-  rrect(c,1.5,1.5,cw-3,ch-3,10);
-  const sh=c.createLinearGradient(0,0,cw*0.6,ch*0.42);
-  sh.addColorStop(0,'rgba(255,255,255,0.58)');
-  sh.addColorStop(0.4,'rgba(255,255,255,0.10)');
-  sh.addColorStop(1,'rgba(255,255,255,0)');
-  c.fillStyle=sh; c.fill();
+  // 顶部 sheen
+  rrect(c, 0, 0, cw, ch*0.4, 9);
+  const sh = c.createLinearGradient(0, 0, 0, ch*0.4);
+  sh.addColorStop(0, 'rgba(255,255,255,0.60)');
+  sh.addColorStop(1, 'rgba(255,255,255,0)');
+  c.fillStyle = sh; c.fill();
 
-  // Content lines
-  [{y:24,w:.80},{y:34,w:.58},{y:50,w:.93},{y:60,w:.68},
-   {y:70,w:.42},{y:86,w:.82},{y:96,w:.50},{y:106,w:.64}]
+  // 文件夹标签页（顶部左侧小突出）
+  const TAB_W = Math.round(cw * 0.38);
+  c.fillStyle = 'rgba(230,237,246,0.98)';
+  c.strokeStyle = 'rgba(190,205,225,0.7)';
+  c.lineWidth = 0.8;
+  c.beginPath();
+  c.roundRect(10, -10, TAB_W, 16, [4,4,0,0]);
+  c.fill(); c.stroke();
+  // 标签文字
+  c.fillStyle = 'rgba(50,70,120,0.58)';
+  c.font = '600 7px -apple-system,sans-serif';
+  c.textAlign = 'left';
+  c.fillText(data.short, 16, -1);
+
+  // 文档内容线条
+  [{y:22,w:.82},{y:32,w:.55},{y:47,w:.90},{y:57,w:.65},
+   {y:67,w:.40},{y:80,w:.76},{y:90,w:.48},{y:100,w:.60}]
   .forEach(({y,w},i)=>{
-    c.fillStyle=i<2?'rgba(0,8,40,0.22)':'rgba(0,8,40,0.15)';
-    c.beginPath(); c.roundRect(14,y,(cw-28)*w,2.5,1.2); c.fill();
+    c.fillStyle = i<2 ? 'rgba(10,20,60,0.18)' : 'rgba(10,20,60,0.10)';
+    c.beginPath(); c.roundRect(14, y, (cw-28)*w, 2, 1); c.fill();
   });
 
-  // Avatar dots
-  [[17,ch-14],[30,ch-14]].forEach(([ax,ay],i)=>{
-    c.fillStyle=i===0?'rgba(0,8,40,0.22)':'rgba(0,8,40,0.14)';
-    c.beginPath(); c.arc(ax,ay,5.5,0,Math.PI*2); c.fill();
-  });
-  c.fillStyle='rgba(0,8,40,0.10)';
-  c.beginPath(); c.arc(cw-15,ch-14,3.5,0,Math.PI*2); c.fill();
-
-  // Label
-  c.fillStyle='rgba(0,8,40,0.30)'; c.font='bold 8.5px -apple-system,sans-serif';
-  c.textAlign='center'; c.fillText(data.short,cw/2,ch-6);
+  // 底部小装饰点
+  c.fillStyle = 'rgba(10,20,60,0.14)';
+  c.beginPath(); c.arc(16, ch-12, 5, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'rgba(10,20,60,0.09)';
+  c.beginPath(); c.arc(30, ch-12, 5, 0, Math.PI*2); c.fill();
 
   if (blurPx<=0) {
     const t=new THREE.CanvasTexture(src); t.colorSpace=THREE.SRGBColorSpace; return t;
