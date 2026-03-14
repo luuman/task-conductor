@@ -233,16 +233,16 @@ function makeActiveTex(data) {
   c.fillStyle = sh; c.fill();
 
   c.fillStyle = 'rgba(255,255,255,0.45)'; c.font = '600 9px -apple-system,sans-serif';
-  c.textAlign = 'left'; c.fillText('FOLDER', 14, 24);
-  c.fillStyle = '#fff'; c.font = '600 14px -apple-system,sans-serif'; c.fillText(data.name, 14, 44);
-  c.fillStyle = 'rgba(255,255,255,0.43)'; c.font = '10px -apple-system,sans-serif'; c.fillText(data.date, 14, 60);
+  c.textAlign = 'left'; c.fillText('FOLDER', 14, 26);
+  c.fillStyle = '#fff'; c.font = '600 14px -apple-system,sans-serif'; c.fillText(data.name, 14, 48);
+  c.fillStyle = 'rgba(255,255,255,0.43)'; c.font = '10px -apple-system,sans-serif'; c.fillText(data.date, 14, 65);
 
-  c.fillStyle = '#fff'; c.font = '800 40px -apple-system,sans-serif';
+  c.fillStyle = '#fff'; c.font = '800 44px -apple-system,sans-serif';
   const nw = c.measureText(String(data.p)).width;
-  c.fillText(String(data.p), 14, 132);
-  c.font = '700 17px -apple-system,sans-serif'; c.fillText('%', 16+nw, 126);
+  c.fillText(String(data.p), 14, 168);
+  c.font = '700 18px -apple-system,sans-serif'; c.fillText('%', 16+nw, 161);
   c.fillStyle = 'rgba(255,255,255,0.38)'; c.font = '9.5px -apple-system,sans-serif';
-  c.fillText('completion', 14, 146);
+  c.fillText('completion', 14, 183);
 
   c.fillStyle = 'rgba(255,255,255,0.14)';
   c.beginPath(); c.arc(cw-19, 18, 11, 0, Math.PI*2); c.fill();
