@@ -361,16 +361,17 @@ function setFanRadius() {
 }
 
 /* ─── Camera: 自动居中扇形 ─── */
-// 视觉居中计算：
-// 左端卡片(off=-3, θ=-30°): x=R·cos(-30°)=R·0.866, z深度≈R·0.34（近）
-// 右端卡片(off=+10, θ=100°): x=R·cos(100°)=-R·0.174, z深度≈R·1.83（远）
-// 令两端屏幕 x 对称：(0.866-k)/0.34 = (0.174+k)/1.825 → k≈0.70
+// 设计图分析：活跃卡片在屏幕左侧，扇形向右展开
+// → 相机需在活跃卡片右侧偏上方，朝左下方看
+// 活跃卡片(θ=0)在 x=R → 相机在 x=R*2 右侧 → 活跃卡片出现在画面左侧 ✓
+// 最右卡片(θ=90°)在 x=0,z=-R → 出现在画面右侧 ✓
 function updateCamera() {
   const R  = getRFan();
-  const cx = R * 0.70;   // 视觉居中 X
-  camera.position.set(cx, R * 0.55, R * 1.0);   // 相机稍远，减少"靠前"感
-  camera.lookAt(cx, -R * 0.04, -R * 0.15);
-  camera.fov    = 63;
+  // 相机在活跃卡片右侧约 1倍R 处，偏高，稍微前置
+  camera.position.set(R * 1.9, R * 0.38, R * 0.60);
+  // lookAt 对准扇形整体中心（x ≈ R*0.4，中间偏左）
+  camera.lookAt(R * 0.40, 0, -R * 0.20);
+  camera.fov    = 62;
   camera.aspect = stage.clientWidth / stage.clientHeight;
   camera.updateProjectionMatrix();
 }
