@@ -1,0 +1,27 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "create": "Create",
+    "back": "Back"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "sessions": "Sessions",
+    "chat": "Chat",
+    "settings": "Settings"
+  },
+  "auth": {
+    "title": "TaskConductor",
+    "pin_label": "Access Code",
+    "pin_placeholder": "Enter 6-digit code",
+    "login_btn": "Login",
+    "connecting": "Connecting...",
+    "error_invalid_pin": "Invalid access code"
+  }
+}

@@ -18,3 +18,4 @@ htmlcov/
 .worktrees/
 ws-core/pkg/
 ws-core/target/
+tauri/node_modules/
