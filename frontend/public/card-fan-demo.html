@@ -355,11 +355,12 @@ function buildArcSlider() {
   // Top-center of card i = rotate (CW/2, CH/2, 0) by tRY around Y axis at origin
   // Three.js rotateY(theta): x' = x*cos(theta) + z*sin(theta), z' = -x*sin(theta) + z*cos(theta)
 
-  const YARC = CH / 2 + 28;  // above card tops
+  const YARC = CH / 2 + 30;  // above card tops
+  const R = EXTRA_OFFSET + CW / 2;  // 扇形半径
   const pts = cards.map((_, i) => {
-    const theta = cards[i].tRY;  // current target rotation
-    const x = (CW/2) * Math.cos(theta);
-    const z = -(CW/2) * Math.sin(theta);
+    const theta = cards[i].tRY;
+    const x = R * Math.cos(theta);
+    const z = -R * Math.sin(theta);
     return new THREE.Vector3(x, YARC, z);
   });
 
