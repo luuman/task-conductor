@@ -13,111 +13,93 @@
 }
 </script>
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --bg: #07090c;
-  --border: rgba(255,255,255,0.08);
-  --text: #eef0f2;
-  --dim: rgba(238,240,242,0.38);
-  --green: #22c55e;
+  --bg: #07090c; --border: rgba(255,255,255,0.08);
+  --text: #eef0f2; --dim: rgba(238,240,242,0.38); --green: #22c55e;
 }
 html, body {
-  height: 100%; overflow: hidden;
-  background: var(--bg); color: var(--text);
-  font-family: -apple-system,'SF Pro Text','Helvetica Neue',sans-serif;
-  -webkit-font-smoothing: antialiased;
-  user-select: none;
-  display: flex; flex-direction: column;
+  height:100%; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;
+  -webkit-font-smoothing:antialiased; user-select:none;
+  display:flex; flex-direction:column;
 }
-/* ── Nav ──────────────────────────────── */
-.nav {
-  height: 50px; flex-shrink: 0;
-  display: flex; align-items: center;
-  padding: 0 18px; gap: 8px;
-  border-bottom: 1px solid var(--border); z-index: 20;
-}
+/* NAV */
+.nav { height:50px; flex-shrink:0; display:flex; align-items:center; padding:0 18px; gap:8px; border-bottom:1px solid var(--border); z-index:20; }
 .logo { width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:center;font-size:12px; }
-.nav-ico { width:26px;height:26px;border-radius:5px;background:transparent;border:none;cursor:pointer;color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:13px; }
-.date-pill { font-size:11px;color:var(--dim);padding:3px 9px;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:5px; }
-.meet { background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px; }
-.meet.live { background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.28);color:rgba(167,243,208,0.9); }
-.ldot { width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite; }
+.ni { width:26px;height:26px;border-radius:5px;border:none;cursor:pointer;color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:13px;background:transparent; }
+.dp2 { font-size:11px;color:var(--dim);padding:3px 9px;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:5px; }
+.mp { background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px; }
+.mp.live { background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.28);color:rgba(167,243,208,0.9); }
+.ld { width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite; }
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.sp { flex:1; }
+.sp2 { flex:1; }
 .btn { padding:4px 11px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);display:flex;align-items:center;gap:4px;white-space:nowrap; }
 .btn.g { background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#86efac; }
-.notif { position:relative; }
-.nb { position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:1.5px solid var(--bg); }
+.nr { position:relative; }
+.nrb { position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:1.5px solid var(--bg); }
 .avp { width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0; }
-/* ── Toolbar ──────────────────────────── */
-.toolbar { height:38px;flex-shrink:0;display:flex;align-items:center;padding:0 18px;gap:6px;border-bottom:1px solid var(--border); }
+/* TOOLBAR */
+.tb { height:38px;flex-shrink:0;display:flex;align-items:center;padding:0 18px;gap:6px;border-bottom:1px solid var(--border); }
 .pill { padding:3px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:4px; }
 .pill.on { background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.16);color:var(--text); }
-/* ── Stage (Three.js canvas goes here) ── */
+/* STAGE */
 .stage { position:relative;flex:1;overflow:hidden;min-height:0; }
 .stage canvas { position:absolute;inset:0; }
-/* Keyboard hint */
 .hint { position:absolute;bottom:10px;right:16px;font-size:9px;color:rgba(255,255,255,0.13);display:flex;gap:5px;align-items:center;pointer-events:none;z-index:5; }
 .key { padding:1px 5px;border:1px solid rgba(255,255,255,0.1);border-radius:3px; }
-/* ── Detail Panel ─────────────────────── */
-.detail-wrap { padding:0 18px 14px;flex-shrink:0; }
+/* DETAIL */
+.dw { padding:0 18px 14px;flex-shrink:0; }
 .dp {
   height:158px;border-radius:14px;
-  background:linear-gradient(135deg,rgba(20,95,50,0.5) 0%,rgba(12,50,30,0.6) 100%);
+  background:linear-gradient(135deg,rgba(20,95,50,0.50) 0%,rgba(12,50,30,0.60) 100%);
   border:1px solid rgba(74,222,128,0.22);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  padding:16px 20px;
-  display:grid;grid-template-columns:1fr 1px 182px;gap:0 16px;
+  padding:16px 20px;display:grid;grid-template-columns:1fr 1px 182px;gap:0 16px;
   overflow:hidden;position:relative;
 }
-.dp::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,222,128,0.07) 0%,transparent 55%);pointer-events:none;}
-.dp-tags{display:flex;gap:5px;margin-bottom:7px;}
-.dp-tag{padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);font-size:9px;color:rgba(255,255,255,0.45);}
-.dp-title{font-size:17px;font-weight:600;margin-bottom:2px;}
-.dp-sub{font-size:10px;color:rgba(255,255,255,0.38);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px;}
-.dp-row{display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,0.33);margin-bottom:8px;}
-.dp-track{flex:1;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;overflow:hidden;}
-.dp-fill{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:2px;transition:width .5s ease;}
-.dp-file{display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;}
-.dp-fi{width:24px;height:24px;border-radius:5px;background:rgba(34,197,94,0.14);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
-.dp-div{background:rgba(255,255,255,0.07);}
-.kv{margin-bottom:8px;}
-.kv-l{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,0.22);margin-bottom:2px;}
-.kv-v{font-size:12px;font-weight:500;color:rgba(255,255,255,0.76);}
-.here{display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
-.hd{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.5);}
+.dp::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,222,128,0.07) 0%,transparent 55%);pointer-events:none; }
+.dtags { display:flex;gap:5px;margin-bottom:7px; }
+.dtag { padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);font-size:9px;color:rgba(255,255,255,0.45); }
+.dttl { font-size:17px;font-weight:600;margin-bottom:2px; }
+.dsub { font-size:10px;color:rgba(255,255,255,0.38);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px; }
+.drow { display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,0.33);margin-bottom:8px; }
+.dtrk { flex:1;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;overflow:hidden; }
+.dfl { position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:2px;transition:width .5s ease; }
+.dfile { display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px; }
+.dfi { width:24px;height:24px;border-radius:5px;background:rgba(34,197,94,0.14);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+.ddv { background:rgba(255,255,255,0.07); }
+.kv { margin-bottom:8px; }
+.kvl { font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,0.22);margin-bottom:2px; }
+.kvv { font-size:12px;font-weight:500;color:rgba(255,255,255,0.76); }
+.here { display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600; }
+.hd { width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.5); }
 </style>
 </head>
 <body>
-
 <nav class="nav">
   <div class="logo">⚡</div>
-  <button class="nav-ico">☰</button>
-  <button class="nav-ico">⌕</button>
-  <div class="date-pill">📅 January 12</div>
-  <div class="meet"><div class="ldot" style="background:rgba(255,255,255,0.22)"></div>09:00 AM · Standup</div>
-  <div class="meet live"><div class="ldot"></div>11:00 AM · Audit Committee Review</div>
-  <div class="sp"></div>
+  <button class="ni">☰</button><button class="ni">⌕</button>
+  <div class="dp2">📅 January 12</div>
+  <div class="mp"><div class="ld" style="background:rgba(255,255,255,0.22)"></div>09:00 AM · Standup</div>
+  <div class="mp live"><div class="ld"></div>11:00 AM · Audit Committee Review</div>
+  <div class="sp2"></div>
   <button class="btn">↑ Export</button>
   <button class="btn">☑ View tasks</button>
   <button class="btn g">+ Add Contracts</button>
-  <button class="nav-ico notif">🔔<span class="nb"></span></button>
+  <button class="ni nr">🔔<span class="nrb"></span></button>
   <div class="avp">EV</div>
 </nav>
-
-<div class="toolbar">
+<div class="tb">
   <div class="pill on">📁 Folders (14)</div>
   <div class="pill">🏷 Tags (44)</div>
   <div class="pill">□ Small ▾</div>
 </div>
-
 <div class="stage" id="stage">
   <div class="hint"><span class="key">←</span><span class="key">→</span></div>
 </div>
-
-<div class="detail-wrap">
-  <div class="dp" id="dp"></div>
-</div>
+<div class="dw"><div class="dp" id="dpanel"></div></div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -126,183 +108,165 @@ import { RenderPass }      from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass }      from 'three/addons/postprocessing/OutputPass.js';
 
-/* ── Data ──────────────────────────────────────────────── */
+/* ─── Data ─────────────────────────────────────────── */
 const DATA = [
-  { short:'FOLIO', name:'Portfolio',   date:'Jan 01 – Mar 31', p:72,  doc:'Portfolio_Q1.pdf',         email:'portfolio@legal.io',  ev:'Portfolio Review',   due:'2 Weeks'  },
-  { short:'LIC',   name:'Licensing',   date:'Jan 15 – Apr 15', p:62,  doc:'License_Agreement_v3.pdf', email:'license@legal.io',    ev:'Renewal Deadline',   due:'3 Weeks'  },
-  { short:'CON',   name:'Contracts',   date:'Jan 01 – Jun 30', p:78,  doc:'Contract_Bundle.pdf',      email:'contracts@legal.io',  ev:'Signature',          due:'3 Weeks'  },
-  { short:'CORP',  name:'Corporate',   date:'Jan 01 – Mar 31', p:57,  doc:'Corporate_Report_Q1.pdf',  email:'corp@legal.io',       ev:'Board Review',       due:'Final'    },
-  { short:'LEG',   name:'Legal',       date:'Jan 10 – Mar 10', p:91,  doc:'Legal_Brief_Memo.pdf',     email:'legal@corp.io',       ev:'Court Hearing',      due:'5 Days'   },
-  { short:'TRA',   name:'Transaction', date:'Feb 15 – Apr 15', p:33,  doc:'Transaction_Log.pdf',      email:'trans@finance.io',    ev:'Closing',            due:'6 Weeks'  },
-  { short:'COMP',  name:'Compliance',  date:'Jan 01 – Mar 31', p:87,  doc:'GDPR_Report_v4.pdf',       email:'compliance@legal.io', ev:'Risk Assessment',    due:'Final Val'},
-  { short:'VEN',   name:'Vendor',      date:'Mar 01 – May 30', p:54,  doc:'Vendor_Terms.pdf',         email:'vendor@ops.io',       ev:'Onboarding',         due:'2 Months' },
-  { short:'TAX',   name:'Tax',         date:'Jan 15 – Apr 15', p:29,  doc:'Tax_Filing_Q1.pdf',        email:'tax@finance.io',      ev:'Filing',             due:'5 Weeks'  },
-  { short:'IP',    name:'IP Rights',   date:'Feb 01 – Mar 31', p:66,  doc:'IP_Registration.pdf',      email:'ip@legal.io',         ev:'Registration',       due:'3 Weeks'  },
-  { short:'HR',    name:'HR Docs',     date:'Jan 01 – Dec 31', p:73,  doc:'HR_Policy_2025.pdf',       email:'hr@corp.io',          ev:'Policy Update',      due:'Q2 2025'  },
-  { short:'FIN',   name:'Finance',     date:'Feb 01 – May 31', p:88,  doc:'Finance_Report_Q1.pdf',    email:'finance@corp.io',     ev:'Audit',              due:'1 Month'  },
-  { short:'REG',   name:'Regulatory',  date:'Feb 15 – May 15', p:41,  doc:'Regulatory_Sub.pdf',       email:'reg@compliance.io',   ev:'Submission',         due:'7 Weeks'  },
-  { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', p:17,  doc:'MA_Term_Sheet.pdf',        email:'ma@finance.io',       ev:'Due Diligence',      due:'3 Months' },
+  { short:'FOLIO', name:'Portfolio',   date:'Jan 01 – Mar 31', p:72, doc:'Portfolio_Q1.pdf',        email:'portfolio@legal.io',  ev:'Portfolio Review',  due:'2 Weeks'  },
+  { short:'LIC',   name:'Licensing',   date:'Jan 15 – Apr 15', p:62, doc:'License_Agreement_v3.pdf',email:'license@legal.io',    ev:'Renewal Deadline',  due:'3 Weeks'  },
+  { short:'CON',   name:'Contracts',   date:'Jan 01 – Jun 30', p:78, doc:'Contract_Bundle.pdf',     email:'contracts@legal.io',  ev:'Signature',         due:'3 Weeks'  },
+  { short:'CORP',  name:'Corporate',   date:'Jan 01 – Mar 31', p:57, doc:'Corporate_Report_Q1.pdf', email:'corp@legal.io',       ev:'Board Review',      due:'Final'    },
+  { short:'LEG',   name:'Legal',       date:'Jan 10 – Mar 10', p:91, doc:'Legal_Brief_Memo.pdf',    email:'legal@corp.io',       ev:'Court Hearing',     due:'5 Days'   },
+  { short:'TRA',   name:'Transaction', date:'Feb 15 – Apr 15', p:33, doc:'Transaction_Log.pdf',     email:'trans@finance.io',    ev:'Closing',           due:'6 Weeks'  },
+  { short:'COMP',  name:'Compliance',  date:'Jan 01 – Mar 31', p:87, doc:'GDPR_Report_v4.pdf',      email:'compliance@legal.io', ev:'Risk Assessment',   due:'Final Val'},
+  { short:'VEN',   name:'Vendor',      date:'Mar 01 – May 30', p:54, doc:'Vendor_Terms.pdf',        email:'vendor@ops.io',       ev:'Onboarding',        due:'2 Months' },
+  { short:'TAX',   name:'Tax',         date:'Jan 15 – Apr 15', p:29, doc:'Tax_Filing_Q1.pdf',       email:'tax@finance.io',      ev:'Filing',            due:'5 Weeks'  },
+  { short:'IP',    name:'IP Rights',   date:'Feb 01 – Mar 31', p:66, doc:'IP_Registration.pdf',     email:'ip@legal.io',         ev:'Registration',      due:'3 Weeks'  },
+  { short:'HR',    name:'HR Docs',     date:'Jan 01 – Dec 31', p:73, doc:'HR_Policy_2025.pdf',      email:'hr@corp.io',          ev:'Policy Update',     due:'Q2 2025'  },
+  { short:'FIN',   name:'Finance',     date:'Feb 01 – May 31', p:88, doc:'Finance_Report_Q1.pdf',   email:'finance@corp.io',     ev:'Audit',             due:'1 Month'  },
+  { short:'REG',   name:'Regulatory',  date:'Feb 15 – May 15', p:41, doc:'Regulatory_Sub.pdf',      email:'reg@compliance.io',   ev:'Submission',        due:'7 Weeks'  },
+  { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', p:17, doc:'MA_Term_Sheet.pdf',       email:'ma@finance.io',       ev:'Due Diligence',     due:'3 Months' },
 ];
 
-/* ── Constants ─────────────────────────────────────────── */
-const CW = 152, CH = 212;   // card world units (≈ pixel size at z=0)
-const ARC_R     = 500;       // arc radius
-const ANGLE_DEG = 10.5;      // degrees between cards
-const POP_Z     = 120;       // active card z pop
-let   activeIdx = 3;         // "Corporate" — 3 cards on left, 10 on right
+/* ─── Card geometry constants ───────────────────────── */
+const CW    = 150;   // card width
+const CH    = 210;   // card height
+const DEPTH = 14;    // physical card thickness  ← BoxGeometry depth
+const ANGLE = 14;    // degrees between adjacent cards (spine-pivot fan)
+const POP_Z = 105;   // active card pops forward by this amount
 
-/* ── Canvas helpers ────────────────────────────────────── */
+let activeIdx = 3;   // "Corporate" — 3 on left, 10 on right
+
+/* ─── Shared spine-pivot geometry ───────────────────── */
+// Translate so the LEFT EDGE of the card is at local origin.
+// All cards share this geometry and rotate around the spine (x=0).
+const cardGeo = new THREE.BoxGeometry(CW, CH, DEPTH);
+cardGeo.translate(CW / 2, 0, 0);   // left edge → origin
+
+/* ─── Canvas helpers ─────────────────────────────────── */
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
   ctx.closePath();
 }
 
-/* Draw an inactive (white frosted glass) card texture.
-   blurPx > 0 → apply DOF blur for far cards */
 function makeInactiveTex(data, blurPx) {
-  const S = 2; // resolution scale
+  const S=2, cw=CW, ch=CH;
   const src = document.createElement('canvas');
-  src.width = CW*S; src.height = CH*S;
-  const c = src.getContext('2d');
-  c.scale(S, S);
+  src.width=cw*S; src.height=ch*S;
+  const c = src.getContext('2d'); c.scale(S,S);
 
-  /* background — frosted white glass */
-  rrect(c, 1.5, 1.5, CW-3, CH-3, 10);
-  const bg = c.createLinearGradient(0, 0, CW, CH);
-  bg.addColorStop(0,   'rgba(215,226,244,0.93)');
-  bg.addColorStop(0.5, 'rgba(195,211,234,0.87)');
-  bg.addColorStop(1,   'rgba(178,200,228,0.80)');
-  c.fillStyle = bg; c.fill();
+  // Frosted white-glass background
+  rrect(c,1.5,1.5,cw-3,ch-3,10);
+  const bg=c.createLinearGradient(0,0,cw,ch);
+  bg.addColorStop(0,'rgba(212,224,242,0.94)');
+  bg.addColorStop(0.5,'rgba(192,210,234,0.88)');
+  bg.addColorStop(1,'rgba(176,198,226,0.82)');
+  c.fillStyle=bg; c.fill();
+  c.strokeStyle='rgba(255,255,255,0.62)'; c.lineWidth=1.5; c.stroke();
 
-  /* white border */
-  c.strokeStyle = 'rgba(255,255,255,0.60)';
-  c.lineWidth = 1.5; c.stroke();
+  // Sheen
+  rrect(c,1.5,1.5,cw-3,ch-3,10);
+  const sh=c.createLinearGradient(0,0,cw*0.6,ch*0.42);
+  sh.addColorStop(0,'rgba(255,255,255,0.58)');
+  sh.addColorStop(0.4,'rgba(255,255,255,0.10)');
+  sh.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=sh; c.fill();
 
-  /* top-left sheen */
-  rrect(c, 1.5, 1.5, CW-3, CH-3, 10);
-  const sh = c.createLinearGradient(0, 0, CW*0.62, CH*0.45);
-  sh.addColorStop(0, 'rgba(255,255,255,0.55)');
-  sh.addColorStop(0.45,'rgba(255,255,255,0.10)');
-  sh.addColorStop(1, 'rgba(255,255,255,0)');
-  c.fillStyle = sh; c.fill();
-
-  /* content lines */
-  const lines = [
-    {y:22, w:0.80}, {y:32, w:0.58},
-    {y:48, w:0.93}, {y:58, w:0.70}, {y:68, w:0.42},
-    {y:84, w:0.84}, {y:94, w:0.52}, {y:104, w:0.65},
-  ];
-  lines.forEach(({y, w}, i) => {
-    c.fillStyle = i < 2 ? 'rgba(0,8,40,0.22)' : 'rgba(0,8,40,0.14)';
-    c.beginPath(); c.roundRect(14, y, (CW-28)*w, 2.5, 1.2); c.fill();
+  // Content lines
+  [{y:24,w:.80},{y:34,w:.58},{y:50,w:.93},{y:60,w:.68},
+   {y:70,w:.42},{y:86,w:.82},{y:96,w:.50},{y:106,w:.64}]
+  .forEach(({y,w},i)=>{
+    c.fillStyle=i<2?'rgba(0,8,40,0.22)':'rgba(0,8,40,0.15)';
+    c.beginPath(); c.roundRect(14,y,(cw-28)*w,2.5,1.2); c.fill();
   });
 
-  /* avatar dots */
-  [[17,CH-15],[30,CH-15]].forEach(([ax,ay], i) => {
-    c.fillStyle = i===0 ? 'rgba(0,8,40,0.20)' : 'rgba(0,8,40,0.13)';
-    c.beginPath(); c.arc(ax, ay, 5.5, 0, Math.PI*2); c.fill();
+  // Avatar dots
+  [[17,ch-14],[30,ch-14]].forEach(([ax,ay],i)=>{
+    c.fillStyle=i===0?'rgba(0,8,40,0.22)':'rgba(0,8,40,0.14)';
+    c.beginPath(); c.arc(ax,ay,5.5,0,Math.PI*2); c.fill();
   });
-  c.fillStyle = 'rgba(0,8,40,0.10)';
-  c.beginPath(); c.arc(CW-15, CH-15, 3.5, 0, Math.PI*2); c.fill();
+  c.fillStyle='rgba(0,8,40,0.10)';
+  c.beginPath(); c.arc(cw-15,ch-14,3.5,0,Math.PI*2); c.fill();
 
-  /* label */
-  c.fillStyle = 'rgba(0,8,40,0.30)';
-  c.font = 'bold 8.5px -apple-system,sans-serif';
-  c.textAlign = 'center';
-  c.fillText(data.short, CW/2, CH-7);
+  // Label
+  c.fillStyle='rgba(0,8,40,0.30)'; c.font='bold 8.5px -apple-system,sans-serif';
+  c.textAlign='center'; c.fillText(data.short,cw/2,ch-6);
 
-  /* DOF blur — draw onto dst canvas with blur filter */
-  if (blurPx <= 0) {
-    const t = new THREE.CanvasTexture(src);
-    t.colorSpace = THREE.SRGBColorSpace;
-    return t;
+  if (blurPx<=0) {
+    const t=new THREE.CanvasTexture(src); t.colorSpace=THREE.SRGBColorSpace; return t;
   }
-  const dst = document.createElement('canvas');
-  dst.width = CW*S; dst.height = CH*S;
-  const dc = dst.getContext('2d');
-  dc.filter = `blur(${(blurPx * S).toFixed(1)}px)`;
-  dc.drawImage(src, 0, 0);
-  const t = new THREE.CanvasTexture(dst);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
+  // DOF blur
+  const dst=document.createElement('canvas'); dst.width=cw*S; dst.height=ch*S;
+  const dc=dst.getContext('2d');
+  dc.filter=`blur(${(blurPx*S).toFixed(1)}px)`;
+  dc.drawImage(src,0,0);
+  const t=new THREE.CanvasTexture(dst); t.colorSpace=THREE.SRGBColorSpace; return t;
 }
 
-/* Draw the active (green) card texture */
 function makeActiveTex(data) {
-  const S = 2;
-  const cv = document.createElement('canvas');
-  cv.width = CW*S; cv.height = CH*S;
-  const c = cv.getContext('2d');
-  c.scale(S, S);
+  const S=2, cw=CW, ch=CH;
+  const cv=document.createElement('canvas'); cv.width=cw*S; cv.height=ch*S;
+  const c=cv.getContext('2d'); c.scale(S,S);
 
-  /* green gradient bg */
-  rrect(c, 0, 0, CW, CH, 10);
-  const bg = c.createLinearGradient(0, 0, CW, CH);
-  bg.addColorStop(0,   '#1d5f3a');
-  bg.addColorStop(0.4, '#207944');
-  bg.addColorStop(1,   '#17823f');
-  c.fillStyle = bg; c.fill();
-  c.strokeStyle = 'rgba(134,239,172,0.52)';
-  c.lineWidth = 1.5; c.stroke();
+  rrect(c,0,0,cw,ch,10);
+  const bg=c.createLinearGradient(0,0,cw,ch);
+  bg.addColorStop(0,'#1d5f3a'); bg.addColorStop(0.4,'#207944'); bg.addColorStop(1,'#17823f');
+  c.fillStyle=bg; c.fill();
+  c.strokeStyle='rgba(134,239,172,0.52)'; c.lineWidth=1.5; c.stroke();
 
-  /* sheen */
-  rrect(c, 0, 0, CW, CH, 10);
-  const sh = c.createLinearGradient(0, 0, CW*0.68, CH*0.46);
-  sh.addColorStop(0, 'rgba(255,255,255,0.24)');
-  sh.addColorStop(1, 'rgba(255,255,255,0)');
-  c.fillStyle = sh; c.fill();
+  rrect(c,0,0,cw,ch,10);
+  const sh=c.createLinearGradient(0,0,cw*0.65,ch*0.44);
+  sh.addColorStop(0,'rgba(255,255,255,0.24)'); sh.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=sh; c.fill();
 
-  c.fillStyle = 'rgba(255,255,255,0.45)';
-  c.font = '600 9px -apple-system,sans-serif';
-  c.fillText('FOLDER', 14, 25);
+  c.fillStyle='rgba(255,255,255,0.45)'; c.font='600 9px -apple-system,sans-serif';
+  c.textAlign='left'; c.fillText('FOLDER',14,25);
+  c.fillStyle='#fff'; c.font='600 14px -apple-system,sans-serif'; c.fillText(data.name,14,46);
+  c.fillStyle='rgba(255,255,255,0.43)'; c.font='10px -apple-system,sans-serif'; c.fillText(data.date,14,63);
 
-  c.fillStyle = '#fff';
-  c.font = '600 14px -apple-system,sans-serif';
-  c.fillText(data.name, 14, 46);
+  c.fillStyle='#fff'; c.font='800 46px -apple-system,sans-serif';
+  const nw=c.measureText(String(data.p)).width;
+  c.fillText(String(data.p),14,158);
+  c.font='700 20px -apple-system,sans-serif'; c.fillText('%',16+nw,152);
+  c.fillStyle='rgba(255,255,255,0.38)'; c.font='10px -apple-system,sans-serif';
+  c.fillText('completion',14,173);
 
-  c.fillStyle = 'rgba(255,255,255,0.43)';
-  c.font = '10px -apple-system,sans-serif';
-  c.fillText(data.date, 14, 63);
+  c.fillStyle='rgba(255,255,255,0.14)';
+  c.beginPath(); c.arc(cw-19,19,11,0,Math.PI*2); c.fill();
+  c.fillStyle='rgba(255,255,255,0.72)'; c.font='13px -apple-system,sans-serif';
+  c.textAlign='center'; c.fillText('→',cw-19,24);
 
-  /* big progress number */
-  c.fillStyle = '#fff';
-  c.font = '800 46px -apple-system,sans-serif';
-  c.textAlign = 'left';
-  const nw = c.measureText(String(data.p)).width;
-  c.fillText(String(data.p), 14, 158);
-  c.font = '700 20px -apple-system,sans-serif';
-  c.fillText('%', 16 + nw, 152);
-
-  c.fillStyle = 'rgba(255,255,255,0.38)';
-  c.font = '10px -apple-system,sans-serif';
-  c.fillText('completion', 14, 172);
-
-  /* arrow circle */
-  c.fillStyle = 'rgba(255,255,255,0.14)';
-  c.beginPath(); c.arc(CW-19, 19, 11, 0, Math.PI*2); c.fill();
-  c.fillStyle = 'rgba(255,255,255,0.72)';
-  c.font = '13px -apple-system,sans-serif';
-  c.textAlign = 'center';
-  c.fillText('→', CW-19, 24);
-
-  const t = new THREE.CanvasTexture(cv);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
+  const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; return t;
 }
 
-/* ── Three.js setup ────────────────────────────────────── */
-const stage = document.getElementById('stage');
-const getSize = () => ({ w: stage.clientWidth, h: stage.clientHeight });
+/* ─── Material factory ───────────────────────────────── */
+// BoxGeometry face order: +X(right), -X(left/spine), +Y(top), -Y(bot), +Z(front), -Z(back)
+function makeMats(tex, isActive) {
+  const edgeC = isActive ? new THREE.Color(0x1e6038) : new THREE.Color(0x68788a);
+  const edge = new THREE.MeshStandardMaterial({ color:edgeC, roughness:0.25, metalness:0.08 });
+  const front = new THREE.MeshStandardMaterial({
+    map:tex, transparent:true, alphaTest:0.01, roughness:0.08, metalness:0.05,
+    ...(isActive ? { emissiveMap:tex, emissive:new THREE.Color(0x1a5c38), emissiveIntensity:0.28 } : {})
+  });
+  const back = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(isActive ? 0x102818 : 0x0b0f16), roughness:0.8,
+    transparent:true, opacity:0.8,
+  });
+  // +X, -X, +Y, -Y, +Z(FRONT/tex), -Z(back)
+  return [edge, edge, edge, edge, front, back];
+}
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+/* ─── Three.js scene setup ───────────────────────────── */
+const stage = document.getElementById('stage');
+const getSize = () => ({ w:stage.clientWidth, h:stage.clientHeight });
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.2;
 renderer.setClearColor(0x000000, 0);
 stage.appendChild(renderer.domElement);
 
@@ -310,181 +274,223 @@ const scene = new THREE.Scene();
 let { w, h } = getSize();
 renderer.setSize(w, h);
 
-/* Camera — slightly above and in front, active card left of center */
-const camera = new THREE.PerspectiveCamera(48, w/h, 1, 4000);
-camera.position.set(-55, 225, 940);
-camera.lookAt(-55, -55, 0);
+/* Camera — above and slightly in front */
+const camera = new THREE.PerspectiveCamera(46, w/h, 1, 4000);
+camera.position.set(CW * 0.35, 310, 980);
+camera.lookAt(CW * 0.35, -10, 30);
+
+/* Fan group — slight backward tilt for the overhead/dramatic look */
+const fanGroup = new THREE.Group();
+fanGroup.rotation.x = -0.18;   // ≈ -10.3° tilt: top of fan goes away from viewer
+scene.add(fanGroup);
 
 /* Lights */
-// Soft ambient (blue-gray tint for the glass cards)
-scene.add(new THREE.AmbientLight(0x5a78a0, 2.2));
-
-// Key light (warm white, upper right)
+scene.add(new THREE.AmbientLight(0x5a78a0, 2.0));
 const key = new THREE.DirectionalLight(0xffffff, 1.8);
-key.position.set(250, 420, 380); scene.add(key);
-
-// Fill light (cool, left side)
-const fill = new THREE.DirectionalLight(0x88aacc, 0.7);
-fill.position.set(-300, 100, 200); scene.add(fill);
-
-// Green point light at active card — creates the green glow on nearby cards
-const gLight = new THREE.PointLight(0x22c55e, 6, 750);
-scene.add(gLight);
+key.position.set(300, 400, 400); scene.add(key);
+const fill = new THREE.DirectionalLight(0x8899cc, 0.6);
+fill.position.set(-250, 120, 200); scene.add(fill);
+const gLight = new THREE.PointLight(0x22c55e, 7, 800);
+scene.add(gLight);   // follows active card each frame
 
 /* Post-processing */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.50, 0.42, 0.68);
+const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.55, 0.45, 0.65);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-/* Card geometry (shared) */
-const geo = new THREE.PlaneGeometry(CW, CH);
-
-/* Card objects */
+/* ─── Card meshes ────────────────────────────────────── */
 const cards = DATA.map((d, i) => {
-  const mat = new THREE.MeshStandardMaterial({
-    transparent: true, side: THREE.FrontSide,
-    roughness: 0.08, metalness: 0.06,
-    alphaTest: 0.01,
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.renderOrder = 0;
-  scene.add(mesh);
-  return {
-    mesh, data: d,
-    tx: 0, ty: 0, tz: 0, tRY: 0,  // targets
-  };
+  const mesh = new THREE.Mesh(cardGeo, []);
+  fanGroup.add(mesh);
+  return { mesh, data:d, tRY:0, tZ:0 };
 });
 
-/* Compute target positions from activeIdx */
-function computeTargets() {
+/* ─── Arc slider (above cards) ───────────────────────── */
+// The slider sits above the card tops, following the arc of card-spine tops.
+// Each card's top-spine is at local (0, CH/2, 0) before rotation.
+// After rotateY=theta: top = (0, CH/2, 0) → same point (spine doesn't move by rotateY).
+// So ALL card spines share the same top point (0, CH/2, 0)!
+// The actual card TOP EDGE center sweeps an arc:
+//   cardTopCenter = (CW/2 * cos(theta), CH/2, -CW/2 * sin(theta))  [Three.js rotateY sign]
+
+let arcLine = null;
+let arcDot  = null;   // glowing indicator sphere
+
+const dotGeo = new THREE.SphereGeometry(5, 16, 16);
+const dotMat = new THREE.MeshStandardMaterial({
+  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:2.5,
+  roughness:0, metalness:0,
+});
+arcDot = new THREE.Mesh(dotGeo, dotMat);
+fanGroup.add(arcDot);
+
+// Outer halo ring around dot
+const haloGeo = new THREE.TorusGeometry(10, 1.2, 8, 32);
+const haloMat = new THREE.MeshStandardMaterial({
+  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:1.2,
+  transparent:true, opacity:0.55, roughness:0, metalness:0,
+});
+const haloDot = new THREE.Mesh(haloGeo, haloMat);
+fanGroup.add(haloDot);
+
+function buildArcSlider() {
+  // Remove old arc line
+  if (arcLine) { fanGroup.remove(arcLine); arcLine.geometry.dispose(); arcLine = null; }
+
+  // Compute top-center of each card's visible face in local fanGroup space
+  // Card i: rotateY = tRY[i], card center is at (CW/2 after geo.translate)
+  // Top-center of card i = rotate (CW/2, CH/2, 0) by tRY around Y axis at origin
+  // Three.js rotateY(theta): x' = x*cos(theta) + z*sin(theta), z' = -x*sin(theta) + z*cos(theta)
+
+  const YARC = CH / 2 + 28;  // above card tops
+  const pts = cards.map((_, i) => {
+    const theta = cards[i].tRY;  // current target rotation
+    const x = (CW/2) * Math.cos(theta);
+    const z = -(CW/2) * Math.sin(theta);
+    return new THREE.Vector3(x, YARC, z);
+  });
+
+  // Smooth the arc with CatmullRomCurve3
+  const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
+  const smoothPts = curve.getPoints(120);
+  const geo = new THREE.BufferGeometry().setFromPoints(smoothPts);
+
+  const mat = new THREE.LineDashedMaterial({
+    color: 0x22c55e,
+    linewidth: 1,
+    dashSize: 5,
+    gapSize: 7,
+    transparent: true,
+    opacity: 0.55,
+  });
+  arcLine = new THREE.Line(geo, mat);
+  arcLine.computeLineDistances();
+  fanGroup.add(arcLine);
+
+  // Position the indicator dot at the active card's top center
+  const atRY = cards[activeIdx].tRY;  // should be 0 for active
+  const dotX = (CW/2) * Math.cos(atRY);
+  const dotZ = -(CW/2) * Math.sin(atRY);
+  arcDot.position.set(dotX, YARC, dotZ);
+  haloDot.position.set(dotX, YARC, dotZ);
+  haloDot.rotation.x = Math.PI / 2;  // lay flat in XZ plane
+}
+
+/* ─── Compute target angles and positions ────────────── */
+function computeTargets(ai) {
   cards.forEach((c, i) => {
-    const off   = i - activeIdx;
-    const rad   = off * ANGLE_DEG * Math.PI / 180;
-    c.tx  = Math.sin(rad) * ARC_R;
-    c.tz  = (Math.cos(rad) - 1) * ARC_R + (off === 0 ? POP_Z : 0);
-    c.ty  = 0;
-    c.tRY = -rad;                   // face the arc center
+    const off = i - ai;
+    c.tRY = off * ANGLE * (Math.PI / 180);
+    c.tZ  = (i === ai) ? POP_Z : 0;   // active card pops forward (spine moves too — like pulling a book out)
   });
 }
 
-/* Rebuild all canvas textures (called on active change) */
-function rebuildTextures() {
+/* ─── Rebuild all card textures ──────────────────────── */
+function rebuildTextures(ai) {
   cards.forEach((c, i) => {
-    // Dispose old texture to free GPU memory
-    if (c.mesh.material.map) { c.mesh.material.map.dispose(); }
-    if (c.mesh.material.emissiveMap) { c.mesh.material.emissiveMap.dispose(); }
-
-    const off    = Math.abs(i - activeIdx);
-    const blurPx = Math.max(0, off * 1.5 - 0.8);   // DOF: blur grows with distance
-    const opacity = i === activeIdx ? 1.0 : Math.max(0.08, 1 - off * 0.095);
-
-    if (i === activeIdx) {
-      const tex = makeActiveTex(c.data);
-      c.mesh.material.map           = tex;
-      c.mesh.material.emissiveMap   = tex;
-      c.mesh.material.emissive      = new THREE.Color(0x1a5c38);
-      c.mesh.material.emissiveIntensity = 0.30;
-    } else {
-      const tex = makeInactiveTex(c.data, blurPx);
-      c.mesh.material.map           = tex;
-      c.mesh.material.emissiveMap   = null;
-      c.mesh.material.emissive      = new THREE.Color(0x000000);
-      c.mesh.material.emissiveIntensity = 0;
+    // Dispose previous materials
+    if (Array.isArray(c.mesh.material)) {
+      c.mesh.material.forEach(m => { if (m.map) m.map.dispose(); if (m.emissiveMap) m.emissiveMap.dispose(); m.dispose(); });
     }
+    const off = Math.abs(i - ai);
+    const blurPx = Math.max(0, off * 1.3 - 0.7);
+    const isAct  = (i === ai);
 
-    c.mesh.material.opacity = opacity;
-    c.mesh.material.needsUpdate = true;
-    c.mesh.renderOrder = 100 - off;   // closer cards render last (on top)
+    const tex  = isAct ? makeActiveTex(c.data) : makeInactiveTex(c.data, blurPx);
+    const mats = makeMats(tex, isAct);
+
+    // Apply distance-based opacity to front + back faces
+    const opacity = isAct ? 1.0 : Math.max(0.08, 1 - off * 0.092);
+    mats[4].opacity = opacity;
+    mats[5].opacity = Math.min(opacity, 0.75);
+    mats.forEach(m => m.needsUpdate = true);
+
+    c.mesh.material  = mats;
+    c.mesh.renderOrder = 100 - off;  // closer cards on top
   });
 }
 
-/* First build */
-computeTargets();
-rebuildTextures();
+/* ─── Initial setup ──────────────────────────────────── */
+computeTargets(activeIdx);
+rebuildTextures(activeIdx);
 
-/* Snap positions on first frame (no animation) */
+// Snap immediately (no animation on first frame)
 cards.forEach(c => {
-  c.mesh.position.set(c.tx, c.ty, c.tz);
   c.mesh.rotation.y = c.tRY;
+  c.mesh.position.set(0, 0, c.tZ);
 });
+buildArcSlider();
 
-/* ── Interaction ───────────────────────────────────────── */
+/* ─── Change active ──────────────────────────────────── */
+function changeActive(idx) {
+  activeIdx = idx;
+  computeTargets(activeIdx);
+  rebuildTextures(activeIdx);
+  buildArcSlider();
+  renderDetail();
+}
+
+/* ─── Raycasting (click detection) ──────────────────── */
 const raycaster = new THREE.Raycaster();
-const mouse2 = new THREE.Vector2();
+const mouse = new THREE.Vector2();
 
 stage.addEventListener('click', e => {
   const r = stage.getBoundingClientRect();
-  mouse2.x =  ((e.clientX - r.left)  / r.width)  * 2 - 1;
-  mouse2.y = -((e.clientY - r.top)   / r.height) * 2 + 1;
-
-  raycaster.setFromCamera(mouse2, camera);
+  mouse.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
+  mouse.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
   const hits = raycaster.intersectObjects(cards.map(c => c.mesh));
   if (!hits.length) return;
-
   const idx = cards.findIndex(c => c.mesh === hits[0].object);
-  if (idx !== -1 && idx !== activeIdx) {
-    activeIdx = idx;
-    computeTargets();
-    rebuildTextures();
-    renderDetail();
-  }
+  if (idx !== -1 && idx !== activeIdx) changeActive(idx);
 });
 
+/* ─── Keyboard ────────────────────────────────────────── */
 document.addEventListener('keydown', e => {
-  let changed = false;
-  if (e.key === 'ArrowLeft'  && activeIdx > 0)              { activeIdx--; changed = true; }
-  if (e.key === 'ArrowRight' && activeIdx < DATA.length-1)  { activeIdx++; changed = true; }
-  if (changed) { computeTargets(); rebuildTextures(); renderDetail(); }
+  if (e.key==='ArrowLeft'  && activeIdx>0)              changeActive(activeIdx-1);
+  if (e.key==='ArrowRight' && activeIdx<DATA.length-1)  changeActive(activeIdx+1);
 });
 
-/* ── Animation loop ────────────────────────────────────── */
+/* ─── Animation loop ──────────────────────────────────── */
 const LERP = 0.10;
 function animate() {
   requestAnimationFrame(animate);
 
   cards.forEach(c => {
-    // Smooth lerp to target positions
-    c.mesh.position.x += (c.tx - c.mesh.position.x) * LERP;
-    c.mesh.position.y += (c.ty - c.mesh.position.y) * LERP;
-    c.mesh.position.z += (c.tz - c.mesh.position.z) * LERP;
+    // Lerp rotation (spine-pivot fan)
     c.mesh.rotation.y += (c.tRY - c.mesh.rotation.y) * LERP;
+    // Lerp active card pop in Z
+    c.mesh.position.z += (c.tZ - c.mesh.position.z) * LERP;
   });
 
-  // Green light follows active card (in world space)
-  const ac = cards[activeIdx];
-  gLight.position.set(
-    ac.mesh.position.x,
-    ac.mesh.position.y + 80,
-    ac.mesh.position.z + 220
-  );
+  // Green point light: follows active card in world space
+  // Active card center in local fanGroup: (CW/2, 0, POP_Z)
+  // After fanGroup.rotation.x tilt, approximate world position:
+  const acPos = new THREE.Vector3(CW/2, 80, cards[activeIdx].mesh.position.z + 200);
+  acPos.applyMatrix4(fanGroup.matrixWorld);
+  gLight.position.copy(acPos);
 
   composer.render();
 }
 animate();
 
-/* ── Detail panel ──────────────────────────────────────── */
+/* ─── Detail panel ────────────────────────────────────── */
 function renderDetail() {
   const d = DATA[activeIdx];
-  document.getElementById('dp').innerHTML = `
+  document.getElementById('dpanel').innerHTML = `
     <div>
-      <div class="dp-tags">
-        <span class="dp-tag">Incident</span>
-        <span class="dp-tag">Vendor</span>
-        <span class="dp-tag">DPIA</span>
-      </div>
-      <div class="dp-title">${d.name}</div>
-      <div class="dp-sub">Recent activity</div>
-      <div class="dp-row">
+      <div class="dtags"><span class="dtag">Incident</span><span class="dtag">Vendor</span><span class="dtag">DPIA</span></div>
+      <div class="dttl">${d.name}</div>
+      <div class="dsub">Recent activity</div>
+      <div class="drow">
         <span>Annual Data Privacy Audit</span>
-        <div class="dp-track" style="max-width:200px">
-          <div class="dp-fill" style="width:${d.p}%"></div>
-        </div>
+        <div class="dtrk" style="max-width:210px"><div class="dfl" style="width:${d.p}%"></div></div>
         <span>${d.due}</span>
       </div>
-      <div class="dp-file">
-        <div class="dp-fi">📄</div>
+      <div class="dfile">
+        <div class="dfi">📄</div>
         <div>
           <div style="font-weight:500;color:rgba(255,255,255,0.84);font-size:11px">${d.doc}</div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3)">${d.email}</div>
@@ -492,18 +498,18 @@ function renderDetail() {
         <div style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.24)">09:00 AM</div>
       </div>
     </div>
-    <div class="dp-div"></div>
+    <div class="ddv"></div>
     <div>
-      <div class="kv"><div class="kv-l">Event</div><div class="kv-v">${d.ev}</div></div>
-      <div class="kv"><div class="kv-l">Deliverable Due</div><div class="kv-v">${d.due}</div></div>
+      <div class="kv"><div class="kvl">Event</div><div class="kvv">${d.ev}</div></div>
+      <div class="kv"><div class="kvl">Deliverable Due</div><div class="kvv">${d.due}</div></div>
       <div><div class="here"><div class="hd"></div>We're Here</div></div>
     </div>`;
 }
 renderDetail();
 
-/* ── Resize ────────────────────────────────────────────── */
+/* ─── Resize ──────────────────────────────────────────── */
 function onResize() {
-  const { w: nw, h: nh } = getSize();
+  const { w:nw, h:nh } = getSize();
   renderer.setSize(nw, nh);
   composer.setSize(nw, nh);
   bloom.resolution.set(nw, nh);
