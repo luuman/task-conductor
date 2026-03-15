@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../lib/store/auth'
+import styles from './auth.module.css'
 
 export default function AuthPage() {
   const { t } = useTranslation()
@@ -40,17 +41,13 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-background">
-      <div className="w-80 rounded-xl border border-border bg-card p-8">
-        <h1 className="mb-6 text-center text-2xl font-semibold text-foreground">
-          {t('auth.title')}
-        </h1>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>{t('auth.title')}</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className={styles.form}>
           <div>
-            <label className="mb-1.5 block text-sm text-muted-foreground">
-              {t('auth.pin_label')}
-            </label>
+            <label className={styles.label}>{t('auth.pin_label')}</label>
             <input
               type="password"
               inputMode="numeric"
@@ -58,19 +55,13 @@ export default function AuthPage() {
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
               placeholder={t('auth.pin_placeholder')}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              className={styles.input}
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className={styles.error}>{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading} className={styles.submitBtn}>
             {loading ? t('auth.connecting') : t('auth.login_btn')}
           </button>
         </form>
