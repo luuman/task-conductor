@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
-import { IconFileText, IconPlus, IconLayoutGrid } from '../ui/icon'
+import { IconFileText, IconPlus, IconLayoutGrid, IconLogo } from '../ui/icon'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
 
