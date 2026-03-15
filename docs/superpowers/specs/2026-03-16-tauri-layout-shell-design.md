@@ -158,7 +158,7 @@ interface ThemeContextValue {
   overflow: hidden;
 }
 
-/* Sidebar 折叠时 */
+/* Sidebar 折叠时：完全隐藏（0px），展开按钮位于 TopBar 左区 */
 .shell[data-sidebar-collapsed="true"] {
   grid-template-columns: 0 1fr;
 }
