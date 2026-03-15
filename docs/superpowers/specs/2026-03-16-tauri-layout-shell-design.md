@@ -367,13 +367,16 @@ src/
 - `@tauri-apps/api`, `@tauri-apps/plugin-opener`
 - `@fontsource-variable/geist`
 
-### 需重写的文件
+### 需重写/删除的文件
 | 文件 | 处理 |
 |------|------|
 | `index.css` | 重写为 reset.css + global.css，去掉 Tailwind 指令 |
+| `App.tsx` | 删除（Tauri 脚手架残留，已被 Router 取代） |
+| `App.css` | 删除（Tauri 脚手架残留，样式迁入 reset.css/global.css） |
 | `app/Layout.tsx` | 替换为 AppShell 组件 |
 | `components/ui/button.tsx` | 迁移到 `ui/button/`，用 CSS Modules 重写 |
 | `features/dashboard/index.tsx` | 去掉 Tailwind class |
+| `features/auth/index.tsx` | 去掉 Tailwind class |
 | `app/PageLoading.tsx` | 去掉 Tailwind class |
 | `vite.config.ts` | 移除 `@tailwindcss/vite` 插件 |
 | `lib/utils.ts` | 移除 `cn()` 辅助函数（不再需要 clsx/tailwind-merge）|
