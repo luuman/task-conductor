@@ -248,7 +248,7 @@ interface SidebarItem {
 
 特性：
 - 展开时从底部向上推出
-- 顶部拖拽条可调整高度（min 150px，max 50vh）
+- 顶部拖拽条可调整高度（min 150px，max 400px）
 - 关闭按钮收起面板
 - 收起时完全隐藏（height: 0）
 
