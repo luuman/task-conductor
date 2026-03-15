@@ -8,7 +8,7 @@ const AuthPage      = lazy(() => import('../features/auth'))
 const DashboardPage = lazy(() => import('../features/dashboard'))
 
 const PlaceholderPage = lazy(() =>
-  Promise.resolve({ default: () => <div className="p-8 text-muted-foreground">Coming soon</div> })
+  Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
 )
 
 const RouterComponent = isTauri() ? HashRouter : BrowserRouter
@@ -25,6 +25,7 @@ export function AppRouter() {
             <Route path="/task-manager" element={<PlaceholderPage />} />
             <Route path="/sessions"     element={<PlaceholderPage />} />
             <Route path="/chat"         element={<PlaceholderPage />} />
+            <Route path="/admin"        element={<PlaceholderPage />} />
             <Route path="/config"       element={<PlaceholderPage />} />
             <Route path="/knowledge"    element={<PlaceholderPage />} />
             <Route path="/mcp"          element={<PlaceholderPage />} />
