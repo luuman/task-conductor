@@ -25,14 +25,6 @@ export function Layout() {
         userName="User"
       />
       <Sidebar
-        header={
-          <>
-            <span className={sidebarStyles.headerTitle}>{t('layout.pages')}</span>
-            <button className={sidebarStyles.headerAction} aria-label={t('layout.new_page')}>
-              <IconPlus size={14} />
-            </button>
-          </>
-        }
         items={workspaceItems}
         activeKey={activeKey}
         onSelect={(key) => navigate(`/${key}`)}
