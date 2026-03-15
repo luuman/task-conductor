@@ -19,6 +19,7 @@ export function Layout() {
   return (
     <AppShell>
       <TopBar
+        logoIcon={<IconLogo size={22} />}
         logo="TaskConductor"
         breadcrumb={[{ label: t('layout.workspace') }]}
         userName="User"
