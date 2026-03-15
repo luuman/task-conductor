@@ -1,41 +1,44 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
 import { IconFileText, IconPlus, IconLayoutGrid } from '../ui/icon'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
 
-const WORKSPACE_ITEMS = [
-  { key: 'tasks', label: 'Tasks', icon: <IconFileText size={16} /> },
-]
-
 export function Layout() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
 
   const activeKey = location.pathname.split('/').pop() ?? ''
 
+  const workspaceItems = [
+    { key: 'tasks', label: t('layout.tasks'), icon: <IconFileText size={16} /> },
+  ]
+
   return (
     <AppShell>
       <TopBar
         logo="TaskConductor"
-        breadcrumb={[{ label: 'Workspace' }]}
+        breadcrumb={[{ label: t('layout.workspace') }]}
+        userName="User"
       />
       <Sidebar
         header={
           <>
-            <span className={sidebarStyles.headerTitle}>Pages</span>
-            <button className={sidebarStyles.headerAction} aria-label="New page">
+            <span className={sidebarStyles.headerTitle}>{t('layout.pages')}</span>
+            <button className={sidebarStyles.headerAction} aria-label={t('layout.new_page')}>
               <IconPlus size={14} />
             </button>
           </>
         }
-        items={WORKSPACE_ITEMS}
+        items={workspaceItems}
         activeKey={activeKey}
         onSelect={(key) => navigate(`/${key}`)}
         footer={
           <button className={sidebarStyles.footerBtn} onClick={() => navigate('/admin')}>
             <IconLayoutGrid size={16} />
-            <span>Admin Console</span>
+            <span className={sidebarStyles.footerBtnLabel}>{t('layout.admin_console')}</span>
           </button>
         }
       />
@@ -45,7 +48,7 @@ export function Layout() {
         </div>
         <Panel>
           <div className={shellStyles.panelPlaceholder}>
-            Panel content (logs, terminal)
+            {t('layout.panel_placeholder')}
           </div>
         </Panel>
       </div>
