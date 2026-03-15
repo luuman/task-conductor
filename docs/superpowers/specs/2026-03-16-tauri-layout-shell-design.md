@@ -313,7 +313,7 @@ src/
 │   │   ├── useTheme.ts              # useTheme() hook
 │   │   ├── theme.module.css
 │   │   └── index.ts
-│   ├── button/
+│   ├── button/                      # 基础按钮（此次仅迁移骨架，详细变体后续迭代）
 │   │   ├── Button.tsx
 │   │   ├── button.module.css
 │   │   └── index.ts
