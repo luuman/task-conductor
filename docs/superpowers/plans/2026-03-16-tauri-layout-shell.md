@@ -1587,6 +1587,7 @@ Create `tauri/src/layouts/AppShell/app-shell.module.css`:
   overflow: hidden;
   background: var(--tc-content-bg);
   color: var(--tc-foreground);
+  transition: grid-template-columns 0.2s ease;
 }
 
 .shell[data-sidebar-collapsed="true"] {
