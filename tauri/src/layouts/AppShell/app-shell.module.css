@@ -14,7 +14,7 @@
 }
 
 .shell[data-sidebar-collapsed="true"] {
-  grid-template-columns: 0 1fr;
+  grid-template-columns: 48px 1fr;
 }
 
 .main {
