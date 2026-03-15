@@ -11,19 +11,25 @@ export interface BreadcrumbItem {
 
 export interface TopBarProps {
   logo?: ReactNode
+  logoIcon?: ReactNode
   breadcrumb?: BreadcrumbItem[]
   actions?: ReactNode
   userName?: string
   userRole?: string
 }
 
-export function TopBar({ logo, breadcrumb, actions, userName, userRole }: TopBarProps) {
+export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole }: TopBarProps) {
   const { sidebarCollapsed, toggleSidebar } = useShell()
 
   return (
     <header className={styles.topbar}>
-      <div className={styles.left}>
-        {logo && <span className={styles.logo}>{logo}</span>}
+      <div className={`${styles.left} ${sidebarCollapsed ? styles.leftCollapsed : ''}`}>
+        {!sidebarCollapsed && (
+          <div className={styles.logoWrap}>
+            {logoIcon && <span className={styles.logoIcon}>{logoIcon}</span>}
+            {logo && <span className={styles.logoText}>{logo}</span>}
+          </div>
+        )}
         <button
           className={styles.toggleBtn}
           onClick={toggleSidebar}
