@@ -19,6 +19,15 @@
 
 两者通过 Sidebar 底部按钮互相跳转。
 
+### 路由架构
+
+两个页面上下文共享同一个 `AppShell`，通过不同的路由前缀区分：
+
+- `/workspace/*` — 项目工作台，`Sidebar` 渲染项目导航项
+- `/admin/*` — 管理后台，`Sidebar` 渲染管理导航项（仪表盘、Sessions、设置等）
+
+`AppShell` 根据当前路由前缀决定传给 `Sidebar` 的 `items` 和 `header`。两个上下文使用同一个 `AppShell` 实例，不需要两套布局组件。
+
 ## 3. 布局结构
 
 ```
