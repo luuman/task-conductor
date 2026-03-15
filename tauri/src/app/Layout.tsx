@@ -13,7 +13,11 @@ export function Layout() {
   const activeKey = location.pathname.split('/').pop() ?? ''
 
   const workspaceItems = [
-    { key: 'tasks', label: t('layout.tasks'), icon: <IconFileText size={16} /> },
+    { key: 'task-manager', label: t('layout.tasks'), icon: <IconFileText size={16} /> },
+    { key: 'sessions', label: t('layout.sessions'), icon: <IconMonitor size={16} /> },
+    { key: 'chat', label: t('layout.chat'), icon: <IconMessage size={16} /> },
+    { key: 'files', label: t('layout.files'), icon: <IconFolder size={16} /> },
+    { key: 'git', label: t('layout.git'), icon: <IconGitBranch size={16} /> },
   ]
 
   return (
