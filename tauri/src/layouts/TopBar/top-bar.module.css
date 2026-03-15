@@ -2,27 +2,29 @@
   grid-area: topbar;
   display: flex;
   align-items: center;
-  height: var(--tc-topbar-height, 46px);
+  height: var(--tc-topbar-height, 48px);
   background: var(--tc-topbar-bg);
   color: var(--tc-topbar-fg);
   border-bottom: 1px solid var(--tc-topbar-border);
-  padding: 0 12px;
-  gap: 8px;
+  padding: 0 16px;
+  gap: 12px;
   -webkit-app-region: drag;
 }
 
+/* Left zone: Logo + collapse toggle */
 .left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex-shrink: 0;
   -webkit-app-region: no-drag;
 }
 
 .logo {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   white-space: nowrap;
+  letter-spacing: -0.3px;
 }
 
 .toggleBtn {
@@ -31,15 +33,17 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
-  color: var(--tc-topbar-fg);
-  transition: background 0.15s;
+  border-radius: 6px;
+  color: var(--tc-foreground-secondary);
+  transition: background 0.15s, color 0.15s;
 }
 
 .toggleBtn:hover {
   background: var(--tc-sidebar-item-hover);
+  color: var(--tc-topbar-fg);
 }
 
+/* Center zone: Breadcrumb */
 .center {
   flex: 1;
   display: flex;
@@ -66,17 +70,20 @@
 
 .breadcrumbItem:last-child {
   color: var(--tc-topbar-fg);
+  font-weight: 500;
 }
 
 .breadcrumbSep {
   color: var(--tc-foreground-secondary);
-  margin: 0 2px;
+  margin: 0 4px;
+  opacity: 0.5;
 }
 
+/* Right zone: Action icons + user */
 .right {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex-shrink: 0;
   -webkit-app-region: no-drag;
 }
@@ -87,7 +94,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--tc-foreground-secondary);
   transition: background 0.15s, color 0.15s;
 }
@@ -97,13 +104,42 @@
   color: var(--tc-topbar-fg);
 }
 
+/* User section */
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--tc-border);
+}
+
 .avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--tc-sidebar-item-hover);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.userName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tc-topbar-fg);
+  white-space: nowrap;
+}
+
+.userRole {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  white-space: nowrap;
 }
