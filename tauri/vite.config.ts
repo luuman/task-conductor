@@ -1,9 +1,7 @@
-// tauri/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import wasm from 'vite-plugin-wasm'
 import topLevelAwait from 'vite-plugin-top-level-await'
-import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
@@ -11,7 +9,6 @@ export default defineConfig({
     react(),
     wasm(),
     topLevelAwait(),
-    tailwindcss(),
   ],
 
   resolve: {
@@ -20,7 +17,6 @@ export default defineConfig({
     },
   },
 
-  // Web 开发模式：代理到本地 FastAPI 后端
   server: {
     port: 7071,
     proxy: {
@@ -35,7 +31,6 @@ export default defineConfig({
     },
   },
 
-  // Tauri 生产构建配置
   build: {
     target: ['es2021', 'chrome105', 'safari15'],
     minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
