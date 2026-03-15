@@ -352,8 +352,8 @@ src/
 ├── app/                             # Router/Providers（保留）
 ├── i18n/                            # 国际化（保留）
 ├── styles/
-│   ├── reset.css                    # CSS Reset
-│   └── global.css                   # 全局样式（字体、滚动条）
+│   ├── reset.css                    # CSS Reset（box-sizing、margin/padding 归零、列表/表单重置）
+│   └── global.css                   # 全局样式（@font-face Geist、滚动条美化、body 默认背景/前景）
 └── main.tsx
 ```
 
