@@ -197,6 +197,12 @@ body {
   outline: 1px solid var(--tc-focus-ring, #007acc);
   outline-offset: -1px;
 }
+
+/* Placeholder pages (temporary) */
+.placeholder-page {
+  padding: 32px;
+  color: var(--tc-foreground-secondary);
+}
 ```
 
 - [ ] **Step 3: Commit**
