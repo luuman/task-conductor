@@ -16,6 +16,14 @@
     "chat": "对话",
     "settings": "设置"
   },
+  "layout": {
+    "workspace": "工作台",
+    "pages": "页面",
+    "new_page": "新建页面",
+    "admin_console": "管理后台",
+    "tasks": "任务",
+    "panel_placeholder": "面板内容（日志、终端）"
+  },
   "auth": {
     "title": "TaskConductor",
     "pin_label": "访问码",
