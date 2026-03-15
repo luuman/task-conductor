@@ -210,7 +210,7 @@ interface BreadcrumbItem {
 
 ### 5.3 Sidebar
 
-宽度 240px，可折叠到 0，带过渡动画（200ms ease）。
+宽度 240px，可折叠到 0px（完全隐藏，不保留图标轨道），带过渡动画（200ms ease）。折叠/展开按钮始终在 TopBar 左区，不随 Sidebar 隐藏。
 
 三区纵向布局：
 
