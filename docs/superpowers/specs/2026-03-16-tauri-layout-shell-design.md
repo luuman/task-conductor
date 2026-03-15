@@ -321,9 +321,17 @@ src/
 │   │   ├── Icon.tsx                 # 基础 Icon 包装
 │   │   ├── icons/                   # 各 SVG 图标组件
 │   │   │   ├── chevron-left.tsx
+│   │   │   ├── chevron-right.tsx
 │   │   │   ├── search.tsx
 │   │   │   ├── bell.tsx
-│   │   │   └── ...
+│   │   │   ├── settings.tsx
+│   │   │   ├── message.tsx
+│   │   │   ├── plus.tsx
+│   │   │   ├── file-text.tsx
+│   │   │   ├── layout-grid.tsx
+│   │   │   ├── x.tsx
+│   │   │   ├── grip-horizontal.tsx
+│   │   │   └── user.tsx
 │   │   └── index.ts
 │   └── index.ts                     # 统一导出
 │
