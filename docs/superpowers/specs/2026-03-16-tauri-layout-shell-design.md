@@ -241,6 +241,8 @@ interface SidebarItem {
 }
 ```
 
+`onSelect` 回调仅通知外部选中了哪个 key，不内置路由跳转。消费方（如 `app/Router.tsx`）负责在 `onSelect` 中调用 `navigate()`，保持 Sidebar 与路由解耦。
+
 导航项状态样式：
 - 默认：透明背景
 - Hover：`--tc-sidebar-item-hover`
