@@ -1,0 +1,14 @@
+.page {
+  padding: 32px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: var(--tc-foreground-secondary);
+}
