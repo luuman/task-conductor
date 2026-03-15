@@ -2039,7 +2039,7 @@ const AuthPage      = lazy(() => import('../features/auth'))
 const DashboardPage = lazy(() => import('../features/dashboard'))
 
 const PlaceholderPage = lazy(() =>
-  Promise.resolve({ default: () => <div style={{ padding: 32, color: 'var(--tc-foreground-secondary)' }}>Coming soon</div> })
+  Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
 )
 
 const RouterComponent = isTauri() ? HashRouter : BrowserRouter
