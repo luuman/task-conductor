@@ -1598,6 +1598,12 @@ Create `tauri/src/layouts/AppShell/app-shell.module.css`:
   flex: 1;
   overflow: auto;
 }
+
+.panelPlaceholder {
+  padding: 8px;
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+}
 ```
 
 - [ ] **Step 2: Create AppShell.tsx**
