@@ -16,6 +16,14 @@
     "chat": "Chat",
     "settings": "Settings"
   },
+  "layout": {
+    "workspace": "Workspace",
+    "pages": "Pages",
+    "new_page": "New page",
+    "admin_console": "Admin Console",
+    "tasks": "Tasks",
+    "panel_placeholder": "Panel content (logs, terminal)"
+  },
   "auth": {
     "title": "TaskConductor",
     "pin_label": "Access Code",
