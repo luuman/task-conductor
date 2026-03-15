@@ -256,8 +256,8 @@ Props：
 ```typescript
 interface PanelProps {
   children: ReactNode
-  minHeight?: number    // 默认 150
-  maxHeight?: number    // 默认 50vh
+  minHeight?: number    // 默认 150（px）
+  maxHeight?: number    // 默认 400（px），所有高度值均为像素
 }
 ```
 
