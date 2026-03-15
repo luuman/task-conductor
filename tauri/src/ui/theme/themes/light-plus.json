@@ -1,0 +1,20 @@
+{
+  "name": "Light+",
+  "type": "light",
+  "colors": {
+    "base.bg-primary": "#ffffff",
+    "base.bg-secondary": "#f3f3f3",
+    "base.bg-hover": "#e8e8e8",
+    "base.fg-primary": "#333333",
+    "base.fg-secondary": "#717171",
+    "base.accent": "#005fb8",
+    "base.accent-bg": "#cce5ff",
+    "base.accent-fg": "#001a33",
+    "base.border": "#e0e0e0",
+    "base.border-active": "#005fb8",
+    "base.error": "#e51400",
+    "base.warning": "#bf8803",
+    "base.success": "#16825d",
+    "base.info": "#005fb8"
+  }
+}
