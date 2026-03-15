@@ -1,0 +1,20 @@
+{
+  "name": "Dark+",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary": "#1e1e1e",
+    "base.bg-secondary": "#252526",
+    "base.bg-hover": "#2a2d2e",
+    "base.fg-primary": "#cccccc",
+    "base.fg-secondary": "#969696",
+    "base.accent": "#007acc",
+    "base.accent-bg": "#094771",
+    "base.accent-fg": "#ffffff",
+    "base.border": "#3c3c3c",
+    "base.border-active": "#007acc",
+    "base.error": "#f44747",
+    "base.warning": "#cca700",
+    "base.success": "#89d185",
+    "base.info": "#75beff"
+  }
+}
