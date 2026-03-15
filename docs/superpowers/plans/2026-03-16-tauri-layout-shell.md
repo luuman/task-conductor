@@ -786,6 +786,136 @@ export { IconGripHorizontal } from './icons/grip-horizontal'
 export { IconUser } from './icons/user'
 ```
 
+- [ ] **Step 4: Commit icons**
+
+```bash
+git add tauri/src/ui/icon/ && git commit -m "feat: add Icon base component and 12 SVG icons"
+```
+
+---
+
+### Task 6b: Create Button component (skeleton migration)
+
+**Files:**
+- Create: `tauri/src/ui/button/Button.tsx`
+- Create: `tauri/src/ui/button/button.module.css`
+- Create: `tauri/src/ui/button/index.ts`
+
+- [ ] **Step 1: Create button.module.css**
+
+Create `tauri/src/ui/button/button.module.css`:
+
+```css
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s;
+  cursor: pointer;
+  user-select: none;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variants */
+.default {
+  background: var(--tc-border-active);
+  color: #ffffff;
+}
+
+.default:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--tc-foreground);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.outline {
+  background: transparent;
+  border: 1px solid var(--tc-border);
+  color: var(--tc-foreground);
+}
+
+.outline:hover:not(:disabled) {
+  background: var(--tc-sidebar-item-hover);
+}
+
+/* Sizes */
+.sm {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.md {
+  height: 32px;
+  padding: 0 12px;
+}
+
+.lg {
+  height: 36px;
+  padding: 0 16px;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+```
+
+- [ ] **Step 2: Create Button.tsx**
+
+Create `tauri/src/ui/button/Button.tsx`:
+
+```tsx
+import type { ButtonHTMLAttributes } from 'react'
+import styles from './button.module.css'
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'ghost' | 'outline'
+  size?: 'sm' | 'md' | 'lg' | 'icon'
+}
+
+export function Button({
+  variant = 'default',
+  size = 'md',
+  className,
+  ...props
+}: ButtonProps) {
+  const classes = [
+    styles.button,
+    styles[variant],
+    styles[size],
+    className,
+  ].filter(Boolean).join(' ')
+
+  return <button className={classes} {...props} />
+}
+```
+
+- [ ] **Step 3: Create button index.ts**
+
+Create `tauri/src/ui/button/index.ts`:
+
+```typescript
+export { Button, type ButtonProps } from './Button'
+```
+
 - [ ] **Step 4: Create ui/index.ts top-level export**
 
 Create `tauri/src/ui/index.ts`:
@@ -793,12 +923,13 @@ Create `tauri/src/ui/index.ts`:
 ```typescript
 export * from './theme'
 export * from './icon'
+export * from './button'
 ```
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add tauri/src/ui/ && git commit -m "feat: add Icon base component and 12 SVG icons"
+git add tauri/src/ui/ && git commit -m "feat: add Button component and ui barrel export"
 ```
 
 ---
