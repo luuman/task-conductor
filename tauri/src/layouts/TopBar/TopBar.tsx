@@ -13,9 +13,11 @@ export interface TopBarProps {
   logo?: ReactNode
   breadcrumb?: BreadcrumbItem[]
   actions?: ReactNode
+  userName?: string
+  userRole?: string
 }
 
-export function TopBar({ logo, breadcrumb, actions }: TopBarProps) {
+export function TopBar({ logo, breadcrumb, actions, userName, userRole }: TopBarProps) {
   const { sidebarCollapsed, toggleSidebar } = useShell()
 
   return (
@@ -48,19 +50,27 @@ export function TopBar({ logo, breadcrumb, actions }: TopBarProps) {
       <div className={styles.right}>
         {actions}
         <button className={styles.iconBtn} aria-label="Search">
-          <IconSearch size={16} />
+          <IconSearch size={18} />
         </button>
         <button className={styles.iconBtn} aria-label="Settings">
-          <IconSettings size={16} />
+          <IconSettings size={18} />
         </button>
         <button className={styles.iconBtn} aria-label="Messages">
-          <IconMessage size={16} />
+          <IconMessage size={18} />
         </button>
         <button className={styles.iconBtn} aria-label="Notifications">
-          <IconBell size={16} />
+          <IconBell size={18} />
         </button>
-        <div className={styles.avatar}>
-          <IconUser size={14} />
+        <div className={styles.userSection}>
+          <div className={styles.avatar}>
+            <IconUser size={16} />
+          </div>
+          {userName && (
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>{userName}</span>
+              {userRole && <span className={styles.userRole}>{userRole}</span>}
+            </div>
+          )}
         </div>
       </div>
     </header>
