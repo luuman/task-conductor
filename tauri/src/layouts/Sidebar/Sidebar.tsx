@@ -33,6 +33,7 @@ export function Sidebar({ header, items, footer, activeKey, onSelect }: SidebarP
               onClick={() => onSelect?.(item.key)}
               role="button"
               tabIndex={0}
+              title={sidebarCollapsed ? item.label : undefined}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
@@ -41,7 +42,7 @@ export function Sidebar({ header, items, footer, activeKey, onSelect }: SidebarP
               }}
             >
               {item.icon && <span className={styles.itemIcon}>{item.icon}</span>}
-              <span>{item.label}</span>
+              <span className={styles.itemLabel}>{item.label}</span>
             </div>
           )
         })}
