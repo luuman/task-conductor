@@ -1,8 +1,10 @@
+import styles from './dashboard.module.css'
+
 export default function DashboardPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-      <p className="mt-2 text-muted-foreground">P2 阶段实现</p>
+    <div className={styles.page}>
+      <h1 className={styles.title}>Dashboard</h1>
+      <p className={styles.subtitle}>P2 阶段实现</p>
     </div>
   )
 }
