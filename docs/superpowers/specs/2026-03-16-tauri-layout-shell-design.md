@@ -176,6 +176,8 @@ AppShell 内部通过 Context 管理：
 - `panelOpen: boolean`
 - `panelHeight: number`
 
+**Panel 位置**：Panel 是 Content Area（`main` grid 区域）的子元素，不是独立的 grid 行。Content Area 内部使用 flexbox 纵向布局：`<Outlet>` 占据 `flex: 1`，Panel 在底部按 `panelHeight` 固定高度渲染。Sidebar 折叠/展开不影响 Panel。
+
 ### 5.2 TopBar
 
 固定高度 46px，三区布局（flexbox）：
