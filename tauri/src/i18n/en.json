@@ -21,7 +21,11 @@
     "pages": "Pages",
     "new_page": "New page",
     "admin_console": "Admin Console",
-    "tasks": "Tasks",
+    "tasks": "Task Manager",
+    "sessions": "Sessions",
+    "chat": "AI Chat",
+    "files": "Files",
+    "git": "Version Control",
     "panel_placeholder": "Panel content (logs, terminal)"
   },
   "auth": {
