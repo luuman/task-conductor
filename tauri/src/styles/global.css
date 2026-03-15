@@ -1,0 +1,42 @@
+@import '@fontsource-variable/geist';
+
+body {
+  font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 13px;
+  background-color: var(--tc-content-bg, #1e1e1e);
+  color: var(--tc-foreground, #cccccc);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Scrollbar styling (VS Code style) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--tc-scrollbar-thumb, rgba(255, 255, 255, 0.2));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tc-scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 1px solid var(--tc-focus-ring, #007acc);
+  outline-offset: -1px;
+}
+
+/* Placeholder pages (temporary) */
+.placeholder-page {
+  padding: 32px;
+  color: var(--tc-foreground-secondary);
+}
