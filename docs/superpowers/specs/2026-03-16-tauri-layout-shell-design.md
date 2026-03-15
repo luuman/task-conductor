@@ -131,6 +131,10 @@ interface ThemeContextValue {
 4. 设置 `data-theme="dark"` 属性
 5. 持久化到 localStorage（key: `tc-theme`）
 
+错误处理：
+- `setTheme()` 传入未注册的主题名称时，忽略操作并 `console.warn`
+- 主题 JSON 缺少必要 color key 时，缺失项回退到 Dark+ 对应值
+
 ### 4.4 内置主题
 
 初始提供 2 套：
