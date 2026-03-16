@@ -1,20 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Skeleton } from '../../../ui/skeleton/Skeleton'
-import { EmptyState } from '../../../ui/empty-state'
 import { api } from '../../../lib/api'
 import type { AiSession } from '../../../lib/api/types'
-import styles from '../admin.module.css'
+import { SessionList } from './sessions/SessionList'
+import { SessionMessages } from './sessions/SessionMessages'
+import { SessionCalendar } from './sessions/SessionCalendar'
+import styles from './sessions/sessions.module.css'
 
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
+type ViewMode = 'messages' | 'calendar'
+
+function toDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 export default function AdminSessions() {
@@ -22,6 +18,9 @@ export default function AdminSessions() {
   const [sessions, setSessions] = useState<AiSession[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState('')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('messages')
+  const [calendarDate, setCalendarDate] = useState<string | null>(null)
 
   useEffect(() => {
     api.getSessions()
@@ -31,74 +30,88 @@ export default function AdminSessions() {
 
   const loading = sessions === null && error === null
 
-  const filtered = sessions?.filter(s =>
-    !filter || s.session_id.toLowerCase().includes(filter.toLowerCase())
-  ) ?? []
+  // When in calendar mode and a date is selected, filter sessions to that date
+  const filteredByDate = useMemo(() => {
+    if (!sessions) return null
+    if (!calendarDate) return sessions
+    return sessions.filter(s => {
+      const key = toDateKey(new Date(s.started_at))
+      return key === calendarDate
+    })
+  }, [sessions, calendarDate])
+
+  const selectedSession = useMemo(() => {
+    if (!selectedId || !sessions) return null
+    return sessions.find(s => s.session_id === selectedId) ?? null
+  }, [selectedId, sessions])
+
+  const handleSelect = (sid: string) => {
+    setSelectedId(prev => prev === sid ? null : sid)
+  }
+
+  const handleCalendarDate = (dateKey: string | null) => {
+    setCalendarDate(dateKey)
+    setSelectedId(null)
+  }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.headerTitle}>{t('admin.sessions.title')}</h1>
-          <p className={styles.headerHint}>{t('admin.sessions.hint')}</p>
+    <div className={styles.root}>
+      {/* Session list (left) */}
+      <SessionList
+        sessions={viewMode === 'calendar' ? filteredByDate : sessions}
+        loading={loading}
+        selectedId={selectedId}
+        filter={filter}
+        onFilterChange={setFilter}
+        onSelect={handleSelect}
+      />
+
+      {/* Right panel */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* View toggle bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 16px',
+          borderBottom: '1px solid var(--tc-border)',
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <h1 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tc-foreground)', margin: 0 }}>
+              {t('admin.sessions.title')}
+            </h1>
+            {error && <span style={{ color: 'var(--tc-error, #f44)', fontSize: 11 }}>{error}</span>}
+          </div>
+          <div className={styles.viewTabs}>
+            <button
+              className={viewMode === 'messages' ? styles.viewTabActive : styles.viewTab}
+              onClick={() => setViewMode('messages')}
+            >
+              {t('admin.sessions.view_messages')}
+            </button>
+            <button
+              className={viewMode === 'calendar' ? styles.viewTabActive : styles.viewTab}
+              onClick={() => setViewMode('calendar')}
+            >
+              {t('admin.sessions.view_calendar')}
+            </button>
+          </div>
         </div>
 
-        {error && <p style={{ color: 'var(--tc-error)', fontSize: 13 }}>{error}</p>}
-
-        {/* 搜索栏 */}
-        <div style={{ marginBottom: 16 }}>
-          {loading
-            ? <Skeleton variant="rect" width="100%" height={36} borderRadius={6} />
-            : <input
-                className={styles.searchInput}
-                placeholder={t('admin.sessions.search_placeholder')}
-                value={filter}
-                onChange={e => setFilter(e.target.value)}
-              />
-          }
-        </div>
-
-        {/* 会话卡片网格 */}
-        {loading
-          ? <div className={styles.cardGrid}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className={styles.section}>
-                  <div className={styles.sectionBody}>
-                    <Skeleton variant="text" width="70%" height={13} />
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <Skeleton variant="text" width={60} height={10} />
-                      <Skeleton variant="text" width={40} height={10} />
-                    </div>
-                    <Skeleton variant="text" width={90} height={10} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          : filtered.length === 0
-            ? <EmptyState icon="\uD83D\uDCAC" title={t('admin.sessions.no_sessions')} />
-            : <div className={styles.cardGrid}>
-                {filtered.map((s) => (
-                  <div key={s.session_id} className={styles.sessionCard}>
-                    <div className={styles.sessionCardHeader}>
-                      <span className={styles.sessionIcon}>
-                        {s.provider === 'claude' ? '🤖' : '💬'}
-                      </span>
-                      <span className={styles.sessionId}>
-                        {s.session_id.slice(0, 8)}...{s.session_id.slice(-4)}
-                      </span>
-                      <span className={styles.eventBadge}>{s.event_count} events</span>
-                    </div>
-                    <div className={styles.sessionCardMeta}>
-                      <span className={styles.sessionMeta}>{s.provider}</span>
-                      <span className={styles.sessionMetaDot} />
-                      <span className={styles.sessionMeta}>{timeAgo(s.started_at)}</span>
-                      <span className={styles.sessionMetaDot} />
-                      <span className={styles.sessionMeta}>last: {timeAgo(s.last_event_at)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-        }
+        {/* Content area */}
+        {viewMode === 'messages' ? (
+          <SessionMessages
+            session={selectedSession}
+            onDeselect={() => setSelectedId(null)}
+          />
+        ) : (
+          <SessionCalendar
+            sessions={sessions}
+            selectedDate={calendarDate}
+            onSelectDate={handleCalendarDate}
+          />
+        )}
       </div>
     </div>
   )
