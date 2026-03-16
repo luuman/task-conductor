@@ -37,6 +37,7 @@ export function Layout() {
         logo="TaskConductor"
         breadcrumb={breadcrumb}
         userName="User"
+        onSettingsClick={() => navigate('/settings')}
       />
       <Sidebar
         items={PROJECT_ITEMS}
