@@ -36,5 +36,93 @@
     "login_btn": "登录",
     "connecting": "连接中...",
     "error_invalid_pin": "访问码错误"
+  },
+  "settings": {
+    "title": "设置",
+    "hint": "管理应用配置、通知、流水线和安全选项",
+    "appearance": {
+      "title": "外观",
+      "hint": "主题和语言偏好",
+      "theme": "主题",
+      "language": "语言",
+      "lang_zh": "中文",
+      "lang_en": "English"
+    },
+    "notification": {
+      "title": "通知",
+      "hint": "配置 TTS 语音播报、Webhook 和浏览器通知",
+      "ttsEnabled": "TTS 语音播报",
+      "ttsPipePath": "TTS 管道路径",
+      "webhookEnabled": "Webhook 通知",
+      "webhookUrl": "Webhook URL",
+      "browserEnabled": "浏览器通知"
+    },
+    "pipeline": {
+      "title": "流水线",
+      "hint": "配置任务流水线的审批阶段和参数",
+      "approvalStages": "需审批的阶段",
+      "maxRetries": "最大重试次数",
+      "confidenceThreshold": "置信度阈值"
+    },
+    "observe": {
+      "title": "观测层",
+      "hint": "Claude 会话监控的显示和清理策略",
+      "sessionLimit": "会话显示上限",
+      "eventLimit": "事件显示上限",
+      "autoCleanup": "自动清理旧数据",
+      "cleanupDays": "清理天数"
+    },
+    "ui": {
+      "title": "界面偏好",
+      "hint": "默认页面和日志显示",
+      "defaultPage": "默认页面",
+      "logMaxLines": "日志最大行数",
+      "pages": {
+        "dashboard": "仪表盘",
+        "sessions": "会话监控",
+        "chat": "AI 对话"
+      }
+    },
+    "security": {
+      "title": "安全",
+      "hint": "访问码和隧道安全配置",
+      "changePin": "修改访问码",
+      "newPinPlaceholder": "输入新访问码（至少 4 位）",
+      "updatePin": "更新",
+      "pinUpdated": "访问码已更新",
+      "pinFailed": "更新失败",
+      "tunnelEnabled": "Cloudflare Tunnel"
+    },
+    "data": {
+      "title": "数据管理",
+      "hint": "导出或清理应用数据",
+      "exportDb": "导出数据库",
+      "exportDbHint": "导出 SQLite 数据库文件",
+      "export": "导出",
+      "clearSessions": "清空会话数据",
+      "clearSessionsHint": "删除所有 Claude 会话和事件记录",
+      "clearSessionsConfirm": "确定清空所有会话数据？此操作不可撤销。",
+      "clearTasks": "清空已完成任务",
+      "clearTasksHint": "删除所有已完成的任务及其产物",
+      "clearTasksConfirm": "确定清空所有已完成任务？此操作不可撤销。",
+      "clear": "清空"
+    },
+    "connection": {
+      "title": "连接",
+      "tokenStatus": "认证状态",
+      "valid": "有效",
+      "invalid": "无效",
+      "verifying": "验证中...",
+      "reVerify": "重新验证",
+      "disconnect": "断开连接",
+      "disconnectHint": "清除凭据并返回登录页",
+      "disconnectBtn": "断开"
+    },
+    "restart": {
+      "title": "重启服务",
+      "hint": "重启后端服务进程，页面将自动刷新",
+      "confirm": "确定重启后端服务？",
+      "restarting": "重启中..."
+    }
   }
 }
