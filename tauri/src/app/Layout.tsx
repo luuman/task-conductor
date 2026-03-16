@@ -2,15 +2,28 @@ import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
-import { IconFileText, IconLayoutGrid, IconLogo, IconFolder } from '../ui/icon'
+import { IconFileText, IconLayoutGrid, IconLogo } from '../ui/icon'
 import { ProjectSwitcher } from '../components/ProjectSwitcher'
 import { useAppStore } from '../lib/store/app'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
 import { api } from '../lib/api'
-import type { FileItem } from '../lib/api/types'
+import type { Task } from '../lib/api/types'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
+
+const STAGE_ICONS: Record<string, string> = {
+  input: '📋',
+  analysis: '🔍',
+  prd: '📄',
+  ui: '🎨',
+  plan: '📐',
+  dev: '⚡',
+  test: '🧪',
+  deploy: '🚀',
+  monitor: '📊',
+  done: '✅',
+}
 
 export function Layout() {
   const { t } = useTranslation()
@@ -20,38 +33,37 @@ export function Layout() {
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
-  const [files, setFiles] = useState<FileItem[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
 
-  // 加载当前项目的文件列表
   useEffect(() => {
     if (!activeProjectId) return
-    loadFiles()
+    loadTasks()
   }, [activeProjectId])
 
-  async function loadFiles() {
+  async function loadTasks() {
     if (!activeProjectId) return
     try {
-      const result = await api.getProjectFiles(Number(activeProjectId))
-      setFiles(result.items)
+      const taskList = await api.getTasks(Number(activeProjectId))
+      setTasks(taskList)
     } catch {
-      setFiles([])
+      setTasks([])
     }
   }
 
-  // 侧边栏导航项 = 项目根目录的文件/文件夹
-  const sidebarItems = files.map((f) => ({
-    key: f.path,
-    label: f.name,
-    icon: f.is_dir ? <IconFolder size={16} /> : <IconFileText size={16} />,
+  // 侧边栏 = 项目的需求/任务列表，带阶段图标
+  const sidebarItems = tasks.map((task) => ({
+    key: String(task.id),
+    label: task.title,
+    icon: <span style={{ fontSize: 14 }}>{STAGE_ICONS[task.stage ?? task.current_stage] ?? '📋'}</span>,
   }))
 
-  // 从路径提取当前选中文件
+  // 从路径中提取当前 task id
   const pathParts = location.pathname.split('/')
-  const activeKey = pathParts[1] === 'file' ? decodeURIComponent(pathParts.slice(2).join('/')) : ''
+  const activeKey = pathParts[1] === 'task' ? pathParts[2] ?? '' : ''
 
   // 面包屑
-  const activeFile = files.find((f) => f.path === activeKey)
-  const breadcrumb = activeFile ? [{ label: activeFile.name }] : []
+  const activeTask = tasks.find((task) => String(task.id) === activeKey)
+  const breadcrumb = activeTask ? [{ label: activeTask.title }] : []
 
   return (
   <>
@@ -71,17 +83,15 @@ export function Layout() {
       <Sidebar
         items={sidebarItems}
         activeKey={activeKey}
-        onSelect={(key) => navigate(`/file/${encodeURIComponent(key)}`)}
+        onSelect={(key) => navigate(`/task/${key}`)}
         footer={
-          <>
-            <button
-              className={sidebarStyles.footerBtn}
-              onClick={clearActiveProject}
-            >
-              <IconLayoutGrid size={16} />
-              <span className={sidebarStyles.footerBtnLabel}>{t('project.switch')}</span>
-            </button>
-          </>
+          <button
+            className={sidebarStyles.footerBtn}
+            onClick={clearActiveProject}
+          >
+            <IconLayoutGrid size={16} />
+            <span className={sidebarStyles.footerBtnLabel}>{t('project.global_manage')}</span>
+          </button>
         }
       />
       <div className={shellStyles.main}>
