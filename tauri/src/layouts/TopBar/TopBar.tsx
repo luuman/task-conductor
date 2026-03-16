@@ -23,7 +23,7 @@ export interface TopBarProps {
   onNotificationClick?: () => void
 }
 
-export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole, onSearchClick, onSettingsClick, onMessageClick, onNotificationClick }: TopBarProps) {
+export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole, unreadCount, onSearchClick, onSettingsClick, onMessageClick, onNotificationClick }: TopBarProps) {
   const { sidebarCollapsed, toggleSidebar } = useShell()
 
   return (
