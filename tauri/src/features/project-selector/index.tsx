@@ -52,10 +52,13 @@ export default function ProjectSelector() {
       const withMeta: ProjectMeta[] = await Promise.all(
         list.map(async (p) => {
           let file_count = 0, knowledge_count = 0, task_count = 0
-          try {
-            const files = await api.getProjectFiles(p.id)
-            file_count = files.items.length
-          } catch { /* */ }
+          const isLocal = p.repo_url && !p.repo_url.startsWith('http')
+          if (isLocal) {
+            try {
+              const files = await api.getProjectFiles(p.id)
+              file_count = files.items.length
+            } catch { /* */ }
+          }
           try {
             const knowledge = await api.getProjectKnowledge(p.id)
             knowledge_count = knowledge.length
