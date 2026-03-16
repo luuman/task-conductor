@@ -1,4 +1,9 @@
-import type { ApiAdapter, ApiMode, Project, Task, AiSession, Settings, FileItem, ProjectKnowledge, Metrics, ClaudeUsage, ClaudeOverview, ClaudeConfig } from './types'
+import type {
+  ApiAdapter, ApiMode, Project, Task, AiSession, Settings, FileItem, ProjectKnowledge,
+  Metrics, ClaudeUsage, ClaudeOverview, ClaudeConfig, HookRule, McpServer,
+  SkillDetail, CommandInfo, RuleInfo, AgentInfo, PresetItem, ClaudeSystemInfo,
+  DisabledItem, ProjectComponents, ProjectDetails,
+} from './types'
 import { cache, CACHE_TTL } from '../cache'
 
 function getStoredTunnelUrl(): string {
