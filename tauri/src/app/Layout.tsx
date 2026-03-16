@@ -87,7 +87,7 @@ export function Layout() {
         footer={
           <button
             className={sidebarStyles.footerBtn}
-            onClick={() => navigate('/admin')}
+            onClick={() => window.open('/admin', '_blank', 'width=1200,height=800')}
           >
             <IconLayoutGrid size={16} />
             <span className={sidebarStyles.footerBtnLabel}>{t('project.global_manage')}</span>
