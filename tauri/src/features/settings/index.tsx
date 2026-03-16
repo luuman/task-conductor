@@ -47,7 +47,7 @@ export default function SettingsPage() {
 
   const showToast = useCallback((msg: string) => {
     setToast(msg)
-    clearTimeout(toastTimer.current)
+    if (toastTimer.current) clearTimeout(toastTimer.current)
     toastTimer.current = setTimeout(() => setToast(null), 2500)
   }, [])
 
