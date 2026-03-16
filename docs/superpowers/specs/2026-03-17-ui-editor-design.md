@@ -359,6 +359,8 @@ async def generate_ui(req: GenerateRequest):
 async def chat_iterate(req: ChatRequest):
     """AI 对话迭代"""
     # req: { nodes: dict, message: str, history: ChatMessage[] }
+    # 注：nodes 可能较大（数百节点），前端仅在首次和结构变更时发送完整树，
+    #     后续迭代发送 delta（自上次同步后的 patches）+ message
     # resp: { patches: NodePatch[], reply: str }
 
 @router.post("/api/editor/preview")
