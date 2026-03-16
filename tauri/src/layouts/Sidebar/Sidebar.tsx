@@ -6,6 +6,8 @@ export interface SidebarItem {
   key: string
   label: string
   icon?: ReactNode
+  badge?: ReactNode
+  shortcut?: string
 }
 
 export interface SidebarProps {
