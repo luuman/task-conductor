@@ -122,7 +122,18 @@
       "hint": "View Claude Code session history and tool call events",
       "search_placeholder": "Search session ID...",
       "list": "Session List",
-      "no_sessions": "No sessions found"
+      "no_sessions": "No sessions found",
+      "view_messages": "Messages",
+      "view_calendar": "Calendar",
+      "select_session": "Select a session",
+      "select_session_hint": "Choose a session from the left panel to view event details",
+      "events": "events",
+      "no_events": "No events",
+      "expand_result": "Show result",
+      "collapse": "Collapse",
+      "showing_date": "Filtering date",
+      "all_dates": "All dates",
+      "clear_filter": "Clear filter"
     }
   },
   "claudeConfig": {
