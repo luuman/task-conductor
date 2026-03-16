@@ -61,8 +61,8 @@ export default function AdminDashboard() {
           }
         </div>
 
-        {/* 任务状态分布 + 项目概览 */}
-        <div className={styles.twoCol}>
+        {/* 卡片网格：任务状态 + 项目列表 + 性能概览 */}
+        <div className={styles.cardGrid}>
           {/* 任务状态 */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -125,44 +125,44 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* 性能概览 */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>{t('admin.dashboard.performance')}</div>
-          </div>
-          <div className={styles.sectionBody}>
-            {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className={styles.formRow}>
-                    <Skeleton variant="text" width="35%" height={12} />
-                    <Skeleton variant="text" width={80} height={12} />
-                  </div>
-                ))
-              : <>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('admin.dashboard.interactions')}</span>
-                    <span className={styles.perfValue}>{kpi?.interactions ?? 0}</span>
-                  </div>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('admin.dashboard.approval_rate')}</span>
-                    <span className={styles.perfValue}>
-                      {metrics?.tasks.approval_rate != null
-                        ? `${(metrics.tasks.approval_rate * 100).toFixed(0)}%`
-                        : '—'}
-                    </span>
-                  </div>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('admin.dashboard.avg_duration')}</span>
-                    <span className={styles.perfValue}>
-                      {metrics?.tasks.avg_duration_s != null
-                        ? `${metrics.tasks.avg_duration_s.toFixed(1)}s`
-                        : '—'}
-                    </span>
-                  </div>
-                </>
-            }
+          {/* 性能概览 */}
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitle}>{t('admin.dashboard.performance')}</div>
+            </div>
+            <div className={styles.sectionBody}>
+              {loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className={styles.formRow}>
+                      <Skeleton variant="text" width="35%" height={12} />
+                      <Skeleton variant="text" width={80} height={12} />
+                    </div>
+                  ))
+                : <>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('admin.dashboard.interactions')}</span>
+                      <span className={styles.perfValue}>{kpi?.interactions ?? 0}</span>
+                    </div>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('admin.dashboard.approval_rate')}</span>
+                      <span className={styles.perfValue}>
+                        {metrics?.tasks.approval_rate != null
+                          ? `${(metrics.tasks.approval_rate * 100).toFixed(0)}%`
+                          : '—'}
+                      </span>
+                    </div>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('admin.dashboard.avg_duration')}</span>
+                      <span className={styles.perfValue}>
+                        {metrics?.tasks.avg_duration_s != null
+                          ? `${metrics.tasks.avg_duration_s.toFixed(1)}s`
+                          : '—'}
+                      </span>
+                    </div>
+                  </>
+              }
+            </div>
           </div>
         </div>
       </div>
