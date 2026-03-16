@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, DisabledItem } from '../../../../lib/api/types'
 import { SectionHeader } from '../shared'
@@ -19,6 +20,7 @@ const TYPE_TAG_CLASS: Record<string, string> = {
 }
 
 export function SecTrash({ showToast }: SectionProps) {
+  const { t } = useTranslation()
   const [items, setItems] = useState<DisabledItem[]>([])
 
   const fetchItems = useCallback(async () => {
@@ -26,9 +28,9 @@ export function SecTrash({ showToast }: SectionProps) {
       const data = await api.claudeConfig.getDisabledItems()
       setItems(data)
     } catch {
-      showToast('Failed to load disabled items')
+      showToast(t('claudeConfig.trash.restoreFailed'))
     }
-  }, [showToast])
+  }, [showToast, t])
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
@@ -36,22 +38,20 @@ export function SecTrash({ showToast }: SectionProps) {
     try {
       await api.claudeConfig.restoreDisabledItem(type, name)
       await fetchItems()
-      showToast(`Restored ${name}`)
     } catch {
-      showToast('Failed to restore item')
+      showToast(t('claudeConfig.trash.restoreFailed'))
     }
-  }, [fetchItems, showToast])
+  }, [fetchItems, showToast, t])
 
   const handleDelete = useCallback(async (type: string, name: string) => {
-    if (!confirm(`Permanently delete "${name}"?`)) return
+    if (!confirm(t('claudeConfig.trash.confirmDeleteAll'))) return
     try {
       await api.claudeConfig.deleteDisabledItem(type, name)
       await fetchItems()
-      showToast(`Deleted ${name}`)
     } catch {
-      showToast('Failed to delete item')
+      showToast(t('claudeConfig.trash.deleteFailed'))
     }
-  }, [fetchItems, showToast])
+  }, [fetchItems, showToast, t])
 
   const handleRestoreAll = useCallback(async () => {
     try {
@@ -59,38 +59,36 @@ export function SecTrash({ showToast }: SectionProps) {
         await api.claudeConfig.restoreDisabledItem(item.type, item.name)
       }
       await fetchItems()
-      showToast('All items restored')
     } catch {
-      showToast('Failed to restore all items')
+      showToast(t('claudeConfig.trash.restoreFailed'))
     }
-  }, [items, fetchItems, showToast])
+  }, [items, fetchItems, showToast, t])
 
   const handleDeleteAll = useCallback(async () => {
-    if (!confirm('Permanently delete all disabled items?')) return
+    if (!confirm(t('claudeConfig.trash.confirmDeleteAll'))) return
     try {
       for (const item of items) {
         await api.claudeConfig.deleteDisabledItem(item.type, item.name)
       }
       await fetchItems()
-      showToast('All items deleted')
     } catch {
-      showToast('Failed to delete all items')
+      showToast(t('claudeConfig.trash.deleteFailed'))
     }
-  }, [items, fetchItems, showToast])
+  }, [items, fetchItems, showToast, t])
 
   return (
     <div className={styles.sectionWrap}>
       <SectionHeader
-        icon="🗑️"
-        title="回收站"
+        icon="&#x1F5D1;&#xFE0F;"
+        title={t('claudeConfig.trash.title')}
         right={
           items.length > 0 ? (
             <div style={{ display: 'flex', gap: 6 }}>
               <button className={styles.btnGhost} onClick={handleRestoreAll} type="button">
-                Restore All
+                {t('claudeConfig.trash.restoreAll')}
               </button>
               <button className={styles.btnDanger} onClick={handleDeleteAll} type="button">
-                Delete All
+                {t('claudeConfig.trash.deleteAll')}
               </button>
             </div>
           ) : undefined
@@ -98,7 +96,7 @@ export function SecTrash({ showToast }: SectionProps) {
       />
 
       {items.length === 0 ? (
-        <div className={styles.sectionPlaceholder}>回收站为空</div>
+        <div className={styles.sectionPlaceholder}>{t('claudeConfig.trash.empty')}</div>
       ) : (
         <div className={styles.card}>
           {items.map((item) => (
@@ -125,14 +123,14 @@ export function SecTrash({ showToast }: SectionProps) {
                 onClick={() => handleRestore(item.type, item.name)}
                 type="button"
               >
-                Restore
+                {t('claudeConfig.trash.restore')}
               </button>
               <button
                 className={styles.btnDanger}
                 onClick={() => handleDelete(item.type, item.name)}
                 type="button"
               >
-                Delete
+                {t('claudeConfig.trash.deletePermanent')}
               </button>
             </div>
           ))}
@@ -141,3 +139,5 @@ export function SecTrash({ showToast }: SectionProps) {
     </div>
   )
 }
+
+export default SecTrash
