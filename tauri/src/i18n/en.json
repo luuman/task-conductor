@@ -123,6 +123,13 @@
       "hint": "Restart backend service, page will refresh automatically",
       "confirm": "Restart the backend service?",
       "restarting": "Restarting..."
+    },
+    "toast": {
+      "saved": "Saved",
+      "saveFailed": "Save failed",
+      "saving": "Saving...",
+      "done": "Done",
+      "cleared": "Cleared"
     }
   }
 }
