@@ -53,14 +53,23 @@ export default function AuthPage() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.logoWrap}>
-          <IconLogo size={32} className={styles.logoIcon} />
-          <h1 className={styles.title}>{t('auth.title')}</h1>
+        {/* Logo */}
+        <div className={styles.logoArea}>
+          <div className={styles.logoBox}>
+            <IconLogo size={26} />
+          </div>
+          <h2 className={styles.brandName}>{t('auth.title')}</h2>
         </div>
-        <p className={styles.subtitle}>{t('auth.subtitle')}</p>
 
+        {/* Welcome text */}
+        <div className={styles.textGroup}>
+          <h1 className={styles.welcome}>{t('auth.welcome')}</h1>
+          <p className={styles.subtitle}>{t('auth.subtitle')}</p>
+        </div>
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div>
+          <div className={styles.fieldGroup}>
             <label className={styles.label}>{t('auth.pin_label')}</label>
             <input
               type="password"
@@ -69,7 +78,7 @@ export default function AuthPage() {
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
               placeholder={t('auth.pin_placeholder')}
-              className={styles.input}
+              className={`${styles.pinInput}${error ? ` ${styles.hasError}` : ''}`}
               autoFocus
             />
           </div>
@@ -81,6 +90,7 @@ export default function AuthPage() {
             disabled={loading || pin.length < 6}
             className={styles.submitBtn}
           >
+            {loading && <span className={styles.spinner} />}
             {loading ? t('auth.connecting') : t('auth.login_btn')}
           </button>
         </form>
