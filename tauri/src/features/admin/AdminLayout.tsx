@@ -26,6 +26,8 @@ export default function AdminLayout() {
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
+  const [cmdOpen, setCmdOpen] = useState(false)
+  const handleCmdClose = useCallback(() => setCmdOpen(false), [])
   const [sessionCount, setSessionCount] = useState<number | null>(null)
 
   // Fetch session count for badge
