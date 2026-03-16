@@ -101,7 +101,10 @@
     },
     "sessions": {
       "title": "会话记录",
-      "hint": "查看 Claude Code 的会话历史和工具调用事件"
+      "hint": "查看 Claude Code 的会话历史和工具调用事件",
+      "search_placeholder": "搜索会话 ID...",
+      "list": "会话列表",
+      "no_sessions": "暂无会话记录"
     }
   },
   "settings": {
