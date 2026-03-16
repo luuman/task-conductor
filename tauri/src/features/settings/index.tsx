@@ -541,6 +541,7 @@ export default function SettingsPage() {
             </button>
           </div>
         </div>
+        </div>{/* end cardGrid */}
 
         <div style={{ height: 32 }} />
       </div>
