@@ -402,7 +402,7 @@ export function SessionMessages({ session, onDeselect }: Props) {
 // ── Helper ──
 
 function getDateLabel(iso: string): string {
-  const d = new Date(iso)
+  const d = toUtcDate(iso)
   const today = new Date()
   if (d.toDateString() === today.toDateString()) return 'Today'
   const yesterday = new Date(today)
