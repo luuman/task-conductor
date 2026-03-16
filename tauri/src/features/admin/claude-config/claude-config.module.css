@@ -718,6 +718,94 @@
   border-top: 1px solid var(--tc-border);
 }
 
+/* ===== Connected Button Group (Untitled UI style) ===== */
+.btnGroup {
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+
+.btnGroupItem {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: -1px;
+  position: relative;
+}
+
+.btnGroupItem:first-child {
+  margin-left: 0;
+  border-radius: 6px 0 0 6px;
+}
+
+.btnGroupItem:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.btnGroupItem:only-child {
+  border-radius: 6px;
+}
+
+.btnGroupItem:hover:not(.btnGroupItemActive) {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+  z-index: 1;
+}
+
+.btnGroupItemActive {
+  background: color-mix(in srgb, var(--tc-border-active) 15%, transparent);
+  border-color: color-mix(in srgb, var(--tc-border-active) 50%, transparent);
+  color: var(--tc-border-active);
+  z-index: 2;
+}
+
+/* ===== Page Header + Breadcrumb ===== */
+.pageHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.breadcrumbItem {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.breadcrumbItem:hover {
+  color: var(--tc-foreground);
+}
+
+.breadcrumbSep {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.5;
+}
+
+.breadcrumbCurrent {
+  font-size: 12px;
+  color: var(--tc-foreground);
+  font-weight: 500;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+}
+
 /* ===== Skeleton loading for sections ===== */
 .sectionSkeleton {
   padding: 24px;
