@@ -101,7 +101,10 @@
     },
     "sessions": {
       "title": "Sessions",
-      "hint": "View Claude Code session history and tool call events"
+      "hint": "View Claude Code session history and tool call events",
+      "search_placeholder": "Search session ID...",
+      "list": "Session List",
+      "no_sessions": "No sessions found"
     }
   },
   "settings": {
