@@ -71,6 +71,9 @@ export function SecMonitoring({ overview }: SectionProps) {
       )}
 
       {/* Project grid */}
+      {overview && overview.projects.length === 0 && (
+        <EmptyState icon="\uD83D\uDCC2" title={t('claudeConfig.monitoring.noProjects', 'No projects')} />
+      )}
       {overview && overview.projects.length > 0 && (
         <>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tc-foreground)', marginBottom: 10 }}>
