@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
+import { EmptyState } from '../../../ui/empty-state'
 import { api } from '../../../lib/api'
 import type { AiSession } from '../../../lib/api/types'
 import styles from '../admin.module.css'
