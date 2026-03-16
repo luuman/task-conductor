@@ -13,6 +13,7 @@ export interface TopBarProps {
   logo?: ReactNode
   logoIcon?: ReactNode
   breadcrumb?: BreadcrumbItem[]
+  breadcrumbPrefix?: ReactNode
   actions?: ReactNode
   userName?: string
   userRole?: string
@@ -23,7 +24,7 @@ export interface TopBarProps {
   onNotificationClick?: () => void
 }
 
-export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole, unreadCount, onSearchClick, onSettingsClick, onMessageClick, onNotificationClick }: TopBarProps) {
+export function TopBar({ logo, logoIcon, breadcrumb, breadcrumbPrefix, actions, userName, userRole, unreadCount, onSearchClick, onSettingsClick, onMessageClick, onNotificationClick }: TopBarProps) {
   const { sidebarCollapsed, toggleSidebar } = useShell()
 
   return (
