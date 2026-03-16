@@ -26,9 +26,8 @@ export class TauriSqliteCache implements CacheDB {
     await this.evictExpired()
   }
 
-  get<T>(key: string): T | null {
-    // plugin-sql 只有异步 API，同步 get 走内存层
-    // 这里返回 null，由 CacheManager 的内存层覆盖
+  get<T>(_key: string): T | null {
+    // plugin-sql 只有异步 API，同步 get 走 CacheManager 的内存层
     return null
   }
 
