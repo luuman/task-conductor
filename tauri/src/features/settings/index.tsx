@@ -205,6 +205,7 @@ export default function SettingsPage() {
           <p className={styles.headerHint}>{t('settings.hint')}</p>
         </div>
 
+        <div className={styles.cardGrid}>
         {/* ── 外观设置 ── */}
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
