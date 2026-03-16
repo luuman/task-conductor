@@ -17,6 +17,7 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsub = initAuthSync()
+    cache.init()
     return unsub
   }, [])
 
