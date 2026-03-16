@@ -57,61 +57,51 @@ export default function AdminSessions() {
           }
         </div>
 
-        {/* 会话列表 */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className={styles.sectionTitle}>{t('admin.sessions.list')}</span>
-              {!loading && (
-                <span className={styles.sectionHint}>{filtered.length} {t('admin.dashboard.total')}</span>
-              )}
+        {/* 会话卡片网格 */}
+        {loading
+          ? <div className={styles.cardGrid}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className={styles.section}>
+                  <div className={styles.sectionBody}>
+                    <Skeleton variant="text" width="70%" height={13} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Skeleton variant="text" width={60} height={10} />
+                      <Skeleton variant="text" width={40} height={10} />
+                    </div>
+                    <Skeleton variant="text" width={90} height={10} />
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-          <div>
-            {loading
-              ? Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className={styles.listItem}>
-                    <Skeleton variant="circle" width={32} />
-                    <div className={styles.listItemContent}>
-                      <Skeleton variant="text" width={`${50 + Math.random() * 30}%`} height={13} />
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <Skeleton variant="text" width={60} height={10} />
-                        <Skeleton variant="text" width={40} height={10} />
-                      </div>
-                    </div>
-                    <div className={styles.listItemRight}>
-                      <Skeleton variant="text" width={70} height={10} />
-                      <Skeleton variant="rect" width={50} height={18} borderRadius={9} />
-                    </div>
-                  </div>
-                ))
-              : filtered.length === 0
-                ? <div className={styles.listItem}>
-                    <span className={styles.emptyHint}>{t('admin.sessions.no_sessions')}</span>
-                  </div>
-                : filtered.map((s) => (
-                    <div key={s.session_id} className={styles.listItem}>
+          : filtered.length === 0
+            ? <div className={styles.section}>
+                <div className={styles.sectionBody}>
+                  <span className={styles.emptyHint}>{t('admin.sessions.no_sessions')}</span>
+                </div>
+              </div>
+            : <div className={styles.cardGrid}>
+                {filtered.map((s) => (
+                  <div key={s.session_id} className={styles.sessionCard}>
+                    <div className={styles.sessionCardHeader}>
                       <span className={styles.sessionIcon}>
                         {s.provider === 'claude' ? '🤖' : '💬'}
                       </span>
-                      <div className={styles.listItemContent}>
-                        <span className={styles.sessionId}>
-                          {s.session_id.slice(0, 8)}...{s.session_id.slice(-4)}
-                        </span>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <span className={styles.sessionMeta}>{s.provider}</span>
-                          <span className={styles.sessionMeta}>{timeAgo(s.started_at)}</span>
-                        </div>
-                      </div>
-                      <div className={styles.listItemRight}>
-                        <span className={styles.sessionMeta}>{timeAgo(s.last_event_at)}</span>
-                        <span className={styles.eventBadge}>{s.event_count} events</span>
-                      </div>
+                      <span className={styles.sessionId}>
+                        {s.session_id.slice(0, 8)}...{s.session_id.slice(-4)}
+                      </span>
+                      <span className={styles.eventBadge}>{s.event_count} events</span>
                     </div>
-                  ))
-            }
-          </div>
-        </div>
+                    <div className={styles.sessionCardMeta}>
+                      <span className={styles.sessionMeta}>{s.provider}</span>
+                      <span className={styles.sessionMetaDot} />
+                      <span className={styles.sessionMeta}>{timeAgo(s.started_at)}</span>
+                      <span className={styles.sessionMetaDot} />
+                      <span className={styles.sessionMeta}>last: {timeAgo(s.last_event_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+        }
       </div>
     </div>
   )
