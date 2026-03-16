@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, RuleInfo, PresetItem } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
@@ -13,6 +14,7 @@ interface SectionProps {
 }
 
 export function SecRules({ showToast }: SectionProps) {
+  const { t } = useTranslation()
   const [rules, setRules] = useState<RuleInfo[]>([])
   const [presets, setPresets] = useState<PresetItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,10 +28,10 @@ export function SecRules({ showToast }: SectionProps) {
       setRules(data)
       return data
     } catch {
-      showToast('Failed to load rules')
+      showToast(t('claudeConfig.rules.toggleFailed'))
       return []
     }
-  }, [showToast])
+  }, [showToast, t])
 
   useEffect(() => {
     let cancelled = false
@@ -44,14 +46,14 @@ export function SecRules({ showToast }: SectionProps) {
         const ruleNames = new Set(ruleData.map((r) => r.name))
         setPresets(presetData.map((p) => ({ ...p, installed: ruleNames.has(p.name) })))
       } catch {
-        if (!cancelled) showToast('Failed to load rules')
+        if (!cancelled) showToast(t('claudeConfig.rules.toggleFailed'))
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
     load()
     return () => { cancelled = true }
-  }, [showToast])
+  }, [showToast, t])
 
   useEffect(() => {
     const ruleNames = new Set(rules.map((r) => r.name))
@@ -64,9 +66,9 @@ export function SecRules({ showToast }: SectionProps) {
       await api.claudeConfig.toggleRule(name, enabled)
     } catch {
       setRules((prev) => prev.map((r) => (r.name === name ? { ...r, enabled: !enabled } : r)))
-      showToast(`Failed to toggle ${name}`)
+      showToast(t('claudeConfig.rules.toggleFailed'))
     }
-  }, [showToast])
+  }, [showToast, t])
 
   const handleCreate = useCallback(async () => {
     const name = newName.trim()
@@ -75,11 +77,10 @@ export function SecRules({ showToast }: SectionProps) {
       await api.claudeConfig.createRule(name)
       setNewName('')
       await loadRules()
-      showToast(`Rule "${name}" created`)
     } catch {
-      showToast(`Failed to create rule "${name}"`)
+      showToast(t('claudeConfig.rules.createFailed'))
     }
-  }, [newName, loadRules, showToast])
+  }, [newName, loadRules, showToast, t])
 
   const handleInstallPreset = useCallback(async (name: string, content: string) => {
     setInstallingPreset(name)
@@ -87,33 +88,31 @@ export function SecRules({ showToast }: SectionProps) {
       const preset = presets.find((p) => p.name === name)
       await api.claudeConfig.createRule(name, preset?.content || content)
       await loadRules()
-      showToast(`Rule "${name}" installed`)
     } catch {
-      showToast(`Failed to install "${name}"`)
+      showToast(t('claudeConfig.rules.createFailed'))
     } finally {
       setInstallingPreset(null)
     }
-  }, [presets, loadRules, showToast])
+  }, [presets, loadRules, showToast, t])
 
   const handleDelete = useCallback(async (name: string) => {
     try {
       await api.claudeConfig.deleteRule(name)
       setRules((prev) => prev.filter((r) => r.name !== name))
       if (selectedRule === name) setSelectedRule(null)
-      showToast(`Rule "${name}" deleted`)
     } catch {
-      showToast(`Failed to delete "${name}"`)
+      showToast(t('claudeConfig.rules.deleteFailed'))
     }
-  }, [selectedRule, showToast])
+  }, [selectedRule, showToast, t])
 
   const selected = selectedRule ? rules.find((r) => r.name === selectedRule) : null
 
   if (loading) {
     return (
       <div className={styles.sectionWrap}>
-        <SectionHeader icon="&#x1f4d0;" title="Rules" />
+        <SectionHeader icon="&#x1f4d0;" title={t('claudeConfig.rules.title')} />
         <div className={styles.sectionSkeleton}>
-          <div className={styles.sectionPlaceholder}>Loading rules...</div>
+          <div className={styles.sectionPlaceholder}>{t('claudeConfig.rules.loading')}</div>
         </div>
       </div>
     )
@@ -121,14 +120,14 @@ export function SecRules({ showToast }: SectionProps) {
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="&#x1f4d0;" title="Rules" />
+      <SectionHeader icon="&#x1f4d0;" title={t('claudeConfig.rules.title')} />
 
       {/* Create form */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <input
           className={styles.formInput}
           type="text"
-          placeholder="Rule name"
+          placeholder={t('claudeConfig.rules.namePlaceholder')}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleCreate() }}
@@ -140,7 +139,7 @@ export function SecRules({ showToast }: SectionProps) {
           disabled={!newName.trim()}
           type="button"
         >
-          Create
+          {t('common.create')}
         </button>
       </div>
 
@@ -159,7 +158,7 @@ export function SecRules({ showToast }: SectionProps) {
       <div style={{ display: 'flex', gap: 16 }}>
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {rules.length === 0 ? (
-            <div className={styles.sectionPlaceholder}>No rules found</div>
+            <div className={styles.sectionPlaceholder}>{t('claudeConfig.rules.empty')}</div>
           ) : (
             rules.map((rule) => (
               <div
@@ -185,7 +184,7 @@ export function SecRules({ showToast }: SectionProps) {
                   type="button"
                   style={{ padding: '4px 8px' }}
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             ))
@@ -206,3 +205,5 @@ export function SecRules({ showToast }: SectionProps) {
     </div>
   )
 }
+
+export default SecRules
