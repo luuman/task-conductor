@@ -82,6 +82,37 @@ export interface Settings {
   security_tunnel_enabled: boolean
 }
 
+export interface Metrics {
+  tasks: {
+    total: number
+    by_status: Record<string, number>
+    avg_duration_s: number | null
+    approval_rate: number | null
+  }
+  claude: Record<string, unknown>
+  kpi: {
+    ai_rating: number
+    interactions: number
+    avg_response_time_s: number
+    uptime_pct: number
+  }
+  gauge: {
+    availability_pct: number
+  }
+  weekly: Record<string, unknown>
+}
+
+export interface ClaudeUsage {
+  tokens: Record<string, unknown>
+  tools: Record<string, unknown>
+  recent_tools: Array<Record<string, unknown>>
+  sessions: {
+    total: number
+    active: number
+  }
+  performance: Record<string, unknown>
+}
+
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
