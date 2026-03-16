@@ -279,6 +279,92 @@ export interface ProjectComponents {
   has_claude_md: boolean
 }
 
+// ─── 编辑器 ───
+
+export interface EditorTab {
+  path: string
+  name: string
+  language: string
+}
+
+// ─── Git ───
+
+export interface GitStatus {
+  branch: string
+  staged: GitFileChange[]
+  unstaged: GitFileChange[]
+  untracked: string[]
+}
+
+export interface GitFileChange {
+  path: string
+  status: 'M' | 'A' | 'D' | 'R' | 'U'
+}
+
+export interface BranchFileChange {
+  path: string
+  status: 'M' | 'A' | 'D' | 'R'
+  additions: number
+  deletions: number
+}
+
+export interface GitCommit {
+  hash: string
+  parents: string[]
+  author: string
+  date: string
+  refs: string
+  message: string
+}
+
+export interface GitBranch {
+  name: string
+  current: boolean
+  remote: boolean
+}
+
+export interface GitStash {
+  ref: string
+  message: string
+  date: string
+}
+
+export interface InlineEditRequest {
+  file_path: string
+  file_content: string
+  selection: { startLine: number; endLine: number }
+  instruction: string
+}
+
+export interface InlineEditResponse {
+  original: string
+  modified: string
+}
+
+export interface TranscriptBlock {
+  type: 'text' | 'tool_use'
+  text?: string | null
+  tool_name?: string | null
+  tool_input?: Record<string, unknown> | null
+  tool_use_id?: string | null
+  tool_result?: string | null
+  tool_error?: boolean | null
+}
+
+export interface TranscriptMessage {
+  role: 'user' | 'assistant'
+  ts: string | null
+  blocks: TranscriptBlock[]
+  model?: string | null
+}
+
+export interface ConversationNote {
+  alias?: string | null
+  notes?: string | null
+  tags?: string[]
+  linked_task_id?: number | null
+}
+
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
@@ -291,6 +377,9 @@ export interface ApiAdapter {
   advanceTask(taskId: number): Promise<void>
   getSessions(): Promise<AiSession[]>
   getSessionEvents(sessionId: string): Promise<SessionEvent[]>
+  getTranscript(sessionId: string): Promise<{ messages: TranscriptMessage[]; file_found: boolean }>
+  getSessionNote(sessionId: string): Promise<ConversationNote>
+  updateSessionNote(sessionId: string, data: Partial<ConversationNote>): Promise<ConversationNote>
   healthCheck(): Promise<boolean>
   getSettings(): Promise<Settings>
   updateSettings(data: Partial<Settings>): Promise<Settings>
@@ -304,6 +393,41 @@ export interface ApiAdapter {
   getClaudeOverview(): Promise<ClaudeOverview>
   getClaudeConfig(): Promise<ClaudeConfig>
   updateClaudeConfigKey(key: string, value: unknown): Promise<{ ok: boolean }>
+
+  // ─── 文件操作 ───
+  getFileContent(projectId: number, path: string): Promise<{ path: string; name: string; size: number; binary: boolean; content: string }>
+  saveFile(projectId: number, path: string, content: string): Promise<void>
+  createFile(projectId: number, path: string, content?: string): Promise<void>
+  createDirectory(projectId: number, path: string): Promise<void>
+  renameFile(projectId: number, oldPath: string, newPath: string): Promise<void>
+  deleteFile(projectId: number, path: string): Promise<void>
+  searchFiles(projectId: number, query: string): Promise<FileItem[]>
+
+  // ─── Git 操作 ───
+  gitStatus(projectId: number): Promise<GitStatus>
+  gitDiff(projectId: number, opts?: { file?: string; staged?: boolean; commit?: string }): Promise<string>
+  gitStage(projectId: number, files?: string[]): Promise<void>
+  gitUnstage(projectId: number, files?: string[]): Promise<void>
+  gitDiscard(projectId: number, files: string[]): Promise<void>
+  gitCommit(projectId: number, message: string): Promise<void>
+  gitLog(projectId: number, limit?: number, branch?: string): Promise<GitCommit[]>
+  gitBranches(projectId: number): Promise<GitBranch[]>
+  gitCheckout(projectId: number, branch: string, create?: boolean): Promise<void>
+  gitPush(projectId: number): Promise<void>
+  gitPull(projectId: number): Promise<void>
+  gitFetch(projectId: number): Promise<void>
+  gitStashList(projectId: number): Promise<GitStash[]>
+  gitStashSave(projectId: number, message?: string): Promise<void>
+  gitStashApply(projectId: number, index: number): Promise<void>
+  gitStashDrop(projectId: number, index: number): Promise<void>
+
+  // ─── Git 虚拟浏览 ───
+  gitShow(projectId: number, ref: string, path: string): Promise<{ content: string }>
+  gitBranchFiles(projectId: number, branch: string, base?: string): Promise<BranchFileChange[]>
+  gitBranchDiff(projectId: number, branch: string, file: string, base?: string): Promise<string>
+
+  // ─── AI ───
+  aiInlineEdit(req: InlineEditRequest): Promise<InlineEditResponse>
 
   claudeConfig: {
     getConfig(): Promise<ClaudeConfig>
