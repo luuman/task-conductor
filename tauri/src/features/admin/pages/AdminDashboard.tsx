@@ -143,7 +143,7 @@ export default function AdminDashboard() {
               : <>
                   <div className={styles.formRow}>
                     <span className={styles.perfLabel}>{t('admin.dashboard.interactions')}</span>
-                    <span className={styles.perfValue}>{metrics?.kpi.interactions ?? 0}</span>
+                    <span className={styles.perfValue}>{kpi?.interactions ?? 0}</span>
                   </div>
                   <div className={styles.formRow}>
                     <span className={styles.perfLabel}>{t('admin.dashboard.approval_rate')}</span>
