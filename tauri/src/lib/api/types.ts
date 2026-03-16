@@ -85,6 +85,8 @@ export interface Settings {
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
+  getProjectFiles(projectId: number): Promise<{ path: string; items: FileItem[] }>
+  getProjectKnowledge(projectId: number): Promise<ProjectKnowledge[]>
   getTasks(projectId: number): Promise<Task[]>
   getTask(taskId: number): Promise<Task>
   createTask(projectId: number, data: { title: string; description?: string }): Promise<Task>
