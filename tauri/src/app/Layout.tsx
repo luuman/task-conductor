@@ -16,6 +16,7 @@ export function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { activeProjectId, clearActiveProject } = useAppStore()
+  const togglePanel = useNotificationStore(s => s.togglePanel)
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [projectName, setProjectName] = useState('')
