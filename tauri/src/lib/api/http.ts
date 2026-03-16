@@ -82,6 +82,21 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<SessionEvent[]>(`/api/sessions/${encodeURIComponent(sessionId)}/events`)
   }
 
+  getTranscript(sessionId: string) {
+    return this.fetch<{ messages: TranscriptMessage[]; file_found: boolean }>(`/api/sessions/${encodeURIComponent(sessionId)}/transcript`)
+  }
+
+  getSessionNote(sessionId: string) {
+    return this.fetch<ConversationNote>(`/api/sessions/${encodeURIComponent(sessionId)}/note`)
+  }
+
+  updateSessionNote(sessionId: string, data: Partial<ConversationNote>) {
+    return this.fetch<ConversationNote>(`/api/sessions/${encodeURIComponent(sessionId)}/note`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
   getSettings() {
     return cache.getOrFetch('settings', CACHE_TTL.settings, () =>
       this.fetch<Settings>('/api/settings')
