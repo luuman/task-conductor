@@ -1,6 +1,6 @@
-/* Sessions page — 1:1 match of frontend Sessions.tsx (Tailwind → CSS Modules) */
+/* Sessions page — 3-column layout */
 
-/* ── Root layout ── */
+/* ── Root ── */
 .root {
   display: flex;
   flex: 1;
@@ -10,361 +10,542 @@
 }
 
 /* ── Left panel (session list) ── */
-.listPanel {
+.leftPanel {
   width: 240px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--tc-border);
+  overflow: hidden;
 }
 
-.listHeader {
-  padding: 10px 12px;
+.leftHeader {
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
 }
 
-.listTitle {
+.leftTitle {
   font-size: 11px;
   font-weight: 600;
   color: var(--tc-foreground);
 }
 
-.listBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: 4px 0;
+.newChatBtn {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
-/* ── Session list items ── */
-.sessionBtn {
+.newChatBtn:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-border-active);
+}
+
+.searchWrap {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
+}
+
+.searchInput {
   width: 100%;
-  padding: 8px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: var(--tc-border-active);
+}
+
+.searchInput::placeholder {
+  color: var(--tc-foreground-secondary);
+}
+
+.leftBody {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Project groups ── */
+.group {
+  /* no special styling, just a container */
+}
+
+.groupHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: none;
+  border-bottom: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.groupHeader:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.groupChevron {
+  font-size: 8px;
+  opacity: 0.5;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+  color: var(--tc-foreground-secondary);
+}
+
+.groupName {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupActiveBadge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(86, 211, 100, 0.15);
+  color: #56d364;
+  flex-shrink: 0;
+}
+
+.groupCount {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+}
+
+/* ── Session items ── */
+.sessionItem {
+  width: 100%;
+  padding: 6px 10px 6px 16px;
   text-align: left;
   border: none;
   border-left: 2px solid transparent;
   background: transparent;
   cursor: pointer;
   transition: background 0.15s;
+  display: block;
 }
 
-.sessionBtn:hover {
+.sessionItem:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.sessionBtnActive {
-  composes: sessionBtn;
+.sessionItemActive {
+  composes: sessionItem;
   border-left-color: var(--tc-border-active);
   background: var(--tc-sidebar-item-hover);
 }
 
 .sessionRow1 {
   display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sessionTitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+.sessionRow2 {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2px;
+  margin-top: 2px;
+  margin-left: 12px;
 }
 
-.sessionIdMono {
-  font-size: 10px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-}
-
-.sessionCwd {
-  font-size: 11px;
-  color: var(--tc-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin: 0;
-}
-
-.sessionCount {
-  font-size: 10px;
+.sessionTime {
+  font-size: 9px;
   color: var(--tc-foreground-secondary);
   opacity: 0.7;
-  margin: 2px 0 0;
 }
 
-/* ── Status badge ── */
-.statusBadge {
+.sessionEvents {
   font-size: 9px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
 }
 
-/* ── Right panel ── */
-.rightPanel {
+.sessionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+  margin-left: 12px;
+}
+
+.sessionTag {
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(0, 122, 204, 0.12);
+  color: var(--tc-border-active);
+}
+
+/* ── Status dot ── */
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.statusDotActive {
+  composes: statusDot;
+  background: #56d364;
+}
+
+.statusDotIdle {
+  composes: statusDot;
+  background: #e3b341;
+}
+
+.statusDotStopped {
+  composes: statusDot;
+  background: #8b949e;
+}
+
+/* ── Center panel (transcript) ── */
+.centerPanel {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
 }
 
-/* ── Toolbar ── */
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--tc-border);
-  flex-shrink: 0;
-}
-
-.toolbarLeft {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toolbarRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toolbarLabel {
-  font-size: 11px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-  padding: 4px 10px;
-}
-
-.toolbarSessionBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-family: 'Geist Mono', monospace;
-  padding: 4px 10px;
-  border-radius: 4px;
-  border: none;
-  background: var(--tc-sidebar-item-hover);
-  color: var(--tc-foreground);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.toolbarSessionBtn:hover {
-  background: var(--tc-panel-bg);
-}
-
-.toolbarWsGroup {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.toolbarWsDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.toolbarWsDotConnected {
-  composes: toolbarWsDot;
-  background: #56d364;
-  animation: pulseDot 2s infinite;
-}
-
-.toolbarWsDotConnecting {
-  composes: toolbarWsDot;
-  background: #e3b341;
-  animation: pulseDot 1s infinite;
-}
-
-.toolbarWsDotDisconnected {
-  composes: toolbarWsDot;
-  background: #f85149;
-}
-
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.toolbarWsLabel {
-  font-size: 9px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-  opacity: 0.7;
-}
-
-.toolbarFilter {
-  font-size: 11px;
-  font-family: 'Geist Mono', monospace;
-  padding: 4px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--tc-border);
-  background: var(--tc-sidebar-item-hover);
-  color: var(--tc-foreground);
-  outline: none;
-  width: 176px;
-  transition: border-color 0.15s;
-}
-
-.toolbarFilter:focus {
-  border-color: var(--tc-border-active);
-}
-
-.toolbarFilter::placeholder {
-  color: var(--tc-foreground-secondary);
-}
-
-/* ── Content area ── */
-.contentArea {
+.transcriptScroll {
   flex: 1;
   overflow-y: auto;
 }
 
-/* ── Message body (bubble container) ── */
-.messageBody {
+.transcriptBody {
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* ── Bubble rows ── */
-.bubbleLeft {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.bubbleRight {
+/* ── Message rows ── */
+.msgRowRight {
   display: flex;
   justify-content: flex-end;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.bubbleCenter {
+.msgRowLeft {
   display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ── Avatars ── */
+.avatarUser {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
   justify-content: center;
-}
-
-/* ── Bubble card ── */
-.bubbleCard {
-  max-width: 75%;
-  min-width: 120px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-family: 'Geist Mono', monospace;
-  font-size: 11px;
-  position: relative;
-}
-
-.bubbleCardOutgoing {
-  composes: bubbleCard;
-  border-top-left-radius: 4px;
-  background: var(--tc-sidebar-item-hover);
+  font-size: 14px;
+  background: var(--tc-panel-bg);
   border: 1px solid var(--tc-border);
 }
 
-.bubbleCardIncoming {
-  composes: bubbleCard;
+.avatarBot {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: rgba(0, 122, 204, 0.08);
+  border: 1px solid rgba(0, 122, 204, 0.15);
+}
+
+/* ── User bubble ── */
+.userBubble {
+  max-width: 75%;
+  min-width: 60px;
+  padding: 8px 12px;
+  border-radius: 12px;
   border-top-right-radius: 4px;
-  background: rgba(86, 211, 100, 0.08);
-  border: 1px solid rgba(86, 211, 100, 0.15);
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
 }
 
-/* ── Bubble header ── */
-.bubbleHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.bubbleToolNameBlue {
-  font-size: 10px;
-  font-weight: 600;
-  color: #79c0ff;
-}
-
-.bubbleToolNameGreen {
-  font-size: 10px;
-  font-weight: 600;
-  color: #56d364;
-}
-
-/* Hover-reveal timestamp */
-.bubbleTs {
-  font-size: 9px;
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s;
-  color: var(--tc-foreground-secondary);
-  opacity: 0.7;
-}
-
-.bubbleCardOutgoing:hover .bubbleTs,
-.bubbleCardIncoming:hover .bubbleTs {
-  opacity: 1;
-}
-
-/* ── Bubble detail ── */
-.bubbleDetail {
-  word-break: break-all;
-  line-height: 1.625;
+.userText {
+  font-size: 12px;
+  line-height: 1.6;
   color: var(--tc-foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-/* ── System event (centered pill) ── */
-.systemPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-family: 'Geist Mono', monospace;
-  background: var(--tc-sidebar-item-hover);
-  color: var(--tc-foreground-secondary);
-  opacity: 0.7;
+/* ── Assistant bubble ── */
+.assistantBubble {
+  max-width: 85%;
+  min-width: 60px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  background: rgba(0, 122, 204, 0.04);
+  border: 1px solid rgba(0, 122, 204, 0.12);
 }
 
-.systemDetailDim {
-  opacity: 0.7;
+.assistantText {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.systemTs {
-  margin-left: 4px;
-  opacity: 0.5;
-}
-
-/* ── Status bar ── */
-.statusBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 16px;
-  border-top: 1px solid var(--tc-border);
-  flex-shrink: 0;
-  font-size: 10px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-  opacity: 0.7;
+/* ── Tool widget ── */
+.toolWidget {
+  margin: 4px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
   background: var(--tc-panel-bg);
 }
 
-.statusBarClearBtn {
+.toolHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Geist Mono', monospace;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.toolHeader:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.toolIcon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.toolName {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  flex-shrink: 0;
+}
+
+.toolParam {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.toolError {
+  font-size: 10px;
+  color: #f85149;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.toolChevron {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.toolBody {
+  border-top: 1px solid var(--tc-border);
+  max-height: 400px;
+  overflow: auto;
+}
+
+.toolCode {
+  margin: 0;
+  padding: 8px 10px;
   font-size: 10px;
   font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground-secondary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.15s;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.5;
+  border-bottom: 1px solid var(--tc-border);
 }
 
-.statusBarClearBtn:hover {
+.toolResult {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground);
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* ── Right panel (question nav) ── */
+.rightPanel {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--tc-border);
+  overflow: hidden;
+}
+
+.rightHeader {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
+}
+
+.rightTitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground-secondary);
+}
+
+.expandToggleWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.expandLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+}
+
+.expandToggle {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--tc-border);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.expandDot {
+  position: absolute;
+  top: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+}
+
+.rightBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.questionItem {
+  width: 100%;
+  text-align: left;
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--tc-foreground-secondary);
+}
+
+.questionItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--tc-foreground);
+}
+
+.questionItemActive {
+  composes: questionItem;
+  background: rgba(0, 122, 204, 0.08);
+  color: var(--tc-border-active);
+}
+
+.questionNum {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  width: 16px;
+  text-align: right;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.questionItemActive .questionNum {
+  color: var(--tc-border-active);
+  opacity: 1;
+}
+
+.questionText {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* ── Empty / loading states ── */
@@ -374,7 +555,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  gap: 12px;
+  gap: 8px;
   color: var(--tc-foreground-secondary);
   opacity: 0.7;
 }
@@ -390,7 +571,6 @@
   opacity: 0.7;
 }
 
-/* ── Loading in list panel ── */
 .listLoadingCenter {
   display: flex;
   align-items: center;
@@ -401,7 +581,6 @@
   opacity: 0.7;
 }
 
-/* ── Empty session list ── */
 .listEmptyCenter {
   display: flex;
   flex-direction: column;
@@ -421,8 +600,4 @@
 
 .listEmptyText {
   font-size: 11px;
-}
-
-.listEmptyHint {
-  font-size: 10px;
 }
