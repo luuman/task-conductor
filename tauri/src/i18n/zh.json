@@ -54,6 +54,36 @@
     "connecting": "连接中...",
     "error_invalid_pin": "访问码错误"
   },
+  "admin": {
+    "title": "管理后台",
+    "back_to_workspace": "返回工作台",
+    "nav": {
+      "dashboard": "仪表盘",
+      "claude_config": "Claude 配置",
+      "settings": "设置",
+      "sessions": "会话记录"
+    },
+    "dashboard": {
+      "title": "仪表盘",
+      "hint": "系统概览与关键指标"
+    },
+    "claude_config": {
+      "title": "Claude 配置",
+      "hint": "管理 Claude Code 的 Hook、模型和提示词配置",
+      "hooks": "Hook 状态",
+      "hooks_hint": "Claude Code Hook 事件的启用状态",
+      "model": "模型配置",
+      "model_hint": "配置 Claude 模型参数",
+      "prompts": "Prompt 模板",
+      "prompts_hint": "自定义流水线各阶段的提示词",
+      "pool": "连接池",
+      "pool_hint": "ClaudePool 并发与超时配置"
+    },
+    "sessions": {
+      "title": "会话记录",
+      "hint": "查看 Claude Code 的会话历史和工具调用事件"
+    }
+  },
   "settings": {
     "title": "设置",
     "hint": "管理应用配置、通知、流水线和安全选项",
