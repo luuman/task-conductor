@@ -1,0 +1,46 @@
+.page {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.explorer {
+  width: 240px;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.editorArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+}
+
+.editorBody {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--tc-foreground-secondary);
+  font-size: 14px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.placeholderIcon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.placeholderText {
+  opacity: 0.6;
+}
