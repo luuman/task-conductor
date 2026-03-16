@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
@@ -8,6 +9,7 @@ import {
 import { ProjectSwitcher } from '../components/ProjectSwitcher'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
+import { CommandMenu } from '../components/CommandMenu'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
 
@@ -17,6 +19,20 @@ export function Layout() {
   const location = useLocation()
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
+  const [cmdOpen, setCmdOpen] = useState(false)
+
+  const handleCmdClose = useCallback(() => setCmdOpen(false), [])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setCmdOpen(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   // 侧边栏 = 导航菜单（首页、任务、会话、文件、Git、设置）
   const sidebarItems = [
