@@ -55,12 +55,9 @@ export function Layout() {
   const pathParts = location.pathname.split('/')
   const activeKey = pathParts[1] === 'tasks' ? pathParts[2] ?? '' : ''
 
-  // 面包屑
+  // 面包屑：ProjectSwitcher 作为 prefix，后面只跟当前任务名
   const activeTask = tasks.find((t) => String(t.id) === activeKey)
-  const breadcrumb = [
-    { label: projectName || t('layout.workspace') },
-    ...(activeTask ? [{ label: activeTask.title }] : []),
-  ]
+  const breadcrumb = activeTask ? [{ label: activeTask.title }] : []
 
   return (
   <>
