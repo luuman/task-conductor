@@ -75,7 +75,7 @@ export function Layout() {
       <Sidebar
         items={sidebarItems}
         activeKey={activeKey}
-        onSelect={(key) => navigate(`/tasks/${key}`)}
+        onSelect={(key) => navigate(`/project/task/${key}`)}
         footer={
           <>
             <button
