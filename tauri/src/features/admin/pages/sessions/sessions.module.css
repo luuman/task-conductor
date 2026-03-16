@@ -1,42 +1,12 @@
-/* Sessions page — matches frontend Sessions.tsx structure */
+/* Sessions page — 1:1 match of frontend Sessions.tsx (Tailwind → CSS Modules) */
 
+/* ── Root layout ── */
 .root {
   display: flex;
   flex: 1;
   height: 100%;
   overflow: hidden;
-}
-
-/* ── View toggle tabs ── */
-.viewTabs {
-  display: flex;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--tc-sidebar-item-hover);
-}
-
-.viewTab {
-  padding: 5px 14px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: var(--tc-foreground-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.viewTab:hover {
-  color: var(--tc-foreground);
-}
-
-.viewTabActive {
-  composes: viewTab;
-  background: var(--tc-panel-bg);
-  color: var(--tc-foreground);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  background: var(--tc-content-bg);
 }
 
 /* ── Left panel (session list) ── */
@@ -49,7 +19,7 @@
 }
 
 .listHeader {
-  padding: 8px 12px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -77,7 +47,7 @@
   border-left: 2px solid transparent;
   background: transparent;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.15s;
 }
 
 .sessionBtn:hover {
@@ -103,17 +73,6 @@
   color: var(--tc-foreground-secondary);
 }
 
-.sessionSummary {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--tc-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  min-width: 0;
-}
-
 .sessionCwd {
   font-size: 11px;
   color: var(--tc-foreground);
@@ -126,15 +85,24 @@
 .sessionCount {
   font-size: 10px;
   color: var(--tc-foreground-secondary);
+  opacity: 0.7;
   margin: 2px 0 0;
 }
 
 /* ── Status badge ── */
 .statusBadge {
   font-size: 9px;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 999px;
   font-family: 'Geist Mono', monospace;
+}
+
+/* ── Right panel ── */
+.rightPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ── Toolbar ── */
@@ -148,6 +116,12 @@
 }
 
 .toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbarRight {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -172,7 +146,7 @@
   background: var(--tc-sidebar-item-hover);
   color: var(--tc-foreground);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.15s;
 }
 
 .toolbarSessionBtn:hover {
@@ -189,26 +163,27 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--tc-foreground-secondary);
   display: inline-block;
 }
 
-.toolbarWsDot[data-status="connected"] {
-  background: var(--tc-success);
-  animation: pulse-dot 2s infinite;
+.toolbarWsDotConnected {
+  composes: toolbarWsDot;
+  background: #56d364;
+  animation: pulseDot 2s infinite;
 }
 
-.toolbarWsDot[data-status="connecting"] {
-  background: var(--tc-warning);
-  animation: pulse-dot 1s infinite;
+.toolbarWsDotConnecting {
+  composes: toolbarWsDot;
+  background: #e3b341;
+  animation: pulseDot 1s infinite;
 }
 
-.toolbarWsDot[data-status="disconnected"] {
-  background: var(--tc-foreground-secondary);
-  opacity: 0.5;
+.toolbarWsDotDisconnected {
+  composes: toolbarWsDot;
+  background: #f85149;
 }
 
-@keyframes pulse-dot {
+@keyframes pulseDot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
@@ -217,6 +192,7 @@
   font-size: 9px;
   font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground-secondary);
+  opacity: 0.7;
 }
 
 .toolbarFilter {
@@ -240,10 +216,14 @@
   color: var(--tc-foreground-secondary);
 }
 
-/* ── Message body (bubble container) ── */
-.messageBody {
+/* ── Content area ── */
+.contentArea {
   flex: 1;
   overflow-y: auto;
+}
+
+/* ── Message body (bubble container) ── */
+.messageBody {
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
@@ -278,12 +258,14 @@
 }
 
 .bubbleCardOutgoing {
+  composes: bubbleCard;
   border-top-left-radius: 4px;
   background: var(--tc-sidebar-item-hover);
   border: 1px solid var(--tc-border);
 }
 
 .bubbleCardIncoming {
+  composes: bubbleCard;
   border-top-right-radius: 4px;
   background: rgba(86, 211, 100, 0.08);
   border: 1px solid rgba(86, 211, 100, 0.15);
@@ -310,64 +292,26 @@
   color: #56d364;
 }
 
-.bubbleToolNameYellow {
-  font-size: 10px;
-  font-weight: 600;
-  color: #e3b341;
-}
-
 /* Hover-reveal timestamp */
 .bubbleTs {
   font-size: 9px;
-  color: var(--tc-foreground-secondary);
   flex-shrink: 0;
   opacity: 0;
   transition: opacity 0.15s;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
 }
 
-.bubbleCard:hover .bubbleTs {
+.bubbleCardOutgoing:hover .bubbleTs,
+.bubbleCardIncoming:hover .bubbleTs {
   opacity: 1;
 }
 
 /* ── Bubble detail ── */
 .bubbleDetail {
-  font-size: 11px;
+  word-break: break-all;
+  line-height: 1.625;
   color: var(--tc-foreground);
-  word-break: break-all;
-  line-height: 1.5;
-}
-
-/* ── Collapsible result ── */
-.bubbleCollapse {
-  margin-top: 6px;
-}
-
-.collapseToggle {
-  font-size: 10px;
-  color: var(--tc-border-active);
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-}
-
-.collapseToggle:hover {
-  text-decoration: underline;
-}
-
-.collapseContent {
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--tc-content-bg) 80%, transparent);
-  font-size: 10px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-  max-height: 200px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
 }
 
 /* ── System event (centered pill) ── */
@@ -381,10 +325,15 @@
   font-family: 'Geist Mono', monospace;
   background: var(--tc-sidebar-item-hover);
   color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.systemDetailDim {
+  opacity: 0.7;
 }
 
 .systemTs {
-  font-size: 9px;
+  margin-left: 4px;
   opacity: 0.5;
 }
 
@@ -399,7 +348,8 @@
   font-size: 10px;
   font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground-secondary);
-  background: color-mix(in srgb, var(--tc-sidebar-bg) 50%, transparent);
+  opacity: 0.7;
+  background: var(--tc-panel-bg);
 }
 
 .statusBarClearBtn {
@@ -410,7 +360,7 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  transition: color 0.12s;
+  transition: color 0.15s;
 }
 
 .statusBarClearBtn:hover {
@@ -423,150 +373,56 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  height: 100%;
   gap: 12px;
   color: var(--tc-foreground-secondary);
+  opacity: 0.7;
 }
 
 .loadingCenter {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  color: var(--tc-foreground-secondary);
+  height: 100%;
   font-size: 12px;
   font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
 }
 
-/* ── Calendar view (kept from original) ── */
-.calendarContainer {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.calendarNav {
+/* ── Loading in list panel ── */
+.listLoadingCenter {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--tc-border);
-  flex-shrink: 0;
-}
-
-.calendarNavBtn {
-  background: none;
-  border: 1px solid var(--tc-border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 14px;
+  height: 80px;
+  font-size: 11px;
   color: var(--tc-foreground-secondary);
-  cursor: pointer;
-  transition: all 0.12s;
+  opacity: 0.7;
 }
 
-.calendarNavBtn:hover {
-  background: var(--tc-sidebar-item-hover);
-  color: var(--tc-foreground);
-}
-
-.calendarMonthLabel {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--tc-foreground);
-  min-width: 160px;
+/* ── Empty session list ── */
+.listEmptyCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 128px;
+  gap: 8px;
+  padding: 0 12px;
   text-align: center;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
 }
 
-.calendarGrid {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
+.listEmptyIcon {
+  font-size: 24px;
 }
 
-.calendarWeekHeader {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 4px;
+.listEmptyText {
+  font-size: 11px;
 }
 
-.calendarWeekDay {
-  text-align: center;
+.listEmptyHint {
   font-size: 10px;
-  font-weight: 600;
-  color: var(--tc-foreground-secondary);
-  text-transform: uppercase;
-  padding: 4px 0;
-}
-
-.calendarDays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-}
-
-.calendarCell {
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.12s;
-  position: relative;
-  min-height: 48px;
-}
-
-.calendarCell:hover {
-  background: var(--tc-sidebar-item-hover);
-}
-
-.calendarCellEmpty {
-  composes: calendarCell;
-  cursor: default;
-}
-
-.calendarCellEmpty:hover {
-  background: transparent;
-}
-
-.calendarCellToday {
-  border-color: var(--tc-border-active);
-}
-
-.calendarCellSelected {
-  background: color-mix(in srgb, var(--tc-border-active) 12%, transparent);
-  border-color: var(--tc-border-active);
-}
-
-.calendarDayNum {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--tc-foreground);
-}
-
-.calendarDayNumOther {
-  font-size: 13px;
-  color: var(--tc-foreground-secondary);
-  opacity: 0.4;
-}
-
-.calendarDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--tc-border-active);
-}
-
-.calendarCount {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--tc-border-active);
-  font-family: 'Geist Mono', monospace;
 }
