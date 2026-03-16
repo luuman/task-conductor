@@ -3,36 +3,21 @@ import type { AiSession } from '../../../../lib/api/types'
 import { Skeleton } from '../../../../ui/skeleton/Skeleton'
 import styles from './sessions.module.css'
 
-function parseTs(iso: string | undefined | null): number {
-  if (!iso) return Date.now()
-  const s = iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z'
-  return new Date(s).getTime()
+function StatusBadge({ status }: { status?: string }) {
+  const color = status === 'active' ? 'var(--tc-success)' : status === 'idle' ? 'var(--tc-warning)' : 'var(--tc-foreground-secondary)'
+  const bg = status === 'active' ? 'rgba(86,211,100,0.15)' : status === 'idle' ? 'rgba(229,161,0,0.15)' : 'rgba(128,128,128,0.15)'
+  const label = status === 'active' ? 'Running' : status === 'idle' ? 'Idle' : 'Stopped'
+  return (
+    <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 999, background: bg, color, fontFamily: "'Geist Mono', monospace" }}>
+      {label}
+    </span>
+  )
 }
 
-function timeAgo(iso: string | undefined | null): string {
-  if (!iso) return ''
-  const diff = Date.now() - parseTs(iso)
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
-}
-
-function cwdName(cwd?: string): string {
+function cwdShort(cwd?: string): string {
   if (!cwd) return ''
   const parts = cwd.replace(/\\/g, '/').split('/')
-  return parts[parts.length - 1] || parts[parts.length - 2] || cwd
-}
-
-function sessionEmoji(provider: string): string {
-  switch (provider) {
-    case 'claude': return '\u{1F916}'
-    case 'openai': return '\u{1F4AC}'
-    default: return '\u{2699}\u{FE0F}'
-  }
+  return parts.slice(-2).join('/') || cwd
 }
 
 interface Props {
@@ -44,7 +29,7 @@ interface Props {
   onSelect: (sessionId: string) => void
 }
 
-export function SessionList({ sessions, loading, selectedId, filter, onFilterChange, onSelect }: Props) {
+export function SessionList({ sessions, loading, selectedId, filter, onFilterChange: _onFilterChange, onSelect }: Props) {
   const { t } = useTranslation()
 
   const filtered = sessions?.filter(s => {
@@ -58,69 +43,52 @@ export function SessionList({ sessions, loading, selectedId, filter, onFilterCha
 
   return (
     <div className={styles.listPanel}>
+      {/* Header: simple title text */}
       <div className={styles.listHeader}>
-        <div className={styles.listHeaderRow}>
-          <span className={styles.listTitle}>{t('admin.sessions.list')}</span>
-          {sessions && <span className={styles.listCount}>{filtered.length}</span>}
-        </div>
-        {loading ? (
-          <Skeleton variant="rect" width="100%" height={30} borderRadius={6} />
-        ) : (
-          <input
-            className={styles.searchInput}
-            placeholder={t('admin.sessions.search_placeholder')}
-            value={filter}
-            onChange={e => onFilterChange(e.target.value)}
-          />
-        )}
+        <span className={styles.listTitle}>{t('admin.sessions.list')}</span>
       </div>
 
+      {/* Session list */}
       <div className={styles.listBody}>
         {loading ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} style={{ padding: '10px 12px', display: 'flex', gap: 10 }}>
-              <Skeleton variant="rect" width={24} height={24} borderRadius={6} />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <Skeleton variant="text" width="70%" height={12} />
-                <Skeleton variant="text" width="50%" height={10} />
+            <div key={i} style={{ padding: '10px 12px' }}>
+              <Skeleton variant="text" width="60%" height={10} />
+              <div style={{ marginTop: 6 }}>
+                <Skeleton variant="text" width="80%" height={11} />
+              </div>
+              <div style={{ marginTop: 4 }}>
+                <Skeleton variant="text" width="40%" height={10} />
               </div>
             </div>
           ))
         ) : filtered.length === 0 ? (
-          <div className={styles.loadingCenter} style={{ minHeight: 120 }}>
+          <div className={styles.loadingCenter} style={{ minHeight: 120, flexDirection: 'column', gap: 8, padding: '0 12px', textAlign: 'center' }}>
+            <span style={{ fontSize: 24 }}>{'\u2317'}</span>
             <span>{t('admin.sessions.no_sessions')}</span>
           </div>
         ) : (
           filtered.map(s => (
             <button
               key={s.session_id}
-              className={selectedId === s.session_id ? styles.sessionItemActive : styles.sessionItem}
+              className={selectedId === s.session_id ? styles.sessionBtnActive : styles.sessionBtn}
               onClick={() => onSelect(s.session_id)}
             >
-              <span className={styles.sessionIcon}>{sessionEmoji(s.provider)}</span>
-              <div className={styles.sessionInfo}>
-                <div className={styles.sessionIdRow}>
-                  <span className={styles.sessionId}>
-                    {s.note?.alias || s.summary || cwdName(s.cwd) || s.provider}
-                  </span>
-                  <span className={styles.eventBadge}>{s.event_count}</span>
-                </div>
-                <div className={styles.sessionMeta}>
-                  {s.cwd && (
-                    <>
-                      <span>{cwdName(s.cwd)}</span>
-                      <span className={styles.metaDot} />
-                    </>
-                  )}
-                  {s.status && (
-                    <>
-                      <span className={styles.statusTag} data-status={s.status}>{s.status}</span>
-                      <span className={styles.metaDot} />
-                    </>
-                  )}
-                  <span>{timeAgo(s.last_event_at)}</span>
-                </div>
+              {/* Row 1: session_id (8 chars) + StatusBadge */}
+              <div className={styles.sessionRow1}>
+                <span className={styles.sessionIdMono}>
+                  {s.session_id.slice(0, 8)}
+                </span>
+                <StatusBadge status={s.status} />
               </div>
+              {/* Row 2: cwd path (last 2 segments) */}
+              <p className={styles.sessionCwd} title={s.cwd}>
+                {cwdShort(s.cwd) || '\u2014'}
+              </p>
+              {/* Row 3: event count */}
+              <p className={styles.sessionCount}>
+                {s.event_count} {t('admin.sessions.events')}
+              </p>
             </button>
           ))
         )}
