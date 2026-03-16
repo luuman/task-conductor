@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, ProjectDetails } from '../../../../lib/api/types'
 import { SectionHeader, ActivityChart } from '../shared'
@@ -12,6 +13,7 @@ interface SectionProps {
 }
 
 export function SecMonitoring({ overview }: SectionProps) {
+  const { t } = useTranslation()
   const [projectDetails, setProjectDetails] = useState<Record<string, ProjectDetails>>({})
 
   useEffect(() => {
@@ -32,19 +34,19 @@ export function SecMonitoring({ overview }: SectionProps) {
   }, [overview?.projects])
 
   const statsCards = [
-    { label: 'Total Messages', value: overview?.total_messages ?? 0 },
-    { label: 'Tool Calls', value: overview?.total_tool_calls ?? 0 },
-    { label: 'Sessions', value: overview?.total_sessions ?? 0 },
-    { label: 'Active Days', value: overview?.active_days ?? 0 },
-    { label: 'Skills', value: overview?.skills?.length ?? 0 },
-    { label: 'MCP Servers', value: overview?.mcp_servers?.length ?? 0 },
-    { label: 'Plugins', value: overview?.installed_plugins?.length ?? 0 },
-    { label: 'Projects', value: overview?.projects?.length ?? 0 },
+    { label: t('claudeConfig.monitoring.messages'), value: overview?.total_messages ?? 0 },
+    { label: t('claudeConfig.monitoring.toolCalls'), value: overview?.total_tool_calls ?? 0 },
+    { label: t('claudeConfig.monitoring.sessions'), value: overview?.total_sessions ?? 0 },
+    { label: t('claudeConfig.monitoring.activeDays'), value: overview?.active_days ?? 0 },
+    { label: t('claudeConfig.monitoring.skills'), value: overview?.skills?.length ?? 0 },
+    { label: t('claudeConfig.monitoring.mcpServers'), value: overview?.mcp_servers?.length ?? 0 },
+    { label: t('claudeConfig.monitoring.plugins'), value: overview?.installed_plugins?.length ?? 0 },
+    { label: t('claudeConfig.monitoring.projects'), value: overview?.projects?.length ?? 0 },
   ]
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="📈" title="监控" />
+      <SectionHeader icon="&#x1F4C8;" title={t('claudeConfig.monitoring.title')} />
 
       {/* Stats grid */}
       <div className={styles.cardGrid} style={{ marginBottom: 16 }}>
@@ -71,7 +73,7 @@ export function SecMonitoring({ overview }: SectionProps) {
       {overview && overview.projects.length > 0 && (
         <>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tc-foreground)', marginBottom: 10 }}>
-            Projects
+            {t('claudeConfig.monitoring.projectGrid')}
           </h3>
           <div className={styles.cardGrid}>
             {overview.projects.map((p) => {
@@ -86,14 +88,14 @@ export function SecMonitoring({ overview }: SectionProps) {
                     </div>
                     {details ? (
                       <div className={styles.listMeta}>
-                        <div>Sessions: {details.session_count}</div>
+                        <div>{t('claudeConfig.monitoring.sessions')}: {details.session_count}</div>
                         <div>Last active: {details.last_active || '-'}</div>
                         {details.description && (
                           <div style={{ marginTop: 4 }}>{details.description}</div>
                         )}
                       </div>
                     ) : (
-                      <div className={styles.listMeta}>Loading...</div>
+                      <div className={styles.listMeta}>{t('claudeConfig.about.loading')}</div>
                     )}
                   </div>
                 </div>
@@ -105,3 +107,5 @@ export function SecMonitoring({ overview }: SectionProps) {
     </div>
   )
 }
+
+export default SecMonitoring
