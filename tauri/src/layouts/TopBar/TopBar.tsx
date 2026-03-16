@@ -59,16 +59,16 @@ export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole
 
       <div className={styles.right}>
         {actions}
-        <button className={styles.iconBtn} aria-label="Search">
+        <button className={styles.iconBtn} aria-label="Search" onClick={onSearchClick}>
           <IconSearch size={18} />
         </button>
         <button className={styles.iconBtn} aria-label="Settings" onClick={onSettingsClick}>
           <IconSettings size={18} />
         </button>
-        <button className={styles.iconBtn} aria-label="Messages">
+        <button className={styles.iconBtn} aria-label="Messages" onClick={onMessageClick}>
           <IconMessage size={18} />
         </button>
-        <button className={styles.iconBtn} aria-label="Notifications">
+        <button className={styles.iconBtn} aria-label="Notifications" onClick={onNotificationClick}>
           <IconBell size={18} />
         </button>
         <div className={styles.userSection}>
