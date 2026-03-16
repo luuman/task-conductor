@@ -33,8 +33,8 @@ export function RequirementList() {
 
   // Filter tasks that have a branch_name (handle gracefully if not present)
   const branchTasks = (tasks ?? []).filter((task) => {
-    const t = task as Record<string, unknown>
-    return !!t.branch_name
+    const r = task as unknown as Record<string, unknown>
+    return !!r.branch_name
   })
 
   if (branchTasks.length === 0) {
