@@ -34,6 +34,31 @@ export interface AiSession {
   last_event_at: string
 }
 
+export interface Settings {
+  workspace_root: string
+  feishu_app_id: string
+  feishu_app_secret: string
+  feishu_owner_id: string
+  feishu_default_chat_id: string
+  notify_tts_enabled: boolean
+  notify_tts_pipe_path: string
+  notify_webhook_url: string
+  notify_webhook_enabled: boolean
+  notify_browser_enabled: boolean
+  pipeline_approval_stages: string[]
+  pipeline_max_retries: number
+  pipeline_confidence_threshold: number
+  observe_session_limit: number
+  observe_event_limit: number
+  observe_auto_cleanup: boolean
+  observe_cleanup_days: number
+  ui_theme: string
+  ui_sidebar_collapsed: boolean
+  ui_default_page: string
+  ui_log_max_lines: number
+  security_tunnel_enabled: boolean
+}
+
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
@@ -44,4 +69,11 @@ export interface ApiAdapter {
   advanceTask(taskId: number): Promise<void>
   getSessions(): Promise<AiSession[]>
   healthCheck(): Promise<boolean>
+  getSettings(): Promise<Settings>
+  updateSettings(data: Partial<Settings>): Promise<Settings>
+  updatePin(newPin: string): Promise<{ ok: boolean }>
+  exportDb(): Promise<{ path: string; size_mb: number }>
+  clearSessions(): Promise<{ ok: boolean; message: string }>
+  clearCompletedTasks(): Promise<{ ok: boolean; count: number }>
+  restartService(): Promise<void>
 }
