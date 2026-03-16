@@ -77,6 +77,10 @@ export class HttpAdapter implements ApiAdapter {
     )
   }
 
+  getSessionEvents(sessionId: string) {
+    return this.fetch<SessionEvent[]>(`/api/sessions/${encodeURIComponent(sessionId)}/events`)
+  }
+
   getSettings() {
     return cache.getOrFetch('settings', CACHE_TTL.settings, () =>
       this.fetch<Settings>('/api/settings')
