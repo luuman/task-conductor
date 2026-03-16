@@ -4,10 +4,12 @@ import { isTauri } from '../lib/tauri'
 import { Layout } from './Layout'
 import { PageLoading } from './PageLoading'
 import { ProtectedRoute } from './ProtectedRoute'
+import { ProjectGate } from './ProjectGate'
 
-const AuthPage      = lazy(() => import('../features/auth'))
-const DashboardPage = lazy(() => import('../features/dashboard'))
-const SettingsPage  = lazy(() => import('../features/settings'))
+const AuthPage          = lazy(() => import('../features/auth'))
+const DashboardPage     = lazy(() => import('../features/dashboard'))
+const SettingsPage      = lazy(() => import('../features/settings'))
+const ProjectSelector   = lazy(() => import('../features/project-selector'))
 
 const PlaceholderPage = lazy(() =>
   Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
@@ -24,7 +26,11 @@ export function AppRouter() {
           <Route
             element={
               <ProtectedRoute>
-                <Layout />
+                <ProjectGate
+                  fallback={<ProjectSelector />}
+                >
+                  <Layout />
+                </ProjectGate>
               </ProtectedRoute>
             }
           >
