@@ -130,9 +130,10 @@
 /* ===== Cards ===== */
 .card {
   border: 1px solid var(--tc-border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--tc-panel-bg);
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .cardHeader {
