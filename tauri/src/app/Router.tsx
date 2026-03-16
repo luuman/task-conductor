@@ -10,6 +10,11 @@ const AuthPage          = lazy(() => import('../features/auth'))
 const DashboardPage     = lazy(() => import('../features/dashboard'))
 const SettingsPage      = lazy(() => import('../features/settings'))
 const ProjectSelector   = lazy(() => import('../features/project-selector'))
+const AdminLayout       = lazy(() => import('../features/admin/AdminLayout'))
+const AdminDashboard    = lazy(() => import('../features/admin/pages/AdminDashboard'))
+const AdminClaudeConfig = lazy(() => import('../features/admin/pages/AdminClaudeConfig'))
+const AdminSettings     = lazy(() => import('../features/admin/pages/AdminSettings'))
+const AdminSessions     = lazy(() => import('../features/admin/pages/AdminSessions'))
 
 const PlaceholderPage = lazy(() =>
   Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
@@ -23,6 +28,22 @@ export function AppRouter() {
       <Suspense fallback={<PageLoading />}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
+
+          {/* 管理后台（独立布局，不需要选中项目） */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/admin"              element={<AdminDashboard />} />
+            <Route path="/admin/claude-config" element={<AdminClaudeConfig />} />
+            <Route path="/admin/settings"     element={<AdminSettings />} />
+            <Route path="/admin/sessions"     element={<AdminSessions />} />
+          </Route>
+
+          {/* 项目工作台（需要选中项目） */}
           <Route
             element={
               <ProtectedRoute>
@@ -35,19 +56,19 @@ export function AppRouter() {
             }
           >
             <Route path="/" element={<DashboardPage />} />
-            <Route path="/task/:id"         element={<PlaceholderPage />} />
-            <Route path="/task-manager" element={<PlaceholderPage />} />
-            <Route path="/sessions"     element={<PlaceholderPage />} />
-            <Route path="/chat"         element={<PlaceholderPage />} />
-            <Route path="/admin"        element={<PlaceholderPage />} />
-            <Route path="/config"       element={<PlaceholderPage />} />
-            <Route path="/knowledge"    element={<PlaceholderPage />} />
-            <Route path="/mcp"          element={<PlaceholderPage />} />
-            <Route path="/files"        element={<PlaceholderPage />} />
-            <Route path="/git"          element={<PlaceholderPage />} />
-            <Route path="/canvas"       element={<PlaceholderPage />} />
-            <Route path="/settings"     element={<SettingsPage />} />
+            <Route path="/task/:id"       element={<PlaceholderPage />} />
+            <Route path="/task-manager"   element={<PlaceholderPage />} />
+            <Route path="/sessions"       element={<PlaceholderPage />} />
+            <Route path="/chat"           element={<PlaceholderPage />} />
+            <Route path="/config"         element={<PlaceholderPage />} />
+            <Route path="/knowledge"      element={<PlaceholderPage />} />
+            <Route path="/mcp"            element={<PlaceholderPage />} />
+            <Route path="/files"          element={<PlaceholderPage />} />
+            <Route path="/git"            element={<PlaceholderPage />} />
+            <Route path="/canvas"         element={<PlaceholderPage />} />
+            <Route path="/settings"       element={<SettingsPage />} />
           </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
