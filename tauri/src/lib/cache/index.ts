@@ -1,90 +1,59 @@
-import { isTauri } from '../tauri'
-import { MemoryCache } from './memory-cache'
-import { WebCache } from './web-cache'
-import { TauriCache } from './tauri-cache'
-import type { CacheEntry, CacheStorage } from './types'
+import { SqliteCache } from './sqlite-cache'
+import type { CacheDB } from './types'
 export { CACHE_TTL } from './types'
+export type { CacheDB } from './types'
 
 /**
- * 二级缓存管理器。
+ * 缓存管理器单例。
  *
- * L1: 内存缓存 — 零延迟，进程内有效
- * L2: 持久化缓存
- *   - Web:   sessionStorage（关标签清除，避免跨会话脏数据）
- *   - Tauri: localStorage（持久化到应用数据目录，跨重启保留）
+ * 两端统一使用 sql.js（SQLite WASM）内存数据库，
+ * 持久化差异由 SqliteCache 内部处理：
+ *   - Web:   IndexedDB 存储二进制
+ *   - Tauri: localStorage 存储 base64（写到应用数据目录磁盘）
  *
- * 读取顺序: L1 → L2 → miss
- * 写入: 同时写 L1 + L2
+ * 使用前必须调用 cache.init()。
  */
 class CacheManager {
-  private l1: MemoryCache
-  private l2: CacheStorage
+  private db: CacheDB = new SqliteCache()
+  private ready = false
+  private initPromise: Promise<void> | null = null
 
-  constructor() {
-    this.l1 = new MemoryCache()
-    this.l2 = isTauri() ? new TauriCache() : new WebCache()
+  /** 初始化缓存（加载 WASM + 恢复数据）。可多次调用，只执行一次。 */
+  async init(): Promise<void> {
+    if (this.ready) return
+    if (this.initPromise) return this.initPromise
+    this.initPromise = this.db.init().then(() => { this.ready = true })
+    return this.initPromise
   }
 
-  /**
-   * 从缓存获取数据。未命中或已过期返回 null。
-   */
+  /** 确保初始化完成后读取。未初始化返回 null。 */
   get<T>(key: string): T | null {
-    const now = Date.now()
-
-    // L1
-    const l1Entry = this.l1.get(key)
-    if (l1Entry && now - l1Entry.ts < l1Entry.ttl) {
-      return l1Entry.data as T
-    }
-
-    // L2
-    const l2Entry = this.l2.get(key)
-    if (l2Entry && now - l2Entry.ts < l2Entry.ttl) {
-      // 回填 L1
-      this.l1.set(key, l2Entry)
-      return l2Entry.data as T
-    }
-
-    // 过期数据清理
-    if (l1Entry) this.l1.delete(key)
-    if (l2Entry) this.l2.delete(key)
-    return null
+    if (!this.ready) return null
+    return this.db.get<T>(key)
   }
 
-  /**
-   * 写入缓存。
-   */
   set<T>(key: string, data: T, ttl: number): void {
-    const entry: CacheEntry = { data, ts: Date.now(), ttl }
-    this.l1.set(key, entry)
-    this.l2.set(key, entry)
+    if (!this.ready) return
+    this.db.set(key, data, ttl)
   }
 
-  /**
-   * 删除指定 key。
-   */
   invalidate(key: string): void {
-    this.l1.delete(key)
-    this.l2.delete(key)
+    if (!this.ready) return
+    this.db.delete(key)
   }
 
-  /**
-   * 删除匹配前缀的所有缓存（仅 L1，L2 由 TTL 自然过期）。
-   */
-  invalidatePrefix(_prefix: string): void {
-    this.l1.clear()
-  }
-
-  /**
-   * 清空所有缓存。
-   */
   clear(): void {
-    this.l1.clear()
-    this.l2.clear()
+    if (!this.ready) return
+    this.db.clear()
+  }
+
+  async flush(): Promise<void> {
+    if (!this.ready) return
+    await this.db.flush()
   }
 
   /**
-   * 带缓存的异步获取。命中返回缓存值，未命中则调用 fetcher 并缓存结果。
+   * 带缓存的异步获取。命中返回缓存值，未命中调用 fetcher 并缓存结果。
    */
   async getOrFetch<T>(key: string, ttl: number, fetcher: () => Promise<T>): Promise<T> {
     const cached = this.get<T>(key)
