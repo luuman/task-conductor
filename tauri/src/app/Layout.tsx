@@ -70,7 +70,7 @@ export function Layout() {
         onSearchClick={() => navigate('/sessions')}
         onSettingsClick={() => navigate('/settings')}
         onMessageClick={() => navigate('/chat')}
-        onNotificationClick={() => navigate('/sessions')}
+        onNotificationClick={togglePanel}
       />
       <Sidebar
         items={sidebarItems}
