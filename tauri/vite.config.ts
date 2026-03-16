@@ -14,17 +14,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // sql.js browser 入口是 UMD，Vite ESM 无法处理
+      // 强制使用 CJS 版本，Vite 自动转换 CJS → ESM
+      'sql.js': path.resolve(__dirname, 'node_modules/sql.js/dist/sql-wasm.js'),
     },
-  },
-
-  optimizeDeps: {
-    exclude: ['sql.js'],
-  },
-
-  // sql.js 的 browser 版本是 UMD 格式，Vite ESM 不兼容；
-  // 强制使用 CJS 版本（sql-wasm.js），Vite 会自动转换为 ESM
-  ssr: {
-    noExternal: ['sql.js'],
   },
 
   server: {
