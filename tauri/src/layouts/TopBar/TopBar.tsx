@@ -16,10 +16,13 @@ export interface TopBarProps {
   actions?: ReactNode
   userName?: string
   userRole?: string
+  onSearchClick?: () => void
   onSettingsClick?: () => void
+  onMessageClick?: () => void
+  onNotificationClick?: () => void
 }
 
-export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole, onSettingsClick }: TopBarProps) {
+export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole, onSearchClick, onSettingsClick, onMessageClick, onNotificationClick }: TopBarProps) {
   const { sidebarCollapsed, toggleSidebar } = useShell()
 
   return (
