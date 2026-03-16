@@ -4,6 +4,7 @@ import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
 import { SectionHeader } from '../shared'
+import { EmptyState } from '../../../../ui/empty-state'
 import styles from '../claude-config.module.css'
 
 interface SectionProps {
