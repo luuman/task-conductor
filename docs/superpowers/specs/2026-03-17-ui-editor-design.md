@@ -409,16 +409,15 @@ class ComponentNodeSchema(BaseModel):
     meta: dict | None = None
 
 class UIOutput(BaseModel):
-    """UI 阶段结构化输出"""
+    """UI 阶段结构化输出（与其他阶段一致，包含透明度字段）"""
     nodes: list[ComponentNodeSchema]
     rootId: str
     design_notes: str | None = None
+    confidence: float = 0.0         # 置信度（0-1），供前端 Gauge 展示
+    assumptions: list[str] = []     # 设计假设，供用户审阅
+    blockers: list[str] = []        # 潜在阻碍
 
-class CriticOutput(BaseModel):
-    score: int
-    issues: list[str]
-    suggestions: str
-    pass_review: bool
+# 注：CriticOutput 已存在于 pipeline/schemas.py，不需要重复定义
 ```
 
 ### 9.3 Pipeline 集成
