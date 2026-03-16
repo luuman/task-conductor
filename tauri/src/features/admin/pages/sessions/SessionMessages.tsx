@@ -49,6 +49,14 @@ const SYSTEM_EVENTS = new Set(['SessionStart', 'SessionEnd', 'Stop', 'SubagentSt
 
 function formatTime(iso: string): string {
   try {
+    return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
+  } catch {
+    return ''
+  }
+}
+
+function formatTimeFull(iso: string): string {
+  try {
     return new Date(iso).toLocaleTimeString(undefined, { hour12: false })
   } catch {
     return ''
@@ -59,6 +67,22 @@ function formatResult(result: unknown): string {
   if (!result) return ''
   if (typeof result === 'string') return result.slice(0, 2000)
   try { return JSON.stringify(result, null, 2).slice(0, 2000) } catch { return '' }
+}
+
+function getDateLabel(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date()
+  if (d.toDateString() === today.toDateString()) return 'Today'
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  return d.toLocaleDateString()
+}
+
+function cwdName(cwd?: string): string {
+  if (!cwd) return ''
+  const parts = cwd.replace(/\/$/, '').split('/')
+  return parts[parts.length - 1] || ''
 }
 
 // ── Collapsible result block ──
@@ -79,75 +103,178 @@ function CollapsibleResult({ result }: { result: unknown }) {
   )
 }
 
-// ── Single bubble ──
+// ── Date divider ──
 
-function EventBubble({ event }: { event: SessionEvent }) {
-  const isSystem = SYSTEM_EVENTS.has(event.event_type)
-  const isNotification = event.event_type === 'Notification'
-  const isResult = event.event_type === 'PostToolUse'
+function DateDivider({ label }: { label: string }) {
+  return (
+    <div className={styles.dateDivider}>
+      <div className={styles.dateDividerLine} />
+      <span className={styles.dateDividerLabel}>{label}</span>
+      <div className={styles.dateDividerLine} />
+    </div>
+  )
+}
+
+// ── System event (center pill) ──
+
+function SystemEvent({ event }: { event: SessionEvent }) {
   const icon = getToolIcon(event.event_type)
   const toolName = event.tool_name || event.event_type
-  const detail = isNotification
-    ? String((event.extra as Record<string, unknown>)?.message || '').slice(0, 160)
-    : getToolDetail(event.tool_name, event.tool_input)
-
-  if (isSystem) {
-    return (
-      <div className={styles.bubbleRowCenter}>
-        <div className={styles.bubbleSystem}>
-          <span>{icon}</span>
-          <span>{toolName}</span>
-          {detail && <span style={{ opacity: 0.7 }}>{detail}</span>}
-          <span style={{ opacity: 0.5 }}>{formatTime(event.created_at)}</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (isNotification) {
-    return (
-      <div className={styles.bubbleRowLeft}>
-        <div className={styles.bubbleNotify}>
-          <div className={styles.bubbleToolName}>
-            <span className={styles.bubbleToolIcon}>{icon}</span>
-            Notification
-          </div>
-          {detail && <div className={styles.bubbleDetail}>{detail}</div>}
-          <div className={styles.bubbleTime}>{formatTime(event.created_at)}</div>
-        </div>
-      </div>
-    )
-  }
-
-  if (isResult) {
-    return (
-      <div className={styles.bubbleRowRight}>
-        <div className={styles.bubbleResult}>
-          <div className={styles.bubbleToolName} style={{ color: 'var(--tc-success)' }}>
-            <span className={styles.bubbleToolIcon}>{icon}</span>
-            {toolName}
-          </div>
-          {detail && <div className={styles.bubbleDetail}>{detail}</div>}
-          <CollapsibleResult result={event.tool_result} />
-          <div className={styles.bubbleTime}>{formatTime(event.created_at)}</div>
-        </div>
-      </div>
-    )
-  }
-
-  // PreToolUse or other
   return (
-    <div className={styles.bubbleRowLeft}>
-      <div className={styles.bubbleTool}>
-        <div className={styles.bubbleToolName}>
-          <span className={styles.bubbleToolIcon}>{icon}</span>
-          {toolName}
+    <div className={styles.dateDivider}>
+      <div className={styles.dateDividerLine} />
+      <span className={styles.dateDividerLabel}>
+        {icon} {toolName} &middot; {formatTimeFull(event.created_at)}
+      </span>
+      <div className={styles.dateDividerLine} />
+    </div>
+  )
+}
+
+// ── Message bubble group ──
+
+interface BubbleGroupProps {
+  events: SessionEvent[]
+  side: 'left' | 'right'
+  senderName: string
+  avatarClass: string
+  avatarContent: string
+  bubbleClass: string
+}
+
+function BubbleGroup({ events, side, senderName, avatarClass, avatarContent, bubbleClass }: BubbleGroupProps) {
+  const rowClass = side === 'right' ? styles.msgRowRight : styles.msgRowLeft
+  const first = events[0]
+
+  return (
+    <div className={rowClass}>
+      <div className={`${styles.avatar} ${avatarClass}`}>{avatarContent}</div>
+      <div className={styles.msgContent}>
+        <div className={side === 'right' ? styles.senderNameRight : styles.senderName}>
+          {senderName}
+          <span className={styles.senderTime}>{formatTime(first.created_at)}</span>
         </div>
-        {detail && <div className={styles.bubbleDetail}>{detail}</div>}
-        <div className={styles.bubbleTime}>{formatTime(event.created_at)}</div>
+        {events.map(event => {
+          const icon = getToolIcon(event.event_type)
+          const toolName = event.tool_name || event.event_type
+          const isNotification = event.event_type === 'Notification'
+          const isResult = event.event_type === 'PostToolUse'
+          const detail = isNotification
+            ? String((event.extra as Record<string, unknown>)?.message || '').slice(0, 160)
+            : getToolDetail(event.tool_name, event.tool_input)
+
+          return (
+            <div key={event.id} className={bubbleClass}>
+              <div className={styles.toolLabel}>
+                <span className={styles.toolLabelIcon}>{icon}</span>
+                <span className={styles.toolLabelName}>{toolName}</span>
+              </div>
+              {detail && <div className={styles.bubbleDetail}>{detail}</div>}
+              {isResult && <CollapsibleResult result={event.tool_result} />}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
+}
+
+// ── Group events into renderable sections ──
+
+interface Section {
+  type: 'date'
+  label: string
+}
+interface SystemSection {
+  type: 'system'
+  event: SessionEvent
+}
+interface BubbleSection {
+  type: 'bubble'
+  side: 'left' | 'right'
+  senderName: string
+  avatarClass: string
+  avatarContent: string
+  bubbleClass: string
+  events: SessionEvent[]
+}
+
+type RenderSection = Section | SystemSection | BubbleSection
+
+function classifyEvent(ev: SessionEvent): { side: 'left' | 'right'; senderName: string; avatarClass: string; avatarContent: string; bubbleClass: string } {
+  if (ev.event_type === 'PreToolUse') {
+    return {
+      side: 'right',
+      senderName: 'Claude',
+      avatarClass: styles.avatarClaude,
+      avatarContent: 'C',
+      bubbleClass: styles.msgBubbleRight,
+    }
+  }
+  if (ev.event_type === 'Notification') {
+    return {
+      side: 'left',
+      senderName: 'Notification',
+      avatarClass: styles.avatarNotify,
+      avatarContent: '\u{1F514}',
+      bubbleClass: styles.msgBubbleLeft,
+    }
+  }
+  // PostToolUse and others → left
+  return {
+    side: 'left',
+    senderName: ev.tool_name || ev.event_type,
+    avatarClass: styles.avatarTool,
+    avatarContent: ev.tool_name ? ev.tool_name.charAt(0) : '\u{1F527}',
+    bubbleClass: styles.msgBubbleLeft,
+  }
+}
+
+function buildSections(events: SessionEvent[]): RenderSection[] {
+  const sections: RenderSection[] = []
+  let lastDate = ''
+  let currentGroup: BubbleSection | null = null
+
+  const flushGroup = () => {
+    if (currentGroup) {
+      sections.push(currentGroup)
+      currentGroup = null
+    }
+  }
+
+  for (const ev of events) {
+    // Date divider check
+    const dateLabel = getDateLabel(ev.created_at)
+    if (dateLabel !== lastDate) {
+      flushGroup()
+      sections.push({ type: 'date', label: dateLabel })
+      lastDate = dateLabel
+    }
+
+    // System events → center divider
+    if (SYSTEM_EVENTS.has(ev.event_type)) {
+      flushGroup()
+      sections.push({ type: 'system', event: ev })
+      continue
+    }
+
+    // Classify this event
+    const cls = classifyEvent(ev)
+
+    // If same sender/side as current group, append
+    if (currentGroup && currentGroup.side === cls.side && currentGroup.senderName === cls.senderName) {
+      currentGroup.events.push(ev)
+    } else {
+      flushGroup()
+      currentGroup = {
+        type: 'bubble',
+        ...cls,
+        events: [ev],
+      }
+    }
+  }
+  flushGroup()
+  return sections
 }
 
 // ── Main messages component ──
@@ -193,27 +320,29 @@ export function SessionMessages({ session, onDeselect }: Props) {
     )
   }
 
+  const headerTitle = session.note?.alias || session.summary || cwdName(session.cwd) || session.provider
+  const headerMeta = [
+    cwdName(session.cwd),
+    `${session.event_count} ${t('admin.sessions.events')}`,
+    formatTime(session.started_at),
+  ].filter(Boolean).join(' \u00B7 ')
+
+  const sections = buildSections(events)
+
   return (
     <div className={styles.messagePanel}>
       {/* Header */}
       <div className={styles.messageHeader}>
         <div className={styles.messageHeaderLeft}>
-          <span className={styles.messageHeaderId}>{session.session_id.slice(0, 12)}</span>
-          <span className={styles.messageHeaderMeta}>
-            {session.provider} &middot; {session.event_count} {t('admin.sessions.events')}
-          </span>
+          <span className={styles.messageHeaderAvatar}>{'\u{1F916}'}</span>
+          <div className={styles.messageHeaderInfo}>
+            <span className={styles.messageHeaderTitle}>{headerTitle}</span>
+            <span className={styles.messageHeaderMeta}>{headerMeta}</span>
+          </div>
         </div>
         <button
+          className={styles.messageHeaderBack}
           onClick={onDeselect}
-          style={{
-            background: 'none',
-            border: '1px solid var(--tc-border)',
-            borderRadius: 6,
-            padding: '3px 10px',
-            fontSize: 11,
-            color: 'var(--tc-foreground-secondary)',
-            cursor: 'pointer',
-          }}
         >
           {t('common.back')}
         </button>
@@ -234,9 +363,25 @@ export function SessionMessages({ session, onDeselect }: Props) {
         </div>
       ) : (
         <div className={styles.messageBody}>
-          {events.map(ev => (
-            <EventBubble key={ev.id} event={ev} />
-          ))}
+          {sections.map((section, i) => {
+            if (section.type === 'date') {
+              return <DateDivider key={`date-${i}`} label={section.label} />
+            }
+            if (section.type === 'system') {
+              return <SystemEvent key={`sys-${section.event.id}`} event={section.event} />
+            }
+            return (
+              <BubbleGroup
+                key={`grp-${section.events[0].id}`}
+                events={section.events}
+                side={section.side}
+                senderName={section.senderName}
+                avatarClass={section.avatarClass}
+                avatarContent={section.avatarContent}
+                bubbleClass={section.bubbleClass}
+              />
+            )
+          })}
           <div ref={bottomRef} />
         </div>
       )}
@@ -244,7 +389,7 @@ export function SessionMessages({ session, onDeselect }: Props) {
       {/* Status bar */}
       <div className={styles.statusBar}>
         <span>{events.length} {t('admin.sessions.events')}</span>
-        <span>{formatTime(session.started_at)}</span>
+        <span>{formatTimeFull(session.started_at)}</span>
       </div>
     </div>
   )
