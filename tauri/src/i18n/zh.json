@@ -122,7 +122,18 @@
       "hint": "查看 Claude Code 的会话历史和工具调用事件",
       "search_placeholder": "搜索会话 ID...",
       "list": "会话列表",
-      "no_sessions": "暂无会话记录"
+      "no_sessions": "暂无会话记录",
+      "view_messages": "消息",
+      "view_calendar": "日历",
+      "select_session": "选择一个会话",
+      "select_session_hint": "从左侧列表选择会话以查看事件详情",
+      "events": "个事件",
+      "no_events": "暂无事件",
+      "expand_result": "展开结果",
+      "collapse": "收起",
+      "showing_date": "筛选日期",
+      "all_dates": "显示所有日期",
+      "clear_filter": "清除筛选"
     }
   },
   "claudeConfig": {
