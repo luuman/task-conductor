@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../lib/store/app'
 import { api } from '../../lib/api'
-import { IconChevronLeft, IconFolder, IconLayoutGrid } from '../../ui/icon'
+import { IconChevronLeft, IconLayoutGrid } from '../../ui/icon'
 import type { Project } from '../../lib/api/types'
 import styles from './project-switcher.module.css'
 
