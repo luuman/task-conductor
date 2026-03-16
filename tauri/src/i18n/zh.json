@@ -65,7 +65,24 @@
     },
     "dashboard": {
       "title": "仪表盘",
-      "hint": "系统概览与关键指标"
+      "hint": "系统概览与关键指标",
+      "total_tasks": "总任务数",
+      "statuses": "种状态",
+      "ai_rating": "AI 评分",
+      "confidence": "置信度",
+      "avg_response": "平均响应",
+      "per_call": "每次调用",
+      "uptime": "可用率",
+      "availability": "系统可用性",
+      "task_status": "任务状态分布",
+      "projects": "项目列表",
+      "total": "个",
+      "no_tasks": "暂无任务数据",
+      "no_projects": "暂无项目",
+      "performance": "性能概览",
+      "interactions": "总交互次数",
+      "approval_rate": "审批通过率",
+      "avg_duration": "平均任务时长"
     },
     "claude_config": {
       "title": "Claude 配置",
