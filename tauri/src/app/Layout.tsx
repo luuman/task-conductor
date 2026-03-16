@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
-import { IconFileText, IconLayoutGrid, IconLogo, IconMonitor, IconMessage, IconFolder, IconGitBranch } from '../ui/icon'
+import { IconFileText, IconLayoutGrid, IconLogo } from '../ui/icon'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
 
@@ -12,12 +12,13 @@ export function Layout() {
 
   const activeKey = location.pathname.split('/').pop() ?? ''
 
-  const workspaceItems = [
-    { key: 'task-manager', label: t('layout.tasks'), icon: <IconFileText size={16} /> },
-    { key: 'sessions', label: t('layout.sessions'), icon: <IconMonitor size={16} /> },
-    { key: 'chat', label: t('layout.chat'), icon: <IconMessage size={16} /> },
-    { key: 'files', label: t('layout.files'), icon: <IconFolder size={16} /> },
-    { key: 'git', label: t('layout.git'), icon: <IconGitBranch size={16} /> },
+  // 当前项目的内容列表（后续从 API 动态加载）
+  const projectItems = [
+    { key: 'tasks/1', label: '需求分析', icon: <IconFileText size={16} /> },
+    { key: 'tasks/2', label: '技术方案', icon: <IconFileText size={16} /> },
+    { key: 'tasks/3', label: 'UI 设计稿', icon: <IconFileText size={16} /> },
+    { key: 'tasks/4', label: '开发计划', icon: <IconFileText size={16} /> },
+    { key: 'tasks/5', label: '测试用例', icon: <IconFileText size={16} /> },
   ]
 
   return (
@@ -25,11 +26,11 @@ export function Layout() {
       <TopBar
         logoIcon={<IconLogo size={22} />}
         logo="TaskConductor"
-        breadcrumb={[{ label: t('layout.workspace') }]}
+        breadcrumb={[{ label: 'Demo Project' }]}
         userName="User"
       />
       <Sidebar
-        items={workspaceItems}
+        items={projectItems}
         activeKey={activeKey}
         onSelect={(key) => navigate(`/${key}`)}
         footer={
