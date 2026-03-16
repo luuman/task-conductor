@@ -348,6 +348,94 @@
   color: var(--tc-border-active);
 }
 
+/* Hook badges */
+.hookLabel {
+  font-size: 12px;
+  color: var(--tc-foreground);
+  font-family: 'Geist Mono', monospace;
+}
+
+.hookBadge {
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 22px;
+  text-align: center;
+  padding: 2px 8px;
+  border-radius: 9px;
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground-secondary);
+}
+
+.hookBadgeActive {
+  composes: hookBadge;
+  background: color-mix(in srgb, var(--tc-success) 15%, transparent);
+  color: var(--tc-success);
+}
+
+/* MCP / skill names */
+.mcpName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tc-foreground);
+}
+
+.skillIcon {
+  font-size: 14px;
+  color: var(--tc-border-active);
+  flex-shrink: 0;
+}
+
+/* Project tags */
+.projectTag {
+  font-size: 9px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tc-border-active) 12%, transparent);
+  color: var(--tc-border-active);
+}
+
+/* Boolean toggle button */
+.boolOn {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--tc-success) 15%, transparent);
+  color: var(--tc-success);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.boolOff {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 9px;
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+/* Select input */
+.selectInput {
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--tc-foreground);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.selectInput:focus {
+  border-color: var(--tc-focus-ring);
+}
+
 /* Toast */
 .toast {
   position: fixed;
