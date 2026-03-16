@@ -287,4 +287,45 @@ export interface ApiAdapter {
   getClaudeOverview(): Promise<ClaudeOverview>
   getClaudeConfig(): Promise<ClaudeConfig>
   updateClaudeConfigKey(key: string, value: unknown): Promise<{ ok: boolean }>
+
+  claudeConfig: {
+    getConfig(): Promise<ClaudeConfig>
+    getOverview(): Promise<ClaudeOverview>
+    getHookEvents(): Promise<string[]>
+    updateHooks(event: string, rules: HookRule[]): Promise<ClaudeConfig>
+    deleteHooks(event: string): Promise<ClaudeConfig>
+    updatePlugin(plugin_id: string, enabled: boolean): Promise<ClaudeConfig>
+    deletePlugin(id: string): Promise<ClaudeConfig>
+    updateOtherKey(key: string, value: unknown): Promise<ClaudeConfig>
+    deleteOtherKey(key: string): Promise<ClaudeConfig>
+    updatePermissions(permissions: Record<string, unknown>): Promise<ClaudeConfig>
+    getMcpServers(): Promise<McpServer[]>
+    addMcpServer(data: { name: string; url?: string; command?: string; args?: string[]; transport: string; scope: string }): Promise<{ ok: boolean; output?: string; servers: McpServer[] }>
+    deleteMcpServer(name: string, scope?: string): Promise<{ ok: boolean; servers: McpServer[] }>
+    getSkills(): Promise<SkillDetail[]>
+    toggleSkill(name: string, enabled: boolean): Promise<{ ok: boolean }>
+    getCommands(): Promise<CommandInfo[]>
+    toggleCommand(name: string, enabled: boolean): Promise<{ ok: boolean }>
+    createCommand(name: string, content?: string): Promise<{ ok: boolean }>
+    deleteCommand(name: string): Promise<{ ok: boolean }>
+    getRules(): Promise<RuleInfo[]>
+    toggleRule(name: string, enabled: boolean): Promise<{ ok: boolean }>
+    createRule(name: string, content?: string): Promise<{ ok: boolean }>
+    deleteRule(name: string): Promise<{ ok: boolean }>
+    getAgents(): Promise<AgentInfo[]>
+    toggleAgent(name: string, enabled: boolean): Promise<{ ok: boolean }>
+    createAgent(name: string, content?: string): Promise<{ ok: boolean }>
+    deleteAgent(name: string): Promise<{ ok: boolean }>
+    getAgentPresets(): Promise<PresetItem[]>
+    getCommandPresets(): Promise<PresetItem[]>
+    getRulePresets(): Promise<PresetItem[]>
+    getSystemInfo(): Promise<ClaudeSystemInfo>
+    getClaudeMd(): Promise<{ content: string; path: string }>
+    updateClaudeMd(content: string): Promise<{ content: string; path: string }>
+    getDisabledItems(): Promise<DisabledItem[]>
+    restoreDisabledItem(type: string, name: string): Promise<{ ok: boolean }>
+    deleteDisabledItem(type: string, name: string): Promise<{ ok: boolean }>
+    getProjectComponents(dirName: string): Promise<ProjectComponents>
+    getProjectDetails(dirName: string): Promise<ProjectDetails>
+  }
 }
