@@ -10,4 +10,4 @@ function detectMode(): ApiMode {
 
 export const api: ApiAdapter = new HttpAdapter(detectMode())
 
-export type { ApiAdapter, ApiMode, Project, Task, AiSession, StageArtifact, Settings } from './types'
+export type { ApiAdapter, ApiMode, Project, Task, AiSession, SessionEvent, StageArtifact, Settings } from './types'
