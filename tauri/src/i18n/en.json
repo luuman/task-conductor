@@ -34,7 +34,9 @@
     "recent": "Recently Opened",
     "with_content": "With Content",
     "empty": "Empty Projects",
-    "switch": "Switch Project"
+    "switch": "Switch Project",
+    "search": "Search projects...",
+    "view_all": "View all projects"
   },
   "notification": {
     "title": "Notifications",
