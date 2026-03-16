@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
 import {
   IconLayoutGrid, IconLogo, IconFileText, IconMonitor,
-  IconMessage, IconSettings, IconSearch, IconFolder,
-  IconGitBranch,
+  IconMessage, IconSettings, IconFolder, IconGitBranch,
 } from '../ui/icon'
 import { ProjectSwitcher } from '../components/ProjectSwitcher'
 import { useNotificationStore } from '../lib/store/notifications'
