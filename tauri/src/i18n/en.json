@@ -25,7 +25,7 @@
     "sessions": "Sessions",
     "chat": "AI Chat",
     "files": "Files",
-    "git": "Version Control",
+    "git": "Git",
     "panel_placeholder": "Panel content (logs, terminal)"
   },
   "project": {
