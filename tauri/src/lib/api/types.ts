@@ -177,6 +177,92 @@ export interface ClaudeConfig {
   raw: Record<string, unknown>
 }
 
+export interface SkillDetail {
+  name: string
+  path: string
+  description: string
+  metadata: Record<string, unknown>
+  content: string
+  has_auxiliary: boolean
+  auxiliary_files: string[]
+  enabled: boolean
+}
+
+export interface AgentInfo {
+  name: string
+  path: string
+  content: string
+  scope: string
+  enabled: boolean
+  metadata: Record<string, unknown>
+}
+
+export interface CommandInfo {
+  name: string
+  path: string
+  content: string
+  scope: string
+  enabled: boolean
+}
+
+export interface RuleInfo {
+  name: string
+  path: string
+  content: string
+  scope: string
+  enabled: boolean
+}
+
+export interface DisabledItem {
+  type: 'agent' | 'command' | 'rule' | 'skill'
+  name: string
+  file_path: string
+  scope?: string
+}
+
+export interface ClaudeSystemInfo {
+  cli_version: string
+  home_path: string
+  config_path: string
+  cache_dir: string
+  cache_size_mb: number
+  history_size_mb: number
+  session_count: number
+  project_count: number
+  skill_count: number
+  plugin_count: number
+  hook_script_count: number
+  mcp_server_count: number
+  platform: string
+  python_version: string
+}
+
+export interface PresetItem {
+  name: string
+  title: string
+  desc: string
+  icon: string
+  content: string
+  installed: boolean
+}
+
+export interface ProjectDetails {
+  dir_name: string
+  session_count: number
+  last_active: string
+  description: string
+}
+
+export interface ProjectComponents {
+  dir_name: string
+  project_path: string
+  agents: string[]
+  commands: string[]
+  rules: string[]
+  has_settings: boolean
+  has_claude_md: boolean
+}
+
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
