@@ -16,7 +16,7 @@ export default function AdminSettings() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.container} style={{ maxWidth: 720 }}>
+      <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.headerTitle}>{t('settings.title')}</h1>
           <p className={styles.headerHint}>{t('settings.hint')}</p>
