@@ -54,6 +54,36 @@
     "connecting": "Connecting...",
     "error_invalid_pin": "Invalid access code"
   },
+  "admin": {
+    "title": "Admin Console",
+    "back_to_workspace": "Back to Workspace",
+    "nav": {
+      "dashboard": "Dashboard",
+      "claude_config": "Claude Config",
+      "settings": "Settings",
+      "sessions": "Sessions"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "hint": "System overview and key metrics"
+    },
+    "claude_config": {
+      "title": "Claude Config",
+      "hint": "Manage Claude Code hooks, model and prompt configuration",
+      "hooks": "Hook Status",
+      "hooks_hint": "Enable/disable Claude Code hook events",
+      "model": "Model Config",
+      "model_hint": "Configure Claude model parameters",
+      "prompts": "Prompt Templates",
+      "prompts_hint": "Customize prompts for each pipeline stage",
+      "pool": "Connection Pool",
+      "pool_hint": "ClaudePool concurrency and timeout settings"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "hint": "View Claude Code session history and tool call events"
+    }
+  },
   "settings": {
     "title": "Settings",
     "hint": "Manage app configuration, notifications, pipeline and security options",
