@@ -1,0 +1,115 @@
+.overlay {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: min(560px, 90%);
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border-active);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 13px;
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  color: var(--tc-foreground);
+  outline: none;
+  font-family: inherit;
+}
+
+.input:focus {
+  border-color: var(--tc-border-active);
+}
+
+.submitBtn {
+  padding: 6px 12px;
+  font-size: 12px;
+  background: var(--tc-border-active);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.diffPreview {
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px 12px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  border-top: 1px solid var(--tc-border);
+}
+
+.diffAdd {
+  background: rgba(137, 209, 133, 0.15);
+  color: var(--tc-success);
+}
+
+.diffRemove {
+  background: rgba(244, 71, 71, 0.15);
+  color: var(--tc-error);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--tc-border);
+}
+
+.actionBtn {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+  color: var(--tc-foreground);
+}
+
+.actionBtn:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.acceptBtn {
+  background: var(--tc-border-active);
+  color: #fff;
+  border-color: var(--tc-border-active);
+}
+
+.acceptBtn:hover {
+  opacity: 0.9;
+}
+
+.working {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--tc-foreground-secondary);
+  text-align: center;
+}
