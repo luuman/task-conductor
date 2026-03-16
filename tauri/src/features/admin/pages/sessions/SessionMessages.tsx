@@ -68,14 +68,6 @@ function getToolIcon(eventType: string): string {
 
 const SYSTEM_EVENTS = new Set(['SessionStart', 'SessionEnd', 'Stop', 'SubagentStart', 'SubagentStop'])
 
-function formatTime(iso: string): string {
-  try {
-    return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
-  } catch {
-    return ''
-  }
-}
-
 function formatTimeFull(iso: string): string {
   try {
     return new Date(iso).toLocaleTimeString(undefined, { hour12: false })
