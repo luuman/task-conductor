@@ -55,6 +55,10 @@ export interface AiSession {
   event_count: number
   started_at: string
   last_event_at: string
+  cwd?: string
+  status?: string
+  summary?: string | null
+  note?: { alias?: string | null; notes?: string | null; tags?: string[] }
 }
 
 export interface SessionEvent {
