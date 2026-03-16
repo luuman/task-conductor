@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../lib/store/app'
 import { api } from '../../lib/api'
 import { IconLogo } from '../../ui/icon'
+import { EmptyState } from '../../ui/empty-state'
 import type { Project } from '../../lib/api/types'
 import styles from './project-selector.module.css'
 
