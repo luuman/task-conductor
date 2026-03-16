@@ -19,7 +19,7 @@ export interface TopBarProps {
   onSettingsClick?: () => void
 }
 
-export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole }: TopBarProps) {
+export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole, onSettingsClick }: TopBarProps) {
   const { sidebarCollapsed, toggleSidebar } = useShell()
 
   return (
