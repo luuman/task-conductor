@@ -33,7 +33,7 @@ export class SqliteCache implements CacheDB {
 
   async init(): Promise<void> {
     const SQL = await initSqlJs({
-      locateFile: (file: string) => `/node_modules/sql.js/dist/${file}`,
+      locateFile: (file: string) => `/${file}`,
     })
 
     // 尝试从持久化层恢复
