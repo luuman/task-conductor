@@ -99,5 +99,7 @@ export function Layout() {
         </Panel>
       </div>
     </AppShell>
+    <NotificationPanel />
+  </>
   )
 }
