@@ -541,3 +541,91 @@ def git_stash_drop(
         raise HTTPException(400, f"git stash drop 失败: {result.stderr.strip()}")
 
     return {"ok": True}
+
+
+# ── Ref 验证 ──────────────────────────────────────────────────
+
+_UNSAFE_REF_PATTERN = re.compile(r'[;&|$`\\\'\"<>]|\.\.')
+
+
+def _validate_ref(ref: str) -> str:
+    if not ref or len(ref) > 256 or _UNSAFE_REF_PATTERN.search(ref):
+        raise HTTPException(400, f"invalid ref: {ref}")
+    return ref
+
+
+# ── 虚拟浏览：按 ref 查看文件/分支变更 ───────────────────────
+
+
+@router.get("/{project_id}/git/show", summary="按 ref 查看文件内容")
+def git_show(
+    project_id: int,
+    ref: str = Query(..., description="Git ref（分支/标签/commit）"),
+    path: str = Query(..., description="文件路径"),
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+    ref = _validate_ref(ref)
+    result = _run_git(cwd, "show", f"{ref}:{path}")
+    if result.returncode != 0:
+        raise HTTPException(404, result.stderr.strip() or "not found")
+    return {"content": result.stdout}
+
+
+@router.get("/{project_id}/git/branch-files", summary="分支变更文件列表")
+def git_branch_files(
+    project_id: int,
+    branch: str = Query(..., description="目标分支"),
+    base: str = Query("main", description="基准分支"),
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+    branch = _validate_ref(branch)
+    base = _validate_ref(base)
+
+    numstat = _run_git(cwd, "diff", "--numstat", f"{base}...{branch}")
+    namestatus = _run_git(cwd, "diff", "--name-status", f"{base}...{branch}")
+    if numstat.returncode != 0:
+        raise HTTPException(400, numstat.stderr.strip() or "diff failed")
+
+    status_map: dict[str, str] = {}
+    for line in namestatus.stdout.strip().splitlines():
+        parts = line.split("\t", 1)
+        if len(parts) == 2:
+            status_map[parts[1]] = parts[0][0]
+
+    files = []
+    for line in numstat.stdout.strip().splitlines():
+        parts = line.split("\t")
+        if len(parts) == 3:
+            add_str, del_str, fpath = parts
+            files.append({
+                "path": fpath,
+                "status": status_map.get(fpath, "M"),
+                "additions": int(add_str) if add_str != "-" else 0,
+                "deletions": int(del_str) if del_str != "-" else 0,
+            })
+
+    return files
+
+
+@router.get("/{project_id}/git/branch-diff", summary="分支单文件 Diff")
+def git_branch_diff(
+    project_id: int,
+    branch: str = Query(..., description="目标分支"),
+    file: str = Query(..., description="文件路径"),
+    base: str = Query("main", description="基准分支"),
+    db: Session = Depends(_get_db),
+):
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+    branch = _validate_ref(branch)
+    base = _validate_ref(base)
+
+    result = _run_git(cwd, "diff", f"{base}...{branch}", "--", file)
+    if result.returncode != 0:
+        raise HTTPException(400, result.stderr.strip() or "diff failed")
+
+    return {"diff": result.stdout}
