@@ -124,11 +124,11 @@ export function SecMcp({ showToast }: SectionProps) {
             </div>
             <div className={styles.formRow}>
               <label className={styles.formLabel}>{t('claudeConfig.mcp.transport')}</label>
-              <div className={styles.pillGroup}>
+              <div className={styles.btnGroup}>
                 {TRANSPORT_OPTIONS.map((opt) => (
                   <button
                     key={opt}
-                    className={formTransport === opt ? styles.pillActive : styles.pill}
+                    className={`${styles.btnGroupItem} ${formTransport === opt ? styles.btnGroupItemActive : ''}`}
                     onClick={() => setFormTransport(opt)}
                     type="button"
                   >
