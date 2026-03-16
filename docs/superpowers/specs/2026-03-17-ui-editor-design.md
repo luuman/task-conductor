@@ -165,7 +165,7 @@ type NodePatch =
 ### 4.2 交互细节
 
 - **图层列表**：dnd-kit 拖拽排序，点击选中，右键菜单（删除/复制/锁定）
-- **预览区**：iframe 内注入选择脚本，点击组件 → postMessage → 父窗口高亮 + 选中
+- **预览区**：iframe 内注入选择脚本，点击组件 → postMessage → 父窗口高亮 + 选中。注：现有 `components/PencilCanvas.tsx` 已实现基础 iframe+postMessage 通信，新建 `PreviewCanvas.tsx` 为编辑器专用（选中高亮、viewport 切换），不复用 PencilCanvas
 - **工具栏**：Desktop/Tablet/Mobile 视口切换、缩放、undo/redo
 - **属性面板**：Tailwind class 编辑（背景色拾色器、间距 slider、布局按钮组）
 - **代码面板**：Monaco Editor 显示选中组件代码，修改后标记为 customCode
