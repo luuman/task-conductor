@@ -49,31 +49,34 @@ export default function ProjectSelector() {
     setError('')
     try {
       const list = await api.getProjects()
-      const withMeta: ProjectMeta[] = await Promise.all(
+
+      // 先渲染项目列表（无 meta），避免等待
+      const initial: ProjectMeta[] = list.map((p) => ({
+        ...p, file_count: 0, knowledge_count: 0, task_count: 0,
+      }))
+      setProjects(initial)
+      setLoading(false)
+
+      // 异步并行补充每个项目的 meta 数据
+      const enriched = await Promise.all(
         list.map(async (p) => {
-          let file_count = 0, knowledge_count = 0, task_count = 0
           const isLocal = p.repo_url && !p.repo_url.startsWith('http')
-          if (isLocal) {
-            try {
-              const files = await api.getProjectFiles(p.id)
-              file_count = files.items.length
-            } catch { /* */ }
+          const [files, knowledge, tasks] = await Promise.all([
+            isLocal ? api.getProjectFiles(p.id).catch(() => ({ items: [] })) : Promise.resolve({ items: [] }),
+            api.getProjectKnowledge(p.id).catch(() => []),
+            api.getTasks(p.id).catch(() => []),
+          ])
+          return {
+            ...p,
+            file_count: files.items.length,
+            knowledge_count: knowledge.length,
+            task_count: tasks.length,
           }
-          try {
-            const knowledge = await api.getProjectKnowledge(p.id)
-            knowledge_count = knowledge.length
-          } catch { /* */ }
-          try {
-            const tasks = await api.getTasks(p.id)
-            task_count = tasks.length
-          } catch { /* */ }
-          return { ...p, file_count, knowledge_count, task_count }
         })
       )
-      setProjects(withMeta)
+      setProjects(enriched)
     } catch {
       setError(t('common.error'))
-    } finally {
       setLoading(false)
     }
   }
