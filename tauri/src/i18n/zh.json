@@ -123,6 +123,13 @@
       "hint": "重启后端服务进程，页面将自动刷新",
       "confirm": "确定重启后端服务？",
       "restarting": "重启中..."
+    },
+    "toast": {
+      "saved": "已保存",
+      "saveFailed": "保存失败",
+      "saving": "保存中...",
+      "done": "完成",
+      "cleared": "已清空"
     }
   }
 }
