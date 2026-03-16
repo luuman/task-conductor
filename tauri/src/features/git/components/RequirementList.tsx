@@ -49,7 +49,7 @@ export function RequirementList() {
     <div className={styles.requirementList}>
       <div className={styles.sectionTitle}>{t('git.requirements')}</div>
       {branchTasks.map((task) => {
-        const branchName = (task as Record<string, unknown>).branch_name as string
+        const branchName = (task as unknown as Record<string, unknown>).branch_name as string
         const isActive = selectedTaskId === task.id
         return (
           <button
