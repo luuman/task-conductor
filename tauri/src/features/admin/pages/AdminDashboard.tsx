@@ -23,11 +23,12 @@ export default function AdminDashboard() {
 
   const loading = metrics === null && error === null
 
+  const kpi = metrics?.kpi
   const kpiItems = metrics ? [
     { label: t('admin.dashboard.total_tasks'), value: metrics.tasks.total, sub: `${Object.keys(metrics.tasks.by_status).length} ${t('admin.dashboard.statuses')}` },
-    { label: t('admin.dashboard.ai_rating'), value: `${(metrics.kpi.ai_rating * 100).toFixed(0)}%`, sub: t('admin.dashboard.confidence') },
-    { label: t('admin.dashboard.avg_response'), value: `${metrics.kpi.avg_response_time_s.toFixed(1)}s`, sub: t('admin.dashboard.per_call') },
-    { label: t('admin.dashboard.uptime'), value: `${metrics.kpi.uptime_pct.toFixed(1)}%`, sub: t('admin.dashboard.availability') },
+    { label: t('admin.dashboard.ai_rating'), value: kpi ? `${(kpi.ai_rating * 100).toFixed(0)}%` : '—', sub: t('admin.dashboard.confidence') },
+    { label: t('admin.dashboard.avg_response'), value: kpi?.avg_response_time_s != null ? `${kpi.avg_response_time_s.toFixed(1)}s` : '—', sub: t('admin.dashboard.per_call') },
+    { label: t('admin.dashboard.uptime'), value: kpi?.uptime_pct != null ? `${kpi.uptime_pct.toFixed(1)}%` : '—', sub: t('admin.dashboard.availability') },
   ] : []
 
   return (
