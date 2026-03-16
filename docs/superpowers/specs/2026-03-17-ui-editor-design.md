@@ -83,7 +83,19 @@ interface ComponentNode {
 }
 ```
 
-### 3.2 EditorStore（Zustand）
+### 3.2 ChatMessage
+
+```typescript
+interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string                   // 用户指令或 AI 回复文本
+  patches?: NodePatch[]             // AI 回复附带的组件树变更
+  timestamp: number
+}
+```
+
+### 3.3 EditorStore（Zustand）
 
 ```typescript
 interface EditorStore {
