@@ -37,7 +37,10 @@ export function Layout() {
         logo="TaskConductor"
         breadcrumb={breadcrumb}
         userName="User"
+        onSearchClick={() => navigate('/sessions')}
         onSettingsClick={() => navigate('/settings')}
+        onMessageClick={() => navigate('/chat')}
+        onNotificationClick={() => navigate('/sessions')}
       />
       <Sidebar
         items={PROJECT_ITEMS}
