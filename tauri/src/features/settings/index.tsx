@@ -550,12 +550,7 @@ function ToggleRow({ label, value, onChange }: {
   return (
     <div className={styles.toggleRow}>
       <span className={styles.toggleLabel}>{label}</span>
-      <button
-        className={value ? styles.toggleOn : styles.toggleOff}
-        onClick={() => onChange(!value)}
-      >
-        <span className={value ? styles.toggleKnobOn : styles.toggleKnobOff} />
-      </button>
+      <Toggle checked={value} onChange={onChange} />
     </div>
   )
 }
