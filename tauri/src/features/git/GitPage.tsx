@@ -42,7 +42,7 @@ export function GitPage() {
       const taskId = Number(taskParam)
       const task = tasks.find((t) => t.id === taskId)
       if (task) {
-        const branchName = (task as Record<string, unknown>).branch_name as string | undefined
+        const branchName = (task as unknown as Record<string, unknown>).branch_name as string | undefined
         if (branchName) {
           setActiveTab('branches')
           setSelectedTask(taskId, branchName)
