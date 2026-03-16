@@ -220,22 +220,36 @@ type NodePatch =
 ```python
 # 后端新增 preview_manager.py
 class PreviewManager:
-    """管理临时 Vite dev server 实例"""
+    """管理临时 Vite dev server 实例（单例）"""
+
+    MAX_CONCURRENT = 5              # 最多同时运行 5 个预览实例
+    IDLE_TIMEOUT = 600              # 10 分钟无更新自动停止
+    PORT_RANGE = (15000, 15100)     # 动态端口分配范围
+
+    def __init__(self):
+        self._instances: dict[str, PreviewInstance] = {}
 
     async def create_preview(self, editor_id: str, nodes: list[dict]) -> str:
         """
-        1. 创建临时目录 /tmp/tc-preview-{editor_id}/
-        2. 生成 package.json, vite.config.ts, index.html, App.tsx
-        3. ComponentNode[] → React JSX 代码写入 components/
-        4. npm install（首次）+ vite dev（动态端口）
-        5. 返回 http://localhost:{port}
+        1. 检查并发数限制，超限则清理最旧的 idle 实例
+        2. 创建临时目录 /tmp/tc-preview-{editor_id}/
+        3. 生成 package.json, vite.config.ts, index.html, App.tsx
+        4. ComponentNode[] → React JSX 代码写入 components/
+        5. npm install（首次）+ vite dev（动态端口）
+        6. 返回 http://localhost:{port}
         """
 
     async def update_preview(self, editor_id: str, nodes: list[dict]):
-        """热更新：重新生成 JSX 文件，Vite HMR 自动刷新"""
+        """热更新：重新生成 JSX 文件，Vite HMR 自动刷新，重置 idle 计时"""
 
     async def cleanup(self, editor_id: str):
         """停止 Vite 进程，清理临时目录"""
+
+    async def cleanup_all(self):
+        """后端关闭时调用，停止所有 Vite 进程（注册到 FastAPI lifespan）"""
+
+    async def _evict_idle(self):
+        """清理超过 IDLE_TIMEOUT 的实例，防止端口耗尽"""
 ```
 
 ### 6.2 iframe 通信
