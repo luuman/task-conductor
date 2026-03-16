@@ -198,4 +198,7 @@ export interface ApiAdapter {
   restartService(): Promise<void>
   getMetrics(): Promise<Metrics>
   getClaudeUsage(): Promise<ClaudeUsage>
+  getClaudeOverview(): Promise<ClaudeOverview>
+  getClaudeConfig(): Promise<ClaudeConfig>
+  updateClaudeConfigKey(key: string, value: unknown): Promise<{ ok: boolean }>
 }
