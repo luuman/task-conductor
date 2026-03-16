@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, McpServer } from '../../../../lib/api/types'
 import { SectionHeader } from '../shared'
@@ -18,7 +19,11 @@ const STATUS_COLORS: Record<string, string> = {
   unknown: 'var(--tc-foreground-secondary)',
 }
 
+const TRANSPORT_OPTIONS = ['http', 'sse', 'stdio']
+const SCOPE_OPTIONS = ['user', 'project']
+
 export function SecMcp({ showToast }: SectionProps) {
+  const { t } = useTranslation()
   const [servers, setServers] = useState<McpServer[]>([])
   const [showForm, setShowForm] = useState(false)
   const [formName, setFormName] = useState('')
@@ -32,9 +37,9 @@ export function SecMcp({ showToast }: SectionProps) {
       const data = await api.claudeConfig.getMcpServers()
       setServers(data)
     } catch {
-      showToast('Failed to load MCP servers')
+      showToast(t('claudeConfig.mcp.loadFailed'))
     }
-  }, [showToast])
+  }, [showToast, t])
 
   useEffect(() => { fetchServers() }, [fetchServers])
 
@@ -42,11 +47,11 @@ export function SecMcp({ showToast }: SectionProps) {
     try {
       const result = await api.claudeConfig.deleteMcpServer(name)
       setServers(result.servers)
-      showToast(`Deleted ${name}`)
+      showToast(t('claudeConfig.mcp.deleted', { name }))
     } catch {
-      showToast('Failed to delete server')
+      showToast(t('claudeConfig.mcp.deleteFailed'))
     }
-  }, [showToast])
+  }, [showToast, t])
 
   const handleAdd = useCallback(async () => {
     if (!formName.trim()) return
@@ -59,35 +64,35 @@ export function SecMcp({ showToast }: SectionProps) {
         scope: formScope,
       })
       setServers(result.servers)
-      showToast(`Added ${formName}`)
+      showToast(t('claudeConfig.mcp.added', { name: formName }))
       setFormName('')
       setFormUrl('')
       setFormTransport('http')
       setFormScope('user')
       setShowForm(false)
     } catch {
-      showToast('Failed to add server')
+      showToast(t('claudeConfig.mcp.addFailed'))
     } finally {
       setAdding(false)
     }
-  }, [formName, formUrl, formTransport, formScope, showToast])
+  }, [formName, formUrl, formTransport, formScope, showToast, t])
 
   return (
     <div className={styles.sectionWrap}>
       <SectionHeader
-        icon="🔌"
-        title="MCP 服务器"
+        icon="\uD83D\uDD0C"
+        title={t('claudeConfig.mcp.title')}
         right={
           <div style={{ display: 'flex', gap: 6 }}>
             <button className={styles.btnGhost} onClick={fetchServers} type="button">
-              Refresh
+              {t('claudeConfig.mcp.refresh')}
             </button>
             <button
               className={styles.btnPrimary}
               onClick={() => setShowForm((v) => !v)}
               type="button"
             >
-              {showForm ? 'Cancel' : 'Add'}
+              {showForm ? t('claudeConfig.mcp.cancel') : t('claudeConfig.mcp.add')}
             </button>
           </div>
         }
@@ -98,7 +103,7 @@ export function SecMcp({ showToast }: SectionProps) {
         <div className={styles.card} style={{ marginBottom: 12 }}>
           <div className={styles.cardBody}>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>Name *</label>
+              <label className={styles.formLabel}>{t('claudeConfig.mcp.name')} *</label>
               <input
                 className={styles.formInput}
                 value={formName}
@@ -108,7 +113,7 @@ export function SecMcp({ showToast }: SectionProps) {
               />
             </div>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>URL</label>
+              <label className={styles.formLabel}>{t('claudeConfig.mcp.url')}</label>
               <input
                 className={styles.formInput}
                 value={formUrl}
@@ -118,27 +123,34 @@ export function SecMcp({ showToast }: SectionProps) {
               />
             </div>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>Transport</label>
-              <select
-                className={styles.formSelect}
-                value={formTransport}
-                onChange={(e) => setFormTransport(e.target.value)}
-              >
-                <option value="http">HTTP</option>
-                <option value="sse">SSE</option>
-                <option value="stdio">Stdio</option>
-              </select>
+              <label className={styles.formLabel}>{t('claudeConfig.mcp.transport')}</label>
+              <div className={styles.pillGroup}>
+                {TRANSPORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt}
+                    className={formTransport === opt ? styles.pillActive : styles.pill}
+                    onClick={() => setFormTransport(opt)}
+                    type="button"
+                  >
+                    {opt.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>Scope</label>
-              <select
-                className={styles.formSelect}
-                value={formScope}
-                onChange={(e) => setFormScope(e.target.value)}
-              >
-                <option value="user">user</option>
-                <option value="project">project</option>
-              </select>
+              <label className={styles.formLabel}>{t('claudeConfig.mcp.scope')}</label>
+              <div className={styles.pillGroup}>
+                {SCOPE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt}
+                    className={formScope === opt ? styles.pillActive : styles.pill}
+                    onClick={() => setFormScope(opt)}
+                    type="button"
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
               <button
@@ -147,7 +159,7 @@ export function SecMcp({ showToast }: SectionProps) {
                 disabled={adding || !formName.trim()}
                 type="button"
               >
-                {adding ? 'Adding...' : 'Add'}
+                {adding ? t('claudeConfig.mcp.adding') : t('claudeConfig.mcp.add')}
               </button>
             </div>
           </div>
@@ -156,7 +168,7 @@ export function SecMcp({ showToast }: SectionProps) {
 
       {/* Server list */}
       {servers.length === 0 ? (
-        <div className={styles.sectionPlaceholder}>No MCP servers configured</div>
+        <div className={styles.sectionPlaceholder}>{t('claudeConfig.mcp.noServers')}</div>
       ) : (
         <div className={styles.cardGrid}>
           {servers.map((s) => (
@@ -195,7 +207,7 @@ export function SecMcp({ showToast }: SectionProps) {
                   onClick={() => handleDelete(s.name)}
                   type="button"
                 >
-                  Delete
+                  {t('claudeConfig.mcp.delete')}
                 </button>
               </div>
             </div>
@@ -205,3 +217,5 @@ export function SecMcp({ showToast }: SectionProps) {
     </div>
   )
 }
+
+export default SecMcp
