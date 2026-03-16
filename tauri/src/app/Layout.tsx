@@ -54,7 +54,7 @@ export function Layout() {
   const sidebarItems = tasks.map((task) => ({
     key: String(task.id),
     label: task.title,
-    icon: <span style={{ fontSize: 14 }}>{STAGE_ICONS[task.stage ?? task.current_stage] ?? '📋'}</span>,
+    icon: <span style={{ fontSize: 14 }}>{STAGE_ICONS[task.current_stage] ?? '📋'}</span>,
   }))
 
   // 从路径中提取当前 task id
