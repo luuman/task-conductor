@@ -16,6 +16,7 @@ export interface TopBarProps {
   actions?: ReactNode
   userName?: string
   userRole?: string
+  unreadCount?: number
   onSearchClick?: () => void
   onSettingsClick?: () => void
   onMessageClick?: () => void
