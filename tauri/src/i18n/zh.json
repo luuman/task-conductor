@@ -36,6 +36,12 @@
     "empty": "空项目",
     "switch": "切换项目"
   },
+  "notification": {
+    "title": "通知",
+    "empty": "暂无通知",
+    "markAllRead": "全部已读",
+    "clearAll": "清空"
+  },
   "auth": {
     "title": "TaskConductor",
     "subtitle": "请输入访问码以继续",
