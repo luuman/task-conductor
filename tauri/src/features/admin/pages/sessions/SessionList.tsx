@@ -34,10 +34,14 @@ interface Props {
 export function SessionList({ sessions, loading, selectedId, filter, onFilterChange, onSelect }: Props) {
   const { t } = useTranslation()
 
-  const filtered = sessions?.filter(s =>
-    !filter || s.session_id.toLowerCase().includes(filter.toLowerCase())
-      || s.provider.toLowerCase().includes(filter.toLowerCase())
-  ) ?? []
+  const filtered = sessions?.filter(s => {
+    if (!filter) return true
+    const q = filter.toLowerCase()
+    return (s.summary?.toLowerCase().includes(q))
+      || (s.cwd?.toLowerCase().includes(q))
+      || s.provider.toLowerCase().includes(q)
+      || (s.note?.alias?.toLowerCase().includes(q))
+  }) ?? []
 
   return (
     <div className={styles.listPanel}>
