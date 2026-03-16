@@ -47,7 +47,8 @@
   },
   "auth": {
     "title": "TaskConductor",
-    "subtitle": "请输入访问码以继续",
+    "welcome": "欢迎回来",
+    "subtitle": "输入访问码继续",
     "pin_label": "访问码",
     "pin_placeholder": "输入 6 位访问码",
     "login_btn": "登录",
