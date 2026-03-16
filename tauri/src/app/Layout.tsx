@@ -1,69 +1,39 @@
-import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
-import { IconLayoutGrid, IconLogo } from '../ui/icon'
+import {
+  IconLayoutGrid, IconLogo, IconFileText, IconMonitor,
+  IconMessage, IconSettings, IconSearch, IconFolder,
+  IconGitBranch,
+} from '../ui/icon'
 import { ProjectSwitcher } from '../components/ProjectSwitcher'
-import { useAppStore } from '../lib/store/app'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
-import { api } from '../lib/api'
-import type { Task } from '../lib/api/types'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
-
-const STAGE_ICONS: Record<string, string> = {
-  input: '📋',
-  analysis: '🔍',
-  prd: '📄',
-  ui: '🎨',
-  plan: '📐',
-  dev: '⚡',
-  test: '🧪',
-  deploy: '🚀',
-  monitor: '📊',
-  done: '✅',
-}
 
 export function Layout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const { activeProjectId } = useAppStore()
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
-  const [tasks, setTasks] = useState<Task[]>([])
+  // 侧边栏 = 导航菜单（首页、任务、会话、文件、Git、设置）
+  const sidebarItems = [
+    { key: '/',            label: t('nav.dashboard'),     icon: <IconLayoutGrid size={16} /> },
+    { key: '/task-manager', label: t('layout.tasks'),     icon: <IconFileText size={16} /> },
+    { key: '/sessions',    label: t('layout.sessions'),   icon: <IconMonitor size={16} /> },
+    { key: '/chat',        label: t('layout.chat'),       icon: <IconMessage size={16} /> },
+    { key: '/files',       label: t('layout.files'),      icon: <IconFolder size={16} /> },
+    { key: '/git',         label: t('layout.git'),        icon: <IconGitBranch size={16} /> },
+    { key: '/settings',    label: t('nav.settings'),      icon: <IconSettings size={16} /> },
+  ]
 
-  useEffect(() => {
-    if (!activeProjectId) return
-    loadTasks()
-  }, [activeProjectId])
-
-  async function loadTasks() {
-    if (!activeProjectId) return
-    try {
-      const taskList = await api.getTasks(Number(activeProjectId))
-      setTasks(taskList)
-    } catch {
-      setTasks([])
-    }
-  }
-
-  // 侧边栏 = 项目的需求/任务列表，带阶段图标
-  const sidebarItems = tasks.map((task) => ({
-    key: String(task.id),
-    label: task.title,
-    icon: <span style={{ fontSize: 14 }}>{STAGE_ICONS[task.current_stage] ?? '📋'}</span>,
-  }))
-
-  // 从路径中提取当前 task id
-  const pathParts = location.pathname.split('/')
-  const activeKey = pathParts[1] === 'task' ? pathParts[2] ?? '' : ''
-
-  // 面包屑
-  const activeTask = tasks.find((task) => String(task.id) === activeKey)
-  const breadcrumb = activeTask ? [{ label: activeTask.title }] : []
+  // 当前激活的导航项
+  const activeKey = sidebarItems.find(
+    (item) => item.key !== '/' && location.pathname.startsWith(item.key)
+  )?.key ?? (location.pathname === '/' ? '/' : '')
 
   return (
   <>
@@ -71,7 +41,7 @@ export function Layout() {
       <TopBar
         logoIcon={<IconLogo size={22} />}
         logo="TaskConductor"
-        breadcrumb={breadcrumb}
+        breadcrumb={[]}
         breadcrumbPrefix={<ProjectSwitcher />}
         userName="User"
         onSearchClick={() => navigate('/sessions')}
@@ -83,7 +53,7 @@ export function Layout() {
       <Sidebar
         items={sidebarItems}
         activeKey={activeKey}
-        onSelect={(key) => navigate(`/task/${key}`)}
+        onSelect={(key) => navigate(key)}
         footer={
           <button
             className={sidebarStyles.footerBtn}
