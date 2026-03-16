@@ -97,125 +97,128 @@ export default function AdminClaudeConfig() {
           }
         </div>
 
-        {/* 流水线审批阶段 */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>{t('settings.pipeline.title')}</div>
-            <div className={styles.sectionHint}>{t('settings.pipeline.hint')}</div>
-          </div>
-          <div className={styles.sectionBody}>
-            {loading
-              ? Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className={styles.formRow}>
-                    <Skeleton variant="text" width="30%" height={12} />
-                    <Skeleton variant="rect" width={200} height={28} borderRadius={6} />
-                  </div>
-                ))
-              : <>
-                  <div className={styles.formCol}>
-                    <span className={styles.fieldLabel}>{t('settings.pipeline.approvalStages')}</span>
-                    <div className={styles.stageTags}>
-                      {ALL_STAGES.map(stage => (
-                        <button
-                          key={stage}
-                          className={
-                            settings?.pipeline_approval_stages.includes(stage)
-                              ? styles.stageTagActive
-                              : styles.stageTag
-                          }
-                          onClick={() => toggleApprovalStage(stage)}
-                        >
-                          {stage}
-                        </button>
-                      ))}
+        {/* 卡片网格 */}
+        <div className={styles.cardGrid}>
+          {/* 流水线审批阶段 */}
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitle}>{t('settings.pipeline.title')}</div>
+              <div className={styles.sectionHint}>{t('settings.pipeline.hint')}</div>
+            </div>
+            <div className={styles.sectionBody}>
+              {loading
+                ? Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className={styles.formRow}>
+                      <Skeleton variant="text" width="30%" height={12} />
+                      <Skeleton variant="rect" width={200} height={28} borderRadius={6} />
                     </div>
-                  </div>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('settings.pipeline.maxRetries')}</span>
-                    <span className={styles.perfValue}>{settings?.pipeline_max_retries}</span>
-                  </div>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('settings.pipeline.confidenceThreshold')}</span>
-                    <span className={styles.perfValue}>{settings?.pipeline_confidence_threshold}</span>
-                  </div>
-                </>
-            }
+                  ))
+                : <>
+                    <div className={styles.formCol}>
+                      <span className={styles.fieldLabel}>{t('settings.pipeline.approvalStages')}</span>
+                      <div className={styles.stageTags}>
+                        {ALL_STAGES.map(stage => (
+                          <button
+                            key={stage}
+                            className={
+                              settings?.pipeline_approval_stages.includes(stage)
+                                ? styles.stageTagActive
+                                : styles.stageTag
+                            }
+                            onClick={() => toggleApprovalStage(stage)}
+                          >
+                            {stage}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('settings.pipeline.maxRetries')}</span>
+                      <span className={styles.perfValue}>{settings?.pipeline_max_retries}</span>
+                    </div>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('settings.pipeline.confidenceThreshold')}</span>
+                      <span className={styles.perfValue}>{settings?.pipeline_confidence_threshold}</span>
+                    </div>
+                  </>
+              }
+            </div>
           </div>
-        </div>
 
-        {/* 观测层配置 */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>{t('settings.observe.title')}</div>
-            <div className={styles.sectionHint}>{t('settings.observe.hint')}</div>
+          {/* 观测层配置 */}
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitle}>{t('settings.observe.title')}</div>
+              <div className={styles.sectionHint}>{t('settings.observe.hint')}</div>
+            </div>
+            <div className={styles.sectionBody}>
+              {loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className={styles.formRow}>
+                      <Skeleton variant="text" width="30%" height={12} />
+                      <Skeleton variant="rect" width={40} height={20} borderRadius={10} />
+                    </div>
+                  ))
+                : <>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('settings.observe.sessionLimit')}</span>
+                      <span className={styles.perfValue}>{settings?.observe_session_limit}</span>
+                    </div>
+                    <div className={styles.formRow}>
+                      <span className={styles.perfLabel}>{t('settings.observe.eventLimit')}</span>
+                      <span className={styles.perfValue}>{settings?.observe_event_limit}</span>
+                    </div>
+                    <div className={styles.toggleRow}>
+                      <span className={styles.perfLabel}>{t('settings.observe.autoCleanup')}</span>
+                      <Toggle
+                        checked={settings?.observe_auto_cleanup ?? false}
+                        onChange={v => updateSetting('observe_auto_cleanup', v)}
+                      />
+                    </div>
+                  </>
+              }
+            </div>
           </div>
-          <div className={styles.sectionBody}>
-            {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className={styles.formRow}>
-                    <Skeleton variant="text" width="30%" height={12} />
-                    <Skeleton variant="rect" width={40} height={20} borderRadius={10} />
-                  </div>
-                ))
-              : <>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('settings.observe.sessionLimit')}</span>
-                    <span className={styles.perfValue}>{settings?.observe_session_limit}</span>
-                  </div>
-                  <div className={styles.formRow}>
-                    <span className={styles.perfLabel}>{t('settings.observe.eventLimit')}</span>
-                    <span className={styles.perfValue}>{settings?.observe_event_limit}</span>
-                  </div>
-                  <div className={styles.toggleRow}>
-                    <span className={styles.perfLabel}>{t('settings.observe.autoCleanup')}</span>
-                    <Toggle
-                      checked={settings?.observe_auto_cleanup ?? false}
-                      onChange={v => updateSetting('observe_auto_cleanup', v)}
-                    />
-                  </div>
-                </>
-            }
-          </div>
-        </div>
 
-        {/* 通知配置 */}
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitle}>{t('settings.notification.title')}</div>
-            <div className={styles.sectionHint}>{t('settings.notification.hint')}</div>
-          </div>
-          <div className={styles.sectionBody}>
-            {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className={styles.formRow}>
-                    <Skeleton variant="text" width="30%" height={12} />
-                    <Skeleton variant="rect" width={40} height={20} borderRadius={10} />
-                  </div>
-                ))
-              : <>
-                  <div className={styles.toggleRow}>
-                    <span className={styles.perfLabel}>{t('settings.notification.ttsEnabled')}</span>
-                    <Toggle
-                      checked={settings?.notify_tts_enabled ?? false}
-                      onChange={v => updateSetting('notify_tts_enabled', v)}
-                    />
-                  </div>
-                  <div className={styles.toggleRow}>
-                    <span className={styles.perfLabel}>{t('settings.notification.webhookEnabled')}</span>
-                    <Toggle
-                      checked={settings?.notify_webhook_enabled ?? false}
-                      onChange={v => updateSetting('notify_webhook_enabled', v)}
-                    />
-                  </div>
-                  <div className={styles.toggleRow}>
-                    <span className={styles.perfLabel}>{t('settings.notification.browserEnabled')}</span>
-                    <Toggle
-                      checked={settings?.notify_browser_enabled ?? false}
-                      onChange={v => updateSetting('notify_browser_enabled', v)}
-                    />
-                  </div>
-                </>
-            }
+          {/* 通知配置 */}
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitle}>{t('settings.notification.title')}</div>
+              <div className={styles.sectionHint}>{t('settings.notification.hint')}</div>
+            </div>
+            <div className={styles.sectionBody}>
+              {loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className={styles.formRow}>
+                      <Skeleton variant="text" width="30%" height={12} />
+                      <Skeleton variant="rect" width={40} height={20} borderRadius={10} />
+                    </div>
+                  ))
+                : <>
+                    <div className={styles.toggleRow}>
+                      <span className={styles.perfLabel}>{t('settings.notification.ttsEnabled')}</span>
+                      <Toggle
+                        checked={settings?.notify_tts_enabled ?? false}
+                        onChange={v => updateSetting('notify_tts_enabled', v)}
+                      />
+                    </div>
+                    <div className={styles.toggleRow}>
+                      <span className={styles.perfLabel}>{t('settings.notification.webhookEnabled')}</span>
+                      <Toggle
+                        checked={settings?.notify_webhook_enabled ?? false}
+                        onChange={v => updateSetting('notify_webhook_enabled', v)}
+                      />
+                    </div>
+                    <div className={styles.toggleRow}>
+                      <span className={styles.perfLabel}>{t('settings.notification.browserEnabled')}</span>
+                      <Toggle
+                        checked={settings?.notify_browser_enabled ?? false}
+                        onChange={v => updateSetting('notify_browser_enabled', v)}
+                      />
+                    </div>
+                  </>
+              }
+            </div>
           </div>
         </div>
       </div>
