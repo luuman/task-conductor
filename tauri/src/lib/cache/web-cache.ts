@@ -29,8 +29,11 @@ export class WebSqliteCache implements CacheDB {
   private dirty = false
 
   async init(): Promise<void> {
+    // 手动 fetch WASM 二进制，避免 Vite 预构建干扰 locateFile 路径
+    const wasmResponse = await fetch('/sql-wasm.wasm')
+    const wasmBinary = await wasmResponse.arrayBuffer()
     const SQL = await initSqlJs({
-      locateFile: (file: string) => `/${file}`,
+      wasmBinary,
     })
 
     const saved = await this.loadFromIDB()
