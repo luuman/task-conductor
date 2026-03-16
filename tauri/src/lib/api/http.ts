@@ -136,4 +136,12 @@ export class HttpAdapter implements ApiAdapter {
     await this.fetch<void>('/api/settings/restart', { method: 'POST' })
     cache.clear()
   }
+
+  getMetrics() {
+    return this.fetch<Metrics>('/api/metrics')
+  }
+
+  getClaudeUsage() {
+    return this.fetch<ClaudeUsage>('/api/metrics/claude-usage')
+  }
 }
