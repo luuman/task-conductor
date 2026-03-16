@@ -3,8 +3,14 @@ import type { AiSession } from '../../../../lib/api/types'
 import { Skeleton } from '../../../../ui/skeleton/Skeleton'
 import styles from './sessions.module.css'
 
+function parseTs(iso: string): number {
+  // Backend may omit 'Z' — treat as UTC
+  const s = iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z'
+  return new Date(s).getTime()
+}
+
 function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
+  const diff = Date.now() - parseTs(iso)
   const mins = Math.floor(diff / 60000)
   if (mins < 1) return 'just now'
   if (mins < 60) return `${mins}m ago`
