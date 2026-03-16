@@ -59,7 +59,7 @@ export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole
         <button className={styles.iconBtn} aria-label="Search">
           <IconSearch size={18} />
         </button>
-        <button className={styles.iconBtn} aria-label="Settings">
+        <button className={styles.iconBtn} aria-label="Settings" onClick={onSettingsClick}>
           <IconSettings size={18} />
         </button>
         <button className={styles.iconBtn} aria-label="Messages">
