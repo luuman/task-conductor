@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, AgentInfo, PresetItem } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
@@ -13,6 +14,7 @@ interface SectionProps {
 }
 
 export function SecAgents({ showToast }: SectionProps) {
+  const { t } = useTranslation()
   const [agents, setAgents] = useState<AgentInfo[]>([])
   const [presets, setPresets] = useState<PresetItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,10 +28,10 @@ export function SecAgents({ showToast }: SectionProps) {
       setAgents(data)
       return data
     } catch {
-      showToast('Failed to load agents')
+      showToast(t('claudeConfig.agents.toggleFailed'))
       return []
     }
-  }, [showToast])
+  }, [showToast, t])
 
   useEffect(() => {
     let cancelled = false
@@ -44,14 +46,14 @@ export function SecAgents({ showToast }: SectionProps) {
         const agentNames = new Set(agentData.map((a) => a.name))
         setPresets(presetData.map((p) => ({ ...p, installed: agentNames.has(p.name) })))
       } catch {
-        if (!cancelled) showToast('Failed to load agents')
+        if (!cancelled) showToast(t('claudeConfig.agents.toggleFailed'))
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
     load()
     return () => { cancelled = true }
-  }, [showToast])
+  }, [showToast, t])
 
   // Update presets installed status when agents change
   useEffect(() => {
@@ -65,9 +67,9 @@ export function SecAgents({ showToast }: SectionProps) {
       await api.claudeConfig.toggleAgent(name, enabled)
     } catch {
       setAgents((prev) => prev.map((a) => (a.name === name ? { ...a, enabled: !enabled } : a)))
-      showToast(`Failed to toggle ${name}`)
+      showToast(t('claudeConfig.agents.toggleFailed'))
     }
-  }, [showToast])
+  }, [showToast, t])
 
   const handleCreate = useCallback(async () => {
     const name = newName.trim()
@@ -76,11 +78,10 @@ export function SecAgents({ showToast }: SectionProps) {
       await api.claudeConfig.createAgent(name)
       setNewName('')
       await loadAgents()
-      showToast(`Agent "${name}" created`)
     } catch {
-      showToast(`Failed to create agent "${name}"`)
+      showToast(t('claudeConfig.agents.createFailed'))
     }
-  }, [newName, loadAgents, showToast])
+  }, [newName, loadAgents, showToast, t])
 
   const handleInstallPreset = useCallback(async (name: string, content: string) => {
     setInstallingPreset(name)
@@ -88,33 +89,31 @@ export function SecAgents({ showToast }: SectionProps) {
       const preset = presets.find((p) => p.name === name)
       await api.claudeConfig.createAgent(name, preset?.content || content)
       await loadAgents()
-      showToast(`Agent "${name}" installed`)
     } catch {
-      showToast(`Failed to install "${name}"`)
+      showToast(t('claudeConfig.agents.createFailed'))
     } finally {
       setInstallingPreset(null)
     }
-  }, [presets, loadAgents, showToast])
+  }, [presets, loadAgents, showToast, t])
 
   const handleDelete = useCallback(async (name: string) => {
     try {
       await api.claudeConfig.deleteAgent(name)
       setAgents((prev) => prev.filter((a) => a.name !== name))
       if (selectedAgent === name) setSelectedAgent(null)
-      showToast(`Agent "${name}" deleted`)
     } catch {
-      showToast(`Failed to delete "${name}"`)
+      showToast(t('claudeConfig.agents.deleteFailed'))
     }
-  }, [selectedAgent, showToast])
+  }, [selectedAgent, showToast, t])
 
   const selected = selectedAgent ? agents.find((a) => a.name === selectedAgent) : null
 
   if (loading) {
     return (
       <div className={styles.sectionWrap}>
-        <SectionHeader icon="&#x1f916;" title="Agents" />
+        <SectionHeader icon="&#x1f916;" title={t('claudeConfig.agents.title')} />
         <div className={styles.sectionSkeleton}>
-          <div className={styles.sectionPlaceholder}>Loading agents...</div>
+          <div className={styles.sectionPlaceholder}>{t('claudeConfig.agents.loading')}</div>
         </div>
       </div>
     )
@@ -122,14 +121,14 @@ export function SecAgents({ showToast }: SectionProps) {
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="&#x1f916;" title="Agents" />
+      <SectionHeader icon="&#x1f916;" title={t('claudeConfig.agents.title')} />
 
       {/* Create form */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <input
           className={styles.formInput}
           type="text"
-          placeholder="Agent name"
+          placeholder={t('claudeConfig.agents.namePlaceholder')}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleCreate() }}
@@ -141,7 +140,7 @@ export function SecAgents({ showToast }: SectionProps) {
           disabled={!newName.trim()}
           type="button"
         >
-          Create
+          {t('common.create')}
         </button>
       </div>
 
@@ -160,7 +159,7 @@ export function SecAgents({ showToast }: SectionProps) {
       <div style={{ display: 'flex', gap: 16 }}>
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {agents.length === 0 ? (
-            <div className={styles.sectionPlaceholder}>No agents found</div>
+            <div className={styles.sectionPlaceholder}>{t('claudeConfig.agents.empty')}</div>
           ) : (
             agents.map((agent) => (
               <div
@@ -186,7 +185,7 @@ export function SecAgents({ showToast }: SectionProps) {
                   type="button"
                   style={{ padding: '4px 8px' }}
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             ))
@@ -208,3 +207,5 @@ export function SecAgents({ showToast }: SectionProps) {
     </div>
   )
 }
+
+export default SecAgents
