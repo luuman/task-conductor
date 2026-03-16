@@ -47,6 +47,7 @@
   },
   "auth": {
     "title": "TaskConductor",
+    "welcome": "Welcome back",
     "subtitle": "Enter your access code to continue",
     "pin_label": "Access Code",
     "pin_placeholder": "Enter 6-digit code",
