@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 import Editor, { type OnMount, type Monaco } from '@monaco-editor/react'
-import type { editor as MonacoEditor } from 'monaco-editor'
+import type { editor } from 'monaco-editor'
 
 interface MonacoWrapperProps {
   path: string
@@ -19,15 +19,15 @@ export function MonacoWrapper({
   onSave,
   onInlineAI,
 }: MonacoWrapperProps) {
-  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
-  const monacoRef = useRef<typeof Monaco | null>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const monacoRef = useRef<Monaco | null>(null)
 
-  const handleMount: OnMount = useCallback((editor, monaco) => {
-    editorRef.current = editor
+  const handleMount: OnMount = useCallback((ed, monaco) => {
+    editorRef.current = ed
     monacoRef.current = monaco
 
     // Register Cmd/Ctrl+S to save
-    editor.addAction({
+    ed.addAction({
       id: 'tc-save-file',
       label: 'Save File',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
@@ -38,12 +38,12 @@ export function MonacoWrapper({
 
     // Register Cmd/Ctrl+K for inline AI
     if (onInlineAI) {
-      editor.addAction({
+      ed.addAction({
         id: 'tc-inline-ai',
         label: 'Inline AI Edit',
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
-        run: (ed) => {
-          const selection = ed.getSelection()
+        run: (e) => {
+          const selection = e.getSelection()
           if (selection && !selection.isEmpty()) {
             onInlineAI({
               startLine: selection.startLineNumber,
@@ -54,7 +54,7 @@ export function MonacoWrapper({
       })
     }
 
-    editor.focus()
+    ed.focus()
   }, [onSave, onInlineAI])
 
   const handleChange = useCallback((value: string | undefined) => {
