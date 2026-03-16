@@ -58,6 +58,11 @@ export default function AdminLayout() {
     const handler = (e: KeyboardEvent) => {
       const mod = isMac ? e.metaKey : e.ctrlKey
       if (!mod) return
+      if (e.key === 'k') {
+        e.preventDefault()
+        setCmdOpen(prev => !prev)
+        return
+      }
       const idx = parseInt(e.key, 10)
       if (idx >= 1 && idx <= NAV_ITEMS.length) {
         e.preventDefault()
