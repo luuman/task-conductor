@@ -40,7 +40,7 @@ export function AppRouter() {
             <Route path="/files"        element={<PlaceholderPage />} />
             <Route path="/git"          element={<PlaceholderPage />} />
             <Route path="/canvas"       element={<PlaceholderPage />} />
-            <Route path="/settings"     element={<PlaceholderPage />} />
+            <Route path="/settings"     element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
