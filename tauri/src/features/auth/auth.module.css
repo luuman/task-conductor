@@ -8,21 +8,41 @@
 }
 
 .card {
-  width: 320px;
+  width: 360px;
   border-radius: 12px;
   border: 1px solid var(--tc-border);
   background: var(--tc-panel-bg);
-  padding: 32px;
+  padding: 40px 32px;
+}
+
+/* Logo + Title */
+.logoWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.logoIcon {
+  color: var(--tc-border-active);
 }
 
 .title {
-  margin-bottom: 24px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   color: var(--tc-foreground);
+  letter-spacing: -0.3px;
 }
 
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--tc-foreground-secondary);
+  margin-bottom: 28px;
+}
+
+/* Form */
 .form {
   display: flex;
   flex-direction: column;
@@ -33,50 +53,59 @@
   display: block;
   margin-bottom: 6px;
   font-size: 13px;
+  font-weight: 500;
   color: var(--tc-foreground-secondary);
 }
 
 .input {
   width: 100%;
+  height: 40px;
   border-radius: 6px;
   border: 1px solid var(--tc-border);
   background: var(--tc-content-bg);
-  padding: 8px 12px;
-  font-size: 13px;
+  padding: 0 12px;
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-align: center;
   color: var(--tc-foreground);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .input::placeholder {
   color: var(--tc-foreground-secondary);
+  letter-spacing: 0;
 }
 
 .input:focus {
   border-color: var(--tc-focus-ring);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tc-focus-ring) 25%, transparent);
 }
 
+/* Error */
 .error {
   font-size: 13px;
   color: var(--tc-error);
+  text-align: center;
 }
 
+/* Submit */
 .submitBtn {
   width: 100%;
+  height: 40px;
   border-radius: 6px;
   background: var(--tc-border-active);
-  padding: 8px 16px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: #ffffff;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, background 0.15s;
 }
 
-.submitBtn:hover {
+.submitBtn:hover:not(:disabled) {
   opacity: 0.9;
 }
 
 .submitBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
