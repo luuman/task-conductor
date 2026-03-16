@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, HookRule, HookEntry } from '../../../../lib/api/types'
 import { SectionHeader } from '../shared'
@@ -33,6 +34,7 @@ function newRule(): HookRule {
 }
 
 export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
+  const { t } = useTranslation()
   const [editState, setEditState] = useState<Record<string, HookRule[]>>({})
 
   const getRules = useCallback(
@@ -112,12 +114,12 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
           delete next[ev]
           return next
         })
-        showToast(`Hooks for ${ev} saved`)
+        showToast(t('claudeConfig.hooks.saved'))
       } catch {
-        showToast(`Failed to save hooks for ${ev}`)
+        showToast(t('claudeConfig.hooks.saveFailed'))
       }
     },
-    [getRules, onConfigUpdate, showToast]
+    [getRules, onConfigUpdate, showToast, t]
   )
 
   const handleClear = useCallback(
@@ -130,17 +132,17 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
           delete next[ev]
           return next
         })
-        showToast(`Hooks for ${ev} cleared`)
+        showToast(t('claudeConfig.hooks.cleared'))
       } catch {
-        showToast(`Failed to clear hooks for ${ev}`)
+        showToast(t('claudeConfig.hooks.clearFailed'))
       }
     },
-    [onConfigUpdate, showToast]
+    [onConfigUpdate, showToast, t]
   )
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="🪝" title="Hook 事件" />
+      <SectionHeader icon="&#x1FA9D;" title={t('claudeConfig.hooks.title')} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {HOOK_EVENTS.map((ev) => {
@@ -159,7 +161,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                   {hookCount > 0 && (
                     <span className={styles.tagBlue}>{hookCount} hook{hookCount > 1 ? 's' : ''}</span>
                   )}
-                  {dirty && <span className={styles.tagYellow}>unsaved</span>}
+                  {dirty && <span className={styles.tagYellow}>{t('claudeConfig.hooks.unsaved')}</span>}
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
@@ -168,7 +170,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                     onClick={() => handleSave(ev)}
                     type="button"
                   >
-                    Save
+                    {t('common.save')}
                   </button>
                   <button
                     className={styles.btnDanger}
@@ -176,7 +178,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                     onClick={() => handleClear(ev)}
                     type="button"
                   >
-                    Clear
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -196,7 +198,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                   >
                     {/* Matcher */}
                     <div className={styles.formRow}>
-                      <span className={styles.formLabel}>Matcher</span>
+                      <span className={styles.formLabel}>{t('claudeConfig.hooks.matcher')}</span>
                       <input
                         className={styles.formInput}
                         placeholder="* (match all)"
@@ -211,7 +213,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                       <div key={hi} className={styles.formRow} style={{ gap: 8 }}>
                         <input
                           className={styles.formInput}
-                          placeholder="command"
+                          placeholder={t('claudeConfig.hooks.command')}
                           value={hook.command}
                           onChange={(e) => updateHook(ev, ri, hi, { command: e.target.value })}
                           style={{ flex: 1 }}
@@ -242,7 +244,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                       type="button"
                       style={{ marginTop: 4, fontSize: 11 }}
                     >
-                      + Add Hook
+                      {t('claudeConfig.hooks.addHook')}
                     </button>
                   </div>
                 ))}
@@ -253,7 +255,7 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
                   type="button"
                   style={{ fontSize: 11 }}
                 >
-                  + Add Rule
+                  {t('claudeConfig.hooks.addRule')}
                 </button>
               </div>
             </div>
@@ -263,3 +265,5 @@ export function SecHooks({ config, onConfigUpdate, showToast }: SecHooksProps) {
     </div>
   )
 }
+
+export default SecHooks
