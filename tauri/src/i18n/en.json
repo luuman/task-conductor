@@ -36,6 +36,12 @@
     "empty": "Empty Projects",
     "switch": "Switch Project"
   },
+  "notification": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all read",
+    "clearAll": "Clear"
+  },
   "auth": {
     "title": "TaskConductor",
     "subtitle": "Enter your access code to continue",
