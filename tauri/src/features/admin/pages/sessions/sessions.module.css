@@ -600,6 +600,249 @@
   font-family: 'Geist Mono', monospace;
 }
 
+/* ── Chat bubble rows ── */
+.bubbleRowLeft {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.bubbleRowRight {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Outgoing bubble (PreToolUse — left, blue accent) ── */
+.bubbleOutgoing {
+  max-width: 75%;
+  min-width: 120px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  background: var(--tc-sidebar-item-hover);
+  border: 1px solid var(--tc-border);
+  position: relative;
+}
+
+.bubbleOutgoing:hover .bubbleTs {
+  opacity: 1;
+}
+
+/* ── Incoming bubble (PostToolUse — right, green accent) ── */
+.bubbleIncoming {
+  max-width: 75%;
+  min-width: 120px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-top-right-radius: 4px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  background: rgba(86, 211, 100, 0.08);
+  border: 1px solid rgba(86, 211, 100, 0.15);
+  position: relative;
+}
+
+.bubbleIncoming:hover .bubbleTs {
+  opacity: 1;
+}
+
+/* ── Notification bubble (left, yellow accent) ── */
+.bubbleNotification {
+  max-width: 75%;
+  min-width: 120px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  background: rgba(227, 179, 65, 0.08);
+  border: 1px solid rgba(227, 179, 65, 0.15);
+  position: relative;
+}
+
+.bubbleNotification:hover .bubbleTs {
+  opacity: 1;
+}
+
+/* ── Bubble header: icon + tool name + timestamp ── */
+.bubbleHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.bubbleToolIcon {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.bubbleToolIcon[data-type="PreToolUse"] {
+  color: #79c0ff;
+}
+
+.bubbleToolIcon[data-type="PostToolUse"] {
+  color: #56d364;
+}
+
+.bubbleToolIcon[data-type="Notification"] {
+  color: #e3b341;
+}
+
+.bubbleToolName {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.bubbleToolName[data-type="PreToolUse"] {
+  color: #79c0ff;
+}
+
+.bubbleToolName[data-type="PostToolUse"] {
+  color: #56d364;
+}
+
+.bubbleToolName[data-type="Notification"] {
+  color: #e3b341;
+}
+
+.bubbleTs {
+  margin-left: auto;
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+/* ── System event (centered pill) ── */
+.systemRow {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.systemPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground-secondary);
+}
+
+.systemIcon {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.systemTs {
+  font-size: 9px;
+  opacity: 0.5;
+}
+
+/* ── Header right area ── */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Header meta with status dot ── */
+.messageHeaderMeta {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tc-foreground-secondary);
+}
+
+.statusDot[data-status="active"],
+.statusDot[data-status="running"] {
+  background: var(--tc-success);
+}
+
+.statusDot[data-status="idle"] {
+  background: var(--tc-warning);
+}
+
+.statusDot[data-status="stopped"] {
+  background: var(--tc-foreground-secondary);
+}
+
+/* ── WebSocket indicator ── */
+.wsIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wsDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tc-foreground-secondary);
+}
+
+.wsDot[data-status="connected"] {
+  background: var(--tc-success);
+  animation: pulse-dot 2s infinite;
+}
+
+.wsDot[data-status="connecting"] {
+  background: var(--tc-warning);
+  animation: pulse-dot 1s infinite;
+}
+
+.wsDot[data-status="disconnected"] {
+  background: var(--tc-foreground-secondary);
+  opacity: 0.5;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.wsLabel {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+}
+
+/* ── Refreshing bar ── */
+.refreshingBar {
+  text-align: center;
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.6;
+  padding: 4px 0;
+}
+
+/* ── Skeleton layout ── */
+.skeletonLeft {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.skeletonRight {
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* ── Loading state ── */
 .loadingCenter {
   display: flex;
