@@ -124,7 +124,7 @@ interface EditorStore {
 }
 ```
 
-### 3.3 AI Patch 格式
+### 3.4 AI Patch 格式
 
 ```typescript
 type NodePatch =
