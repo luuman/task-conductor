@@ -24,6 +24,20 @@
   color: var(--tc-foreground-secondary);
 }
 
+/* Responsive card grid */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cardGrid > .section,
+.cardGrid > .sectionWarning,
+.cardGrid > .sectionDanger {
+  margin-bottom: 0;
+}
+
 /* Section card */
 .section {
   border-radius: 10px;
