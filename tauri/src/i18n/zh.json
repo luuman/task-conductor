@@ -36,7 +36,8 @@
     "empty": "空项目",
     "switch": "切换项目",
     "search": "搜索项目...",
-    "view_all": "查看所有项目"
+    "view_all": "查看所有项目",
+    "global_manage": "全局管理"
   },
   "notification": {
     "title": "通知",
