@@ -3,6 +3,7 @@ import type {
   Metrics, ClaudeUsage, ClaudeOverview, ClaudeConfig, HookRule, McpServer,
   SkillDetail, CommandInfo, RuleInfo, AgentInfo, PresetItem, ClaudeSystemInfo,
   DisabledItem, ProjectComponents, ProjectDetails,
+  TranscriptMessage, ConversationNote,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
