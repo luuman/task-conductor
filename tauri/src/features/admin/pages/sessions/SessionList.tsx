@@ -88,13 +88,23 @@ export function SessionList({ sessions, loading, selectedId, filter, onFilterCha
               <div className={styles.sessionInfo}>
                 <div className={styles.sessionIdRow}>
                   <span className={styles.sessionId}>
-                    {s.session_id.slice(0, 8)}...{s.session_id.slice(-4)}
+                    {s.note?.alias || s.summary || cwdName(s.cwd) || s.provider}
                   </span>
                   <span className={styles.eventBadge}>{s.event_count}</span>
                 </div>
                 <div className={styles.sessionMeta}>
-                  <span className={styles.sessionProvider}>{s.provider}</span>
-                  <span className={styles.metaDot} />
+                  {s.cwd && (
+                    <>
+                      <span>{cwdName(s.cwd)}</span>
+                      <span className={styles.metaDot} />
+                    </>
+                  )}
+                  {s.status && (
+                    <>
+                      <span className={styles.statusTag} data-status={s.status}>{s.status}</span>
+                      <span className={styles.metaDot} />
+                    </>
+                  )}
                   <span>{timeAgo(s.last_event_at)}</span>
                 </div>
               </div>
