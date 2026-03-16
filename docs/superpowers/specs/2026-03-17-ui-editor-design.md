@@ -326,12 +326,21 @@ function generateJSX(node: ComponentNode, allNodes: Record<string, ComponentNode
 | element(text) | TEXT |
 | element(img) | RECTANGLE + Image Fill |
 
-Tailwind classes → Figma 属性：
-- `bg-*` → fills
-- `p-*` / `m-*` → padding
-- `flex` / `grid` → Auto Layout
-- `text-*` → fontSize + fontWeight
-- `rounded-*` → cornerRadius
+Tailwind classes → Figma 属性映射：
+
+| Tailwind | Figma 属性 | 转换规则 |
+|----------|-----------|---------|
+| `bg-{color}` | fills[].color | Tailwind 色值表 → RGBA（如 `bg-indigo-500` → `{r:0.39, g:0.40, b:0.95, a:1}`） |
+| `p-{n}` / `px-{n}` / `py-{n}` | paddingLeft/Right/Top/Bottom | n × 4px（如 `p-4` → 16px） |
+| `m-{n}` | 父 FRAME 的 itemSpacing | 同上 |
+| `flex` / `flex-col` | layoutMode: HORIZONTAL / VERTICAL | Auto Layout 方向 |
+| `grid` / `grid-cols-{n}` | layoutWrap: WRAP + counterAxisSpacing | 网格模拟 |
+| `gap-{n}` | itemSpacing | n × 4px |
+| `text-{size}` | fontSize | Tailwind size 表 → px（如 `text-xl` → 20） |
+| `font-{weight}` | fontWeight | 字面映射（`font-bold` → 700） |
+| `rounded-{n}` | cornerRadius | Tailwind 圆角表 → px |
+| `w-{n}` / `h-{n}` | width / height | n × 4px 或特殊值（`w-full` → FILL_CONTAINER） |
+| 未映射 class | 忽略（不中断导出） | 只映射可视化属性，逻辑类如 `hover:` 跳过 |
 
 ## 9. 后端 API
 
