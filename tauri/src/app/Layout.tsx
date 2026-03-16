@@ -21,7 +21,6 @@ export function Layout() {
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
   const [tasks, setTasks] = useState<Task[]>([])
-  const [projectName, setProjectName] = useState('')
 
   // 加载当前项目的任务列表
   useEffect(() => {
