@@ -14,6 +14,12 @@ function timeAgo(iso: string): string {
   return `${days}d ago`
 }
 
+function cwdName(cwd?: string): string {
+  if (!cwd) return ''
+  const parts = cwd.replace(/\\/g, '/').split('/')
+  return parts[parts.length - 1] || parts[parts.length - 2] || cwd
+}
+
 function sessionEmoji(provider: string): string {
   switch (provider) {
     case 'claude': return '\u{1F916}'
