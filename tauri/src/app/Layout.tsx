@@ -61,6 +61,7 @@ export function Layout() {
   ]
 
   return (
+  <>
     <AppShell>
       <TopBar
         logoIcon={<IconLogo size={22} />}
