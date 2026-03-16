@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { initAuthSync } from '../lib/store/auth'
+import { cache } from '../lib/cache'
 import { ThemeProvider } from '../ui/theme'
 
 const queryClient = new QueryClient({
