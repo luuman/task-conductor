@@ -1,0 +1,257 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.section {
+  border-bottom: 1px solid var(--tc-border);
+  padding-bottom: 4px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--tc-foreground-secondary);
+}
+
+.vsLabel {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--tc-foreground-tertiary, var(--tc-foreground-secondary));
+  font-size: 11px;
+}
+
+.empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: var(--tc-foreground-secondary);
+  font-size: 13px;
+}
+
+/* Branch list */
+.branchList {
+  display: flex;
+  flex-direction: column;
+}
+
+.branchItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 12px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.branchItem:hover {
+  background: var(--tc-bg-hover);
+}
+
+.branchItemActive {
+  background: var(--tc-bg-active);
+}
+
+.branchIcon {
+  font-size: 10px;
+  color: var(--tc-accent);
+}
+
+.branchNameText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remoteTag {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--tc-bg-secondary);
+  color: var(--tc-foreground-secondary);
+}
+
+.virtualBadge {
+  font-size: 14px;
+  cursor: default;
+}
+
+/* Requirement list */
+.requirementList {
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.reqItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.reqItem:hover {
+  background: var(--tc-bg-hover);
+}
+
+.reqItemActive {
+  background: var(--tc-bg-active);
+}
+
+.stageIcon {
+  flex-shrink: 0;
+  font-size: 12px;
+  margin-top: 2px;
+  color: var(--tc-accent);
+}
+
+.reqInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.reqName {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reqMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.branchTag {
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--tc-bg-secondary);
+  color: var(--tc-accent);
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.stageLabel {
+  color: var(--tc-foreground-secondary);
+}
+
+/* File change list */
+.fileList {
+  display: flex;
+  flex-direction: column;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 12px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.fileItem:hover {
+  background: var(--tc-bg-hover);
+}
+
+.fileItemActive {
+  background: var(--tc-bg-active);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.statusM {
+  background: rgba(78, 154, 6, 0.15);
+  color: #4e9a06;
+}
+
+.statusA {
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.statusD {
+  background: rgba(204, 0, 0, 0.15);
+  color: #cc0000;
+}
+
+.statusR {
+  background: rgba(196, 160, 0, 0.15);
+  color: #c4a000;
+}
+
+.fileInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fileName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileDir {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileStat {
+  display: flex;
+  gap: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
+.additions {
+  color: #4e9a06;
+}
+
+.deletions {
+  color: #cc0000;
+}
