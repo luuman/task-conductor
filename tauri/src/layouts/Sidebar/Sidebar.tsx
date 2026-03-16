@@ -45,6 +45,8 @@ export function Sidebar({ header, items, footer, activeKey, onSelect }: SidebarP
             >
               {item.icon && <span className={styles.itemIcon}>{item.icon}</span>}
               <span className={styles.itemLabel}>{item.label}</span>
+              {!sidebarCollapsed && item.badge && <span className={styles.itemBadge}>{item.badge}</span>}
+              {!sidebarCollapsed && item.shortcut && <span className={styles.itemShortcut}>{item.shortcut}</span>}
             </div>
           )
         })}
