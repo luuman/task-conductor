@@ -104,7 +104,8 @@ export function SessionCalendar({ sessions, selectedDate, onSelectDate }: Props)
     const map = new Map<string, number>()
     if (!sessions) return map
     for (const s of sessions) {
-      const d = new Date(s.started_at)
+      const raw = s.started_at.endsWith('Z') || s.started_at.includes('+') ? s.started_at : s.started_at + 'Z'
+      const d = new Date(raw)
       const key = toDateKey(d)
       map.set(key, (map.get(key) ?? 0) + 1)
     }
