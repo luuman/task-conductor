@@ -331,6 +331,18 @@
       "loading": "Loading..."
     }
   },
+  "commandMenu": {
+    "searchPlaceholder": "Search commands...",
+    "empty": "No matching commands found",
+    "backToWorkspace": "Back to Workspace",
+    "toggleTheme": "Toggle Theme",
+    "toggleLanguage": "Toggle Language",
+    "group": {
+      "navigation": "Navigation",
+      "actions": "Actions",
+      "config": "Config"
+    }
+  },
   "settings": {
     "title": "Settings",
     "hint": "Manage app configuration, notifications, pipeline and security options",
