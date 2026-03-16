@@ -57,6 +57,17 @@ export interface AiSession {
   last_event_at: string
 }
 
+export interface SessionEvent {
+  id: number
+  session_id: string
+  event_type: string
+  tool_name: string | null
+  tool_input: unknown
+  tool_result: unknown
+  extra: unknown
+  created_at: string
+}
+
 export interface Settings {
   workspace_root: string
   feishu_app_id: string
