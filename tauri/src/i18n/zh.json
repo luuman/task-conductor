@@ -28,6 +28,14 @@
     "git": "版本控制",
     "panel_placeholder": "面板内容（日志、终端）"
   },
+  "project": {
+    "select_hint": "选择一个项目开始工作",
+    "no_projects": "暂无项目，请在管理后台创建",
+    "recent": "最近打开",
+    "with_content": "有内容",
+    "empty": "空项目",
+    "switch": "切换项目"
+  },
   "auth": {
     "title": "TaskConductor",
     "subtitle": "请输入访问码以继续",
