@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Skeleton, SkeletonCard } from '../../../ui/skeleton/Skeleton'
+import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import { api } from '../../../lib/api'
 import type { Metrics, Project } from '../../../lib/api/types'
 import styles from '../admin.module.css'
