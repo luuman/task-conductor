@@ -193,16 +193,6 @@ export default function SettingsPage() {
     localStorage.setItem('tc_language', lng)
   }, [])
 
-  if (!loaded) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <p style={{ color: 'var(--tc-foreground-secondary)', fontSize: 13 }}>{t('common.loading')}</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={styles.page}>
       <div className={styles.container}>
