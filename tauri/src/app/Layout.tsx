@@ -34,7 +34,6 @@ export function Layout() {
       const projects = await api.getProjects()
       const project = projects.find((p) => String(p.id) === activeProjectId)
       if (project) {
-        setProjectName(project.name)
         const taskList = await api.getTasks(project.id)
         setTasks(taskList)
       }
