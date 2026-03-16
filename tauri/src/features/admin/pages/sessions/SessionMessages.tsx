@@ -68,7 +68,8 @@ function getToolIcon(eventType: string): string {
 
 const SYSTEM_EVENTS = new Set(['SessionStart', 'SessionEnd', 'Stop', 'SubagentStart', 'SubagentStop'])
 
-function toUtcDate(iso: string): Date {
+function toUtcDate(iso: string | undefined | null): Date {
+  if (!iso) return new Date()
   const s = iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z'
   return new Date(s)
 }
