@@ -49,9 +49,9 @@ export function Layout() {
     icon: <IconFileText size={16} />,
   }))
 
-  // 从路径中提取当前 task id
+  // 从路径中提取当前 task id: /project/task/3 → "3"
   const pathParts = location.pathname.split('/')
-  const activeKey = pathParts[1] === 'tasks' ? pathParts[2] ?? '' : ''
+  const activeKey = (pathParts[1] === 'project' && pathParts[2] === 'task') ? pathParts[3] ?? '' : ''
 
   // 面包屑：ProjectSwitcher 作为 prefix，后面只跟当前任务名
   const activeTask = tasks.find((t) => String(t.id) === activeKey)
