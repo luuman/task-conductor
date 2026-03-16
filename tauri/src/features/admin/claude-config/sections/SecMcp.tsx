@@ -139,11 +139,11 @@ export function SecMcp({ showToast }: SectionProps) {
             </div>
             <div className={styles.formRow}>
               <label className={styles.formLabel}>{t('claudeConfig.mcp.scope')}</label>
-              <div className={styles.pillGroup}>
+              <div className={styles.btnGroup}>
                 {SCOPE_OPTIONS.map((opt) => (
                   <button
                     key={opt}
-                    className={formScope === opt ? styles.pillActive : styles.pill}
+                    className={`${styles.btnGroupItem} ${formScope === opt ? styles.btnGroupItemActive : ''}`}
                     onClick={() => setFormScope(opt)}
                     type="button"
                   >
