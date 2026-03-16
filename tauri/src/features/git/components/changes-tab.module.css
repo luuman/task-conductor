@@ -1,0 +1,252 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--tc-foreground-secondary);
+  font-size: 13px;
+}
+
+.branchBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--tc-border);
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+}
+
+.branchIcon {
+  font-size: 14px;
+  color: var(--tc-accent);
+}
+
+.branchName {
+  font-weight: 600;
+}
+
+.section {
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--tc-bg-secondary);
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--tc-foreground-secondary);
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--tc-accent);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.actionBtn:hover {
+  background: var(--tc-bg-hover);
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 12px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.fileRow:hover {
+  background: var(--tc-bg-hover);
+}
+
+.fileRowActive {
+  background: var(--tc-bg-active);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.badgeM {
+  background: rgba(78, 154, 6, 0.15);
+  color: #4e9a06;
+}
+
+.badgeA {
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.badgeD {
+  background: rgba(204, 0, 0, 0.15);
+  color: #cc0000;
+}
+
+.badgeR {
+  background: rgba(196, 160, 0, 0.15);
+  color: #c4a000;
+}
+
+.badgeU {
+  background: rgba(128, 128, 128, 0.15);
+  color: var(--tc-foreground-secondary);
+}
+
+.filePath {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.miniActions {
+  display: flex;
+  gap: 4px;
+}
+
+.miniBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  font-size: 14px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.miniBtn:hover {
+  background: var(--tc-bg-hover);
+  color: var(--tc-foreground-primary);
+}
+
+.miniBtnDanger {
+  composes: miniBtn;
+}
+
+.miniBtnDanger:hover {
+  background: rgba(204, 0, 0, 0.15);
+  color: #cc0000;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--tc-foreground-secondary);
+  font-size: 13px;
+}
+
+.commitArea {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--tc-border);
+}
+
+.commitInput {
+  width: 100%;
+  background: var(--tc-bg-secondary);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+  resize: vertical;
+  font-family: inherit;
+}
+
+.commitInput::placeholder {
+  color: var(--tc-foreground-secondary);
+}
+
+.commitInput:focus {
+  outline: none;
+  border-color: var(--tc-accent);
+}
+
+.commitBtn {
+  padding: 6px 12px;
+  background: var(--tc-accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.commitBtn:hover {
+  opacity: 0.9;
+}
+
+.commitBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.syncBar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--tc-border);
+}
+
+.syncBtn {
+  flex: 1;
+  padding: 5px 0;
+  background: var(--tc-bg-secondary);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+}
+
+.syncBtn:hover {
+  background: var(--tc-bg-hover);
+}
+
+.syncBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
