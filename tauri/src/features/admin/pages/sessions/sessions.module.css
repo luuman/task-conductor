@@ -189,6 +189,24 @@
   flex-shrink: 0;
 }
 
+.statusTag {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.statusTag[data-status="running"] {
+  color: var(--tc-success);
+}
+
+.statusTag[data-status="idle"] {
+  color: var(--tc-warning);
+}
+
+.statusTag[data-status="stopped"] {
+  color: var(--tc-foreground-secondary);
+}
+
 /* ── Right panel (messages) ── */
 .messagePanel {
   flex: 1;
