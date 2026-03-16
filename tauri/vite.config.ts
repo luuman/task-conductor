@@ -17,6 +17,10 @@ export default defineConfig({
     },
   },
 
+  optimizeDeps: {
+    exclude: ['sql.js'],
+  },
+
   server: {
     port: 7071,
     proxy: {
