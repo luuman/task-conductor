@@ -164,4 +164,172 @@ export class HttpAdapter implements ApiAdapter {
       body: JSON.stringify({ value }),
     })
   }
+
+  // ─── Claude Config 完整 API ───
+
+  claudeConfig = {
+    getConfig: () =>
+      this.fetch<ClaudeConfig>('/api/claude-config'),
+
+    getOverview: () =>
+      this.fetch<ClaudeOverview>('/api/claude-config/overview'),
+
+    getHookEvents: () =>
+      this.fetch<string[]>('/api/claude-config/hook-events'),
+
+    updateHooks: (event: string, rules: HookRule[]) =>
+      this.fetch<ClaudeConfig>('/api/claude-config/hooks', {
+        method: 'PUT',
+        body: JSON.stringify({ event, rules }),
+      }),
+
+    deleteHooks: (event: string) =>
+      this.fetch<ClaudeConfig>(`/api/claude-config/hooks/${encodeURIComponent(event)}`, { method: 'DELETE' }),
+
+    updatePlugin: (plugin_id: string, enabled: boolean) =>
+      this.fetch<ClaudeConfig>('/api/claude-config/plugins', {
+        method: 'PUT',
+        body: JSON.stringify({ plugin_id, enabled }),
+      }),
+
+    deletePlugin: (id: string) =>
+      this.fetch<ClaudeConfig>(`/api/claude-config/plugins/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+    updateOtherKey: (key: string, value: unknown) =>
+      this.fetch<ClaudeConfig>(`/api/claude-config/other/${encodeURIComponent(key)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ value }),
+      }),
+
+    deleteOtherKey: (key: string) =>
+      this.fetch<ClaudeConfig>(`/api/claude-config/other/${encodeURIComponent(key)}`, { method: 'DELETE' }),
+
+    updatePermissions: (permissions: Record<string, unknown>) =>
+      this.fetch<ClaudeConfig>('/api/claude-config/permissions', {
+        method: 'PUT',
+        body: JSON.stringify({ permissions }),
+      }),
+
+    getMcpServers: () =>
+      this.fetch<McpServer[]>('/api/claude-config/mcp'),
+
+    addMcpServer: (data: { name: string; url?: string; command?: string; args?: string[]; transport: string; scope: string }) =>
+      this.fetch<{ ok: boolean; output?: string; servers: McpServer[] }>('/api/claude-config/mcp', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    deleteMcpServer: (name: string, scope?: string) => {
+      const params = scope ? `?scope=${encodeURIComponent(scope)}` : ''
+      return this.fetch<{ ok: boolean; servers: McpServer[] }>(
+        `/api/claude-config/mcp/${encodeURIComponent(name)}${params}`,
+        { method: 'DELETE' },
+      )
+    },
+
+    getSkills: () =>
+      this.fetch<SkillDetail[]>('/api/claude-config/skills'),
+
+    toggleSkill: (name: string, enabled: boolean) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/skills/toggle', {
+        method: 'POST',
+        body: JSON.stringify({ name, enabled }),
+      }),
+
+    getCommands: () =>
+      this.fetch<CommandInfo[]>('/api/claude-config/commands'),
+
+    toggleCommand: (name: string, enabled: boolean) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/commands/toggle', {
+        method: 'POST',
+        body: JSON.stringify({ name, enabled }),
+      }),
+
+    createCommand: (name: string, content?: string) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/commands', {
+        method: 'POST',
+        body: JSON.stringify({ name, content }),
+      }),
+
+    deleteCommand: (name: string) =>
+      this.fetch<{ ok: boolean }>(`/api/claude-config/commands/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+
+    getRules: () =>
+      this.fetch<RuleInfo[]>('/api/claude-config/rules'),
+
+    toggleRule: (name: string, enabled: boolean) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/rules/toggle', {
+        method: 'POST',
+        body: JSON.stringify({ name, enabled }),
+      }),
+
+    createRule: (name: string, content?: string) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/rules', {
+        method: 'POST',
+        body: JSON.stringify({ name, content }),
+      }),
+
+    deleteRule: (name: string) =>
+      this.fetch<{ ok: boolean }>(`/api/claude-config/rules/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+
+    getAgents: () =>
+      this.fetch<AgentInfo[]>('/api/claude-config/agents'),
+
+    toggleAgent: (name: string, enabled: boolean) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/agents/toggle', {
+        method: 'POST',
+        body: JSON.stringify({ name, enabled }),
+      }),
+
+    createAgent: (name: string, content?: string) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/agents', {
+        method: 'POST',
+        body: JSON.stringify({ name, content }),
+      }),
+
+    deleteAgent: (name: string) =>
+      this.fetch<{ ok: boolean }>(`/api/claude-config/agents/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+
+    getAgentPresets: () =>
+      this.fetch<PresetItem[]>('/api/claude-config/presets/agents'),
+
+    getCommandPresets: () =>
+      this.fetch<PresetItem[]>('/api/claude-config/presets/commands'),
+
+    getRulePresets: () =>
+      this.fetch<PresetItem[]>('/api/claude-config/presets/rules'),
+
+    getSystemInfo: () =>
+      this.fetch<ClaudeSystemInfo>('/api/claude-config/system-info'),
+
+    getClaudeMd: () =>
+      this.fetch<{ content: string; path: string }>('/api/claude-config/claude-md'),
+
+    updateClaudeMd: (content: string) =>
+      this.fetch<{ content: string; path: string }>('/api/claude-config/claude-md', {
+        method: 'PUT',
+        body: JSON.stringify({ content }),
+      }),
+
+    getDisabledItems: () =>
+      this.fetch<DisabledItem[]>('/api/claude-config/disabled-items'),
+
+    restoreDisabledItem: (type: string, name: string) =>
+      this.fetch<{ ok: boolean }>('/api/claude-config/disabled-items/restore', {
+        method: 'POST',
+        body: JSON.stringify({ type, name }),
+      }),
+
+    deleteDisabledItem: (type: string, name: string) =>
+      this.fetch<{ ok: boolean }>(
+        `/api/claude-config/disabled-items/${encodeURIComponent(type)}/${encodeURIComponent(name)}`,
+        { method: 'DELETE' },
+      ),
+
+    getProjectComponents: (dirName: string) =>
+      this.fetch<ProjectComponents>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/components`),
+
+    getProjectDetails: (dirName: string) =>
+      this.fetch<ProjectDetails>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/details`),
+  }
 }
