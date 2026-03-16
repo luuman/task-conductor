@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
@@ -13,6 +14,7 @@ interface SectionProps {
 }
 
 export function SecPlugins({ config, overview, onConfigUpdate, showToast }: SectionProps) {
+  const { t } = useTranslation()
   const plugins = config?.enabled_plugins ?? {}
   const pluginIds = Object.keys(plugins)
 
@@ -24,28 +26,26 @@ export function SecPlugins({ config, overview, onConfigUpdate, showToast }: Sect
     try {
       const result = await api.claudeConfig.updatePlugin(id, enabled)
       onConfigUpdate(result)
-      showToast(`${id} ${enabled ? 'enabled' : 'disabled'}`)
     } catch {
-      showToast('Failed to update plugin')
+      showToast(t('claudeConfig.plugins.toggleFailed'))
     }
-  }, [onConfigUpdate, showToast])
+  }, [onConfigUpdate, showToast, t])
 
   const handleDelete = useCallback(async (id: string) => {
     try {
       const result = await api.claudeConfig.deletePlugin(id)
       onConfigUpdate(result)
-      showToast(`Deleted ${id}`)
     } catch {
-      showToast('Failed to delete plugin')
+      showToast(t('claudeConfig.plugins.deleteFailed'))
     }
-  }, [onConfigUpdate, showToast])
+  }, [onConfigUpdate, showToast, t])
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="🧩" title="插件" />
+      <SectionHeader icon="&#x1F9E9;" title={t('claudeConfig.plugins.title')} />
 
       {pluginIds.length === 0 ? (
-        <div className={styles.sectionPlaceholder}>No plugins installed</div>
+        <div className={styles.sectionPlaceholder}>{t('claudeConfig.plugins.empty')}</div>
       ) : (
         <div className={styles.card}>
           {pluginIds.map((id) => {
@@ -71,7 +71,7 @@ export function SecPlugins({ config, overview, onConfigUpdate, showToast }: Sect
                   onClick={() => handleDelete(id)}
                   type="button"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             )
@@ -81,3 +81,5 @@ export function SecPlugins({ config, overview, onConfigUpdate, showToast }: Sect
     </div>
   )
 }
+
+export default SecPlugins
