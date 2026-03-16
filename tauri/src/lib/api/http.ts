@@ -37,6 +37,8 @@ export class HttpAdapter implements ApiAdapter {
   createProject(data: { name: string; description?: string }) {
     return this.fetch<Project>('/api/projects', { method: 'POST', body: JSON.stringify(data) })
   }
+  getProjectFiles(projectId: number) { return this.fetch<{ path: string; items: FileItem[] }>(`/api/projects/${projectId}/files`) }
+  getProjectKnowledge(projectId: number) { return this.fetch<ProjectKnowledge[]>(`/api/projects/${projectId}/knowledge`) }
   getTasks(projectId: number) { return this.fetch<Task[]>(`/api/projects/${projectId}/tasks`) }
   getTask(taskId: number) { return this.fetch<Task>(`/api/tasks/${taskId}`) }
   createTask(projectId: number, data: { title: string; description?: string }) {
