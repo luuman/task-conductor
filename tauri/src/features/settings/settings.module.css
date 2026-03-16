@@ -422,3 +422,33 @@
   border-color: color-mix(in srgb, var(--tc-border-active) 40%, transparent);
   color: var(--tc-border-active);
 }
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  top: 60px;
+  right: 24px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
+  color: var(--tc-foreground);
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: toastIn 0.2s ease-out;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Dirty state for inputs (edited but not saved) */
+.fieldInputDirty {
+  border-color: color-mix(in srgb, var(--tc-border-active) 60%, transparent);
+}
+
+.numberInputDirty {
+  border-color: color-mix(in srgb, var(--tc-border-active) 60%, transparent);
+}
