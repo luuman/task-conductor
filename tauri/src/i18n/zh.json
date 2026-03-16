@@ -124,6 +124,30 @@
       "no_sessions": "暂无会话记录"
     }
   },
+  "claudeConfig": {
+    "searchPlaceholder": "搜索...",
+    "comingSoon": "即将推出",
+    "nav": {
+      "core": "核心",
+      "extensions": "扩展",
+      "security": "安全",
+      "system": "系统",
+      "overview": "概览",
+      "settings": "设置",
+      "skills": "Skills",
+      "agents": "Agents",
+      "commands": "Commands",
+      "mcp": "MCP 服务器",
+      "hooks": "Hooks",
+      "rules": "Rules",
+      "permissions": "权限",
+      "env": "环境变量",
+      "plugins": "插件",
+      "monitoring": "监控",
+      "trash": "回收站",
+      "about": "关于"
+    }
+  },
   "settings": {
     "title": "设置",
     "hint": "管理应用配置、通知、流水线和安全选项",
