@@ -334,7 +334,7 @@ export function SessionMessages({ session, onDeselect }: Props) {
             // Show date divider if day changed
             const prevEvent = idx > 0 ? events[idx - 1] : null
             const showDateDivider = !prevEvent ||
-              new Date(event.created_at).toDateString() !== new Date(prevEvent.created_at).toDateString()
+              toUtcDate(event.created_at).toDateString() !== toUtcDate(prevEvent.created_at).toDateString()
             const dateLabel = showDateDivider ? getDateLabel(event.created_at) : null
 
             const detail = isNotification
