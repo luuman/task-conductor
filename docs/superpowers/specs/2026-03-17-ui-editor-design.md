@@ -308,9 +308,12 @@ function generateJSX(node: ComponentNode, allNodes: Record<string, ComponentNode
 
 ### 8.1 移植范围
 
-从 OpenPencil `src/services/figma/` 移植 .fig 文件编码器：
-- ComponentNode → Figma Document JSON
-- Figma Document JSON → .fig 二进制（ZIP 压缩）
+从 OpenPencil 仓库 `src/services/figma/` 目录移植 .fig 文件编码器（本地源码，MIT 协议）：
+- `figma-encoder.ts` — Figma Document JSON → .fig 二进制（ZIP 压缩格式）
+- `figma-types.ts` — Figma 节点类型定义
+- 新增 `component-to-figma.ts` — ComponentNode → Figma Document JSON 转换层
+
+.fig 文件格式：ZIP 包含 `document.json`（Figma 文档树）+ `meta.json`（元信息），Figma 可直接打开。
 
 ### 8.2 映射规则
 
