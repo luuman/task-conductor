@@ -444,20 +444,22 @@ export default function AdminSessions() {
                 className={selectedId === s.session_id ? styles.sessionBtnActive : styles.sessionBtn}
                 onClick={() => handleSelectSession(s.session_id)}
               >
-                {/* Row 1: session_id (8 chars) + StatusBadge */}
+                {/* Row 1: summary or cwd + StatusBadge */}
                 <div className={styles.sessionRow1}>
-                  <span className={styles.sessionIdMono}>
-                    {s.session_id.slice(0, 8)}
+                  <span className={styles.sessionSummary}>
+                    {s.summary || cwdShort(s.cwd) || s.session_id.slice(0, 8)}
                   </span>
                   <StatusBadge status={s.status} />
                 </div>
-                {/* Row 2: cwd path (last 2 segments) */}
+                {/* Row 2: cwd path */}
                 <p className={styles.sessionCwd} title={s.cwd}>
                   {cwdShort(s.cwd) || '\u2014'}
                 </p>
-                {/* Row 3: event count */}
+                {/* Row 3: event count + time */}
                 <p className={styles.sessionCount}>
                   {s.event_count} {t('admin.sessions.events')}
+                  {' · '}
+                  {parseTs(s.last_seen_at || s.last_event_at || s.started_at).toLocaleTimeString(undefined, { hour12: false })}
                 </p>
               </button>
             ))
