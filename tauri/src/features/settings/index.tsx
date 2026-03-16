@@ -11,6 +11,8 @@ import styles from './settings.module.css'
 
 const ALL_STAGES = ['input', 'analysis', 'prd', 'ui', 'plan', 'dev', 'test', 'deploy', 'monitor']
 
+const CACHE_KEY = 'tc-settings-cache'
+
 const DEFAULT_SETTINGS: Settings = {
   workspace_root: '',
   feishu_app_id: '', feishu_app_secret: '', feishu_owner_id: '', feishu_default_chat_id: '',
@@ -24,6 +26,18 @@ const DEFAULT_SETTINGS: Settings = {
   security_tunnel_enabled: false,
 }
 
+function readCache(): Settings {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }
+  } catch { /* ignore */ }
+  return DEFAULT_SETTINGS
+}
+
+function writeCache(s: Settings) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(s)) } catch { /* ignore */ }
+}
+
 type TokenStatus = 'checking' | 'valid' | 'invalid'
 type ActionStatus = 'idle' | 'loading' | 'ok' | 'error'
 
@@ -33,8 +47,7 @@ export default function SettingsPage() {
   const { theme, setTheme, themes } = useTheme()
   const { logout } = useAuthStore()
 
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
-  const [loaded, setLoaded] = useState(false)
+  const [settings, setSettings] = useState<Settings>(readCache)
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>('checking')
   const [checking, setChecking] = useState(false)
   const [newPin, setNewPin] = useState('')
@@ -52,11 +65,11 @@ export default function SettingsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 2500)
   }, [])
 
-  // 加载设置
+  // 后台同步：拉取后端最新设置，静默更新
   useEffect(() => {
     api.getSettings()
-      .then(s => { setSettings(s); setLoaded(true) })
-      .catch(() => setLoaded(true))
+      .then(s => { setSettings(s); writeCache(s) })
+      .catch(() => {})
     checkToken()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
