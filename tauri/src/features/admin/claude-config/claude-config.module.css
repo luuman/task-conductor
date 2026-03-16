@@ -638,6 +638,86 @@
   font-weight: 600;
 }
 
+/* ===== Pill button groups ===== */
+.pillGroup {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 4px 12px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pill:hover {
+  color: var(--tc-foreground);
+}
+
+.pillActive {
+  composes: pill;
+  background: color-mix(in srgb, var(--tc-border-active) 15%, transparent);
+  border-color: color-mix(in srgb, var(--tc-border-active) 50%, transparent);
+  color: var(--tc-border-active);
+}
+
+/* ===== CLAUDE.md categorized sections ===== */
+.mdSections {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mdSectionCard {
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  background: var(--tc-content-bg);
+  overflow: hidden;
+}
+
+.mdSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  color: var(--tc-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.12s;
+}
+
+.mdSectionHeader:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.mdSectionChevron {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+  width: 14px;
+}
+
+.mdSectionTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.mdSectionBody {
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--tc-border);
+}
+
 /* ===== Skeleton loading for sections ===== */
 .sectionSkeleton {
   padding: 24px;
