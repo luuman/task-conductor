@@ -7,6 +7,7 @@ import { ProtectedRoute } from './ProtectedRoute'
 
 const AuthPage      = lazy(() => import('../features/auth'))
 const DashboardPage = lazy(() => import('../features/dashboard'))
+const SettingsPage  = lazy(() => import('../features/settings'))
 
 const PlaceholderPage = lazy(() =>
   Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
