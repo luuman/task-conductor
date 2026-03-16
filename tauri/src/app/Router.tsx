@@ -3,6 +3,7 @@ import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router
 import { isTauri } from '../lib/tauri'
 import { Layout } from './Layout'
 import { PageLoading } from './PageLoading'
+import { ProtectedRoute } from './ProtectedRoute'
 
 const AuthPage      = lazy(() => import('../features/auth'))
 const DashboardPage = lazy(() => import('../features/dashboard'))
@@ -19,7 +20,13 @@ export function AppRouter() {
       <Suspense fallback={<PageLoading />}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
-          <Route element={<Layout />}>
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
             <Route path="/" element={<DashboardPage />} />
             <Route path="/tasks/:id"    element={<PlaceholderPage />} />
             <Route path="/task-manager" element={<PlaceholderPage />} />
