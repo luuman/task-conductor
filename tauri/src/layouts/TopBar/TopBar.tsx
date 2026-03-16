@@ -69,8 +69,13 @@ export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole
         <button className={styles.iconBtn} aria-label="Messages" onClick={onMessageClick}>
           <IconMessage size={18} />
         </button>
-        <button className={styles.iconBtn} aria-label="Notifications" onClick={onNotificationClick}>
+        <button className={`${styles.iconBtn} ${styles.bellWrap}`} aria-label="Notifications" onClick={onNotificationClick}>
           <IconBell size={18} />
+          {(unreadCount ?? 0) > 0 && (
+            <span className={styles.bellBadge}>
+              {(unreadCount ?? 0) > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
         <div className={styles.userSection}>
           <div className={styles.avatar}>
