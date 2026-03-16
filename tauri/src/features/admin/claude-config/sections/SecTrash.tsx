@@ -97,7 +97,7 @@ export function SecTrash({ showToast }: SectionProps) {
       />
 
       {items.length === 0 ? (
-        <div className={styles.sectionPlaceholder}>{t('claudeConfig.trash.empty')}</div>
+        <EmptyState icon="\uD83D\uDDD1\uFE0F" title={t('claudeConfig.trash.empty')} />
       ) : (
         <div className={styles.card}>
           {items.map((item) => (
