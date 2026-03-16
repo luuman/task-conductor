@@ -4,7 +4,30 @@ export interface Project {
   id: number
   name: string
   description: string | null
+  repo_url: string
+  max_parallel: number
+  execution_mode: string
+  is_test: boolean
+  sort_order: number
   created_at: string
+}
+
+export interface ProjectKnowledge {
+  id: number
+  stage: string
+  category: string
+  title: string
+  content: string
+  source_task_id: number | null
+  created_at: string
+}
+
+export interface FileItem {
+  name: string
+  path: string
+  is_dir: boolean
+  size: number | null
+  modified: string
 }
 
 export interface Task {
