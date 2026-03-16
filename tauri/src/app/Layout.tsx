@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation, useParams } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
 import { IconFileText, IconLayoutGrid, IconLogo } from '../ui/icon'
