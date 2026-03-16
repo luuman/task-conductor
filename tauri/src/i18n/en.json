@@ -124,6 +124,30 @@
       "no_sessions": "No sessions found"
     }
   },
+  "claudeConfig": {
+    "searchPlaceholder": "Search...",
+    "comingSoon": "Coming soon",
+    "nav": {
+      "core": "Core",
+      "extensions": "Extensions",
+      "security": "Security",
+      "system": "System",
+      "overview": "Overview",
+      "settings": "Settings",
+      "skills": "Skills",
+      "agents": "Agents",
+      "commands": "Commands",
+      "mcp": "MCP Servers",
+      "hooks": "Hooks",
+      "rules": "Rules",
+      "permissions": "Permissions",
+      "env": "Environment",
+      "plugins": "Plugins",
+      "monitoring": "Monitoring",
+      "trash": "Trash",
+      "about": "About"
+    }
+  },
   "settings": {
     "title": "Settings",
     "hint": "Manage app configuration, notifications, pipeline and security options",
