@@ -1,0 +1,93 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--tc-border);
+  background: var(--tc-bg-secondary);
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.modeSwitch {
+  display: flex;
+  gap: 2px;
+  background: var(--tc-bg-primary);
+  border-radius: 4px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.modeBtn {
+  padding: 3px 8px;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+}
+
+.modeBtn:hover {
+  color: var(--tc-foreground-primary);
+}
+
+.modeBtnActive {
+  background: var(--tc-bg-hover);
+  color: var(--tc-foreground-primary);
+}
+
+.editorArea {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--tc-foreground-secondary);
+  font-size: 14px;
+  gap: 8px;
+}
+
+.placeholderIcon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-top: 1px solid var(--tc-border);
+  background: var(--tc-bg-secondary);
+  font-size: 12px;
+  color: var(--tc-accent);
+  flex-shrink: 0;
+}
+
+.statusDetail {
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+}
