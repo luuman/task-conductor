@@ -34,7 +34,9 @@
     "recent": "最近打开",
     "with_content": "有内容",
     "empty": "空项目",
-    "switch": "切换项目"
+    "switch": "切换项目",
+    "search": "搜索项目...",
+    "view_all": "查看所有项目"
   },
   "notification": {
     "title": "通知",
