@@ -69,7 +69,7 @@ export function SecSkills({ showToast }: SectionProps) {
         {/* List */}
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {skills.length === 0 ? (
-            <div className={styles.sectionPlaceholder}>{t('claudeConfig.skills.empty')}</div>
+            <EmptyState icon="\u2728" title={t('claudeConfig.skills.empty')} />
           ) : (
             skills.map((skill) => (
               <div
