@@ -88,12 +88,6 @@ function formatResult(result: unknown): string {
   try { return JSON.stringify(result, null, 2).slice(0, 2000) } catch { return '' }
 }
 
-function cwdName(cwd?: string): string {
-  if (!cwd) return ''
-  const parts = cwd.replace(/\/$/, '').split('/')
-  return parts[parts.length - 1] || ''
-}
-
 // ── Collapsible result block ──
 
 function CollapsibleResult({ result }: { result: unknown }) {
@@ -125,6 +119,7 @@ export function SessionMessages({ session, onDeselect }: Props) {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
+  const [filter, setFilter] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const shouldAutoScroll = useRef(true)
 
@@ -161,7 +156,6 @@ export function SessionMessages({ session, onDeselect }: Props) {
       setEvents(cached)
       setLoading(false)
       setRefreshing(true)
-      // Scroll to bottom with cached data immediately
       requestAnimationFrame(() => scrollToBottom('instant'))
     } else {
       setLoading(true)
@@ -173,7 +167,6 @@ export function SessionMessages({ session, onDeselect }: Props) {
         cacheSet(session.session_id, evs)
         setLoading(false)
         setRefreshing(false)
-        // Scroll to bottom on first load
         requestAnimationFrame(() => scrollToBottom('instant'))
       })
       .catch(() => {
@@ -237,13 +230,31 @@ export function SessionMessages({ session, onDeselect }: Props) {
     }
   }, [events, scrollToBottom])
 
-  // ── Empty state ──
+  // ── Filtered events ──
+
+  const filteredEvents = filter.trim()
+    ? events.filter(e => {
+        const q = filter.toLowerCase()
+        return (e.tool_name?.toLowerCase().includes(q))
+          || e.event_type.toLowerCase().includes(q)
+          || getToolDetail(e.tool_name, e.tool_input).toLowerCase().includes(q)
+      })
+    : events
+
+  // ── Empty state (no session selected) ──
 
   if (!session) {
     return (
       <div className={styles.messagePanel}>
+        {/* Toolbar: no session */}
+        <div className={styles.toolbar}>
+          <span className={styles.toolbarLabel}>
+            {t('admin.sessions.list')}
+          </span>
+          <div />
+        </div>
         <EmptyState
-          icon={'\u2328'}
+          icon={'\u2317'}
           title={t('admin.sessions.select_session')}
           description={t('admin.sessions.select_session_hint')}
         />
@@ -251,64 +262,49 @@ export function SessionMessages({ session, onDeselect }: Props) {
     )
   }
 
-  const headerTitle = session.note?.alias || session.summary || cwdName(session.cwd) || session.provider
-  const headerMeta = [
-    cwdName(session.cwd),
-    `${session.event_count} ${t('admin.sessions.events')}`,
-  ].filter(Boolean).join(' \u00B7 ')
-
   return (
     <div className={styles.messagePanel}>
-      {/* Header */}
-      <div className={styles.messageHeader}>
-        <div className={styles.messageHeaderLeft}>
-          <span className={styles.messageHeaderAvatar}>{'\uD83E\uDD16'}</span>
-          <div className={styles.messageHeaderInfo}>
-            <span className={styles.messageHeaderTitle}>{headerTitle}</span>
-            <div className={styles.messageHeaderMeta}>
-              <span>{headerMeta}</span>
-              {session.status && (
-                <span className={styles.statusDot} data-status={session.status} />
-              )}
-            </div>
-          </div>
-        </div>
-        <div className={styles.headerRight}>
-          {/* WS status indicator */}
-          <div className={styles.wsIndicator}>
+      {/* Toolbar */}
+      <div className={styles.toolbar}>
+        <div className={styles.toolbarLeft}>
+          <button className={styles.toolbarSessionBtn} onClick={onDeselect}>
+            <span style={{ color: 'var(--tc-border-active)' }}>{session.session_id.slice(0, 8)}</span>
+            <span style={{ color: 'var(--tc-foreground-secondary)', marginLeft: 6 }}>{'\u2715'}</span>
+          </button>
+          {/* WS status dot */}
+          <div className={styles.toolbarWsGroup}>
             <span
-              className={styles.wsDot}
+              className={styles.toolbarWsDot}
               data-status={wsStatus}
             />
-            <span className={styles.wsLabel}>
+            <span className={styles.toolbarWsLabel}>
               {wsStatus === 'connected' ? 'live' : wsStatus === 'connecting' ? '...' : 'off'}
             </span>
           </div>
-          <button
-            className={styles.messageHeaderBack}
-            onClick={onDeselect}
-          >
-            {'\u2190'} {t('common.back')}
-          </button>
         </div>
+        <input
+          className={styles.toolbarFilter}
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          placeholder={t('admin.sessions.search_placeholder')}
+        />
       </div>
 
       {/* Messages */}
       {loading ? (
         <div className={styles.messageBody}>
-          {/* Skeleton bubbles */}
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className={i % 2 === 0 ? styles.skeletonLeft : styles.skeletonRight}
+              className={i % 2 === 0 ? styles.bubbleLeft : styles.bubbleRight}
             >
               <Skeleton variant="rect" width={200 + (i % 3) * 40} height={52} borderRadius={12} />
             </div>
           ))}
         </div>
-      ) : events.length === 0 ? (
+      ) : filteredEvents.length === 0 ? (
         <div className={styles.loadingCenter}>
-          <span>{t('admin.sessions.no_events')}</span>
+          <span>{filter ? t('admin.sessions.no_events') : t('admin.sessions.no_events')}</span>
         </div>
       ) : (
         <div
@@ -316,14 +312,11 @@ export function SessionMessages({ session, onDeselect }: Props) {
           ref={scrollRef}
           onScroll={handleScroll}
         >
-          {/* Refreshing indicator */}
           {refreshing && (
-            <div className={styles.refreshingBar}>
-              refreshing...
-            </div>
+            <div className={styles.refreshingBar}>refreshing...</div>
           )}
 
-          {events.map((event, idx) => {
+          {filteredEvents.map((event, idx) => {
             const isSystem = SYSTEM_EVENTS.has(event.event_type)
             const isOutgoing = event.event_type === 'PreToolUse'
             const isNotification = event.event_type === 'Notification'
@@ -332,59 +325,42 @@ export function SessionMessages({ session, onDeselect }: Props) {
             const icon = getToolIcon(event.event_type)
             const toolName = event.tool_name || event.event_type
 
-            // Show date divider if day changed
-            const prevEvent = idx > 0 ? events[idx - 1] : null
-            const showDateDivider = !prevEvent ||
-              toUtcDate(event.created_at).toDateString() !== toUtcDate(prevEvent.created_at).toDateString()
-            const dateLabel = showDateDivider ? getDateLabel(event.created_at) : null
-
             const detail = isNotification
               ? String((event.extra as Record<string, unknown>)?.message || '').slice(0, 160)
               : getToolDetail(event.tool_name, event.tool_input)
 
-            return (
-              <div key={`${event.id}-${idx}`}>
-                {/* Date divider */}
-                {dateLabel && (
-                  <div className={styles.dateDivider}>
-                    <div className={styles.dateDividerLine} />
-                    <span className={styles.dateDividerLabel}>{dateLabel}</span>
-                    <div className={styles.dateDividerLine} />
-                  </div>
-                )}
+            // System event -> centered pill
+            if (isSystem) {
+              return (
+                <div key={`${event.id}-${idx}`} className={styles.bubbleCenter}>
+                  <span className={styles.systemPill}>
+                    <span className={styles.systemIcon}>{icon}</span>
+                    <span>{toolName}</span>
+                    {detail && <span style={{ opacity: 0.7 }}>{'\u00B7'} {detail}</span>}
+                    <span className={styles.systemTs}>{formatTimeFull(event.created_at)}</span>
+                  </span>
+                </div>
+              )
+            }
 
-                {/* System event → centered pill */}
-                {isSystem ? (
-                  <div className={styles.systemRow}>
-                    <span className={styles.systemPill}>
-                      <span className={styles.systemIcon}>{icon}</span>
-                      <span>{toolName}</span>
-                      <span className={styles.systemTs}>{formatTimeFull(event.created_at)}</span>
+            // PreToolUse -> left, PostToolUse -> right, Notification -> left
+            const isLeft = isOutgoing || isNotification
+            return (
+              <div key={`${event.id}-${idx}`} className={isLeft ? styles.bubbleLeft : styles.bubbleRight}>
+                <div className={`${styles.bubbleCard} ${isLeft ? styles.bubbleCardOutgoing : styles.bubbleCardIncoming}`}>
+                  {/* Header: tool icon + tool name | timestamp */}
+                  <div className={styles.bubbleHeader}>
+                    <span className={isOutgoing ? styles.bubbleToolNameBlue : isNotification ? styles.bubbleToolNameYellow : styles.bubbleToolNameGreen}>
+                      <span style={{ marginRight: 4 }}>{icon}</span>
+                      {toolName}
                     </span>
+                    <span className={styles.bubbleTs}>{formatTimeFull(event.created_at)}</span>
                   </div>
-                ) : (
-                  /* PreToolUse → left (outgoing), PostToolUse → right (incoming), Notification → left */
-                  <div className={isOutgoing ? styles.bubbleRowLeft : isNotification ? styles.bubbleRowLeft : styles.bubbleRowRight}>
-                    <div className={
-                      isOutgoing
-                        ? styles.bubbleOutgoing
-                        : isNotification
-                          ? styles.bubbleNotification
-                          : styles.bubbleIncoming
-                    }>
-                      {/* Header: icon + tool name */}
-                      <div className={styles.bubbleHeader}>
-                        <span className={styles.bubbleToolIcon} data-type={event.event_type}>{icon}</span>
-                        <span className={styles.bubbleToolName} data-type={event.event_type}>{toolName}</span>
-                        <span className={styles.bubbleTs}>{formatTimeFull(event.created_at)}</span>
-                      </div>
-                      {/* Detail text */}
-                      {detail && <div className={styles.bubbleDetail}>{detail}</div>}
-                      {/* Collapsible result for PostToolUse */}
-                      {isResult && <CollapsibleResult result={event.tool_result} />}
-                    </div>
-                  </div>
-                )}
+                  {/* Detail text */}
+                  {detail && <div className={styles.bubbleDetail}>{detail}</div>}
+                  {/* Collapsible result for PostToolUse */}
+                  {isResult && <CollapsibleResult result={event.tool_result} />}
+                </div>
               </div>
             )
           })}
@@ -393,21 +369,16 @@ export function SessionMessages({ session, onDeselect }: Props) {
 
       {/* Status bar */}
       <div className={styles.statusBar}>
-        <span>{events.length} {t('admin.sessions.events')}</span>
-        <span>{formatTimeFull(session.started_at)}</span>
+        <span>{filteredEvents.length} {t('admin.sessions.events')}</span>
+        {filter && (
+          <button
+            className={styles.statusBarClearBtn}
+            onClick={() => setFilter('')}
+          >
+            {t('admin.sessions.clear_filter')}
+          </button>
+        )}
       </div>
     </div>
   )
-}
-
-// ── Helper ──
-
-function getDateLabel(iso: string): string {
-  const d = toUtcDate(iso)
-  const today = new Date()
-  if (d.toDateString() === today.toDateString()) return 'Today'
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
-  return d.toLocaleDateString()
 }
