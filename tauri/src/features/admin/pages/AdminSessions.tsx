@@ -21,7 +21,6 @@ function relativeTime(iso: string): string {
   const mins = Math.floor(diff / 60000)
   if (mins < 1) return '\u521A\u521A' // 刚刚
   if (mins < 60) return `${mins}\u5206\u949F\u524D`
-  const hours = Math.floor(mins / 60)
   if (d.toDateString() === now.toDateString())
     return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
   const yesterday = new Date(now)
