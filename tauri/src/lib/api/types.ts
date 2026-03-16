@@ -113,6 +113,70 @@ export interface ClaudeUsage {
   performance: Record<string, unknown>
 }
 
+export interface HookEntry {
+  type: string
+  command: string
+  timeout: number
+}
+
+export interface HookRule {
+  matcher: string
+  hooks: HookEntry[]
+}
+
+export interface McpServer {
+  name: string
+  url: string | null
+  command: string | null
+  args: string[] | null
+  transport: string
+  status: string
+  scope: string
+}
+
+export interface SkillInfo {
+  name: string
+  path: string
+}
+
+export interface ProjectRef {
+  dir_name: string
+  has_memory: boolean
+  has_claude_md: boolean
+}
+
+export interface DailyActivity {
+  date: string
+  message_count: number
+  session_count: number
+  tool_call_count: number
+}
+
+export interface ClaudeOverview {
+  cli_version: string
+  home_path: string
+  total_messages: number
+  total_tool_calls: number
+  total_sessions: number
+  first_active_day: string | null
+  last_active_day: string | null
+  active_days: number
+  daily_activity: DailyActivity[]
+  installed_plugins: Array<{ plugin_id: string; name: string; publisher: string; scope: string; version: string }>
+  skills: SkillInfo[]
+  hook_scripts: Array<{ name: string; path: string; size_bytes: number }>
+  projects: ProjectRef[]
+  mcp_servers: McpServer[]
+}
+
+export interface ClaudeConfig {
+  hooks: Record<string, HookRule[]>
+  enabled_plugins: Record<string, boolean>
+  permissions: Record<string, unknown>
+  other: Record<string, unknown>
+  raw: Record<string, unknown>
+}
+
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
