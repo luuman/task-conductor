@@ -21,6 +21,12 @@ export default defineConfig({
     exclude: ['sql.js'],
   },
 
+  // sql.js 的 browser 版本是 UMD 格式，Vite ESM 不兼容；
+  // 强制使用 CJS 版本（sql-wasm.js），Vite 会自动转换为 ESM
+  ssr: {
+    noExternal: ['sql.js'],
+  },
+
   server: {
     port: 7071,
     proxy: {
