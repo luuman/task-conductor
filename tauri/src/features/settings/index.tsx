@@ -90,13 +90,17 @@ export default function SettingsPage() {
   // 保存单个设置字段（用于 toggle / pill 等即时操作）
   const updateSetting = useCallback(async <K extends keyof Settings>(key: K, value: Settings[K]) => {
     const prev = { ...settings }
-    setSettings(s => ({ ...s, [key]: value }))
+    const next = { ...settings, [key]: value }
+    setSettings(next)
+    writeCache(next)
     try {
       const updated = await api.updateSettings({ [key]: value })
       setSettings(updated)
+      writeCache(updated)
       showToast(t('settings.toast.saved'))
     } catch {
       setSettings(prev)
+      writeCache(prev)
       showToast(t('settings.toast.saveFailed'))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
