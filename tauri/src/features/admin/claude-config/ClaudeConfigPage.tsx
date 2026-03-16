@@ -250,6 +250,16 @@ export default function ClaudeConfigPage() {
 
       {/* ── Right content ── */}
       <div className={styles.content} ref={contentRef}>
+        {/* Page Header */}
+        <div className={styles.pageHeader}>
+          <div className={styles.breadcrumb}>
+            <span className={styles.breadcrumbItem}>{t('admin.title')}</span>
+            <span className={styles.breadcrumbSep}>/</span>
+            <span className={styles.breadcrumbCurrent}>{t('claudeConfig.nav.' + activeId)}</span>
+          </div>
+          <h1 className={styles.pageTitle}>{t('claudeConfig.nav.' + activeId)}</h1>
+        </div>
+
         {ALL_SECTION_IDS.map((id) => (
           <div
             key={id}
