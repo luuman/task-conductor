@@ -1,7 +1,10 @@
 /* Overlay */
 .overlay {
   position: fixed;
-  inset: 0;
+  top: var(--tc-topbar-height, 48px);
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 900;
   background: rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.2s ease-out;
@@ -15,7 +18,7 @@
 /* Panel */
 .panel {
   position: fixed;
-  top: 0;
+  top: var(--tc-topbar-height, 48px);
   right: 0;
   bottom: 0;
   width: 380px;
