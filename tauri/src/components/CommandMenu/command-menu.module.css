@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 560px;
+  background: var(--tc-bg-primary);
+  border: 1px solid var(--tc-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 480px;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+}
+
+.searchIcon {
+  color: var(--tc-text-secondary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  padding: 14px 0;
+  color: var(--tc-text-primary);
+  font-family: inherit;
+}
+
+.searchInput::placeholder {
+  color: var(--tc-text-secondary);
+}
+
+.divider {
+  height: 1px;
+  background: var(--tc-border);
+  flex-shrink: 0;
+}
+
+.results {
+  overflow-y: auto;
+  padding: 8px 0;
+  flex: 1;
+}
+
+.groupLabel {
+  padding: 8px 16px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tc-text-secondary);
+  user-select: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  gap: 10px;
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.item:hover,
+.item[data-selected='true'] {
+  background: var(--tc-bg-hover);
+}
+
+.itemIcon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.itemLabel {
+  flex: 1;
+  font-size: 14px;
+  color: var(--tc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemShortcut {
+  font-size: 11px;
+  color: var(--tc-text-secondary);
+  background: var(--tc-bg-secondary);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--tc-text-secondary);
+}
