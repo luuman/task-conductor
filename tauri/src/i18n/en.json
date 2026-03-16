@@ -65,7 +65,24 @@
     },
     "dashboard": {
       "title": "Dashboard",
-      "hint": "System overview and key metrics"
+      "hint": "System overview and key metrics",
+      "total_tasks": "Total Tasks",
+      "statuses": "statuses",
+      "ai_rating": "AI Rating",
+      "confidence": "Confidence",
+      "avg_response": "Avg Response",
+      "per_call": "Per call",
+      "uptime": "Uptime",
+      "availability": "Availability",
+      "task_status": "Task Status",
+      "projects": "Projects",
+      "total": "total",
+      "no_tasks": "No task data",
+      "no_projects": "No projects",
+      "performance": "Performance",
+      "interactions": "Total Interactions",
+      "approval_rate": "Approval Rate",
+      "avg_duration": "Avg Task Duration"
     },
     "claude_config": {
       "title": "Claude Config",
