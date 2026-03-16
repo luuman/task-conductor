@@ -64,7 +64,7 @@ export function AppRouter() {
             <Route path="/config"         element={<PlaceholderPage />} />
             <Route path="/knowledge"      element={<PlaceholderPage />} />
             <Route path="/mcp"            element={<PlaceholderPage />} />
-            <Route path="/files"          element={<PlaceholderPage />} />
+            <Route path="/files"          element={<FilesPage />} />
             <Route path="/git"            element={<PlaceholderPage />} />
             <Route path="/canvas"         element={<PlaceholderPage />} />
             <Route path="/settings"       element={<SettingsPage />} />
