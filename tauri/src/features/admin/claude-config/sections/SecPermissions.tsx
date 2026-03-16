@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview } from '../../../../lib/api/types'
 import { JsonEditor } from '../../../../ui/json-editor'
@@ -13,6 +14,8 @@ interface SecPermissionsProps {
 }
 
 export function SecPermissions({ config, onConfigUpdate, showToast }: SecPermissionsProps) {
+  const { t } = useTranslation()
+
   const handleChange = useCallback(
     async (value: unknown) => {
       try {
@@ -20,26 +23,28 @@ export function SecPermissions({ config, onConfigUpdate, showToast }: SecPermiss
           value as Record<string, unknown>
         )
         onConfigUpdate(result)
-        showToast('Permissions saved')
+        showToast(t('claudeConfig.permissions.updated'))
       } catch {
-        showToast('Failed to save permissions')
+        showToast(t('claudeConfig.permissions.updateFailed'))
       }
     },
-    [onConfigUpdate, showToast]
+    [onConfigUpdate, showToast, t]
   )
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="🔒" title="权限" />
+      <SectionHeader icon="&#x1F512;" title={t('claudeConfig.permissions.title')} />
       <div className={styles.card}>
         <div className={styles.cardBody}>
           <JsonEditor
             value={config?.permissions ?? {}}
             onChange={handleChange}
-            label="Permissions"
+            label={t('claudeConfig.permissions.title')}
           />
         </div>
       </div>
     </div>
   )
 }
+
+export default SecPermissions
