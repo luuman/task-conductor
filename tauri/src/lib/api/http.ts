@@ -1,5 +1,5 @@
 import type {
-  ApiAdapter, ApiMode, Project, Task, AiSession, Settings, FileItem, ProjectKnowledge,
+  ApiAdapter, ApiMode, Project, Task, AiSession, SessionEvent, Settings, FileItem, ProjectKnowledge,
   Metrics, ClaudeUsage, ClaudeOverview, ClaudeConfig, HookRule, McpServer,
   SkillDetail, CommandInfo, RuleInfo, AgentInfo, PresetItem, ClaudeSystemInfo,
   DisabledItem, ProjectComponents, ProjectDetails,
