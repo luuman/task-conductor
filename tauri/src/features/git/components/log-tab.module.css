@@ -1,0 +1,186 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.section {
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.sectionTitle {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--tc-foreground-secondary);
+}
+
+.empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: var(--tc-foreground-secondary);
+  font-size: 13px;
+}
+
+.commitList {
+  display: flex;
+  flex-direction: column;
+}
+
+.commitRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.commitRow:hover {
+  background: var(--tc-bg-hover);
+}
+
+.commitRowActive {
+  background: var(--tc-bg-active);
+}
+
+.commitHash {
+  flex-shrink: 0;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--tc-accent);
+  margin-top: 1px;
+}
+
+.commitInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.commitMsg {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commitMeta {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+}
+
+/* Stash */
+.stashSave {
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px;
+}
+
+.stashInput {
+  flex: 1;
+  background: var(--tc-bg-secondary);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--tc-foreground-primary);
+}
+
+.stashInput::placeholder {
+  color: var(--tc-foreground-secondary);
+}
+
+.stashInput:focus {
+  outline: none;
+  border-color: var(--tc-accent);
+}
+
+.stashSaveBtn {
+  padding: 4px 10px;
+  background: var(--tc-bg-secondary);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--tc-foreground-primary);
+  cursor: pointer;
+}
+
+.stashSaveBtn:hover {
+  background: var(--tc-bg-hover);
+}
+
+.stashSaveBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stashRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.stashRef {
+  flex-shrink: 0;
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--tc-accent);
+}
+
+.stashMessage {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tc-foreground-primary);
+}
+
+.stashActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.stashActionBtn {
+  padding: 2px 6px;
+  background: none;
+  border: 1px solid var(--tc-border);
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+}
+
+.stashActionBtn:hover {
+  background: var(--tc-bg-hover);
+  color: var(--tc-foreground-primary);
+}
+
+.stashActionBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stashActionBtnDanger {
+  composes: stashActionBtn;
+}
+
+.stashActionBtnDanger:hover {
+  background: rgba(204, 0, 0, 0.1);
+  color: #cc0000;
+  border-color: rgba(204, 0, 0, 0.3);
+}
