@@ -1,5 +1,6 @@
-"""Git 操作 API：状态查询、Diff、Stage/Commit、Log/Branch、Stash"""
+"""Git 操作 API：状态查询、Diff、Stage/Commit、Log/Branch、Stash、虚拟浏览"""
 
+import re
 import subprocess
 from pathlib import Path
 
