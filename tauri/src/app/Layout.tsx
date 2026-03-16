@@ -66,6 +66,7 @@ export function Layout() {
         logoIcon={<IconLogo size={22} />}
         logo="TaskConductor"
         breadcrumb={breadcrumb}
+        breadcrumbPrefix={<ProjectSwitcher />}
         userName="User"
         onSearchClick={() => navigate('/sessions')}
         onSettingsClick={() => navigate('/settings')}
