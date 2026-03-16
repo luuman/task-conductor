@@ -43,7 +43,7 @@ export default function SettingsPage() {
   const [clearTaskStatus, setClearTaskStatus] = useState<ActionStatus>('idle')
   const [restartStatus, setRestartStatus] = useState<ActionStatus>('idle')
   const [toast, setToast] = useState<string | null>(null)
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>()
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(null)
 
   const showToast = useCallback((msg: string) => {
     setToast(msg)
