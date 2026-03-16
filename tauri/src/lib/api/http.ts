@@ -144,4 +144,19 @@ export class HttpAdapter implements ApiAdapter {
   getClaudeUsage() {
     return this.fetch<ClaudeUsage>('/api/metrics/claude-usage')
   }
+
+  getClaudeOverview() {
+    return this.fetch<ClaudeOverview>('/api/claude-config/overview')
+  }
+
+  getClaudeConfig() {
+    return this.fetch<ClaudeConfig>('/api/claude-config')
+  }
+
+  updateClaudeConfigKey(key: string, value: unknown) {
+    return this.fetch<{ ok: boolean }>(`/api/claude-config/other/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    })
+  }
 }
