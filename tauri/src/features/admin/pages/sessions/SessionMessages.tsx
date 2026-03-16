@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AiSession, SessionEvent } from '../../../../lib/api/types'
 import { api } from '../../../../lib/api'
@@ -6,7 +6,28 @@ import { EmptyState } from '../../../../ui/empty-state/EmptyState'
 import { Skeleton } from '../../../../ui/skeleton/Skeleton'
 import styles from './sessions.module.css'
 
-// ── Tool detail formatter (adapted from reference frontend) ──
+// ── Module-level event cache (persists across re-renders) ──
+
+const eventCache = new Map<string, SessionEvent[]>()
+const cacheInsertOrder: string[] = []
+const MAX_CACHE_SESSIONS = 20
+
+function cacheSet(sessionId: string, events: SessionEvent[]) {
+  if (!eventCache.has(sessionId)) {
+    if (cacheInsertOrder.length >= MAX_CACHE_SESSIONS) {
+      const oldest = cacheInsertOrder.shift()
+      if (oldest) eventCache.delete(oldest)
+    }
+    cacheInsertOrder.push(sessionId)
+  }
+  eventCache.set(sessionId, events)
+}
+
+function cacheGet(sessionId: string): SessionEvent[] | undefined {
+  return eventCache.get(sessionId)
+}
+
+// ── Tool detail formatter ──
 
 function getToolDetail(tool: string | null, input: unknown): string {
   if (!tool || !input || typeof input !== 'object') return ''
@@ -33,15 +54,15 @@ function getToolDetail(tool: string | null, input: unknown): string {
 
 function getToolIcon(eventType: string): string {
   switch (eventType) {
-    case 'PreToolUse': return '\u{2192}'
-    case 'PostToolUse': return '\u{2713}'
-    case 'Notification': return '\u{1F514}'
-    case 'Stop': return '\u{25A0}'
-    case 'SessionStart': return '\u{25B6}'
-    case 'SessionEnd': return '\u{25C0}'
-    case 'SubagentStart': return '\u{21B3}'
-    case 'SubagentStop': return '\u{21B5}'
-    default: return '\u{00B7}'
+    case 'PreToolUse': return '\u2192'
+    case 'PostToolUse': return '\u2713'
+    case 'Notification': return '\u25C6'
+    case 'Stop': return '\u25A0'
+    case 'SessionStart': return '\u25B6'
+    case 'SessionEnd': return '\u25C0'
+    case 'SubagentStart': return '\u21B3'
+    case 'SubagentStop': return '\u21B5'
+    default: return '\u00B7'
   }
 }
 
@@ -69,16 +90,6 @@ function formatResult(result: unknown): string {
   try { return JSON.stringify(result, null, 2).slice(0, 2000) } catch { return '' }
 }
 
-function getDateLabel(iso: string): string {
-  const d = new Date(iso)
-  const today = new Date()
-  if (d.toDateString() === today.toDateString()) return 'Today'
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
-  return d.toLocaleDateString()
-}
-
 function cwdName(cwd?: string): string {
   if (!cwd) return ''
   const parts = cwd.replace(/\/$/, '').split('/')
@@ -103,180 +114,6 @@ function CollapsibleResult({ result }: { result: unknown }) {
   )
 }
 
-// ── Date divider ──
-
-function DateDivider({ label }: { label: string }) {
-  return (
-    <div className={styles.dateDivider}>
-      <div className={styles.dateDividerLine} />
-      <span className={styles.dateDividerLabel}>{label}</span>
-      <div className={styles.dateDividerLine} />
-    </div>
-  )
-}
-
-// ── System event (center pill) ──
-
-function SystemEvent({ event }: { event: SessionEvent }) {
-  const icon = getToolIcon(event.event_type)
-  const toolName = event.tool_name || event.event_type
-  return (
-    <div className={styles.dateDivider}>
-      <div className={styles.dateDividerLine} />
-      <span className={styles.dateDividerLabel}>
-        {icon} {toolName} &middot; {formatTimeFull(event.created_at)}
-      </span>
-      <div className={styles.dateDividerLine} />
-    </div>
-  )
-}
-
-// ── Message bubble group ──
-
-interface BubbleGroupProps {
-  events: SessionEvent[]
-  side: 'left' | 'right'
-  senderName: string
-  avatarClass: string
-  avatarContent: string
-  bubbleClass: string
-}
-
-function BubbleGroup({ events, side, senderName, avatarClass, avatarContent, bubbleClass }: BubbleGroupProps) {
-  const rowClass = side === 'right' ? styles.msgRowRight : styles.msgRowLeft
-  const first = events[0]
-
-  return (
-    <div className={rowClass}>
-      <div className={`${styles.avatar} ${avatarClass}`}>{avatarContent}</div>
-      <div className={styles.msgContent}>
-        <div className={side === 'right' ? styles.senderNameRight : styles.senderName}>
-          {senderName}
-          <span className={styles.senderTime}>{formatTime(first.created_at)}</span>
-        </div>
-        {events.map(event => {
-          const icon = getToolIcon(event.event_type)
-          const toolName = event.tool_name || event.event_type
-          const isNotification = event.event_type === 'Notification'
-          const isResult = event.event_type === 'PostToolUse'
-          const detail = isNotification
-            ? String((event.extra as Record<string, unknown>)?.message || '').slice(0, 160)
-            : getToolDetail(event.tool_name, event.tool_input)
-
-          return (
-            <div key={event.id} className={bubbleClass}>
-              <div className={styles.toolLabel}>
-                <span className={styles.toolLabelIcon}>{icon}</span>
-                <span className={styles.toolLabelName}>{toolName}</span>
-              </div>
-              {detail && <div className={styles.bubbleDetail}>{detail}</div>}
-              {isResult && <CollapsibleResult result={event.tool_result} />}
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ── Group events into renderable sections ──
-
-interface Section {
-  type: 'date'
-  label: string
-}
-interface SystemSection {
-  type: 'system'
-  event: SessionEvent
-}
-interface BubbleSection {
-  type: 'bubble'
-  side: 'left' | 'right'
-  senderName: string
-  avatarClass: string
-  avatarContent: string
-  bubbleClass: string
-  events: SessionEvent[]
-}
-
-type RenderSection = Section | SystemSection | BubbleSection
-
-function classifyEvent(ev: SessionEvent): { side: 'left' | 'right'; senderName: string; avatarClass: string; avatarContent: string; bubbleClass: string } {
-  if (ev.event_type === 'PreToolUse') {
-    return {
-      side: 'right',
-      senderName: 'Claude',
-      avatarClass: styles.avatarClaude,
-      avatarContent: 'C',
-      bubbleClass: styles.msgBubbleRight,
-    }
-  }
-  if (ev.event_type === 'Notification') {
-    return {
-      side: 'left',
-      senderName: 'Notification',
-      avatarClass: styles.avatarNotify,
-      avatarContent: '\u{1F514}',
-      bubbleClass: styles.msgBubbleLeft,
-    }
-  }
-  // PostToolUse and others → left
-  return {
-    side: 'left',
-    senderName: ev.tool_name || ev.event_type,
-    avatarClass: styles.avatarTool,
-    avatarContent: ev.tool_name ? ev.tool_name.charAt(0) : '\u{1F527}',
-    bubbleClass: styles.msgBubbleLeft,
-  }
-}
-
-function buildSections(events: SessionEvent[]): RenderSection[] {
-  const sections: RenderSection[] = []
-  let lastDate = ''
-  let currentGroup: BubbleSection | null = null
-
-  const flushGroup = () => {
-    if (currentGroup) {
-      sections.push(currentGroup)
-      currentGroup = null
-    }
-  }
-
-  for (const ev of events) {
-    // Date divider check
-    const dateLabel = getDateLabel(ev.created_at)
-    if (dateLabel !== lastDate) {
-      flushGroup()
-      sections.push({ type: 'date', label: dateLabel })
-      lastDate = dateLabel
-    }
-
-    // System events → center divider
-    if (SYSTEM_EVENTS.has(ev.event_type)) {
-      flushGroup()
-      sections.push({ type: 'system', event: ev })
-      continue
-    }
-
-    // Classify this event
-    const cls = classifyEvent(ev)
-
-    // If same sender/side as current group, append
-    if (currentGroup && currentGroup.side === cls.side && currentGroup.senderName === cls.senderName) {
-      currentGroup.events.push(ev)
-    } else {
-      flushGroup()
-      currentGroup = {
-        type: 'bubble',
-        ...cls,
-        events: [ev],
-      }
-    }
-  }
-  flushGroup()
-  return sections
-}
-
 // ── Main messages component ──
 
 interface Props {
@@ -288,31 +125,127 @@ export function SessionMessages({ session, onDeselect }: Props) {
   const { t } = useTranslation()
   const [events, setEvents] = useState<SessionEvent[]>([])
   const [loading, setLoading] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const shouldAutoScroll = useRef(true)
+
+  // ── Scroll helpers ──
+
+  const isNearBottom = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 100
+  }, [])
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior })
+  }, [])
+
+  const handleScroll = useCallback(() => {
+    shouldAutoScroll.current = isNearBottom()
+  }, [isNearBottom])
+
+  // ── Load events (cache-first, then fetch fresh) ──
 
   useEffect(() => {
     if (!session) {
       setEvents([])
+      setLoading(false)
+      setRefreshing(false)
       return
     }
-    setLoading(true)
+
+    const cached = cacheGet(session.session_id)
+    if (cached) {
+      setEvents(cached)
+      setLoading(false)
+      setRefreshing(true)
+      // Scroll to bottom with cached data immediately
+      requestAnimationFrame(() => scrollToBottom('instant'))
+    } else {
+      setLoading(true)
+    }
+
     api.getSessionEvents(session.session_id)
       .then(evs => {
         setEvents(evs)
+        cacheSet(session.session_id, evs)
         setLoading(false)
+        setRefreshing(false)
+        // Scroll to bottom on first load
+        requestAnimationFrame(() => scrollToBottom('instant'))
       })
-      .catch(() => setLoading(false))
-  }, [session])
+      .catch(() => {
+        setLoading(false)
+        setRefreshing(false)
+      })
+  }, [session, scrollToBottom])
+
+  // ── WebSocket real-time updates ──
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [events])
+    if (!session) {
+      setWsStatus('disconnected')
+      return
+    }
+
+    setWsStatus('connecting')
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${proto}//${location.host}/ws/session/${session.session_id}`
+    const ws = new WebSocket(wsUrl)
+
+    ws.onopen = () => setWsStatus('connected')
+    ws.onclose = () => setWsStatus('disconnected')
+    ws.onerror = () => setWsStatus('disconnected')
+
+    ws.onmessage = (msg) => {
+      try {
+        const parsed = JSON.parse(msg.data)
+        if (parsed.type === 'claude_event' && parsed.data) {
+          const d = parsed.data as Record<string, unknown>
+          const newEvent: SessionEvent = {
+            id: Date.now(),
+            session_id: session.session_id,
+            event_type: String(d.event_type || ''),
+            tool_name: (d.tool_name as string | null) || null,
+            tool_input: d.tool_input ?? null,
+            tool_result: d.tool_result ?? null,
+            extra: d.extra ?? null,
+            created_at: String(d.ts || new Date().toISOString()),
+          }
+          setEvents(prev => {
+            const updated = [...prev, newEvent]
+            cacheSet(session.session_id, updated)
+            return updated
+          })
+        }
+      } catch { /* ignore parse errors */ }
+    }
+
+    return () => {
+      ws.close()
+      setWsStatus('disconnected')
+    }
+  }, [session])
+
+  // ── Auto-scroll when new events arrive ──
+
+  useEffect(() => {
+    if (shouldAutoScroll.current) {
+      scrollToBottom('smooth')
+    }
+  }, [events, scrollToBottom])
+
+  // ── Empty state ──
 
   if (!session) {
     return (
       <div className={styles.messagePanel}>
         <EmptyState
-          icon="\u{2328}"
+          icon={'\u2328'}
           title={t('admin.sessions.select_session')}
           description={t('admin.sessions.select_session_hint')}
         />
@@ -324,36 +257,54 @@ export function SessionMessages({ session, onDeselect }: Props) {
   const headerMeta = [
     cwdName(session.cwd),
     `${session.event_count} ${t('admin.sessions.events')}`,
-    formatTime(session.started_at),
   ].filter(Boolean).join(' \u00B7 ')
-
-  const sections = buildSections(events)
 
   return (
     <div className={styles.messagePanel}>
       {/* Header */}
       <div className={styles.messageHeader}>
         <div className={styles.messageHeaderLeft}>
-          <span className={styles.messageHeaderAvatar}>{'\u{1F916}'}</span>
+          <span className={styles.messageHeaderAvatar}>{'\uD83E\uDD16'}</span>
           <div className={styles.messageHeaderInfo}>
             <span className={styles.messageHeaderTitle}>{headerTitle}</span>
-            <span className={styles.messageHeaderMeta}>{headerMeta}</span>
+            <div className={styles.messageHeaderMeta}>
+              <span>{headerMeta}</span>
+              {session.status && (
+                <span className={styles.statusDot} data-status={session.status} />
+              )}
+            </div>
           </div>
         </div>
-        <button
-          className={styles.messageHeaderBack}
-          onClick={onDeselect}
-        >
-          {t('common.back')}
-        </button>
+        <div className={styles.headerRight}>
+          {/* WS status indicator */}
+          <div className={styles.wsIndicator}>
+            <span
+              className={styles.wsDot}
+              data-status={wsStatus}
+            />
+            <span className={styles.wsLabel}>
+              {wsStatus === 'connected' ? 'live' : wsStatus === 'connecting' ? '...' : 'off'}
+            </span>
+          </div>
+          <button
+            className={styles.messageHeaderBack}
+            onClick={onDeselect}
+          >
+            {'\u2190'} {t('common.back')}
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
       {loading ? (
         <div className={styles.messageBody}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: i % 2 === 0 ? 'flex-start' : 'flex-end' }}>
-              <Skeleton variant="rect" width={240} height={60} borderRadius={12} />
+          {/* Skeleton bubbles */}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className={i % 2 === 0 ? styles.skeletonLeft : styles.skeletonRight}
+            >
+              <Skeleton variant="rect" width={200 + (i % 3) * 40} height={52} borderRadius={12} />
             </div>
           ))}
         </div>
@@ -362,27 +313,83 @@ export function SessionMessages({ session, onDeselect }: Props) {
           <span>{t('admin.sessions.no_events')}</span>
         </div>
       ) : (
-        <div className={styles.messageBody}>
-          {sections.map((section, i) => {
-            if (section.type === 'date') {
-              return <DateDivider key={`date-${i}`} label={section.label} />
-            }
-            if (section.type === 'system') {
-              return <SystemEvent key={`sys-${section.event.id}`} event={section.event} />
-            }
+        <div
+          className={styles.messageBody}
+          ref={scrollRef}
+          onScroll={handleScroll}
+        >
+          {/* Refreshing indicator */}
+          {refreshing && (
+            <div className={styles.refreshingBar}>
+              refreshing...
+            </div>
+          )}
+
+          {events.map((event, idx) => {
+            const isSystem = SYSTEM_EVENTS.has(event.event_type)
+            const isOutgoing = event.event_type === 'PreToolUse'
+            const isNotification = event.event_type === 'Notification'
+            const isResult = event.event_type === 'PostToolUse'
+
+            const icon = getToolIcon(event.event_type)
+            const toolName = event.tool_name || event.event_type
+
+            // Show date divider if day changed
+            const prevEvent = idx > 0 ? events[idx - 1] : null
+            const showDateDivider = !prevEvent ||
+              new Date(event.created_at).toDateString() !== new Date(prevEvent.created_at).toDateString()
+            const dateLabel = showDateDivider ? getDateLabel(event.created_at) : null
+
+            const detail = isNotification
+              ? String((event.extra as Record<string, unknown>)?.message || '').slice(0, 160)
+              : getToolDetail(event.tool_name, event.tool_input)
+
             return (
-              <BubbleGroup
-                key={`grp-${section.events[0].id}`}
-                events={section.events}
-                side={section.side}
-                senderName={section.senderName}
-                avatarClass={section.avatarClass}
-                avatarContent={section.avatarContent}
-                bubbleClass={section.bubbleClass}
-              />
+              <div key={`${event.id}-${idx}`}>
+                {/* Date divider */}
+                {dateLabel && (
+                  <div className={styles.dateDivider}>
+                    <div className={styles.dateDividerLine} />
+                    <span className={styles.dateDividerLabel}>{dateLabel}</span>
+                    <div className={styles.dateDividerLine} />
+                  </div>
+                )}
+
+                {/* System event → centered pill */}
+                {isSystem ? (
+                  <div className={styles.systemRow}>
+                    <span className={styles.systemPill}>
+                      <span className={styles.systemIcon}>{icon}</span>
+                      <span>{toolName}</span>
+                      <span className={styles.systemTs}>{formatTimeFull(event.created_at)}</span>
+                    </span>
+                  </div>
+                ) : (
+                  /* PreToolUse → left (outgoing), PostToolUse → right (incoming), Notification → left */
+                  <div className={isOutgoing ? styles.bubbleRowLeft : isNotification ? styles.bubbleRowLeft : styles.bubbleRowRight}>
+                    <div className={
+                      isOutgoing
+                        ? styles.bubbleOutgoing
+                        : isNotification
+                          ? styles.bubbleNotification
+                          : styles.bubbleIncoming
+                    }>
+                      {/* Header: icon + tool name */}
+                      <div className={styles.bubbleHeader}>
+                        <span className={styles.bubbleToolIcon} data-type={event.event_type}>{icon}</span>
+                        <span className={styles.bubbleToolName} data-type={event.event_type}>{toolName}</span>
+                        <span className={styles.bubbleTs}>{formatTimeFull(event.created_at)}</span>
+                      </div>
+                      {/* Detail text */}
+                      {detail && <div className={styles.bubbleDetail}>{detail}</div>}
+                      {/* Collapsible result for PostToolUse */}
+                      {isResult && <CollapsibleResult result={event.tool_result} />}
+                    </div>
+                  </div>
+                )}
+              </div>
             )
           })}
-          <div ref={bottomRef} />
         </div>
       )}
 
@@ -393,4 +400,16 @@ export function SessionMessages({ session, onDeselect }: Props) {
       </div>
     </div>
   )
+}
+
+// ── Helper ──
+
+function getDateLabel(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date()
+  if (d.toDateString() === today.toDateString()) return 'Today'
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  return d.toLocaleDateString()
 }
