@@ -1,0 +1,121 @@
+.explorer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tc-sidebar-bg);
+  border-right: 1px solid var(--tc-border);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--tc-foreground-secondary);
+}
+
+.headerTitle {
+  flex: 1;
+}
+
+.headerActions {
+  display: flex;
+  gap: 2px;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 0;
+}
+
+.iconBtn:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+}
+
+.search {
+  padding: 4px 12px 8px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  color: var(--tc-foreground);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: var(--tc-border-active);
+}
+
+.searchInput::placeholder {
+  color: var(--tc-foreground-secondary);
+}
+
+.treeWrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 4px 8px;
+}
+
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--tc-foreground-secondary);
+  font-size: 13px;
+}
+
+.searchResults {
+  list-style: none;
+  margin: 0;
+  padding: 0 4px;
+}
+
+.searchItem {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--tc-foreground);
+  border-radius: 4px;
+  font-size: 13px;
+  gap: 6px;
+}
+
+.searchItem:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.searchItemIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.searchItemPath {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+}
