@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, SkillDetail } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
@@ -13,6 +14,7 @@ interface SectionProps {
 }
 
 export function SecSkills({ showToast }: SectionProps) {
+  const { t } = useTranslation()
   const [skills, setSkills] = useState<SkillDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null)
@@ -24,14 +26,14 @@ export function SecSkills({ showToast }: SectionProps) {
         const data = await api.claudeConfig.getSkills()
         if (!cancelled) setSkills(data)
       } catch {
-        if (!cancelled) showToast('Failed to load skills')
+        if (!cancelled) showToast(t('claudeConfig.skills.toggleFailed'))
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
     load()
     return () => { cancelled = true }
-  }, [showToast])
+  }, [showToast, t])
 
   const handleToggle = useCallback(async (name: string, enabled: boolean) => {
     // Optimistic update
@@ -41,18 +43,18 @@ export function SecSkills({ showToast }: SectionProps) {
     } catch {
       // Revert
       setSkills((prev) => prev.map((s) => (s.name === name ? { ...s, enabled: !enabled } : s)))
-      showToast(`Failed to toggle ${name}`)
+      showToast(t('claudeConfig.skills.toggleFailed'))
     }
-  }, [showToast])
+  }, [showToast, t])
 
   const selected = selectedSkill ? skills.find((s) => s.name === selectedSkill) : null
 
   if (loading) {
     return (
       <div className={styles.sectionWrap}>
-        <SectionHeader icon="&#x2728;" title="Skills" />
+        <SectionHeader icon="&#x2728;" title={t('claudeConfig.skills.title')} />
         <div className={styles.sectionSkeleton}>
-          <div className={styles.sectionPlaceholder}>Loading skills...</div>
+          <div className={styles.sectionPlaceholder}>{t('claudeConfig.skills.loading')}</div>
         </div>
       </div>
     )
@@ -60,13 +62,13 @@ export function SecSkills({ showToast }: SectionProps) {
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="&#x2728;" title="Skills" />
+      <SectionHeader icon="&#x2728;" title={t('claudeConfig.skills.title')} />
 
       <div style={{ display: 'flex', gap: 16 }}>
         {/* List */}
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {skills.length === 0 ? (
-            <div className={styles.sectionPlaceholder}>No skills found</div>
+            <div className={styles.sectionPlaceholder}>{t('claudeConfig.skills.empty')}</div>
           ) : (
             skills.map((skill) => (
               <div
@@ -85,11 +87,11 @@ export function SecSkills({ showToast }: SectionProps) {
                     {skill.description || 'No description'}
                   </div>
                   <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
-                    {!skill.enabled && <span className={styles.tagRed}>disabled</span>}
-                    {skill.has_auxiliary && <span className={styles.tagBlue}>auxiliary</span>}
+                    {!skill.enabled && <span className={styles.tagRed}>{t('claudeConfig.skills.disabled')}</span>}
+                    {skill.has_auxiliary && <span className={styles.tagBlue}>{t('claudeConfig.skills.auxiliary')}</span>}
                     {Object.keys(skill.metadata).length > 0 && (
                       <span className={styles.tagGray}>
-                        {Object.keys(skill.metadata).length} meta
+                        {Object.keys(skill.metadata).length} {t('claudeConfig.skills.meta')}
                       </span>
                     )}
                   </div>
@@ -120,7 +122,7 @@ export function SecSkills({ showToast }: SectionProps) {
               <div className={styles.card} style={{ marginTop: 8 }}>
                 <div className={styles.cardHeader}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tc-foreground)' }}>
-                    Auxiliary Files
+                    {t('claudeConfig.skills.auxiliaryFiles')}
                   </span>
                 </div>
                 <div className={styles.cardBody}>
@@ -138,3 +140,5 @@ export function SecSkills({ showToast }: SectionProps) {
     </div>
   )
 }
+
+export default SecSkills
