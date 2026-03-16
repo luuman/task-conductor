@@ -28,6 +28,14 @@
     "git": "Version Control",
     "panel_placeholder": "Panel content (logs, terminal)"
   },
+  "project": {
+    "select_hint": "Select a project to get started",
+    "no_projects": "No projects yet. Create one in Admin Console",
+    "recent": "Recently Opened",
+    "with_content": "With Content",
+    "empty": "Empty Projects",
+    "switch": "Switch Project"
+  },
   "auth": {
     "title": "TaskConductor",
     "subtitle": "Enter your access code to continue",
