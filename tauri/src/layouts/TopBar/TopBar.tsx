@@ -16,6 +16,7 @@ export interface TopBarProps {
   actions?: ReactNode
   userName?: string
   userRole?: string
+  onSettingsClick?: () => void
 }
 
 export function TopBar({ logo, logoIcon, breadcrumb, actions, userName, userRole }: TopBarProps) {
