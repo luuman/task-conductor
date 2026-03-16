@@ -110,6 +110,32 @@
 .itemLabel {
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+}
+
+.itemBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--tc-accent, #007acc);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.itemShortcut {
+  margin-left: auto;
+  font-size: 10px;
+  font-family: var(--tc-font-mono, monospace);
+  color: var(--tc-foreground-tertiary, rgba(255,255,255,0.3));
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
 }
 
 .collapsed .item {
