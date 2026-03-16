@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../../../lib/api'
 import type { ClaudeConfig } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
@@ -14,7 +15,7 @@ interface SecSettingsProps {
 
 interface SettingDef {
   key: string
-  label: string
+  labelKey: string
   type: 'select' | 'string' | 'number' | 'boolean'
   options?: string[]
   placeholder?: string
@@ -22,34 +23,34 @@ interface SettingDef {
 }
 
 const COMMON_SETTINGS: SettingDef[] = [
-  { key: 'model', label: '默认模型', type: 'select', options: ['', 'opus', 'sonnet', 'haiku'], group: 'model' },
-  { key: 'effortLevel', label: '推理等级', type: 'select', options: ['', 'low', 'medium', 'high'], group: 'model' },
-  { key: 'language', label: '回复语言', type: 'string', placeholder: 'chinese', group: 'behavior' },
-  { key: 'outputStyle', label: '输出风格', type: 'string', placeholder: 'Concise', group: 'behavior' },
-  { key: 'alwaysThinkingEnabled', label: '始终思考', type: 'boolean', group: 'behavior' },
-  { key: 'showTurnDuration', label: '显示轮次时长', type: 'boolean', group: 'behavior' },
-  { key: 'cleanupPeriodDays', label: '清理周期(天)', type: 'number', placeholder: '30', group: 'session' },
-  { key: 'plansDirectory', label: '计划目录', type: 'string', placeholder: './plans', group: 'session' },
-  { key: 'forceLoginMethod', label: '强制登录方式', type: 'select', options: ['', 'claudeai', 'console'], group: 'security' },
-  { key: 'autoUpdatesChannel', label: '更新频道', type: 'select', options: ['', 'latest', 'stable'], group: 'ui' },
-  { key: 'spinnerTipsEnabled', label: '加载提示', type: 'boolean', group: 'ui' },
-  { key: 'terminalProgressBarEnabled', label: '终端进度条', type: 'boolean', group: 'ui' },
-  { key: 'prefersReducedMotion', label: '减少动画', type: 'boolean', group: 'ui' },
-  { key: 'respectGitignore', label: '遵守 .gitignore', type: 'boolean', group: 'ui' },
-  { key: 'includeCoAuthoredBy', label: 'Git Co-Author', type: 'boolean', group: 'ui' },
-  { key: 'enableAllProjectMcpServers', label: '自动启用项目 MCP', type: 'boolean', group: 'advanced' },
-  { key: 'teammateMode', label: 'Teammate 模式', type: 'select', options: ['', 'auto', 'in-process', 'tmux'], group: 'advanced' },
+  { key: 'model', labelKey: 'claudeConfig.settings.model', type: 'select', options: ['', 'opus', 'sonnet', 'haiku'], group: 'model' },
+  { key: 'effortLevel', labelKey: 'claudeConfig.settings.effortLevel', type: 'select', options: ['', 'low', 'medium', 'high'], group: 'model' },
+  { key: 'language', labelKey: 'claudeConfig.settings.language', type: 'string', placeholder: 'chinese', group: 'behavior' },
+  { key: 'outputStyle', labelKey: 'claudeConfig.settings.outputStyle', type: 'string', placeholder: 'Concise', group: 'behavior' },
+  { key: 'alwaysThinkingEnabled', labelKey: 'claudeConfig.settings.alwaysThinking', type: 'boolean', group: 'behavior' },
+  { key: 'showTurnDuration', labelKey: 'claudeConfig.settings.showTurnDuration', type: 'boolean', group: 'behavior' },
+  { key: 'cleanupPeriodDays', labelKey: 'claudeConfig.settings.cleanupPeriod', type: 'number', placeholder: '30', group: 'session' },
+  { key: 'plansDirectory', labelKey: 'claudeConfig.settings.plansDirectory', type: 'string', placeholder: './plans', group: 'session' },
+  { key: 'forceLoginMethod', labelKey: 'claudeConfig.settings.forceLoginMethod', type: 'select', options: ['', 'claudeai', 'console'], group: 'security' },
+  { key: 'autoUpdatesChannel', labelKey: 'claudeConfig.settings.autoUpdatesChannel', type: 'select', options: ['', 'latest', 'stable'], group: 'ui' },
+  { key: 'spinnerTipsEnabled', labelKey: 'claudeConfig.settings.spinnerTips', type: 'boolean', group: 'ui' },
+  { key: 'terminalProgressBarEnabled', labelKey: 'claudeConfig.settings.terminalProgressBar', type: 'boolean', group: 'ui' },
+  { key: 'prefersReducedMotion', labelKey: 'claudeConfig.settings.reducedMotion', type: 'boolean', group: 'ui' },
+  { key: 'respectGitignore', labelKey: 'claudeConfig.settings.respectGitignore', type: 'boolean', group: 'ui' },
+  { key: 'includeCoAuthoredBy', labelKey: 'claudeConfig.settings.coAuthor', type: 'boolean', group: 'ui' },
+  { key: 'enableAllProjectMcpServers', labelKey: 'claudeConfig.settings.enableProjectMcp', type: 'boolean', group: 'advanced' },
+  { key: 'teammateMode', labelKey: 'claudeConfig.settings.teammateMode', type: 'select', options: ['', 'auto', 'in-process', 'tmux'], group: 'advanced' },
 ]
 
 const COMMON_SETTING_KEYS = new Set(COMMON_SETTINGS.map((s) => s.key))
 
-const GROUP_LABELS: Record<string, string> = {
-  model: '模型',
-  behavior: '行为',
-  session: '会话',
-  security: '安全',
-  ui: '界面',
-  advanced: '高级',
+const GROUP_LABEL_KEYS: Record<string, string> = {
+  model: 'claudeConfig.settings.groupModel',
+  behavior: 'claudeConfig.settings.groupBehavior',
+  session: 'claudeConfig.settings.groupSession',
+  security: 'claudeConfig.settings.groupSecurity',
+  ui: 'claudeConfig.settings.groupUi',
+  advanced: 'claudeConfig.settings.groupAdvanced',
 }
 
 function getSettingValue(config: ClaudeConfig | null, key: string): unknown {
@@ -58,6 +59,7 @@ function getSettingValue(config: ClaudeConfig | null, key: string): unknown {
 }
 
 export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsProps) {
+  const { t } = useTranslation()
   const [newKey, setNewKey] = useState('')
   const [newValue, setNewValue] = useState('')
 
@@ -90,19 +92,19 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
       const result = await api.claudeConfig.updateOtherKey(key, value)
       onConfigUpdate(result)
     } catch {
-      showToast(`Failed to update ${key}`)
+      showToast(t('claudeConfig.settings.updateFailed', { key }))
     }
-  }, [onConfigUpdate, showToast])
+  }, [onConfigUpdate, showToast, t])
 
   const handleDeleteOther = useCallback(async (key: string) => {
     try {
       const result = await api.claudeConfig.deleteOtherKey(key)
       onConfigUpdate(result)
-      showToast(`Deleted ${key}`)
+      showToast(t('claudeConfig.settings.deleted', { key }))
     } catch {
-      showToast(`Failed to delete ${key}`)
+      showToast(t('claudeConfig.settings.deleteFailed', { key }))
     }
-  }, [onConfigUpdate, showToast])
+  }, [onConfigUpdate, showToast, t])
 
   const handleAddOther = useCallback(async () => {
     if (!newKey.trim()) return
@@ -118,11 +120,11 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
       onConfigUpdate(result)
       setNewKey('')
       setNewValue('')
-      showToast(`Added ${newKey.trim()}`)
+      showToast(t('claudeConfig.settings.added', { key: newKey.trim() }))
     } catch {
-      showToast(`Failed to add ${newKey}`)
+      showToast(t('claudeConfig.settings.addFailed', { key: newKey }))
     }
-  }, [newKey, newValue, onConfigUpdate, showToast])
+  }, [newKey, newValue, onConfigUpdate, showToast, t])
 
   const renderSettingControl = (setting: SettingDef) => {
     const value = getSettingValue(config, setting.key)
@@ -138,17 +140,18 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
 
     if (setting.type === 'select') {
       return (
-        <select
-          className={styles.formSelect}
-          value={String(value ?? '')}
-          onChange={(e) => handleSave(setting.key, e.target.value || undefined)}
-        >
+        <div className={styles.pillGroup}>
           {setting.options?.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt || '(default)'}
-            </option>
+            <button
+              key={opt}
+              className={String(value ?? '') === opt ? styles.pillActive : styles.pill}
+              onClick={() => handleSave(setting.key, opt || undefined)}
+              type="button"
+            >
+              {opt || t('claudeConfig.settings.default')}
+            </button>
           ))}
-        </select>
+        </div>
       )
     }
 
@@ -190,20 +193,20 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
 
   return (
     <div className={styles.sectionWrap}>
-      <SectionHeader icon="&#x2699;&#xfe0f;" title="设置" />
+      <SectionHeader icon="&#x2699;&#xfe0f;" title={t('claudeConfig.settings.title')} />
 
       {/* Common Settings grouped */}
       {Object.entries(groupedSettings).map(([group, settings]) => (
         <div key={group} className={styles.card} style={{ marginBottom: 12 }}>
           <div className={styles.cardHeader}>
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tc-foreground)' }}>
-              {GROUP_LABELS[group] ?? group}
+              {t(GROUP_LABEL_KEYS[group] ?? group)}
             </span>
           </div>
           <div className={styles.cardBody} style={{ padding: '4px 16px' }}>
             {settings.map((s) => (
               <div key={s.key} className={styles.formRow}>
-                <span className={styles.formLabel}>{s.label}</span>
+                <span className={styles.formLabel}>{t(s.labelKey)}</span>
                 {renderSettingControl(s)}
               </div>
             ))}
@@ -215,13 +218,13 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
       <div className={styles.card} style={{ marginTop: 16 }}>
         <div className={styles.cardHeader}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tc-foreground)' }}>
-            其他字段
+            {t('claudeConfig.settings.otherFields')}
           </span>
         </div>
         <div className={styles.cardBody}>
           {otherFields.length === 0 && (
             <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)', padding: '8px 0' }}>
-              No custom fields
+              {t('claudeConfig.settings.noCustomFields')}
             </div>
           )}
           {otherFields.map((field) => {
@@ -243,7 +246,7 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
                         try {
                           handleSave(field.key, JSON.parse(e.target.value))
                         } catch {
-                          showToast('Invalid JSON')
+                          showToast(t('claudeConfig.settings.invalidJson'))
                         }
                       }}
                     />
@@ -265,7 +268,7 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
                     type="button"
                     style={{ padding: '4px 8px' }}
                   >
-                    Delete
+                    {t('claudeConfig.settings.delete')}
                   </button>
                 </div>
               </div>
@@ -278,7 +281,7 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
               <input
                 className={styles.formInput}
                 type="text"
-                placeholder="Key"
+                placeholder={t('claudeConfig.settings.keyPlaceholder')}
                 value={newKey}
                 onChange={(e) => setNewKey(e.target.value)}
                 style={{ width: 140 }}
@@ -286,7 +289,7 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
               <input
                 className={styles.formInput}
                 type="text"
-                placeholder="Value (JSON or string)"
+                placeholder={t('claudeConfig.settings.valuePlaceholder')}
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 style={{ flex: 1 }}
@@ -297,7 +300,7 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
                 disabled={!newKey.trim()}
                 type="button"
               >
-                Add
+                {t('claudeConfig.settings.add')}
               </button>
             </div>
           </div>
@@ -306,3 +309,5 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
     </div>
   )
 }
+
+export default SecSettings
