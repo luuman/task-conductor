@@ -345,6 +345,82 @@ def _extract_title(file_path: Path) -> str | None:
     return None
 
 
+# ── 文件/目录 CRUD ─────────────────────────────────────────
+
+
+@router.post("/{project_id}/file", summary="创建文件")
+def create_file(
+    project_id: int,
+    body: dict,
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    rel = body.get("path", "")
+    content = body.get("content", "")
+    target = _safe_resolve(base, rel)
+    if target.exists():
+        raise HTTPException(409, "file already exists")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content, encoding="utf-8")
+    return {"ok": True}
+
+
+@router.post("/{project_id}/directory", summary="创建目录")
+def create_directory(
+    project_id: int,
+    body: dict,
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    rel = body.get("path", "")
+    target = _safe_resolve(base, rel)
+    if target.exists():
+        raise HTTPException(409, "directory already exists")
+    target.mkdir(parents=True, exist_ok=True)
+    return {"ok": True}
+
+
+@router.post("/{project_id}/file/rename", summary="重命名文件或目录")
+def rename_file(
+    project_id: int,
+    body: dict,
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    old_rel = body.get("old_path", "")
+    new_rel = body.get("new_path", "")
+    old_target = _safe_resolve(base, old_rel)
+    new_target = _safe_resolve(base, new_rel)
+    if not old_target.exists():
+        raise HTTPException(404, "source not found")
+    if new_target.exists():
+        raise HTTPException(409, "target already exists")
+    new_target.parent.mkdir(parents=True, exist_ok=True)
+    old_target.rename(new_target)
+    return {"ok": True}
+
+
+@router.delete("/{project_id}/file", summary="删除文件或空目录")
+def delete_file(
+    project_id: int,
+    path: str = Query(..., description="相对于项目根的文件路径"),
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    target = _safe_resolve(base, path)
+    if not target.exists():
+        raise HTTPException(404, "not found")
+    if target.is_dir():
+        if any(target.iterdir()):
+            raise HTTPException(400, "directory not empty")
+        target.rmdir()
+    else:
+        target.unlink()
+    return {"ok": True}
+
+
+# ── docs 知识库 ─────────────────────────────────────────
+
 @router.get("/{project_id}/docs", summary="列出项目 docs/ 文档")
 def list_docs(
     project_id: int,
