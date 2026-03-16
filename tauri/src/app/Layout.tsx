@@ -72,6 +72,7 @@ export function Layout() {
         onSearchClick={() => navigate('/sessions')}
         onSettingsClick={() => navigate('/settings')}
         onMessageClick={() => navigate('/chat')}
+        unreadCount={unreadCount}
         onNotificationClick={togglePanel}
       />
       <Sidebar
