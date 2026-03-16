@@ -377,30 +377,62 @@ async def list_templates():
     # resp: { templates: [{ id, name, category, preview, nodes }] }
 ```
 
-### 9.2 Pipeline 集成
+### 9.2 后端 Pydantic Schema
+
+```python
+# pipeline/schemas.py 新增
+class ComponentNodeSchema(BaseModel):
+    id: str
+    type: Literal['page', 'section', 'component', 'element']
+    name: str
+    tag: str
+    props: dict[str, Any]
+    children: list[str]
+    parentId: str | None
+    locked: bool = False
+    visible: bool = True
+    customCode: str | None = None
+    meta: dict | None = None
+
+class UIOutput(BaseModel):
+    """UI 阶段结构化输出"""
+    nodes: list[ComponentNodeSchema]
+    rootId: str
+    design_notes: str | None = None
+
+class CriticOutput(BaseModel):
+    score: int
+    issues: list[str]
+    suggestions: str
+    pass_review: bool
+```
+
+### 9.3 Pipeline 集成
+
+UIExecutor 遵循 StageExecutor 接口（build_prompt → get_output_schema → validate-critic-retry 循环）：
 
 ```python
 # pipeline/stages/ui.py
 class UIExecutor(StageExecutor):
-    """UI 阶段 executor"""
+    """UI 阶段 executor，遵循 StageExecutor 接口"""
 
     stage_name = "ui"
 
-    async def execute(self, task, context):
-        # 1. 从 PRD artifact 提取组件需求
-        prd = self.get_previous_artifact(task, "prd")
+    def build_prompt(self, title: str, desc: str, context: dict, knowledge: list[str]) -> str:
+        """从 PRD artifact 构建 UI 生成 prompt，注入设计原则"""
+        prd_content = context.get("prd_artifact", "")
+        knowledge_str = "\n".join(knowledge)
+        return f"""你是 UI 组件生成器。根据 PRD 生成 React+Tailwind 组件树。
+PRD：{prd_content}
+项目经验：{knowledge_str}
+设计原则：8px grid / type scale / 1 primary + 1 accent + neutral
+输出格式：UIOutput JSON"""
 
-        # 2. 调用 /api/editor/generate 生成初始组件树
-        nodes = await self.generate_from_prd(prd)
+    def get_output_schema(self) -> type[UIOutput]:
+        return UIOutput
 
-        # 3. 保存为 artifact，状态设为 awaiting_approval
-        self.save_artifact(task, "ui", {
-            "nodes": nodes,
-            "editor_url": f"/editor?task={task.id}"
-        })
-
-        # 4. 通知用户审阅（TTS + webhook）
-        await notify_human_required(task, "UI 组件已生成，请在编辑器中审阅")
+    # StageExecutor 基类处理：validate → critic → retry 循环
+    # 审批后，前端引导用户进入 /editor?task={task_id} 进行微调
 ```
 
 ## 10. 前端文件结构
