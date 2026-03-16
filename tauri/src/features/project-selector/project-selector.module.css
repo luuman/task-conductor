@@ -173,34 +173,7 @@
   letter-spacing: 0.3px;
 }
 
-/* Progress bar */
-.progressWrap {
-  margin-bottom: 8px;
-}
-
-.progressBar {
-  height: 3px;
-  border-radius: 2px;
-  background: var(--tc-sidebar-item-hover);
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  border-radius: 2px;
-  background: var(--tc-border-active);
-  transition: width 0.3s ease;
-}
-
-.progressLabel {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-  font-size: 10px;
-  color: var(--tc-foreground-secondary);
-}
-
-/* Footer: time + stage badge */
+/* Footer */
 .cardFooter {
   display: flex;
   align-items: center;
