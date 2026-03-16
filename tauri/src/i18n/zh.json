@@ -331,6 +331,18 @@
       "loading": "加载中..."
     }
   },
+  "commandMenu": {
+    "searchPlaceholder": "搜索命令...",
+    "empty": "没有找到匹配的命令",
+    "backToWorkspace": "返回工作台",
+    "toggleTheme": "切换主题",
+    "toggleLanguage": "切换语言",
+    "group": {
+      "navigation": "导航",
+      "actions": "操作",
+      "config": "配置"
+    }
+  },
   "settings": {
     "title": "设置",
     "hint": "管理应用配置、通知、流水线和安全选项",
