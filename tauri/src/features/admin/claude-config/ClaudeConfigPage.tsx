@@ -13,6 +13,31 @@ import type { ClaudeConfig, ClaudeOverview } from '../../../lib/api/types'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import styles from './claude-config.module.css'
 
+/* ───────── Lazy section imports ───────── */
+
+const SecOverview = lazy(() => import('./sections/SecOverview'))
+const SecSettings = lazy(() => import('./sections/SecSettings'))
+const SecSkills = lazy(() => import('./sections/SecSkills'))
+const SecAgents = lazy(() => import('./sections/SecAgents'))
+const SecCommands = lazy(() => import('./sections/SecCommands'))
+const SecMcp = lazy(() => import('./sections/SecMcp'))
+const SecHooks = lazy(() => import('./sections/SecHooks'))
+const SecRules = lazy(() => import('./sections/SecRules'))
+const SecPermissions = lazy(() => import('./sections/SecPermissions'))
+const SecEnvVars = lazy(() => import('./sections/SecEnvVars'))
+const SecPlugins = lazy(() => import('./sections/SecPlugins'))
+const SecMonitoring = lazy(() => import('./sections/SecMonitoring'))
+const SecTrash = lazy(() => import('./sections/SecTrash'))
+const SecAbout = lazy(() => import('./sections/SecAbout'))
+
+const SECTION_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  overview: SecOverview, settings: SecSettings, skills: SecSkills,
+  agents: SecAgents, commands: SecCommands, mcp: SecMcp,
+  hooks: SecHooks, rules: SecRules, permissions: SecPermissions,
+  env: SecEnvVars, plugins: SecPlugins, monitoring: SecMonitoring,
+  trash: SecTrash, about: SecAbout,
+}
+
 /* ───────── Nav definition ───────── */
 
 interface NavItem {
