@@ -212,18 +212,13 @@
   color: var(--tc-foreground-secondary);
 }
 
-.stageBadge {
+.knowledgeBadge {
   font-size: 10px;
   padding: 2px 8px;
   border-radius: 4px;
-  background: var(--tc-sidebar-item-hover);
-  color: var(--tc-foreground-secondary);
+  background: color-mix(in srgb, var(--tc-success) 15%, transparent);
+  color: var(--tc-success);
   font-weight: 500;
-}
-
-.stageBadgeActive {
-  background: color-mix(in srgb, var(--tc-border-active) 20%, transparent);
-  color: var(--tc-border-active);
 }
 
 /* Empty card for empty projects */
