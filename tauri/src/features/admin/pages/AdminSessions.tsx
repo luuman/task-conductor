@@ -1,9 +1,49 @@
 // AdminSessions.tsx — 3-column layout: session list, transcript viewer, question navigation
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import type { Components } from 'react-markdown'
+import hljs from 'highlight.js/lib/core'
+import '../../../styles/hljs-ayu-dark.css'
+import typescript from 'highlight.js/lib/languages/typescript'
+import javascript from 'highlight.js/lib/languages/javascript'
+import python from 'highlight.js/lib/languages/python'
+import bashLang from 'highlight.js/lib/languages/bash'
+import jsonLang from 'highlight.js/lib/languages/json'
+import cssLang from 'highlight.js/lib/languages/css'
+import xml from 'highlight.js/lib/languages/xml'
+import sql from 'highlight.js/lib/languages/sql'
+import yaml from 'highlight.js/lib/languages/yaml'
+import markdownLang from 'highlight.js/lib/languages/markdown'
+import go from 'highlight.js/lib/languages/go'
+import rust from 'highlight.js/lib/languages/rust'
+import javaLang from 'highlight.js/lib/languages/java'
+import cpp from 'highlight.js/lib/languages/cpp'
+
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('bash', bashLang)
+hljs.registerLanguage('json', jsonLang)
+hljs.registerLanguage('css', cssLang)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('sql', sql)
+hljs.registerLanguage('yaml', yaml)
+hljs.registerLanguage('markdown', markdownLang)
+hljs.registerLanguage('go', go)
+hljs.registerLanguage('rust', rust)
+hljs.registerLanguage('java', javaLang)
+hljs.registerLanguage('cpp', cpp)
+
 import { api } from '../../../lib/api'
 import type { AiSession, TranscriptMessage, TranscriptBlock } from '../../../lib/api/types'
 import styles from './sessions/sessions.module.css'
+
+// ── Context ─────────────────────────────────────────────────
+// signal > 0 = expand all (increments), signal < 0 = collapse all (decrements)
+const ExpandSignalCtx = createContext(0)
+const AutoExpandCtx = createContext(false)
 
 // ── Timestamp parsing (append Z if missing) ─────────────────
 
@@ -87,83 +127,439 @@ function getToolEmoji(toolName: string): string {
 
 // ── Tool parameter summary ──────────────────────────────────
 
-function getToolParam(block: TranscriptBlock): string {
-  const input = block.tool_input
-  const name = block.tool_name
+function getToolDetail(name: string | null | undefined, input: Record<string, unknown> | null | undefined): string {
   if (!name || !input) return ''
   switch (name) {
-    case 'Bash':
-      return String(input.command || '').slice(0, 120)
-    case 'Read': case 'Write': case 'Edit': case 'MultiEdit':
-      return String(input.file_path || '').split('/').pop() || ''
-    case 'Glob':
-      return String(input.pattern || '')
-    case 'Grep':
-      return `"${input.pattern || ''}"${input.path ? ' in ' + String(input.path).split('/').pop() : ''}`
-    case 'WebSearch':
-      return String(input.query || '').slice(0, 80)
-    case 'WebFetch':
-      return String(input.url || '').slice(0, 80)
-    case 'Agent':
-      return String(input.description || input.prompt || '').slice(0, 80)
-    case 'AskUserQuestion':
-      return String(input.question || '').slice(0, 80)
-    default:
-      return ''
+    case 'Bash': return String(input.command || '').slice(0, 120)
+    case 'Read': case 'Write': return String(input.file_path || '')
+    case 'Edit': case 'MultiEdit': return String(input.file_path || '')
+    case 'Glob': return String(input.pattern || '')
+    case 'Grep': return `"${input.pattern || ''}"${input.path ? ' in ' + input.path : ''}`
+    case 'WebSearch': return String(input.query || '').slice(0, 80)
+    case 'WebFetch': return String(input.url || '').slice(0, 80)
+    case 'Agent': return String(input.description || input.prompt || '').slice(0, 80)
+    case 'AskUserQuestion': return String(input.question || '').slice(0, 120)
+    default: return ''
   }
 }
 
-// ── Status dot ──────────────────────────────────────────────
+// ── Markdown components ─────────────────────────────────────
 
-function StatusDot({ status }: { status: AiSession['status'] }) {
-  const cls =
-    status === 'active' ? styles.statusDotActive
-    : status === 'idle' ? styles.statusDotIdle
-    : styles.statusDotStopped
-  return <span className={cls} />
+const mdComponents: Components = {
+  p: ({ children }) => <p className={styles.mdP}>{children}</p>,
+  h1: ({ children }) => <h1 className={styles.mdH1}>{children}</h1>,
+  h2: ({ children }) => <h2 className={styles.mdH2}>{children}</h2>,
+  h3: ({ children }) => <h3 className={styles.mdH3}>{children}</h3>,
+  ul: ({ children }) => <ul className={styles.mdUl}>{children}</ul>,
+  ol: ({ children }) => <ol className={styles.mdOl}>{children}</ol>,
+  li: ({ children }) => <li className={styles.mdLi}>{children}</li>,
+  strong: ({ children }) => <strong className={styles.mdStrong}>{children}</strong>,
+  em: ({ children }) => <em className={styles.mdEm}>{children}</em>,
+  code: ({ children, className }) => {
+    if (className?.includes('language-')) {
+      const lang = className.replace('language-', '')
+      const code = String(children).replace(/\n$/, '')
+      let highlighted: string | null = null
+      try {
+        if (hljs.getLanguage(lang)) {
+          highlighted = hljs.highlight(code, { language: lang }).value
+        } else {
+          highlighted = hljs.highlightAuto(code).value
+        }
+      } catch { /* fallback */ }
+      if (highlighted) {
+        return (
+          <code className={`hljs ${styles.mdCodeBlock}`}
+                dangerouslySetInnerHTML={{ __html: highlighted }} />
+        )
+      }
+      return (
+        <code className={styles.mdCodeBlockPlain}>
+          {children}
+        </code>
+      )
+    }
+    return (
+      <code className={styles.mdInlineCode}>
+        {children}
+      </code>
+    )
+  },
+  pre: ({ children }) => <pre className={styles.mdPre}>{children}</pre>,
+  blockquote: ({ children }) => (
+    <blockquote className={styles.mdBlockquote}>
+      {children}
+    </blockquote>
+  ),
+  hr: () => <hr className={styles.mdHr} />,
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={styles.mdLink}>
+      {children}
+    </a>
+  ),
+  table: ({ children }) => (
+    <div className={styles.mdTableWrap}>
+      <table className={styles.mdTable}>{children}</table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th className={styles.mdTh}>{children}</th>
+  ),
+  td: ({ children }) => (
+    <td className={styles.mdTd}>{children}</td>
+  ),
 }
 
-// ── Tool widget (collapsible) ───────────────────────────────
+// ── Diff algorithm (LCS) ────────────────────────────────────
 
-function ToolWidget({ block }: { block: TranscriptBlock }) {
-  const [expanded, setExpanded] = useState(false)
-  const toolName = block.tool_name || 'Tool'
-  const param = getToolParam(block)
-  const hasContent = block.tool_input != null || (block.tool_result != null && block.tool_result !== '')
+interface DiffLine {
+  type: 'add' | 'del' | 'ctx'
+  text: string
+  oldNum?: number
+  newNum?: number
+}
+
+function computeDiff(oldStr: string, newStr: string): DiffLine[] {
+  const oldL = oldStr.split('\n')
+  const newL = newStr.split('\n')
+  const m = oldL.length, n = newL.length
+
+  if (m + n > 400) {
+    const out: DiffLine[] = []
+    oldL.forEach((t, i) => out.push({ type: 'del', text: t, oldNum: i + 1 }))
+    newL.forEach((t, i) => out.push({ type: 'add', text: t, newNum: i + 1 }))
+    return out
+  }
+
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = oldL[i - 1] === newL[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1])
+
+  const raw: DiffLine[] = []
+  let i = m, j = n
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && oldL[i - 1] === newL[j - 1]) {
+      raw.push({ type: 'ctx', text: oldL[i - 1], oldNum: i, newNum: j })
+      i--; j--
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      raw.push({ type: 'add', text: newL[j - 1], newNum: j })
+      j--
+    } else {
+      raw.push({ type: 'del', text: oldL[i - 1], oldNum: i })
+      i--
+    }
+  }
+  raw.reverse()
+  return raw
+}
+
+// ── guessLang / stripLineNumbers ────────────────────────────
+
+function guessLang(filePath: string): string {
+  const ext = filePath.split('.').pop()?.toLowerCase() || ''
+  const map: Record<string, string> = {
+    ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript',
+    py: 'python', rs: 'rust', go: 'go', java: 'java', kt: 'kotlin',
+    rb: 'ruby', sh: 'bash', zsh: 'bash', bash: 'bash',
+    css: 'css', scss: 'scss', less: 'less', html: 'xml', xml: 'xml', svg: 'xml',
+    json: 'json', yaml: 'yaml', yml: 'yaml', toml: 'ini', md: 'markdown',
+    sql: 'sql', c: 'c', cpp: 'cpp', h: 'c', hpp: 'cpp',
+    dockerfile: 'dockerfile', makefile: 'makefile',
+  }
+  return map[ext] || ''
+}
+
+function stripLineNumbers(text: string): string {
+  return text.replace(/^ *\d+[→\t]/gm, '')
+}
+
+// ── EditDiffView ────────────────────────────────────────────
+
+function EditDiffView({ input }: { input: Record<string, unknown> }) {
+  const oldStr = String(input.old_string ?? '')
+  const newStr = String(input.new_string ?? '')
+  const filePath = String(input.file_path ?? '')
+  const fileName = filePath.split('/').pop() || filePath
+
+  const raw = useMemo(() => computeDiff(oldStr, newStr), [oldStr, newStr])
+  const added = raw.filter(d => d.type === 'add').length
+  const removed = raw.filter(d => d.type === 'del').length
+
+  const lines: (DiffLine | { type: 'fold'; count: number })[] = []
+  let ctxRun: DiffLine[] = []
+  const flushCtx = () => {
+    if (ctxRun.length <= 4) { lines.push(...ctxRun) }
+    else {
+      lines.push(ctxRun[0])
+      lines.push({ type: 'fold', count: ctxRun.length - 2 })
+      lines.push(ctxRun[ctxRun.length - 1])
+    }
+    ctxRun = []
+  }
+  for (const d of raw) {
+    if (d.type === 'ctx') ctxRun.push(d)
+    else { if (ctxRun.length) flushCtx(); lines.push(d) }
+  }
+  if (ctxRun.length) flushCtx()
 
   return (
-    <div className={styles.toolWidget}>
-      <button
-        className={styles.toolHeader}
-        onClick={() => hasContent && setExpanded(!expanded)}
-      >
-        <span className={styles.toolIcon}>{getToolEmoji(toolName)}</span>
-        <span className={styles.toolName}>{toolName}</span>
-        {param && <span className={styles.toolParam}>{param}</span>}
-        {block.tool_error && <span className={styles.toolError}>{'\u2717'}</span>}
-        {hasContent && (
-          <span className={styles.toolChevron}>{expanded ? '\u25BE' : '\u25B8'}</span>
-        )}
-      </button>
-      {expanded && (
-        <div className={styles.toolBody}>
-          {block.tool_input && (
-            <pre className={styles.toolCode}>
-              {JSON.stringify(block.tool_input, null, 2)}
-            </pre>
-          )}
-          {block.tool_result != null && block.tool_result !== '' && (
-            <pre className={styles.toolResult}>
-              {block.tool_result}
-            </pre>
-          )}
+    <div className={styles.diffWrap}>
+      <div className={styles.diffHeader}>
+        <span style={{ fontSize: 13 }}>{'\uD83D\uDD27'}</span>
+        <span className={styles.diffFilePath} title={filePath}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        <span className={styles.diffStats}>
+          {added > 0 && <span className={styles.diffStatsAdd}>+{added}</span>}
+          {removed > 0 && <span className={styles.diffStatsDel}>{'\u2212'}{removed}</span>}
+        </span>
+      </div>
+      <div className={styles.diffBody}>
+        {lines.map((item, idx) => {
+          if ('count' in item) {
+            return (
+              <div key={idx} className={styles.diffFold}>
+                <span>{'\u22EF'} {item.count} unchanged lines {'\u22EF'}</span>
+              </div>
+            )
+          }
+          const isAdd = item.type === 'add'
+          const isDel = item.type === 'del'
+          return (
+            <div key={idx}
+                 className={isAdd ? styles.diffLineAdd : isDel ? styles.diffLineDel : styles.diffLineCtx}>
+              <span className={`${styles.diffSign} ${isAdd ? styles.diffSignAdd : isDel ? styles.diffSignDel : ''}`}>
+                {isAdd ? '+' : isDel ? '\u2212' : ' '}
+              </span>
+              <span className={`${styles.diffText} ${isAdd ? styles.diffTextAdd : isDel ? styles.diffTextDel : styles.diffTextCtx}`}>
+                {item.text || ' '}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── BashOutput ──────────────────────────────────────────────
+
+function BashOutput({ command, result, isError }: { command: string; result: string; isError: boolean }) {
+  return (
+    <div className={styles.bashWrap} style={isError ? { borderColor: 'rgba(244,63,94,0.3)' } : undefined}>
+      <div className={styles.bashHeader}>
+        <span className={styles.bashPrompt}>$</span>
+        <span className={styles.bashCmd}>{command}</span>
+      </div>
+      <pre className={`${styles.bashOutput} ${isError ? styles.bashOutputError : ''}`}>
+        {result}
+      </pre>
+    </div>
+  )
+}
+
+// ── ReadFileView ────────────────────────────────────────────
+
+function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
+  const stripped = stripLineNumbers(result)
+  const lineCount = stripped.split('\n').length
+  const lang = guessLang(filePath)
+  const fileName = filePath.split('/').pop() || filePath
+
+  const highlighted = useMemo(() => {
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(stripped, { language: lang }).value
+      }
+      return hljs.highlightAuto(stripped).value
+    } catch {
+      return null
+    }
+  }, [stripped, lang])
+
+  return (
+    <div className={styles.readWrap}>
+      <div className={styles.readHeader}>
+        <span style={{ fontSize: 13 }}>{'\uD83D\uDCC4'}</span>
+        <span className={styles.readFilePath} title={filePath}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        <span className={styles.readLineCount}>{lineCount} lines</span>
+      </div>
+      {highlighted ? (
+        <pre className={`hljs ${styles.readBody}`}
+             dangerouslySetInnerHTML={{ __html: highlighted }} />
+      ) : (
+        <pre className={styles.readBody}>
+          {stripped}
+        </pre>
+      )}
+    </div>
+  )
+}
+
+// ── AgentResultView ─────────────────────────────────────────
+
+function AgentResultView({ result, description }: { result: string; description: string }) {
+  return (
+    <div className={styles.agentWrap}>
+      {description && (
+        <div className={styles.agentHeader}>
+          <span style={{ fontSize: 13 }}>{'\uD83E\uDD16'}</span>
+          <span className={styles.agentDesc}>{description}</span>
+        </div>
+      )}
+      <div className={styles.agentBody}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+          {result}
+        </ReactMarkdown>
+      </div>
+    </div>
+  )
+}
+
+// ── AskUserQuestionView ─────────────────────────────────────
+
+function AskUserQuestionView({ input, result }: { input: Record<string, unknown>; result?: string | null }) {
+  const question = String(input.question || '')
+
+  return (
+    <div className={styles.askWrap}>
+      <div className={styles.askHeader}>
+        <span style={{ fontSize: 14 }}>{'\u2753'}</span>
+        <span className={styles.askTitle}>AskUserQuestion</span>
+      </div>
+      <div className={styles.askBody}>
+        <p className={styles.askQuestion}>{question}</p>
+      </div>
+      {result && (
+        <div className={styles.askAnswer}>
+          <span style={{ fontSize: 12, flexShrink: 0, marginTop: 1 }}>{'\uD83D\uDC64'}</span>
+          <p className={styles.askAnswerText}>{result}</p>
         </div>
       )}
     </div>
   )
 }
 
-// ── User message card ───────────────────────────────────────
+// ── OutputBlock (generic markdown result) ───────────────────
+
+function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
+  return (
+    <div className={styles.outputWrap} style={isError ? { borderColor: 'rgba(244,63,94,0.3)' } : undefined}>
+      <div className={`${styles.outputBody} ${isError ? styles.outputBodyError : ''}`}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+          {result}
+        </ReactMarkdown>
+      </div>
+    </div>
+  )
+}
+
+// ── ToolWidget ──────────────────────────────────────────────
+
+function ToolWidget({ block }: { block: TranscriptBlock }) {
+  const signal = useContext(ExpandSignalCtx)
+  const autoExpand = useContext(AutoExpandCtx)
+  const toolName = block.tool_name || 'Tool'
+  const isAskUserInit = toolName === 'AskUserQuestion'
+  const [open, setOpen] = useState(autoExpand || isAskUserInit)
+  const toggle = useCallback(() => setOpen(v => !v), [])
+
+  // Respond to global expand/collapse signal
+  const prevSignal = useRef(signal)
+  useEffect(() => {
+    if (signal === prevSignal.current) return
+    prevSignal.current = signal
+    setOpen(signal > 0)
+  }, [signal])
+
+  const detail = getToolDetail(block.tool_name, block.tool_input)
+  const hasFilePath = ['Read', 'Write', 'Edit', 'MultiEdit'].includes(toolName) && block.tool_input?.file_path
+  const filePath = hasFilePath ? String(block.tool_input!.file_path) : ''
+  const fileName = filePath ? filePath.split('/').pop() || filePath : ''
+  const hasResult = block.tool_result != null && block.tool_result !== ''
+  const isError = block.tool_error === true
+  const isEdit = toolName === 'Edit' || toolName === 'MultiEdit'
+  const isBash = toolName === 'Bash'
+  const isRead = toolName === 'Read'
+  const isAgent = toolName === 'Agent'
+  const isAskUser = toolName === 'AskUserQuestion'
+  const hasEditData = isEdit && block.tool_input && (block.tool_input.old_string || block.tool_input.new_string)
+  const bashCmd = isBash ? String(block.tool_input?.command ?? '') : ''
+  const canExpand = hasResult || hasEditData || isAskUser
+
+  const editInfo = useMemo(() => {
+    if (!hasEditData || !block.tool_input) return ''
+    const oldN = String(block.tool_input.old_string ?? '').split('\n').length
+    const newN = String(block.tool_input.new_string ?? '').split('\n').length
+    const parts: string[] = []
+    if (newN > 0) parts.push(`+${newN}`)
+    if (oldN > 0) parts.push(`\u2212${oldN}`)
+    return parts.join(' ')
+  }, [hasEditData, block.tool_input])
+
+  const preview = hasResult
+    ? block.tool_name === 'Read'
+      ? `${block.tool_result!.split('\n').length} lines`
+      : block.tool_result!.split('\n')[0].slice(0, 100)
+    : ''
+
+  return (
+    <div className={styles.toolWidget}>
+      <button
+        onClick={canExpand ? toggle : undefined}
+        className={`${styles.toolHeader} ${canExpand ? styles.toolHeaderClickable : ''}`}
+      >
+        <span className={styles.toolIcon}>{getToolEmoji(toolName)}</span>
+        <span className={styles.toolName}>{isEdit ? 'Edit' : toolName}</span>
+        {hasFilePath ? (
+          <span className={styles.toolParam} title={filePath}>{fileName}</span>
+        ) : detail ? (
+          <code className={styles.toolParam}>{detail}</code>
+        ) : null}
+        {editInfo && (
+          <span className={styles.toolEditInfo}>{editInfo}</span>
+        )}
+        {isError && (
+          <span className={styles.toolError}>ERROR</span>
+        )}
+        <span style={{ flex: 1 }} />
+        {!open && preview && (
+          <span className={styles.toolPreview}>{preview}</span>
+        )}
+        {canExpand && (
+          <span className={styles.toolChevron}>{open ? '\u25BE' : '\u25B8'}</span>
+        )}
+      </button>
+      {open && (
+        <div className={styles.toolBody}>
+          {!!hasEditData && <EditDiffView input={block.tool_input!} />}
+          {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
+          {isRead && hasResult && <ReadFileView filePath={String(block.tool_input?.file_path ?? '')} result={block.tool_result!} />}
+          {isAgent && hasResult && <AgentResultView result={block.tool_result!} description={String(block.tool_input?.description ?? '')} />}
+          {isAskUser && <AskUserQuestionView input={block.tool_input || {}} result={block.tool_result} />}
+          {!isEdit && !isBash && !isRead && !isAgent && !isAskUser && hasResult && <OutputBlock result={block.tool_result!} isError={isError} />}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Avatars ─────────────────────────────────────────────────
+
+function ClaudeAvatar() {
+  return (
+    <div className={styles.avatarBot}>{'\uD83E\uDD16'}</div>
+  )
+}
+
+function UserAvatar() {
+  return (
+    <div className={styles.avatarUser}>{'\uD83D\uDC64'}</div>
+  )
+}
+
+// ── Message cards ───────────────────────────────────────────
 
 function UserCard({ msg }: { msg: TranscriptMessage }) {
   const text = msg.blocks
@@ -176,32 +572,42 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
   return (
     <div className={styles.msgRowRight}>
       <div className={styles.userBubble}>
-        <div className={styles.userText}>{text}</div>
+        <div className={styles.mdContent}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{text}</ReactMarkdown>
+        </div>
       </div>
-      <div className={styles.avatarUser}>{'\uD83D\uDC64'}</div>
+      <UserAvatar />
     </div>
   )
 }
 
-// ── Assistant message card ──────────────────────────────────
-
 function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   return (
     <div className={styles.msgRowLeft}>
-      <div className={styles.avatarBot}>{'\uD83E\uDD16'}</div>
+      <ClaudeAvatar />
       <div className={styles.assistantBubble}>
-        {msg.blocks.map((block, i) =>
-          block.type === 'text' ? (
-            <div key={i} className={styles.assistantText}>
-              {block.text || ''}
-            </div>
-          ) : (
-            <ToolWidget key={i} block={block} />
-          )
-        )}
+        <div className={styles.mdContent}>
+          {msg.blocks.map((block, i) =>
+            block.type === 'text' ? (
+              <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>{block.text ?? ''}</ReactMarkdown>
+            ) : (
+              <ToolWidget key={i} block={block} />
+            )
+          )}
+        </div>
       </div>
     </div>
   )
+}
+
+// ── Status dot ──────────────────────────────────────────────
+
+function StatusDot({ status }: { status: AiSession['status'] }) {
+  const cls =
+    status === 'active' ? styles.statusDotActive
+    : status === 'idle' ? styles.statusDotIdle
+    : styles.statusDotStopped
+  return <span className={cls} />
 }
 
 // ── Session list group (collapsible) ────────────────────────
@@ -249,7 +655,7 @@ function SessionGroup({
             </div>
             <div className={styles.sessionRow2}>
               <span className={styles.sessionTime}>{time}</span>
-              <span className={styles.sessionEvents}>{s.event_count} \u4E2A\u4E8B\u4EF6</span>
+              <span className={styles.sessionEvents}>{s.event_count} {'\u4E2A\u4E8B\u4EF6'}</span>
             </div>
             {tags.length > 0 && (
               <div className={styles.sessionTags}>
@@ -286,6 +692,12 @@ export default function AdminSessions() {
   // Question navigation
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1)
   const [autoExpand, setAutoExpand] = useState(true)
+
+  // Expand signal
+  const [expandSignal, setExpandSignal] = useState(0)
+
+  // Sticky question
+  const [currentQuestion, setCurrentQuestion] = useState<string | null>(null)
 
   // Load session list (on mount + 5s auto-refresh)
   const loadSessions = useCallback(() => {
@@ -361,6 +773,17 @@ export default function AdminSessions() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [transcript])
 
+  // Sync expand signal when transcript changes
+  useEffect(() => {
+    setExpandSignal(prev => autoExpand ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1))
+    setCurrentQuestion(null)
+  }, [transcript])
+
+  // Sync expand signal when autoExpand toggles
+  useEffect(() => {
+    setExpandSignal(prev => autoExpand ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1))
+  }, [autoExpand])
+
   // Filtered sessions
   const filtered = useMemo(() => {
     if (!search.trim()) return sessions
@@ -398,6 +821,46 @@ export default function AdminSessions() {
       }))
       .filter(q => q.text)
   }, [transcript])
+
+  // IntersectionObserver for sticky question header
+  useEffect(() => {
+    const container = transcriptRef.current
+    if (!container || questions.length === 0) return
+
+    const timer = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              const idx = Number((entry.target as HTMLElement).dataset.msgIndex)
+              const q = questions.find(q => q.msgIndex === idx)
+              if (q) setCurrentQuestion(q.text.slice(0, 200))
+            }
+          }
+        },
+        { root: container, rootMargin: '-40px 0px 0px 0px', threshold: 0.1 }
+      )
+
+      const qIndices = new Set(questions.map(q => q.msgIndex))
+      const elements = container.querySelectorAll('[data-msg-index]')
+      elements.forEach(el => {
+        const idx = Number((el as HTMLElement).dataset.msgIndex)
+        if (qIndices.has(idx)) observer.observe(el)
+      })
+
+      ;(container as unknown as Record<string, unknown>).__convObserver = observer
+
+      return () => {
+        observer.disconnect()
+      }
+    }, 100)
+
+    return () => {
+      clearTimeout(timer)
+      const obs = (container as unknown as Record<string, unknown>).__convObserver as IntersectionObserver | undefined
+      if (obs) { obs.disconnect(); delete (container as unknown as Record<string, unknown>).__convObserver }
+    }
+  }, [questions])
 
   // Jump to question
   const jumpToQuestion = useCallback((qIdx: number, msgIndex: number) => {
@@ -492,20 +955,31 @@ export default function AdminSessions() {
             <p style={{ fontSize: 12 }}>{t('admin.sessions.no_events')}</p>
           </div>
         ) : (
-          <div ref={transcriptRef} className={styles.transcriptScroll}>
-            <div className={styles.transcriptBody}>
-              {transcript.map((msg, i) => (
-                <div key={i} data-msg-index={i}>
-                  {msg.role === 'user' ? (
-                    <UserCard msg={msg} />
-                  ) : (
-                    <AssistantCard msg={msg} />
-                  )}
+          <AutoExpandCtx.Provider value={autoExpand}>
+          <ExpandSignalCtx.Provider value={expandSignal}>
+            <div ref={transcriptRef} className={styles.transcriptScroll}>
+              {/* Sticky question header */}
+              {currentQuestion && (
+                <div className={styles.stickyQuestion}>
+                  <span style={{ fontSize: 12, flexShrink: 0 }}>{'\uD83D\uDC64'}</span>
+                  <span className={styles.stickyQuestionText}>{currentQuestion}</span>
                 </div>
-              ))}
-              <div ref={bottomRef} />
+              )}
+              <div className={styles.transcriptBody}>
+                {transcript.map((msg, i) => (
+                  <div key={i} data-msg-index={i}>
+                    {msg.role === 'user' ? (
+                      <UserCard msg={msg} />
+                    ) : (
+                      <AssistantCard msg={msg} />
+                    )}
+                  </div>
+                ))}
+                <div ref={bottomRef} />
+              </div>
             </div>
-          </div>
+          </ExpandSignalCtx.Provider>
+          </AutoExpandCtx.Provider>
         )}
       </div>
 
