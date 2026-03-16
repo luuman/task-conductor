@@ -8,7 +8,7 @@ import { useAppStore } from '../lib/store/app'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
 import { api } from '../lib/api'
-import type { Task } from '../lib/api/types'
+import type { FileItem } from '../lib/api/types'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
 
