@@ -132,4 +132,6 @@ export interface ApiAdapter {
   clearSessions(): Promise<{ ok: boolean; message: string }>
   clearCompletedTasks(): Promise<{ ok: boolean; count: number }>
   restartService(): Promise<void>
+  getMetrics(): Promise<Metrics>
+  getClaudeUsage(): Promise<ClaudeUsage>
 }
