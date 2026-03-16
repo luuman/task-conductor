@@ -69,17 +69,10 @@ class CacheManager {
   }
 
   /**
-   * 删除匹配前缀的所有缓存。
+   * 删除匹配前缀的所有缓存（仅 L1，L2 由 TTL 自然过期）。
    */
   invalidatePrefix(prefix: string): void {
-    // L1 遍历 Map
-    const l1 = this.l1 as MemoryCache & { store: Map<string, CacheEntry> }
-    if (l1['store']) {
-      for (const k of Array.from(l1['store'].keys())) {
-        if (k.startsWith(prefix)) this.l1.delete(k)
-      }
-    }
-    // L2 不好遍历私有存储，直接 invalidate 已知 key
+    this.l1.clear()
   }
 
   /**
