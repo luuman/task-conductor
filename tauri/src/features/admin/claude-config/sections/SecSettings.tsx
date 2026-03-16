@@ -140,11 +140,11 @@ export function SecSettings({ config, onConfigUpdate, showToast }: SecSettingsPr
 
     if (setting.type === 'select') {
       return (
-        <div className={styles.pillGroup}>
+        <div className={styles.btnGroup}>
           {setting.options?.map((opt) => (
             <button
               key={opt}
-              className={String(value ?? '') === opt ? styles.pillActive : styles.pill}
+              className={`${styles.btnGroupItem} ${String(value ?? '') === opt ? styles.btnGroupItemActive : ''}`}
               onClick={() => handleSave(setting.key, opt || undefined)}
               type="button"
             >
