@@ -94,12 +94,17 @@
   gap: 12px;
 }
 
-/* Two-column layout */
-.twoCol {
+/* Responsive card grid — auto-fill, 一行多列自适应 */
+.cardGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+}
+
+/* section 在 grid 内不需要自带 margin */
+.cardGrid > .section {
+  margin-bottom: 0;
 }
 
 /* List items */
