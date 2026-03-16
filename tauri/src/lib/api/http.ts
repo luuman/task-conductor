@@ -1,4 +1,4 @@
-import type { ApiAdapter, ApiMode, Project, Task, AiSession, Settings } from './types'
+import type { ApiAdapter, ApiMode, Project, Task, AiSession, Settings, FileItem, ProjectKnowledge } from './types'
 
 function getStoredTunnelUrl(): string {
   return localStorage.getItem('tc_tunnel_url') ?? 'http://localhost:8765'
