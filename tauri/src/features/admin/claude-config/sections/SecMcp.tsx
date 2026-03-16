@@ -169,7 +169,11 @@ export function SecMcp({ showToast }: SectionProps) {
 
       {/* Server list */}
       {servers.length === 0 ? (
-        <div className={styles.sectionPlaceholder}>{t('claudeConfig.mcp.noServers')}</div>
+        <EmptyState
+          icon="\uD83D\uDD0C"
+          title={t('claudeConfig.mcp.noServers')}
+          action={{ label: t('claudeConfig.mcp.add'), onClick: () => setShowForm(true) }}
+        />
       ) : (
         <div className={styles.cardGrid}>
           {servers.map((s) => (
