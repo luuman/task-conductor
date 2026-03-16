@@ -164,6 +164,181 @@ export class HttpAdapter implements ApiAdapter {
     cache.clear()
   }
 
+  // ─── 文件操作 API（无缓存） ───
+
+  getFileContent(projectId: number, path: string) {
+    return this.fetch<{ path: string; name: string; size: number; binary: boolean; content: string }>(
+      `/api/projects/${projectId}/file?path=${encodeURIComponent(path)}`,
+    )
+  }
+
+  saveFile(projectId: number, path: string, content: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/file`, {
+      method: 'PUT',
+      body: JSON.stringify({ path, content }),
+    })
+  }
+
+  createFile(projectId: number, path: string, content?: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/file`, {
+      method: 'POST',
+      body: JSON.stringify({ path, content: content ?? '' }),
+    })
+  }
+
+  createDirectory(projectId: number, path: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/directory`, {
+      method: 'POST',
+      body: JSON.stringify({ path }),
+    })
+  }
+
+  renameFile(projectId: number, oldPath: string, newPath: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/file/rename`, {
+      method: 'POST',
+      body: JSON.stringify({ old_path: oldPath, new_path: newPath }),
+    })
+  }
+
+  deleteFile(projectId: number, path: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/file?path=${encodeURIComponent(path)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  searchFiles(projectId: number, query: string) {
+    return this.fetch<FileItem[]>(
+      `/api/projects/${projectId}/files/search?q=${encodeURIComponent(query)}`,
+    )
+  }
+
+  // ─── Git 操作 API（无缓存） ───
+
+  gitStatus(projectId: number) {
+    return this.fetch<GitStatus>(`/api/projects/${projectId}/git/status`)
+  }
+
+  gitDiff(projectId: number, opts?: { file?: string; staged?: boolean; commit?: string }) {
+    const params = new URLSearchParams()
+    if (opts?.file) params.set('file', opts.file)
+    if (opts?.staged) params.set('staged', 'true')
+    if (opts?.commit) params.set('commit', opts.commit)
+    const qs = params.toString()
+    return this.fetch<string>(`/api/projects/${projectId}/git/diff${qs ? `?${qs}` : ''}`)
+  }
+
+  gitStage(projectId: number, files?: string[]) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/stage`, {
+      method: 'POST',
+      body: JSON.stringify(files ? { files } : { all: true }),
+    })
+  }
+
+  gitUnstage(projectId: number, files?: string[]) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/unstage`, {
+      method: 'POST',
+      body: JSON.stringify(files ? { files } : { all: true }),
+    })
+  }
+
+  gitDiscard(projectId: number, files: string[]) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/discard`, {
+      method: 'POST',
+      body: JSON.stringify({ files }),
+    })
+  }
+
+  gitCommit(projectId: number, message: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/commit`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    })
+  }
+
+  gitLog(projectId: number, limit?: number, branch?: string) {
+    const params = new URLSearchParams()
+    if (limit != null) params.set('limit', String(limit))
+    if (branch) params.set('branch', branch)
+    const qs = params.toString()
+    return this.fetch<GitCommit[]>(`/api/projects/${projectId}/git/log${qs ? `?${qs}` : ''}`)
+  }
+
+  gitBranches(projectId: number) {
+    return this.fetch<GitBranch[]>(`/api/projects/${projectId}/git/branches`)
+  }
+
+  gitCheckout(projectId: number, branch: string, create?: boolean) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/checkout`, {
+      method: 'POST',
+      body: JSON.stringify(create ? { create: branch } : { branch }),
+    })
+  }
+
+  gitPush(projectId: number) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/push`, { method: 'POST' })
+  }
+
+  gitPull(projectId: number) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/pull`, { method: 'POST' })
+  }
+
+  gitFetch(projectId: number) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/fetch`, { method: 'POST' })
+  }
+
+  gitStashList(projectId: number) {
+    return this.fetch<GitStash[]>(`/api/projects/${projectId}/git/stash`)
+  }
+
+  gitStashSave(projectId: number, message?: string) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/stash/save`, {
+      method: 'POST',
+      body: JSON.stringify(message != null ? { message } : {}),
+    })
+  }
+
+  gitStashApply(projectId: number, index: number) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/stash/apply`, {
+      method: 'POST',
+      body: JSON.stringify({ index }),
+    })
+  }
+
+  gitStashDrop(projectId: number, index: number) {
+    return this.fetch<void>(`/api/projects/${projectId}/git/stash/drop`, {
+      method: 'POST',
+      body: JSON.stringify({ index }),
+    })
+  }
+
+  // ─── Git 虚拟浏览 API ───
+
+  gitShow(projectId: number, ref: string, path: string) {
+    const params = new URLSearchParams({ ref, path })
+    return this.fetch<{ content: string }>(`/api/projects/${projectId}/git/show?${params}`)
+  }
+
+  gitBranchFiles(projectId: number, branch: string, base?: string) {
+    const params = new URLSearchParams({ branch })
+    if (base) params.set('base', base)
+    return this.fetch<BranchFileChange[]>(`/api/projects/${projectId}/git/branch-files?${params}`)
+  }
+
+  gitBranchDiff(projectId: number, branch: string, file: string, base?: string) {
+    const params = new URLSearchParams({ branch, file })
+    if (base) params.set('base', base)
+    return this.fetch<string>(`/api/projects/${projectId}/git/branch-diff?${params}`)
+  }
+
+  // ─── AI API ───
+
+  aiInlineEdit(req: InlineEditRequest) {
+    return this.fetch<InlineEditResponse>('/api/ai/inline-edit', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    })
+  }
+
   getMetrics() {
     return this.fetch<Metrics>('/api/metrics')
   }
