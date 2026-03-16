@@ -29,7 +29,7 @@ export function Layout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const { activeProjectId, clearActiveProject } = useAppStore()
+  const { activeProjectId } = useAppStore()
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
