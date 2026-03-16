@@ -285,6 +285,7 @@ export interface ApiAdapter {
   approveTask(taskId: number, data: { action: 'approve' | 'reject'; reason?: string }): Promise<void>
   advanceTask(taskId: number): Promise<void>
   getSessions(): Promise<AiSession[]>
+  getSessionEvents(sessionId: string): Promise<SessionEvent[]>
   healthCheck(): Promise<boolean>
   getSettings(): Promise<Settings>
   updateSettings(data: Partial<Settings>): Promise<Settings>
