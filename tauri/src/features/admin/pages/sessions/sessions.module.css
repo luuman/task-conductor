@@ -254,13 +254,14 @@
 .transcriptScroll {
   flex: 1;
   overflow-y: auto;
+  position: relative;
 }
 
 .transcriptBody {
-  padding: 12px 16px;
+  padding: 8px 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 /* ── Message rows ── */
@@ -268,14 +269,16 @@
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 16px;
 }
 
 .msgRowLeft {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 16px;
 }
 
 /* ── Avatars ── */
@@ -290,6 +293,7 @@
   font-size: 14px;
   background: var(--tc-panel-bg);
   border: 1px solid var(--tc-border);
+  margin-top: 2px;
 }
 
 .avatarBot {
@@ -303,70 +307,53 @@
   font-size: 14px;
   background: rgba(0, 122, 204, 0.08);
   border: 1px solid rgba(0, 122, 204, 0.15);
+  margin-top: 2px;
 }
 
 /* ── User bubble ── */
 .userBubble {
+  min-width: 0;
   max-width: 75%;
-  min-width: 60px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border-top-right-radius: 4px;
-  background: var(--tc-panel-bg);
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: var(--tc-sidebar-item-hover);
   border: 1px solid var(--tc-border);
-}
-
-.userText {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--tc-foreground);
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 
 /* ── Assistant bubble ── */
 .assistantBubble {
+  min-width: 0;
   max-width: 85%;
-  min-width: 60px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border-top-left-radius: 4px;
-  background: rgba(0, 122, 204, 0.04);
-  border: 1px solid rgba(0, 122, 204, 0.12);
-}
-
-.assistantText {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--tc-foreground);
-  white-space: pre-wrap;
-  word-break: break-word;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: rgba(68, 119, 255, 0.04);
+  border: 1px solid rgba(68, 119, 255, 0.12);
 }
 
 /* ── Tool widget ── */
 .toolWidget {
   margin: 4px 0;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid var(--tc-border);
-  background: var(--tc-panel-bg);
 }
 
 .toolHeader {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-family: 'Geist Mono', monospace;
-  transition: background 0.15s;
+  gap: 8px;
+  padding: 4px 0;
   text-align: left;
+  background: none;
+  border: none;
+  cursor: default;
+  transition: background 0.15s;
+  border-radius: 4px;
 }
 
-.toolHeader:hover {
+.toolHeaderClickable {
+  cursor: pointer;
+}
+
+.toolHeaderClickable:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -376,63 +363,548 @@
 }
 
 .toolName {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--tc-foreground);
   flex-shrink: 0;
 }
 
 .toolParam {
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  background: var(--tc-content-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+.toolEditInfo {
   font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+}
+
+.toolError {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  color: #f85149;
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.toolPreview {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
-}
-
-.toolError {
-  font-size: 10px;
-  color: #f85149;
-  flex-shrink: 0;
-  font-weight: 700;
+  max-width: 180px;
 }
 
 .toolChevron {
   font-size: 10px;
   color: var(--tc-foreground-secondary);
   flex-shrink: 0;
-  margin-left: auto;
 }
 
 .toolBody {
-  border-top: 1px solid var(--tc-border);
-  max-height: 400px;
-  overflow: auto;
+  padding: 4px 0;
 }
 
-.toolCode {
-  margin: 0;
-  padding: 8px 10px;
-  font-size: 10px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-  white-space: pre-wrap;
-  word-break: break-all;
-  line-height: 1.5;
+/* ── Diff view ── */
+.diffWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.diffHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--tc-panel-bg);
   border-bottom: 1px solid var(--tc-border);
 }
 
-.toolResult {
-  margin: 0;
-  padding: 8px 10px;
+.diffFilePath {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diffStats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 10px;
   font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground);
+  flex-shrink: 0;
+}
+
+.diffStatsAdd {
+  color: #56d364;
+}
+
+.diffStatsDel {
+  color: #f85149;
+}
+
+.diffBody {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.7;
+  background: var(--tc-content-bg);
+  overflow-x: auto;
+}
+
+.diffLineAdd {
+  display: flex;
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.diffLineDel {
+  display: flex;
+  background: rgba(244, 63, 94, 0.07);
+}
+
+.diffLineCtx {
+  display: flex;
+}
+
+.diffSign {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 600;
+  user-select: none;
+}
+
+.diffSignAdd {
+  color: #56d364;
+}
+
+.diffSignDel {
+  color: #f85149;
+}
+
+.diffText {
+  flex: 1;
+  white-space: pre;
+  padding-right: 16px;
+}
+
+.diffTextAdd {
+  color: #86efac;
+}
+
+.diffTextDel {
+  color: #fda4af;
+}
+
+.diffTextCtx {
+  color: var(--tc-foreground-secondary);
+  opacity: 0.6;
+}
+
+.diffFold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 0;
+  background: var(--tc-panel-bg);
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  border-top: 1px solid var(--tc-border);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+/* ── Bash output ── */
+.bashWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.bashHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.bashPrompt {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 700;
+  color: var(--tc-border-active);
+}
+
+.bashCmd {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bashOutput {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
   white-space: pre-wrap;
-  word-break: break-all;
-  line-height: 1.5;
+  word-break: break-word;
+  line-height: 1.6;
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground-secondary);
+}
+
+.bashOutputError {
+  color: #f85149;
+}
+
+/* ── Read file view ── */
+.readWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.readHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.readFilePath {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.readLineCount {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.readBody {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.7;
+  background: var(--tc-content-bg);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── Agent result ── */
+.agentWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.agentHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.agentDesc {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.agentBody {
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  background: var(--tc-content-bg);
+}
+
+/* ── AskUserQuestion ── */
+.askWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+  margin-top: 8px;
+}
+
+.askHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(234, 179, 8, 0.06);
+  border-bottom: 1px solid rgba(234, 179, 8, 0.15);
+}
+
+.askTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #eab308;
+}
+
+.askBody {
+  padding: 12px 16px;
+  background: var(--tc-content-bg);
+}
+
+.askQuestion {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  margin: 0;
+}
+
+.askAnswer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+}
+
+.askAnswerText {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground-secondary);
+  margin: 0;
+}
+
+/* ── Generic output block ── */
+.outputWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.outputBody {
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  background: var(--tc-content-bg);
+}
+
+.outputBodyError {
+  color: #f85149;
+}
+
+/* ── Markdown content styling ── */
+.mdContent {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+}
+
+.mdP {
+  margin: 0 0 6px 0;
+}
+
+.mdP:last-child {
+  margin-bottom: 0;
+}
+
+.mdH1 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 12px 0 4px;
+  color: var(--tc-foreground);
+}
+
+.mdH2 {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 8px 0 4px;
+  color: var(--tc-foreground);
+}
+
+.mdH3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 6px 0 2px;
+  color: var(--tc-foreground);
+}
+
+.mdUl {
+  list-style: disc;
+  padding-left: 16px;
+  margin: 0 0 6px 0;
+}
+
+.mdOl {
+  list-style: decimal;
+  padding-left: 16px;
+  margin: 0 0 6px 0;
+}
+
+.mdLi {
+  line-height: 1.6;
+}
+
+.mdStrong {
+  font-weight: 600;
+  color: var(--tc-foreground);
+}
+
+.mdEm {
+  font-style: italic;
+  color: var(--tc-foreground-secondary);
+}
+
+.mdCodeBlock {
+  display: block;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 6px 0;
+  overflow-x: auto;
+  white-space: pre;
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+}
+
+.mdCodeBlockPlain {
+  display: block;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 6px 0;
+  overflow-x: auto;
+  white-space: pre;
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground-secondary);
+  border: 1px solid var(--tc-border);
+}
+
+.mdInlineCode {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--tc-panel-bg);
+  color: var(--tc-border-active);
+}
+
+.mdPre {
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+.mdBlockquote {
+  padding-left: 12px;
+  border-left: 2px solid var(--tc-border-active);
+  color: var(--tc-foreground-secondary);
+  margin: 6px 0;
+}
+
+.mdHr {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid var(--tc-border);
+}
+
+.mdLink {
+  color: var(--tc-border-active);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s;
+}
+
+.mdLink:hover {
+  opacity: 0.8;
+}
+
+.mdTableWrap {
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.mdTable {
+  font-size: 11px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.mdTh {
+  padding: 4px 8px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+}
+
+.mdTd {
+  padding: 4px 8px;
+  border: 1px solid var(--tc-border);
+}
+
+/* ── Sticky question header ── */
+.stickyQuestion {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  backdrop-filter: blur(12px);
+  background: rgba(30, 30, 30, 0.85);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.stickyQuestionText {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 /* ── Right panel (question nav) ── */
