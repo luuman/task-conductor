@@ -21,6 +21,7 @@ from .routers import tc_config as tc_config_router
 from .routers import files as files_router
 from .routers import git as git_router
 from .routers import chat as chat_router
+from .routers import ai as ai_router
 from .feishu.dispatcher import router as feishu_router
 from .session import pin_session
 from .tunnel import start_cloudflare_tunnel, get_tunnel_url, stop_tunnel, detect_tunnel_url_from_request
