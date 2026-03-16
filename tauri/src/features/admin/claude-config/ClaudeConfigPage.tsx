@@ -169,7 +169,7 @@ export default function ClaudeConfigPage() {
   }, [])
 
   /* ── render section placeholder ── */
-  const renderSection = (id: string) => {
+  const renderSection = (_id: string) => {
     if (loading) {
       return (
         <div className={styles.sectionSkeleton}>
