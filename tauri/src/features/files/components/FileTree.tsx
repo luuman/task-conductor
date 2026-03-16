@@ -33,7 +33,7 @@ function sortItems(items: FileItem[]): FileItem[] {
 
 export function FileTree({ items, onFileClick, activePath, depth = 0, collapsedAll = 0 }: FileTreeProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [childrenCache, setChildrenCache] = useState<Record<string, FileItem[]>>({})
+  const [childrenCache] = useState<Record<string, FileItem[]>>({})
 
   // Reset expanded when collapsedAll changes
   const [lastCollapsed, setLastCollapsed] = useState(collapsedAll)
