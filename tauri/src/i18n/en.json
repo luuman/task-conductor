@@ -36,7 +36,8 @@
     "empty": "Empty Projects",
     "switch": "Switch Project",
     "search": "Search projects...",
-    "view_all": "View all projects"
+    "view_all": "View all projects",
+    "global_manage": "Global Admin"
   },
   "notification": {
     "title": "Notifications",
