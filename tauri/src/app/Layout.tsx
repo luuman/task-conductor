@@ -91,6 +91,7 @@ export function Layout() {
       </div>
     </AppShell>
     <NotificationPanel />
+    <CommandMenu open={cmdOpen} onClose={handleCmdClose} />
   </>
   )
 }
