@@ -112,6 +112,11 @@
   color: #ffffff;
 }
 
+.cardNameWrap {
+  flex: 1;
+  min-width: 0;
+}
+
 .cardName {
   font-size: 15px;
   font-weight: 600;
@@ -119,7 +124,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+}
+
+.cardPath {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.7;
 }
 
 /* Description */
