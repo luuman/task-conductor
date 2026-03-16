@@ -75,11 +75,7 @@ export default function AdminSessions() {
               ))}
             </div>
           : filtered.length === 0
-            ? <div className={styles.section}>
-                <div className={styles.sectionBody}>
-                  <span className={styles.emptyHint}>{t('admin.sessions.no_sessions')}</span>
-                </div>
-              </div>
+            ? <EmptyState icon="\uD83D\uDCAC" title={t('admin.sessions.no_sessions')} />
             : <div className={styles.cardGrid}>
                 {filtered.map((s) => (
                   <div key={s.session_id} className={styles.sessionCard}>
