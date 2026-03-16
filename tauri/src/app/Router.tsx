@@ -16,6 +16,7 @@ const AdminClaudeConfig = lazy(() => import('../features/admin/pages/AdminClaude
 const AdminSettings     = lazy(() => import('../features/admin/pages/AdminSettings'))
 const AdminSessions     = lazy(() => import('../features/admin/pages/AdminSessions'))
 const FilesPage         = lazy(() => import('../features/files'))
+const GitPage           = lazy(() => import('../features/git'))
 
 const PlaceholderPage = lazy(() =>
   Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
