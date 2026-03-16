@@ -115,7 +115,9 @@ export default function ProjectSelector() {
 
       {loading && <div className={styles.loading}><div className={styles.spinner} /></div>}
       {error && <p className={styles.error}>{error}</p>}
-      {!loading && !error && projects.length === 0 && <p className={styles.empty}>{t('project.no_projects')}</p>}
+      {!loading && !error && projects.length === 0 && (
+        <EmptyState icon="\uD83D\uDCCB" title={t('project.no_projects')} />
+      )}
 
       {!loading && !error && (
         <>
