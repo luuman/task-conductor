@@ -36,5 +36,93 @@
     "login_btn": "Login",
     "connecting": "Connecting...",
     "error_invalid_pin": "Invalid access code"
+  },
+  "settings": {
+    "title": "Settings",
+    "hint": "Manage app configuration, notifications, pipeline and security options",
+    "appearance": {
+      "title": "Appearance",
+      "hint": "Theme and language preferences",
+      "theme": "Theme",
+      "language": "Language",
+      "lang_zh": "中文",
+      "lang_en": "English"
+    },
+    "notification": {
+      "title": "Notifications",
+      "hint": "Configure TTS, Webhook and browser notifications",
+      "ttsEnabled": "TTS voice",
+      "ttsPipePath": "TTS pipe path",
+      "webhookEnabled": "Webhook",
+      "webhookUrl": "Webhook URL",
+      "browserEnabled": "Browser notifications"
+    },
+    "pipeline": {
+      "title": "Pipeline",
+      "hint": "Configure approval stages and pipeline parameters",
+      "approvalStages": "Approval required stages",
+      "maxRetries": "Max retries",
+      "confidenceThreshold": "Confidence threshold"
+    },
+    "observe": {
+      "title": "Observation",
+      "hint": "Claude session monitoring display and cleanup",
+      "sessionLimit": "Session display limit",
+      "eventLimit": "Event display limit",
+      "autoCleanup": "Auto cleanup old data",
+      "cleanupDays": "Cleanup after days"
+    },
+    "ui": {
+      "title": "UI Preferences",
+      "hint": "Default page and log display",
+      "defaultPage": "Default page",
+      "logMaxLines": "Log max lines",
+      "pages": {
+        "dashboard": "Dashboard",
+        "sessions": "Sessions",
+        "chat": "AI Chat"
+      }
+    },
+    "security": {
+      "title": "Security",
+      "hint": "Access code and tunnel security",
+      "changePin": "Change access code",
+      "newPinPlaceholder": "New code (min 4 chars)",
+      "updatePin": "Update",
+      "pinUpdated": "Access code updated",
+      "pinFailed": "Update failed",
+      "tunnelEnabled": "Cloudflare Tunnel"
+    },
+    "data": {
+      "title": "Data Management",
+      "hint": "Export or clear application data",
+      "exportDb": "Export database",
+      "exportDbHint": "Export SQLite database file",
+      "export": "Export",
+      "clearSessions": "Clear session data",
+      "clearSessionsHint": "Delete all Claude sessions and events",
+      "clearSessionsConfirm": "Clear all session data? This cannot be undone.",
+      "clearTasks": "Clear completed tasks",
+      "clearTasksHint": "Delete all completed tasks and artifacts",
+      "clearTasksConfirm": "Clear all completed tasks? This cannot be undone.",
+      "clear": "Clear"
+    },
+    "connection": {
+      "title": "Connection",
+      "tokenStatus": "Auth status",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "verifying": "Verifying...",
+      "reVerify": "Re-verify",
+      "disconnect": "Disconnect",
+      "disconnectHint": "Clear credentials and return to login",
+      "disconnectBtn": "Disconnect"
+    },
+    "restart": {
+      "title": "Restart Service",
+      "hint": "Restart backend service, page will refresh automatically",
+      "confirm": "Restart the backend service?",
+      "restarting": "Restarting..."
+    }
   }
 }
