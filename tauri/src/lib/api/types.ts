@@ -54,7 +54,8 @@ export interface AiSession {
   provider: string
   event_count: number
   started_at: string
-  last_event_at: string
+  last_event_at?: string
+  last_seen_at?: string
   cwd?: string
   status?: string
   summary?: string | null
