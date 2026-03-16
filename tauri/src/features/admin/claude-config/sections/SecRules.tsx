@@ -159,7 +159,7 @@ export function SecRules({ showToast }: SectionProps) {
       <div style={{ display: 'flex', gap: 16 }}>
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {rules.length === 0 ? (
-            <div className={styles.sectionPlaceholder}>{t('claudeConfig.rules.empty')}</div>
+            <EmptyState icon="\uD83D\uDCD0" title={t('claudeConfig.rules.empty')} />
           ) : (
             rules.map((rule) => (
               <div
