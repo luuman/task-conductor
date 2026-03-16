@@ -80,46 +80,6 @@
   color: var(--tc-foreground);
 }
 
-.toggle {
-  position: relative;
-  width: 36px;
-  height: 20px;
-  border-radius: 10px;
-  transition: background 0.2s;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.toggleOff {
-  composes: toggle;
-  background: color-mix(in srgb, var(--tc-foreground-secondary) 40%, transparent);
-}
-
-.toggleOn {
-  composes: toggle;
-  background: var(--tc-border-active);
-}
-
-.toggleKnob {
-  position: absolute;
-  top: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  transition: transform 0.2s;
-}
-
-.toggleKnobOff {
-  composes: toggleKnob;
-  transform: translateX(2px);
-}
-
-.toggleKnobOn {
-  composes: toggleKnob;
-  transform: translateX(18px);
-}
-
 /* Field input */
 .fieldGroup {
   display: flex;
