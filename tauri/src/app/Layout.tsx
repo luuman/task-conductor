@@ -20,42 +20,38 @@ export function Layout() {
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [files, setFiles] = useState<FileItem[]>([])
 
-  // 加载当前项目的任务列表
+  // 加载当前项目的文件列表
   useEffect(() => {
     if (!activeProjectId) return
-    loadProjectData()
+    loadFiles()
   }, [activeProjectId])
 
-  async function loadProjectData() {
+  async function loadFiles() {
     if (!activeProjectId) return
     try {
-      const projects = await api.getProjects()
-      const project = projects.find((p) => String(p.id) === activeProjectId)
-      if (project) {
-        const taskList = await api.getTasks(project.id)
-        setTasks(taskList)
-      }
+      const result = await api.getProjectFiles(Number(activeProjectId))
+      setFiles(result.items)
     } catch {
-      // 静默失败，显示空列表
+      setFiles([])
     }
   }
 
-  // 侧边栏导航项 = 当前项目的任务
-  const sidebarItems = tasks.map((task) => ({
-    key: String(task.id),
-    label: task.title,
-    icon: <IconFileText size={16} />,
+  // 侧边栏导航项 = 项目根目录的文件/文件夹
+  const sidebarItems = files.map((f) => ({
+    key: f.path,
+    label: f.name,
+    icon: f.is_dir ? <IconFolder size={16} /> : <IconFileText size={16} />,
   }))
 
-  // 从路径中提取当前 task id: /project/task/3 → "3"
+  // 从路径提取当前选中文件
   const pathParts = location.pathname.split('/')
-  const activeKey = (pathParts[1] === 'project' && pathParts[2] === 'task') ? pathParts[3] ?? '' : ''
+  const activeKey = pathParts[1] === 'file' ? decodeURIComponent(pathParts.slice(2).join('/')) : ''
 
-  // 面包屑：ProjectSwitcher 作为 prefix，后面只跟当前任务名
-  const activeTask = tasks.find((t) => String(t.id) === activeKey)
-  const breadcrumb = activeTask ? [{ label: activeTask.title }] : []
+  // 面包屑
+  const activeFile = files.find((f) => f.path === activeKey)
+  const breadcrumb = activeFile ? [{ label: activeFile.name }] : []
 
   return (
   <>
