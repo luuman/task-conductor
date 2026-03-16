@@ -71,7 +71,7 @@ class CacheManager {
   /**
    * 删除匹配前缀的所有缓存（仅 L1，L2 由 TTL 自然过期）。
    */
-  invalidatePrefix(prefix: string): void {
+  invalidatePrefix(_prefix: string): void {
     this.l1.clear()
   }
 
