@@ -46,17 +46,16 @@ export function TopBar({ logo, logoIcon, breadcrumb, breadcrumbPrefix, actions, 
       </div>
 
       <div className={styles.center}>
-        {breadcrumb && breadcrumb.length > 0 && (
-          <nav className={styles.breadcrumb}>
-            {breadcrumb.map((item, i) => (
-              <span key={i} className={styles.breadcrumbItem}>
-                {i > 0 && <span className={styles.breadcrumbSep}>/</span>}
-                {item.icon}
-                <span>{item.label}</span>
-              </span>
-            ))}
-          </nav>
-        )}
+        <nav className={styles.breadcrumb}>
+          {breadcrumbPrefix}
+          {breadcrumb && breadcrumb.length > 0 && breadcrumb.map((item, i) => (
+            <span key={i} className={styles.breadcrumbItem}>
+              <span className={styles.breadcrumbSep}>/</span>
+              {item.icon}
+              <span>{item.label}</span>
+            </span>
+          ))}
+        </nav>
       </div>
 
       <div className={styles.right}>
