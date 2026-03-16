@@ -140,6 +140,7 @@ export default function AdminLayout() {
         </div>
       </AppShell>
       <NotificationPanel />
+      <CommandMenu open={cmdOpen} onClose={handleCmdClose} />
     </>
   )
 }
