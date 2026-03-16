@@ -52,4 +52,23 @@ export class HttpAdapter implements ApiAdapter {
   async healthCheck() {
     try { await fetch(`${this.baseUrl}/health`); return true } catch { return false }
   }
+  getSettings() { return this.fetch<Settings>('/api/settings') }
+  updateSettings(data: Partial<Settings>) {
+    return this.fetch<Settings>('/api/settings', { method: 'PUT', body: JSON.stringify(data) })
+  }
+  updatePin(newPin: string) {
+    return this.fetch<{ ok: boolean }>('/api/settings/security/pin', { method: 'PUT', body: JSON.stringify({ new_pin: newPin }) })
+  }
+  exportDb() {
+    return this.fetch<{ path: string; size_mb: number }>('/api/settings/data/export-db', { method: 'POST' })
+  }
+  clearSessions() {
+    return this.fetch<{ ok: boolean; message: string }>('/api/settings/data/clear-sessions', { method: 'POST' })
+  }
+  clearCompletedTasks() {
+    return this.fetch<{ ok: boolean; count: number }>('/api/settings/data/clear-completed-tasks', { method: 'POST' })
+  }
+  async restartService() {
+    await this.fetch<void>('/api/settings/restart', { method: 'POST' })
+  }
 }
