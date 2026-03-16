@@ -337,6 +337,7 @@ app.include_router(tc_config_router.router)      # GET/PUT /api/tc-config
 app.include_router(files_router.router)          # GET /api/projects/{id}/files, /file
 app.include_router(git_router.router)            # GET /api/projects/{id}/git/status, /git/diff
 app.include_router(chat_router.router)            # GET /api/chat/models
+app.include_router(ai_router.router)              # POST /api/ai/inline-edit
 app.include_router(feishu_router)
 
 
