@@ -195,8 +195,8 @@ export default function ClaudeConfigPage() {
     sectionRefs.current[id] = el
   }, [])
 
-  /* ── render section placeholder ── */
-  const renderSection = (_id: string) => {
+  /* ── render section ── */
+  const renderSection = (id: string) => {
     if (loading) {
       return (
         <div className={styles.sectionSkeleton}>
@@ -205,14 +205,14 @@ export default function ClaudeConfigPage() {
         </div>
       )
     }
-    // All sections are placeholders for now - actual components will be swapped in later
-    return <div className={styles.sectionPlaceholder}>{t('claudeConfig.comingSoon')}</div>
+    const Comp = SECTION_COMPONENTS[id]
+    if (!Comp) return null
+    return (
+      <Suspense fallback={<Skeleton variant="rect" width="100%" height={60} borderRadius={8} />}>
+        <Comp config={config} overview={overview} onConfigUpdate={setConfig} showToast={showToast} />
+      </Suspense>
+    )
   }
-
-  /* ── Suppress unused var warnings ── */
-  void config
-  void overview
-  void showToast
 
   return (
     <div className={styles.page}>
