@@ -1043,6 +1043,7 @@ function highlightLog(text: string): string {
 }
 
 function BashStatusLine({ block }: { block: TranscriptBlock }) {
+  const { t } = useTranslation()
   const cmd = String(block.tool_input?.command ?? '')
   const shortCmd = cmd.replace(/^cd [^ ]+ && /, '').slice(0, 150)
   const result = (block.tool_result || '').trim()
