@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { FileItem } from '../../../lib/api/types'
+import { getFileIconPath } from './file-icon-map'
 import styles from './file-tree.module.css'
 
 interface FileTreeProps {
@@ -8,20 +9,6 @@ interface FileTreeProps {
   activePath: string | null
   depth?: number
   collapsedAll?: number
-}
-
-const FILE_ICONS: Record<string, string> = {
-  ts: '🟦', tsx: '⚛', js: '🟨', jsx: '⚛',
-  py: '🐍', css: '🎨', html: '🌐', json: '📋',
-  md: '📝', rs: '🦀', go: '🔵', sh: '📜',
-  yaml: '⚙', yml: '⚙', toml: '⚙', sql: '🗃',
-  svg: '🖼', png: '🖼', jpg: '🖼', gif: '🖼',
-}
-
-function getFileIcon(name: string, isDir: boolean): string {
-  if (isDir) return '📁'
-  const ext = name.split('.').pop()?.toLowerCase() ?? ''
-  return FILE_ICONS[ext] ?? '📄'
 }
 
 function sortItems(items: FileItem[]): FileItem[] {
