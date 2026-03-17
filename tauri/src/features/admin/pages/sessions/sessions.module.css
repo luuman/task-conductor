@@ -368,8 +368,10 @@
 }
 
 .toolIcon {
-  font-size: 12px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--tc-foreground-secondary);
 }
 
 .toolName {
