@@ -594,7 +594,7 @@ function AgentResultView({ result, description }: { result: string; description:
     <div className={styles.agentWrap}>
       {description && (
         <div className={styles.agentHeader}>
-          <span style={{ fontSize: 13 }}>{'\uD83E\uDD16'}</span>
+          <IconBot size={12} />
           <span className={styles.agentDesc}>{description}</span>
         </div>
       )}
