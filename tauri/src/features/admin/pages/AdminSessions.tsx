@@ -1277,6 +1277,12 @@ export default function AdminSessions() {
                 ))}
                 <div ref={bottomRef} />
               </div>
+              {showJumpBtn && (
+                <button className={styles.jumpToBottom} onClick={jumpToBottom}>
+                  <IconChevronDown size={14} />
+                  <span>{'\u6700\u65B0'}</span>
+                </button>
+              )}
             </div>
           </ExpandSignalCtx.Provider>
           </AutoExpandCtx.Provider>
