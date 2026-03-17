@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AssistantBubble 方案对比 Demo</title>
+<style>
+  :root {
+    --bg: #1e1e1e;
+    --panel: #252526;
+    --border: rgba(255,255,255,0.08);
+    --fg: #d4d4d4;
+    --fg2: #8b949e;
+    --accent: #007acc;
+    --green: #56d364;
+    --red: #f85149;
+    --yellow: #eab308;
+    --font: 'Geist', -apple-system, system-ui, sans-serif;
+    --mono: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #111;
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  /* ── Page layout ── */
+  .page-header {
+    position: sticky; top: 0; z-index: 100;
+    padding: 16px 32px;
+    background: rgba(17,17,17,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .page-header h1 { font-size: 16px; font-weight: 700; }
+  .page-header .subtitle { font-size: 12px; color: var(--fg2); }
+  .schemes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .scheme {
+    background: var(--bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .scheme-header {
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .scheme-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-current { background: rgba(139,148,158,0.15); color: var(--fg2); }
+  .badge-a { background: rgba(0,122,204,0.15); color: var(--accent); }
+  .badge-b { background: rgba(86,211,100,0.15); color: var(--green); }
+  .badge-c { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .scheme-name { font-size: 13px; font-weight: 600; }
+  .scheme-desc { font-size: 11px; color: var(--fg2); margin-left: auto; }
+  .scheme-body { padding: 16px; }
+
+  /* ── Shared: message row ── */
+  .msg-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0;
+  }
+  .avatar {
+    width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; margin-top: 2px;
+  }
+  .avatar-bot {
+    background: rgba(0,122,204,0.08);
+    border: 1px solid rgba(0,122,204,0.15);
+  }
+  .avatar-user {
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+  .msg-row-right { flex-direction: row-reverse; }
+  .user-bubble {
+    max-width: 70%; border-radius: 8px; padding: 8px 12px;
+    background: var(--panel); border: 1px solid var(--border);
+    font-size: 12.5px;
+  }
+
+  /* ── Shared icon ── */
+  .icon { display: inline-flex; align-items: center; color: var(--fg2); flex-shrink: 0; }
+  .icon svg { width: 14px; height: 14px; }
+
+  /* ============================
+     CURRENT (方案 0: 现状)
+     ============================ */
+  .c0-bubble {
+    max-width: 85%; border-radius: 8px; padding: 10px 14px;
+    background: rgba(68,119,255,0.04);
+    border: 1px solid rgba(68,119,255,0.12);
+  }
+  .c0-text { font-size: 12.5px; margin-bottom: 6px; }
+  .c0-text:last-child { margin-bottom: 0; }
+  .c0-tool {
+    margin: 4px 0;
+  }
+  .c0-tool-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0; font-size: 11.5px;
+  }
+  .c0-tool-name { font-weight: 600; color: var(--fg); flex-shrink: 0; }
+  .c0-tool-param {
+    font-size: 10.5px; font-family: var(--mono);
+    color: var(--fg2); background: var(--bg);
+    padding: 2px 6px; border-radius: 4px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 300px;
+  }
+  .c0-tool-edit-info {
+    font-size: 10px; font-family: var(--mono);
+    color: var(--fg2); margin-left: 6px;
+  }
+  .c0-tool-error {
+    font-size: 9px; font-family: var(--mono);
+    padding: 1px 6px; border-radius: 4px;
+    color: var(--red); background: rgba(244,63,94,0.1);
+  }
+  .c0-tool-preview {
+    font-size: 10px; font-family: var(--mono);
+    color: var(--fg2); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 180px;
+  }
+  .c0-tool-chevron { color: var(--fg2); margin-left: auto; }
+  .c0-sys-reminder {
+    margin: 6px 0; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+  .c0-sys-summary {
+    padding: 6px 10px; font-size: 10px; font-weight: 600;
+    color: var(--fg2); text-transform: uppercase; letter-spacing: 0.5px;
+    cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px;
+  }
+  .c0-task-notif {
+    margin: 6px 0; padding: 10px 12px; border-radius: 8px;
+    border-left: 3px solid var(--green);
+    background: rgba(63,185,80,0.08);
+  }
+  .c0-task-notif-header {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+  }
+  .c0-task-notif-title { font-weight: 600; font-size: 11.5px; }
+  .c0-task-notif-status {
+    font-size: 10px; font-weight: 600; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-left: auto; color: var(--green);
+  }
+  .c0-task-notif-summary { font-size: 12px; line-height: 1.4; margin-bottom: 6px; }
+  .c0-task-notif-meta {
+    display: flex; align-items: center; gap: 6px; margin-top: 2px;
+  }
+  .c0-task-notif-label {
+    font-size: 9.5px; font-weight: 600; color: var(--fg2);
+    text-transform: uppercase; letter-spacing: 0.3px; min-width: 40px;
+  }
+  .c0-task-notif-code {
+    font-size: 10px; font-family: var(--mono); color: var(--fg2);
+    background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 3px;
+  }
+  /* Read group pills (current) */
+  .c0-read-group { margin: 4px 0; }
+  .c0-read-group-header {
+    display: flex; align-items: center; gap: 6px; padding: 4px 0;
+    cursor: pointer;
+  }
+  .c0-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    font-size: 10.5px; font-family: var(--mono);
+    color: var(--fg2);
+  }
+
+  /* ============================
+     方案 A: 极简紧凑
+     ============================ */
+  .a-bubble {
+    max-width: 85%; border-radius: 8px; padding: 10px 14px;
+    background: rgba(68,119,255,0.04);
+    border: 1px solid rgba(68,119,255,0.12);
+  }
+  .a-text { font-size: 12.5px; margin-bottom: 6px; }
+  .a-text:last-child { margin-bottom: 0; }
+  /* Tool: single line, icon + param only */
+  .a-tool-line {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 0;
+    font-size: 11px; font-family: var(--mono);
+    color: var(--fg2);
+    border-left: 2px solid rgba(255,255,255,0.06);
+    padding-left: 8px;
+    margin: 2px 0;
+  }
+  .a-tool-line .file {
+    color: var(--accent);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .a-tool-line .cmd {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 300px;
+  }
+  .a-tool-line .edit-badge {
+    font-size: 9px; padding: 1px 5px; border-radius: 3px;
+    background: rgba(86,211,100,0.1); color: var(--green);
+  }
+  .a-tool-line .err-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--red); flex-shrink: 0;
+  }
+  /* System reminder: completely hidden */
+  /* Task notification: inline badge */
+  .a-task-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-family: var(--mono);
+    background: rgba(63,185,80,0.1); color: var(--green);
+    margin: 2px 0;
+  }
+  /* Read group: just file count */
+  .a-read-summary {
+    font-size: 10px; color: var(--fg2); padding: 2px 0;
+    font-family: var(--mono);
+    border-left: 2px solid rgba(255,255,255,0.06);
+    padding-left: 8px;
+    margin: 2px 0;
+  }
+
+  /* ============================
+     方案 B: 分区卡片
+     ============================ */
+  .b-bubble {
+    max-width: 85%; border-radius: 8px;
+    background: rgba(68,119,255,0.04);
+    border: 1px solid rgba(68,119,255,0.12);
+    overflow: hidden;
+  }
+  .b-text-zone { padding: 10px 14px; font-size: 12.5px; }
+  /* Tool zone: separated with subtle bg */
+  .b-tool-zone {
+    background: rgba(0,0,0,0.15);
+    border-top: 1px solid rgba(255,255,255,0.04);
+    padding: 6px 10px;
+  }
+  .b-tool-zone-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 0 4px;
+    font-size: 10px; font-weight: 600; color: var(--fg2);
+    text-transform: uppercase; letter-spacing: 0.3px;
+    cursor: pointer; user-select: none;
+  }
+  .b-tool-zone-count {
+    font-size: 9px; font-family: var(--mono);
+    padding: 1px 5px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); color: var(--fg2);
+  }
+  .b-tool-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 6px; margin: 2px 0;
+    border-radius: 6px;
+    font-size: 11px;
+    transition: background 0.15s;
+  }
+  .b-tool-item:hover { background: rgba(255,255,255,0.03); }
+  .b-tool-icon {
+    width: 20px; height: 20px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.04); flex-shrink: 0;
+  }
+  .b-tool-info { flex: 1; min-width: 0; }
+  .b-tool-name { font-weight: 600; color: var(--fg); font-size: 10.5px; }
+  .b-tool-detail {
+    font-size: 10px; font-family: var(--mono);
+    color: var(--fg2); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .b-tool-badge {
+    font-size: 9px; font-family: var(--mono);
+    padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+  }
+  .b-badge-edit { background: rgba(86,211,100,0.1); color: var(--green); }
+  .b-badge-err { background: rgba(244,63,94,0.1); color: var(--red); }
+  .b-badge-read { background: rgba(0,122,204,0.1); color: var(--accent); }
+
+  /* ============================
+     方案 C: 时间线
+     ============================ */
+  .c-bubble {
+    max-width: 85%; border-radius: 8px; padding: 10px 14px;
+    background: rgba(68,119,255,0.04);
+    border: 1px solid rgba(68,119,255,0.12);
+  }
+  .c-text { font-size: 12.5px; margin-bottom: 8px; }
+  .c-text:last-child { margin-bottom: 0; }
+  .c-timeline {
+    position: relative;
+    padding-left: 16px;
+    margin: 4px 0 4px 6px;
+  }
+  .c-timeline::before {
+    content: '';
+    position: absolute; left: 0; top: 4px; bottom: 4px;
+    width: 1.5px;
+    background: linear-gradient(to bottom, var(--accent), rgba(0,122,204,0.2));
+    border-radius: 1px;
+  }
+  .c-tl-item {
+    position: relative;
+    padding: 3px 0;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px;
+  }
+  .c-tl-item::before {
+    content: '';
+    position: absolute; left: -19px; top: 50%; transform: translateY(-50%);
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--bg);
+    border: 1.5px solid var(--accent);
+  }
+  .c-tl-item.done::before { background: var(--accent); }
+  .c-tl-item.error::before { border-color: var(--red); background: var(--red); }
+  .c-tl-label {
+    font-size: 10px; font-weight: 600; color: var(--fg2);
+    width: 36px; flex-shrink: 0; text-align: right;
+  }
+  .c-tl-detail {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--fg2); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; flex: 1;
+  }
+  .c-tl-detail .highlight { color: var(--accent); }
+  .c-tl-badge {
+    font-size: 9px; font-family: var(--mono);
+    padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+  }
+
+  /* ── Inline code ── */
+  code.inline {
+    font-size: 11px; font-family: var(--mono);
+    padding: 1px 4px; border-radius: 4px;
+    background: var(--panel); color: var(--accent);
+  }
+
+  /* ── Annotation labels ── */
+  .anno {
+    display: block;
+    font-size: 10px; color: var(--yellow);
+    margin: 8px 0 4px;
+    font-family: var(--mono);
+    opacity: 0.8;
+  }
+  .anno::before { content: '▸ '; }
+
+  /* ── Full width scheme ── */
+  .full-width { grid-column: 1 / -1; }
+
+  /* ── Vote buttons ── */
+  .vote-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; border-top: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .vote-btn {
+    padding: 6px 16px; border-radius: 6px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--fg); font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .vote-btn:hover {
+    background: rgba(0,122,204,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .vote-btn.selected {
+    background: rgba(0,122,204,0.2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>AssistantBubble 展示方案对比</h1>
+  <span class="subtitle">同一条 assistant 消息，四种展示风格</span>
+</div>
+
+<div class="schemes">
+
+<!-- ════════════════════════════════════════════
+     方案 0: 现状 (CURRENT)
+     ════════════════════════════════════════════ -->
+<div class="scheme">
+  <div class="scheme-header">
+    <span class="scheme-badge badge-current">CURRENT</span>
+    <span class="scheme-name">现状</span>
+    <span class="scheme-desc">所有信息平铺在一个 bubble 内</span>
+  </div>
+  <div class="scheme-body">
+    <!-- User message -->
+    <div class="msg-row msg-row-right">
+      <div class="avatar avatar-user">👤</div>
+      <div class="user-bubble">帮我重构 useAuth hook，把 token 存储迁移到 zustand</div>
+    </div>
+    <!-- Assistant message -->
+    <div class="msg-row">
+      <div class="avatar avatar-bot">🤖</div>
+      <div class="c0-bubble">
+        <div class="c0-text">好的，让我先看看当前的实现。</div>
+
+        <span class="anno">↓ system-reminder（内部系统提醒）</span>
+        <div class="c0-sys-reminder">
+          <div class="c0-sys-summary">▸ SYSTEM REMINDER</div>
+        </div>
+
+        <span class="anno">↓ Read group pills（连续只读工具）</span>
+        <div class="c0-read-group">
+          <div class="c0-read-group-header">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            <span class="c0-pill">📄 useAuth.ts</span>
+            <span class="c0-pill">📄 auth-store.ts</span>
+            <span class="c0-pill">🔍 "token"</span>
+          </div>
+        </div>
+
+        <div class="c0-text">现在我来修改文件。</div>
+
+        <span class="anno">↓ ToolWidget（每个工具调用完整展示）</span>
+        <div class="c0-tool">
+          <div class="c0-tool-header">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+            <span class="c0-tool-param">useAuth.ts<span class="c0-tool-edit-info"> +12 −8</span></span>
+            <span style="flex:1"></span>
+            <span class="c0-tool-preview">refactor token storage…</span>
+            <span class="c0-tool-chevron">▸</span>
+          </div>
+        </div>
+        <div class="c0-tool">
+          <div class="c0-tool-header">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+            <span class="c0-tool-param">auth-store.ts<span class="c0-tool-edit-info"> +24 −3</span></span>
+            <span style="flex:1"></span>
+            <span class="c0-tool-preview">add token persist…</span>
+            <span class="c0-tool-chevron">▸</span>
+          </div>
+        </div>
+        <div class="c0-tool">
+          <div class="c0-tool-header">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span>
+            <span class="c0-tool-name">Bash</span>
+            <code class="c0-tool-param">npx tsc --noEmit</code>
+            <span style="flex:1"></span>
+            <span class="c0-tool-preview">Found 0 errors</span>
+            <span class="c0-tool-chevron">▸</span>
+          </div>
+        </div>
+        <div class="c0-tool">
+          <div class="c0-tool-header">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span>
+            <span class="c0-tool-name">Bash</span>
+            <code class="c0-tool-param">pnpm test -- --run auth</code>
+            <span style="flex:1"></span>
+            <span class="c0-tool-error">ERROR</span>
+            <span class="c0-tool-chevron">▸</span>
+          </div>
+        </div>
+
+        <span class="anno">↓ task-notification 卡片（子任务通知）</span>
+        <div class="c0-task-notif">
+          <div class="c0-task-notif-header">
+            <svg width="8" height="8"><circle cx="4" cy="4" r="4" fill="#56d364"/></svg>
+            <span class="c0-task-notif-title">Background Task</span>
+            <span class="c0-task-notif-status">completed</span>
+          </div>
+          <div class="c0-task-notif-summary">类型检查和依赖分析已完成</div>
+          <div class="c0-task-notif-meta">
+            <span class="c0-task-notif-label">ID</span>
+            <code class="c0-task-notif-code">toolu_01JBL...</code>
+          </div>
+          <div class="c0-task-notif-meta">
+            <span class="c0-task-notif-label">Output</span>
+            <code class="c0-task-notif-code">result.json</code>
+          </div>
+        </div>
+
+        <div class="c0-text">重构完成。<code class="inline">useAuth</code> 现在使用 zustand store 管理 token，移除了 localStorage 直接读写。类型检查通过，但 auth 测试有一个用例需要更新 mock。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     方案 A: 极简紧凑
+     ════════════════════════════════════════════ -->
+<div class="scheme">
+  <div class="scheme-header">
+    <span class="scheme-badge badge-a">A</span>
+    <span class="scheme-name">极简紧凑</span>
+    <span class="scheme-desc">隐藏噪音，工具调用缩为单行</span>
+  </div>
+  <div class="scheme-body">
+    <div class="msg-row msg-row-right">
+      <div class="avatar avatar-user">👤</div>
+      <div class="user-bubble">帮我重构 useAuth hook，把 token 存储迁移到 zustand</div>
+    </div>
+    <div class="msg-row">
+      <div class="avatar avatar-bot">🤖</div>
+      <div class="a-bubble">
+        <div class="a-text">好的，让我先看看当前的实现。</div>
+
+        <!-- system-reminder: 完全隐藏 -->
+
+        <!-- Read group: 一行摘要 -->
+        <div class="a-read-summary">📖 读取了 useAuth.ts, auth-store.ts + 搜索 "token"</div>
+
+        <div class="a-text">现在我来修改文件。</div>
+
+        <!-- Tools: 每个一行 -->
+        <div class="a-tool-line">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+          <span class="file">useAuth.ts</span>
+          <span class="edit-badge">+12 −8</span>
+        </div>
+        <div class="a-tool-line">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+          <span class="file">auth-store.ts</span>
+          <span class="edit-badge">+24 −3</span>
+        </div>
+        <div class="a-tool-line">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span>
+          <span class="cmd">npx tsc --noEmit</span>
+        </div>
+        <div class="a-tool-line">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span>
+          <span class="cmd">pnpm test -- --run auth</span>
+          <span class="err-dot"></span>
+        </div>
+
+        <!-- Task notification: inline badge -->
+        <div class="a-task-badge">✓ 类型检查和依赖分析已完成</div>
+
+        <div class="a-text" style="margin-top: 6px;">重构完成。<code class="inline">useAuth</code> 现在使用 zustand store 管理 token，移除了 localStorage 直接读写。类型检查通过，但 auth 测试有一个用例需要更新 mock。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     方案 B: 分区卡片
+     ════════════════════════════════════════════ -->
+<div class="scheme">
+  <div class="scheme-header">
+    <span class="scheme-badge badge-b">B</span>
+    <span class="scheme-name">分区卡片</span>
+    <span class="scheme-desc">文本区与工具区分离，工具区可折叠</span>
+  </div>
+  <div class="scheme-body">
+    <div class="msg-row msg-row-right">
+      <div class="avatar avatar-user">👤</div>
+      <div class="user-bubble">帮我重构 useAuth hook，把 token 存储迁移到 zustand</div>
+    </div>
+    <div class="msg-row">
+      <div class="avatar avatar-bot">🤖</div>
+      <div class="b-bubble">
+        <div class="b-text-zone">
+          <div style="font-size:12.5px">好的，让我先看看当前的实现。</div>
+        </div>
+
+        <!-- Tool zone -->
+        <div class="b-tool-zone">
+          <div class="b-tool-zone-header">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="9 18 15 12 9 6"/></svg></span>
+            执行操作
+            <span class="b-tool-zone-count">6</span>
+          </div>
+
+          <div class="b-tool-item">
+            <div class="b-tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+            <div class="b-tool-info">
+              <div class="b-tool-detail">useAuth.ts, auth-store.ts, token</div>
+            </div>
+            <span class="b-tool-badge b-badge-read">Read ×3</span>
+          </div>
+
+          <div class="b-tool-item">
+            <div class="b-tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+            <div class="b-tool-info">
+              <div class="b-tool-detail">useAuth.ts</div>
+            </div>
+            <span class="b-tool-badge b-badge-edit">+12 −8</span>
+          </div>
+
+          <div class="b-tool-item">
+            <div class="b-tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+            <div class="b-tool-info">
+              <div class="b-tool-detail">auth-store.ts</div>
+            </div>
+            <span class="b-tool-badge b-badge-edit">+24 −3</span>
+          </div>
+
+          <div class="b-tool-item">
+            <div class="b-tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+            <div class="b-tool-info">
+              <div class="b-tool-detail">npx tsc --noEmit</div>
+            </div>
+            <span class="b-tool-badge" style="background:rgba(86,211,100,0.1);color:#56d364">pass</span>
+          </div>
+
+          <div class="b-tool-item">
+            <div class="b-tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+            <div class="b-tool-info">
+              <div class="b-tool-detail">pnpm test -- --run auth</div>
+            </div>
+            <span class="b-tool-badge b-badge-err">fail</span>
+          </div>
+        </div>
+
+        <div class="b-text-zone">
+          <div style="font-size:12.5px">重构完成。<code class="inline">useAuth</code> 现在使用 zustand store 管理 token，移除了 localStorage 直接读写。类型检查通过，但 auth 测试有一个用例需要更新 mock。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     方案 C: 时间线
+     ════════════════════════════════════════════ -->
+<div class="scheme">
+  <div class="scheme-header">
+    <span class="scheme-badge badge-c">C</span>
+    <span class="scheme-name">时间线</span>
+    <span class="scheme-desc">工具调用以竖线串联，呈现执行流</span>
+  </div>
+  <div class="scheme-body">
+    <div class="msg-row msg-row-right">
+      <div class="avatar avatar-user">👤</div>
+      <div class="user-bubble">帮我重构 useAuth hook，把 token 存储迁移到 zustand</div>
+    </div>
+    <div class="msg-row">
+      <div class="avatar avatar-bot">🤖</div>
+      <div class="c-bubble">
+        <div class="c-text">好的，让我先看看当前的实现。</div>
+
+        <div class="c-timeline">
+          <div class="c-tl-item done">
+            <span class="c-tl-label">Read</span>
+            <span class="c-tl-detail"><span class="highlight">useAuth.ts</span></span>
+          </div>
+          <div class="c-tl-item done">
+            <span class="c-tl-label">Read</span>
+            <span class="c-tl-detail"><span class="highlight">auth-store.ts</span></span>
+          </div>
+          <div class="c-tl-item done">
+            <span class="c-tl-label">Grep</span>
+            <span class="c-tl-detail">"token" in src/</span>
+          </div>
+          <div class="c-tl-item done">
+            <span class="c-tl-label">Edit</span>
+            <span class="c-tl-detail"><span class="highlight">useAuth.ts</span></span>
+            <span class="c-tl-badge" style="background:rgba(86,211,100,0.1);color:#56d364">+12 −8</span>
+          </div>
+          <div class="c-tl-item done">
+            <span class="c-tl-label">Edit</span>
+            <span class="c-tl-detail"><span class="highlight">auth-store.ts</span></span>
+            <span class="c-tl-badge" style="background:rgba(86,211,100,0.1);color:#56d364">+24 −3</span>
+          </div>
+          <div class="c-tl-item done">
+            <span class="c-tl-label">Bash</span>
+            <span class="c-tl-detail">npx tsc --noEmit</span>
+            <span class="c-tl-badge" style="background:rgba(86,211,100,0.1);color:#56d364">pass</span>
+          </div>
+          <div class="c-tl-item error">
+            <span class="c-tl-label">Bash</span>
+            <span class="c-tl-detail">pnpm test -- --run auth</span>
+            <span class="c-tl-badge" style="background:rgba(244,63,94,0.1);color:#f85149">fail</span>
+          </div>
+        </div>
+
+        <div class="c-text">重构完成。<code class="inline">useAuth</code> 现在使用 zustand store 管理 token，移除了 localStorage 直接读写。类型检查通过，但 auth 测试有一个用例需要更新 mock。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// Simple interactive: click scheme to highlight
+document.querySelectorAll('.scheme').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.scheme').forEach(s => s.style.outline = 'none')
+    el.style.outline = '2px solid var(--accent)'
+    el.style.outlineOffset = '2px'
+  })
+})
+</script>
+
+</body>
+</html>
