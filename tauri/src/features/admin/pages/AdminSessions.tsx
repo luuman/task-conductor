@@ -623,7 +623,7 @@ function AskUserQuestionView({ input, result }: { input: Record<string, unknown>
       </div>
       {result && (
         <div className={styles.askAnswer}>
-          <span style={{ fontSize: 12, flexShrink: 0, marginTop: 1 }}>{'\uD83D\uDC64'}</span>
+          <span style={{ flexShrink: 0, marginTop: 1, display: 'flex' }}><IconUser size={12} /></span>
           <p className={styles.askAnswerText}>{result}</p>
         </div>
       )}
