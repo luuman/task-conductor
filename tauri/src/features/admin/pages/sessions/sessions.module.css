@@ -1073,3 +1073,111 @@
 .listEmptyText {
   font-size: 11px;
 }
+
+/* ── Task Notification Card ── */
+.taskNotification {
+  margin: 6px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid;
+  font-size: 12px;
+}
+
+.taskNotifHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.taskNotifTitle {
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--tc-foreground);
+}
+
+.taskNotifStatus {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+.taskNotifSummary {
+  font-size: 12px;
+  color: var(--tc-foreground);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.taskNotifMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.taskNotifLabel {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.taskNotifCode {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── System Reminder ── */
+.systemReminder {
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 11px;
+}
+
+.systemReminderSummary {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.systemReminderSummary::before {
+  content: '\25B8';
+  font-size: 8px;
+  transition: transform 0.15s;
+}
+
+.systemReminder[open] > .systemReminderSummary::before {
+  transform: rotate(90deg);
+}
+
+.systemReminderBody {
+  padding: 0 10px 8px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.5;
+}
