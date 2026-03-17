@@ -218,13 +218,14 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<GitStatus>(`/api/projects/${projectId}/git/status`)
   }
 
-  gitDiff(projectId: number, opts?: { file?: string; staged?: boolean; commit?: string }) {
+  async gitDiff(projectId: number, opts?: { file?: string; staged?: boolean; commit?: string }) {
     const params = new URLSearchParams()
     if (opts?.file) params.set('file', opts.file)
     if (opts?.staged) params.set('staged', 'true')
     if (opts?.commit) params.set('commit', opts.commit)
     const qs = params.toString()
-    return this.fetch<string>(`/api/projects/${projectId}/git/diff${qs ? `?${qs}` : ''}`)
+    const res = await this.fetch<{ diff: string }>(`/api/projects/${projectId}/git/diff${qs ? `?${qs}` : ''}`)
+    return res.diff
   }
 
   gitStage(projectId: number, files?: string[]) {
