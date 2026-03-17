@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    tc_tauri_tmp_lib::run()
+    task_conductor_app_lib::run()
 }
