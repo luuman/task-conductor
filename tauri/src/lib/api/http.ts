@@ -288,8 +288,9 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<void>(`/api/projects/${projectId}/git/fetch`, { method: 'POST' })
   }
 
-  gitStashList(projectId: number) {
-    return this.fetch<GitStash[]>(`/api/projects/${projectId}/git/stash`)
+  async gitStashList(projectId: number) {
+    const res = await this.fetch<{ stashes: GitStash[] }>(`/api/projects/${projectId}/git/stash`)
+    return res.stashes
   }
 
   gitStashSave(projectId: number, message?: string) {
