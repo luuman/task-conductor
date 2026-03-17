@@ -697,7 +697,7 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
     <div className={styles.msgRowRight}>
       <div className={styles.userBubble}>
         <div className={styles.mdContent}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{text}</ReactMarkdown>
+          <RichTextBlock text={text} />
         </div>
       </div>
       <UserAvatar />
