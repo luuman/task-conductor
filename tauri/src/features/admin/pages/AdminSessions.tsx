@@ -299,25 +299,31 @@ const mdComponents: Components = {
   code: ({ children, className }) => {
     if (className?.includes('language-')) {
       const lang = className.replace('language-', '')
-      const code = String(children).replace(/\n$/, '')
+      const raw = String(children).replace(/\n$/, '')
       let highlighted: string | null = null
       try {
         if (hljs.getLanguage(lang)) {
-          highlighted = hljs.highlight(code, { language: lang }).value
+          highlighted = hljs.highlight(raw, { language: lang }).value
         } else {
-          highlighted = hljs.highlightAuto(code).value
+          highlighted = hljs.highlightAuto(raw).value
         }
       } catch { /* fallback */ }
       if (highlighted) {
         return (
-          <code className={`hljs ${styles.mdCodeBlock}`}
-                dangerouslySetInnerHTML={{ __html: highlighted }} />
+          <>
+            <CopyButton text={raw} className={styles.codeCopyBtn} />
+            <code className={`hljs ${styles.mdCodeBlock}`}
+                  dangerouslySetInnerHTML={{ __html: highlighted }} />
+          </>
         )
       }
       return (
-        <code className={styles.mdCodeBlockPlain}>
-          {children}
-        </code>
+        <>
+          <CopyButton text={raw} className={styles.codeCopyBtn} />
+          <code className={styles.mdCodeBlockPlain}>
+            {children}
+          </code>
+        </>
       )
     }
     return (
