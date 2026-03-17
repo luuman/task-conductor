@@ -206,6 +206,12 @@ export class HttpAdapter implements ApiAdapter {
     })
   }
 
+  listDir(projectId: number, path: string) {
+    return this.fetch<{ path: string; items: FileItem[] }>(
+      `/api/projects/${projectId}/files?path=${encodeURIComponent(path)}`,
+    )
+  }
+
   searchFiles(projectId: number, query: string) {
     return this.fetch<FileItem[]>(
       `/api/projects/${projectId}/files/search?q=${encodeURIComponent(query)}`,
