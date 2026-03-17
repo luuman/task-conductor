@@ -984,31 +984,22 @@ function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
 
 function EditInlineCard({ block }: { block: TranscriptBlock }) {
   const input = block.tool_input || {}
-  const filePath = String(input.file_path || '')
-  const fileName = filePath.split('/').pop() || filePath
   const hasEditData = Boolean(input.old_string || input.new_string)
 
-  return (
-    <div className={styles.editCard}>
-      <div className={styles.editCardHead}>
-        <span className={styles.editCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+  if (!hasEditData) {
+    // Write without diff data — show compact line
+    const filePath = String(input.file_path || '')
+    const fileName = filePath.split('/').pop() || filePath
+    return (
+      <div className={styles.bashLine}>
+        <span className={styles.bashLineIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
         <span className={styles.editCardFile} title={filePath}>{fileName}</span>
-        {hasEditData && (
-          <span className={styles.editCardStat}>
-            {(() => {
-              const oldN = String(input.old_string ?? '').split('\n').length
-              const newN = String(input.new_string ?? '').split('\n').length
-              const parts: string[] = []
-              if (newN > 0) parts.push(`+${newN}`)
-              if (oldN > 0) parts.push(`\u2212${oldN}`)
-              return parts.join(' ')
-            })()}
-          </span>
-        )}
+        <span className={`${styles.bashLineBadge} ${styles.bashLinePass}`}>{'\u2713'}</span>
       </div>
-      {hasEditData && <EditDiffView input={input} />}
-    </div>
-  )
+    )
+  }
+
+  return <EditDiffView input={input} />
 }
 
 function BashStatusLine({ block }: { block: TranscriptBlock }) {
