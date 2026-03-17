@@ -1495,12 +1495,12 @@ export default function AdminSessions() {
                 </div>
               )}
               <div className={styles.transcriptBody}>
-                {transcript.map((msg, i) => (
+                {groupMessagesIntoTurns(transcript).map((item, i) => (
                   <div key={i} data-msg-index={i}>
-                    {msg.role === 'user' ? (
-                      <UserCard msg={msg} />
+                    {item.kind === 'user' ? (
+                      <UserCard msg={item.msg} />
                     ) : (
-                      <AssistantCard msg={msg} />
+                      <AssistantTurnCard turn={item.turn} />
                     )}
                   </div>
                 ))}
