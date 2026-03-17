@@ -713,7 +713,7 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
         <div className={styles.mdContent}>
           {msg.blocks.map((block, i) =>
             block.type === 'text' ? (
-              <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>{block.text ?? ''}</ReactMarkdown>
+              <RichTextBlock key={i} text={block.text ?? ''} />
             ) : (
               <ToolWidget key={i} block={block} />
             )
