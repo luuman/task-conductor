@@ -998,24 +998,41 @@ export default function AdminSessions() {
     setActiveQuestionIdx(-1)
   }, [])
 
-  // Auto-refresh transcript for active sessions
+  // Auto-refresh transcript: WS-driven + fallback polling
   const selectedSession = useMemo(() => sessions.find(s => s.session_id === selectedId), [sessions, selectedId])
 
+  const refreshTranscript = useCallback((sid: string) => {
+    api.getTranscript(sid)
+      .then(r => {
+        transcriptCache.current.set(sid, { messages: r.messages, file_found: r.file_found })
+        setTranscript(r.messages)
+        setFileFound(r.file_found)
+      })
+      .catch(() => {})
+  }, [])
+
+  // WS: subscribe to session events for real-time refresh
   useEffect(() => {
     if (!selectedSession || selectedSession.status !== 'active') return
     const sid = selectedSession.session_id
-    const poll = () => {
-      api.getTranscript(sid)
-        .then(r => {
-          transcriptCache.current.set(sid, { messages: r.messages, file_found: r.file_found })
-          setTranscript(r.messages)
-          setFileFound(r.file_found)
-        })
-        .catch(() => {})
+    const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/session/${sid}`
+    const channel = `session-detail:${sid}`
+
+    wsManager.connect(channel, wsUrl)
+    const unsub = wsManager.subscribe(channel, () => {
+      // Debounce: refresh transcript when WS event arrives
+      refreshTranscript(sid)
+    })
+
+    // Fallback poll every 10s in case WS misses events
+    const pollId = setInterval(() => refreshTranscript(sid), 10000)
+
+    return () => {
+      unsub()
+      wsManager.disconnect(channel)
+      clearInterval(pollId)
     }
-    const id = setInterval(poll, 3000)
-    return () => clearInterval(id)
-  }, [selectedSession])
+  }, [selectedSession, refreshTranscript])
 
   // Scroll management: scroll to bottom on first load only
   const bottomRef = useRef<HTMLDivElement>(null)
