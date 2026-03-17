@@ -133,6 +133,7 @@ function getToolIcon(toolName: string, size = 13): ReactNode {
 // ── Block grouping for smart layout ─────────────────────────
 
 const READONLY_TOOLS = new Set(['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'])
+const WRITE_TOOLS = new Set(['Edit', 'MultiEdit', 'Write'])
 
 type GroupedUnit =
   | { kind: 'text'; block: TranscriptBlock }
@@ -166,6 +167,68 @@ function groupBlocks(blocks: TranscriptBlock[]): GroupedUnit[] {
   }
   flushReads()
   return units
+}
+
+// ── Message-level grouping: consecutive assistant msgs → turns ──
+
+interface AssistantTurn {
+  texts: string[]
+  reads: TranscriptBlock[]
+  edits: TranscriptBlock[]
+  bashes: TranscriptBlock[]
+  others: TranscriptBlock[]
+  allBlocks: TranscriptBlock[]
+}
+
+function groupMessagesIntoTurns(messages: TranscriptMessage[]): Array<{ kind: 'user'; msg: TranscriptMessage } | { kind: 'turn'; turn: AssistantTurn }> {
+  const result: Array<{ kind: 'user'; msg: TranscriptMessage } | { kind: 'turn'; turn: AssistantTurn }> = []
+  let currentTurn: AssistantTurn | null = null
+
+  const flushTurn = () => {
+    if (!currentTurn) return
+    if (currentTurn.texts.length || currentTurn.allBlocks.length) {
+      result.push({ kind: 'turn', turn: currentTurn })
+    }
+    currentTurn = null
+  }
+
+  const newTurn = (): AssistantTurn => ({ texts: [], reads: [], edits: [], bashes: [], others: [], allBlocks: [] })
+
+  for (const msg of messages) {
+    if (msg.role === 'user') {
+      flushTurn()
+      result.push({ kind: 'user', msg })
+      continue
+    }
+    // assistant message
+    const block = msg.blocks[0]
+    if (!block) continue
+
+    if (block.type === 'text' && block.text) {
+      // Text creates a "segment" boundary within the turn — flush accumulated tools
+      // then start fresh but keep in same logical turn group
+      if (currentTurn && (currentTurn.reads.length || currentTurn.edits.length || currentTurn.bashes.length || currentTurn.others.length)) {
+        flushTurn()
+      }
+      if (!currentTurn) currentTurn = newTurn()
+      currentTurn.texts.push(block.text)
+    } else if (block.type === 'tool_use') {
+      if (!currentTurn) currentTurn = newTurn()
+      currentTurn.allBlocks.push(block)
+      const tn = block.tool_name || ''
+      if (READONLY_TOOLS.has(tn)) {
+        currentTurn.reads.push(block)
+      } else if (WRITE_TOOLS.has(tn)) {
+        currentTurn.edits.push(block)
+      } else if (tn === 'Bash') {
+        currentTurn.bashes.push(block)
+      } else {
+        currentTurn.others.push(block)
+      }
+    }
+  }
+  flushTurn()
+  return result
 }
 
 // ── Tool parameter summary ──────────────────────────────────
