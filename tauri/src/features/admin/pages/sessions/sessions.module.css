@@ -339,6 +339,7 @@
 .bubbleWrap {
   position: relative;
   min-width: 0;
+  flex: 1;
 }
 
 .bubbleWrap:hover > .msgCopyBtn {
