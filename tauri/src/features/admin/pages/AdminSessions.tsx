@@ -965,6 +965,7 @@ export default function AdminSessions() {
   const handleSelect = useCallback((s: AiSession) => {
     setSelectedId(s.session_id)
     setActiveQuestionIdx(-1)
+    isFirstLoad.current = true
 
     const cached = transcriptCache.current.get(s.session_id)
     if (cached) {
