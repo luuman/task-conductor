@@ -267,6 +267,23 @@ function RichTextBlock({ text }: { text: string }) {
   )
 }
 
+// ── Copy button ─────────────────────────────────────────────
+
+function CopyButton({ text, className }: { text: string; className?: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }, [text])
+  return (
+    <button onClick={copy} className={`${styles.copyBtn} ${className ?? ''}`} title="Copy">
+      {copied ? '\u2713' : '\uD83D\uDCCB'}
+    </button>
+  )
+}
+
 // ── Markdown components ─────────────────────────────────────
 
 const mdComponents: Components = {
