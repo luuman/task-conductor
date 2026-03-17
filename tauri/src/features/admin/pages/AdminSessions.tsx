@@ -615,7 +615,7 @@ function AskUserQuestionView({ input, result }: { input: Record<string, unknown>
   return (
     <div className={styles.askWrap}>
       <div className={styles.askHeader}>
-        <span style={{ fontSize: 14 }}>{'\u2753'}</span>
+        <IconCircleHelp size={13} />
         <span className={styles.askTitle}>AskUserQuestion</span>
       </div>
       <div className={styles.askBody}>
