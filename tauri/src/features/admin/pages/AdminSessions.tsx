@@ -1002,16 +1002,54 @@ function EditInlineCard({ block }: { block: TranscriptBlock }) {
   return <EditDiffView input={input} />
 }
 
+// Guess best hljs language for command output
+function guessOutputLang(text: string, cmd: string): string | null {
+  // JSON output
+  if (/^\s*[\[{]/.test(text) && /[\]}]\s*$/.test(text)) return 'json'
+  // TypeScript/ESLint errors: file(line,col): error TS...
+  if (/\.(ts|tsx|js|jsx)\(\d+,\d+\):\s*error/.test(text)) return 'typescript'
+  // Python traceback
+  if (/Traceback \(most recent call last\)/.test(text)) return 'python'
+  // YAML-like
+  if (/^[\w-]+:\s+.+$/m.test(text) && !text.includes('=')) return 'yaml'
+  // If command is a known tool, hint the language
+  if (/\b(tsc|eslint|tsx?)\b/.test(cmd)) return 'typescript'
+  if (/\bpython|pip|pytest\b/.test(cmd)) return 'python'
+  if (/\bcargo|rustc\b/.test(cmd)) return 'rust'
+  if (/\bgo (build|test|run)\b/.test(cmd)) return 'go'
+  return null
+}
+
+// Custom log highlighter for terminal output that doesn't match a known language
+function highlightLog(text: string): string {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    // File paths: /foo/bar.ts or ./foo/bar
+    .replace(/((?:\/[\w.@-]+)+(?:\.\w+)?(?:\(\d+[,:]?\d*\))?)/g, '<span class="hljs-string">$1</span>')
+    // error / Error / ERROR
+    .replace(/\b(error|Error|ERROR|fail|FAIL|failed|FAILED|fatal|FATAL)\b/g, '<span class="hljs-deletion">$1</span>')
+    // warning / Warning / WARN
+    .replace(/\b(warning|Warning|WARN|warn|deprecated|DEPRECATED)\b/g, '<span class="hljs-comment">$1</span>')
+    // success / pass / ok
+    .replace(/\b(success|Success|SUCCESS|pass|PASS|passed|ok|OK|done|Done|DONE)\b/g, '<span class="hljs-addition">$1</span>')
+    // Numbers (standalone)
+    .replace(/\b(\d+(?:\.\d+)?(?:ms|s|m|KB|MB|GB|%)?)\b/g, '<span class="hljs-number">$1</span>')
+    // Quoted strings
+    .replace(/'([^']{1,80})'/g, '\'<span class="hljs-string">$1</span>\'')
+    .replace(/"([^"]{1,80})"/g, '"<span class="hljs-string">$1</span>"')
+    // TS error codes
+    .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
+}
+
 function BashStatusLine({ block }: { block: TranscriptBlock }) {
   const cmd = String(block.tool_input?.command ?? '')
-  // Strip leading cd ... && for cleaner display
   const shortCmd = cmd.replace(/^cd [^ ]+ && /, '').slice(0, 150)
   const result = (block.tool_result || '').trim()
   const isError = block.tool_error === true
   const hasError = isError || result.toLowerCase().includes('error') || result.toLowerCase().includes('fail')
   const noOutput = !result || result === '(Bash completed with no output)'
 
-  const highlighted = useMemo(() => {
+  const cmdHighlighted = useMemo(() => {
     try {
       return hljs.highlight(shortCmd, { language: 'bash' }).value
     } catch {
@@ -1019,22 +1057,35 @@ function BashStatusLine({ block }: { block: TranscriptBlock }) {
     }
   }, [shortCmd])
 
-  const resultHighlighted = useMemo(() => {
+  const resultHtml = useMemo(() => {
     if (!result || noOutput) return null
-    try {
-      return hljs.highlight(result, { language: 'bash' }).value
-    } catch {
-      return null
+    // Try known language first
+    const lang = guessOutputLang(result, cmd)
+    if (lang) {
+      try {
+        if (hljs.getLanguage(lang)) {
+          return hljs.highlight(result, { language: lang }).value
+        }
+      } catch { /* fall through */ }
     }
-  }, [result, noOutput])
+    // Try auto-detect for short output
+    if (result.length < 2000) {
+      try {
+        const auto = hljs.highlightAuto(result)
+        if (auto.relevance > 5) return auto.value
+      } catch { /* fall through */ }
+    }
+    // Custom log highlighter
+    return highlightLog(result)
+  }, [result, noOutput, cmd])
 
   return (
     <div className={styles.bashCard}>
       <div className={`${styles.bashCardHeader} ${hasError ? styles.bashCardHeaderErr : ''}`}>
         <span className={styles.bashCardIcon}>{getToolIcon('Bash', 12)}</span>
         <span className={styles.bashCardPrompt}>$</span>
-        {highlighted ? (
-          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
+        {cmdHighlighted ? (
+          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: cmdHighlighted }} />
         ) : (
           <code className={styles.bashCardCmd}>{shortCmd}</code>
         )}
@@ -1043,12 +1094,8 @@ function BashStatusLine({ block }: { block: TranscriptBlock }) {
         </span>
       </div>
       {result && !noOutput && (
-        resultHighlighted ? (
-          <pre className={`hljs ${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}
-               dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
-        ) : (
-          <pre className={`${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}>{result}</pre>
-        )
+        <pre className={`hljs ${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}
+             dangerouslySetInnerHTML={{ __html: resultHtml || '' }} />
       )}
     </div>
   )
