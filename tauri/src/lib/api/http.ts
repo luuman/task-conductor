@@ -255,12 +255,13 @@ export class HttpAdapter implements ApiAdapter {
     })
   }
 
-  gitLog(projectId: number, limit?: number, branch?: string) {
+  async gitLog(projectId: number, limit?: number, branch?: string) {
     const params = new URLSearchParams()
     if (limit != null) params.set('limit', String(limit))
     if (branch) params.set('branch', branch)
     const qs = params.toString()
-    return this.fetch<GitCommit[]>(`/api/projects/${projectId}/git/log${qs ? `?${qs}` : ''}`)
+    const res = await this.fetch<{ commits: GitCommit[] }>(`/api/projects/${projectId}/git/log${qs ? `?${qs}` : ''}`)
+    return res.commits
   }
 
   async gitBranches(projectId: number) {
