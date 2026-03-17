@@ -1092,7 +1092,7 @@ function BashStatusLine({ block }: { block: TranscriptBlock }) {
           <code className={styles.bashCardCmd}>{shortCmd}</code>
         )}
         <span className={`${styles.bashCardBadge} ${hasError ? styles.bashCardFail : styles.bashCardPass}`}>
-          {hasError ? 'fail' : '\u2713 pass'}
+          {hasError ? t('admin.sessions.bash_fail') : t('admin.sessions.bash_pass')}
         </span>
       </div>
       {result && !noOutput && (
