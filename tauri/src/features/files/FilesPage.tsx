@@ -25,9 +25,16 @@ function getLang(filename: string): string {
 
 export function FilesPage() {
   const projectId = useAppStore((s) => s.activeProjectId)
+  const queryClient = useQueryClient()
   const { openFile, activeTab, activeTabPath, markUnsaved, markSaved, isUnsaved, hasUnsaved } = useEditorTabs()
   const [fileContents, setFileContents] = useState<Record<string, string>>({})
   const [aiSelection, setAiSelection] = useState<{ startLine: number; endLine: number } | null>(null)
+
+  // 从缓存中取当前项目的 repo_url 作为 Rust IPC 的 root
+  const projectRoot = useMemo(() => {
+    const projects = queryClient.getQueryData<Project[]>(['projects'])
+    return projects?.find((p) => String(p.id) === projectId)?.repo_url
+  }, [queryClient, projectId])
 
   // Fetch file content when active tab changes
   const { data: fileData } = useQuery({
