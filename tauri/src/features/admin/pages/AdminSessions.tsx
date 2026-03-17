@@ -9,7 +9,7 @@ import '../../../styles/hljs-ayu-dark.css'
 import {
   IconTerminal, IconFileText, IconPencil, IconWrench, IconSearch,
   IconFolderOpen, IconGlobe, IconBot, IconCircleHelp, IconChevronDown,
-  IconChevronRight,
+  IconChevronRight, IconUser,
 } from '../../../ui/icon'
 import typescript from 'highlight.js/lib/languages/typescript'
 import javascript from 'highlight.js/lib/languages/javascript'
