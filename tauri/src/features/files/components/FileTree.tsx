@@ -72,7 +72,12 @@ export function FileTree({ items, onFileClick, activePath, depth = 0, collapsedA
               >
                 ▸
               </span>
-              <span className={styles.icon}>{getFileIcon(item.name, item.is_dir)}</span>
+              <img
+                className={styles.icon}
+                src={getFileIconPath(item.name, item.is_dir, isExpanded)}
+                alt=""
+                draggable={false}
+              />
               <span className={styles.name}>{item.name}</span>
             </div>
             {item.is_dir && isExpanded && childrenCache[item.path] && (
