@@ -985,7 +985,7 @@ function EditInlineCard({ block }: { block: TranscriptBlock }) {
   const input = block.tool_input || {}
   const filePath = String(input.file_path || '')
   const fileName = filePath.split('/').pop() || filePath
-  const hasEditData = input.old_string || input.new_string
+  const hasEditData = Boolean(input.old_string || input.new_string)
 
   return (
     <div className={styles.editCard}>
