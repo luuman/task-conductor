@@ -134,7 +134,11 @@
       "collapse": "收起",
       "showing_date": "筛选日期",
       "all_dates": "显示所有日期",
-      "clear_filter": "清除筛选"
+      "clear_filter": "清除筛选",
+      "pill_read": "读取",
+      "pill_search": "搜索",
+      "bash_pass": "✓ pass",
+      "bash_fail": "fail"
     }
   },
   "claudeConfig": {
