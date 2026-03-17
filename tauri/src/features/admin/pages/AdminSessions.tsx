@@ -734,6 +734,51 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
   )
 }
 
+// ── ReadGroupStrip (collapsed read-only tools) ──────────────
+
+function ReadGroupStrip({ blocks }: { blocks: TranscriptBlock[] }) {
+  const [open, setOpen] = useState(false)
+
+  const pills = useMemo(() => blocks.map(b => {
+    const name = b.tool_name || 'Tool'
+    const detail = name === 'Read'
+      ? String(b.tool_input?.file_path ?? '').split('/').pop() || ''
+      : name === 'Grep'
+        ? `"${String(b.tool_input?.pattern ?? '')}"`
+        : name === 'Glob'
+          ? String(b.tool_input?.pattern ?? '')
+          : name === 'WebSearch'
+            ? String(b.tool_input?.query ?? '').slice(0, 40)
+            : String(b.tool_input?.url ?? '').split('/').pop()?.slice(0, 40) || ''
+    return { name, detail, icon: getToolIcon(name, 11) }
+  }), [blocks])
+
+  return (
+    <div className={styles.readGroupStrip}>
+      <button className={styles.readGroupHeader} onClick={() => setOpen(v => !v)}>
+        <span className={styles.readGroupChevron} style={{ transform: open ? 'rotate(90deg)' : undefined }}>
+          <IconChevronRight size={10} />
+        </span>
+        <div className={styles.readGroupPills}>
+          {pills.map((p, i) => (
+            <span key={i} className={styles.readGroupPill} title={p.detail}>
+              <span className={styles.readGroupPillIcon}>{p.icon}</span>
+              <span className={styles.readGroupPillText}>{p.detail}</span>
+            </span>
+          ))}
+        </div>
+      </button>
+      {open && (
+        <div className={styles.readGroupBody}>
+          {blocks.map((block, i) => (
+            <ToolWidget key={i} block={block} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Avatars ─────────────────────────────────────────────────
 
 function ClaudeAvatar() {
