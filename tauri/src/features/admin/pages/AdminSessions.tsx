@@ -1016,11 +1016,43 @@ export default function AdminSessions() {
     return () => clearInterval(id)
   }, [selectedSession])
 
-  // Scroll to bottom on transcript load
+  // Scroll management: scroll to bottom on first load only
   const bottomRef = useRef<HTMLDivElement>(null)
+  const isFirstLoad = useRef(true)
+  const [showJumpBtn, setShowJumpBtn] = useState(false)
+
+  // Track if user is near bottom
+  const checkNearBottom = useCallback(() => {
+    const el = transcriptRef.current
+    if (!el) return false
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 80
+  }, [])
+
+  // Scroll listener to toggle jump button
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = transcriptRef.current
+    if (!el) return
+    const onScroll = () => setShowJumpBtn(!checkNearBottom())
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [checkNearBottom, transcript])
+
+  // Scroll to bottom only on first load of a session
+  useEffect(() => {
+    if (!transcript.length) return
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false
+      requestAnimationFrame(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'auto' })
+        setShowJumpBtn(false)
+      })
+    }
   }, [transcript])
+
+  const jumpToBottom = useCallback(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    setShowJumpBtn(false)
+  }, [])
 
   // Sync expand signal when transcript changes
   useEffect(() => {
