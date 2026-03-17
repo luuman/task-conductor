@@ -929,6 +929,153 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   )
 }
 
+// ── Scheme C: Smart grouping components ─────────────────────
+
+function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
+  const readFiles = blocks.filter(b => b.tool_name === 'Read')
+  const greps = blocks.filter(b => b.tool_name === 'Grep')
+  const globs = blocks.filter(b => b.tool_name === 'Glob')
+  const rest = blocks.filter(b => !['Read', 'Grep', 'Glob'].includes(b.tool_name || ''))
+
+  return (
+    <div className={styles.pillRow}>
+      {readFiles.length > 0 && (
+        <>
+          <span className={styles.pillLabel}>读取</span>
+          {readFiles.map((b, i) => {
+            const fp = String(b.tool_input?.file_path || '')
+            const name = fp.split('/').pop() || fp
+            return (
+              <span key={`r${i}`} className={styles.pill} title={fp}>
+                <span className={styles.pillIcon}>{getToolIcon('Read', 10)}</span>
+                <span className={styles.pillText}>{name}</span>
+              </span>
+            )
+          })}
+        </>
+      )}
+      {greps.length > 0 && (
+        <>
+          <span className={styles.pillLabel}>搜索</span>
+          {greps.map((b, i) => (
+            <span key={`g${i}`} className={`${styles.pill} ${styles.pillGrep}`} title={String(b.tool_input?.pattern || '')}>
+              <span className={styles.pillIcon}>{getToolIcon('Grep', 10)}</span>
+              <span className={styles.pillText}>&quot;{String(b.tool_input?.pattern || '').slice(0, 30)}&quot;</span>
+            </span>
+          ))}
+        </>
+      )}
+      {globs.map((b, i) => (
+        <span key={`gl${i}`} className={styles.pill} title={String(b.tool_input?.pattern || '')}>
+          <span className={styles.pillIcon}>{getToolIcon('Glob', 10)}</span>
+          <span className={styles.pillText}>{String(b.tool_input?.pattern || '').slice(0, 30)}</span>
+        </span>
+      ))}
+      {rest.map((b, i) => (
+        <span key={`o${i}`} className={styles.pill}>
+          <span className={styles.pillIcon}>{getToolIcon(b.tool_name || '', 10)}</span>
+          <span className={styles.pillText}>{b.tool_name}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function EditInlineCard({ block }: { block: TranscriptBlock }) {
+  const input = block.tool_input || {}
+  const filePath = String(input.file_path || '')
+  const fileName = filePath.split('/').pop() || filePath
+  const hasEditData = input.old_string || input.new_string
+
+  return (
+    <div className={styles.editCard}>
+      <div className={styles.editCardHead}>
+        <span className={styles.editCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
+        {hasEditData && (
+          <span className={styles.editCardStat}>
+            {(() => {
+              const oldN = String(input.old_string ?? '').split('\n').length
+              const newN = String(input.new_string ?? '').split('\n').length
+              const parts: string[] = []
+              if (newN > 0) parts.push(`+${newN}`)
+              if (oldN > 0) parts.push(`\u2212${oldN}`)
+              return parts.join(' ')
+            })()}
+          </span>
+        )}
+      </div>
+      {hasEditData && <EditDiffView input={input} />}
+    </div>
+  )
+}
+
+function BashStatusLine({ block }: { block: TranscriptBlock }) {
+  const cmd = String(block.tool_input?.command ?? '')
+  // Strip leading cd ... && for cleaner display
+  const shortCmd = cmd.replace(/^cd [^ ]+ && /, '').slice(0, 100)
+  const result = (block.tool_result || '').trim()
+  const isError = block.tool_error === true
+  const hasError = isError || result.toLowerCase().includes('error') || result.toLowerCase().includes('fail')
+  const noOutput = !result || result === '(Bash completed with no output)'
+
+  return (
+    <>
+      <div className={styles.bashLine}>
+        <span className={styles.bashLineIcon}>{getToolIcon('Bash', 12)}</span>
+        <span className={styles.bashLineCmd}>{shortCmd}</span>
+        <span className={`${styles.bashLineBadge} ${hasError ? styles.bashLineFail : styles.bashLinePass}`}>
+          {hasError ? 'fail' : '\u2713 pass'}
+        </span>
+      </div>
+      {result && !noOutput && (
+        <pre className={`${styles.bashLineResult} ${hasError ? styles.bashLineResultErr : ''}`}>{result.slice(0, 300)}</pre>
+      )}
+    </>
+  )
+}
+
+function AssistantTurnCard({ turn }: { turn: AssistantTurn }) {
+  const fullText = turn.texts.join('\n').trim()
+
+  return (
+    <div className={styles.msgRowLeft}>
+      <ClaudeAvatar />
+      <div className={styles.bubbleWrap}>
+        <div className={styles.assistantBubble}>
+          <div className={styles.mdContent}>
+            {/* Text segments */}
+            {turn.texts.map((t, i) => (
+              <RichTextBlock key={`t${i}`} text={t} />
+            ))}
+
+            {/* Read-only tools → pill row */}
+            {turn.reads.length > 0 && (
+              <ReadPillRow blocks={turn.reads} />
+            )}
+
+            {/* Edit/Write → inline diff cards */}
+            {turn.edits.map((block, i) => (
+              <EditInlineCard key={`e${i}`} block={block} />
+            ))}
+
+            {/* Bash → status lines */}
+            {turn.bashes.map((block, i) => (
+              <BashStatusLine key={`b${i}`} block={block} />
+            ))}
+
+            {/* Other tools → compact widget */}
+            {turn.others.map((block, i) => (
+              <ToolWidget key={`o${i}`} block={block} />
+            ))}
+          </div>
+        </div>
+        {fullText && <CopyButton text={fullText} className={styles.msgCopyBtn} />}
+      </div>
+    </div>
+  )
+}
+
 // ── Status dot ──────────────────────────────────────────────
 
 function StatusDot({ status }: { status: AiSession['status'] }) {
