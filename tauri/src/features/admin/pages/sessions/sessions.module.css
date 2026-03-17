@@ -841,8 +841,13 @@
 }
 
 .mdPre {
+  position: relative;
   margin: 4px 0;
   overflow-x: auto;
+}
+
+.mdPre:hover > .codeCopyBtn {
+  opacity: 1;
 }
 
 .mdBlockquote {
