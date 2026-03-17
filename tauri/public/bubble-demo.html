@@ -3,579 +3,520 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AssistantBubble 当前 vs 优化方案</title>
+<title>AssistantBubble 方案 C 智能分区 — 真实数据对比</title>
 <script src="demo-data.js"></script>
 <style>
   :root {
     --bg: #1e1e1e;
+    --bg2: #181818;
     --panel: #252526;
     --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.04);
     --fg: #d4d4d4;
     --fg2: #8b949e;
+    --fg3: #6e7681;
     --accent: #007acc;
+    --accent2: rgba(0,122,204,0.12);
     --green: #56d364;
+    --green-bg: rgba(86,211,100,0.06);
     --red: #f85149;
+    --red-bg: rgba(248,81,73,0.06);
     --yellow: #eab308;
-    --font: -apple-system, system-ui, 'Segoe UI', sans-serif;
-    --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --font: 'Geist', -apple-system, system-ui, sans-serif;
+    --mono: 'Geist Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #111; color: var(--fg); font-family: var(--font); font-size: 13px; }
 
-  /* ── Page layout ── */
+  /* ── Page ── */
   .header {
     position: sticky; top: 0; z-index: 100;
-    padding: 12px 24px;
-    background: rgba(17,17,17,0.95);
-    backdrop-filter: blur(12px);
+    padding: 10px 24px;
+    background: rgba(17,17,17,0.95); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 16px;
+    display: flex; align-items: center; gap: 12px;
   }
-  .header h1 { font-size: 15px; font-weight: 700; }
+  .header h1 { font-size: 14px; font-weight: 700; }
   .header .sub { font-size: 11px; color: var(--fg2); }
+  .header .badge {
+    font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-c { background: rgba(86,211,100,0.15); color: var(--green); }
 
   .columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    height: calc(100vh - 48px);
+    display: grid; grid-template-columns: 1fr 1fr;
+    height: calc(100vh - 40px);
   }
   .col {
-    overflow-y: auto;
+    overflow-y: auto; background: var(--bg);
     border-right: 1px solid var(--border);
-    background: var(--bg);
   }
   .col:last-child { border-right: none; }
-  .col-header {
+  .col-head {
     position: sticky; top: 0; z-index: 10;
-    padding: 8px 16px;
-    background: var(--panel);
+    padding: 8px 16px; background: var(--panel);
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 8px;
+    font-size: 11px;
   }
   .col-badge {
-    font-size: 9px; font-weight: 700; padding: 2px 8px;
-    border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
   }
-  .badge-old { background: rgba(139,148,158,0.15); color: var(--fg2); }
-  .badge-new { background: rgba(0,122,204,0.15); color: var(--accent); }
-  .col-title { font-size: 12px; font-weight: 600; }
-  .col-desc { font-size: 10px; color: var(--fg2); margin-left: auto; }
-  .col-body { padding: 8px 0; }
+  .col-badge-old { background: rgba(139,148,158,0.12); color: var(--fg2); }
+  .col-badge-new { background: rgba(0,122,204,0.15); color: var(--accent); }
+  .col-title { font-weight: 600; }
+  .col-desc { color: var(--fg3); margin-left: auto; font-size: 10px; }
+  .col-body { padding: 4px 0; }
 
   /* ── Shared ── */
   .msg-row {
     display: flex; align-items: flex-start; gap: 10px;
-    padding: 6px 16px;
+    padding: 5px 14px;
   }
   .avatar {
     width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; margin-top: 2px;
-    background: rgba(0,122,204,0.08);
-    border: 1px solid rgba(0,122,204,0.15);
+    font-size: 10px; font-weight: 700; margin-top: 2px;
     color: var(--accent);
+    background: rgba(0,122,204,0.06); border: 1px solid rgba(0,122,204,0.12);
   }
-  .bubble-wrap { min-width: 0; flex: 1; }
+  .wrap { min-width: 0; flex: 1; }
 
-  /* ══════════════════════════════════════
-     CURRENT — mirrors real component
-     ══════════════════════════════════════ */
-  .cur-bubble {
-    border-radius: 8px; padding: 10px 14px;
-    background: rgba(68,119,255,0.04);
-    border: 1px solid rgba(68,119,255,0.12);
-    max-width: 92%;
+  /* ══════════════════════════════════════════
+     CURRENT — 每条消息独立 bubble
+     ══════════════════════════════════════════ */
+  .cur-bub {
+    border-radius: 8px; padding: 8px 12px; margin-bottom: 2px;
+    background: rgba(68,119,255,0.03); border: 1px solid rgba(68,119,255,0.08);
+    max-width: 95%;
   }
-  .cur-text { font-size: 12.5px; line-height: 1.6; margin-bottom: 4px; }
-  .cur-text:last-child { margin-bottom: 0; }
+  .cur-text { font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
   .cur-text code {
-    font-size: 11px; font-family: var(--mono);
-    padding: 1px 4px; border-radius: 3px;
-    background: var(--panel); color: var(--accent);
-  }
-  /* Tool widget (current) */
-  .cur-tool { margin: 4px 0; }
-  .cur-tool-header {
-    display: flex; align-items: center; gap: 8px;
-    padding: 4px 0; cursor: pointer;
-  }
-  .cur-tool-header:hover { opacity: 0.8; }
-  .cur-tool-icon {
-    flex-shrink: 0; color: var(--fg2); font-size: 14px;
-    width: 16px; text-align: center;
-  }
-  .cur-tool-name {
-    font-size: 11.5px; font-weight: 600; color: var(--fg); flex-shrink: 0;
-  }
-  .cur-tool-param {
     font-size: 10.5px; font-family: var(--mono);
-    color: var(--fg2); background: var(--bg);
-    padding: 2px 6px; border-radius: 4px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    max-width: 280px;
+    padding: 1px 4px; border-radius: 3px;
+    background: rgba(255,255,255,0.06); color: var(--accent);
   }
-  .cur-tool-edit-info {
-    font-size: 10px; font-family: var(--mono);
-    color: var(--fg2); margin-left: 4px;
+  /* Tool header (current) */
+  .cur-th {
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 0; cursor: pointer;
   }
-  .cur-tool-preview {
-    font-size: 10px; font-family: var(--mono);
-    color: var(--fg2); overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap; max-width: 160px;
-  }
-  .cur-tool-chevron {
-    color: var(--fg2); font-size: 10px; margin-left: auto;
-    transition: transform 0.15s;
-  }
-  .cur-tool-error {
-    font-size: 9px; font-family: var(--mono);
-    padding: 1px 6px; border-radius: 4px;
-    color: var(--red); background: rgba(244,63,94,0.1);
-  }
-  /* Tool body (expanded) */
-  .cur-tool-body { padding: 4px 0; }
-  .cur-diff {
-    border-radius: 6px; overflow: hidden;
-    border: 1px solid var(--border); margin-top: 4px;
-  }
-  .cur-diff-header {
-    display: flex; align-items: center; gap: 8px;
-    padding: 4px 10px; background: var(--panel);
-    border-bottom: 1px solid var(--border);
+  .cur-th:hover { opacity: 0.8; }
+  .cur-ti { flex-shrink: 0; font-size: 12px; width: 16px; text-align: center; color: var(--fg2); }
+  .cur-tn { font-size: 10.5px; font-weight: 600; color: var(--fg); flex-shrink: 0; }
+  .cur-tp {
     font-size: 10px; font-family: var(--mono); color: var(--fg2);
+    background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;
+  }
+  .cur-ei { font-size: 9px; font-family: var(--mono); color: var(--fg3); margin-left: 2px; }
+  .cur-err {
+    font-size: 8px; font-family: var(--mono); font-weight: 700;
+    padding: 1px 5px; border-radius: 3px;
+    color: var(--red); background: var(--red-bg);
+  }
+  .cur-pv {
+    font-size: 9px; font-family: var(--mono); color: var(--fg3);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;
+  }
+  .cur-ch { color: var(--fg3); font-size: 9px; margin-left: auto; }
+  .flex1 { flex: 1; }
+
+  /* Expandable body */
+  .cur-body { overflow: hidden; }
+  .cur-diff {
+    border-radius: 6px; overflow: hidden; margin-top: 3px;
+    border: 1px solid var(--border);
+  }
+  .cur-diff-head {
+    padding: 3px 8px; background: var(--panel); border-bottom: 1px solid var(--border);
+    font-size: 9.5px; font-family: var(--mono); color: var(--fg3);
   }
   .cur-diff-body {
-    font-size: 10px; font-family: var(--mono);
-    line-height: 1.6; background: var(--bg);
-    padding: 4px 0; max-height: 150px; overflow-y: auto;
+    font-size: 9.5px; font-family: var(--mono); line-height: 1.55;
+    max-height: 140px; overflow-y: auto; background: var(--bg2);
   }
-  .cur-diff-line { padding: 0 10px; white-space: pre-wrap; word-break: break-all; }
-  .cur-diff-del { background: rgba(244,63,94,0.07); color: #fda4af; }
-  .cur-diff-add { background: rgba(34,197,94,0.07); color: #86efac; }
-  .cur-diff-ctx { color: var(--fg2); opacity: 0.5; }
-  /* Bash output */
+  .cur-dl { padding: 0 8px; white-space: pre-wrap; word-break: break-all; }
+  .cur-dd { background: var(--red-bg); color: #fda4af; }
+  .cur-da { background: var(--green-bg); color: #86efac; }
   .cur-bash {
-    border-radius: 6px; overflow: hidden;
-    border: 1px solid var(--border); margin-top: 4px;
+    border-radius: 6px; overflow: hidden; margin-top: 3px;
+    border: 1px solid var(--border);
   }
-  .cur-bash-header {
-    display: flex; align-items: center; gap: 6px;
-    padding: 4px 10px; background: var(--panel);
-    border-bottom: 1px solid var(--border);
+  .cur-bash-h {
+    padding: 3px 8px; background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 4px;
   }
-  .cur-bash-prompt {
-    font-size: 10px; font-family: var(--mono);
-    font-weight: 700; color: var(--accent);
-  }
-  .cur-bash-cmd {
-    font-size: 10px; font-family: var(--mono);
-    color: var(--fg2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .cur-bash-output {
-    padding: 4px 10px; font-size: 10px; font-family: var(--mono);
-    white-space: pre-wrap; color: var(--fg2);
-    max-height: 80px; overflow-y: auto;
-    background: var(--bg);
-  }
-  /* Read group pills (current) */
-  .cur-read-group { margin: 4px 0; }
-  .cur-read-header {
-    display: flex; align-items: center; gap: 6px;
-    padding: 4px 0; cursor: pointer;
-  }
-  .cur-pill {
-    display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 7px; border-radius: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    font-size: 10px; font-family: var(--mono); color: var(--fg2);
-  }
-  .cur-pill-icon { font-size: 10px; }
-  /* Read file result */
-  .cur-read-result {
-    border-radius: 6px; overflow: hidden;
-    border: 1px solid var(--border); margin-top: 4px;
-  }
-  .cur-read-header2 {
-    display: flex; align-items: center; gap: 6px;
-    padding: 4px 10px; background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    font-size: 10px; font-family: var(--mono); color: var(--fg2);
-  }
-  .cur-read-body {
-    padding: 4px 10px; font-size: 10px; font-family: var(--mono);
-    white-space: pre; color: var(--fg2); overflow-x: auto;
-    max-height: 100px; overflow-y: auto; line-height: 1.6;
-    background: var(--bg);
+  .cur-bash-p { font-size: 10px; font-family: var(--mono); font-weight: 700; color: var(--accent); }
+  .cur-bash-c { font-size: 9.5px; font-family: var(--mono); color: var(--fg2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cur-bash-o {
+    padding: 3px 8px; font-size: 9.5px; font-family: var(--mono);
+    white-space: pre-wrap; color: var(--fg3); max-height: 60px; overflow-y: auto;
+    background: var(--bg2);
   }
 
-  /* ══════════════════════════════════════
-     NEW — 极简紧凑 + Edit 代码展示
-     ══════════════════════════════════════ */
-  .new-bubble {
-    border-radius: 8px; padding: 10px 14px;
-    background: rgba(68,119,255,0.04);
-    border: 1px solid rgba(68,119,255,0.12);
-    max-width: 92%;
+  /* ══════════════════════════════════════════
+     方案 C — 智能分区
+     ══════════════════════════════════════════ */
+  .c-bub {
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 2px;
+    background: rgba(68,119,255,0.03); border: 1px solid rgba(68,119,255,0.08);
+    max-width: 95%;
   }
-  .new-text { font-size: 12.5px; line-height: 1.6; margin-bottom: 4px; }
-  .new-text:last-child { margin-bottom: 0; }
-  .new-text code {
-    font-size: 11px; font-family: var(--mono);
+  .c-text { font-size: 12px; line-height: 1.6; white-space: pre-wrap; margin: 3px 0; }
+  .c-text:first-child { margin-top: 0; }
+  .c-text:last-child { margin-bottom: 0; }
+  .c-text code {
+    font-size: 10.5px; font-family: var(--mono);
     padding: 1px 4px; border-radius: 3px;
-    background: var(--panel); color: var(--accent);
+    background: rgba(255,255,255,0.06); color: var(--accent);
   }
 
-  /* Compact tool line */
-  .new-tool-line {
-    display: flex; align-items: center; gap: 6px;
-    padding: 3px 0 3px 8px;
-    margin: 1px 0;
-    border-left: 2px solid rgba(255,255,255,0.06);
-    font-size: 11px; color: var(--fg2);
-    cursor: pointer;
+  /* ── 只读工具 pill 行 ── */
+  .c-read-row {
+    display: flex; align-items: center; gap: 0;
+    flex-wrap: wrap;
+    margin: 4px 0;
+  }
+  .c-read-label {
+    font-size: 10px; color: var(--fg3); margin-right: 6px;
+    font-weight: 600; flex-shrink: 0;
+  }
+  .c-pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; margin: 1px 3px 1px 0;
+    border-radius: 10px; font-size: 10px; font-family: var(--mono);
+    color: var(--fg2);
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     transition: border-color 0.15s;
   }
-  .new-tool-line:hover { border-left-color: var(--accent); }
-  .new-tool-icon { flex-shrink: 0; font-size: 12px; width: 14px; text-align: center; }
-  .new-tool-file {
-    font-family: var(--mono); font-size: 10.5px;
-    color: var(--accent); overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .new-tool-cmd {
-    font-family: var(--mono); font-size: 10.5px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    max-width: 280px;
-  }
-  .new-badge {
-    font-size: 9px; font-family: var(--mono);
-    padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
-    margin-left: auto;
-  }
-  .new-badge-edit { background: rgba(86,211,100,0.1); color: var(--green); }
-  .new-badge-err { background: rgba(244,63,94,0.1); color: var(--red); }
-  .new-badge-ok { background: rgba(86,211,100,0.1); color: var(--green); }
-  .new-err-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: var(--red); flex-shrink: 0;
-  }
+  .c-pill:hover { border-color: var(--accent2); }
+  .c-pill-icon { font-size: 9px; flex-shrink: 0; }
+  /* Grep pill has search icon */
+  .c-pill-grep { border-left: 2px solid rgba(0,122,204,0.3); }
 
-  /* Read summary line */
-  .new-read-summary {
+  /* ── 写操作：Edit（内联 diff） ── */
+  .c-edit {
+    margin: 5px 0;
+    border-radius: 6px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .c-edit-head {
     display: flex; align-items: center; gap: 6px;
-    padding: 3px 0 3px 8px;
-    margin: 1px 0;
-    border-left: 2px solid rgba(255,255,255,0.06);
+    padding: 5px 10px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .c-edit-icon { font-size: 11px; color: var(--fg2); flex-shrink: 0; }
+  .c-edit-file {
+    font-size: 10.5px; font-family: var(--mono); font-weight: 600;
+    color: var(--accent);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .c-edit-stat {
+    margin-left: auto; font-size: 9px; font-family: var(--mono);
+    padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
+    background: var(--green-bg); color: var(--green);
+  }
+  .c-edit-diff {
+    font-size: 9.5px; font-family: var(--mono); line-height: 1.55;
+    max-height: 130px; overflow-y: auto;
+  }
+  .c-dl { padding: 0 10px; white-space: pre-wrap; word-break: break-all; }
+  .c-dd { background: var(--red-bg); color: #fda4af; }
+  .c-da { background: var(--green-bg); color: #86efac; }
+
+  /* ── 验证操作：Bash（状态行） ── */
+  .c-bash {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 0; margin: 2px 0;
     font-size: 10.5px; font-family: var(--mono); color: var(--fg2);
   }
-
-  /* Edit inline diff (compact) */
-  .new-diff {
-    margin: 2px 0 2px 10px;
-    border-radius: 4px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.05);
-    max-height: 120px; overflow-y: auto;
+  .c-bash-icon { font-size: 11px; flex-shrink: 0; color: var(--fg3); }
+  .c-bash-cmd {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 300px; color: var(--fg2);
   }
-  .new-diff-line {
-    padding: 0 8px;
-    font-size: 10px; font-family: var(--mono);
-    line-height: 1.5;
-    white-space: pre-wrap; word-break: break-all;
+  .c-bash-ok {
+    margin-left: auto; font-size: 9px; font-weight: 600;
+    padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
   }
-  .new-diff-del { background: rgba(244,63,94,0.06); color: #fda4af; }
-  .new-diff-add { background: rgba(34,197,94,0.06); color: #86efac; }
-
-  /* Bash inline result */
-  .new-bash-result {
-    margin: 1px 0 1px 10px;
-    padding: 3px 8px;
-    font-size: 10px; font-family: var(--mono);
-    color: var(--fg2); background: rgba(255,255,255,0.02);
-    border-radius: 4px;
-    max-height: 60px; overflow-y: auto;
-    white-space: pre-wrap;
+  .c-bash-pass { background: var(--green-bg); color: var(--green); }
+  .c-bash-fail { background: var(--red-bg); color: var(--red); }
+  .c-bash-result {
+    margin: 1px 0 1px 18px;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 9px; font-family: var(--mono); color: var(--fg3);
+    background: rgba(255,255,255,0.02);
+    max-height: 48px; overflow-y: auto; white-space: pre-wrap;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  /* ── Other tools ── */
+  .c-other {
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 0; margin: 1px 0;
+    font-size: 10.5px; color: var(--fg3);
+  }
+  .c-other-icon { font-size: 11px; flex-shrink: 0; }
+  .c-other-name { font-weight: 600; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+  .hidden { display: none !important; }
+
+  /* ── Divider between logical turns ── */
+  .turn-gap { height: 8px; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>AssistantBubble 对比</h1>
-  <span class="sub">左：当前效果 — 右：极简紧凑优化（Edit 代码可见）— 数据来自真实 session</span>
+  <span class="badge badge-c">方案 C</span>
+  <span class="sub">智能分区 — 只读工具 pill 收纳 · Edit diff 内联 · Bash 状态行 · 真实 session 数据</span>
 </div>
 
 <div class="columns">
-  <!-- Left: Current -->
   <div class="col">
-    <div class="col-header">
-      <span class="col-badge badge-old">CURRENT</span>
+    <div class="col-head">
+      <span class="col-badge col-badge-old">CURRENT</span>
       <span class="col-title">当前效果</span>
-      <span class="col-desc">每条消息独立 bubble，工具展示完整</span>
+      <span class="col-desc">每条消息独立 bubble，无分层</span>
     </div>
-    <div class="col-body" id="current-col"></div>
+    <div class="col-body" id="col-cur"></div>
   </div>
-  <!-- Right: New -->
   <div class="col">
-    <div class="col-header">
-      <span class="col-badge badge-new">NEW</span>
-      <span class="col-title">极简紧凑</span>
-      <span class="col-desc">隐藏噪音，工具缩行，Edit 展示代码</span>
+    <div class="col-head">
+      <span class="col-badge col-badge-new">NEW</span>
+      <span class="col-title">方案 C · 智能分区</span>
+      <span class="col-desc">只读→pill · 写入→diff · 验证→状态行</span>
     </div>
-    <div class="col-body" id="new-col"></div>
+    <div class="col-body" id="col-new"></div>
   </div>
 </div>
 
 <script>
-// ── Helper ──
-function esc(s) {
-  if (!s) return '';
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const READONLY = new Set(['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch', 'ToolSearch']);
+const WRITE_TOOLS = new Set(['Edit', 'MultiEdit', 'Write']);
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fn(fp) { return fp ? (fp.split('/').pop() || fp) : ''; }
+function ic(name) {
+  return ({ Read:'📄', Write:'📝', Edit:'✏️', MultiEdit:'✏️', Bash:'⚡', Grep:'🔍', Glob:'📂', Agent:'🤖', Skill:'🎯', ToolSearch:'🔧' })[name] || '🔧';
 }
-function fileName(fp) {
-  if (!fp) return '';
-  return fp.split('/').pop() || fp;
+function editStat(o,n) {
+  const a = o ? o.split('\n').length : 0;
+  const b = n ? n.split('\n').length : 0;
+  const p = []; if(b>0) p.push('+'+b); if(a>0) p.push('−'+a); return p.join(' ');
 }
-function toolIcon(name) {
-  const map = {
-    'Read': '📄', 'Write': '📝', 'Edit': '✏️', 'Bash': '⚡',
-    'Grep': '🔍', 'Glob': '📂', 'Agent': '🤖', 'Skill': '🎯',
-    'ToolSearch': '🔧', 'MultiEdit': '✏️',
-  };
-  return map[name] || '🔧';
-}
-function editStats(old_s, new_s) {
-  const oldN = old_s ? old_s.split('\n').length : 0;
-  const newN = new_s ? new_s.split('\n').length : 0;
-  const parts = [];
-  if (newN > 0) parts.push('+' + newN);
-  if (oldN > 0) parts.push('−' + oldN);
-  return parts.join(' ');
-}
-function inlineCode(text) {
-  if (!text) return '';
-  return text.replace(/`([^`]+)`/g, '<code>$1</code>');
-}
+function inlineCode(t) { return (t||'').replace(/`([^`]+)`/g, '<code>$1</code>'); }
 
 // ══════════════════════════════════════
-// CURRENT renderer
+// CURRENT: each message = 1 bubble
 // ══════════════════════════════════════
 function renderCurrent(data) {
-  let html = '';
-  // Group consecutive assistant messages into "turns"
-  // In current component, each message is a separate bubble
+  let h = '';
   for (const m of data) {
-    if (m.role === 'user') continue; // skip user for this demo
-    html += '<div class="msg-row">';
-    html += '<div class="avatar">C</div>';
-    html += '<div class="bubble-wrap">';
-    html += '<div class="cur-bubble">';
+    if (m.role !== 'assistant') continue;
+    h += '<div class="msg-row"><div class="avatar">C</div><div class="wrap"><div class="cur-bub">';
 
     if (m.type === 'text' && m.text) {
-      html += '<div class="cur-text">' + inlineCode(esc(m.text)) + '</div>';
+      h += '<div class="cur-text">' + inlineCode(esc(m.text)) + '</div>';
     } else if (m.type === 'tool_use') {
       const tn = m.tool_name || 'Tool';
-      const isEdit = tn === 'Edit' || tn === 'MultiEdit';
-      const isRead = tn === 'Read';
+      const isEdit = WRITE_TOOLS.has(tn);
       const isBash = tn === 'Bash';
       const fp = m.file_path;
+      const uid = 'ct_' + Math.random().toString(36).slice(2,8);
 
-      html += '<div class="cur-tool">';
-      html += '<div class="cur-tool-header" onclick="this.nextElementSibling&&this.nextElementSibling.classList.toggle(\'hidden\')">';
-      html += '<span class="cur-tool-icon">' + toolIcon(tn) + '</span>';
-
+      h += '<div class="cur-th" onclick="document.getElementById(\'' + uid + '\')?.classList.toggle(\'hidden\')">';
+      h += '<span class="cur-ti">' + ic(tn) + '</span>';
       if (fp) {
-        html += '<span class="cur-tool-param">' + esc(fileName(fp));
-        if (isEdit && m.old_string) {
-          html += '<span class="cur-tool-edit-info">' + editStats(m.old_string, m.new_string) + '</span>';
-        }
-        html += '</span>';
+        h += '<span class="cur-tn">' + tn + '</span>';
+        h += '<span class="cur-tp">' + esc(fn(fp));
+        if (isEdit && m.old_string) h += '<span class="cur-ei"> ' + editStat(m.old_string, m.new_string) + '</span>';
+        h += '</span>';
       } else if (isBash && m.command) {
-        html += '<span class="cur-tool-name">' + tn + '</span>';
-        html += '<code class="cur-tool-param">' + esc(m.command) + '</code>';
+        h += '<span class="cur-tn">Bash</span>';
+        h += '<span class="cur-tp">' + esc(m.command.slice(0,80)) + '</span>';
       } else {
-        html += '<span class="cur-tool-name">' + tn + '</span>';
+        h += '<span class="cur-tn">' + esc(tn) + '</span>';
       }
-
-      if (m.tool_error) html += '<span class="cur-tool-error">ERROR</span>';
-      html += '<span style="flex:1"></span>';
+      if (m.tool_error) h += '<span class="cur-err">ERROR</span>';
+      h += '<span class="flex1"></span>';
       if (m.tool_result && !isEdit) {
-        html += '<span class="cur-tool-preview">' + esc(m.tool_result.split('\n')[0].slice(0, 60)) + '</span>';
+        h += '<span class="cur-pv">' + esc(m.tool_result.split('\n')[0].slice(0,50)) + '</span>';
       }
-      html += '<span class="cur-tool-chevron">▸</span>';
-      html += '</div>'; // header
+      h += '<span class="cur-ch">▸</span>';
+      h += '</div>';
 
-      // Body (collapsed by default, click to toggle)
-      html += '<div class="cur-tool-body hidden">';
+      // body (hidden by default)
+      h += '<div id="' + uid + '" class="cur-body hidden">';
       if (isEdit && m.old_string) {
-        html += '<div class="cur-diff">';
-        html += '<div class="cur-diff-header">' + esc(fp) + '</div>';
-        html += '<div class="cur-diff-body">';
-        for (const line of (m.old_string || '').split('\n')) {
-          html += '<div class="cur-diff-line cur-diff-del">- ' + esc(line) + '</div>';
-        }
-        for (const line of (m.new_string || '').split('\n')) {
-          html += '<div class="cur-diff-line cur-diff-add">+ ' + esc(line) + '</div>';
-        }
-        html += '</div></div>';
+        h += '<div class="cur-diff"><div class="cur-diff-head">' + esc(fp) + '</div><div class="cur-diff-body">';
+        for (const l of (m.old_string||'').split('\n')) h += '<div class="cur-dl cur-dd">- ' + esc(l) + '</div>';
+        for (const l of (m.new_string||'').split('\n')) h += '<div class="cur-dl cur-da">+ ' + esc(l) + '</div>';
+        h += '</div></div>';
       }
       if (isBash && m.tool_result) {
-        html += '<div class="cur-bash">';
-        html += '<div class="cur-bash-header"><span class="cur-bash-prompt">$</span><span class="cur-bash-cmd">' + esc(m.command) + '</span></div>';
-        html += '<div class="cur-bash-output">' + esc(m.tool_result) + '</div>';
-        html += '</div>';
+        h += '<div class="cur-bash"><div class="cur-bash-h"><span class="cur-bash-p">$</span><span class="cur-bash-c">' + esc(m.command) + '</span></div>';
+        h += '<div class="cur-bash-o">' + esc(m.tool_result) + '</div></div>';
       }
-      if (isRead && m.tool_result) {
-        html += '<div class="cur-read-result">';
-        html += '<div class="cur-read-header2">' + esc(fp) + '</div>';
-        html += '<div class="cur-read-body">' + esc(m.tool_result) + '</div>';
-        html += '</div>';
-      }
-      html += '</div>'; // body
-      html += '</div>'; // tool
+      h += '</div>';
     }
-
-    html += '</div></div></div>'; // bubble, wrap, row
+    h += '</div></div></div>';
   }
-  return html;
+  return h;
 }
 
 // ══════════════════════════════════════
-// NEW renderer — 极简紧凑 + Edit 代码展示
+// 方案 C: 智能分区
 // ══════════════════════════════════════
-function renderNew(data) {
-  let html = '';
-  // Group consecutive assistant messages into turns (text separates turns)
-  let currentTurn = [];
+function renderSchemeC(data) {
+  // 1. Group consecutive assistant msgs into "turns" split by text messages
+  // A turn = optional text + following tool calls until next text
   const turns = [];
+  let cur = { texts: [], tools: [] };
 
   for (const m of data) {
-    if (m.role === 'user') {
-      if (currentTurn.length) { turns.push(currentTurn); currentTurn = []; }
-      continue;
+    if (m.role !== 'assistant') continue;
+    if (m.type === 'text' && m.text) {
+      // If we have accumulated tools, flush as a turn
+      if (cur.tools.length > 0) {
+        turns.push({ ...cur });
+        cur = { texts: [], tools: [] };
+      }
+      cur.texts.push(m.text);
+    } else if (m.type === 'tool_use') {
+      cur.tools.push(m);
     }
-    currentTurn.push(m);
-    // Text messages create natural breaks — but keep in same turn
   }
-  if (currentTurn.length) turns.push(currentTurn);
+  if (cur.texts.length || cur.tools.length) turns.push(cur);
 
+  let h = '';
   for (const turn of turns) {
-    html += '<div class="msg-row">';
-    html += '<div class="avatar">C</div>';
-    html += '<div class="bubble-wrap"><div class="new-bubble">';
+    h += '<div class="msg-row"><div class="avatar">C</div><div class="wrap"><div class="c-bub">';
 
-    // Group reads together
-    let readBuf = [];
-    const flushReads = () => {
-      if (readBuf.length === 0) return;
-      if (readBuf.length === 1) {
-        const r = readBuf[0];
-        html += '<div class="new-tool-line">';
-        html += '<span class="new-tool-icon">📄</span>';
-        html += '<span class="new-tool-file">' + esc(fileName(r.file_path)) + '</span>';
-        html += '</div>';
+    // Render texts first
+    for (const t of turn.texts) {
+      h += '<div class="c-text">' + inlineCode(esc(t)) + '</div>';
+    }
+
+    // Classify tools
+    const reads = [];
+    const writes = [];
+    const bashes = [];
+    const others = [];
+
+    for (const t of turn.tools) {
+      const tn = t.tool_name || '';
+      if (READONLY.has(tn)) reads.push(t);
+      else if (WRITE_TOOLS.has(tn)) writes.push(t);
+      else if (tn === 'Bash') bashes.push(t);
+      else others.push(t);
+    }
+
+    // ── Only-read tools → pill row ──
+    if (reads.length > 0) {
+      h += '<div class="c-read-row">';
+      // Group by type for label
+      const readFiles = reads.filter(r => r.tool_name === 'Read');
+      const greps = reads.filter(r => r.tool_name === 'Grep');
+      const globs = reads.filter(r => r.tool_name === 'Glob');
+      const otherReads = reads.filter(r => !['Read','Grep','Glob'].includes(r.tool_name||''));
+
+      if (readFiles.length > 0) {
+        h += '<span class="c-read-label">读取</span>';
+        for (const r of readFiles) {
+          h += '<span class="c-pill"><span class="c-pill-icon">📄</span>' + esc(fn(r.file_path)) + '</span>';
+        }
+      }
+      if (greps.length > 0) {
+        h += '<span class="c-read-label" style="margin-left:4px">搜索</span>';
+        for (const r of greps) {
+          h += '<span class="c-pill c-pill-grep"><span class="c-pill-icon">🔍</span>"' + esc((r.pattern||'').slice(0,30)) + '"</span>';
+        }
+      }
+      if (globs.length > 0) {
+        for (const r of globs) {
+          h += '<span class="c-pill"><span class="c-pill-icon">📂</span>' + esc((r.pattern||'').slice(0,30)) + '</span>';
+        }
+      }
+      for (const r of otherReads) {
+        h += '<span class="c-pill"><span class="c-pill-icon">' + ic(r.tool_name) + '</span>' + esc(r.tool_name) + '</span>';
+      }
+      h += '</div>';
+    }
+
+    // ── Write tools → inline diff ──
+    for (const w of writes) {
+      h += '<div class="c-edit">';
+      h += '<div class="c-edit-head">';
+      h += '<span class="c-edit-icon">✏️</span>';
+      h += '<span class="c-edit-file">' + esc(fn(w.file_path)) + '</span>';
+      if (w.old_string || w.new_string) {
+        h += '<span class="c-edit-stat">' + editStat(w.old_string, w.new_string) + '</span>';
+      }
+      h += '</div>';
+      if (w.old_string || w.new_string) {
+        h += '<div class="c-edit-diff">';
+        for (const l of (w.old_string||'').split('\n')) {
+          if (l.trim()) h += '<div class="c-dl c-dd">- ' + esc(l) + '</div>';
+        }
+        for (const l of (w.new_string||'').split('\n')) {
+          if (l.trim()) h += '<div class="c-dl c-da">+ ' + esc(l) + '</div>';
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+    }
+
+    // ── Bash → status line ──
+    for (const b of bashes) {
+      h += '<div class="c-bash">';
+      h += '<span class="c-bash-icon">⚡</span>';
+      h += '<span class="c-bash-cmd">' + esc((b.command||'').replace(/^cd [^ ]+ && /, '').slice(0,80)) + '</span>';
+      // Determine pass/fail
+      const result = (b.tool_result || '').trim();
+      const hasError = b.tool_error || result.toLowerCase().includes('error');
+      const noOutput = result === '' || result === '(Bash completed with no output)';
+      if (hasError) {
+        h += '<span class="c-bash-ok c-bash-fail">fail</span>';
       } else {
-        const names = readBuf.map(r => fileName(r.file_path)).join(', ');
-        html += '<div class="new-read-summary">';
-        html += '📖 读取 ' + readBuf.length + ' 个文件: ' + esc(names);
-        html += '</div>';
+        h += '<span class="c-bash-ok c-bash-pass">✓ pass</span>';
       }
-      readBuf = [];
-    };
-
-    for (const m of turn) {
-      if (m.type === 'text' && m.text) {
-        flushReads();
-        html += '<div class="new-text">' + inlineCode(esc(m.text)) + '</div>';
-        continue;
-      }
-
-      const tn = m.tool_name || '';
-      const isEdit = tn === 'Edit' || tn === 'MultiEdit';
-      const isBash = tn === 'Bash';
-      const isRead = tn === 'Read';
-
-      if (isRead) {
-        readBuf.push(m);
-        continue;
-      }
-
-      flushReads();
-
-      if (isEdit) {
-        // Compact line + inline diff
-        html += '<div class="new-tool-line">';
-        html += '<span class="new-tool-icon">✏️</span>';
-        html += '<span class="new-tool-file">' + esc(fileName(m.file_path)) + '</span>';
-        html += '<span class="new-badge new-badge-edit">' + editStats(m.old_string, m.new_string) + '</span>';
-        html += '</div>';
-        // Show diff inline
-        if (m.old_string || m.new_string) {
-          html += '<div class="new-diff">';
-          for (const line of (m.old_string || '').split('\n')) {
-            if (line.trim()) html += '<div class="new-diff-line new-diff-del">- ' + esc(line) + '</div>';
-          }
-          for (const line of (m.new_string || '').split('\n')) {
-            if (line.trim()) html += '<div class="new-diff-line new-diff-add">+ ' + esc(line) + '</div>';
-          }
-          html += '</div>';
-        }
-      } else if (isBash) {
-        html += '<div class="new-tool-line">';
-        html += '<span class="new-tool-icon">⚡</span>';
-        html += '<span class="new-tool-cmd">' + esc(m.command) + '</span>';
-        if (m.tool_error) {
-          html += '<span class="new-err-dot"></span>';
-        } else if (m.tool_result) {
-          const firstLine = m.tool_result.split('\n')[0].trim();
-          if (firstLine.toLowerCase().includes('error') || firstLine.toLowerCase().includes('fail')) {
-            html += '<span class="new-badge new-badge-err">fail</span>';
-          }
-        }
-        html += '</div>';
-        // Show short result inline
-        if (m.tool_result && m.tool_result.trim()) {
-          html += '<div class="new-bash-result">' + esc(m.tool_result.trim().slice(0, 200)) + '</div>';
-        }
-      } else {
-        // Other tools: single line
-        html += '<div class="new-tool-line">';
-        html += '<span class="new-tool-icon">' + toolIcon(tn) + '</span>';
-        if (m.file_path) {
-          html += '<span class="new-tool-file">' + esc(fileName(m.file_path)) + '</span>';
-        } else {
-          html += '<span class="new-tool-cmd">' + esc(tn) + '</span>';
-        }
-        html += '</div>';
+      h += '</div>';
+      // Show result if it has meaningful content (errors or short output)
+      if (result && !noOutput) {
+        h += '<div class="c-bash-result">' + esc(result.slice(0,150)) + '</div>';
       }
     }
-    flushReads();
 
-    html += '</div></div></div>'; // bubble, wrap, row
+    // ── Other tools ──
+    for (const o of others) {
+      h += '<div class="c-other">';
+      h += '<span class="c-other-icon">' + ic(o.tool_name) + '</span>';
+      h += '<span class="c-other-name">' + esc(o.tool_name) + '</span>';
+      h += '</div>';
+    }
+
+    h += '</div></div></div>';
+
+    // Small gap between turns
+    h += '<div class="turn-gap"></div>';
   }
-  return html;
+  return h;
 }
 
-// ── Toggle hidden ──
-document.addEventListener('click', e => {
-  // for .hidden toggle
-});
-
-// ── Render ──
-document.getElementById('current-col').innerHTML = renderCurrent(DEMO_DATA);
-document.getElementById('new-col').innerHTML = renderNew(DEMO_DATA);
-
-// Style for hidden
-const style = document.createElement('style');
-style.textContent = '.hidden { display: none !important; }';
-document.head.appendChild(style);
+// ── Render both columns ──
+document.getElementById('col-cur').innerHTML = renderCurrent(DEMO_DATA);
+document.getElementById('col-new').innerHTML = renderSchemeC(DEMO_DATA);
 </script>
 </body>
 </html>
