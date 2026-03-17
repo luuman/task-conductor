@@ -134,7 +134,11 @@
       "collapse": "Collapse",
       "showing_date": "Filtering date",
       "all_dates": "All dates",
-      "clear_filter": "Clear filter"
+      "clear_filter": "Clear filter",
+      "pill_read": "Read",
+      "pill_search": "Search",
+      "bash_pass": "✓ pass",
+      "bash_fail": "fail"
     }
   },
   "claudeConfig": {
