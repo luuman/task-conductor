@@ -933,6 +933,7 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
 // ── Scheme C: Smart grouping components ─────────────────────
 
 function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
+  const { t } = useTranslation()
   const readFiles = blocks.filter(b => b.tool_name === 'Read')
   const greps = blocks.filter(b => b.tool_name === 'Grep')
   const globs = blocks.filter(b => b.tool_name === 'Glob')
@@ -942,7 +943,7 @@ function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
     <div className={styles.pillRow}>
       {readFiles.length > 0 && (
         <>
-          <span className={styles.pillLabel}>读取</span>
+          <span className={styles.pillLabel}>{t('admin.sessions.pill_read')}</span>
           {readFiles.map((b, i) => {
             const fp = String(b.tool_input?.file_path || '')
             const name = fp.split('/').pop() || fp
