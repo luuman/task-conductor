@@ -163,17 +163,17 @@ export function ChangesTab() {
           <div className={styles.sectionHeader}>
             <span className={styles.sectionTitle}>{t('git.untracked')}</span>
           </div>
-          {status.untracked.map((path) => (
+          {status.untracked.map((f) => (
             <button
-              key={path}
-              className={`${styles.fileRow} ${selectedFile === path ? styles.fileRowActive : ''}`}
-              onClick={() => setSelectedFile(path)}
+              key={f.path}
+              className={`${styles.fileRow} ${selectedFile === f.path ? styles.fileRowActive : ''}`}
+              onClick={() => setSelectedFile(f.path)}
             >
               <span className={`${styles.badge} ${styles.badgeU}`}>U</span>
-              <span className={styles.filePath}>{path}</span>
+              <span className={styles.filePath}>{f.path}</span>
               <span
                 className={styles.miniBtn}
-                onClick={(e) => { e.stopPropagation(); stageMutation.mutate([path]) }}
+                onClick={(e) => { e.stopPropagation(); stageMutation.mutate([f.path]) }}
                 title={t('git.stageAll')}
               >
                 +
