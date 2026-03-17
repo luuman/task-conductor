@@ -5,6 +5,7 @@ import { api } from '../../../lib/api'
 import { useAppStore } from '../../../lib/store/app'
 import { useFileTree } from '../hooks/useFileTree'
 import { FileTreeWithChildren } from './FileTree'
+import { getFileIconPath } from './file-icon-map'
 import type { FileItem } from '../../../lib/api/types'
 import styles from './file-explorer.module.css'
 
