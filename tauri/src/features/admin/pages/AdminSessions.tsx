@@ -1022,7 +1022,7 @@ function BashStatusLine({ block }: { block: TranscriptBlock }) {
   const resultHighlighted = useMemo(() => {
     if (!result || noOutput) return null
     try {
-      return hljs.highlight(result.slice(0, 500), { language: 'bash' }).value
+      return hljs.highlight(result, { language: 'bash' }).value
     } catch {
       return null
     }
