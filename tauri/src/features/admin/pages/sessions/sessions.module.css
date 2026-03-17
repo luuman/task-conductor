@@ -598,30 +598,7 @@
   white-space: nowrap;
 }
 
-/* Edit inline card */
-.editCard {
-  margin: 5px 0;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.editCardHead {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.editCardIcon {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  color: var(--tc-foreground-secondary);
-}
-
+/* Edit inline — file name for Write without diff */
 .editCardFile {
   font-size: 10.5px;
   font-family: 'Geist Mono', monospace;
@@ -630,17 +607,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.editCardStat {
-  margin-left: auto;
-  font-size: 9px;
-  font-family: 'Geist Mono', monospace;
-  padding: 1px 6px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  background: rgba(86, 211, 100, 0.08);
-  color: #56d364;
 }
 
 /* Bash terminal card */
