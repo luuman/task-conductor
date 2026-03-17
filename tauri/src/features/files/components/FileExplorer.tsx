@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../../lib/api'
 import { useAppStore } from '../../../lib/store/app'
-import { useFileTree } from '../hooks/useFileTree'
+import { useFileTree, useDirExpander } from '../hooks/useFileTree'
 import { FileTreeWithChildren } from './FileTree'
 import { getFileIconPath } from './file-icon-map'
 import type { FileItem } from '../../../lib/api/types'
@@ -12,12 +12,14 @@ import styles from './file-explorer.module.css'
 interface FileExplorerProps {
   activePath: string | null
   onFileClick: (path: string, name: string) => void
+  projectRoot?: string
 }
 
-export function FileExplorer({ activePath, onFileClick }: FileExplorerProps) {
+export function FileExplorer({ activePath, onFileClick, projectRoot }: FileExplorerProps) {
   const { t } = useTranslation()
   const projectId = useAppStore((s) => s.activeProjectId)
   const { data, isLoading, refetch } = useFileTree()
+  const { expandDir, invalidate } = useDirExpander(projectRoot)
   const [searchQuery, setSearchQuery] = useState('')
   const [collapsedAll, setCollapsedAll] = useState(0)
 
@@ -33,8 +35,9 @@ export function FileExplorer({ activePath, onFileClick }: FileExplorerProps) {
   }, [])
 
   const handleRefresh = useCallback(() => {
+    invalidate()
     refetch()
-  }, [refetch])
+  }, [refetch, invalidate])
 
   const items = data?.items ?? []
   const isSearching = searchQuery.length >= 2
@@ -93,6 +96,7 @@ export function FileExplorer({ activePath, onFileClick }: FileExplorerProps) {
           <FileTreeWithChildren
             items={items}
             onFileClick={onFileClick}
+            onExpandDir={expandDir}
             activePath={activePath}
             collapsedAll={collapsedAll}
           />
