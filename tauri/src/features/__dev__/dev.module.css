@@ -1,0 +1,168 @@
+.page {
+  padding: 32px;
+  max-width: 1200px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--tc-foreground-secondary);
+  margin-bottom: 24px;
+}
+
+.devBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f59e0b20;
+  color: #f59e0b;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Icon Gallery */
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.iconCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  cursor: default;
+  transition: border-color 0.15s;
+}
+
+.iconCard:hover {
+  border-color: var(--tc-border-active);
+}
+
+.iconCard img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.iconCardLabel {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+/* Component Library */
+.componentSection {
+  margin-bottom: 32px;
+}
+
+.componentTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  margin-bottom: 8px;
+}
+
+.componentHint {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  margin-bottom: 12px;
+}
+
+.showcase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  background: var(--tc-content-bg);
+}
+
+.uiIconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.uiIconCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+}
+
+.uiIconCard:hover {
+  border-color: var(--tc-border-active);
+}
+
+.uiIconCardLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  text-align: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: var(--tc-foreground);
+}
+
+.tab[data-active='true'] {
+  color: var(--tc-foreground);
+  border-bottom-color: var(--tc-border-active);
+}
