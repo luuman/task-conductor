@@ -1047,7 +1047,7 @@ function BashStatusLine({ block }: { block: TranscriptBlock }) {
           <pre className={`hljs ${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}
                dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
         ) : (
-          <pre className={`${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}>{result.slice(0, 500)}</pre>
+          <pre className={`${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}>{result}</pre>
         )
       )}
     </div>
