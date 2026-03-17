@@ -1005,25 +1005,52 @@ function EditInlineCard({ block }: { block: TranscriptBlock }) {
 function BashStatusLine({ block }: { block: TranscriptBlock }) {
   const cmd = String(block.tool_input?.command ?? '')
   // Strip leading cd ... && for cleaner display
-  const shortCmd = cmd.replace(/^cd [^ ]+ && /, '').slice(0, 100)
+  const shortCmd = cmd.replace(/^cd [^ ]+ && /, '').slice(0, 150)
   const result = (block.tool_result || '').trim()
   const isError = block.tool_error === true
   const hasError = isError || result.toLowerCase().includes('error') || result.toLowerCase().includes('fail')
   const noOutput = !result || result === '(Bash completed with no output)'
 
+  const highlighted = useMemo(() => {
+    try {
+      return hljs.highlight(shortCmd, { language: 'bash' }).value
+    } catch {
+      return null
+    }
+  }, [shortCmd])
+
+  const resultHighlighted = useMemo(() => {
+    if (!result || noOutput) return null
+    try {
+      return hljs.highlight(result.slice(0, 500), { language: 'bash' }).value
+    } catch {
+      return null
+    }
+  }, [result, noOutput])
+
   return (
-    <>
-      <div className={styles.bashLine}>
-        <span className={styles.bashLineIcon}>{getToolIcon('Bash', 12)}</span>
-        <span className={styles.bashLineCmd}>{shortCmd}</span>
-        <span className={`${styles.bashLineBadge} ${hasError ? styles.bashLineFail : styles.bashLinePass}`}>
+    <div className={styles.bashCard}>
+      <div className={`${styles.bashCardHeader} ${hasError ? styles.bashCardHeaderErr : ''}`}>
+        <span className={styles.bashCardIcon}>{getToolIcon('Bash', 12)}</span>
+        <span className={styles.bashCardPrompt}>$</span>
+        {highlighted ? (
+          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
+        ) : (
+          <code className={styles.bashCardCmd}>{shortCmd}</code>
+        )}
+        <span className={`${styles.bashCardBadge} ${hasError ? styles.bashCardFail : styles.bashCardPass}`}>
           {hasError ? 'fail' : '\u2713 pass'}
         </span>
       </div>
       {result && !noOutput && (
-        <pre className={`${styles.bashLineResult} ${hasError ? styles.bashLineResultErr : ''}`}>{result.slice(0, 300)}</pre>
+        resultHighlighted ? (
+          <pre className={`hljs ${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}
+               dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
+        ) : (
+          <pre className={`${styles.bashCardOutput} ${hasError ? styles.bashCardOutputErr : ''}`}>{result.slice(0, 500)}</pre>
+        )
       )}
-    </>
+    </div>
   )
 }
 
