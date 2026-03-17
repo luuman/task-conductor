@@ -74,7 +74,12 @@ export function FileExplorer({ activePath, onFileClick }: FileExplorerProps) {
                 className={styles.searchItem}
                 onClick={() => onFileClick(item.path, item.name)}
               >
-                <span className={styles.searchItemIcon}>{item.is_dir ? '📁' : '📄'}</span>
+                <img
+                  className={styles.searchItemIcon}
+                  src={getFileIconPath(item.name, item.is_dir)}
+                  alt=""
+                  draggable={false}
+                />
                 <span className={styles.searchItemPath}>{item.path}</span>
               </li>
             ))}
