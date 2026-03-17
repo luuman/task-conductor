@@ -143,6 +143,130 @@ function getToolDetail(name: string | null | undefined, input: Record<string, un
   }
 }
 
+// ── Parse special XML tags in text blocks ───────────────────
+
+interface TaskNotification {
+  taskId: string
+  toolUseId: string
+  outputFile: string
+  status: string
+  summary: string
+}
+
+interface SystemReminder {
+  content: string
+}
+
+type ParsedSegment =
+  | { kind: 'text'; content: string }
+  | { kind: 'task-notification'; data: TaskNotification }
+  | { kind: 'system-reminder'; data: SystemReminder }
+
+function extractTag(xml: string, tag: string): string {
+  const re = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`)
+  return re.exec(xml)?.[1]?.trim() ?? ''
+}
+
+function parseTextSegments(text: string): ParsedSegment[] {
+  const segments: ParsedSegment[] = []
+  // Match <task-notification>...</task-notification> and <system-reminder>...</system-reminder>
+  const re = /<(task-notification|system-reminder)>([\s\S]*?)<\/\1>/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      const before = text.slice(lastIndex, match.index).trim()
+      if (before) segments.push({ kind: 'text', content: before })
+    }
+    if (match[1] === 'task-notification') {
+      const xml = match[2]
+      segments.push({
+        kind: 'task-notification',
+        data: {
+          taskId: extractTag(xml, 'task-id'),
+          toolUseId: extractTag(xml, 'tool-use-id'),
+          outputFile: extractTag(xml, 'output-file'),
+          status: extractTag(xml, 'status'),
+          summary: extractTag(xml, 'summary'),
+        },
+      })
+    } else {
+      segments.push({ kind: 'system-reminder', data: { content: match[2].trim() } })
+    }
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length) {
+    // Also strip trailing "Read the output file to retrieve the result: ..." line
+    let rest = text.slice(lastIndex).trim()
+    rest = rest.replace(/^Read the output file to retrieve the result:\s*\S+\s*/m, '').trim()
+    if (rest) segments.push({ kind: 'text', content: rest })
+  }
+  return segments
+}
+
+const STATUS_STYLE: Record<string, { icon: string; color: string; bg: string }> = {
+  completed: { icon: '\u2705', color: '#3fb950', bg: 'rgba(63, 185, 80, 0.08)' },
+  killed: { icon: '\u23F9\uFE0F', color: '#d29922', bg: 'rgba(210, 153, 34, 0.08)' },
+  failed: { icon: '\u274C', color: '#f85149', bg: 'rgba(248, 81, 73, 0.08)' },
+  running: { icon: '\u23F3', color: '#58a6ff', bg: 'rgba(88, 166, 255, 0.08)' },
+}
+
+function TaskNotificationCard({ data }: { data: TaskNotification }) {
+  const st = STATUS_STYLE[data.status] || STATUS_STYLE.completed
+  return (
+    <div className={styles.taskNotification} style={{ borderColor: st.color, background: st.bg }}>
+      <div className={styles.taskNotifHeader}>
+        <span>{st.icon}</span>
+        <span className={styles.taskNotifTitle}>Background Task</span>
+        <span className={styles.taskNotifStatus} style={{ color: st.color }}>{data.status}</span>
+      </div>
+      <div className={styles.taskNotifSummary}>{data.summary}</div>
+      <div className={styles.taskNotifMeta}>
+        <span className={styles.taskNotifLabel}>ID</span>
+        <code className={styles.taskNotifCode}>{data.taskId}</code>
+      </div>
+      {data.outputFile && (
+        <div className={styles.taskNotifMeta}>
+          <span className={styles.taskNotifLabel}>Output</span>
+          <code className={styles.taskNotifCode}>{data.outputFile.split('/').slice(-1)[0]}</code>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SystemReminderCard({ data }: { data: SystemReminder }) {
+  return (
+    <details className={styles.systemReminder}>
+      <summary className={styles.systemReminderSummary}>System Reminder</summary>
+      <div className={styles.systemReminderBody}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{data.content}</ReactMarkdown>
+      </div>
+    </details>
+  )
+}
+
+function RichTextBlock({ text }: { text: string }) {
+  const segments = useMemo(() => parseTextSegments(text), [text])
+  if (segments.length === 1 && segments[0].kind === 'text') {
+    return <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{segments[0].content}</ReactMarkdown>
+  }
+  return (
+    <>
+      {segments.map((seg, i) => {
+        switch (seg.kind) {
+          case 'text':
+            return <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>{seg.content}</ReactMarkdown>
+          case 'task-notification':
+            return <TaskNotificationCard key={i} data={seg.data} />
+          case 'system-reminder':
+            return <SystemReminderCard key={i} data={seg.data} />
+        }
+      })}
+    </>
+  )
+}
+
 // ── Markdown components ─────────────────────────────────────
 
 const mdComponents: Components = {
