@@ -62,7 +62,8 @@
       "dashboard": "Dashboard",
       "claude_config": "Claude Config",
       "settings": "Settings",
-      "sessions": "Sessions"
+      "sessions": "Sessions",
+      "dev_tools": "Dev Tools"
     },
     "dashboard": {
       "title": "Dashboard",
