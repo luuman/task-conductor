@@ -783,13 +783,13 @@ function ReadGroupStrip({ blocks }: { blocks: TranscriptBlock[] }) {
 
 function ClaudeAvatar() {
   return (
-    <div className={styles.avatarBot}>{'\uD83E\uDD16'}</div>
+    <div className={styles.avatarBot}><IconBot size={14} /></div>
   )
 }
 
 function UserAvatar() {
   return (
-    <div className={styles.avatarUser}>{'\uD83D\uDC64'}</div>
+    <div className={styles.avatarUser}><IconUser size={14} /></div>
   )
 }
 
