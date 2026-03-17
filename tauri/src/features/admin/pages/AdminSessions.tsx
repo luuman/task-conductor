@@ -247,11 +247,19 @@ function parseTextSegments(text: string): ParsedSegment[] {
   return segments
 }
 
-const STATUS_STYLE: Record<string, { icon: string; color: string; bg: string }> = {
-  completed: { icon: '\u2705', color: '#3fb950', bg: 'rgba(63, 185, 80, 0.08)' },
-  killed: { icon: '\u23F9\uFE0F', color: '#d29922', bg: 'rgba(210, 153, 34, 0.08)' },
-  failed: { icon: '\u274C', color: '#f85149', bg: 'rgba(248, 81, 73, 0.08)' },
-  running: { icon: '\u23F3', color: '#58a6ff', bg: 'rgba(88, 166, 255, 0.08)' },
+const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
+  completed: { color: '#3fb950', bg: 'rgba(63, 185, 80, 0.08)' },
+  killed: { color: '#d29922', bg: 'rgba(210, 153, 34, 0.08)' },
+  failed: { color: '#f85149', bg: 'rgba(248, 81, 73, 0.08)' },
+  running: { color: '#58a6ff', bg: 'rgba(88, 166, 255, 0.08)' },
+}
+
+function StatusCircle({ color }: { color: string }) {
+  return (
+    <svg width="8" height="8" viewBox="0 0 8 8" style={{ flexShrink: 0 }}>
+      <circle cx="4" cy="4" r="4" fill={color} />
+    </svg>
+  )
 }
 
 function TaskNotificationCard({ data }: { data: TaskNotification }) {
@@ -259,7 +267,7 @@ function TaskNotificationCard({ data }: { data: TaskNotification }) {
   return (
     <div className={styles.taskNotification} style={{ borderColor: st.color, background: st.bg }}>
       <div className={styles.taskNotifHeader}>
-        <span>{st.icon}</span>
+        <StatusCircle color={st.color} />
         <span className={styles.taskNotifTitle}>Background Task</span>
         <span className={styles.taskNotifStatus} style={{ color: st.color }}>{data.status}</span>
       </div>
