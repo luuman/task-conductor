@@ -701,14 +701,15 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
         className={`${styles.toolHeader} ${canExpand ? styles.toolHeaderClickable : ''}`}
       >
         <span className={styles.toolIcon}>{getToolIcon(toolName)}</span>
-        <span className={styles.toolName}>{isEdit ? 'Edit' : toolName}</span>
         {hasFilePath ? (
-          <span className={styles.toolParam} title={filePath}>{fileName}</span>
+          <span className={styles.toolParam} title={filePath}>
+            {fileName}
+            {editInfo && <span className={styles.toolEditInfo}>{editInfo}</span>}
+          </span>
         ) : detail ? (
           <code className={styles.toolParam}>{detail}</code>
-        ) : null}
-        {editInfo && (
-          <span className={styles.toolEditInfo}>{editInfo}</span>
+        ) : (
+          <span className={styles.toolName}>{isEdit ? 'Edit' : toolName}</span>
         )}
         {isError && (
           <span className={styles.toolError}>ERROR</span>
@@ -718,7 +719,9 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
           <span className={styles.toolPreview}>{preview}</span>
         )}
         {canExpand && (
-          <span className={styles.toolChevron}>{open ? '\u25BE' : '\u25B8'}</span>
+          <span className={styles.toolChevron} style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform 0.15s' }}>
+            <IconChevronRight size={10} />
+          </span>
         )}
       </button>
       {open && (
