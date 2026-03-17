@@ -339,6 +339,9 @@
 .bubbleWrap {
   position: relative;
   min-width: 0;
+}
+
+.msgRowLeft .bubbleWrap {
   flex: 1;
 }
 
