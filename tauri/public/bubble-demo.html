@@ -229,30 +229,37 @@
   .c-dd { background: var(--red-bg); color: #fda4af; }
   .c-da { background: var(--green-bg); color: #86efac; }
 
-  /* ── 验证操作：Bash（状态行） ── */
-  .c-bash {
+  /* ── 验证操作：Bash（终端卡片） ── */
+  .c-bash-card {
+    margin: 5px 0; border-radius: 6px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2);
+  }
+  .c-bash-header {
     display: flex; align-items: center; gap: 6px;
-    padding: 3px 0; margin: 2px 0;
-    font-size: 10.5px; font-family: var(--mono); color: var(--fg2);
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.04);
   }
-  .c-bash-icon { font-size: 11px; flex-shrink: 0; color: var(--fg3); }
+  .c-bash-header-err { border-left: 2px solid rgba(248,81,73,0.4); }
+  .c-bash-icon { flex-shrink: 0; color: var(--fg3); display: flex; align-items: center; }
+  .c-bash-prompt { font-size: 11px; font-family: var(--mono); font-weight: 700; color: var(--green); flex-shrink: 0; }
   .c-bash-cmd {
+    font-size: 10.5px; font-family: var(--mono); color: var(--fg);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    max-width: 300px; color: var(--fg2);
+    flex: 1; min-width: 0;
   }
-  .c-bash-ok {
+  .c-bash-badge {
     margin-left: auto; font-size: 9px; font-weight: 600;
-    padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
+    padding: 2px 8px; border-radius: 4px; flex-shrink: 0; letter-spacing: 0.3px;
   }
-  .c-bash-pass { background: var(--green-bg); color: var(--green); }
-  .c-bash-fail { background: var(--red-bg); color: var(--red); }
-  .c-bash-result {
-    margin: 1px 0 1px 18px;
-    padding: 2px 8px; border-radius: 4px;
-    font-size: 9px; font-family: var(--mono); color: var(--fg3);
-    background: rgba(255,255,255,0.02);
-    max-height: 48px; overflow-y: auto; white-space: pre-wrap;
+  .c-bash-pass { background: rgba(86,211,100,0.1); color: var(--green); }
+  .c-bash-fail { background: rgba(248,81,73,0.1); color: var(--red); }
+  .c-bash-output {
+    padding: 6px 10px; font-size: 10px; font-family: var(--mono); line-height: 1.5;
+    color: var(--fg2); background: rgba(0,0,0,0.15);
+    max-height: 80px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+    border-top: 1px solid rgba(255,255,255,0.03);
   }
+  .c-bash-output-err { color: #fda4af; }
 
   /* ── Other tools ── */
   .c-other {
