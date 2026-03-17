@@ -1020,9 +1020,11 @@ export default function AdminSessions() {
     const channel = `session-detail:${sid}`
 
     wsManager.connect(channel, wsUrl)
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
     const unsub = wsManager.subscribe(channel, () => {
-      // Debounce: refresh transcript when WS event arrives
-      refreshTranscript(sid)
+      // Debounce: batch rapid WS events into one refresh
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => refreshTranscript(sid), 500)
     })
 
     // Fallback poll every 10s in case WS misses events
