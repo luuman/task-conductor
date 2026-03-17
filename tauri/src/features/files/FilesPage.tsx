@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api'
 import { useAppStore } from '../../lib/store/app'
 import { useEditorTabs } from './hooks/useEditorTabs'
@@ -8,6 +8,7 @@ import { EditorTabs } from './components/EditorTabs'
 import { MonacoWrapper } from './components/MonacoWrapper'
 import { InlineAI } from './components/InlineAI'
 import { StatusBar } from './components/StatusBar'
+import type { Project } from '../../lib/api/types'
 import styles from './files-page.module.css'
 
 const EXT_TO_LANG: Record<string, string> = {
