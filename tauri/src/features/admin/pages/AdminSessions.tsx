@@ -958,7 +958,7 @@ function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
       )}
       {greps.length > 0 && (
         <>
-          <span className={styles.pillLabel}>搜索</span>
+          <span className={styles.pillLabel}>{t('admin.sessions.pill_search')}</span>
           {greps.map((b, i) => (
             <span key={`g${i}`} className={`${styles.pill} ${styles.pillGrep}`} title={String(b.tool_input?.pattern || '')}>
               <span className={styles.pillIcon}>{getToolIcon('Grep', 10)}</span>
