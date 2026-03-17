@@ -136,7 +136,7 @@ export function FilesPage() {
             </>
           ) : (
             <div className={styles.placeholder}>
-              <div className={styles.placeholderIcon}>📝</div>
+              <img className={styles.placeholderIcon} src="/file-icons/file_type_default.svg" alt="" style={{ width: 48, height: 48, opacity: 0.4 }} />
               <div className={styles.placeholderText}>Select a file to edit</div>
             </div>
           )}
