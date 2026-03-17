@@ -718,10 +718,13 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
 
   return (
     <div className={styles.msgRowRight}>
-      <div className={styles.userBubble}>
-        <div className={styles.mdContent}>
-          <RichTextBlock text={text} />
+      <div className={styles.bubbleWrap}>
+        <div className={styles.userBubble}>
+          <div className={styles.mdContent}>
+            <RichTextBlock text={text} />
+          </div>
         </div>
+        <CopyButton text={text} className={styles.msgCopyBtn} />
       </div>
       <UserAvatar />
     </div>
