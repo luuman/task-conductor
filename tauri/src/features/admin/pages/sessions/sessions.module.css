@@ -298,6 +298,12 @@
   padding: 8px 16px;
 }
 
+.msgRowRight .bubbleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .msgRowLeft {
   display: flex;
   justify-content: flex-start;
