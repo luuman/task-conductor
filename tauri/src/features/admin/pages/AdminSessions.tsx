@@ -1,11 +1,16 @@
 // AdminSessions.tsx — 3-column layout: session list, transcript viewer, question navigation
-import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
 import hljs from 'highlight.js/lib/core'
 import '../../../styles/hljs-ayu-dark.css'
+import {
+  IconTerminal, IconFileText, IconPencil, IconWrench, IconSearch,
+  IconFolderOpen, IconGlobe, IconBot, IconCircleHelp, IconChevronDown,
+  IconChevronRight,
+} from '../../../ui/icon'
 import typescript from 'highlight.js/lib/languages/typescript'
 import javascript from 'highlight.js/lib/languages/javascript'
 import python from 'highlight.js/lib/languages/python'
