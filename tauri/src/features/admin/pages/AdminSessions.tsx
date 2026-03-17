@@ -898,6 +898,7 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   const fullText = msg.blocks
     .filter(b => b.type === 'text')
