@@ -699,7 +699,7 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
         onClick={canExpand ? toggle : undefined}
         className={`${styles.toolHeader} ${canExpand ? styles.toolHeaderClickable : ''}`}
       >
-        <span className={styles.toolIcon}>{getToolEmoji(toolName)}</span>
+        <span className={styles.toolIcon}>{getToolIcon(toolName)}</span>
         <span className={styles.toolName}>{isEdit ? 'Edit' : toolName}</span>
         {hasFilePath ? (
           <span className={styles.toolParam} title={filePath}>{fileName}</span>
