@@ -264,6 +264,31 @@
   gap: 4px;
 }
 
+/* ── Jump to bottom button ── */
+.jumpToBottom {
+  position: sticky;
+  bottom: 12px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: background 0.15s, color 0.15s;
+  z-index: 10;
+}
+
+.jumpToBottom:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+}
+
 /* ── Message rows ── */
 .msgRowRight {
   display: flex;
