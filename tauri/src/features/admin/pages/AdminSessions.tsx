@@ -42,6 +42,7 @@ hljs.registerLanguage('java', javaLang)
 hljs.registerLanguage('cpp', cpp)
 
 import { api } from '../../../lib/api'
+import { wsManager } from '../../../lib/ws'
 import type { AiSession, TranscriptMessage, TranscriptBlock } from '../../../lib/api/types'
 import styles from './sessions/sessions.module.css'
 
