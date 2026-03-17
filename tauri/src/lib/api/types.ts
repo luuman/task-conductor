@@ -401,6 +401,7 @@ export interface ApiAdapter {
   createDirectory(projectId: number, path: string): Promise<void>
   renameFile(projectId: number, oldPath: string, newPath: string): Promise<void>
   deleteFile(projectId: number, path: string): Promise<void>
+  listDir(projectId: number, path: string): Promise<{ path: string; items: FileItem[] }>
   searchFiles(projectId: number, query: string): Promise<FileItem[]>
 
   // ─── Git 操作 ───
