@@ -1196,3 +1196,42 @@
   color: var(--tc-foreground-secondary);
   line-height: 1.5;
 }
+
+/* ── Copy button (shared base) ── */
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--tc-border);
+  border-radius: 6px;
+  background: var(--tc-panel-bg);
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+}
+
+/* ── Message-level copy (top-right of bubble) ── */
+.msgCopyBtn {
+  position: absolute;
+  top: 4px;
+  right: -32px;
+  opacity: 0;
+}
+
+/* ── Code block copy (top-right inside pre) ── */
+.codeCopyBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0;
+  z-index: 2;
+}
