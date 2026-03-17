@@ -1267,7 +1267,7 @@ export default function AdminSessions() {
               {/* Sticky question header */}
               {currentQuestion && (
                 <div className={styles.stickyQuestion}>
-                  <span style={{ fontSize: 12, flexShrink: 0 }}>{'\uD83D\uDC64'}</span>
+                  <span style={{ flexShrink: 0, display: 'flex' }}><IconUser size={12} /></span>
                   <span className={styles.stickyQuestionText}>{currentQuestion}</span>
                 </div>
               )}
