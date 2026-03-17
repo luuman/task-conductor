@@ -115,7 +115,7 @@ export function FilesPage() {
   return (
     <div className={styles.page}>
       <div className={styles.explorer}>
-        <FileExplorer activePath={activeTabPath} onFileClick={handleFileClick} />
+        <FileExplorer activePath={activeTabPath} onFileClick={handleFileClick} projectRoot={projectRoot} />
       </div>
 
       <div className={styles.editorArea}>
