@@ -991,10 +991,10 @@ function EditInlineCard({ block }: { block: TranscriptBlock }) {
     const filePath = String(input.file_path || '')
     const fileName = filePath.split('/').pop() || filePath
     return (
-      <div className={styles.bashLine}>
-        <span className={styles.bashLineIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+      <div className={styles.bashCardHeader}>
+        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
         <span className={styles.editCardFile} title={filePath}>{fileName}</span>
-        <span className={`${styles.bashLineBadge} ${styles.bashLinePass}`}>{'\u2713'}</span>
+        <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
       </div>
     )
   }
