@@ -1032,6 +1032,7 @@ export default function AdminSessions() {
 
     return () => {
       unsub()
+      if (debounceTimer) clearTimeout(debounceTimer)
       wsManager.disconnect(channel)
       clearInterval(pollId)
     }
