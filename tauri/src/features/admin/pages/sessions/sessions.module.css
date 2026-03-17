@@ -310,6 +310,16 @@
   margin-top: 2px;
 }
 
+/* ── Bubble wrapper (for hover copy) ── */
+.bubbleWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.bubbleWrap:hover > .msgCopyBtn {
+  opacity: 1;
+}
+
 /* ── User bubble ── */
 .userBubble {
   min-width: 0;
