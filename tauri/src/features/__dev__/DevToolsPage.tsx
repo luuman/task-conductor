@@ -21,9 +21,16 @@ import {
   IconFolderOpen,
 } from '../../ui/icon'
 import { Button } from '../../ui/button/Button'
+import { Toggle } from '../../ui/toggle/Toggle'
+import { TagInput } from '../../ui/tag-input/TagInput'
+import { JsonEditor } from '../../ui/json-editor/JsonEditor'
+import { Skeleton, SkeletonCard } from '../../ui/skeleton/Skeleton'
+import { EmptyState } from '../../ui/empty-state/EmptyState'
+import { Modal } from '../../ui/modal/Modal'
+import { RadioGroup } from '../../ui/radio-group/RadioGroup'
 import styles from './dev.module.css'
 
-// All file icons from /public/file-icons/
+// ── File Icons ─────────────────────────────────────────────
 const FILE_ICONS = [
   { name: 'default', file: 'file_type_default.svg' },
   { name: 'angular', file: 'file_type_angular.svg' },
@@ -45,7 +52,7 @@ const FILE_ICONS = [
   { name: 'elm', file: 'file_type_elm@2x.png' },
   { name: 'erlang', file: 'file_type_erlang@2x.png' },
   { name: 'eslint', file: 'file_type_eslint@2x.png' },
-  { name: 'ex (elixir)', file: 'file_type_ex@2x.png' },
+  { name: 'elixir', file: 'file_type_ex@2x.png' },
   { name: 'excel', file: 'file_type_excel@2x.png' },
   { name: 'font', file: 'file_type_font.svg' },
   { name: 'git', file: 'file_type_git.svg' },
@@ -122,6 +129,7 @@ const FILE_ICONS = [
   { name: 'folder open', file: 'folder_opened_dark@2x.png' },
 ]
 
+// ── UI Icons ───────────────────────────────────────────────
 const UI_ICONS = [
   { name: 'ChevronLeft', component: <IconChevronLeft size={20} /> },
   { name: 'ChevronRight', component: <IconChevronRight size={20} /> },
@@ -143,11 +151,29 @@ const UI_ICONS = [
   { name: 'FolderOpen', component: <IconFolderOpen size={20} /> },
 ]
 
+// ── CSS Variable 色板 ──────────────────────────────────────
+const CSS_VARS = [
+  { group: 'Foreground', vars: ['--tc-foreground', '--tc-foreground-secondary'] },
+  { group: 'Background', vars: ['--tc-content-bg', '--tc-sidebar-bg', '--tc-topbar-bg', '--tc-panel-bg'] },
+  { group: 'Border', vars: ['--tc-border', '--tc-border-active', '--tc-focus-ring'] },
+  { group: 'Sidebar', vars: ['--tc-sidebar-item-hover', '--tc-sidebar-item-active-bg', '--tc-sidebar-item-active-fg'] },
+  { group: 'Semantic', vars: ['--tc-error', '--tc-warning', '--tc-success', '--tc-info'] },
+]
+
 type Tab = 'file-icons' | 'ui-icons' | 'components'
 
 export default function DevToolsPage() {
-  const [tab, setTab] = useState<Tab>('file-icons')
+  const [tab, setTab] = useState<Tab>('components')
   const [search, setSearch] = useState('')
+
+  // Component demo states
+  const [toggleA, setToggleA] = useState(false)
+  const [toggleB, setToggleB] = useState(true)
+  const [tags, setTags] = useState(['React', 'TypeScript', 'Vite'])
+  const [jsonVal, setJsonVal] = useState<unknown>({ name: 'TaskConductor', version: '1.0.0', features: ['pipeline', 'observe'] })
+  const [modalOpen, setModalOpen] = useState(false)
+  const [radioVal, setRadioVal] = useState('dark')
+  const [radioLayout, setRadioLayout] = useState<'vertical' | 'horizontal' | 'grid'>('horizontal')
 
   const filteredFileIcons = search
     ? FILE_ICONS.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
@@ -157,6 +183,8 @@ export default function DevToolsPage() {
     ? UI_ICONS.filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
     : UI_ICONS
 
+  const componentCount = 9 // Button, Toggle, TagInput, JsonEditor, Skeleton, EmptyState, Modal, RadioGroup, Icon
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>
@@ -164,18 +192,18 @@ export default function DevToolsPage() {
         <span className={styles.devBadge}>DEV ONLY</span>
       </h1>
       <p className={styles.subtitle}>
-        {FILE_ICONS.length} file icons &middot; {UI_ICONS.length} UI icons &middot; Components
+        {componentCount} components &middot; {UI_ICONS.length} UI icons &middot; {FILE_ICONS.length} file icons
       </p>
 
       <div className={styles.tabs}>
-        <button className={styles.tab} data-active={tab === 'file-icons'} onClick={() => setTab('file-icons')}>
-          File Icons ({filteredFileIcons.length})
+        <button className={styles.tab} data-active={tab === 'components'} onClick={() => setTab('components')}>
+          Components ({componentCount})
         </button>
         <button className={styles.tab} data-active={tab === 'ui-icons'} onClick={() => setTab('ui-icons')}>
           UI Icons ({filteredUIIcons.length})
         </button>
-        <button className={styles.tab} data-active={tab === 'components'} onClick={() => setTab('components')}>
-          Components
+        <button className={styles.tab} data-active={tab === 'file-icons'} onClick={() => setTab('file-icons')}>
+          File Icons ({filteredFileIcons.length})
         </button>
       </div>
 
@@ -200,20 +228,251 @@ export default function DevToolsPage() {
         </div>
       )}
 
-      {tab === 'file-icons' && (
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>Ayu File Icons ({filteredFileIcons.length})</div>
-          <div className={styles.iconGrid}>
-            {filteredFileIcons.map(icon => (
-              <div key={icon.file} className={styles.iconCard}>
-                <img src={`/file-icons/${icon.file}`} alt={icon.name} />
-                <span className={styles.iconCardLabel}>{icon.name}</span>
-              </div>
-            ))}
+      {/* ── Components Tab ─────────────────────────────── */}
+      {tab === 'components' && (
+        <>
+          {/* Button */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>Button</div>
+            <div className={styles.componentHint}>
+              ui/button/Button.tsx &middot; variant: default | ghost | outline &middot; size: sm | md | lg | icon
+            </div>
+            <div className={styles.showcase}>
+              <Button variant="default" size="sm">Default SM</Button>
+              <Button variant="default" size="md">Default MD</Button>
+              <Button variant="default" size="lg">Default LG</Button>
+              <Button variant="ghost" size="md">Ghost</Button>
+              <Button variant="outline" size="md">Outline</Button>
+              <Button variant="default" size="icon"><IconPlus size={16} /></Button>
+              <Button variant="ghost" size="icon"><IconSettings size={16} /></Button>
+              <Button variant="default" size="md" disabled>Disabled</Button>
+            </div>
           </div>
-        </div>
+
+          {/* Toggle */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>Toggle</div>
+            <div className={styles.componentHint}>
+              ui/toggle/Toggle.tsx &middot; role="switch" &middot; checked + onChange
+            </div>
+            <div className={styles.showcase}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Toggle checked={toggleA} onChange={setToggleA} />
+                <span style={{ fontSize: 13, color: 'var(--tc-foreground-secondary)' }}>
+                  {toggleA ? 'ON' : 'OFF'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Toggle checked={toggleB} onChange={setToggleB} />
+                <span style={{ fontSize: 13, color: 'var(--tc-foreground-secondary)' }}>
+                  {toggleB ? 'ON' : 'OFF'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Toggle checked={false} disabled />
+                <span style={{ fontSize: 13, color: 'var(--tc-foreground-secondary)' }}>Disabled</span>
+              </div>
+            </div>
+          </div>
+
+          {/* TagInput */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>TagInput</div>
+            <div className={styles.componentHint}>
+              ui/tag-input/TagInput.tsx &middot; Enter to add, Backspace to remove
+            </div>
+            <div className={styles.showcase} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+              <TagInput tags={tags} onChange={setTags} placeholder="Add a tag..." />
+              <TagInput tags={['read-only']} onChange={() => {}} disabled />
+            </div>
+          </div>
+
+          {/* RadioGroup */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>RadioGroup</div>
+            <div className={styles.componentHint}>
+              ui/radio-group/RadioGroup.tsx &middot; layout: horizontal | vertical | grid &middot; size: sm | md
+            </div>
+            <div className={styles.showcase} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--tc-foreground-secondary)', marginBottom: 6 }}>
+                  Layout switcher (horizontal):
+                </div>
+                <RadioGroup
+                  options={[
+                    { value: 'horizontal', label: 'Horizontal' },
+                    { value: 'vertical', label: 'Vertical' },
+                    { value: 'grid', label: 'Grid' },
+                  ]}
+                  value={radioLayout}
+                  onChange={(v) => setRadioLayout(v as typeof radioLayout)}
+                  layout="horizontal"
+                  size="sm"
+                />
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--tc-foreground-secondary)', marginBottom: 6 }}>
+                  Theme selector ({radioLayout}):
+                </div>
+                <RadioGroup
+                  options={[
+                    { value: 'dark', label: 'Dark+', description: 'VS Code Dark theme' },
+                    { value: 'light', label: 'Light+', description: 'VS Code Light theme' },
+                    { value: 'custom', label: 'Custom', description: 'User defined', disabled: true },
+                  ]}
+                  value={radioVal}
+                  onChange={setRadioVal}
+                  layout={radioLayout}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Modal */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>Modal</div>
+            <div className={styles.componentHint}>
+              ui/modal/Modal.tsx &middot; Portal to body &middot; size: sm | md | lg &middot; Escape to close
+            </div>
+            <div className={styles.showcase}>
+              <Button variant="default" size="md" onClick={() => setModalOpen(true)}>
+                Open Modal
+              </Button>
+              <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title="Modal Title"
+                description="This is a modal dialog component."
+                size="md"
+                footer={
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <Button variant="ghost" size="sm" onClick={() => setModalOpen(false)}>Cancel</Button>
+                    <Button variant="default" size="sm" onClick={() => setModalOpen(false)}>Confirm</Button>
+                  </div>
+                }
+              >
+                <p style={{ color: 'var(--tc-foreground)', fontSize: 13, margin: 0 }}>
+                  Modal body content goes here. Click overlay or press Escape to close.
+                </p>
+              </Modal>
+            </div>
+          </div>
+
+          {/* EmptyState */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>EmptyState</div>
+            <div className={styles.componentHint}>
+              ui/empty-state/EmptyState.tsx &middot; icon + title + description + primary/secondary actions
+            </div>
+            <div className={styles.showcase} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+              <EmptyState
+                icon="📭"
+                title="No data yet"
+                description="Start by creating your first item"
+                action={{ label: 'Create', onClick: () => {} }}
+                secondaryAction={{ label: 'Learn more', onClick: () => {} }}
+              />
+            </div>
+          </div>
+
+          {/* Skeleton */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>Skeleton</div>
+            <div className={styles.componentHint}>
+              ui/skeleton/Skeleton.tsx &middot; variant: text | rect | circle &middot; SkeletonCard wrapper
+            </div>
+            <div className={styles.showcase} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <Skeleton variant="circle" width={40} />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <Skeleton variant="text" width="60%" />
+                  <Skeleton variant="text" width="40%" />
+                </div>
+              </div>
+              <SkeletonCard>
+                <Skeleton variant="rect" width="100%" height={80} />
+                <div style={{ padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <Skeleton variant="text" width="80%" />
+                  <Skeleton variant="text" width="50%" />
+                </div>
+              </SkeletonCard>
+            </div>
+          </div>
+
+          {/* JsonEditor */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>JsonEditor</div>
+            <div className={styles.componentHint}>
+              ui/json-editor/JsonEditor.tsx &middot; Pretty-print + validation + auto-save on blur
+            </div>
+            <div className={styles.showcase} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+              <JsonEditor
+                value={jsonVal}
+                onChange={setJsonVal}
+                label="Editable JSON"
+              />
+              <JsonEditor
+                value={{ status: 'readonly', mode: 'display' }}
+                onChange={() => {}}
+                readonly
+                label="Read-only JSON"
+              />
+            </div>
+          </div>
+
+          {/* Icon (Base) */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>Icon (Base)</div>
+            <div className={styles.componentHint}>
+              ui/icon/Icon.tsx &middot; SVG wrapper &middot; size + color props &middot; Feather style (24x24 viewBox, 2px stroke)
+            </div>
+            <div className={styles.showcase}>
+              <Icon size={16}><circle cx="12" cy="12" r="10" /></Icon>
+              <Icon size={20}><circle cx="12" cy="12" r="10" /></Icon>
+              <Icon size={24}><circle cx="12" cy="12" r="10" /></Icon>
+              <Icon size={24} color="var(--tc-border-active)"><circle cx="12" cy="12" r="10" /></Icon>
+              <Icon size={24} color="var(--tc-error)"><circle cx="12" cy="12" r="10" /></Icon>
+              <Icon size={24} color="var(--tc-success)"><circle cx="12" cy="12" r="10" /></Icon>
+            </div>
+          </div>
+
+          {/* CSS Variables */}
+          <div className={styles.componentSection}>
+            <div className={styles.componentTitle}>Design Tokens (CSS Variables)</div>
+            <div className={styles.componentHint}>
+              ui/theme/tokens.ts &middot; --tc-* prefix &middot; ThemeProvider injects to :root
+            </div>
+            <div className={styles.showcase} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
+              {CSS_VARS.map(group => (
+                <div key={group.group}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground-secondary)', marginBottom: 6 }}>
+                    {group.group}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {group.vars.map(v => (
+                      <div key={v} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: 4,
+                          background: `var(${v})`,
+                          border: '1px solid var(--tc-border)',
+                          flexShrink: 0,
+                        }} />
+                        <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: 'monospace' }}>
+                          {v}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
+      {/* ── UI Icons Tab ───────────────────────────────── */}
       {tab === 'ui-icons' && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>UI Icons ({filteredUIIcons.length})</div>
@@ -228,62 +487,19 @@ export default function DevToolsPage() {
         </div>
       )}
 
-      {tab === 'components' && (
-        <>
-          <div className={styles.componentSection}>
-            <div className={styles.componentTitle}>Button</div>
-            <div className={styles.componentHint}>variant: default | ghost | outline &middot; size: sm | md | lg | icon</div>
-            <div className={styles.showcase}>
-              <Button variant="default" size="sm">Default SM</Button>
-              <Button variant="default" size="md">Default MD</Button>
-              <Button variant="default" size="lg">Default LG</Button>
-              <Button variant="ghost" size="md">Ghost</Button>
-              <Button variant="outline" size="md">Outline</Button>
-              <Button variant="default" size="icon"><IconPlus size={16} /></Button>
-              <Button variant="ghost" size="icon"><IconSettings size={16} /></Button>
-            </div>
+      {/* ── File Icons Tab ─────────────────────────────── */}
+      {tab === 'file-icons' && (
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>Ayu File Icons ({filteredFileIcons.length})</div>
+          <div className={styles.iconGrid}>
+            {filteredFileIcons.map(icon => (
+              <div key={icon.file} className={styles.iconCard}>
+                <img src={`/file-icons/${icon.file}`} alt={icon.name} />
+                <span className={styles.iconCardLabel}>{icon.name}</span>
+              </div>
+            ))}
           </div>
-
-          <div className={styles.componentSection}>
-            <div className={styles.componentTitle}>Icon (Base)</div>
-            <div className={styles.componentHint}>{'<Icon size={N} color="...">'} &middot; SVG wrapper &middot; Feather style</div>
-            <div className={styles.showcase}>
-              <Icon size={16}><circle cx="12" cy="12" r="10" /></Icon>
-              <Icon size={20}><circle cx="12" cy="12" r="10" /></Icon>
-              <Icon size={24}><circle cx="12" cy="12" r="10" /></Icon>
-              <Icon size={24} color="var(--tc-border-active)"><circle cx="12" cy="12" r="10" /></Icon>
-            </div>
-          </div>
-
-          <div className={styles.componentSection}>
-            <div className={styles.componentTitle}>Colors (CSS Variables)</div>
-            <div className={styles.showcase} style={{ gap: 8, flexWrap: 'wrap' }}>
-              {[
-                '--tc-foreground',
-                '--tc-foreground-secondary',
-                '--tc-content-bg',
-                '--tc-sidebar-bg',
-                '--tc-border',
-                '--tc-border-active',
-                '--tc-sidebar-item-hover',
-                '--tc-sidebar-item-active-bg',
-                '--tc-sidebar-item-active-fg',
-                '--tc-focus-ring',
-              ].map(v => (
-                <div key={v} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 4,
-                    background: `var(${v})`,
-                    border: '1px solid var(--tc-border)',
-                  }} />
-                  <span style={{ fontSize: 11, color: 'var(--tc-foreground-secondary)' }}>{v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   )
