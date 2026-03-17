@@ -824,19 +824,23 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
     .map(b => b.text || '')
     .join('\n')
     .trim()
+  const units = useMemo(() => groupBlocks(msg.blocks), [msg.blocks])
   return (
     <div className={styles.msgRowLeft}>
       <ClaudeAvatar />
       <div className={styles.bubbleWrap}>
         <div className={styles.assistantBubble}>
           <div className={styles.mdContent}>
-            {msg.blocks.map((block, i) =>
-              block.type === 'text' ? (
-                <RichTextBlock key={i} text={block.text ?? ''} />
-              ) : (
-                <ToolWidget key={i} block={block} />
-              )
-            )}
+            {units.map((unit, i) => {
+              switch (unit.kind) {
+                case 'text':
+                  return <RichTextBlock key={i} text={unit.block.text ?? ''} />
+                case 'tool':
+                  return <ToolWidget key={i} block={unit.block} />
+                case 'read-group':
+                  return <ReadGroupStrip key={i} blocks={unit.blocks} />
+              }
+            })}
           </div>
         </div>
         {fullText && <CopyButton text={fullText} className={styles.msgCopyBtn} />}
