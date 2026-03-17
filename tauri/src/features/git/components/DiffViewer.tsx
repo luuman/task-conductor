@@ -146,6 +146,7 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
         )}
         {!isLoading && hasContent && diffMode === 'file' && (
           <DiffEditor
+            key={`file-${selectedFile}-${selectedCommit}-${virtualBranch}`}
             original={original}
             modified={modified}
             language={language}
@@ -163,6 +164,7 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
         )}
         {!isLoading && hasContent && diffMode !== 'file' && (
           <DiffEditor
+            key={`${diffMode}-${selectedFile}-${selectedCommit}-${virtualBranch}`}
             original={original}
             modified={modified}
             language={language}
