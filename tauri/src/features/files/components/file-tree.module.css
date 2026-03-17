@@ -52,9 +52,7 @@
   height: 16px;
   margin-right: 4px;
   flex-shrink: 0;
-  font-size: 14px;
-  text-align: center;
-  line-height: 16px;
+  object-fit: contain;
 }
 
 .name {
