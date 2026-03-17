@@ -750,7 +750,9 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
                 <ToolWidget key={i} block={block} />
               )
             )}
+          </div>
         </div>
+        {fullText && <CopyButton text={fullText} className={styles.msgCopyBtn} />}
       </div>
     </div>
   )
