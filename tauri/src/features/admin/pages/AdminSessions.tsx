@@ -111,23 +111,60 @@ function groupByProject(sessions: AiSession[]): ProjectGroup[] {
   })
 }
 
-// ── Tool emoji mapping ──────────────────────────────────────
+// ── Tool SVG icon mapping ───────────────────────────────────
 
-function getToolEmoji(toolName: string): string {
-  const map: Record<string, string> = {
-    Bash: '\uD83D\uDCBB',
-    Read: '\uD83D\uDCC4',
-    Write: '\u270F\uFE0F',
-    Edit: '\uD83D\uDD27',
-    MultiEdit: '\uD83D\uDD27',
-    Grep: '\uD83D\uDD0D',
-    Glob: '\uD83D\uDCC1',
-    WebSearch: '\uD83C\uDF10',
-    WebFetch: '\uD83C\uDF10',
-    Agent: '\uD83E\uDD16',
-    AskUserQuestion: '\u2753',
+function getToolIcon(toolName: string, size = 13): ReactNode {
+  const props = { size, color: 'currentColor' }
+  switch (toolName) {
+    case 'Bash': return <IconTerminal {...props} />
+    case 'Read': return <IconFileText {...props} />
+    case 'Write': return <IconPencil {...props} />
+    case 'Edit': case 'MultiEdit': return <IconWrench {...props} />
+    case 'Grep': return <IconSearch {...props} />
+    case 'Glob': return <IconFolderOpen {...props} />
+    case 'WebSearch': case 'WebFetch': return <IconGlobe {...props} />
+    case 'Agent': return <IconBot {...props} />
+    case 'AskUserQuestion': return <IconCircleHelp {...props} />
+    default: return <IconTerminal {...props} />
   }
-  return map[toolName] || '\uD83D\uDCBB'
+}
+
+// ── Block grouping for smart layout ─────────────────────────
+
+const READONLY_TOOLS = new Set(['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'])
+
+type GroupedUnit =
+  | { kind: 'text'; block: TranscriptBlock }
+  | { kind: 'tool'; block: TranscriptBlock }
+  | { kind: 'read-group'; blocks: TranscriptBlock[] }
+
+function groupBlocks(blocks: TranscriptBlock[]): GroupedUnit[] {
+  const units: GroupedUnit[] = []
+  let readBuf: TranscriptBlock[] = []
+
+  const flushReads = () => {
+    if (readBuf.length === 0) return
+    if (readBuf.length === 1) {
+      units.push({ kind: 'tool', block: readBuf[0] })
+    } else {
+      units.push({ kind: 'read-group', blocks: [...readBuf] })
+    }
+    readBuf = []
+  }
+
+  for (const block of blocks) {
+    if (block.type === 'text') {
+      flushReads()
+      units.push({ kind: 'text', block })
+    } else if (block.type === 'tool_use' && READONLY_TOOLS.has(block.tool_name || '')) {
+      readBuf.push(block)
+    } else {
+      flushReads()
+      units.push({ kind: 'tool', block })
+    }
+  }
+  flushReads()
+  return units
 }
 
 // ── Tool parameter summary ──────────────────────────────────
