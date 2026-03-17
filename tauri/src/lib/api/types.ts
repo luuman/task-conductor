@@ -293,12 +293,12 @@ export interface GitStatus {
   branch: string
   staged: GitFileChange[]
   unstaged: GitFileChange[]
-  untracked: string[]
+  untracked: GitFileChange[]
 }
 
 export interface GitFileChange {
   path: string
-  status: 'M' | 'A' | 'D' | 'R' | 'U'
+  status: string
 }
 
 export interface BranchFileChange {
