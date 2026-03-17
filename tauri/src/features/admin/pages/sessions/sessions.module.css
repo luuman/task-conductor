@@ -368,7 +368,8 @@
 /* ── Assistant bubble ── */
 .assistantBubble {
   min-width: 0;
-  width: 100%;
+  max-width: 100%;
+  width: fit-content;
   border-radius: 8px;
   padding: 10px 14px;
   background: rgba(68, 119, 255, 0.04);
