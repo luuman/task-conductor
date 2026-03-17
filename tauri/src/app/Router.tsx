@@ -22,6 +22,11 @@ const PlaceholderPage = lazy(() =>
   Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
 )
 
+// Dev-only pages (tree-shaken in production)
+const DevToolsPage = import.meta.env.DEV
+  ? lazy(() => import('../features/__dev__/DevToolsPage'))
+  : null
+
 const RouterComponent = isTauri() ? HashRouter : BrowserRouter
 
 export function AppRouter() {
