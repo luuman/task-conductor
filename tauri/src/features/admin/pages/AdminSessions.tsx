@@ -732,18 +732,24 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
 }
 
 function AssistantCard({ msg }: { msg: TranscriptMessage }) {
+  const fullText = msg.blocks
+    .filter(b => b.type === 'text')
+    .map(b => b.text || '')
+    .join('\n')
+    .trim()
   return (
     <div className={styles.msgRowLeft}>
       <ClaudeAvatar />
-      <div className={styles.assistantBubble}>
-        <div className={styles.mdContent}>
-          {msg.blocks.map((block, i) =>
-            block.type === 'text' ? (
-              <RichTextBlock key={i} text={block.text ?? ''} />
-            ) : (
-              <ToolWidget key={i} block={block} />
-            )
-          )}
+      <div className={styles.bubbleWrap}>
+        <div className={styles.assistantBubble}>
+          <div className={styles.mdContent}>
+            {msg.blocks.map((block, i) =>
+              block.type === 'text' ? (
+                <RichTextBlock key={i} text={block.text ?? ''} />
+              ) : (
+                <ToolWidget key={i} block={block} />
+              )
+            )}
         </div>
       </div>
     </div>
