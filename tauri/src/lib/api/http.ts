@@ -263,8 +263,9 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<GitCommit[]>(`/api/projects/${projectId}/git/log${qs ? `?${qs}` : ''}`)
   }
 
-  gitBranches(projectId: number) {
-    return this.fetch<GitBranch[]>(`/api/projects/${projectId}/git/branches`)
+  async gitBranches(projectId: number) {
+    const res = await this.fetch<{ branches: GitBranch[] }>(`/api/projects/${projectId}/git/branches`)
+    return res.branches
   }
 
   gitCheckout(projectId: number, branch: string, create?: boolean) {
