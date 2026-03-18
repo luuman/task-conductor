@@ -81,7 +81,9 @@ export function Layout() {
       />
       <div className={shellStyles.main}>
         <div className={shellStyles.content}>
-          <Outlet />
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
         </div>
         <Panel>
           <div className={shellStyles.panelPlaceholder}>
