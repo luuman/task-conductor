@@ -143,18 +143,18 @@ impl SyncManager {
 - [ ] **Step 4: 在 lib.rs 中声明 sync 模块**
 
 ```rust
-mod sync;
+pub mod sync;  // pub 以便 bin target 可以引用
 ```
 
 - [ ] **Step 5: 编译验证**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-tauri 2>&1 | tail -20`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-app 2>&1 | tail -20`
 Expected: 编译成功（可有 unused warnings）
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src-tauri/Cargo.toml src-tauri/src/sync/ src-tauri/src/lib.rs
+git add tauri/src-tauri/Cargo.toml tauri/src-tauri/src/sync/ tauri/src-tauri/src/lib.rs
 git commit -m "feat(sync): add module skeleton and dependencies"
 ```
 
