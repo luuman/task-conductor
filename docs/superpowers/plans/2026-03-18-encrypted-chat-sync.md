@@ -2128,7 +2128,197 @@ git commit -m "feat(sync): integrate synced sessions into admin Sessions page"
 
 ---
 
-## Task 15: 集成测试 + 端到端验证
+## Task 15: 密码 Key File 管理 + Recovery Key
+
+**Files:**
+- Modify: `src-tauri/src/lib.rs`
+- Modify: `src-tauri/src/sync/mod.rs`
+
+此 Task 解决 hook 脚本读取密码的关键路径：Tauri 将密码写入 tmpfs，hook 从中读取。
+
+- [ ] **Step 1: 实现 key file 写入/清理**
+
+在 `sync/mod.rs` 中添加：
+
+```rust
+use std::os::unix::fs::PermissionsExt;
+
+fn key_file_dir() -> PathBuf {
+    let dir = std::env::var("XDG_RUNTIME_DIR")
+        .unwrap_or_else(|_| format!("/tmp/tc-sync-{}", unsafe { libc::getuid() }));
+    PathBuf::from(dir)
+}
+
+pub fn write_key_file(password: &str) -> Result<(), String> {
+    let dir = key_file_dir();
+    std::fs::create_dir_all(&dir).map_err(|e| format!("mkdir: {e}"))?;
+    let path = dir.join("tc-sync.key");
+    std::fs::write(&path, password).map_err(|e| format!("write key: {e}"))?;
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600))
+        .map_err(|e| format!("chmod: {e}"))?;
+    Ok(())
+}
+
+pub fn remove_key_file() {
+    let path = key_file_dir().join("tc-sync.key");
+    let _ = std::fs::remove_file(path);
+}
+```
+
+- [ ] **Step 2: 在 sync_init / sync_push 时写入 key file**
+
+在 `sync_init` 和 `sync_push` Tauri command 中，成功后调用 `sync::write_key_file(&password)?;`
+
+- [ ] **Step 3: Tauri 退出时清理**
+
+在 `lib.rs` 的 `run()` 函数中，注册 `on_window_event` 或使用 `Drop` guard 调用 `sync::remove_key_file()`。
+
+- [ ] **Step 4: sync_init 打印 recovery key**
+
+在 `sync_init` 返回前，生成 recovery key：
+
+```rust
+let recovery = base64::engine::general_purpose::STANDARD.encode(
+    [salt.as_ref(), master.0.as_ref()].concat()
+);
+// 通过 Tauri event 发送到前端展示
+app.emit("sync:recovery_key", recovery).ok();
+```
+
+前端 SyncSettings 监听此 event，弹窗提示用户保存。
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add tauri/src-tauri/src/sync/mod.rs tauri/src-tauri/src/lib.rs
+git commit -m "feat(sync): add key file management + recovery key generation"
+```
+
+---
+
+## Task 16: .gitattributes / .gitignore / Git LFS 初始化
+
+**Files:**
+- Modify: `src-tauri/src/sync/mod.rs`
+
+- [ ] **Step 1: 在 push 首次初始化时创建 repo 配置文件**
+
+在 `push()` 函数中，meta.json 创建之后添加：
+
+```rust
+// 首次初始化 repo 配置
+let gitattributes = repo_path.join(".gitattributes");
+if !gitattributes.exists() {
+    fs::write(&gitattributes, "*.enc filter=lfs diff=lfs merge=lfs -text\n")
+        .map_err(|e| format!("write .gitattributes: {e}"))?;
+}
+let gitignore = repo_path.join(".gitignore");
+if !gitignore.exists() {
+    fs::write(&gitignore, ".local-state.json\n*.key\n")
+        .map_err(|e| format!("write .gitignore: {e}"))?;
+}
+```
+
+- [ ] **Step 2: 在 README 中注明 Git LFS 要求**
+
+同时创建 README.md（首次时）：
+
+```rust
+let readme = repo_path.join("README.md");
+if !readme.exists() {
+    fs::write(&readme, "# Claude Chat Encrypted\n\nEncrypted conversation backup. Requires `git lfs install` before cloning.\n")
+        .map_err(|e| format!("write README: {e}"))?;
+}
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add tauri/src-tauri/src/sync/mod.rs
+git commit -m "feat(sync): add .gitattributes, .gitignore, and LFS config to sync repo"
+```
+
+---
+
+## Task 17: sync_repair 命令
+
+**Files:**
+- Modify: `src-tauri/src/sync/mod.rs`
+- Modify: `src-tauri/src/lib.rs`
+
+- [ ] **Step 1: 实现 repair 逻辑**
+
+```rust
+pub struct RepairResult {
+    pub orphan_files_removed: usize,
+    pub missing_files_flagged: usize,
+}
+
+pub fn repair(repo_path: &Path, password: &str) -> Result<RepairResult, String> {
+    let _lock = SYNC_LOCK.lock().map_err(|e| format!("lock: {e}"))?;
+
+    let meta = MetaJson::load(&repo_path.join("meta.json"))?;
+    let salt: [u8; 32] = /* decode salt from meta */ ;
+    let master = derive_master_key(password, &salt, /* params */)?;
+    if !meta.verify_password(&master) { return Err("密码错误".into()); }
+
+    let manifest = Manifest::decrypt_and_load(&repo_path.join("manifest.json.enc"), &master)
+        .unwrap_or_default();
+
+    let encrypted_dir = repo_path.join("encrypted");
+    let mut orphans = 0;
+    let mut missing = 0;
+
+    // 检查 .enc 文件是否在 manifest 中
+    if encrypted_dir.exists() {
+        for entry in WalkDir::new(&encrypted_dir).into_iter().filter_map(|e| e.ok()) {
+            if entry.file_type().is_file() {
+                let rel = entry.path().strip_prefix(&encrypted_dir).unwrap().to_string_lossy().to_string();
+                if !manifest.files.contains_key(&rel) {
+                    fs::remove_file(entry.path()).ok();
+                    orphans += 1;
+                }
+            }
+        }
+    }
+
+    // 检查 manifest 中的文件是否存在
+    for (enc_rel, _) in &manifest.files {
+        if !encrypted_dir.join(enc_rel).exists() {
+            missing += 1;
+        }
+    }
+
+    Ok(RepairResult { orphan_files_removed: orphans, missing_files_flagged: missing })
+}
+```
+
+- [ ] **Step 2: 注册 Tauri command**
+
+```rust
+#[tauri::command]
+async fn sync_repair(password: String) -> Result<serde_json::Value, String> {
+    let repo_path = dirs::home_dir().unwrap().join(".claude-sync");
+    let result = sync::repair(&repo_path, &password)?;
+    Ok(serde_json::json!({
+        "orphan_files_removed": result.orphan_files_removed,
+        "missing_files_flagged": result.missing_files_flagged,
+    }))
+}
+```
+
+添加到 `invoke_handler`。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add tauri/src-tauri/src/sync/mod.rs tauri/src-tauri/src/lib.rs
+git commit -m "feat(sync): add sync_repair command for manifest/file reconciliation"
+```
+
+---
+
+## Task 18: 集成测试 + 端到端验证
 
 - [ ] **Step 1: Rust 全模块测试**
 
