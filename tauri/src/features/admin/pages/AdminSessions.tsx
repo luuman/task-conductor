@@ -944,53 +944,173 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
 
 // ── Scheme C: Smart grouping components ─────────────────────
 
+// ── Parse search results into file entries ──────────────────
+function parseSearchResultFiles(result: string): { path: string; name: string }[] {
+  if (!result) return []
+  const lines = result.split('\n').filter(l => l.trim())
+  const files: { path: string; name: string }[] = []
+  const seen = new Set<string>()
+  for (const line of lines) {
+    // Grep results: "filepath:linenum:content" or just file paths from Glob
+    const match = line.match(/^(.+?\.\w+)(?::\d|$)/)
+    const fp = match ? match[1].trim() : line.trim()
+    if (!fp || seen.has(fp)) continue
+    // Basic heuristic: looks like a file path
+    if (fp.includes('/') || fp.includes('.')) {
+      seen.add(fp)
+      files.push({ path: fp, name: fp.split('/').pop() || fp })
+    }
+  }
+  return files
+}
+
 function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
   const { t } = useTranslation()
+  const [expandedIdx, setExpandedIdx] = useState<string | null>(null)
+
   const readFiles = blocks.filter(b => b.tool_name === 'Read')
   const greps = blocks.filter(b => b.tool_name === 'Grep')
   const globs = blocks.filter(b => b.tool_name === 'Glob')
   const rest = blocks.filter(b => !['Read', 'Grep', 'Glob'].includes(b.tool_name || ''))
 
+  const toggle = useCallback((key: string) => {
+    setExpandedIdx(prev => prev === key ? null : key)
+  }, [])
+
+  // Find the expanded block
+  const expandedBlock = useMemo(() => {
+    if (!expandedIdx) return null
+    const [prefix, idxStr] = expandedIdx.split(':')
+    const idx = parseInt(idxStr, 10)
+    if (prefix === 'r') return readFiles[idx] ?? null
+    if (prefix === 'g') return greps[idx] ?? null
+    if (prefix === 'gl') return globs[idx] ?? null
+    return null
+  }, [expandedIdx, readFiles, greps, globs])
+
   return (
-    <div className={styles.pillRow}>
-      {readFiles.length > 0 && (
-        <>
-          <span className={styles.pillLabel}>{t('admin.sessions.pill_read')}</span>
-          {readFiles.map((b, i) => {
-            const fp = String(b.tool_input?.file_path || '')
-            const name = fp.split('/').pop() || fp
-            return (
-              <span key={`r${i}`} className={styles.pill} title={fp}>
-                <span className={styles.pillIcon}>{getToolIcon('Read', 10)}</span>
-                <span className={styles.pillText}>{name}</span>
-              </span>
-            )
-          })}
-        </>
-      )}
-      {greps.length > 0 && (
-        <>
-          <span className={styles.pillLabel}>{t('admin.sessions.pill_search')}</span>
-          {greps.map((b, i) => (
-            <span key={`g${i}`} className={`${styles.pill} ${styles.pillGrep}`} title={String(b.tool_input?.pattern || '')}>
-              <span className={styles.pillIcon}>{getToolIcon('Grep', 10)}</span>
-              <span className={styles.pillText}>&quot;{String(b.tool_input?.pattern || '').slice(0, 30)}&quot;</span>
+    <div className={styles.pillRowWrap}>
+      <div className={styles.pillRow}>
+        {readFiles.length > 0 && (
+          <>
+            <span className={styles.pillLabel}>{t('admin.sessions.pill_read')}</span>
+            {readFiles.map((b, i) => {
+              const fp = String(b.tool_input?.file_path || '')
+              const name = fp.split('/').pop() || fp
+              const key = `r:${i}`
+              const isActive = expandedIdx === key
+              const hasContent = b.tool_result != null && b.tool_result !== ''
+              return (
+                <span
+                  key={key}
+                  className={`${styles.pill} ${isActive ? styles.pillActive : ''} ${hasContent ? styles.pillClickable : ''}`}
+                  title={fp}
+                  onClick={hasContent ? () => toggle(key) : undefined}
+                >
+                  <span className={styles.pillIcon}>{getToolIcon('Read', 10)}</span>
+                  <span className={styles.pillText}>{name}</span>
+                </span>
+              )
+            })}
+          </>
+        )}
+        {greps.length > 0 && (
+          <>
+            <span className={styles.pillLabel}>{t('admin.sessions.pill_search')}</span>
+            {greps.map((b, i) => {
+              const key = `g:${i}`
+              const isActive = expandedIdx === key
+              const hasContent = b.tool_result != null && b.tool_result !== ''
+              return (
+                <span
+                  key={key}
+                  className={`${styles.pill} ${styles.pillGrep} ${isActive ? styles.pillActive : ''} ${hasContent ? styles.pillClickable : ''}`}
+                  title={String(b.tool_input?.pattern || '')}
+                  onClick={hasContent ? () => toggle(key) : undefined}
+                >
+                  <span className={styles.pillIcon}>{getToolIcon('Grep', 10)}</span>
+                  <span className={styles.pillText}>&quot;{String(b.tool_input?.pattern || '').slice(0, 30)}&quot;</span>
+                </span>
+              )
+            })}
+          </>
+        )}
+        {globs.map((b, i) => {
+          const key = `gl:${i}`
+          const isActive = expandedIdx === key
+          const hasContent = b.tool_result != null && b.tool_result !== ''
+          return (
+            <span
+              key={key}
+              className={`${styles.pill} ${isActive ? styles.pillActive : ''} ${hasContent ? styles.pillClickable : ''}`}
+              title={String(b.tool_input?.pattern || '')}
+              onClick={hasContent ? () => toggle(key) : undefined}
+            >
+              <span className={styles.pillIcon}>{getToolIcon('Glob', 10)}</span>
+              <span className={styles.pillText}>{String(b.tool_input?.pattern || '').slice(0, 30)}</span>
             </span>
-          ))}
-        </>
+          )
+        })}
+        {rest.map((b, i) => (
+          <span key={`o${i}`} className={styles.pill}>
+            <span className={styles.pillIcon}>{getToolIcon(b.tool_name || '', 10)}</span>
+            <span className={styles.pillText}>{b.tool_name}</span>
+          </span>
+        ))}
+      </div>
+      {/* Inline expanded panel */}
+      {expandedBlock && expandedIdx && (
+        <PillExpandedPanel block={expandedBlock} toolType={expandedIdx.split(':')[0]} />
       )}
-      {globs.map((b, i) => (
-        <span key={`gl${i}`} className={styles.pill} title={String(b.tool_input?.pattern || '')}>
-          <span className={styles.pillIcon}>{getToolIcon('Glob', 10)}</span>
-          <span className={styles.pillText}>{String(b.tool_input?.pattern || '').slice(0, 30)}</span>
+    </div>
+  )
+}
+
+// ── Expanded panel for pill content ─────────────────────────
+
+function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolType: string }) {
+  const result = block.tool_result || ''
+
+  if (toolType === 'r') {
+    // Read → show file content
+    const filePath = String(block.tool_input?.file_path ?? '')
+    return (
+      <div className={styles.pillExpandedPanel}>
+        <ReadFileView filePath={filePath} result={result} />
+      </div>
+    )
+  }
+
+  // Grep / Glob → show search results as file list
+  const files = useMemo(() => parseSearchResultFiles(result), [result])
+  const pattern = toolType === 'g'
+    ? String(block.tool_input?.pattern ?? '')
+    : String(block.tool_input?.pattern ?? '')
+  const resultLines = result.split('\n').filter(l => l.trim())
+
+  return (
+    <div className={styles.pillExpandedPanel}>
+      <div className={styles.searchResultHeader}>
+        <IconSearch size={12} />
+        <span className={styles.searchResultPattern}>{pattern}</span>
+        <span style={{ flex: 1 }} />
+        <span className={styles.searchResultCount}>
+          {files.length > 0 ? `${files.length} files` : `${resultLines.length} lines`}
         </span>
-      ))}
-      {rest.map((b, i) => (
-        <span key={`o${i}`} className={styles.pill}>
-          <span className={styles.pillIcon}>{getToolIcon(b.tool_name || '', 10)}</span>
-          <span className={styles.pillText}>{b.tool_name}</span>
-        </span>
-      ))}
+      </div>
+      {files.length > 0 ? (
+        <div className={styles.searchResultList}>
+          {files.map((f, i) => (
+            <div key={i} className={styles.searchResultItem} title={f.path}>
+              <span className={styles.searchResultItemIcon}>{getToolIcon('Read', 11)}</span>
+              <span className={styles.searchResultItemName}>{f.name}</span>
+              <span className={styles.searchResultItemPath}>{f.path}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <pre className={styles.searchResultRaw}>{result}</pre>
+      )}
     </div>
   )
 }
