@@ -25,14 +25,20 @@
 | `src-tauri/src/sync/git.rs` | git2 clone/fetch/commit/push + SSH/PAT 认证 |
 | `src-tauri/src/sync/importer.rs` | 解密 JSONL → 解析 → 写入 tc_sync.db |
 | `src-tauri/src/sync/compress.rs` | zstd 压缩/解压 |
-| `src-tauri/src/sync/cli.rs` | `tc-sync` 独立二进制入口（复用 sync/ 模块） |
+| `src-tauri/src/bin/tc_sync.rs` | `tc-sync` 独立二进制入口（通过 lib crate 复用 sync/ 模块） |
 
 ### Rust 修改文件
 
 | 文件 | 改动 |
 |------|------|
 | `src-tauri/Cargo.toml` | 新增依赖 + `[[bin]]` target |
-| `src-tauri/src/lib.rs` | 注册 sync commands |
+| `src-tauri/src/lib.rs` | 注册 sync commands，`pub mod sync` |
+
+### 重要路径说明
+
+- Rust 文件路径相对于 `tauri/` 目录，git 命令中需加 `tauri/` 前缀
+- Cargo 包名为 `task-conductor-app`（非 task-conductor-tauri）
+- CLI 二进制在 `src/bin/tc_sync.rs`（非 `src/sync/cli.rs`），通过 `use task_conductor_app::sync` 引用 lib crate
 
 ### 前端新建文件
 
