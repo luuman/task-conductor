@@ -86,6 +86,7 @@ argon2 = "0.5"
 hkdf = "0.12"
 sha2 = "0.10"
 hmac = "0.12"
+hex = "0.4"
 git2 = "0.19"
 walkdir = "2"
 zeroize = { version = "1", features = ["derive"] }
@@ -94,6 +95,12 @@ rand = "0.8"
 base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }
 hostname = "0.4"
+dirs = "5"
+rusqlite = { version = "0.31", features = ["bundled"] }
+libc = "0.2"
+
+[dev-dependencies]
+tempfile = "3"
 ```
 
 - [ ] **Step 2: 创建 sync/mod.rs 骨架**
