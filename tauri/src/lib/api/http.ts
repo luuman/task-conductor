@@ -350,7 +350,9 @@ export class HttpAdapter implements ApiAdapter {
   }
 
   getMetrics() {
-    return this.fetch<Metrics>('/api/metrics')
+    return cache.getOrFetch('metrics', CACHE_TTL.metrics, () =>
+      this.fetch<Metrics>('/api/metrics')
+    )
   }
 
   getClaudeUsage() {
