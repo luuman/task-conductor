@@ -1745,7 +1745,7 @@ Expected: 编译成功
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tauri/src-tauri/src/sync/cli.rs src-tauri/Cargo.toml
+git add tauri/src-tauri/src/bin/tc_sync.rs tauri/src-tauri/Cargo.toml
 git commit -m "feat(sync): add tc-sync CLI binary for hook-driven sync"
 ```
 
