@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { isTauri } from '../lib/tauri'
 import { Layout } from './Layout'
-import { PageLoading } from './PageLoading'
 import { ProtectedRoute } from './ProtectedRoute'
 import { ProjectGate } from './ProjectGate'
 
