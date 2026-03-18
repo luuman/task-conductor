@@ -457,6 +457,18 @@ const mdComponents: Components = {
         </>
       )
     }
+    // Multi-line without language → plain code block
+    const raw = String(children).replace(/\n$/, '')
+    if (raw.includes('\n')) {
+      return (
+        <>
+          <CopyButton text={raw} className={styles.codeCopyBtn} />
+          <code className={styles.mdCodeBlockPlain}>
+            {children}
+          </code>
+        </>
+      )
+    }
     return (
       <code className={styles.mdInlineCode}>
         {children}
