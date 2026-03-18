@@ -267,7 +267,6 @@ GET /api/projects/{id}/file-tree?depth=3
 | `components/mindmap/mindmap.module.css` | 样式 |
 | `features/__dev__/tabs/FileTreeMap.tsx` | 文件脑图 tab |
 | `features/admin/pages/AdminMindMap.tsx` | 任务全景页 |
-| `backend/app/routers/files.py` | file-tree API |
 
 ## 修改文件清单
 
