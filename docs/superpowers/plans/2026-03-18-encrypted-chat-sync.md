@@ -199,7 +199,7 @@ impl Default for Argon2Params {
 }
 
 pub fn generate_salt() -> [u8; 32] {
-    let mut salt = [u8; 32];
+    let mut salt = [0u8; 32];
     rand::thread_rng().fill_bytes(&mut salt);
     salt
 }
