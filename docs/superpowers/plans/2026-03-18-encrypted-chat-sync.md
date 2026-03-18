@@ -1537,10 +1537,12 @@ async fn sync_push(app: tauri::AppHandle, password: String) -> Result<sync::Sync
     let claude_dir = dirs::home_dir().unwrap().join(".claude");
     let branch = format!("sync/{}", hostname::get().unwrap_or_default().to_string_lossy());
 
-    // TODO: 从持久化配置读取 auth 和 remote_url
-    // 暂用 placeholder
-    let auth = get_saved_auth(&repo_path)?;
-    let remote_url = get_saved_remote(&repo_path)?;
+    // 从 git remote 读取 URL，SSH key 默认 ~/.ssh/id_ed25519
+    let remote_url = git2::Repository::open(&repo_path)
+        .and_then(|r| r.find_remote("origin").map(|remote| remote.url().unwrap_or("").to_string()))
+        .map_err(|e| format!("read remote: {e}"))?;
+    let ssh_key = dirs::home_dir().unwrap().join(".ssh/id_ed25519");
+    let auth = sync::git::AuthMethod::Ssh { key_path: ssh_key };
 
     sync::push(&repo_path, &claude_dir, &password, &branch, &auth, &remote_url, Some(&app))
 }
