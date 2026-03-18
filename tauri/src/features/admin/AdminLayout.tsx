@@ -138,7 +138,9 @@ export default function AdminLayout() {
         />
         <div className={shellStyles.main}>
           <div className={shellStyles.content}>
-            <Outlet />
+            <Suspense fallback={null}>
+              <Outlet />
+            </Suspense>
           </div>
         </div>
       </AppShell>
