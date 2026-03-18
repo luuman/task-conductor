@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { AppShell, TopBar, Sidebar } from '../../layouts'
 import { IconLogo, IconLayoutGrid, IconSettings, IconSearch, IconMonitor, IconArrowLeft } from '../../ui/icon'
 import { useNotificationStore } from '../../lib/store/notifications'
