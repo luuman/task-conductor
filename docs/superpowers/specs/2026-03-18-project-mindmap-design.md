@@ -276,7 +276,8 @@ GET /api/projects/{id}/file-tree?depth=3
 | `app/Router.tsx` | 新增 /admin/mindmap 路由 |
 | `features/admin/AdminLayout.tsx` | 侧边栏新增脑图导航项 |
 | `tauri/package.json` | 新增 3 个依赖 |
-| `backend/app/main.py` | 注册 files router |
+| `backend/app/routers/files.py` | 新增 file-tree 端点（文件已存在） |
+| `backend/app/main.py` | 注册 files router（如尚未注册） |
 
 ## 不做的事
 
