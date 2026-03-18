@@ -7,9 +7,9 @@
 | 决策项 | 选择 |
 |--------|------|
 | 同步范围 | 全部 `~/.claude/` 对话（~1.1GB） |
-| 加密方案 | Argon2id 密码派生 + AES-256-GCM |
-| 触发方式 | Claude Code SessionEnd Hook |
-| GitHub 仓库 | 独立私有仓库，多机独立 branch |
+| 加密方案 | Argon2id 密码派生 + HKDF 子密钥 + AES-256-GCM |
+| 触发方式 | Claude Code SessionEnd Hook（5 分钟防抖） |
+| GitHub 仓库 | 独立私有仓库，多机独立 branch，Git LFS |
 | 数据呈现 | 融入 Tauri `/admin/sessions` 页面 |
 
 ## §1 数据流与加密架构
@@ -19,44 +19,55 @@
 │                     加密同步数据流                            │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  ① SessionEnd Hook 触发                                     │
+│  ① SessionEnd Hook 触发（5min 防抖）                         │
 │     ~/.claude/hooks/sync-hook.sh                            │
-│         → 调用 tc-sync push（Rust 二进制）                   │
+│         → flock 串行化 → tc-sync push（从 stdin 读密码）     │
 │                                                             │
 │  ② tc-sync push                                             │
 │     a. 扫描 ~/.claude/projects/**/*.jsonl                   │
-│     b. 对比 manifest.json（上次同步快照）→ 只处理增量          │
-│     c. 每个文件：Argon2id 派生密钥 → AES-256-GCM 加密        │
-│        明文 JSONL → 密文 .enc 文件                           │
-│     d. 更新 manifest.json（文件哈希 + 时间戳）               │
-│     e. git2: add → commit → push 到 GitHub                  │
+│     b. 对比 local-state.json → 只处理增量                    │
+│     c. Argon2id → master key → HKDF(file_path) → 子密钥     │
+│     d. 每个文件：随机 96-bit nonce + AES-256-GCM 加密        │
+│        明文 JSONL → [nonce(12B) || ciphertext || tag(16B)]   │
+│     e. 更新 manifest.json.enc（加密索引）                    │
+│     f. git2: add → commit → push（SSH key / PAT 认证）      │
 │                                                             │
-│  ③ GitHub 仓库 (私有)                                       │
+│  ③ GitHub 仓库 (私有, Git LFS for *.enc)                    │
 │     encrypted/                                              │
 │       ├── {project-hash}/                                   │
 │       │   ├── {session-id}.jsonl.enc                        │
-│       │   └── sessions-index.enc                            │
-│       └── manifest.json（明文，无敏感内容）                   │
+│       │   └── subagents/                                    │
+│       └── ...                                               │
+│     meta.json          （明文：salt, argon2 params, verify） │
+│     manifest.json.enc  （加密：文件列表 + HMAC 哈希）        │
 │                                                             │
 │  ④ Tauri 拉取 + 解密                                        │
 │     Rust command: sync_pull                                 │
-│     a. git2: fetch + fast-forward                           │
-│     b. 对比本地 manifest → 只解密变更文件                     │
+│     a. git2: fetch 所有 sync/* 分支                         │
+│     b. 解密 manifest → 对比本地 → 只解密变更文件              │
 │     c. AES-256-GCM 解密 → 解析 JSONL                        │
-│     d. 写入 tc_cache.db 的 synced_sessions/synced_events 表  │
+│     d. 写入 tc_sync.db（独立 SQLite）                        │
 │                                                             │
 │  ⑤ 前端 Sessions 页面                                       │
-│     现有 API + SQLite 缓存 → 渲染（无感知加密层存在）         │
+│     合并实时 WS + tc_sync.db → 统一渲染                      │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 关键设计点
+### 加密细节
 
-- **增量同步**：`manifest.json` 记录每个文件的 SHA-256 哈希，只加密/传输变更文件
-- **项目路径哈希化**：目录名用 `SHA-256(项目绝对路径)[:16]`，避免泄露本地路径
-- **加密粒度**：每个 JSONL 文件单独加密，增量同步友好
-- **密钥派生参数**：Argon2id, m=64MB, t=3, p=1 → 256-bit key。salt 随机生成，每仓库一个，存于 manifest
+- **密钥派生**：Argon2id (m=64MB, t=3, p=1) 从密码 + salt 派生 256-bit master key。**密钥派生只在每次同步操作开始时执行一次**
+- **子密钥派生**：HKDF-SHA256(master_key, info=file_path) → 每文件独立子密钥，防御 nonce 重用
+- **Nonce**：每次加密生成随机 96-bit nonce，前置于密文：`[nonce(12B) || ciphertext || auth_tag(16B)]`
+- **加密格式版本**：每个 `.enc` 文件前 5 字节为 header：`[magic(4B): "TCSN"] [version(1B): 0x01]`
+- **变更检测**：使用 HMAC-SHA256(master_key, plaintext) 代替裸 SHA-256，不泄露明文指纹
+- **压缩**：加密前用 zstd 压缩（JSONL 压缩率约 80%），减小仓库体积
+
+### 增量同步
+
+- `local-state.json`（`~/.claude-sync/` 下，不进 git）记录：每文件 HMAC + 上次同步时间 + dirty 标记
+- push 时：扫描 → 对比 HMAC → 只加密变更文件 → 写 `.enc` → 更新 manifest → commit + push
+- push 失败：`local-state.json` 保留 dirty 标记，下次重试
 
 ## §2 Rust 模块 & Tauri Commands
 
@@ -67,53 +78,77 @@ src-tauri/src/
 ├── lib.rs            # 现有 + 注册新 commands
 ├── main.rs           # 不动
 └── sync/             # 新模块
-    ├── mod.rs        # 模块入口
-    ├── crypto.rs     # Argon2id 派生 + AES-256-GCM 加密/解密
-    ├── manifest.rs   # manifest.json 读写 + 增量 diff
-    ├── scanner.rs    # 扫描 ~/.claude/ 目录，收集 JSONL 文件
-    ├── git.rs        # git2 操作（clone/pull/commit/push）
-    └── importer.rs   # 解密 JSONL → 解析 → 写入 SQLite
+    ├── mod.rs        # 模块入口 + 内部 Mutex 锁（防并发）
+    ├── crypto.rs     # Argon2id + HKDF + AES-256-GCM + zeroize
+    ├── manifest.rs   # manifest 加密/解密 + 增量 diff
+    ├── scanner.rs    # 扫描 ~/.claude/，收集 JSONL + subagents
+    ├── git.rs        # git2（clone/fetch/commit/push）+ SSH/PAT 认证
+    ├── importer.rs   # 解密 JSONL → 解析 → 写入 tc_sync.db
+    └── compress.rs   # zstd 压缩/解压
+```
+
+`tc-sync` CLI 二进制与 Tauri 共享同一 crate：
+
+```toml
+# src-tauri/Cargo.toml
+[[bin]]
+name = "tc-sync"
+path = "src/sync/cli.rs"   # 复用 sync/ 模块，仅加 CLI 入口
 ```
 
 ### Tauri Commands
 
 ```rust
 #[tauri::command]
-async fn sync_init(repo_url: String, password: String) → Result<()>
-// 首次设置：clone 空仓库 + 生成 salt + 存密码验证 blob
+async fn sync_init(repo_url: String, password: String, auth_method: AuthMethod) → Result<()>
+// 首次设置：clone 空仓库 + 生成 salt + 存 verify_blob + 配置 Git 认证
+// AuthMethod: Ssh { key_path } | Pat { token }
 
 #[tauri::command]
 async fn sync_push(password: String) → Result<SyncResult>
-// 扫描 → 增量加密 → git push。返回 {added, updated, total_size}
+// 扫描 → 增量加密 → git push
+// 通过 Tauri event "sync:progress" 推送进度 { current, total, file_name }
 
 #[tauri::command]
 async fn sync_pull(password: String) → Result<SyncResult>
-// git pull → 增量解密 → 导入 SQLite。返回 {imported, skipped}
+// fetch 所有 sync/* 分支 → 增量解密 → 导入 tc_sync.db
+// 多分支合并策略：按 session_id 去重，modified_at 最新者优先
 
 #[tauri::command]
 async fn sync_status() → Result<SyncStatus>
-// 返回 {last_sync_time, file_count, repo_url, is_configured}
+// 返回 { last_sync_time, file_count, repo_url, is_configured, branches[] }
 
 #[tauri::command]
 async fn sync_verify_password(password: String) → Result<bool>
-// 验证密码（用 manifest 中的 salt 派生密钥，解密 verify_blob）
+// 用 meta.json 中的 salt 派生密钥，解密 verify_blob 校验
+
+#[tauri::command]
+async fn sync_repair() → Result<RepairResult>
+// 对比 manifest 与实际 .enc 文件，修复不一致（orphan 文件/缺失文件）
 ```
 
 ### Cargo.toml 新增依赖
 
 ```toml
-aes-gcm = "0.10"        # AES-256-GCM 加密
+aes-gcm = "0.10"        # AES-256-GCM
 argon2 = "0.5"           # 密钥派生
-git2 = "0.19"            # Git 操作（libgit2 绑定）
-sha2 = "0.10"            # 文件哈希 + 路径哈希
-walkdir = "2"            # 递归目录扫描
+hkdf = "0.12"            # 子密钥派生
+git2 = "0.19"            # Git 操作（libgit2）
+sha2 = "0.10"            # HMAC 基础
+hmac = "0.12"            # HMAC-SHA256
+walkdir = "2"            # 目录扫描
+zeroize = "1"            # 内存安全清除密钥
+zstd = "0.13"            # 压缩
 ```
 
 ### 密码管理
 
 - 密码不持久化到磁盘
-- 调用时传入，Tauri 进程内存缓存至应用关闭
-- 运行时通过 `$XDG_RUNTIME_DIR/tc-sync.key`（tmpfs）传递给 Hook 脚本
+- Tauri 进程内存缓存，使用 `zeroize` crate 确保释放时安全清零
+- **30 分钟空闲自动清除**，需重新输入
+- Hook 脚本通过 **stdin pipe** 读取密码（非命令行参数，避免 `/proc/PID/cmdline` 泄露）
+- Tauri 将密码写入 `$XDG_RUNTIME_DIR/tc-sync.key`（权限 `0600`），fallback 到 `/tmp/tc-sync-$UID/`
+- Tauri 退出/崩溃时通过 drop guard 删除该文件
 
 ## §3 Hook 集成 & GitHub 仓库结构
 
@@ -122,64 +157,93 @@ walkdir = "2"            # 递归目录扫描
 ```bash
 #!/bin/bash
 # ~/.claude/hooks/sync-hook.sh
+
 TC_SYNC_BIN="$HOME/.local/bin/tc-sync"
 TC_SYNC_REPO="$HOME/.claude-sync"
+LOCK_FILE="/tmp/tc-sync.lock"
+COOLDOWN_FILE="/tmp/tc-sync-last-push"
 
-PASSWORD=$(cat "$XDG_RUNTIME_DIR/tc-sync.key" 2>/dev/null)
-[ -z "$PASSWORD" ] && exit 0  # 未解锁则静默跳过
+# 5 分钟防抖：上次 push 不到 300 秒则跳过
+if [ -f "$COOLDOWN_FILE" ]; then
+  LAST=$(cat "$COOLDOWN_FILE")
+  NOW=$(date +%s)
+  [ $((NOW - LAST)) -lt 300 ] && exit 0
+fi
 
-$TC_SYNC_BIN push --repo "$TC_SYNC_REPO" --password "$PASSWORD" &
+# 密码文件
+KEY_DIR="${XDG_RUNTIME_DIR:-/tmp/tc-sync-$(id -u)}"
+KEY_FILE="$KEY_DIR/tc-sync.key"
+[ ! -f "$KEY_FILE" ] && exit 0  # 未解锁则静默跳过
+
+# flock 串行化，避免并发 push
+(
+  flock -n 200 || exit 0
+  cat "$KEY_FILE" | $TC_SYNC_BIN push --repo "$TC_SYNC_REPO" --password-stdin
+  date +%s > "$COOLDOWN_FILE"
+) 200>"$LOCK_FILE" &
 # 后台执行，不阻塞 Claude Code
-```
-
-Hook 注册追加到 `~/.claude/settings.json`：
-
-```json
-"SessionEnd": [{
-  "matcher": "",
-  "hooks": [{
-    "type": "command",
-    "command": "~/.claude/hooks/sync-hook.sh",
-    "timeout": 5
-  }]
-}]
 ```
 
 ### GitHub 仓库结构
 
 ```
 claude-chat-encrypted/           # 独立私有仓库
-├── manifest.json                # 明文索引
+├── meta.json                    # 明文：salt, argon2_params, verify_blob
+├── manifest.json.enc            # 加密索引（文件列表 + HMAC 哈希）
 ├── encrypted/
-│   ├── a3f8b2c1d4e5f6a7/       # SHA-256(项目路径)[:16]
+│   ├── a3f8b2c1d4e5f6a7/       # HMAC-SHA256(master_key, 项目路径)[:16]
 │   │   ├── 1e7e3459.jsonl.enc   # session-id[:8].jsonl.enc
-│   │   ├── sessions-index.enc
 │   │   └── subagents/
 │   │       └── agent-a886.jsonl.enc
 │   ├── b7c9d0e1f2a3b4c5/
 │   │   └── ...
 │   └── ...
 ├── history.enc                  # 全局 history.jsonl 加密
-└── .gitattributes               # *.enc binary
+├── .gitattributes               # *.enc filter=lfs diff=lfs merge=lfs -text
+└── .gitignore                   # local-state.json, *.key
 ```
 
-### manifest.json 格式
+### meta.json 格式（明文，仅含加密参数）
 
 ```json
 {
   "version": 1,
+  "enc_version": 1,
   "salt": "base64-encoded-32-bytes",
   "argon2_params": {"m": 65536, "t": 3, "p": 1},
-  "verify_blob": "base64-加密后的固定字符串，用于验证密码",
+  "verify_blob": "base64-加密后的固定字符串",
+  "created_at": "2026-03-18T10:00:00Z",
+  "hostname": "desktop-home"
+}
+```
+
+> **安全说明**：`verify_blob` 允许离线密码验证。Argon2id (m=64MB, t=3) 使暴力破解不可行，但仍建议使用强密码（12+ 字符）。
+
+### manifest.json.enc 解密后格式
+
+```json
+{
   "files": {
     "encrypted/a3f8b2c1d4e5f6a7/1e7e3459.jsonl.enc": {
-      "source_hash": "sha256-of-plaintext",
+      "hmac": "HMAC-SHA256-of-plaintext",
       "size": 284567,
-      "modified": "2026-03-18T10:30:00Z"
+      "compressed_size": 57000,
+      "modified": "2026-03-18T10:30:00Z",
+      "source_path_hint": "~/.claude/projects/-home-user-myproject/1e7e3459.jsonl"
     }
   }
 }
 ```
+
+### Git 认证
+
+`git2` 通过 credential callback 支持两种方式：
+- **SSH key**：默认读 `~/.ssh/id_ed25519`，可在 `sync_init` 时指定路径
+- **PAT (Personal Access Token)**：存于 `$XDG_RUNTIME_DIR/tc-sync-git-pat`（同 tmpfs 策略）
+
+### Salt 备份
+
+首次 `sync_init` 时，在终端打印 recovery key（`base64(salt + master_key_verify)`），提示用户离线保存。manifest 丢失时可用 recovery key 重建。
 
 ## §4 前端集成
 
@@ -189,7 +253,8 @@ claude-chat-encrypted/           # 独立私有仓库
 tauri/src/
 ├── lib/
 │   ├── store/sync-store.ts      # Zustand store（同步状态/密码内存缓存）
-│   └── api/sync.ts              # 封装 5 个 Tauri invoke 调用
+│   ├── api/sync.ts              # 封装 Tauri invoke 调用 + event 监听
+│   └── types/session.ts         # UnifiedSession 统一类型
 ├── features/admin/pages/settings/
 │   └── SyncSettings.tsx         # 同步配置面板（嵌入现有 Settings 页）
 ```
@@ -198,28 +263,55 @@ tauri/src/
 
 ```
 tauri/src/features/admin/pages/sessions/
-└── SessionList.tsx              # 数据源扩展：WS + SQLite 缓存
+└── SessionList.tsx              # 数据源扩展：WS + tc_sync.db
 ```
 
-### SyncSettings 面板
+### 统一会话类型
 
-嵌入现有设置页，包含：仓库地址输入、密码输入+验证、同步状态显示（上次同步时间/文件数/仓库大小）、手动同步/拉取按钮。
+```typescript
+interface UnifiedSession {
+  sessionId: string
+  source: 'live' | 'synced'       // 区分来源
+  sourceBranch?: string            // synced 时标记来源机器
+  projectPath?: string
+  firstPrompt?: string
+  summary?: string
+  messageCount: number
+  createdAt: string
+  modifiedAt: string
+  gitBranch?: string
+}
+```
 
 ### Sessions 页面数据融合
 
 ```typescript
 // 合并策略：
 // 1. 实时会话优先（有 WS 连接的 session 用实时数据）
-// 2. 历史会话补充（无实时连接的用 SQLite 缓存）
-// 3. 按 modified 时间倒序排列
-// 4. 顶部 "来源" 筛选：全部 | 实时 | 历史归档
+// 2. 历史会话补充（无实时连接的用 tc_sync.db）
+// 3. 按 modifiedAt 时间倒序排列
+// 4. 顶部筛选：全部 | 实时 | 历史归档 | 按机器筛选
+// 5. 同一 session_id 出现在多个来源时，modifiedAt 最新者优先
 ```
 
-### SQLite 新增表（tc_cache.db）
+### 进度事件
+
+```typescript
+// 监听 Tauri event
+listen('sync:progress', (event) => {
+  // { phase: 'scanning' | 'encrypting' | 'pushing' | 'pulling' | 'decrypting',
+  //   current: number, total: number, fileName?: string }
+})
+```
+
+### SQLite（独立 tc_sync.db）
+
+使用独立数据库文件 `tc_sync.db`（非 `tc_cache.db`），避免与 TTL 缓存层耦合。
 
 ```sql
 CREATE TABLE IF NOT EXISTS synced_sessions (
   session_id TEXT PRIMARY KEY,
+  source_branch TEXT NOT NULL,     -- sync/desktop-home
   project_hash TEXT NOT NULL,
   project_path TEXT,
   first_prompt TEXT,
@@ -234,39 +326,64 @@ CREATE TABLE IF NOT EXISTS synced_sessions (
 CREATE TABLE IF NOT EXISTS synced_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id TEXT NOT NULL,
-  type TEXT,
+  event_type TEXT,                  -- message/tool_use/tool_result/thinking...
   timestamp TEXT,
-  content TEXT,
+  content TEXT,                     -- JSON blob
   FOREIGN KEY (session_id) REFERENCES synced_sessions(session_id)
 );
 
 CREATE INDEX idx_synced_events_session ON synced_events(session_id);
 CREATE INDEX idx_synced_sessions_modified ON synced_sessions(modified_at);
+CREATE INDEX idx_synced_sessions_branch ON synced_sessions(source_branch);
 ```
 
-解密数据只走 Tauri 本地 SQLite，不经过 FastAPI 后端。
+### JSONL → SQLite 字段映射（importer.rs）
+
+| JSONL 字段 | synced_sessions 列 | 说明 |
+|------------|-------------------|------|
+| `sessionId` | `session_id` | 主键 |
+| `cwd` | `project_path` | 工作目录 |
+| 首条 `type: "user"` 的 `message` | `first_prompt` | 截取前 200 字符 |
+| 末条 `type: "assistant"` 的 `message` | `summary` | 截取前 200 字符 |
+| `type: "message"` 的计数 | `message_count` | 统计 |
+| 首条 `timestamp` | `created_at` | |
+| 末条 `timestamp` | `modified_at` | |
+| `gitBranch` | `git_branch` | |
+
+每条 JSONL 行 → `synced_events` 的一行（`type` + `timestamp` + 原始 JSON 作为 `content`）。
 
 ## §5 错误处理 & 边界情况
 
 | 场景 | 处理方式 |
 |------|---------|
-| 密码错误 | `sync_verify_password` 用 manifest 中 `verify_blob` 校验，失败则提示 |
-| 网络断开 | push 失败静默记录，下次 SessionEnd 重试（manifest 标记 dirty files） |
+| 密码错误 | `sync_verify_password` 用 `verify_blob` 校验，3 次失败锁定 5 分钟 |
+| 网络断开 | `local-state.json` 标记 dirty，下次 Hook 重试 |
 | Git 冲突 | 不会发生 —— 每台机器独立 branch（`sync/{hostname}`） |
-| 大文件（>25MB） | 分片加密，每片 10MB，`xxx.jsonl.enc.001/.002` |
-| 首次全量同步 | 后台线程，前端显示进度条（通过 Tauri event 推送进度） |
+| 大文件（>25MB） | zstd 压缩后通常 <5MB，如仍超大则 Git LFS 处理 |
+| 首次全量同步 | 后台线程 + `sync:progress` event 推送进度 |
 | Tauri 未运行 | `tc-sync.key` 不存在 → hook 静默退出 |
 | 换机器恢复 | clone 仓库 → 输入密码 → `sync_pull` 全量解密 |
-| 多机同时使用 | 各机器独立 branch，pull 时合并所有 `sync/*` 分支的 manifest |
+| 多机同时使用 | 各机器独立 branch，pull 遍历所有 `sync/*` 分支，session_id 去重 |
+| 并发 push | `flock` 文件锁串行化 |
+| 5 分钟内频繁 SessionEnd | 防抖：cooldown 文件记录上次时间，未到间隔则跳过 |
+| manifest 丢失 | 用 recovery key 重建 salt，重新解密 |
+| Tauri 并发操作 | `sync/mod.rs` 内部 `Mutex` 锁，同一时刻只有一个 sync 操作 |
+| 加密格式升级 | `.enc` 文件 header 含 `enc_version`，新版本可识别并迁移旧文件 |
+| 会话被本地删除 | 已知限制：GitHub 上对应 `.enc` 不自动删除，可手动 `sync_repair` 清理 |
 
 ### 多机 branch 策略
 
 ```
 claude-chat-encrypted/
-├── main                    # 空，仅 README
+├── main                    # 仅 README + meta.json
 ├── sync/desktop-home       # 家里电脑
 ├── sync/laptop-work        # 工作笔记本
 └── sync/server-gpu         # GPU 服务器
 ```
 
-Tauri pull 时 fetch 所有 `sync/*` 分支，合并解密，实现多机对话历史统一查看。
+**Pull 语义**：遍历每个 `sync/*` 远程分支，各自解密 manifest → 合并到本地 `tc_sync.db`。同一 `session_id` 出现在多个分支时，取 `modified_at` 最新的版本。每条记录附 `source_branch` 标记来源。
+
+### GitHub 仓库大小管理
+
+- Git LFS 托管 `.enc` 文件，避免 git 历史膨胀
+- 仓库增长超过 1GB 时，Tauri 界面提示用户执行 `git lfs prune` 或清理旧归档
