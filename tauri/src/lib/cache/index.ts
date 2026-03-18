@@ -89,7 +89,12 @@ class CacheManager {
     const memCached = this.get<T>(key)
     if (memCached !== null) return memCached
 
-    // L2（仅 Web 端 sql.js 支持同步 get，Tauri 端需要 async）
+    // 等待 L2 初始化完成（避免竞态导致持久化缓存失效）
+    if (!this.ready && this.initPromise) {
+      await this.initPromise.catch(() => {})
+    }
+
+    // L2
     if (this.ready && this.db) {
       const dbCached = this.db.get<T>(key)
       if (dbCached !== null) {
