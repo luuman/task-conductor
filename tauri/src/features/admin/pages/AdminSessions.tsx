@@ -1381,11 +1381,12 @@ export default function AdminSessions() {
     setExpandSignal(prev => autoExpand ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1))
   }, [autoExpand])
 
-  // Filtered sessions
+  // Filtered sessions: exclude sessions without summary (no user messages)
   const filtered = useMemo(() => {
-    if (!search.trim()) return sessions
+    const withSummary = sessions.filter(s => s.summary)
+    if (!search.trim()) return withSummary
     const q = search.toLowerCase()
-    return sessions.filter(s =>
+    return withSummary.filter(s =>
       (s.note?.alias ?? '').toLowerCase().includes(q) ||
       (s.cwd ?? '').toLowerCase().includes(q) ||
       (s.note?.tags ?? []).some(tag => tag.toLowerCase().includes(q)) ||
