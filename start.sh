@@ -18,7 +18,7 @@ fi
 echo ""
 
 # ── 清理残留进程 ───────────────────────────────────────────────
-for port in 8765 7070; do
+for port in 8765 7070 7071; do
   if lsof -ti:$port &>/dev/null; then
     echo "  清理端口 $port..."
     fuser -k ${port}/tcp 2>/dev/null || true
