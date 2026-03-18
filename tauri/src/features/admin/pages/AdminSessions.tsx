@@ -96,15 +96,27 @@ function groupByProject(sessions: AiSession[]): ProjectGroup[] {
   return Array.from(map.entries()).map(([cwd, items]) => ({
     name: cwd.split('/').filter(Boolean).pop() || cwd,
     cwd,
-    sessions: items.sort(
-      (a, b) =>
-        safeDate(b.last_seen_at || b.started_at).getTime() -
+    sessions: items.sort((a, b) => {
+      // active sessions first
+      const aActive = a.status === 'active' ? 1 : 0
+      const bActive = b.status === 'active' ? 1 : 0
+      if (bActive !== aActive) return bActive - aActive
+      // then by event_count descending (more active = more events)
+      if (b.event_count !== a.event_count) return b.event_count - a.event_count
+      // then by last_seen_at descending
+      return safeDate(b.last_seen_at || b.started_at).getTime() -
         safeDate(a.last_seen_at || a.started_at).getTime()
-    ),
+    }),
     activeCount: items.filter(s => s.status === 'active').length,
   })).sort((a, b) => {
+    // groups with active sessions first
     if (a.activeCount > 0 && b.activeCount === 0) return -1
     if (b.activeCount > 0 && a.activeCount === 0) return 1
+    // then by total event count descending
+    const aTotal = a.sessions.reduce((sum, s) => sum + s.event_count, 0)
+    const bTotal = b.sessions.reduce((sum, s) => sum + s.event_count, 0)
+    if (bTotal !== aTotal) return bTotal - aTotal
+    // then by most recent activity
     return b.sessions[0]
       ? safeDate(b.sessions[0].last_seen_at || b.sessions[0].started_at).getTime() -
         safeDate(a.sessions[0].last_seen_at || a.sessions[0].started_at).getTime()
