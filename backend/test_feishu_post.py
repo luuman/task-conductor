@@ -135,8 +135,11 @@ async def test_upload_html_file():
 
     import httpx
 
-    # 上传文件到飞书
-    async with httpx.AsyncClient(timeout=30) as http:
+    # 上传文件到飞书（跳过 socks 代理）
+    proxy = os.getenv("https_proxy") or os.getenv("http_proxy") or None
+    if proxy and proxy.startswith("socks"):
+        proxy = None
+    async with httpx.AsyncClient(timeout=30, proxy=proxy) as http:
         with open(html_path, "rb") as f:
             resp = await http.post(
                 "https://open.feishu.cn/open-apis/im/v1/files",
