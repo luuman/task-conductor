@@ -540,13 +540,17 @@
 
 /* ── Scheme C: Smart grouping ── */
 
+/* Pill row wrapper (contains pill row + expanded panel) */
+.pillRowWrap {
+  margin: 6px 0;
+}
+
 /* Pill row (read-only tools) */
 .pillRow {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 2px 0;
-  margin: 6px 0;
   padding: 4px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
