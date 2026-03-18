@@ -344,7 +344,7 @@ Expected: 4 tests passed
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src-tauri/src/sync/crypto.rs src-tauri/Cargo.toml
+git add tauri/src-tauri/src/sync/crypto.rs src-tauri/Cargo.toml
 git commit -m "feat(sync): implement crypto module — Argon2id + HKDF + AES-256-GCM"
 ```
 
@@ -392,7 +392,7 @@ Expected: PASS
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src-tauri/src/sync/compress.rs
+git add tauri/src-tauri/src/sync/compress.rs
 git commit -m "feat(sync): add zstd compress/decompress"
 ```
 
@@ -523,7 +523,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src-tauri/src/sync/scanner.rs src-tauri/Cargo.toml
+git add tauri/src-tauri/src/sync/scanner.rs src-tauri/Cargo.toml
 git commit -m "feat(sync): implement scanner — walk ~/.claude/ for JSONL files"
 ```
 
@@ -781,7 +781,7 @@ Expected: PASS
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src-tauri/src/sync/manifest.rs
+git add tauri/src-tauri/src/sync/manifest.rs
 git commit -m "feat(sync): implement manifest — encrypted index + incremental diff"
 ```
 
@@ -970,7 +970,7 @@ Expected: 编译成功
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src-tauri/src/sync/git.rs
+git add tauri/src-tauri/src/sync/git.rs
 git commit -m "feat(sync): implement git module — clone/fetch/commit/push with SSH/PAT auth"
 ```
 
@@ -1248,7 +1248,7 @@ Expected: 编译成功
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src-tauri/src/sync/mod.rs
+git add tauri/src-tauri/src/sync/mod.rs
 git commit -m "feat(sync): implement push/pull main logic in SyncManager"
 ```
 
@@ -1466,7 +1466,7 @@ Expected: PASS
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src-tauri/src/sync/importer.rs src-tauri/Cargo.toml
+git add tauri/src-tauri/src/sync/importer.rs src-tauri/Cargo.toml
 git commit -m "feat(sync): implement importer — JSONL parse + SQLite write"
 ```
 
@@ -1624,7 +1624,7 @@ Expected: 编译成功
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src-tauri/src/lib.rs src-tauri/Cargo.toml
+git add tauri/src-tauri/src/lib.rs src-tauri/Cargo.toml
 git commit -m "feat(sync): register Tauri commands — init/push/pull/status/verify"
 ```
 
@@ -1745,7 +1745,7 @@ Expected: 编译成功
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src-tauri/src/sync/cli.rs src-tauri/Cargo.toml
+git add tauri/src-tauri/src/sync/cli.rs src-tauri/Cargo.toml
 git commit -m "feat(sync): add tc-sync CLI binary for hook-driven sync"
 ```
 
