@@ -1553,8 +1553,11 @@ async fn sync_pull(app: tauri::AppHandle, password: String) -> Result<sync::Sync
     let db_path = dirs::data_dir().unwrap()
         .join("com.sichengli.task-conductor")
         .join("tc_sync.db");
-    let auth = get_saved_auth(&repo_path)?;
-    let remote_url = get_saved_remote(&repo_path)?;
+    let remote_url = git2::Repository::open(&repo_path)
+        .and_then(|r| r.find_remote("origin").map(|remote| remote.url().unwrap_or("").to_string()))
+        .map_err(|e| format!("read remote: {e}"))?;
+    let ssh_key = dirs::home_dir().unwrap().join(".ssh/id_ed25519");
+    let auth = sync::git::AuthMethod::Ssh { key_path: ssh_key };
 
     sync::pull(&repo_path, &password, &auth, &remote_url, &db_path, Some(&app))
 }
