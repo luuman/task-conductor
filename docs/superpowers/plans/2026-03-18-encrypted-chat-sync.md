@@ -1633,7 +1633,7 @@ git commit -m "feat(sync): register Tauri commands — init/push/pull/status/ver
 ## Task 10: tc-sync CLI 二进制
 
 **Files:**
-- Create: `src-tauri/src/sync/cli.rs`
+- Create: `src-tauri/src/bin/tc_sync.rs`
 - Modify: `src-tauri/Cargo.toml`
 
 - [ ] **Step 1: 在 Cargo.toml 添加 bin target**
@@ -1641,7 +1641,7 @@ git commit -m "feat(sync): register Tauri commands — init/push/pull/status/ver
 ```toml
 [[bin]]
 name = "tc-sync"
-path = "src/sync/cli.rs"
+path = "src/bin/tc_sync.rs"
 ```
 
 - [ ] **Step 2: 实现 CLI 入口**
@@ -1653,8 +1653,8 @@ path = "src/sync/cli.rs"
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 
-// 复用 sync 模块
-mod sync;
+// 通过 lib crate 引用 sync 模块
+use task_conductor_app::sync;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
