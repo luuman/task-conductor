@@ -610,6 +610,114 @@
   white-space: nowrap;
 }
 
+.pillClickable {
+  cursor: pointer;
+}
+
+.pillActive {
+  border-color: rgba(0, 122, 204, 0.5);
+  background: rgba(0, 122, 204, 0.1);
+  color: var(--tc-foreground);
+}
+
+/* Expanded panel below pill row */
+.pillExpandedPanel {
+  margin-top: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  animation: pillPanelIn 0.15s ease-out;
+}
+
+@keyframes pillPanelIn {
+  from { opacity: 0; max-height: 0; }
+  to   { opacity: 1; max-height: 600px; }
+}
+
+/* Search result header */
+.searchResultHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.searchResultPattern {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-accent, #007acc);
+  font-weight: 600;
+}
+
+.searchResultCount {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Search result file list */
+.searchResultList {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.searchResultItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  transition: background 0.1s;
+  cursor: default;
+}
+
+.searchResultItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.searchResultItemIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+}
+
+.searchResultItemName {
+  color: var(--tc-foreground);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.searchResultItemPath {
+  color: var(--tc-foreground-secondary);
+  opacity: 0.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 4px;
+  font-size: 10px;
+}
+
+/* Raw search output fallback */
+.searchResultRaw {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.6;
+  background: var(--tc-content-bg);
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--tc-foreground-secondary);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
 /* Edit inline — file name for Write without diff */
 .editCardFile {
   font-size: 10.5px;
