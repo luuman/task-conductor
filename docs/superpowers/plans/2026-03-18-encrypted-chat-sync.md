@@ -37,7 +37,7 @@
 ### 重要路径说明
 
 - Rust 文件路径相对于 `tauri/` 目录，git 命令中需加 `tauri/` 前缀
-- Cargo 包名为 `task-conductor-app`（非 task-conductor-tauri）
+- Cargo 包名为 `task-conductor-app`（非 task-conductor-app）
 - CLI 二进制在 `src/bin/tc_sync.rs`（非 `src/sync/cli.rs`），通过 `use task_conductor_app::sync` 引用 lib crate
 
 ### 前端新建文件
@@ -338,7 +338,7 @@ mod tests {
 
 - [ ] **Step 6: 编译 + 跑测试**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-tauri --lib sync::crypto -- --nocapture 2>&1 | tail -30`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-app --lib sync::crypto -- --nocapture 2>&1 | tail -30`
 Expected: 4 tests passed
 
 - [ ] **Step 7: Commit**
@@ -386,7 +386,7 @@ mod tests {
 
 - [ ] **Step 2: 测试**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-tauri --lib sync::compress`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-app --lib sync::compress`
 Expected: PASS
 
 - [ ] **Step 3: Commit**
@@ -517,7 +517,7 @@ mod tests {
 
 - [ ] **Step 4: 测试**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-tauri --lib sync::scanner`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-app --lib sync::scanner`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -775,7 +775,7 @@ mod tests {
 
 - [ ] **Step 6: 测试**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-tauri --lib sync::manifest`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-app --lib sync::manifest`
 Expected: PASS
 
 - [ ] **Step 7: Commit**
@@ -964,7 +964,7 @@ impl Clone for AuthMethod {
 
 - [ ] **Step 4: 编译验证**（git2 操作难以单元测试，集成测试后续补）
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-tauri 2>&1 | tail -20`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-app 2>&1 | tail -20`
 Expected: 编译成功
 
 - [ ] **Step 5: Commit**
@@ -1242,7 +1242,7 @@ pub fn pull(
 
 - [ ] **Step 3: 编译验证**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-tauri 2>&1 | tail -20`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-app 2>&1 | tail -20`
 Expected: 编译成功
 
 - [ ] **Step 4: Commit**
@@ -1460,7 +1460,7 @@ mod tests {
 
 - [ ] **Step 3: 测试**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-tauri --lib sync::importer`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-app --lib sync::importer`
 Expected: PASS
 
 - [ ] **Step 4: Commit**
@@ -1618,7 +1618,7 @@ async fn sync_verify_password(password: String) -> Result<bool, String> {
 
 - [ ] **Step 3: 编译验证**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-tauri 2>&1 | tail -30`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-app 2>&1 | tail -30`
 Expected: 编译成功
 
 - [ ] **Step 4: Commit**
@@ -1739,7 +1739,7 @@ fn read_remote_url(repo_path: &std::path::Path) -> String {
 
 - [ ] **Step 3: 编译验证**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-tauri --bin tc-sync 2>&1 | tail -20`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo build -p task-conductor-app --bin tc-sync 2>&1 | tail -20`
 Expected: 编译成功
 
 - [ ] **Step 4: Commit**
@@ -2132,7 +2132,7 @@ git commit -m "feat(sync): integrate synced sessions into admin Sessions page"
 
 - [ ] **Step 1: Rust 全模块测试**
 
-Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-tauri --lib 2>&1`
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && cargo test -p task-conductor-app --lib 2>&1`
 Expected: 全部 PASS
 
 - [ ] **Step 2: 编译 release 二进制**
