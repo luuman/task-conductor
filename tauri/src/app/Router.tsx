@@ -32,7 +32,7 @@ const RouterComponent = isTauri() ? HashRouter : BrowserRouter
 export function AppRouter() {
   return (
     <RouterComponent>
-      <Suspense fallback={<PageLoading />}>
+      <Suspense fallback={null}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
 
