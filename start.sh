@@ -46,21 +46,38 @@ echo "  后端 PID: $BACKEND_PID  → http://localhost:8765"
 sleep 2
 
 # ── 3. 启动前端 ───────────────────────────────────────────────
-echo "[3/3] 启动 React 前端..."
+echo "[3/4] 启动 React 前端..."
 cd "$ROOT_DIR/frontend"
 npm run dev &
 FRONTEND_PID=$!
 echo "  前端 PID: $FRONTEND_PID  → http://localhost:7070"
 
+# ── 4. 启动 Tauri Web ────────────────────────────────────────
+echo "[4/4] 启动 Tauri Web..."
+cd "$ROOT_DIR/tauri"
+# 清理 7071 端口
+if lsof -ti:7071 &>/dev/null; then
+  echo "  清理端口 7071..."
+  fuser -k 7071/tcp 2>/dev/null || true
+  for i in $(seq 1 10); do
+    sleep 0.5
+    lsof -ti:7071 &>/dev/null || break
+  done
+fi
+npx vite --port 7071 &
+TAURI_WEB_PID=$!
+echo "  Tauri Web PID: $TAURI_WEB_PID  → http://localhost:7071"
+
 echo ""
 echo "====================================="
 echo "  TaskConductor 已启动"
-echo "  前端: http://localhost:7070"
-echo "  后端: http://localhost:8765"
+echo "  前端:      http://localhost:7070"
+echo "  Tauri Web: http://localhost:7071"
+echo "  后端:      http://localhost:8765"
 echo "  远程: 前端 → Connection 页查看 Tunnel URL 和 PIN"
 echo "====================================="
 echo ""
 echo "按 Ctrl+C 停止所有服务"
 
-trap "echo ''; echo '停止服务...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit 0" INT TERM
+trap "echo ''; echo '停止服务...'; kill $BACKEND_PID $FRONTEND_PID $TAURI_WEB_PID 2>/dev/null; exit 0" INT TERM
 wait
