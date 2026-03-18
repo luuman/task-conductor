@@ -358,8 +358,6 @@ git commit -m "feat(sync): implement crypto module — Argon2id + HKDF + AES-256
 - [ ] **Step 1: 实现压缩/解压**
 
 ```rust
-use std::io::{Read, Write};
-
 /// zstd 压缩，level 3（默认平衡）
 pub fn compress(data: &[u8]) -> Result<Vec<u8>, String> {
     zstd::encode_all(data, 3).map_err(|e| format!("compress: {e}"))
