@@ -43,4 +43,6 @@ export const CACHE_TTL = {
   sessions:         15 * 1000,
   /** 设置 — 很少变化 */
   settings:         5 * 60 * 1000,
+  /** 指标 — 中等频率变化 */
+  metrics:          30 * 1000,
 } as const
