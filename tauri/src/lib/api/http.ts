@@ -363,6 +363,14 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<ClaudeUsage>('/api/metrics/claude-usage')
   }
 
+  getSystemMetrics() {
+    return this.fetch<SystemMetrics>('/api/metrics/system')
+  }
+
+  getProcesses() {
+    return this.fetch<ProcessList>('/api/metrics/processes')
+  }
+
   getClaudeOverview() {
     return this.fetch<ClaudeOverview>('/api/claude-config/overview')
   }
