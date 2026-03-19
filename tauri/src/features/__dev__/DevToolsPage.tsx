@@ -206,6 +206,9 @@ export default function DevToolsPage() {
         <button className={styles.tab} data-active={tab === 'file-icons'} onClick={() => setTab('file-icons')}>
           File Icons ({filteredFileIcons.length})
         </button>
+        <button className={styles.tab} data-active={tab === 'file-map'} onClick={() => setTab('file-map')}>
+          File Map
+        </button>
       </div>
 
       {(tab === 'file-icons' || tab === 'ui-icons') && (
