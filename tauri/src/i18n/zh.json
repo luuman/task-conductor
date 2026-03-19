@@ -63,6 +63,7 @@
       "claude_config": "Claude 配置",
       "settings": "设置",
       "sessions": "会话记录",
+      "mindmap": "脑图",
       "dev_tools": "开发工具"
     },
     "dashboard": {
