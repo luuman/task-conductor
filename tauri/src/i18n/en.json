@@ -63,6 +63,7 @@
       "claude_config": "Claude Config",
       "settings": "Settings",
       "sessions": "Sessions",
+      "mindmap": "Mind Map",
       "dev_tools": "Dev Tools"
     },
     "dashboard": {
