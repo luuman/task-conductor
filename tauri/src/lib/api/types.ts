@@ -394,6 +394,7 @@ export interface ApiAdapter {
   clearSessions(): Promise<{ ok: boolean; message: string }>
   clearCompletedTasks(): Promise<{ ok: boolean; count: number }>
   restartService(): Promise<void>
+  getFileTree(projectId: number, depth?: number): Promise<FileTreeNode>
   getMetrics(): Promise<Metrics>
   getClaudeUsage(): Promise<ClaudeUsage>
   getClaudeOverview(): Promise<ClaudeOverview>
