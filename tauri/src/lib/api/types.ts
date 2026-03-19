@@ -445,6 +445,8 @@ export interface ApiAdapter {
   getFileTree(projectId: number, depth?: number): Promise<FileTreeNode>
   getMetrics(): Promise<Metrics>
   getClaudeUsage(): Promise<ClaudeUsage>
+  getSystemMetrics(): Promise<SystemMetrics>
+  getProcesses(): Promise<ProcessList>
   getClaudeOverview(): Promise<ClaudeOverview>
   getClaudeConfig(): Promise<ClaudeConfig>
   updateClaudeConfigKey(key: string, value: unknown): Promise<{ ok: boolean }>
