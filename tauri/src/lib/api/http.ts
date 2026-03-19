@@ -1,6 +1,6 @@
 import type {
   ApiAdapter, ApiMode, Project, Task, AiSession, SessionEvent, Settings, FileItem, ProjectKnowledge,
-  Metrics, ClaudeUsage, ClaudeOverview, ClaudeConfig, HookRule, McpServer,
+  Metrics, ClaudeUsage, SystemMetrics, ProcessList, ClaudeOverview, ClaudeConfig, HookRule, McpServer,
   SkillDetail, CommandInfo, RuleInfo, AgentInfo, PresetItem, ClaudeSystemInfo,
   DisabledItem, ProjectComponents, ProjectDetails,
   GitStatus, GitCommit, GitBranch, GitStash, BranchFileChange,
