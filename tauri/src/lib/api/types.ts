@@ -135,6 +135,54 @@ export interface ClaudeUsage {
   performance: Record<string, unknown>
 }
 
+export interface SystemMetrics {
+  cpu: {
+    percent: number
+    user_pct: number | null
+    system_pct: number | null
+    iowait_pct: number | null
+    count_logical: number
+    count_physical: number
+    freq_mhz: number | null
+    freq_max_mhz: number | null
+    ctx_switches_per_sec: number | null
+    load_avg: { '1m': number; '5m': number; '15m': number } | null
+    per_core: number[]
+  }
+  memory: {
+    total_gb: number
+    used_gb: number
+    avail_gb: number
+    free_gb: number
+    buffers_gb: number
+    cached_gb: number
+    percent: number
+  }
+  swap: { total_gb: number; used_gb: number; percent: number }
+  disk_space: { total_gb: number | null; used_gb: number | null; free_gb: number | null; percent: number | null }
+  disk_io: { read_mbps: number | null; write_mbps: number | null; read_iops: number | null; write_iops: number | null; util_pct: number | null }
+  network: { in_kbps: number | null; out_kbps: number | null; sent_mb: number | null; recv_mb: number | null; tcp_states: Record<string, number>; err_out: number | null; err_in: number | null }
+  uptime_hours: number
+  hostname: string
+  platform: string
+  process_count: number | null
+  sensors: { temperatures: Array<{ sensor: string; label: string; current: number; high: number | null; critical: number | null }>; fans: Array<{ sensor: string; label: string; rpm: number }> }
+  net_interfaces: Array<{ name: string; ip: string }>
+  disk_device: string | null
+}
+
+export interface ProcessInfo {
+  pid: number
+  name: string
+  cpu_pct: number
+  mem_mb: number
+}
+
+export interface ProcessList {
+  by_cpu: ProcessInfo[]
+  by_mem: ProcessInfo[]
+}
+
 export interface HookEntry {
   type: string
   command: string
