@@ -485,3 +485,42 @@ def read_doc(
         return {"path": path, "name": target.name, "size": size, "binary": True, "content": None}
 
     return {"path": path, "name": target.name, "size": size, "binary": False, "content": content}
+
+
+def _build_tree(path: Path, depth: int, max_depth: int) -> dict:
+    """递归构建目录树 JSON"""
+    name = path.name
+    if path.is_file():
+        return {"name": name, "type": "file"}
+
+    result: dict = {"name": name, "type": "directory", "children": []}
+    if depth >= max_depth:
+        return result
+
+    try:
+        entries = sorted(path.iterdir(), key=lambda e: (not e.is_dir(), e.name.lower()))
+    except PermissionError:
+        return result
+
+    for entry in entries:
+        if entry.name in IGNORE_NAMES:
+            continue
+        if entry.name.startswith(".") and entry.name not in (".env.example", ".gitignore", ".editorconfig"):
+            continue
+        result["children"].append(_build_tree(entry, depth + 1, max_depth))
+
+    return result
+
+
+@router.get("/{project_id}/file-tree", summary="递归项目目录树（脑图用）")
+def get_file_tree(
+    project_id: int,
+    depth: int = Query(3, ge=1, le=10, description="递归深度限制"),
+    db: Session = Depends(_get_db),
+):
+    base = _get_project_path(project_id, db)
+    if not base.is_dir():
+        raise HTTPException(404, "项目目录不存在")
+
+    tree = _build_tree(base, 0, depth)
+    return tree
