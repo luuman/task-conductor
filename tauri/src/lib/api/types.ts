@@ -22,6 +22,12 @@ export interface ProjectKnowledge {
   created_at: string
 }
 
+export interface FileTreeNode {
+  name: string
+  type: 'directory' | 'file'
+  children?: FileTreeNode[]
+}
+
 export interface FileItem {
   name: string
   path: string
