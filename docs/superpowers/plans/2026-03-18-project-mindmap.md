@@ -1084,24 +1084,24 @@ import { useState, useEffect } from 'react'
 import styles from './mindmap.module.css'
 
 export function MindMapZoomControls() {
-  const { zoomIn, zoomOut, fitView, getZoom } = useReactFlow()
+  const { zoomIn, zoomOut, fitView } = useReactFlow()
   const [zoom, setZoom] = useState(100)
 
-  useEffect(() => {
-    // 初始读取一次
-    setZoom(Math.round(getZoom() * 100))
-  }, [getZoom])
+  // 响应式监听 viewport 变化
+  useOnViewportChange({
+    onChange: (viewport) => setZoom(Math.round(viewport.zoom * 100)),
+  })
 
   return (
     <div className={styles.zoomControls}>
-      <button className={styles.zoomBtn} onClick={() => { zoomOut(); setZoom(Math.round(getZoom() * 100)) }} title="缩小">
+      <button className={styles.zoomBtn} onClick={() => zoomOut()} title="缩小">
         −
       </button>
-      <button className={styles.zoomBtn} onClick={() => { fitView({ padding: 0.2 }); setZoom(Math.round(getZoom() * 100)) }} title="适应">
+      <button className={styles.zoomBtn} onClick={() => fitView({ padding: 0.2 })} title="适应">
         ○
       </button>
       <span className={styles.zoomLevel}>{zoom}%</span>
-      <button className={styles.zoomBtn} onClick={() => { zoomIn(); setZoom(Math.round(getZoom() * 100)) }} title="放大">
+      <button className={styles.zoomBtn} onClick={() => zoomIn()} title="放大">
         +
       </button>
     </div>
