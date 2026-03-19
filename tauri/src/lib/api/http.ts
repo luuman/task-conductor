@@ -342,6 +342,10 @@ export class HttpAdapter implements ApiAdapter {
 
   // ─── AI API ───
 
+  getFileTree(projectId: number, depth = 3) {
+    return this.fetch<FileTreeNode>(`/api/projects/${projectId}/file-tree?depth=${depth}`)
+  }
+
   aiInlineEdit(req: InlineEditRequest) {
     return this.fetch<InlineEditResponse>('/api/ai/inline-edit', {
       method: 'POST',
