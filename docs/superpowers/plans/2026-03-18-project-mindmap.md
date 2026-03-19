@@ -1079,8 +1079,8 @@ export function MindMapToolbar({ nodeId, x, y }: Props) {
 ```typescript
 // tauri/src/components/mindmap/MindMapZoomControls.tsx
 
-import { useReactFlow } from '@xyflow/react'
-import { useState, useEffect } from 'react'
+import { useReactFlow, useOnViewportChange } from '@xyflow/react'
+import { useState } from 'react'
 import styles from './mindmap.module.css'
 
 export function MindMapZoomControls() {
