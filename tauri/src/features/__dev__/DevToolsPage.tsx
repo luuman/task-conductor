@@ -161,7 +161,7 @@ const CSS_VARS = [
   { group: 'Semantic', vars: ['--tc-error', '--tc-warning', '--tc-success', '--tc-info'] },
 ]
 
-type Tab = 'file-icons' | 'ui-icons' | 'components'
+type Tab = 'file-icons' | 'ui-icons' | 'components' | 'file-map'
 
 export default function DevToolsPage() {
   const [tab, setTab] = useState<Tab>('components')
