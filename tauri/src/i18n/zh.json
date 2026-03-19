@@ -64,7 +64,19 @@
       "settings": "设置",
       "sessions": "会话记录",
       "mindmap": "脑图",
+      "server": "服务器监控",
       "dev_tools": "开发工具"
+    },
+    "server": {
+      "title": "服务器性能监控",
+      "hint": "实时系统资源、进程与 Claude 会话监控",
+      "memory": "内存",
+      "network": "网络",
+      "disk_io": "磁盘 I/O",
+      "sensors": "温度传感器",
+      "claude_processes": "Claude 进程",
+      "top_cpu": "CPU 占用 Top 进程",
+      "top_mem": "内存占用 Top 进程"
     },
     "dashboard": {
       "title": "仪表盘",
