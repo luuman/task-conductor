@@ -385,24 +385,24 @@ export const useMindMapStore = create<MindMapState>()((set, get) => ({
   },
 
   undo() {
-    const { _history, nodes } = get()
+    const { _history, _future, nodes } = get()
     if (_history.length === 0) return
     const prev = _history[_history.length - 1]
     set({
       nodes: prev,
       _history: _history.slice(0, -1),
-      _future: [nodes, ...get()._future],
+      _future: [nodes, ..._future],
     })
   },
 
   redo() {
-    const { _future, nodes } = get()
+    const { _future, _history, nodes } = get()
     if (_future.length === 0) return
     const next = _future[0]
     set({
       nodes: next,
       _future: _future.slice(1),
-      _history: [...get()._history, nodes],
+      _history: [..._history, nodes],
     })
   },
 
