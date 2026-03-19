@@ -491,6 +491,9 @@ export default function DevToolsPage() {
         </div>
       )}
 
+      {/* ── File Map Tab ───────────────────────────────── */}
+      {tab === 'file-map' && <FileTreeMap />}
+
       {/* ── File Icons Tab ─────────────────────────────── */}
       {tab === 'file-icons' && (
         <div className={styles.section}>
