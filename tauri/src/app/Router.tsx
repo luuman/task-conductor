@@ -15,6 +15,7 @@ const AdminClaudeConfig = lazy(() => import('../features/admin/pages/AdminClaude
 const AdminSettings     = lazy(() => import('../features/admin/pages/AdminSettings'))
 const AdminSessions     = lazy(() => import('../features/admin/pages/AdminSessions'))
 const AdminMindMap      = lazy(() => import('../features/admin/pages/AdminMindMap'))
+const AdminServerMonitor = lazy(() => import('../features/admin/pages/AdminServerMonitor'))
 const FilesPage         = lazy(() => import('../features/files'))
 const GitPage           = lazy(() => import('../features/git'))
 
