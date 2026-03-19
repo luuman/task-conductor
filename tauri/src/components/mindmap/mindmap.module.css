@@ -1,0 +1,255 @@
+/* tauri/src/components/mindmap/mindmap.module.css */
+
+/* ── Canvas ────────────────────────────────── */
+.canvas {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #13131a;
+}
+
+/* ── Node ──────────────────────────────────── */
+.node {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  max-width: 260px;
+  transition: box-shadow 0.15s;
+  user-select: none;
+}
+
+.node[data-type='root'] {
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 18px;
+}
+
+.nodeSelected {
+  /* applied dynamically via JS — glow effect */
+}
+
+.nodeLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeLabelEdit {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.nodeIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.nodeBadge {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.nodeCollapseBtn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.5);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nodeChildCount {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+
+/* ── Toolbar (floating) ────────────────────── */
+.toolbar {
+  position: absolute;
+  display: flex;
+  gap: 1px;
+  padding: 4px 6px;
+  background: rgba(30,30,42,0.95);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 50;
+}
+
+.toolbarBtn {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #ccc;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toolbarBtn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Context Menu ──────────────────────────── */
+.contextMenu {
+  position: fixed;
+  min-width: 160px;
+  background: rgba(25,25,35,0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  padding: 4px;
+  z-index: 100;
+}
+
+.contextMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #ccc;
+  border: none;
+  background: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.contextMenuItem:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.contextMenuDivider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 3px 0;
+}
+
+.contextMenuItemDanger {
+  composes: contextMenuItem;
+  color: #f87171;
+}
+
+/* ── Zoom Controls ─────────────────────────── */
+.zoomControls {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  background: rgba(30,30,42,0.9);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  z-index: 10;
+}
+
+.zoomBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-radius: 50%;
+}
+
+.zoomBtn:hover {
+  color: #ccc;
+  background: rgba(255,255,255,0.06);
+}
+
+.zoomLevel {
+  font-size: 11px;
+  color: #666;
+  padding: 0 8px;
+  min-width: 36px;
+  text-align: center;
+}
+
+/* ── Left Tool Rail ────────────────────────── */
+.toolRail {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  z-index: 10;
+}
+
+.toolRailBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #888;
+  border: none;
+  background: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toolRailBtn:hover {
+  color: #ccc;
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Status Badge Colors ───────────────────── */
+.statusDone {
+  background: rgba(74,222,128,0.12);
+  color: #4ade80;
+}
+
+.statusDev, .statusPrd, .statusPlan, .statusAnalysis {
+  background: rgba(0,122,204,0.12);
+  color: #7cc;
+}
+
+.statusPending, .statusInput {
+  background: rgba(255,255,255,0.04);
+  color: #666;
+}
