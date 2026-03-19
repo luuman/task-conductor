@@ -64,7 +64,19 @@
       "settings": "Settings",
       "sessions": "Sessions",
       "mindmap": "Mind Map",
+      "server": "Server Monitor",
       "dev_tools": "Dev Tools"
+    },
+    "server": {
+      "title": "Server Performance Monitor",
+      "hint": "Real-time system resources, processes & Claude sessions",
+      "memory": "Memory",
+      "network": "Network",
+      "disk_io": "Disk I/O",
+      "sensors": "Temperature Sensors",
+      "claude_processes": "Claude Processes",
+      "top_cpu": "Top Processes by CPU",
+      "top_mem": "Top Processes by Memory"
     },
     "dashboard": {
       "title": "Dashboard",
