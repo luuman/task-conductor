@@ -17,8 +17,9 @@ const NAV_ITEMS: Array<{ key: string; icon: React.ReactNode; i18n: string; short
   { key: '/admin/claude-config', icon: <IconSettings size={18} />,  i18n: 'admin.nav.claude_config', shortcut: `${modKey}2` },
   { key: '/admin/settings',     icon: <IconMonitor size={18} />,    i18n: 'admin.nav.settings',      shortcut: `${modKey}3` },
   { key: '/admin/sessions',     icon: <IconSearch size={18} />,     i18n: 'admin.nav.sessions',      shortcut: `${modKey}4` },
+  { key: '/admin/mindmap',      icon: <IconGitBranch size={18} />,  i18n: 'admin.nav.mindmap',       shortcut: `${modKey}5` },
   ...(import.meta.env.DEV ? [
-    { key: '/admin/dev', icon: <IconLayoutGrid size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}5`, devOnly: true },
+    { key: '/admin/dev', icon: <IconLayoutGrid size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}6`, devOnly: true },
   ] : []),
 ]
 
