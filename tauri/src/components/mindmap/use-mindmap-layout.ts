@@ -66,7 +66,7 @@ export function useMindMapLayout(allNodes: MindMapNodeData[]) {
           x: pos.x - NODE_WIDTH / 2,
           y: pos.y - NODE_HEIGHT / 2,
         },
-        data: node,
+        data: node as unknown as Record<string, unknown>,
       }
     })
 
