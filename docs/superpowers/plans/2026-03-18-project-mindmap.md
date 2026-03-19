@@ -99,12 +99,8 @@ export interface MindMapNodeData {
   parentId: string | null
 }
 
-/** file-tree API 返回的递归结构 */
-export interface FileTreeNode {
-  name: string
-  type: 'directory' | 'file'
-  children?: FileTreeNode[]
-}
+// FileTreeNode 定义在 api/types.ts 中，此处 re-export
+export type { FileTreeNode } from '../../lib/api/types'
 
 /** 分支颜色 palette */
 export const BRANCH_COLORS = [
