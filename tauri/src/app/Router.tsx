@@ -48,6 +48,7 @@ export function AppRouter() {
             <Route path="/admin/claude-config" element={<AdminClaudeConfig />} />
             <Route path="/admin/settings"     element={<AdminSettings />} />
             <Route path="/admin/sessions"     element={<AdminSessions />} />
+            <Route path="/admin/mindmap"      element={<AdminMindMap />} />
             {DevToolsPage && <Route path="/admin/dev" element={<DevToolsPage />} />}
           </Route>
 
