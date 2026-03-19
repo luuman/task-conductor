@@ -5,7 +5,7 @@ import type {
   DisabledItem, ProjectComponents, ProjectDetails,
   GitStatus, GitCommit, GitBranch, GitStash, BranchFileChange,
   InlineEditRequest, InlineEditResponse,
-  TranscriptMessage, ConversationNote,
+  TranscriptMessage, ConversationNote, FileTreeNode,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
