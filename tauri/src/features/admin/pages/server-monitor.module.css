@@ -1,0 +1,165 @@
+/* Gauge ring row */
+.gaugeRow {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.gaugeSvg {
+  width: 96px;
+  height: 96px;
+}
+
+.gaugeValue {
+  font-size: 16px;
+  font-weight: 700;
+  fill: var(--tc-foreground);
+  font-family: 'Geist Mono', monospace;
+}
+
+.gaugeLabel {
+  font-size: 9px;
+  fill: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gaugeSub {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  text-align: center;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Bar / progress */
+.barRow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.barMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.barLabel {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  font-family: 'Geist Mono', monospace;
+}
+
+.barDetail {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  font-family: 'Geist Mono', monospace;
+}
+
+.barTrack {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--tc-border);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* Core grid */
+.coreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+/* Stat rows */
+.statRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.statItem {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Tags */
+.tagGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground-secondary);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Process list */
+.pid {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  font-family: 'Geist Mono', monospace;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.procName {
+  font-size: 12px;
+  color: var(--tc-foreground);
+  font-family: 'Geist Mono', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.procVal {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  font-family: 'Geist Mono', monospace;
+}
+
+.procSub {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Sparkline */
+.sparkWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sparkLabel {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  width: 36px;
+  flex-shrink: 0;
+  font-family: 'Geist Mono', monospace;
+}
+
+.sparkSvg {
+  width: 100%;
+  height: auto;
+}
