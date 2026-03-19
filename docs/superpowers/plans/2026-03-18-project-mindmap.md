@@ -1707,13 +1707,17 @@ const AdminMindMap     = lazy(() => import('../features/admin/pages/AdminMindMap
 
 - [ ] **Step 2: AdminLayout.tsx — 添加导航项**
 
-在 `tauri/src/features/admin/AdminLayout.tsx` 的 `NAV_ITEMS` 数组中，在 sessions 项之后（即 `shortcut: \`${modKey}4\`` 之后）添加：
+在 `tauri/src/features/admin/AdminLayout.tsx` 中：
+
+1. 在文件顶部 import 中，将 `IconGitBranch` 加入 icon 导入列表（从 `'../../ui/icon'` 导入）。
+
+2. 在 `NAV_ITEMS` 数组中，在 sessions 项之后（即 `shortcut: \`${modKey}4\`` 之后）添加：
 
 ```typescript
 { key: '/admin/mindmap', icon: <IconGitBranch size={18} />, i18n: 'admin.nav.mindmap', shortcut: `${modKey}5` },
 ```
 
-将原来 dev_tools 的 shortcut 从 `${modKey}5` 改为 `${modKey}6`。
+3. 将原来 dev_tools 的 shortcut 从 `${modKey}5` 改为 `${modKey}6`。
 
 - [ ] **Step 3: 验证 TypeScript**
 
