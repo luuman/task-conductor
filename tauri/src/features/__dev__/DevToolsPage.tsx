@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FileTreeMap } from './tabs/FileTreeMap'
 import {
   Icon,
   IconChevronLeft,
