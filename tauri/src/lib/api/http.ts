@@ -6,6 +6,7 @@ import type {
   GitStatus, GitCommit, GitBranch, GitStash, BranchFileChange,
   InlineEditRequest, InlineEditResponse,
   TranscriptMessage, ConversationNote, FileTreeNode,
+  InterviewMessage, InterviewStartResponse,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
