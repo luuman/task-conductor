@@ -22,12 +22,12 @@ const GitPage           = lazy(() => import('../features/git'))
 const TaskManagerPage   = lazy(() => import('../features/task-manager'))
 const TaskDetailPage    = lazy(() => import('../features/task-detail'))
 
+function PlaceholderPageComponent() {
+  const { t } = useTranslation()
+  return <div className="placeholder-page">{t('admin_extra.coming_soon')}</div>
+}
 const PlaceholderPage = lazy(() =>
-  Promise.resolve({ default: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { t } = require('react-i18next').useTranslation()
-    return <div className="placeholder-page">{t('admin_extra.coming_soon')}</div>
-  }})
+  Promise.resolve({ default: PlaceholderPageComponent })
 )
 
 // Dev-only pages (tree-shaken in production)
