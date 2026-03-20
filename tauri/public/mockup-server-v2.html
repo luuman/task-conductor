@@ -862,8 +862,15 @@
       </div>
       <div class="card-hint">双环：外环 = CPU% · 内环 = MEM · 点击查看详情</div>
     </div>
-    <div class="card-body" style="overflow-x:auto;">
-      <svg id="topoSvg" viewBox="0 0 1100 520" style="width:100%;height:520px;"></svg>
+    <div class="card-body">
+      <div class="topo-wrap" id="topoWrap">
+        <svg id="topoSvg" viewBox="0 0 1100 520"></svg>
+        <div class="topo-controls">
+          <button class="topo-ctrl-btn" id="topoZoomIn" title="放大">+</button>
+          <button class="topo-ctrl-btn" id="topoZoomOut" title="缩小">−</button>
+          <button class="topo-ctrl-btn" id="topoReset" title="重置">⟳</button>
+        </div>
+      </div>
       <div class="topo-legend">
         <span><span class="tl-ring" style="border-color:var(--blue)"></span>外环 = CPU%</span>
         <span><span class="tl-ring" style="border-color:var(--green)"></span>内环 = MEM</span>
