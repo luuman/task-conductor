@@ -391,21 +391,7 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
         viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
         onMouseDown={handleMouseDown}
       >
-        <defs>
-          {nodes.map(n => {
-            const pos = getPos(n.id)
-            return (
-              <g key={`defs-${n.id}`}>
-                <path id={`cpu-arc-${n.id}`}
-                  d={`M${pos.x - outerR},${pos.y} A${outerR},${outerR} 0 0,1 ${pos.x + outerR},${pos.y}`}
-                  fill="none" />
-                <path id={`mem-arc-${n.id}`}
-                  d={`M${pos.x + innerR},${pos.y} A${innerR},${innerR} 0 0,1 ${pos.x - innerR},${pos.y}`}
-                  fill="none" />
-              </g>
-            )
-          })}
-        </defs>
+        {/* no defs needed */}
 
         {/* 连线（贝塞尔曲线，避免穿越中心） */}
         {edges.map((e, i) => {
