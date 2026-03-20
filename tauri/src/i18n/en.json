@@ -551,5 +551,20 @@
     "field_desc": "Description",
     "title_placeholder": "Enter task title",
     "desc_placeholder": "Optional task description"
+  },
+  "task_detail": {
+    "not_found": "Task not found",
+    "pipeline": "Pipeline Progress",
+    "stage": "Current Stage",
+    "created": "Created",
+    "started": "Started",
+    "finished": "Finished",
+    "branch": "Branch",
+    "worktree": "Worktree",
+    "artifacts": "Stage Artifacts",
+    "no_artifacts": "No artifacts yet",
+    "assumptions": "Assumptions",
+    "critic_notes": "Critic Notes",
+    "error_log": "Error Log"
   }
 }
