@@ -62,7 +62,7 @@ export interface InterviewMessage {
   task_id: number
   role: 'user' | 'assistant'
   content: string
-  metadata?: string | null
+  extra?: string | null
   created_at: string
 }
 
