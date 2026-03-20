@@ -185,9 +185,9 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 
   // 环形布局参数
   const nodeSize = 64 // 双环节点直径 (outerR*2 + padding)
-  const cx = 450, cy = 400
-  const innerR = 160  // 内环半径（组头）
-  const outerR = 320  // 外环半径（子节点）
+  const cx = 600, cy = 550
+  const innerR = 240  // 内环半径（组头）
+  const outerR = 480  // 外环半径（子节点）
 
   // 计算外环最小角度间距（确保节点不重叠）
   const minAngleGap = (nodeSize + 8) / outerR // 弧长 = 角度 * 半径
