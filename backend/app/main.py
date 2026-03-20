@@ -22,6 +22,7 @@ from .routers import files as files_router
 from .routers import git as git_router
 from .routers import chat as chat_router
 from .routers import ai as ai_router
+from .routers import interview as interview_router
 from .routers import screenshot as screenshot_router
 from .feishu.dispatcher import router as feishu_router
 from .session import pin_session
