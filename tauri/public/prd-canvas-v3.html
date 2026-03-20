@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>PRD 需求画布 v3 — pixi.js + 悬浮聊天 + VS Code 拆分</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f0f17; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #ccc; height: 100vh; overflow: hidden; }
+
+  /* ── 顶栏 ── */
+  .topbar { height: 36px; background: #13131d; border-bottom: 1px solid #1e1e2e; display: flex; align-items: center; padding: 0 8px; gap: 2px; }
+  .tab { padding: 5px 14px; font-size: 12px; color: #666; cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px; transition: all .1s; }
+  .tab:hover { color: #aaa; background: #1a1a2588; }
+  .tab.active { background: #0f0f17; color: #eee; }
+  .tab .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tab .close { font-size: 10px; opacity: 0; margin-left: 2px; transition: opacity .1s; }
+  .tab:hover .close { opacity: 0.5; }
+  .topbar-right { margin-left: auto; display: flex; gap: 4px; }
+  .topbar-btn { background: none; border: 1px solid #2a2a3a; color: #777; border-radius: 4px; padding: 3px 10px; font-size: 11px; cursor: pointer; }
+  .topbar-btn:hover { background: #1e1e2e; color: #ccc; }
+
+  /* ── 主体 ── */
+  .main { display: flex; height: calc(100vh - 36px); }
+
+  /* 拆分条 */
+  .divider { width: 4px; background: #1a1a25; cursor: col-resize; flex-shrink: 0; transition: background .15s; }
+  .divider:hover, .divider.active { background: #007acc; }
+
+  /* 面板 */
+  .pane { display: flex; flex-direction: column; min-width: 240px; overflow: hidden; }
+  .pane-head { height: 30px; background: #111119; border-bottom: 1px solid #1e1e2e; display: flex; align-items: center; padding: 0 12px; gap: 8px; flex-shrink: 0; }
+  .pane-label { font-size: 11px; color: #555; font-weight: 600; }
+  .pane-badge { font-size: 9px; padding: 1px 6px; border-radius: 6px; }
+
+  /* ── pixi 画布容器 ── */
+  #canvas-container { flex: 1; position: relative; background: #0b0b12; }
+  #canvas-container canvas { display: block; }
+  .canvas-hud { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 8px; z-index: 5; }
+  .canvas-hud .chip { background: #1a1a28; border: 1px solid #2a2a3a; border-radius: 6px; padding: 4px 10px; font-size: 10px; color: #666; }
+  .canvas-hud .chip b { color: #aaa; }
+  .canvas-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 5; }
+  .canvas-tools button { background: #1a1a28; border: 1px solid #2a2a3a; border-radius: 5px; padding: 4px 10px; font-size: 10px; color: #777; cursor: pointer; }
+  .canvas-tools button:hover { background: #222; color: #ccc; }
+  .canvas-tools button.on { background: #007acc22; color: #60a5fa; border-color: #007acc44; }
+
+  /* ── PRD 文档面板 ── */
+  .prd-doc { flex: 1; overflow-y: auto; padding: 20px 24px; background: #0f0f17; }
+  .prd-doc h1 { font-size: 17px; color: #eee; margin-bottom: 3px; }
+  .prd-doc .meta { font-size: 10px; color: #444; margin-bottom: 18px; }
+  .prd-doc h2 { font-size: 13px; color: #60a5fa; margin: 16px 0 6px; }
+  .prd-doc p { font-size: 12px; color: #888; line-height: 1.7; margin-bottom: 10px; }
+  .prd-doc .mod-row { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #1a1a25; font-size: 12px; }
+  .prd-doc .mod-row .st { font-size: 9px; margin-left: auto; }
+  .prd-doc .spec { font-size: 12px; color: #777; line-height: 1.8; }
+
+  /* ── 悬浮聊天 ── */
+  .float-chat {
+    position: fixed; width: 400px; height: 540px;
+    background: #111119ee; border: 1px solid #2a2a3a; border-radius: 14px;
+    box-shadow: 0 16px 64px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
+    display: flex; flex-direction: column; z-index: 100;
+    overflow: hidden;
+  }
+  .fc-head {
+    padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+    cursor: move; user-select: none; border-bottom: 1px solid #1e1e2e;
+    background: #16162288; border-radius: 14px 14px 0 0;
+  }
+  .fc-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#007acc,#a855f7); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .fc-name { font-size: 13px; font-weight: 600; color: #ddd; flex: 1; }
+  .fc-online { font-size: 10px; color: #10b981; display: flex; align-items: center; gap: 4px; }
+  .fc-online::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+  .fc-ctrl { display: flex; gap: 2px; }
+  .fc-ctrl button { background: none; border: none; color: #555; cursor: pointer; width: 22px; height: 22px; border-radius: 4px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .fc-ctrl button:hover { background: #2a2a3a; color: #ccc; }
+  /* 拖拽resize手柄 */
+  .fc-resize { position: absolute; bottom: 0; right: 0; width: 18px; height: 18px; cursor: se-resize; opacity: 0.3; }
+  .fc-resize::after { content: '⋱'; position: absolute; right: 4px; bottom: 0; font-size: 12px; color: #555; }
+
+  .fc-msgs { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* 消息 */
+  .m { display: flex; flex-direction: column; gap: 3px; }
+  .m-u { align-items: flex-end; }
+  .m-a { align-items: flex-start; }
+  .bubble { max-width: 92%; padding: 9px 13px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+  .m-u .bubble { background: #007acc; color: #fff; border-bottom-right-radius: 4px; }
+  .m-a .bubble { background: #1e1e2e; color: #ccc; border-bottom-left-radius: 4px; }
+  .m-time { font-size: 9px; color: #333; padding: 0 4px; }
+  .ref { display: inline-block; background: #007acc22; color: #60a5fa; padding: 1px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+
+  /* 富交互卡片 */
+  .card { background: #1a1a2a; border: 1px solid #2a2a3a; border-radius: 10px; overflow: hidden; max-width: 94%; }
+  .card-head { padding: 7px 11px; background: #20203a; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #ddd; }
+  .card-body { padding: 10px 11px; }
+  .card-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .choices { display: flex; flex-direction: column; gap: 5px; }
+  .ch {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+    border-radius: 7px; border: 1px solid #2a2a3a; background: #16162a;
+    cursor: pointer; transition: all .12s;
+  }
+  .ch:hover { border-color: #007acc44; background: #1a2a3a; }
+  .ch.on { border-color: #007acc; background: #007acc12; }
+  .ch-radio { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #444; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .ch.on .ch-radio { border-color: #007acc; }
+  .ch.on .ch-radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #007acc; }
+  .ch-label { font-size: 12px; color: #bbb; }
+  .ch.on .ch-label { color: #fff; }
+  .ch-sub { font-size: 10px; color: #555; }
+  .card-footer { display: flex; gap: 6px; padding: 7px 11px; border-top: 1px solid #2a2a3a; }
+  .card-btn { flex: 1; padding: 6px; border-radius: 6px; border: none; font-size: 11px; cursor: pointer; font-weight: 500; }
+  .card-btn.ok { background: #007acc; color: #fff; }
+  .card-btn.cancel { background: #2a2a3a; color: #666; }
+
+  /* 快捷标签 */
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tag {
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    border: 1px solid #2a2a3a; background: #1a1a2a; color: #888; transition: all .12s;
+  }
+  .tag:hover { border-color: #007acc44; color: #bbb; }
+  .tag.on { background: #007acc; border-color: #007acc; color: #fff; }
+  .tag.primary { background: #007acc22; border-color: #007acc44; color: #60a5fa; }
+
+  /* 进度卡片 */
+  .prog-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .prog-label { font-size: 10px; width: 56px; }
+  .prog-bar { flex: 1; height: 5px; background: #222; border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; }
+
+  /* 线稿预览卡片（在聊天中） */
+  .wireframe-preview {
+    background: #1a1a28; border: 1px dashed #3a3a5a; border-radius: 8px;
+    overflow: hidden; max-width: 94%; margin-top: 4px;
+  }
+  .wp-top { padding: 4px 8px; background: #22223a; display: flex; align-items: center; gap: 4px; }
+  .wp-dots { display: flex; gap: 3px; }
+  .wp-dots span { width: 5px; height: 5px; border-radius: 50%; }
+  .wp-title { font-size: 9px; color: #555; }
+  .wp-body { padding: 10px; display: flex; gap: 10px; }
+  .wp-col { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .wp-inp { height: 18px; border-radius: 4px; border: 1px solid #2a2a3a; background: #13131d; display: flex; align-items: center; padding: 0 6px; }
+  .wp-inp span { font-size: 8px; color: #444; }
+  .wp-btn { height: 18px; border-radius: 4px; background: #007acc33; display: flex; align-items: center; justify-content: center; }
+  .wp-btn span { font-size: 8px; color: #60a5fa; }
+  .wp-qr { width: 38px; height: 38px; border-radius: 3px; background: #1e1e2e; display: flex; align-items: center; justify-content: center; font-size: 16px; filter: grayscale(1) opacity(0.3); margin: 0 auto; }
+  .wp-label { font-size: 7px; color: #444; text-align: center; }
+  .wp-footer { padding: 5px 8px; border-top: 1px solid #2a2a3a; display: flex; justify-content: flex-end; gap: 4px; }
+  .wp-action { font-size: 9px; color: #60a5fa; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+  .wp-action:hover { background: #007acc22; }
+
+  .fc-input-area { padding: 10px 12px; border-top: 1px solid #1e1e2e; display: flex; gap: 8px; align-items: flex-end; background: #13131dee; border-radius: 0 0 14px 14px; }
+  .fc-input { flex: 1; background: #0d0d14; border: 1px solid #2a2a3a; border-radius: 8px; padding: 8px 10px; color: #ccc; font-size: 13px; outline: none; resize: none; font-family: inherit; }
+  .fc-input:focus { border-color: #007acc; }
+  .fc-send { background: #007acc; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 12px; font-weight: 500; }
+</style>
+<script src="./pixi.min.js"></script>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="tab active"><span class="dot" style="background:#10b981"></span> 用户登录系统 <span class="close">×</span></div>
+  <div class="tab"><span class="dot" style="background:#f59e0b"></span> 消息推送 <span class="close">×</span></div>
+  <div class="tab"><span class="dot" style="background:#3b82f6"></span> 数据报表 <span class="close">×</span></div>
+  <div class="topbar-right">
+    <button class="topbar-btn">⊞ 拆分</button>
+    <button class="topbar-btn">+ 新需求</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 左：pixi 画布 -->
+  <div class="pane" id="leftPane" style="flex:1.2;">
+    <div class="pane-head">
+      <span class="pane-label">需求画布</span>
+      <span class="pane-badge" style="background:#007acc22;color:#60a5fa;">6 模块</span>
+      <span class="pane-badge" style="background:#10b98122;color:#10b981;">3/5 已确认</span>
+    </div>
+    <div id="canvas-container">
+      <div class="canvas-tools">
+        <button class="on">自动布局</button>
+        <button>自由摆放</button>
+        <button>适应屏幕</button>
+      </div>
+      <div class="canvas-hud">
+        <div class="chip">缩放 <b id="hud-zoom">100%</b></div>
+        <div class="chip">模块 <b>5</b></div>
+        <div class="chip">连线 <b>4</b></div>
+        <div class="chip">FPS <b id="hud-fps">60</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分隔条 -->
+  <div class="divider" id="divider"></div>
+
+  <!-- 右：PRD 文档 -->
+  <div class="pane" id="rightPane" style="flex:0.8;">
+    <div class="pane-head">
+      <span class="pane-label">PRD 文档</span>
+      <span class="pane-badge" style="background:#a855f722;color:#a855f7;">自动生成</span>
+    </div>
+    <div class="prd-doc">
+      <h1>用户登录系统 PRD</h1>
+      <div class="meta">v1.2 · AI 自动生成 · 2分钟前更新</div>
+      <h2>1. 背景与目标</h2>
+      <p>构建统一的用户认证系统，支持微信扫码（PC）、微信公众号授权（H5）和手机验证码三种登录方式。新用户首次登录自动注册，使用 JWT Token 管理登录状态。</p>
+      <h2>2. 功能模块</h2>
+      <div class="mod-row"><span style="color:#10b981">●</span> 微信 OAuth <span class="st" style="color:#10b981">已确认</span></div>
+      <div class="mod-row"><span style="color:#10b981">●</span> 短信验证 <span class="st" style="color:#10b981">已确认</span></div>
+      <div class="mod-row"><span style="color:#10b981">●</span> Token 管理 <span class="st" style="color:#10b981">已确认</span></div>
+      <div class="mod-row"><span style="color:#f59e0b">●</span> 用户认证（核心） <span class="st" style="color:#f59e0b">讨论中</span></div>
+      <div class="mod-row"><span style="color:#6b7280">●</span> 安全策略 <span class="st" style="color:#6b7280">待讨论</span></div>
+      <h2>3. 技术规格</h2>
+      <div class="spec">
+        • 验证码: 6位数字，有效期5分钟，重发间隔60秒<br>
+        • Token: JWT，Access Token 7天，Refresh Token 刷新<br>
+        • 微信: 同时支持 PC 扫码 + 公众号 H5 授权
+      </div>
+      <h2>4. 界面设计</h2>
+      <p style="color:#555;">见左侧画布中登录页线稿 →</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 悬浮聊天 ── -->
+<div class="float-chat" id="floatChat" style="right:20px;bottom:20px;">
+  <div class="fc-head" id="fcHead">
+    <div class="fc-avatar">🤖</div>
+    <span class="fc-name">AI 需求助手</span>
+    <span class="fc-online">在线</span>
+    <div class="fc-ctrl">
+      <button title="最小化">—</button>
+      <button title="最大化">□</button>
+      <button title="关闭">×</button>
+    </div>
+  </div>
+
+  <div class="fc-msgs">
+    <div class="m m-u"><div class="bubble">我想做一个用户登录系统，支持微信扫码和手机验证码</div><span class="m-time">14:32</span></div>
+
+    <div class="m m-a">
+      <div class="bubble">好的，这是一个完整的认证系统。我已创建任务并生成了初步需求 👉 <span class="ref">📋 用户登录系统</span></div>
+    </div>
+
+    <!-- 选项卡片 -->
+    <div class="m m-a">
+      <div class="card">
+        <div class="card-head">📱 微信登录方式</div>
+        <div class="card-body">
+          <div class="card-desc">微信登录需要支持哪些场景？</div>
+          <div class="choices">
+            <div class="ch on" onclick="this.classList.toggle('on')"><div class="ch-radio"></div><div><div class="ch-label">PC 扫码登录</div><div class="ch-sub">用户打开微信扫描二维码</div></div></div>
+            <div class="ch on" onclick="this.classList.toggle('on')"><div class="ch-radio"></div><div><div class="ch-label">公众号授权</div><div class="ch-sub">微信内 H5 页面一键授权</div></div></div>
+            <div class="ch" onclick="this.classList.toggle('on')"><div class="ch-radio"></div><div><div class="ch-label">小程序登录</div><div class="ch-sub">从微信小程序获取用户信息</div></div></div>
+          </div>
+        </div>
+        <div class="card-footer"><button class="card-btn cancel">跳过</button><button class="card-btn ok">确认选择</button></div>
+      </div>
+    </div>
+
+    <!-- 快捷标签 -->
+    <div class="m m-a">
+      <div class="bubble">
+        验证码参数：
+        <div class="tags">
+          <span class="tag on" onclick="this.classList.toggle('on')">5分钟有效</span>
+          <span class="tag" onclick="this.classList.toggle('on')">10分钟有效</span>
+          <span class="tag on" onclick="this.classList.toggle('on')">60秒重发</span>
+          <span class="tag" onclick="this.classList.toggle('on')">30秒重发</span>
+          <span class="tag primary">自定义...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 线稿预览卡片 -->
+    <div class="m m-a">
+      <div class="wireframe-preview">
+        <div class="wp-top">
+          <div class="wp-dots"><span style="background:#ef4444"></span><span style="background:#f59e0b"></span><span style="background:#10b981"></span></div>
+          <span class="wp-title">登录页线稿</span>
+        </div>
+        <div class="wp-body">
+          <div class="wp-col" style="align-items:center;">
+            <div class="wp-label">微信扫码</div>
+            <div class="wp-qr">⊞</div>
+            <div class="wp-label">扫一扫登录</div>
+          </div>
+          <div style="width:1px;background:#2a2a3a;"></div>
+          <div class="wp-col">
+            <div class="wp-label">手机号登录</div>
+            <div class="wp-inp"><span>手机号</span></div>
+            <div style="display:flex;gap:4px;">
+              <div class="wp-inp" style="flex:1"><span>验证码</span></div>
+              <div class="wp-btn" style="width:36px"><span style="font-size:7px">59s</span></div>
+            </div>
+            <div class="wp-btn"><span>登 录</span></div>
+          </div>
+        </div>
+        <div class="wp-footer">
+          <span class="wp-action">🔍 查看大图</span>
+          <span class="wp-action">✏️ 编辑线稿</span>
+          <span class="wp-action">📌 固定到画布</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 进度卡片 -->
+    <div class="m m-a">
+      <div class="card">
+        <div class="card-head">📊 需求完成度</div>
+        <div class="card-body">
+          <div class="prog-row"><span class="prog-label" style="color:#10b981">已确认</span><div class="prog-bar"><div class="prog-fill" style="width:60%;background:#10b981"></div></div><span style="font-size:10px;color:#666;">3/5</span></div>
+          <div class="prog-row"><span class="prog-label" style="color:#f59e0b">讨论中</span><div class="prog-bar"><div class="prog-fill" style="width:20%;background:#f59e0b"></div></div><span style="font-size:10px;color:#666;">1/5</span></div>
+          <div class="prog-row"><span class="prog-label" style="color:#6b7280">待讨论</span><div class="prog-bar"><div class="prog-fill" style="width:20%;background:#6b7280"></div></div><span style="font-size:10px;color:#666;">1/5</span></div>
+        </div>
+        <div class="card-footer"><button class="card-btn ok" style="background:#10b981">✓ 全部确认，生成最终 PRD</button></div>
+      </div>
+    </div>
+
+    <!-- 下一步建议 -->
+    <div class="m m-a">
+      <div class="bubble">
+        接下来：
+        <div class="tags">
+          <span class="tag primary">🛡️ 讨论安全策略</span>
+          <span class="tag primary">👤 注册流程</span>
+          <span class="tag">📄 导出 PRD</span>
+          <span class="tag">🚀 开始开发</span>
+        </div>
+      </div>
+      <span class="m-time">14:35</span>
+    </div>
+  </div>
+
+  <div class="fc-input-area">
+    <textarea class="fc-input" placeholder="描述需求，或点击按钮快速操作..." rows="1"></textarea>
+    <button class="fc-send">发送</button>
+  </div>
+  <div class="fc-resize"></div>
+</div>
+
+<script>
+// ── pixi.js 画布 ──────────────────────────
+(async () => {
+const container = document.getElementById('canvas-container');
+const app = new PIXI.Application();
+await app.init({
+  resizeTo: container,
+  background: 0x0b0b12,
+  antialias: true,
+  resolution: window.devicePixelRatio || 1,
+  autoDensity: true,
+});
+container.insertBefore(app.canvas, container.firstChild);
+
+const world = new PIXI.Container();
+app.stage.addChild(world);
+let zoom = 1, panX = 60, panY = 30;
+
+function updateWorld() {
+  world.scale.set(zoom);
+  world.position.set(panX, panY);
+  document.getElementById('hud-zoom').textContent = Math.round(zoom * 100) + '%';
+}
+
+// ── 绘制模块卡片 ──
+function drawCard(x, y, w, h, title, icon, status, features, color) {
+  const c = new PIXI.Container();
+  c.position.set(x, y);
+  c.eventMode = 'static';
+  c.cursor = 'grab';
+
+  // 阴影
+  const shadow = new PIXI.Graphics();
+  shadow.roundRect(3, 3, w, h, 10);
+  shadow.fill({ color: 0x000000, alpha: 0.25 });
+  c.addChild(shadow);
+
+  // 背景
+  const bg = new PIXI.Graphics();
+  bg.roundRect(0, 0, w, h, 10);
+  bg.fill({ color: 0x161622, alpha: 0.95 });
+  bg.roundRect(0, 0, w, h, 10);
+  bg.stroke({ width: 1, color: color, alpha: 0.3 });
+  // 左色条
+  bg.roundRect(0, 4, 4, h - 8, 2);
+  bg.fill({ color: color });
+  c.addChild(bg);
+
+  // 头部背景
+  const headBg = new PIXI.Graphics();
+  headBg.roundRect(1, 1, w - 2, 28, 9);
+  headBg.fill({ color: 0x1a1a2a, alpha: 0.6 });
+  c.addChild(headBg);
+
+  // 标题
+  const titleText = new PIXI.Text({ text: `${icon} ${title}`, style: { fontSize: 12, fill: 0xeeeeee, fontFamily: 'system-ui', fontWeight: '600' } });
+  titleText.position.set(12, 6);
+  c.addChild(titleText);
+
+  // 状态
+  const statusColors = { '已确认': 0x10b981, '讨论中': 0xf59e0b, '待讨论': 0x6b7280 };
+  const stColor = statusColors[status] || 0x6b7280;
+  const stBg = new PIXI.Graphics();
+  stBg.roundRect(w - 50, 6, 42, 16, 8);
+  stBg.fill({ color: stColor, alpha: 0.15 });
+  c.addChild(stBg);
+  const stText = new PIXI.Text({ text: status, style: { fontSize: 9, fill: stColor, fontFamily: 'system-ui' } });
+  stText.position.set(w - 46, 8);
+  c.addChild(stText);
+
+  // 功能列表
+  features.forEach((f, i) => {
+    const fy = 34 + i * 18;
+    const check = f.done ? '✓' : '○';
+    const checkColor = f.done ? 0x10b981 : 0x555555;
+    const ct = new PIXI.Text({ text: check, style: { fontSize: 11, fill: checkColor, fontFamily: 'system-ui' } });
+    ct.position.set(14, fy);
+    c.addChild(ct);
+    const ft = new PIXI.Text({ text: f.text, style: { fontSize: 11, fill: 0xaaaaaa, fontFamily: 'system-ui' } });
+    ft.position.set(28, fy);
+    c.addChild(ft);
+  });
+
+  // 拖拽
+  let dragging = false, doff = { x: 0, y: 0 };
+  c.on('pointerdown', (e) => { dragging = true; const wp = world.toLocal(e.global); doff.x = wp.x - c.x; doff.y = wp.y - c.y; c.cursor = 'grabbing'; e.stopPropagation(); });
+  c.on('globalpointermove', (e) => { if (!dragging) return; const wp = world.toLocal(e.global); c.position.set(wp.x - doff.x, wp.y - doff.y); drawLines(); });
+  c.on('pointerup', () => { dragging = false; c.cursor = 'grab'; });
+  c.on('pointerupoutside', () => { dragging = false; c.cursor = 'grab'; });
+
+  world.addChild(c);
+  return c;
+}
+
+// ── 绘制线稿 ──
+function drawWireframe(x, y) {
+  const c = new PIXI.Container();
+  c.position.set(x, y);
+  c.eventMode = 'static';
+  c.cursor = 'grab';
+
+  const w = 200, h = 210;
+  // 背景
+  const bg = new PIXI.Graphics();
+  bg.roundRect(0, 0, w, h, 8);
+  bg.fill({ color: 0x1a1a28 });
+  bg.roundRect(0, 0, w, h, 8);
+  bg.stroke({ width: 1, color: 0x3a3a5a, alpha: 0.6 });
+  c.addChild(bg);
+
+  // 标题栏
+  const topBg = new PIXI.Graphics();
+  topBg.roundRect(1, 1, w - 2, 20, 7);
+  topBg.fill({ color: 0x22223a });
+  c.addChild(topBg);
+  // 窗口按钮
+  [0xef4444, 0xf59e0b, 0x10b981].forEach((col, i) => {
+    const d = new PIXI.Graphics(); d.circle(12 + i * 12, 11, 3); d.fill({ color: col }); c.addChild(d);
+  });
+  const wtitle = new PIXI.Text({ text: '登录页', style: { fontSize: 9, fill: 0x666666, fontFamily: 'system-ui' } });
+  wtitle.position.set(55, 5);
+  c.addChild(wtitle);
+
+  // 左半 - 微信扫码
+  const qrLabel = new PIXI.Text({ text: '微信扫码', style: { fontSize: 8, fill: 0x555555, fontFamily: 'system-ui' } });
+  qrLabel.position.set(24, 30);
+  c.addChild(qrLabel);
+  const qr = new PIXI.Graphics();
+  qr.roundRect(16, 44, 55, 55, 4);
+  qr.fill({ color: 0x222233 });
+  c.addChild(qr);
+  const qrIcon = new PIXI.Text({ text: '⊞', style: { fontSize: 24, fill: 0x333344, fontFamily: 'system-ui' } });
+  qrIcon.position.set(30, 52);
+  c.addChild(qrIcon);
+  const scanLabel = new PIXI.Text({ text: '扫一扫登录', style: { fontSize: 7, fill: 0x444444, fontFamily: 'system-ui' } });
+  scanLabel.position.set(22, 104);
+  c.addChild(scanLabel);
+
+  // 分隔线
+  const divLine = new PIXI.Graphics();
+  divLine.moveTo(92, 30); divLine.lineTo(92, 190);
+  divLine.stroke({ width: 1, color: 0x2a2a40 });
+  c.addChild(divLine);
+
+  // 右半 - 手机登录
+  const phoneLabel = new PIXI.Text({ text: '手机号登录', style: { fontSize: 8, fill: 0x555555, fontFamily: 'system-ui' } });
+  phoneLabel.position.set(104, 30);
+  c.addChild(phoneLabel);
+
+  // 输入框们
+  const drawInput = (ix, iy, iw, text) => {
+    const g = new PIXI.Graphics();
+    g.roundRect(ix, iy, iw, 20, 4);
+    g.fill({ color: 0x13131d });
+    g.stroke({ width: 1, color: 0x2a2a3a });
+    c.addChild(g);
+    const t = new PIXI.Text({ text, style: { fontSize: 8, fill: 0x444444, fontFamily: 'system-ui' } });
+    t.position.set(ix + 6, iy + 5);
+    c.addChild(t);
+  };
+  drawInput(100, 44, 88, '手机号');
+  drawInput(100, 70, 52, '验证码');
+
+  // 倒计时按钮
+  const timerBg = new PIXI.Graphics();
+  timerBg.roundRect(156, 70, 32, 20, 4);
+  timerBg.fill({ color: 0x007acc, alpha: 0.25 });
+  c.addChild(timerBg);
+  const timerText = new PIXI.Text({ text: '59s', style: { fontSize: 8, fill: 0x60a5fa, fontFamily: 'system-ui' } });
+  timerText.position.set(163, 75);
+  c.addChild(timerText);
+
+  // 登录按钮
+  const loginBg = new PIXI.Graphics();
+  loginBg.roundRect(100, 96, 88, 22, 4);
+  loginBg.fill({ color: 0x007acc, alpha: 0.3 });
+  c.addChild(loginBg);
+  const loginText = new PIXI.Text({ text: '登 录', style: { fontSize: 9, fill: 0x60a5fa, fontFamily: 'system-ui' } });
+  loginText.position.set(130, 100);
+  c.addChild(loginText);
+
+  // 其他方式
+  const otherLabel = new PIXI.Text({ text: '—— 其他方式 ——', style: { fontSize: 7, fill: 0x444444, fontFamily: 'system-ui' } });
+  otherLabel.position.set(110, 126);
+  c.addChild(otherLabel);
+  [0x10b981, 0x3b82f6, 0xef4444].forEach((col, i) => {
+    const g = new PIXI.Graphics(); g.circle(120 + i * 20, 148, 8); g.fill({ color: col, alpha: 0.2 }); c.addChild(g);
+  });
+
+  // 标注
+  const noteLabel = new PIXI.Text({ text: '🖼️ AI 生成线稿', style: { fontSize: 8, fill: 0x555555, fontFamily: 'system-ui' } });
+  noteLabel.position.set(105, 195);
+  c.addChild(noteLabel);
+
+  // 拖拽
+  let dragging = false, doff = { x: 0, y: 0 };
+  c.on('pointerdown', (e) => { dragging = true; const wp = world.toLocal(e.global); doff.x = wp.x - c.x; doff.y = wp.y - c.y; e.stopPropagation(); });
+  c.on('globalpointermove', (e) => { if (!dragging) return; const wp = world.toLocal(e.global); c.position.set(wp.x - doff.x, wp.y - doff.y); drawLines(); });
+  c.on('pointerup', () => { dragging = false; });
+  c.on('pointerupoutside', () => { dragging = false; });
+
+  world.addChild(c);
+  return c;
+}
+
+// ── 创建卡片 ──
+const cards = {};
+cards.auth = drawCard(0, 20, 200, 110, '用户认证', '🔐', '讨论中', [
+  { text: '多方式登录入口', done: true }, { text: '统一认证接口', done: true },
+  { text: '自动注册', done: false }, { text: '状态管理', done: false },
+], 0xf59e0b);
+
+cards.oauth = drawCard(300, 0, 180, 92, '微信 OAuth', '📱', '已确认', [
+  { text: 'PC 扫码登录', done: true }, { text: '公众号授权', done: true },
+  { text: '回调处理', done: true },
+], 0x10b981);
+
+cards.sms = drawCard(300, 110, 180, 92, '短信验证', '💬', '已确认', [
+  { text: '验证码发送', done: true }, { text: '5min 有效', done: true },
+  { text: '60s 重发', done: true },
+], 0x10b981);
+
+cards.token = drawCard(300, 220, 180, 74, 'Token 管理', '🔑', '已确认', [
+  { text: 'JWT · 7天过期', done: true }, { text: 'Refresh Token', done: true },
+], 0x10b981);
+
+cards.security = drawCard(0, 180, 200, 92, '安全策略', '🛡️', '待讨论', [
+  { text: '失败次数限制', done: false }, { text: 'IP 封禁', done: false },
+  { text: '异常检测', done: false },
+], 0x6b7280);
+
+const wireframe = drawWireframe(540, 10);
+
+// ── 分组区域 ──
+const groupGfx = new PIXI.Graphics();
+groupGfx.roundRect(-15, -10, 510, 315, 14);
+groupGfx.fill({ color: 0xffffff, alpha: 0.015 });
+groupGfx.stroke({ width: 1, color: 0xffffff, alpha: 0.03 });
+world.addChildAt(groupGfx, 0);
+
+const groupLabel = new PIXI.Text({ text: '核心认证', style: { fontSize: 10, fill: 0x333333, fontFamily: 'system-ui', fontWeight: '600' } });
+groupLabel.position.set(-8, -6);
+world.addChildAt(groupLabel, 1);
+
+const wfGroup = new PIXI.Graphics();
+wfGroup.roundRect(525, -10, 230, 245, 14);
+wfGroup.fill({ color: 0xa855f7, alpha: 0.01 });
+wfGroup.stroke({ width: 1, color: 0xa855f7, alpha: 0.06 });
+world.addChildAt(wfGroup, 0);
+
+const wfLabel = new PIXI.Text({ text: '界面线稿', style: { fontSize: 10, fill: 0xa855f744, fontFamily: 'system-ui', fontWeight: '600' } });
+wfLabel.position.set(532, -6);
+world.addChildAt(wfLabel, 1);
+
+// ── 连线 ──
+const lineGfx = new PIXI.Graphics();
+world.addChildAt(lineGfx, 2);
+
+function drawLines() {
+  lineGfx.clear();
+  const pairs = [
+    [cards.auth, cards.oauth, 0x007acc],
+    [cards.auth, cards.sms, 0x007acc],
+    [cards.auth, cards.token, 0x007acc],
+    [cards.auth, cards.security, 0xef4444],
+  ];
+  pairs.forEach(([from, to, color]) => {
+    const sx = from.x + 200, sy = from.y + 50;
+    const ex = to.x, ey = to.y + 40;
+    const mx = (sx + ex) / 2;
+    lineGfx.moveTo(sx, sy);
+    lineGfx.bezierCurveTo(mx, sy, mx, ey, ex, ey);
+    lineGfx.stroke({ width: 1.5, color: color, alpha: 0.35 });
+  });
+  // 到线稿的虚线(用短线段模拟)
+  [[cards.oauth, wireframe, 50], [cards.sms, wireframe, 120]].forEach(([from, to, ty]) => {
+    const sx = from.x + 180, sy = from.y + 40;
+    const ex = to.x, ey = to.y + ty;
+    for (let t = 0; t < 1; t += 0.06) {
+      const t2 = t + 0.03;
+      const x1 = sx + (ex - sx) * t, y1 = sy + (ey - sy) * t;
+      const x2 = sx + (ex - sx) * t2, y2 = sy + (ey - sy) * t2;
+      lineGfx.moveTo(x1, y1);
+      lineGfx.lineTo(x2, y2);
+      lineGfx.stroke({ width: 1, color: 0xa855f7, alpha: 0.2 });
+    }
+  });
+}
+drawLines();
+
+// 标注
+const note1 = new PIXI.Text({ text: '💡 倒计时 59s\n   发送后禁用', style: { fontSize: 9, fill: 0xf59e0b, fontFamily: 'system-ui' } });
+note1.position.set(545, 230);
+world.addChild(note1);
+
+const note2 = new PIXI.Text({ text: '💡 AI 建议:\n   先讨论安全策略', style: { fontSize: 9, fill: 0x60a5fa, fontFamily: 'system-ui' } });
+note2.position.set(220, 240);
+world.addChild(note2);
+
+updateWorld();
+
+// ── 平移缩放 ──
+let isPan = false, lastP = { x: 0, y: 0 };
+app.canvas.addEventListener('pointerdown', (e) => { isPan = true; lastP = { x: e.clientX, y: e.clientY }; });
+window.addEventListener('pointermove', (e) => { if (!isPan) return; panX += e.clientX - lastP.x; panY += e.clientY - lastP.y; lastP = { x: e.clientX, y: e.clientY }; updateWorld(); });
+window.addEventListener('pointerup', () => { isPan = false; });
+
+app.canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const f = e.deltaY > 0 ? 0.93 : 1.07;
+  const old = zoom;
+  zoom = Math.max(0.2, Math.min(3, zoom * f));
+  const rect = app.canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  panX = mx - (mx - panX) * (zoom / old);
+  panY = my - (my - panY) * (zoom / old);
+  updateWorld();
+}, { passive: false });
+
+// FPS
+let fc = 0, lt = performance.now();
+app.ticker.add(() => {
+  fc++;
+  const now = performance.now();
+  if (now - lt > 500) { document.getElementById('hud-fps').textContent = Math.round(fc / ((now - lt) / 1000)); fc = 0; lt = now; }
+});
+})();
+
+// ── 悬浮窗拖拽 ──
+const chat = document.getElementById('floatChat');
+const fcHead = document.getElementById('fcHead');
+let chatDrag = false, cStart = {};
+fcHead.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.fc-ctrl')) return;
+  chatDrag = true;
+  const r = chat.getBoundingClientRect();
+  cStart = { x: e.clientX, y: e.clientY, l: r.left, t: r.top };
+  chat.style.right = 'auto'; chat.style.bottom = 'auto';
+  chat.style.left = r.left + 'px'; chat.style.top = r.top + 'px';
+  e.preventDefault();
+});
+document.addEventListener('mousemove', (e) => {
+  if (!chatDrag) return;
+  chat.style.left = Math.max(0, cStart.l + e.clientX - cStart.x) + 'px';
+  chat.style.top = Math.max(0, cStart.t + e.clientY - cStart.y) + 'px';
+});
+document.addEventListener('mouseup', () => { chatDrag = false; });
+
+// ── 悬浮窗 resize ──
+const fcResize = chat.querySelector('.fc-resize');
+let chatResize = false, rStart = {};
+fcResize.addEventListener('mousedown', (e) => {
+  chatResize = true;
+  rStart = { x: e.clientX, y: e.clientY, w: chat.offsetWidth, h: chat.offsetHeight };
+  e.preventDefault(); e.stopPropagation();
+});
+document.addEventListener('mousemove', (e) => {
+  if (!chatResize) return;
+  chat.style.width = Math.max(320, rStart.w + e.clientX - rStart.x) + 'px';
+  chat.style.height = Math.max(300, rStart.h + e.clientY - rStart.y) + 'px';
+});
+document.addEventListener('mouseup', () => { chatResize = false; });
+
+// ── 拆分条 ──
+const divider = document.getElementById('divider');
+const mainEl = document.querySelector('.main');
+const leftPane = document.getElementById('leftPane');
+const rightPane = document.getElementById('rightPane');
+let splitDrag = false;
+divider.addEventListener('mousedown', (e) => { splitDrag = true; divider.classList.add('active'); e.preventDefault(); });
+document.addEventListener('mousemove', (e) => {
+  if (!splitDrag) return;
+  const r = mainEl.getBoundingClientRect();
+  const ratio = Math.max(0.25, Math.min(0.8, (e.clientX - r.left) / r.width));
+  leftPane.style.flex = ratio;
+  rightPane.style.flex = 1 - ratio;
+  window.dispatchEvent(new Event('resize')); // 让 pixi 重新适应
+});
+document.addEventListener('mouseup', () => { splitDrag = false; divider.classList.remove('active'); });
+</script>
+</body>
+</html>
