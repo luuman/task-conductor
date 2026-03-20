@@ -579,5 +579,20 @@
     "monitor": "Monitor",
     "done": "Done",
     "approval_tag": "Approval"
+  },
+  "statuses": {
+    "pending": "Pending",
+    "running": "Running",
+    "waiting_review": "Review",
+    "approved": "Approved",
+    "done": "Done",
+    "failed": "Failed",
+    "rejected": "Rejected"
+  },
+  "time": {
+    "just_now": "Just now",
+    "mins_ago": "{{n}}m ago",
+    "hours_ago": "{{n}}h ago",
+    "days_ago": "{{n}}d ago"
   }
 }
