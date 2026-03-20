@@ -551,5 +551,20 @@
     "field_desc": "描述",
     "title_placeholder": "输入任务标题",
     "desc_placeholder": "可选的任务描述"
+  },
+  "task_detail": {
+    "not_found": "任务不存在",
+    "pipeline": "流水线进度",
+    "stage": "当前阶段",
+    "created": "创建时间",
+    "started": "开始时间",
+    "finished": "完成时间",
+    "branch": "分支",
+    "worktree": "Worktree",
+    "artifacts": "阶段产物",
+    "no_artifacts": "暂无阶段产物",
+    "assumptions": "假设",
+    "critic_notes": "Critic 评审",
+    "error_log": "错误日志"
   }
 }
