@@ -70,6 +70,8 @@ class Task(Base):
     stages: Mapped[Optional[str]] = mapped_column(Text, nullable=True)            # JSON list[str]，per-task 阶段
     prd_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)       # 结构化 PRD JSON
     interview_status: Mapped[str] = mapped_column(String(20), default="none")     # none|active|completed
+    claude_session_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)  # 关联的 Claude 会话
+    canvas_data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)               # Canvas JSON 数据
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     project: Mapped["Project"] = relationship(back_populates="tasks")
