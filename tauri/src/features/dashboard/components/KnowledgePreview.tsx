@@ -7,17 +7,18 @@ interface Props {
 }
 
 export function KnowledgePreview({ items }: Props) {
+  const { t } = useTranslation()
   const recent = items.slice(0, 5)
 
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <span className={styles.title}>知识库</span>
+        <span className={styles.title}>{t('dashboard.knowledge_base')}</span>
         <span className={styles.count}>{items.length}</span>
       </div>
       <div className={styles.body}>
         {recent.length === 0 ? (
-          <p className={styles.empty}>暂无知识条目</p>
+          <p className={styles.empty}>{t('dashboard.no_knowledge_items')}</p>
         ) : (
           recent.map((k) => (
             <div key={k.id} className={styles.item}>
