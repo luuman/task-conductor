@@ -101,26 +101,19 @@ function ProcessCard({
   const [confirming, setConfirming] = useState(false)
 
   return (
-    <div className={s.procCard} style={{ borderLeftColor: color }}>
+    <div className={s.procCard} style={{ borderLeftColor: color }} title={`PID ${proc.pid} · ${proc.name}\nCPU: ${proc.cpu_pct}% · MEM: ${proc.mem_mb} MB`}>
       <div className={s.procCardHeader}>
         <span className={s.procDot} style={{ background: color }} />
         <span className={s.procCardName}>{proc.name}</span>
-        <span className={s.procCardPid}>PID {proc.pid}</span>
       </div>
       <div className={s.procCardBody}>
-        <div className={s.procMetric}>
-          <span className={s.procMetricVal}>{metric}</span>
-          <span className={s.procMetricLabel}>{metricLabel}</span>
-        </div>
-        <div className={s.procMetric}>
-          <span className={s.procMetricVal}>{subMetric}</span>
-          <span className={s.procMetricLabel}>{subLabel}</span>
-        </div>
+        <span className={s.procMetricVal}>{metric}</span>
+        <span className={s.procMetricSub}>{subMetric}</span>
       </div>
       <div className={s.procCardFooter}>
         {confirming ? (
           <>
-            <button className={s.killConfirm} onClick={() => { onKill(proc.pid); setConfirming(false) }}>确认终止</button>
+            <button className={s.killConfirm} onClick={() => { onKill(proc.pid); setConfirming(false) }}>确认</button>
             <button className={s.killCancel} onClick={() => setConfirming(false)}>取消</button>
           </>
         ) : (
