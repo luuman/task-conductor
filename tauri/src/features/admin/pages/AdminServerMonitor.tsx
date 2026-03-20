@@ -396,28 +396,45 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
           })}
         </defs>
 
-        {/* 连线 */}
+        {/* 连线（贝塞尔曲线，避免穿越中心） */}
         {edges.map((e, i) => {
           const from = getPos(e.from), to = getPos(e.to)
           const rel = isEdgeRelated(e.from, e.to)
+          // 中点
+          const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2
+          // 中点到圆心的方向，向外偏移
+          const toCenterDx = mx - (nodes[0]?.x ?? 450)
+          const toCenterDy = my - (nodes[0]?.y ?? 400)
+          const dist = Math.hypot(toCenterDx, toCenterDy) || 1
+          const bulge = 30 // 曲线外凸程度
+          const cpx = mx + (toCenterDx / dist) * bulge
+          const cpy = my + (toCenterDy / dist) * bulge
+          const d = `M${from.x},${from.y} Q${cpx},${cpy} ${to.x},${to.y}`
           return (
-            <line key={i} x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+            <path key={i} d={d} fill="none"
               stroke={rel ? '#2a3244' : '#141820'}
               strokeWidth="1.5" strokeDasharray="5 3"
               style={{ transition: 'stroke 0.25s, opacity 0.25s', opacity: rel ? 1 : 0.1 }} />
           )
         })}
 
-        {/* 流动光点 */}
+        {/* 流动光点（沿曲线） */}
         {edges.map((e, i) => {
           const from = getPos(e.from), to = getPos(e.to)
           const toNode = nodes.find(n => n.id === e.to)
+          const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2
+          const toCenterDx = mx - (nodes[0]?.x ?? 450)
+          const toCenterDy = my - (nodes[0]?.y ?? 400)
+          const dist = Math.hypot(toCenterDx, toCenterDy) || 1
+          const bulge = 30
+          const cpx = mx + (toCenterDx / dist) * bulge
+          const cpy = my + (toCenterDy / dist) * bulge
           return (
             <circle key={`dot-${i}`} r="2" fill={toNode?.color ?? '#888'} opacity="0.6">
               <animateMotion
                 dur={`${1.3 + (i % 5) * 0.3}s`}
                 repeatCount="indefinite"
-                path={`M${from.x},${from.y} L${to.x},${to.y}`}
+                path={`M${from.x},${from.y} Q${cpx},${cpy} ${to.x},${to.y}`}
               />
             </circle>
           )
