@@ -21,14 +21,14 @@ export function TaskFilters({ stage, status, search, onStageChange, onStatusChan
       <select className={styles.select} value={stage} onChange={(e) => onStageChange(e.target.value)}>
         {STAGES.map((s) => (
           <option key={s} value={s}>
-            {s === 'all' ? t('task_manager.filter_all_stages', '所有阶段') : s}
+            {s === 'all' ? t('task_manager.filter_all_stages', '所有阶段') : t(`stages.${s}`)}
           </option>
         ))}
       </select>
       <select className={styles.select} value={status} onChange={(e) => onStatusChange(e.target.value)}>
         {STATUSES.map((s) => (
           <option key={s} value={s}>
-            {s === 'all' ? t('task_manager.filter_all_statuses', '所有状态') : s}
+            {s === 'all' ? t('task_manager.filter_all_statuses', '所有状态') : t(`statuses.${s}`)}
           </option>
         ))}
       </select>
