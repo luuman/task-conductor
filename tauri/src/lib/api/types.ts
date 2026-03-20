@@ -520,7 +520,7 @@ export interface ApiAdapter {
 
   // ─── Interview ───
   startInterview(taskId: number): Promise<InterviewStartResponse>
-  saveInterviewMessage(taskId: number, data: { role: string; content: string; metadata?: string }): Promise<InterviewMessage>
+  saveInterviewMessage(taskId: number, data: { role: string; content: string; extra?: string }): Promise<InterviewMessage>
   getInterviewMessages(taskId: number): Promise<InterviewMessage[]>
   updatePrd(taskId: number, prd: string): Promise<Task>
   completeInterview(taskId: number, data: { prd: string; stages: string[] }): Promise<Task>
