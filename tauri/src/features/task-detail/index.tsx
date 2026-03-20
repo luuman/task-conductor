@@ -81,7 +81,7 @@ export default function TaskDetailPage() {
             className={styles.badge}
             style={{ background: `${statusColor}20`, color: statusColor }}
           >
-            {task.status}
+            {t(`statuses.${task.status}`)}
           </span>
         </div>
       </div>
