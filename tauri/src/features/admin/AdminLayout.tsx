@@ -98,7 +98,7 @@ export default function AdminLayout() {
           logoIcon={<IconLogo size={22} />}
           logo="TaskConductor"
           breadcrumb={[{ label: t('admin.title') }]}
-          userName="User"
+          userName={t('admin_extra.user')}
           onSearchClick={() => navigate('/admin/sessions')}
           onSettingsClick={() => navigate('/admin/settings')}
           unreadCount={unreadCount}
