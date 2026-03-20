@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MindMapCanvas } from '../../../components/mindmap/MindMapCanvas'
 import { tasksToNodes, resetIdCounter } from '../../../components/mindmap/mindmap-utils'
 import type { MindMapNodeData } from '../../../components/mindmap/mindmap-types'
@@ -12,7 +13,7 @@ export default function AdminMindMap() {
     try {
       resetIdCounter()
       const projects = await api.getProjects()
-      const tasksByProject = new Map<number, Array<{ id: number; title: string; current_stage?: string }>>()
+      const tasksByProject = new Map<number, Array<{ id: number; title: string; stage?: string }>>()
 
       await Promise.all(
         projects.map(async (p) => {
