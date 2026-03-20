@@ -39,8 +39,8 @@
 
 /* ── Dual column layout (CPU | Memory) ── */
 .dualCol {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 16px;
 }
