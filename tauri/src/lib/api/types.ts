@@ -447,6 +447,7 @@ export interface ApiAdapter {
   getClaudeUsage(): Promise<ClaudeUsage>
   getSystemMetrics(): Promise<SystemMetrics>
   getProcesses(): Promise<ProcessList>
+  killProcess(pid: number): Promise<{ ok: boolean; pid: number; name: string }>
   getClaudeOverview(): Promise<ClaudeOverview>
   getClaudeConfig(): Promise<ClaudeConfig>
   updateClaudeConfigKey(key: string, value: unknown): Promise<{ ok: boolean }>
