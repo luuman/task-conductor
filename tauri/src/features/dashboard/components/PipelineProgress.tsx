@@ -11,11 +11,12 @@ interface Props {
 }
 
 export function PipelineProgress({ tasks, loading }: Props) {
+  const { t } = useTranslation()
   if (loading) {
     return (
       <div className={styles.section}>
         <div className={styles.header}>
-          <span className={styles.title}>流水线进度</span>
+          <span className={styles.title}>{t('dashboard.pipeline_progress')}</span>
         </div>
         <div className={styles.body}>
           {Array.from({ length: 3 }).map((_, i) => (
