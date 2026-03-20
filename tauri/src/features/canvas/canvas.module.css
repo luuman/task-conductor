@@ -1,0 +1,44 @@
+.page { display: flex; flex-direction: column; height: 100%; background: var(--tc-bg-primary, #0f0f17); }
+
+/* Tab bar */
+.tabBar { height: 36px; background: var(--tc-bg-secondary, #13131d); border-bottom: 1px solid var(--tc-border, #1e1e2e); display: flex; align-items: center; padding: 0 8px; gap: 2px; flex-shrink: 0; }
+.tab { padding: 5px 12px; font-size: 12px; color: var(--tc-text-secondary, #666); cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px; transition: all .1s; }
+.tab:hover { color: var(--tc-text-primary, #aaa); }
+.tabActive { background: var(--tc-bg-primary, #0f0f17); color: #fff; }
+.tabDot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.tabTitle { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabClose { background: none; border: none; color: var(--tc-text-secondary); cursor: pointer; font-size: 10px; opacity: 0; padding: 0 2px; }
+.tab:hover .tabClose { opacity: 0.6; }
+.tabBarRight { margin-left: auto; display: flex; gap: 4px; }
+.tabBarBtn { background: none; border: 1px solid var(--tc-border, #2a2a3a); color: var(--tc-text-secondary); border-radius: 4px; padding: 3px 10px; font-size: 11px; cursor: pointer; }
+.tabBarBtn:hover { background: var(--tc-bg-hover, #1e1e2e); color: var(--tc-text-primary); }
+
+/* Split */
+.splitContainer { flex: 1; display: flex; overflow: hidden; }
+.splitPane { display: flex; flex-direction: column; min-width: 240px; overflow: hidden; }
+.splitDivider { width: 4px; background: var(--tc-border, #1a1a25); cursor: col-resize; flex-shrink: 0; transition: background .15s; }
+.splitDivider:hover { background: var(--tc-accent, #007acc); }
+
+/* Pane header */
+.paneHeader { height: 30px; background: var(--tc-bg-secondary, #111119); border-bottom: 1px solid var(--tc-border); display: flex; align-items: center; padding: 0 12px; gap: 8px; flex-shrink: 0; }
+.paneLabel { font-size: 11px; color: var(--tc-text-secondary, #555); font-weight: 600; }
+.paneBadge { font-size: 9px; padding: 1px 6px; border-radius: 6px; background: var(--tc-accent, #007acc); color: var(--tc-text-primary); opacity: 0.6; }
+
+/* Canvas container */
+.canvasContainer { flex: 1; position: relative; background: #0b0b12; overflow: hidden; }
+.canvasHud { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
+.canvasChip { background: var(--tc-bg-secondary, #1a1a28); border: 1px solid var(--tc-border); border-radius: 6px; padding: 4px 10px; font-size: 10px; color: var(--tc-text-secondary); }
+.canvasChip b { color: var(--tc-text-primary, #aaa); }
+.canvasTools { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 5; }
+.canvasToolBtn { background: var(--tc-bg-secondary); border: 1px solid var(--tc-border); border-radius: 5px; padding: 4px 10px; font-size: 10px; color: var(--tc-text-secondary); cursor: pointer; }
+.canvasToolBtn:hover { background: var(--tc-bg-hover); color: var(--tc-text-primary); }
+
+/* PRD doc */
+.prdDoc { flex: 1; overflow-y: auto; padding: 20px 24px; background: var(--tc-bg-primary); }
+.prdDoc h1 { font-size: 17px; color: var(--tc-text-primary, #eee); margin-bottom: 4px; }
+.prdDoc h2 { font-size: 13px; color: var(--tc-accent, #60a5fa); margin: 16px 0 6px; }
+.prdDoc p { font-size: 12px; color: var(--tc-text-secondary, #888); line-height: 1.7; }
+.prdEditor { width: 100%; height: 100%; background: transparent; color: var(--tc-text-primary, #ccc); border: none; outline: none; resize: none; font-family: 'Geist Mono', monospace; font-size: 13px; line-height: 1.7; padding: 0; }
+
+/* Empty state */
+.empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--tc-text-secondary); font-size: 13px; }
