@@ -41,9 +41,16 @@ export interface Task {
   project_id: number
   title: string
   description: string | null
-  current_stage: string
+  stage: string
   status: string
+  depends_on: string | null
+  worktree_path: string | null
+  branch_name: string | null
+  queued_at: string | null
+  started_at: string | null
+  finished_at: string | null
   created_at: string
+  updated_at: string
   provider?: string
 }
 
