@@ -1311,6 +1311,7 @@ function SessionGroup({
   onSelect: (s: AiSession) => void
   defaultOpen: boolean
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(defaultOpen)
 
   return (
