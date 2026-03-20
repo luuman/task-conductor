@@ -219,72 +219,58 @@ export default function AdminServerMonitor() {
           )}
         </div>
 
-        {/* ══════ CPU + 内存 双栏 ══════ */}
+        {/* ══════ CPU 组合卡片：左信息 + 右进程 ══════ */}
         <div className={s.dualCol}>
-          {/* ── 左: CPU ── */}
-          <div className={s.dualColItem}>
-            {/* CPU 详情 */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionTitle}>CPU</div>
-                {sys?.cpu.load_avg && <div className={styles.sectionHint}>Load: {sys.cpu.load_avg['1m']} / {sys.cpu.load_avg['5m']} / {sys.cpu.load_avg['15m']}</div>}
+          <div className={s.comboCard}>
+            <div className={s.comboCardHeader}>
+              <div className={styles.sectionTitle}>CPU</div>
+              <div className={styles.sectionHint}>
+                {sys?.cpu.load_avg ? `Load: ${sys.cpu.load_avg['1m']} / ${sys.cpu.load_avg['5m']} / ${sys.cpu.load_avg['15m']}` : ''}
+                {procs ? ` · ${procs.by_cpu.filter(p => p.cpu_pct > 0).length} 活跃进程` : ''}
               </div>
-              <div className={styles.sectionBody}>
+            </div>
+            <div className={s.comboCardBody}>
+              <div className={s.comboLeft}>
                 <Sparkline data={cpuHistory} color={cpuColor} height={48} />
                 {sys && (
                   <>
                     <div className={s.coreGrid}>
                       {sys.cpu.per_core.map((v, i) => (
-                        <Bar key={i} value={v} color={v > 80 ? 'var(--tc-error)' : 'var(--tc-success)'} label={`Core ${i}`} />
+                        <Bar key={i} value={v} color={v > 80 ? 'var(--tc-error)' : 'var(--tc-success)'} label={`C${i}`} />
                       ))}
                     </div>
                     {sys.cpu.user_pct != null && (
                       <div className={s.statRow}>
                         <span className={s.statItem}>User: {sys.cpu.user_pct}%</span>
                         <span className={s.statItem}>Sys: {sys.cpu.system_pct}%</span>
-                        <span className={s.statItem}>IO Wait: {sys.cpu.iowait_pct}%</span>
+                        <span className={s.statItem}>IO: {sys.cpu.iowait_pct}%</span>
                         {sys.cpu.ctx_switches_per_sec != null && <span className={s.statItem}>Ctx/s: {sys.cpu.ctx_switches_per_sec}</span>}
                       </div>
                     )}
                   </>
                 )}
               </div>
-            </div>
-
-            {/* CPU Top 进程 */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionTitle}>{t('admin.server.top_cpu')}</div>
-                <div className={styles.sectionHint}>{procs ? `${procs.by_cpu.length} 进程` : ''}</div>
-              </div>
-              <div className={s.procGrid}>
+              <div className={s.comboRight}>
                 {procs ? procs.by_cpu.map((p) => (
-                  <ProcessCard
-                    key={p.pid}
-                    proc={p}
-                    color={getProcessColor(p.name, colorMap)}
-                    metric={`${p.cpu_pct}%`}
-                    metricLabel="CPU"
-                    subMetric={`${p.mem_mb} MB`}
-                    subLabel="MEM"
-                    onKill={handleKill}
-                  />
-                )) : Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className={s.procCard}><Skeleton variant="text" width="100%" height={60} /></div>
+                  <ProcessCard key={p.pid} proc={p} color={getProcessColor(p.name, colorMap)}
+                    metric={`${p.cpu_pct}%`} metricLabel="CPU" subMetric={`${p.mem_mb}MB`} subLabel="MEM" onKill={handleKill} />
+                )) : Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={s.procCard}><Skeleton variant="text" width="100%" height={40} /></div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* ── 右: 内存 ── */}
-          <div className={s.dualColItem}>
-            {/* 内存详情 */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionTitle}>{t('admin.server.memory')}</div>
-                {sys && <div className={styles.sectionHint}>{sys.memory.avail_gb} GB 可用</div>}
+          {/* ══════ 内存 组合卡片 ══════ */}
+          <div className={s.comboCard}>
+            <div className={s.comboCardHeader}>
+              <div className={styles.sectionTitle}>{t('admin.server.memory')}</div>
+              <div className={styles.sectionHint}>
+                {sys ? `${sys.memory.used_gb}/${sys.memory.total_gb} GB · ${sys.memory.avail_gb} GB 可用` : ''}
               </div>
-              <div className={styles.sectionBody}>
+            </div>
+            <div className={s.comboCardBody}>
+              <div className={s.comboLeft}>
                 <Sparkline data={memHistory} color={memColor} height={48} />
                 {sys && (
                   <>
@@ -293,33 +279,17 @@ export default function AdminServerMonitor() {
                     <Bar value={(sys.memory.buffers_gb / sys.memory.total_gb) * 100} color="var(--tc-foreground-secondary)" label="Buffers" detail={`${sys.memory.buffers_gb} GB`} />
                     <div className={s.statRow}>
                       <span className={s.statItem}>Free: {sys.memory.free_gb} GB</span>
-                      <span className={s.statItem}>Available: {sys.memory.avail_gb} GB</span>
+                      <span className={s.statItem}>Avail: {sys.memory.avail_gb} GB</span>
                     </div>
                   </>
                 )}
               </div>
-            </div>
-
-            {/* 内存 Top 进程 */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionTitle}>{t('admin.server.top_mem')}</div>
-                <div className={styles.sectionHint}>{procs ? `${procs.by_mem.length} 进程` : ''}</div>
-              </div>
-              <div className={s.procGrid}>
+              <div className={s.comboRight}>
                 {procs ? procs.by_mem.map((p) => (
-                  <ProcessCard
-                    key={p.pid}
-                    proc={p}
-                    color={getProcessColor(p.name, colorMap)}
-                    metric={`${p.mem_mb} MB`}
-                    metricLabel="MEM"
-                    subMetric={`${p.cpu_pct}%`}
-                    subLabel="CPU"
-                    onKill={handleKill}
-                  />
-                )) : Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className={s.procCard}><Skeleton variant="text" width="100%" height={60} /></div>
+                  <ProcessCard key={p.pid} proc={p} color={getProcessColor(p.name, colorMap)}
+                    metric={`${p.mem_mb}MB`} metricLabel="MEM" subMetric={`${p.cpu_pct}%`} subLabel="CPU" onKill={handleKill} />
+                )) : Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={s.procCard}><Skeleton variant="text" width="100%" height={40} /></div>
                 ))}
               </div>
             </div>
