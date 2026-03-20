@@ -44,6 +44,7 @@ interface ChatStore {
   appendCurrentReply(text: string): void
   setIsGenerating(v: boolean): void
   setSystemPrompt(prompt: string): void
+  setClaudeSessionId(id: string | null): void
   setPrd(prd: string | null): void
   togglePrdSidebar(): void
   openPrdSidebar(): void
