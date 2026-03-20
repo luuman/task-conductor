@@ -467,8 +467,8 @@ export interface CanvasNodeData {
   title: string
   icon?: string
   status?: string
-  features?: string[]
-  color?: string
+  features?: { text: string; done: boolean }[]
+  color?: number
   content?: string
 }
 
