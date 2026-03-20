@@ -71,12 +71,36 @@ export function useChatStream() {
     }
 
     ws.onerror = () => {
-      useChatStore.getState().setIsGenerating(false)
-      useChatStore.getState().setCurrentReply('')
+      const s = useChatStore.getState()
+      if (s.isGenerating) {
+        s.setIsGenerating(false)
+        s.setCurrentReply('')
+        s.addMessage({
+          id: Date.now(),
+          task_id: 0,
+          role: 'assistant',
+          content: '连接失败：无法连接到后端服务，请确认后端已启动。',
+          created_at: new Date().toISOString(),
+        })
+      }
     }
 
     ws.onclose = () => {
-      useChatStore.getState().setIsGenerating(false)
+      const s = useChatStore.getState()
+      // 如果还在生成中说明异常关闭
+      if (s.isGenerating && !fullText) {
+        s.setIsGenerating(false)
+        s.setCurrentReply('')
+        s.addMessage({
+          id: Date.now(),
+          task_id: 0,
+          role: 'assistant',
+          content: '连接已断开，请重试。',
+          created_at: new Date().toISOString(),
+        })
+      } else {
+        s.setIsGenerating(false)
+      }
       wsRef.current = null
     }
   }, [])
