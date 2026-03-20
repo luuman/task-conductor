@@ -954,9 +954,9 @@ areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5
   line(outD,'#22d3ee')
 })()
 
-// ═══════ 进程总览表格 ═══════
+// ═══════ 进程总览卡片 ═══════
 ;(function() {
-  const tbody = document.getElementById('procTableBody')
+  const grid = document.getElementById('procGrid')
   const PROC_COLORS = {
     chrome: '#60a5fa', claude: '#a78bfa', node: '#34d399',
     'rust-analyzer': '#f97316', python: '#fbbf24', vite: '#22d3ee',
@@ -965,52 +965,58 @@ areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5
   const procs = [
     { name: 'chrome', pid: 12340, cpu: 99.9, mem: 125.1 },
     { name: 'claude', pid: 14821, cpu: 29.0, mem: 609.4 },
-    { name: 'chrome', pid: 12355, cpu: 3.0, mem: 180.8 },
-    { name: 'chrome', pid: 12410, cpu: 2.3, mem: 197.3 },
     { name: 'claude', pid: 14890, cpu: 5.0, mem: 484.1 },
     { name: 'claude', pid: 15102, cpu: 5.0, mem: 524.1 },
+    { name: 'chrome', pid: 12355, cpu: 3.0, mem: 180.8 },
     { name: 'node', pid: 16200, cpu: 2.7, mem: 694.9 },
+    { name: 'chrome', pid: 12410, cpu: 2.3, mem: 197.3 },
+    { name: 'claude', pid: 15340, cpu: 2.0, mem: 454.1 },
+    { name: 'code', pid: 11000, cpu: 1.2, mem: 320.5 },
+    { name: 'claude', pid: 15501, cpu: 0.7, mem: 591.9 },
     { name: 'node', pid: 16220, cpu: 0.4, mem: 684.9 },
     { name: 'node', pid: 16300, cpu: 0.4, mem: 646.8 },
-    { name: 'rust-analyzer', pid: 15800, cpu: 0.0, mem: 2597.1 },
-    { name: 'claude', pid: 15340, cpu: 2.0, mem: 454.1 },
-    { name: 'claude', pid: 15501, cpu: 0.7, mem: 591.9 },
     { name: 'node', pid: 16350, cpu: 0.3, mem: 642.8 },
+    { name: 'rust-analyzer', pid: 15800, cpu: 0.0, mem: 2597.1 },
     { name: 'node', pid: 16400, cpu: 0.0, mem: 182.3 },
-    { name: 'code', pid: 11000, cpu: 1.2, mem: 320.5 },
-  ].sort((a, b) => b.cpu - a.cpu)
+  ]
 
   procs.forEach(p => {
     const color = PROC_COLORS[p.name] || '#8891a5'
     const cpuPct = Math.min(p.cpu, 100)
-    const memPct = Math.min(p.mem / 2600 * 100, 100)
-    const cpuColor = p.cpu > 50 ? 'var(--red)' : p.cpu > 10 ? 'var(--orange)' : 'var(--blue)'
-    const memColor = p.mem > 1000 ? 'var(--orange)' : 'var(--green)'
+    const memMax = 2600
+    const memPct = Math.min(p.mem / memMax * 100, 100)
+    const cpuColor = p.cpu > 50 ? '#f87171' : p.cpu > 10 ? '#f97316' : '#60a5fa'
+    const memColor = p.mem > 1000 ? '#f97316' : '#34d399'
+    const memStr = p.mem > 1000 ? (p.mem/1024).toFixed(1)+'G' : Math.round(p.mem)+'M'
 
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
-      <td>
-        <div class="pt-name-cell">
-          <div class="pt-dot" style="background:${color}"></div>
-          <span class="pt-name">${p.name}</span>
+    const card = document.createElement('div')
+    card.className = 'pc'
+    card.innerHTML = `
+      <div class="pc-bar" style="background:${color}"></div>
+      <div class="pc-head">
+        <div class="pc-dot" style="background:${color}"></div>
+        <span class="pc-name">${p.name}</span>
+        <span class="pc-pid">${p.pid}</span>
+      </div>
+      <div class="pc-metrics">
+        <div class="pc-metric">
+          <div class="pc-metric-header">
+            <span class="pc-metric-label">CPU</span>
+            <span class="pc-metric-val" style="color:${cpuColor}">${p.cpu}%</span>
+          </div>
+          <div class="pc-track"><div class="pc-fill" style="width:${cpuPct}%;background:${cpuColor}"></div></div>
         </div>
-      </td>
-      <td><span class="pt-pid">${p.pid}</span></td>
-      <td>
-        <div class="pt-bar-cell">
-          <div class="pt-bar"><div class="pt-bar-fill" style="width:${cpuPct}%;background:${cpuColor}"></div></div>
-          <span class="pt-val" style="color:${cpuColor}">${p.cpu}%</span>
+        <div class="pc-metric">
+          <div class="pc-metric-header">
+            <span class="pc-metric-label">MEM</span>
+            <span class="pc-metric-val" style="color:${memColor}">${memStr}</span>
+          </div>
+          <div class="pc-track"><div class="pc-fill" style="width:${memPct}%;background:${memColor}"></div></div>
         </div>
-      </td>
-      <td>
-        <div class="pt-bar-cell">
-          <div class="pt-bar"><div class="pt-bar-fill" style="width:${memPct}%;background:${memColor}"></div></div>
-          <span class="pt-val">${p.mem > 1000 ? (p.mem/1024).toFixed(1)+'GB' : p.mem+'MB'}</span>
-        </div>
-      </td>
-      <td><button class="pt-kill-btn">终止</button></td>
+      </div>
+      <button class="pc-kill">终止</button>
     `
-    tbody.appendChild(tr)
+    grid.appendChild(card)
   })
 })()
 
