@@ -82,10 +82,16 @@ def save_interview_message(task_id: int, body: InterviewMessageBody, db: Session
 
 
 @router.get("/{task_id}/interview/messages", response_model=list[InterviewMessageOut], summary="获取访谈历史")
-def get_interview_messages(task_id: int, db: Session = Depends(get_db)):
-    return db.query(InterviewMessage).filter(
-        InterviewMessage.task_id == task_id
-    ).order_by(InterviewMessage.created_at).all()
+def get_interview_messages(
+    task_id: int,
+    before_id: Optional[int] = None,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+):
+    q = db.query(InterviewMessage).filter(InterviewMessage.task_id == task_id)
+    if before_id is not None:
+        q = q.filter(InterviewMessage.id < before_id)
+    return q.order_by(InterviewMessage.created_at).limit(limit).all()
 
 
 @router.put("/{task_id}/prd", response_model=TaskOut, summary="保存 PRD")
