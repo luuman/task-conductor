@@ -761,6 +761,34 @@
   </div>
 </div>
 
+<!-- ═══════ 进程总览 ═══════ -->
+<div class="section-label">进程总览</div>
+<div class="full-row">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#fbbf2422;color:var(--amber)">▤</div>
+        Top 进程
+      </div>
+      <div class="card-hint" id="procTableHint">15 进程 · 按 CPU 排序</div>
+    </div>
+    <div class="card-body">
+      <table class="proc-table">
+        <thead>
+          <tr>
+            <th style="width:30%">进程</th>
+            <th style="width:10%">PID</th>
+            <th style="width:25%" class="sorted">CPU ↓</th>
+            <th style="width:25%">内存</th>
+            <th style="width:10%"></th>
+          </tr>
+        </thead>
+        <tbody id="procTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════ Claude 进程区 ═══════ -->
 <div class="section-label">Claude 进程</div>
 
