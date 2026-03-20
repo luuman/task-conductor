@@ -39,7 +39,9 @@ class ClaudePool:
 
         # 清除 CLAUDECODE 环境变量，允许从 Claude Code 会话内启动子进程
         env = {**os.environ}
-        env.pop("CLAUDECODE", None)
+        for k in list(env):
+            if k.startswith("CLAUDE") or k == "CLAUDECODE":
+                env.pop(k, None)
 
         proc = await asyncio.create_subprocess_exec(
             *cmd,
