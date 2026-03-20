@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { isTauri } from '../lib/tauri'
 import { Layout } from './Layout'
 import { ProtectedRoute } from './ProtectedRoute'
