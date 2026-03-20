@@ -6,6 +6,7 @@ import type { MindMapNodeData } from '../../../components/mindmap/mindmap-types'
 import { api } from '../../../lib/api'
 
 export default function AdminMindMap() {
+  const { t } = useTranslation()
   const [initialNodes, setInitialNodes] = useState<MindMapNodeData[]>([])
   const [loading, setLoading] = useState(true)
 
