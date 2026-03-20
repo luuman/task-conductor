@@ -58,7 +58,13 @@ export interface StageArtifact {
   id: number
   task_id: number
   stage: string
+  artifact_type: string
   content: string
+  confidence: number | null
+  assumptions: string | null
+  critic_notes: string | null
+  retry_count: number
+  error_log: string | null
   created_at: string
 }
 
