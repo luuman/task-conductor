@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ReactFlow, type Node, type Edge, Position, Background } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { Task } from '../../../lib/api/types'
@@ -39,7 +40,7 @@ export function TaskDependencyGraph({ tasks }: Props) {
             <div style={{ fontWeight: 600, marginBottom: 2 }}>
               {task.title.length > 20 ? task.title.slice(0, 20) + '...' : task.title}
             </div>
-            <div style={{ fontSize: 9, opacity: 0.7 }}>{task.current_stage}</div>
+            <div style={{ fontSize: 9, opacity: 0.7 }}>{task.stage}</div>
           </div>
         ),
       },
