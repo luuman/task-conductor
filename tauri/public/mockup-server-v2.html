@@ -1257,16 +1257,47 @@ areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5
     nameText.textContent = n.label.length > 10 ? n.label.slice(0,9)+'…' : n.label
     g.appendChild(nameText)
 
-    // hover 放大
+    // hover: 高亮自身及关联节点，其余置灰
     g.addEventListener('mouseenter', () => {
-      g.style.transform = `scale(1.12)`
+      if (dragNode) return
+      const rels = related[n.id]
+      nodeGroups.forEach((gEl, id) => {
+        if (rels.has(id)) {
+          gEl.style.opacity = '1'
+          gEl.style.filter = 'none'
+        } else {
+          gEl.style.opacity = '0.15'
+          gEl.style.filter = 'saturate(0)'
+        }
+      })
+      g.style.transform = `scale(1.1)`
       g.style.transformOrigin = `${n.x}px ${n.y}px`
-      g.style.transition = 'transform 0.2s'
+      // 连线也置灰/高亮
+      svg.querySelectorAll('line').forEach(line => {
+        const x1 = +line.getAttribute('x1'), y1 = +line.getAttribute('y1')
+        const x2 = +line.getAttribute('x2'), y2 = +line.getAttribute('y2')
+        const matchesFrom = nodes.find(nd => Math.abs(nd.x-x1)<1 && Math.abs(nd.y-y1)<1)
+        const matchesTo = nodes.find(nd => Math.abs(nd.x-x2)<1 && Math.abs(nd.y-y2)<1)
+        const isRelated = matchesFrom && matchesTo && rels.has(matchesFrom.id) && rels.has(matchesTo.id)
+        line.style.opacity = isRelated ? '1' : '0.08'
+        line.style.stroke = isRelated ? '#3a4460' : '#1e2536'
+        line.style.transition = 'opacity 0.25s, stroke 0.25s'
+      })
     })
     g.addEventListener('mouseleave', () => {
+      if (dragNode) return
+      nodeGroups.forEach(gEl => {
+        gEl.style.opacity = '1'
+        gEl.style.filter = 'none'
+      })
       g.style.transform = 'scale(1)'
+      svg.querySelectorAll('line').forEach(line => {
+        line.style.opacity = '1'
+        line.style.stroke = '#1e2536'
+      })
     })
 
+    nodeGroups.set(n.id, g)
     svg.appendChild(g)
   }
 
