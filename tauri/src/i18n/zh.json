@@ -566,5 +566,18 @@
     "assumptions": "假设",
     "critic_notes": "Critic 评审",
     "error_log": "错误日志"
+  },
+  "stages": {
+    "input": "需求输入",
+    "analysis": "分析",
+    "prd": "产品文档",
+    "ui": "UI 设计",
+    "plan": "技术方案",
+    "dev": "开发",
+    "test": "测试",
+    "deploy": "部署",
+    "monitor": "监控",
+    "done": "完成",
+    "approval_tag": "审"
   }
 }
