@@ -29,19 +29,20 @@ function TreeNode({ node, depth }: { node: FileTreeNode; depth: number }) {
 }
 
 export function FileTreePreview({ tree }: Props) {
+  const { t } = useTranslation()
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <span className={styles.title}>文件结构</span>
+        <span className={styles.title}>{t('dashboard.file_structure')}</span>
       </div>
       <div className={styles.body}>
         {!tree ? (
-          <p className={styles.empty}>暂无文件数据</p>
+          <p className={styles.empty}>{t('dashboard.no_file_data')}</p>
         ) : (
           <div className={styles.tree}>
             {tree.children?.map((child) => (
               <TreeNode key={child.name} node={child} depth={0} />
-            )) ?? <p className={styles.empty}>空目录</p>}
+            )) ?? <p className={styles.empty}>{t('dashboard.empty_dir')}</p>}
           </div>
         )}
       </div>
