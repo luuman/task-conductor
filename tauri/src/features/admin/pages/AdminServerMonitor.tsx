@@ -88,7 +88,7 @@ function Sparkline({ data, color, height = 40, label }: { data: number[]; color:
 
 /* ── 进程卡片 ────────────────────────────────────── */
 function ProcessCard({
-  proc, color, metric, metricLabel, subMetric, subLabel, onKill
+  proc, color, metric, metricLabel: _ml, subMetric, subLabel: _sl, onKill
 }: {
   proc: ProcessInfo
   color: string
