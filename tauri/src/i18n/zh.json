@@ -524,5 +524,32 @@
       "done": "完成",
       "cleared": "已清空"
     }
+  },
+  "task_manager": {
+    "title": "任务管理",
+    "no_project": "请选择一个项目",
+    "no_project_hint": "从侧边栏选择一个项目开始",
+    "new_task": "新建任务",
+    "search_placeholder": "搜索任务...",
+    "filter_all_stages": "所有阶段",
+    "filter_all_statuses": "所有状态",
+    "no_tasks": "暂无任务",
+    "no_tasks_hint": "点击「新建任务」开始",
+    "col_title": "标题",
+    "col_stage": "阶段",
+    "col_status": "状态",
+    "col_deps": "依赖",
+    "col_time": "时间",
+    "col_actions": "操作",
+    "deps": "依赖",
+    "approve": "批准",
+    "reject": "拒绝",
+    "advance": "推进",
+    "view": "查看",
+    "create_title": "新建任务",
+    "field_title": "标题",
+    "field_desc": "描述",
+    "title_placeholder": "输入任务标题",
+    "desc_placeholder": "可选的任务描述"
   }
 }
