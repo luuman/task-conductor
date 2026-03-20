@@ -188,28 +188,22 @@
 
 .procCardBody {
   display: flex;
-  gap: 12px;
-}
-
-.procMetric {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .procMetricVal {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--tc-foreground);
   font-family: 'Geist Mono', monospace;
-  line-height: 1.2;
+  line-height: 1;
 }
 
-.procMetricLabel {
-  font-size: 8px;
+.procMetricSub {
+  font-size: 9px;
   color: var(--tc-foreground-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-family: 'Geist Mono', monospace;
 }
 
 .procCardFooter {
