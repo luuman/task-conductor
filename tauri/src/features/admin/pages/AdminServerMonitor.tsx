@@ -175,42 +175,50 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
   const nodes: TopoNode[] = []
   const edges: TopoEdge[] = []
 
-  // 根节点
-  nodes.push({ id: 'root', label: 'host', x: 500, y: 40, cpu: 0, mem: 0, color: '#545d72' })
-
-  // 根据 ppid 构建父子关系
   const pidToId = new Map<number, string>()
   const allPids = new Set(procs.map(p => p.pid))
 
-  // 为每个进程创建节点
-  let idx = 0
   const groupNames = [...groups.keys()].sort((a, b) => {
     const aCpu = Math.max(...(groups.get(a)?.map(p => p.cpu_pct) ?? [0]))
     const bCpu = Math.max(...(groups.get(b)?.map(p => p.cpu_pct) ?? [0]))
     return bCpu - aCpu
   })
 
-  const groupCount = groupNames.length
-  const spacing = 900 / (groupCount + 1)
+  // 计算布局尺寸：每组至少 120px 宽，子节点间距 80px
+  const childSpacing = 80
+  const groupGap = 40 // 组之间额外间距
+  // 预计算每组宽度
+  const groupWidths = groupNames.map(name => {
+    const count = groups.get(name)!.length
+    return count <= 1 ? 80 : (count - 1) * childSpacing
+  })
+  const totalWidth = groupWidths.reduce((s, w) => s + w, 0) + (groupNames.length - 1) * groupGap + 200
+  const viewW = Math.max(totalWidth, 800)
 
+  // 根节点
+  nodes.push({ id: 'root', label: 'host', x: viewW / 2, y: 40, cpu: 0, mem: 0, color: '#545d72' })
+
+  let curX = 100
   groupNames.forEach((name, gi) => {
     const members = groups.get(name)!
     const color = procColor(name)
-    const gx = 100 + spacing * gi
-
-    // 第一个成员作为组头（CPU 最高的）
     const sorted = [...members].sort((a, b) => b.cpu_pct - a.cpu_pct)
+    const groupW = groupWidths[gi]
+    const gx = curX + groupW / 2
+
+    // 组头
     const head = sorted[0]
     const headId = `p${head.pid}`
     nodes.push({ id: headId, label: name, x: gx, y: 160, cpu: head.cpu_pct, mem: head.mem_mb, color })
     pidToId.set(head.pid, headId)
     edges.push({ from: 'root', to: headId })
 
-    // 其余成员作为子节点
+    // 子节点
     sorted.slice(1).forEach((p, ci) => {
       const cid = `p${p.pid}`
-      const cx = gx - ((sorted.length - 2) / 2 - ci) * 70
-      nodes.push({ id: cid, label: name, x: cx, y: 290, cpu: p.cpu_pct, mem: p.mem_mb, color })
+      const childCount = sorted.length - 1
+      const cx = curX + (childCount <= 1 ? groupW / 2 : (ci / (childCount - 1)) * groupW)
+      nodes.push({ id: cid, label: name, x: cx, y: 300, cpu: p.cpu_pct, mem: p.mem_mb, color })
       pidToId.set(p.pid, cid)
 
       // 如果 ppid 在当前进程列表中，连到父进程
