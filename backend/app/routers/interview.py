@@ -21,7 +21,7 @@ def get_db():
 class InterviewMessageBody(BaseModel):
     role: str  # "user" | "assistant"
     content: str
-    metadata: Optional[str] = None
+    extra: Optional[str] = None
 
 
 class PrdUpdateBody(BaseModel):
