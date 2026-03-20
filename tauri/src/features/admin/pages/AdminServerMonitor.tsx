@@ -597,7 +597,7 @@ export default function AdminServerMonitor() {
       if (claudeData) setClaude(claudeData)
       setError(null)
     } catch {
-      setError('无法连接服务器')
+      setError(t('admin_extra.cannot_connect'))
     }
   }, [])
 
