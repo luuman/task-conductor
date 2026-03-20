@@ -524,5 +524,32 @@
       "done": "Done",
       "cleared": "Cleared"
     }
+  },
+  "task_manager": {
+    "title": "Task Manager",
+    "no_project": "Please select a project",
+    "no_project_hint": "Select a project from the sidebar to begin",
+    "new_task": "New Task",
+    "search_placeholder": "Search tasks...",
+    "filter_all_stages": "All stages",
+    "filter_all_statuses": "All statuses",
+    "no_tasks": "No tasks yet",
+    "no_tasks_hint": "Click \"New Task\" to get started",
+    "col_title": "Title",
+    "col_stage": "Stage",
+    "col_status": "Status",
+    "col_deps": "Deps",
+    "col_time": "Time",
+    "col_actions": "Actions",
+    "deps": "deps",
+    "approve": "Approve",
+    "reject": "Reject",
+    "advance": "Advance",
+    "view": "View",
+    "create_title": "New Task",
+    "field_title": "Title",
+    "field_desc": "Description",
+    "title_placeholder": "Enter task title",
+    "desc_placeholder": "Optional task description"
   }
 }
