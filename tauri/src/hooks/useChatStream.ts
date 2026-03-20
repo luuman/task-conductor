@@ -25,11 +25,12 @@ export function useChatStream() {
     let fullText = ''
 
     ws.onopen = () => {
-      const { systemPrompt, pageContext } = useChatStore.getState()
+      const { systemPrompt, pageContext, claudeSessionId } = useChatStore.getState()
       ws.send(JSON.stringify({
         type: 'chat',
         message,
-        system_prompt: systemPrompt || undefined,
+        system_prompt: !claudeSessionId ? (systemPrompt || undefined) : undefined,
+        session_id: claudeSessionId || undefined,
         context: pageContext,
       }))
     }
