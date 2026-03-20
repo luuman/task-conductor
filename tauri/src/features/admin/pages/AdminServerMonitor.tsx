@@ -400,8 +400,8 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
           // 中点
           const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2
           // 中点到圆心的方向，向外偏移
-          const toCenterDx = mx - (nodes[0]?.x ?? 450)
-          const toCenterDy = my - (nodes[0]?.y ?? 400)
+          const toCenterDx = mx - (nodes[0]?.x ?? 600)
+          const toCenterDy = my - (nodes[0]?.y ?? 550)
           const dist = Math.hypot(toCenterDx, toCenterDy) || 1
           const bulge = 30 // 曲线外凸程度
           const cpx = mx + (toCenterDx / dist) * bulge
@@ -420,8 +420,8 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
           const from = getPos(e.from), to = getPos(e.to)
           const toNode = nodes.find(n => n.id === e.to)
           const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2
-          const toCenterDx = mx - (nodes[0]?.x ?? 450)
-          const toCenterDy = my - (nodes[0]?.y ?? 400)
+          const toCenterDx = mx - (nodes[0]?.x ?? 600)
+          const toCenterDy = my - (nodes[0]?.y ?? 550)
           const dist = Math.hypot(toCenterDx, toCenterDy) || 1
           const bulge = 30
           const cpx = mx + (toCenterDx / dist) * bulge
