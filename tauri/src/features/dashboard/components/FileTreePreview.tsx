@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { FileTreeNode } from '../../../lib/api/types'
 import styles from './FileTreePreview.module.css'
 
