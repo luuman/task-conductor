@@ -129,8 +129,12 @@ export function FloatingAssistant() {
 
       {/* 聊天面板 */}
       {isOpen && (
-        <div className={`${styles.panel} ${isMinimized ? styles.panelMinimized : ''}`}>
-          <div className={styles.header}>
+        <div
+          ref={panelRef}
+          className={`${styles.panel} ${isMinimized ? styles.panelMinimized : ''}`}
+          style={position.x >= 0 ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : undefined}
+        >
+          <div className={styles.header} onMouseDown={handleDragStart}>
             <div>
               <span className={styles.headerTitle}>AI 助手</span>
               <span className={styles.headerContext}>{pageContext.page}</span>
