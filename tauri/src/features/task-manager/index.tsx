@@ -74,7 +74,15 @@ export default function TaskManagerPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSubmit={(data) => {
-          createTask.mutate(data, { onSuccess: () => setModalOpen(false) })
+          createTask.mutate(data, {
+            onSuccess: (task) => {
+              setModalOpen(false)
+              // 创建后自动打开 AI 助手开始访谈
+              const chatStore = useChatStore.getState()
+              chatStore.setActiveTaskId(task.id)
+              if (!chatStore.isOpen) chatStore.toggle()
+            },
+          })
         }}
         loading={createTask.isPending}
       />
