@@ -85,7 +85,7 @@ class InterviewMessage(Base):
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
     role: Mapped[str] = mapped_column(String(20))  # "user" | "assistant"
     content: Mapped[str] = mapped_column(Text)
-    metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    extra: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     task: Mapped["Task"] = relationship(back_populates="interview_messages")
 
