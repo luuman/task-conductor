@@ -73,7 +73,7 @@ def save_interview_message(task_id: int, body: InterviewMessageBody, db: Session
         task_id=task_id,
         role=body.role,
         content=body.content,
-        metadata=body.metadata,
+        extra=body.extra,
     )
     db.add(msg)
     db.commit()
