@@ -21,6 +21,7 @@ interface ChatStore {
   currentReply: string
   isGenerating: boolean
   systemPrompt: string
+  claudeSessionId: string | null
 
   // PRD
   prdContent: string | null
