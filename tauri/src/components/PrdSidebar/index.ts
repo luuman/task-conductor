@@ -1,0 +1,1 @@
+export { PrdSidebar } from './PrdSidebar'
