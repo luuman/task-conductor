@@ -472,16 +472,6 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
                 style={{ transform: `rotate(-90deg)`, transformOrigin: `${pos.x}px ${pos.y}px` }} />
               {/* 中心 */}
               <circle cx={pos.x} cy={pos.y} r={innerR - innerSW / 2 - 1} fill={n.color + '15'} />
-              {/* CPU% 沿外环 */}
-              {n.cpu > 0 && (
-                <text fill={cpuC} fontSize="7" fontWeight="700" fontFamily="'Geist Mono', monospace">
-                  <textPath href={`#cpu-arc-${n.id}`} startOffset="50%" textAnchor="middle">{n.cpu}%</textPath>
-                </text>
-              )}
-              {/* MEM 沿内环 */}
-              <text fill={memC} fontSize="6.5" fontWeight="600" fontFamily="'Geist Mono', monospace">
-                <textPath href={`#mem-arc-${n.id}`} startOffset="50%" textAnchor="middle">{fmtMem(n.mem)}</textPath>
-              </text>
               {/* 进程名 */}
               <text x={pos.x} y={pos.y + 1} textAnchor="middle" dominantBaseline="central"
                 fill="var(--tc-foreground)" fontSize="7.5" fontWeight="600"
