@@ -239,20 +239,29 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
   const svgRef = useRef<SVGSVGElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const { nodes, edges, viewW } = useMemo(() => buildTopology(procs), [procs])
-  const [vb, setVb] = useState({ x: 0, y: 0, w: 1000, h: 380 })
   const initVb = useMemo(() => ({ x: 0, y: 0, w: Math.max(viewW, 800), h: 380 }), [viewW])
-  useEffect(() => { setVb(initVb) }, [initVb])
+  const [vb, setVb] = useState({ x: 0, y: 0, w: 1000, h: 380 })
+  const vbInitialized = useRef(false)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const panRef = useRef<{ startX: number; startY: number; vbx: number; vby: number } | null>(null)
   const dragRef = useRef<{ nodeId: string; dx: number; dy: number } | null>(null)
   const [nodePositions, setNodePositions] = useState<Map<string, { x: number; y: number }>>(new Map())
 
-  // 初始化位置
+  // 只在首次或节点结构变化时初始化位置，数据刷新（CPU/MEM变化）不重置
   useEffect(() => {
-    const map = new Map<string, { x: number; y: number }>()
-    nodes.forEach(n => map.set(n.id, { x: n.x, y: n.y }))
-    setNodePositions(map)
-  }, [nodes])
+    setNodePositions(prev => {
+      const next = new Map<string, { x: number; y: number }>()
+      nodes.forEach(n => {
+        // 保留用户拖拽过的位置
+        next.set(n.id, prev.get(n.id) ?? { x: n.x, y: n.y })
+      })
+      return next
+    })
+    if (!vbInitialized.current) {
+      setVb(initVb)
+      vbInitialized.current = true
+    }
+  }, [nodes, initVb])
 
   // 关联关系
   const related = useMemo(() => {
