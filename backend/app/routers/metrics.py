@@ -317,23 +317,34 @@ def get_system_metrics():
 
 @router.get("/processes", summary="Top 进程资源占用")
 def get_top_processes():
-    """Top 8 进程（按 CPU% 和 内存 各一份）"""
+    """Top 进程（按 CPU% 和 内存 各一份）+ 合并列表用于拓扑"""
     procs = []
-    for p in psutil.process_iter(["pid", "name", "cpu_percent", "memory_info"]):
+    for p in psutil.process_iter(["pid", "name", "ppid", "cpu_percent", "memory_info"]):
         try:
             info = p.info
             mem = info["memory_info"]
             procs.append({
                 "pid":     info["pid"],
+                "ppid":    info["ppid"],
                 "name":    (info["name"] or "?")[:20],
                 "cpu_pct": round(info["cpu_percent"] or 0, 1),
                 "mem_mb":  round((mem.rss if mem else 0) / (1024 ** 2), 1),
             })
         except Exception:
             pass
+    by_cpu = sorted(procs, key=lambda x: -x["cpu_pct"])[:20]
+    by_mem = sorted(procs, key=lambda x: -x["mem_mb"])[:20]
+    # 合并去重
+    seen = set()
+    all_procs = []
+    for p in by_cpu + by_mem:
+        if p["pid"] not in seen:
+            seen.add(p["pid"])
+            all_procs.append(p)
     return {
-        "by_cpu": sorted(procs, key=lambda x: -x["cpu_pct"])[:15],
-        "by_mem": sorted(procs, key=lambda x: -x["mem_mb"])[:15],
+        "by_cpu": by_cpu,
+        "by_mem": by_mem,
+        "all": all_procs,
     }
 
 
