@@ -614,7 +614,7 @@ export default function AdminServerMonitor() {
       setKillMsg(t('admin_extra.killed_process', { name: res.name, pid: res.pid }))
       fetchAll()
     } catch {
-      setKillMsg(`终止 PID ${pid} 失败`)
+      setKillMsg(t('admin_extra.kill_failed', { pid }))
     }
     setTimeout(() => setKillMsg(null), 3000)
   }, [fetchAll])
