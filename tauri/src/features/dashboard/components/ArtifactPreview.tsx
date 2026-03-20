@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Task } from '../../../lib/api/types'
 import styles from './ArtifactPreview.module.css'
 
@@ -8,7 +9,7 @@ interface Props {
 export function ArtifactPreview({ tasks }: Props) {
   // Show most recently active tasks with meaningful stages
   const active = tasks
-    .filter((t) => t.current_stage !== 'input' && t.current_stage !== 'done')
+    .filter((t) => t.stage !== 'input' && t.stage !== 'done')
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3)
 
@@ -25,7 +26,7 @@ export function ArtifactPreview({ tasks }: Props) {
             <div key={t.id} className={styles.item}>
               <div className={styles.itemHeader}>
                 <span className={styles.taskName}>{t.title}</span>
-                <span className={styles.stage}>{t.current_stage}</span>
+                <span className={styles.stage}>{t.stage}</span>
               </div>
               {t.description && (
                 <p className={styles.snippet}>
