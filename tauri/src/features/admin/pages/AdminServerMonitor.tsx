@@ -29,6 +29,23 @@ function getProcessColor(name: string, colorMap: Map<string, string>): string {
   return color
 }
 
+/** 按进程名分组，同名进程聚在一起，组按最大值排序，组内按值降序 */
+function groupAndSort(procs: ProcessInfo[], key: 'cpu_pct' | 'mem_mb'): ProcessInfo[] {
+  const groups = new Map<string, ProcessInfo[]>()
+  for (const p of procs) {
+    const list = groups.get(p.name) ?? []
+    list.push(p)
+    groups.set(p.name, list)
+  }
+  // 每组内按 key 降序
+  for (const list of groups.values()) {
+    list.sort((a, b) => b[key] - a[key])
+  }
+  // 组按最大值降序
+  const sorted = [...groups.entries()].sort((a, b) => b[1][0][key] - a[1][0][key])
+  return sorted.flatMap(([, list]) => list)
+}
+
 /* ── 环形仪表 ─────────────────────────────────────── */
 function GaugeRing({ value, label, color, sub, size = 96 }: { value: number; label: string; color: string; sub?: string; size?: number }) {
   const r = size * 0.395, stroke = size * 0.063
