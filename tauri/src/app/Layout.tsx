@@ -24,6 +24,27 @@ export function Layout() {
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
   const [cmdOpen, setCmdOpen] = useState(false)
+  const setPageContext = useChatStore((s) => s.setPageContext)
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
+
+  // 页面上下文感知
+  useEffect(() => {
+    const path = location.pathname
+    let page = 'dashboard'
+    const taskMatch = path.match(/^\/task\/(\d+)/)
+    if (taskMatch) {
+      page = 'task-detail'
+      setPageContext({ page, projectId: Number(activeProjectId), taskId: Number(taskMatch[1]) })
+      return
+    }
+    if (path.startsWith('/task-manager')) page = 'task-manager'
+    else if (path.startsWith('/files')) page = 'files'
+    else if (path.startsWith('/git')) page = 'git'
+    else if (path.startsWith('/sessions')) page = 'sessions'
+    else if (path.startsWith('/settings')) page = 'settings'
+    else if (path.startsWith('/chat')) page = 'chat'
+    setPageContext({ page, projectId: Number(activeProjectId) || undefined })
+  }, [location.pathname, activeProjectId, setPageContext])
 
   const handleCmdClose = useCallback(() => setCmdOpen(false), [])
 
