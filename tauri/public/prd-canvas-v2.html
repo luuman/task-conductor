@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>PRD 需求画布 v2 — 可拆分 + 悬浮对话 + 富交互</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f0f17; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #ccc; height: 100vh; overflow: hidden; }
+
+  /* ── 顶栏 ── */
+  .topbar { height: 38px; background: #13131d; border-bottom: 1px solid #1e1e2e; display: flex; align-items: center; padding: 0 12px; gap: 2px; }
+  .topbar-tab { padding: 5px 14px; font-size: 12px; color: #888; cursor: pointer; border-radius: 6px 6px 0 0; position: relative; display: flex; align-items: center; gap: 6px; }
+  .topbar-tab:hover { color: #bbb; }
+  .topbar-tab.active { background: #0f0f17; color: #fff; }
+  .topbar-tab .close { font-size: 10px; opacity: 0; margin-left: 4px; }
+  .topbar-tab:hover .close { opacity: 0.6; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 6px; }
+  .topbar-btn { background: none; border: 1px solid #2a2a3a; color: #888; border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
+  .topbar-btn:hover { background: #1e1e2e; color: #ccc; }
+
+  /* ── 拆分布局 ── */
+  .split-container { display: flex; height: calc(100vh - 38px); }
+  .split-pane { flex: 1; position: relative; overflow: hidden; min-width: 200px; }
+  .split-divider { width: 4px; background: #1e1e2e; cursor: col-resize; flex-shrink: 0; position: relative; }
+  .split-divider:hover, .split-divider.dragging { background: #007acc; }
+  .split-divider::after { content: ''; position: absolute; inset: -4px; }
+
+  /* ── 面板头 ── */
+  .pane-header { height: 32px; background: #13131d; border-bottom: 1px solid #1e1e2e; display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+  .pane-title { font-size: 11px; color: #888; font-weight: 600; }
+  .pane-badge { font-size: 10px; background: #007acc33; color: #60a5fa; padding: 1px 6px; border-radius: 8px; }
+
+  /* ── 画布 ── */
+  .canvas { flex: 1; position: relative; background: #0d0d14; overflow: hidden; height: calc(100% - 32px); }
+  .canvas-content { position: absolute; inset: 0; padding: 20px; }
+
+  /* 模块卡片 */
+  .mod { position: absolute; border-radius: 10px; background: #161622; border: 1px solid #2a2a3a; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+  .mod:hover { border-color: #007acc44; box-shadow: 0 0 16px #007acc11; }
+  .mod-head { padding: 8px 12px; display: flex; align-items: center; gap: 6px; background: #1a1a2a88; border-bottom: 1px solid #1e1e2e33; }
+  .mod-icon { font-size: 14px; }
+  .mod-name { font-size: 12px; font-weight: 600; color: #eee; flex: 1; }
+  .mod-status { font-size: 9px; padding: 2px 7px; border-radius: 8px; }
+  .s-ok { background: #10b98122; color: #10b981; }
+  .s-wip { background: #f59e0b22; color: #f59e0b; }
+  .s-draft { background: #6b728022; color: #6b7280; }
+  .mod-body { padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .feat { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #aaa; }
+  .feat .ok { color: #10b981; }
+  .feat .no { color: #555; }
+
+  /* 连线 SVG */
+  .lines { position: absolute; inset: 0; pointer-events: none; }
+  .lines path { fill: none; stroke-width: 1.5; }
+
+  /* 线稿 */
+  .wireframe { position: absolute; border-radius: 8px; background: #1a1a28; border: 1px dashed #3a3a5a; overflow: hidden; }
+  .wf-top { padding: 5px 8px; background: #22223a; display: flex; align-items: center; gap: 5px; }
+  .wf-dots { display: flex; gap: 3px; }
+  .wf-dots span { width: 5px; height: 5px; border-radius: 50%; }
+  .wf-title { font-size: 9px; color: #666; }
+  .wf-body { padding: 10px; }
+  .wf-inp { height: 22px; border-radius: 5px; border: 1px solid #333; background: #16162a; display: flex; align-items: center; padding: 0 6px; margin-bottom: 6px; }
+  .wf-inp span { font-size: 9px; color: #444; }
+  .wf-btn2 { height: 22px; border-radius: 5px; background: #007acc44; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .wf-btn2 span { font-size: 9px; color: #60a5fa; }
+  .wf-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .wf-qr { width: 44px; height: 44px; border-radius: 4px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 18px; filter: grayscale(1) opacity(0.3); }
+
+  /* 分组 */
+  .group { position: absolute; border-radius: 12px; border: 1px solid #ffffff06; background: #ffffff02; }
+  .group-lbl { position: absolute; font-size: 10px; color: #333; font-weight: 600; letter-spacing: 0.5px; }
+
+  /* 标注 */
+  .note { position: absolute; background: #f59e0b18; border: 1px solid #f59e0b33; border-radius: 5px; padding: 5px 8px; font-size: 9px; color: #f59e0b; max-width: 140px; line-height: 1.4; }
+
+  /* ── 悬浮聊天窗口 ── */
+  .float-chat {
+    position: fixed; width: 420px; height: 520px;
+    background: #111119; border: 1px solid #2a2a3a; border-radius: 12px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; z-index: 100;
+    resize: both; overflow: hidden; min-width: 320px; min-height: 300px;
+  }
+  .fc-header {
+    padding: 10px 14px; background: #16162288; border-bottom: 1px solid #1e1e2e;
+    display: flex; align-items: center; gap: 8px; cursor: move; user-select: none;
+    backdrop-filter: blur(8px); border-radius: 12px 12px 0 0;
+  }
+  .fc-avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #007acc, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .fc-title { font-size: 13px; font-weight: 600; color: #ddd; flex: 1; }
+  .fc-status { font-size: 10px; color: #10b981; display: flex; align-items: center; gap: 4px; }
+  .fc-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+  .fc-btns { display: flex; gap: 2px; }
+  .fc-btn { background: none; border: none; color: #666; cursor: pointer; width: 24px; height: 24px; border-radius: 4px; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .fc-btn:hover { background: #2a2a3a; color: #ccc; }
+
+  .fc-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* 消息气泡 */
+  .m { display: flex; flex-direction: column; gap: 4px; }
+  .m-user { align-items: flex-end; }
+  .m-ai { align-items: flex-start; }
+  .m-bubble { max-width: 92%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+  .m-user .m-bubble { background: #007acc; color: #fff; border-bottom-right-radius: 4px; }
+  .m-ai .m-bubble { background: #1e1e2e; color: #ccc; border-bottom-left-radius: 4px; }
+  .m-time { font-size: 10px; color: #444; padding: 0 4px; }
+
+  /* ── 富交互卡片 ── */
+  .card { background: #1a1a2a; border: 1px solid #2a2a3a; border-radius: 10px; overflow: hidden; max-width: 92%; }
+  .card-header { padding: 8px 12px; background: #22223a; display: flex; align-items: center; gap: 6px; }
+  .card-icon { font-size: 14px; }
+  .card-title { font-size: 12px; font-weight: 600; color: #ddd; }
+  .card-body { padding: 10px 12px; }
+  .card-desc { font-size: 12px; color: #999; line-height: 1.5; margin-bottom: 10px; }
+
+  /* 选项按钮组 */
+  .choice-group { display: flex; flex-direction: column; gap: 6px; }
+  .choice-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 8px; border: 1px solid #2a2a3a;
+    background: #16162a; cursor: pointer; transition: all .15s;
+  }
+  .choice-btn:hover { border-color: #007acc55; background: #1a2a3a; }
+  .choice-btn.selected { border-color: #007acc; background: #007acc15; }
+  .choice-btn .cb-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #444; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .choice-btn.selected .cb-radio { border-color: #007acc; }
+  .choice-btn.selected .cb-radio::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #007acc; }
+  .choice-btn .cb-text { font-size: 12px; color: #bbb; }
+  .choice-btn .cb-desc { font-size: 10px; color: #666; margin-top: 2px; }
+  .choice-btn.selected .cb-text { color: #fff; }
+
+  /* 行内按钮 */
+  .inline-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .inline-btn {
+    padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    border: 1px solid #2a2a3a; background: #1a1a2a; color: #aaa; transition: all .15s;
+  }
+  .inline-btn:hover { border-color: #007acc55; background: #1a2a3a; color: #ddd; }
+  .inline-btn.primary { background: #007acc22; border-color: #007acc44; color: #60a5fa; }
+  .inline-btn.primary:hover { background: #007acc33; }
+  .inline-btn.selected { background: #007acc; border-color: #007acc; color: #fff; }
+
+  /* 确认条 */
+  .confirm-bar { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid #2a2a3a; background: #1a1a2a; border-radius: 0 0 10px 10px; }
+  .confirm-btn { flex: 1; padding: 7px; border-radius: 6px; border: none; font-size: 12px; cursor: pointer; font-weight: 500; }
+  .confirm-btn.ok { background: #007acc; color: #fff; }
+  .confirm-btn.ok:hover { background: #0088dd; }
+  .confirm-btn.cancel { background: #2a2a3a; color: #888; }
+
+  /* 进度条卡片 */
+  .progress-card { padding: 10px 12px; }
+  .prog-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .prog-label { font-size: 11px; color: #888; width: 70px; }
+  .prog-bar { flex: 1; height: 6px; background: #2a2a3a; border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+
+  /* 模块标签引用 */
+  .ref { display: inline-block; background: #007acc22; color: #60a5fa; padding: 1px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+  .ref:hover { background: #007acc33; }
+
+  /* 输入区 */
+  .fc-input-area { padding: 10px 12px; border-top: 1px solid #1e1e2e; display: flex; gap: 8px; align-items: flex-end; background: #13131d; border-radius: 0 0 12px 12px; }
+  .fc-input { flex: 1; background: #0f0f17; border: 1px solid #2a2a3a; border-radius: 8px; padding: 8px 12px; color: #ccc; font-size: 13px; outline: none; resize: none; font-family: inherit; max-height: 80px; }
+  .fc-input:focus { border-color: #007acc; }
+  .fc-send { background: #007acc; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .fc-send:hover { background: #0088dd; }
+
+  /* 拖拽手柄视觉 */
+  .resize-handle { position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; cursor: se-resize; }
+</style>
+</head>
+<body>
+
+<!-- ── 顶栏（VS Code 风格标签） ── -->
+<div class="topbar">
+  <div class="topbar-tab active">📋 用户登录系统 <span class="close">×</span></div>
+  <div class="topbar-tab">📋 消息推送 <span class="close">×</span></div>
+  <div class="topbar-tab">📋 数据报表 <span class="close">×</span></div>
+  <div class="topbar-actions">
+    <button class="topbar-btn" title="垂直拆分">⊞ 拆分</button>
+    <button class="topbar-btn" title="新建需求">+ 新需求</button>
+  </div>
+</div>
+
+<!-- ── 拆分面板 ── -->
+<div class="split-container">
+  <!-- 左面板：需求画布 -->
+  <div class="split-pane">
+    <div class="pane-header">
+      <span class="pane-title">需求画布</span>
+      <span class="pane-badge">6 模块</span>
+      <span class="pane-badge" style="background:#10b98122;color:#10b981;">3/5 已确认</span>
+    </div>
+    <div class="canvas">
+      <div class="canvas-content">
+        <!-- SVG 连线 -->
+        <svg class="lines" width="100%" height="100%">
+          <path d="M 215 90 C 270 90, 270 60, 310 60" stroke="#007acc44" />
+          <path d="M 215 110 C 280 110, 280 165, 310 165" stroke="#007acc44" />
+          <path d="M 215 130 C 290 130, 290 265, 310 265" stroke="#007acc44" />
+          <path d="M 160 155 C 160 280, 120 290, 120 320" stroke="#ef444433" />
+          <!-- OAuth → 线稿 -->
+          <path d="M 490 60 C 530 60, 530 85, 555 85" stroke="#a855f733" stroke-dasharray="3 3" />
+          <path d="M 490 175 C 530 175, 535 150, 555 150" stroke="#a855f733" stroke-dasharray="3 3" />
+        </svg>
+
+        <!-- 分组 -->
+        <div class="group" style="left:10px;top:10px;width:500px;height:300px;"></div>
+        <div class="group-lbl" style="left:18px;top:16px;">核心认证</div>
+        <div class="group" style="left:540px;top:10px;width:250px;height:300px;border-color:#a855f708;"></div>
+        <div class="group-lbl" style="left:548px;top:16px;color:#a855f744;">界面线稿</div>
+
+        <!-- 用户认证 -->
+        <div class="mod" style="left:20px;top:40px;width:195px;">
+          <div class="mod-head"><span class="mod-icon">🔐</span><span class="mod-name">用户认证</span><span class="mod-status s-wip">讨论中</span></div>
+          <div class="mod-body">
+            <div class="feat"><span class="ok">✓</span> 多方式登录入口</div>
+            <div class="feat"><span class="ok">✓</span> 统一认证接口</div>
+            <div class="feat"><span class="no">○</span> 自动注册</div>
+            <div class="feat"><span class="no">○</span> 状态管理</div>
+          </div>
+        </div>
+
+        <!-- 微信 OAuth -->
+        <div class="mod" style="left:310px;top:35px;width:180px;">
+          <div class="mod-head"><span class="mod-icon">📱</span><span class="mod-name">微信 OAuth</span><span class="mod-status s-ok">已确认</span></div>
+          <div class="mod-body">
+            <div class="feat"><span class="ok">✓</span> PC 扫码登录</div>
+            <div class="feat"><span class="ok">✓</span> 公众号授权</div>
+            <div class="feat"><span class="ok">✓</span> 回调处理</div>
+          </div>
+        </div>
+
+        <!-- 短信验证 -->
+        <div class="mod" style="left:310px;top:140px;width:180px;">
+          <div class="mod-head"><span class="mod-icon">💬</span><span class="mod-name">短信验证</span><span class="mod-status s-ok">已确认</span></div>
+          <div class="mod-body">
+            <div class="feat"><span class="ok">✓</span> 验证码发送</div>
+            <div class="feat"><span class="ok">✓</span> 5min 有效</div>
+            <div class="feat"><span class="ok">✓</span> 60s 重发</div>
+          </div>
+        </div>
+
+        <!-- Token -->
+        <div class="mod" style="left:310px;top:245px;width:180px;">
+          <div class="mod-head"><span class="mod-icon">🔑</span><span class="mod-name">Token 管理</span><span class="mod-status s-ok">已确认</span></div>
+          <div class="mod-body">
+            <div class="feat"><span class="ok">✓</span> JWT · 7天</div>
+            <div class="feat"><span class="ok">✓</span> Refresh Token</div>
+          </div>
+        </div>
+
+        <!-- 安全策略 -->
+        <div class="mod" style="left:20px;top:320px;width:195px;border-color:#ef444422;">
+          <div class="mod-head"><span class="mod-icon">🛡️</span><span class="mod-name">安全策略</span><span class="mod-status s-draft">待讨论</span></div>
+          <div class="mod-body">
+            <div class="feat"><span class="no">○</span> 失败次数限制</div>
+            <div class="feat"><span class="no">○</span> IP 封禁</div>
+          </div>
+        </div>
+
+        <!-- 登录页线稿 -->
+        <div class="wireframe" style="left:555px;top:35px;width:220px;height:230px;">
+          <div class="wf-top">
+            <div class="wf-dots"><span style="background:#ef4444"></span><span style="background:#f59e0b"></span><span style="background:#10b981"></span></div>
+            <span class="wf-title">登录页</span>
+          </div>
+          <div class="wf-body" style="display:flex;gap:10px;">
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:8px;color:#555;margin-bottom:6px;">微信扫码</div>
+              <div class="wf-qr">⊞</div>
+              <div style="font-size:7px;color:#444;margin-top:4px;">扫一扫登录</div>
+            </div>
+            <div style="width:1px;background:#2a2a40;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:8px;color:#555;">手机号登录</div>
+              <div class="wf-inp"><span>手机号</span></div>
+              <div class="wf-row">
+                <div class="wf-inp" style="flex:1;margin:0;"><span>验证码</span></div>
+                <div class="wf-btn2" style="width:50px;margin:0;"><span style="font-size:8px;">59s</span></div>
+              </div>
+              <div class="wf-btn2"><span>登 录</span></div>
+              <div style="font-size:7px;color:#444;text-align:center;margin-top:2px;">—— 其他方式 ——</div>
+              <div style="display:flex;justify-content:center;gap:10px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:#10b98133;"></div>
+                <div style="width:16px;height:16px;border-radius:50%;background:#3b82f633;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 标注 -->
+        <div class="note" style="left:555px;top:278px;">倒计时 59s，点击后灰色禁用态</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分隔条 -->
+  <div class="split-divider" id="divider"></div>
+
+  <!-- 右面板：PRD 文档 / 第二个画布 -->
+  <div class="split-pane">
+    <div class="pane-header">
+      <span class="pane-title">PRD 文档</span>
+      <span class="pane-badge">自动生成</span>
+    </div>
+    <div style="height:calc(100% - 32px);overflow-y:auto;padding:20px 24px;background:#0f0f17;">
+      <div style="font-size:18px;font-weight:700;color:#eee;margin-bottom:4px;">用户登录系统 PRD</div>
+      <div style="font-size:11px;color:#555;margin-bottom:20px;">v1.2 · AI 自动生成 · 最后更新 2分钟前</div>
+
+      <div style="font-size:13px;font-weight:600;color:#60a5fa;margin-bottom:8px;">1. 背景与目标</div>
+      <div style="font-size:12px;color:#999;line-height:1.7;margin-bottom:16px;">
+        构建统一的用户认证系统，支持微信扫码（PC）、微信公众号授权（H5）和手机验证码三种登录方式。新用户首次登录自动注册，使用 JWT Token 管理登录状态。
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:#60a5fa;margin-bottom:8px;">2. 功能模块</div>
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #1e1e2e;">
+          <span style="color:#10b981;font-size:11px;">●</span>
+          <span style="font-size:12px;color:#ccc;flex:1;">微信 OAuth</span>
+          <span style="font-size:10px;color:#10b981;">已确认</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #1e1e2e;">
+          <span style="color:#10b981;font-size:11px;">●</span>
+          <span style="font-size:12px;color:#ccc;flex:1;">短信验证</span>
+          <span style="font-size:10px;color:#10b981;">已确认</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #1e1e2e;">
+          <span style="color:#10b981;font-size:11px;">●</span>
+          <span style="font-size:12px;color:#ccc;flex:1;">Token 管理</span>
+          <span style="font-size:10px;color:#10b981;">已确认</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #1e1e2e;">
+          <span style="color:#f59e0b;font-size:11px;">●</span>
+          <span style="font-size:12px;color:#ccc;flex:1;">用户认证（核心）</span>
+          <span style="font-size:10px;color:#f59e0b;">讨论中</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 0;">
+          <span style="color:#6b7280;font-size:11px;">●</span>
+          <span style="font-size:12px;color:#ccc;flex:1;">安全策略</span>
+          <span style="font-size:10px;color:#6b7280;">待讨论</span>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:#60a5fa;margin-bottom:8px;">3. 技术规格</div>
+      <div style="font-size:12px;color:#999;line-height:1.7;margin-bottom:16px;">
+        • 验证码: 6位数字，有效期5分钟，重发间隔60秒<br>
+        • Token: JWT 签发，Access Token 7天过期，支持 Refresh Token 刷新<br>
+        • 微信: 同时支持 PC 扫码 + 公众号 H5 授权<br>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:#60a5fa;margin-bottom:8px;">4. 界面设计</div>
+      <div style="font-size:12px;color:#666;margin-bottom:8px;">见需求画布中的登录页线稿 →</div>
+      <div style="padding:12px;background:#1a1a28;border-radius:8px;border:1px dashed #2a2a3a;text-align:center;color:#444;font-size:11px;">
+        [登录页线稿预览 — 点击查看大图]
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 悬浮聊天窗口 ── -->
+<div class="float-chat" id="floatChat" style="right:24px;bottom:24px;">
+  <div class="fc-header" id="fcHeader">
+    <div class="fc-avatar">🤖</div>
+    <span class="fc-title">AI 需求助手</span>
+    <span class="fc-status">在线</span>
+    <div class="fc-btns">
+      <button class="fc-btn" title="最小化">—</button>
+      <button class="fc-btn" title="最大化">□</button>
+      <button class="fc-btn" title="关闭">×</button>
+    </div>
+  </div>
+
+  <div class="fc-messages">
+    <!-- 用户消息 -->
+    <div class="m m-user">
+      <div class="m-bubble">我想做一个用户登录系统，支持微信扫码和手机验证码</div>
+      <span class="m-time">14:32</span>
+    </div>
+
+    <!-- AI 回复 + 富卡片 -->
+    <div class="m m-ai">
+      <div class="m-bubble">
+        好的，这是一个完整的认证系统。我已创建任务并生成了初步需求结构 👉 <span class="ref">📋 用户登录系统</span>
+      </div>
+    </div>
+
+    <!-- 选项卡片：微信登录方式 -->
+    <div class="m m-ai">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📱</span>
+          <span class="card-title">微信登录方式</span>
+        </div>
+        <div class="card-body">
+          <div class="card-desc">微信登录需要支持哪些场景？</div>
+          <div class="choice-group">
+            <div class="choice-btn selected" onclick="this.classList.toggle('selected')">
+              <div class="cb-radio"></div>
+              <div><div class="cb-text">PC 扫码登录</div><div class="cb-desc">用户打开微信扫描二维码</div></div>
+            </div>
+            <div class="choice-btn selected" onclick="this.classList.toggle('selected')">
+              <div class="cb-radio"></div>
+              <div><div class="cb-text">公众号授权</div><div class="cb-desc">微信内 H5 页面一键授权</div></div>
+            </div>
+            <div class="choice-btn" onclick="this.classList.toggle('selected')">
+              <div class="cb-radio"></div>
+              <div><div class="cb-text">小程序登录</div><div class="cb-desc">从微信小程序获取用户信息</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="confirm-bar">
+          <button class="confirm-btn cancel">跳过</button>
+          <button class="confirm-btn ok">确认选择</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 快捷按钮回复 -->
+    <div class="m m-ai">
+      <div class="m-bubble">
+        验证码的技术参数需要确认：
+        <div class="inline-btns">
+          <button class="inline-btn selected">5分钟有效</button>
+          <button class="inline-btn" onclick="this.classList.toggle('selected')">10分钟有效</button>
+          <button class="inline-btn selected">60秒重发</button>
+          <button class="inline-btn" onclick="this.classList.toggle('selected')">30秒重发</button>
+          <button class="inline-btn primary">自定义...</button>
+        </div>
+      </div>
+      <span class="m-time">14:33</span>
+    </div>
+
+    <!-- 进度卡片 -->
+    <div class="m m-ai">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-title">需求进度</span>
+        </div>
+        <div class="progress-card">
+          <div class="prog-row">
+            <span class="prog-label" style="color:#10b981;">已确认</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:60%;background:#10b981;"></div></div>
+            <span style="font-size:10px;color:#888;">3/5</span>
+          </div>
+          <div class="prog-row">
+            <span class="prog-label" style="color:#f59e0b;">讨论中</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:20%;background:#f59e0b;"></div></div>
+            <span style="font-size:10px;color:#888;">1/5</span>
+          </div>
+          <div class="prog-row">
+            <span class="prog-label" style="color:#6b7280;">待讨论</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:20%;background:#6b7280;"></div></div>
+            <span style="font-size:10px;color:#888;">1/5</span>
+          </div>
+        </div>
+        <div class="confirm-bar">
+          <button class="confirm-btn ok" style="background:#10b981;">✓ 全部确认，生成最终 PRD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 接续建议 -->
+    <div class="m m-ai">
+      <div class="m-bubble">
+        接下来建议讨论：
+        <div class="inline-btns">
+          <button class="inline-btn primary">🛡️ 安全策略</button>
+          <button class="inline-btn primary">👤 注册流程</button>
+          <button class="inline-btn">📊 导出 PRD</button>
+          <button class="inline-btn">🚀 开始开发</button>
+        </div>
+      </div>
+      <span class="m-time">14:35</span>
+    </div>
+  </div>
+
+  <div class="fc-input-area">
+    <textarea class="fc-input" placeholder="描述需求，或点击上方按钮快速操作..." rows="1"></textarea>
+    <button class="fc-send">发送</button>
+  </div>
+</div>
+
+<script>
+// ── 悬浮窗拖拽 ──
+const chat = document.getElementById('floatChat');
+const header = document.getElementById('fcHeader');
+let isDragging = false, startX, startY, startLeft, startTop;
+
+header.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.fc-btn')) return;
+  isDragging = true;
+  const rect = chat.getBoundingClientRect();
+  startX = e.clientX; startY = e.clientY;
+  startLeft = rect.left; startTop = rect.top;
+  chat.style.right = 'auto'; chat.style.bottom = 'auto';
+  chat.style.left = rect.left + 'px'; chat.style.top = rect.top + 'px';
+  e.preventDefault();
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  chat.style.left = Math.max(0, startLeft + e.clientX - startX) + 'px';
+  chat.style.top = Math.max(0, startTop + e.clientY - startY) + 'px';
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+
+// ── 拆分条拖拽 ──
+const divider = document.getElementById('divider');
+const container = document.querySelector('.split-container');
+const panes = document.querySelectorAll('.split-pane');
+let isSplitDrag = false;
+
+divider.addEventListener('mousedown', (e) => {
+  isSplitDrag = true;
+  divider.classList.add('dragging');
+  e.preventDefault();
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isSplitDrag) return;
+  const rect = container.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  const clamped = Math.max(0.2, Math.min(0.8, ratio));
+  panes[0].style.flex = `${clamped}`;
+  panes[1].style.flex = `${1 - clamped}`;
+});
+document.addEventListener('mouseup', () => {
+  isSplitDrag = false;
+  divider.classList.remove('dragging');
+});
+</script>
+</body>
+</html>
