@@ -381,6 +381,29 @@ export class HttpAdapter implements ApiAdapter {
     return result
   }
 
+  // ─── Canvas API ───
+
+  getCanvasData(taskId: number) {
+    return this.fetch<CanvasData>(`/api/tasks/${taskId}/canvas`)
+  }
+
+  async saveCanvasData(taskId: number, data: string) {
+    const result = await this.fetch<CanvasData>(`/api/tasks/${taskId}/canvas`, {
+      method: 'PUT',
+      body: JSON.stringify({ canvas_data: data }),
+    })
+    cache.invalidate(`task:${taskId}`)
+    return result
+  }
+
+  getInterviewMessagesPaginated(taskId: number, beforeId?: number, limit?: number) {
+    const params = new URLSearchParams()
+    if (beforeId != null) params.set('before_id', String(beforeId))
+    if (limit != null) params.set('limit', String(limit))
+    const qs = params.toString()
+    return this.fetch<PaginatedMessages>(`/api/tasks/${taskId}/interview/messages/paginated${qs ? `?${qs}` : ''}`)
+  }
+
   // ─── AI API ───
 
   getFileTree(projectId: number, depth = 3) {
