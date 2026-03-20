@@ -78,6 +78,18 @@ class Task(Base):
     interview_messages: Mapped[list["InterviewMessage"]] = relationship(back_populates="task")
 
 
+class InterviewMessage(Base):
+    """需求访谈对话消息"""
+    __tablename__ = "interview_messages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
+    role: Mapped[str] = mapped_column(String(20))  # "user" | "assistant"
+    content: Mapped[str] = mapped_column(Text)
+    metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    task: Mapped["Task"] = relationship(back_populates="interview_messages")
+
+
 class StageArtifact(Base):
     __tablename__ = "stage_artifacts"
     id: Mapped[int] = mapped_column(primary_key=True)
