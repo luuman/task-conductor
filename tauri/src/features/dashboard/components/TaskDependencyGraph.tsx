@@ -20,6 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export function TaskDependencyGraph({ tasks }: Props) {
+  const { t } = useTranslation()
   const { nodes, edges } = useMemo(() => {
     if (tasks.length === 0) return { nodes: [], edges: [] }
 
