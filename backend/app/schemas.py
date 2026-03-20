@@ -40,6 +40,9 @@ class TaskOut(BaseModel):
     stage: str
     status: str
     depends_on: Optional[str] = None         # JSON list[int]
+    stages: Optional[str] = None             # JSON list[str]，per-task 阶段
+    prd_content: Optional[str] = None        # 结构化 PRD JSON
+    interview_status: str = "none"           # none|active|completed
     worktree_path: Optional[str] = None
     branch_name: Optional[str] = None
     queued_at: Optional[datetime] = None
@@ -47,6 +50,16 @@ class TaskOut(BaseModel):
     finished_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class InterviewMessageOut(BaseModel):
+    id: int
+    task_id: int
+    role: str
+    content: str
+    metadata: Optional[str] = None
+    created_at: datetime
     model_config = {"from_attributes": True}
 
 
