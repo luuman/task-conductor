@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTaskManagerData } from './hooks/useTaskManagerData'
 import { TaskTable } from './components/TaskTable'
