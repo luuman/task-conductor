@@ -84,7 +84,7 @@ export function AppRouter() {
             <Route path="/mcp"            element={<PlaceholderPage />} />
             <Route path="/files"          element={<FilesPage />} />
             <Route path="/git"            element={<GitPage />} />
-            <Route path="/canvas"         element={<PlaceholderPage />} />
+            <Route path="/canvas"         element={<CanvasPage />} />
             <Route path="/settings"       element={<SettingsPage />} />
           </Route>
 
