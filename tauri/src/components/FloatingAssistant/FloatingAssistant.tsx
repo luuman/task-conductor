@@ -24,12 +24,50 @@ function buildSystemPrompt(ctx: { page: string; projectId?: number; taskId?: num
 export function FloatingAssistant() {
   const {
     isOpen, isMinimized, messages, currentReply, isGenerating,
-    pageContext, toggle, minimize, restore, close,
-    addMessage, setSystemPrompt,
+    pageContext, position, toggle, minimize, restore, close,
+    addMessage, setSystemPrompt, setPosition,
   } = useChatStore()
   const { send, stop } = useChatStream()
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
+
+  // 拖拽 header 移动面板
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    // 如果点击的是按钮，不拖拽
+    if ((e.target as HTMLElement).closest('button')) return
+    e.preventDefault()
+
+    const panel = panelRef.current
+    if (!panel) return
+    const rect = panel.getBoundingClientRect()
+
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPosX: rect.left,
+      startPosY: rect.top,
+    }
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return
+      const dx = ev.clientX - dragRef.current.startX
+      const dy = ev.clientY - dragRef.current.startY
+      const newX = Math.max(0, Math.min(window.innerWidth - 400, dragRef.current.startPosX + dx))
+      const newY = Math.max(0, Math.min(window.innerHeight - 60, dragRef.current.startPosY + dy))
+      setPosition({ x: newX, y: newY })
+    }
+
+    const handleMouseUp = () => {
+      dragRef.current = null
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [setPosition])
 
   // 页面上下文变化时更新 system prompt
   useEffect(() => {
