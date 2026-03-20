@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..database import engine
 from ..models import Task, StageArtifact
 from ..schemas import TaskOut, StageArtifactOut
-from ..pipeline.engine import PipelineEngine, StageTransitionError
+from ..pipeline.engine import PipelineEngine, StageTransitionError, get_task_stages
 
 router = APIRouter(prefix="/api/tasks", tags=["任务"])
 
