@@ -74,6 +74,10 @@ export class HttpAdapter implements ApiAdapter {
     )
   }
 
+  getTaskArtifacts(taskId: number) {
+    return this.fetch<StageArtifact[]>(`/api/tasks/${taskId}/artifacts`)
+  }
+
   getSessions() {
     return cache.getOrFetch('sessions', CACHE_TTL.sessions, () =>
       this.fetch<AiSession[]>('/api/sessions')
