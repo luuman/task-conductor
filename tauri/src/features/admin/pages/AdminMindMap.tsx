@@ -40,16 +40,16 @@ export default function AdminMindMap() {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '20px 24px 0', flexShrink: 0 }}>
         <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--tc-foreground)', margin: 0 }}>
-          任务全景脑图
+          {t('admin_extra.mindmap_title')}
         </h1>
         <p style={{ fontSize: 13, color: 'var(--tc-foreground-secondary)', margin: '4px 0 0' }}>
-          项目 → 任务 → 阶段 全局视图
+          {t('admin_extra.mindmap_hint')}
         </p>
       </div>
       <div style={{ flex: 1, minHeight: 0, padding: '16px 24px 24px' }}>
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--tc-foreground-secondary)', fontSize: 13 }}>
-            加载中...
+            {t('common.loading')}
           </div>
         ) : (
           <MindMapCanvas
