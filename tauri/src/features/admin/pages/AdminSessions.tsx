@@ -1629,7 +1629,7 @@ export default function AdminSessions() {
         <div className={styles.leftHeader}>
           <span className={styles.leftTitle}>{t('admin.sessions.title')}</span>
           <button className={styles.newChatBtn} onClick={handleClearSelection}>
-            + {'\u65B0\u5BF9\u8BDD'}
+            + {t('admin_extra.new_conversation')}
           </button>
         </div>
 
