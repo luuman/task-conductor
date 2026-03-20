@@ -59,7 +59,7 @@ export function FileTree({
           const children = await onExpandDir(item.path)
           childrenRef.current.set(item.path, children)
         } catch (err) {
-          console.error('加载子目录失败:', err)
+          console.error('Failed to load subdirectory:', err)
           childrenRef.current.set(item.path, [])
         } finally {
           setLoading((prev) => {
