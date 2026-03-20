@@ -81,6 +81,7 @@ export const useChatStore = create<ChatStore>()((set) => ({
   appendCurrentReply: (text) => set((s) => ({ currentReply: s.currentReply + text })),
   setIsGenerating: (v) => set({ isGenerating: v }),
   setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
+  setClaudeSessionId: (id) => set({ claudeSessionId: id }),
   setPrd: (prd) => set({ prdContent: prd }),
   togglePrdSidebar: () => set((s) => ({ prdSidebarOpen: !s.prdSidebarOpen })),
   openPrdSidebar: () => set({ prdSidebarOpen: true }),
