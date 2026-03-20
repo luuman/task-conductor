@@ -127,22 +127,23 @@
 
 /* ── Process card grid ── */
 .procGrid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 12px;
 }
 
 /* ── Process card ── */
 .procCard {
+  width: 150px;
   border-radius: 8px;
   border: 1px solid var(--tc-border);
   border-left: 3px solid var(--tc-border);
   background: var(--tc-content-bg);
-  padding: 10px 12px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
