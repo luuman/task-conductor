@@ -1738,7 +1738,7 @@ export default function AdminSessions() {
             <span className={styles.rightTitle}>{t('admin_extra.question_nav')}</span>
             <span className={styles.expandToggleWrap}>
               <span className={styles.expandLabel}>
-                {autoExpand ? '\u5C55\u5F00' : '\u6298\u53E0'}
+                {autoExpand ? t('admin_extra.expand') : t('admin_extra.collapse')}
               </span>
               <button
                 className={styles.expandToggle}
