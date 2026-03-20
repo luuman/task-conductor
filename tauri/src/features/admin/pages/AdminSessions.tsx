@@ -1343,7 +1343,7 @@ function SessionGroup({
             </div>
             <div className={styles.sessionRow2}>
               <span className={styles.sessionTime}>{time}</span>
-              <span className={styles.sessionEvents}>{s.event_count} {'\u4E2A\u4E8B\u4EF6'}</span>
+              <span className={styles.sessionEvents}>{s.event_count} {t('admin.sessions.events')}</span>
             </div>
             {tags.length > 0 && (
               <div className={styles.sessionTags}>
