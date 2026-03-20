@@ -27,15 +27,15 @@ const STATUS_COLORS: Record<string, string> = {
   rejected: '#ef4444',
 }
 
-function timeAgo(dateStr: string, t: (key: string, fallback?: string) => string): string {
+function timeAgo(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return t('time.just_now', '刚刚')
-  if (mins < 60) return t('time.mins_ago', '{{n}}分钟前').replace('{{n}}', String(mins))
+  if (mins < 1) return t('time.just_now')
+  if (mins < 60) return t('time.mins_ago', { n: mins })
   const hours = Math.floor(mins / 60)
-  if (hours < 24) return t('time.hours_ago', '{{n}}小时前').replace('{{n}}', String(hours))
+  if (hours < 24) return t('time.hours_ago', { n: hours })
   const days = Math.floor(hours / 24)
-  return t('time.days_ago', '{{n}}天前').replace('{{n}}', String(days))
+  return t('time.days_ago', { n: days })
 }
 
 interface TaskRowProps {
