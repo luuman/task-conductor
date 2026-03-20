@@ -67,6 +67,8 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE tasks ADD COLUMN stages TEXT",
         "ALTER TABLE tasks ADD COLUMN prd_content TEXT",
         "ALTER TABLE tasks ADD COLUMN interview_status VARCHAR(20) DEFAULT 'none'",
+        "ALTER TABLE tasks ADD COLUMN claude_session_id VARCHAR(128)",
+        "ALTER TABLE tasks ADD COLUMN canvas_data TEXT",
     ]:
         try:
             with engine.connect() as conn:
