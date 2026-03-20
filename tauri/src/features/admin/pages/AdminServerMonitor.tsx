@@ -237,15 +237,29 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid: number) => void }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
-  // 只在进程结构（pid 集合）变化时重算布局，CPU/MEM 变化不触发
-  const pidKey = useMemo(() => procs.map(p => p.pid).sort().join(','), [procs])
-  const { nodes: layoutNodes, edges, viewW } = useMemo(() => buildTopology(procs), [pidKey])
-  // 用最新数据更新 CPU/MEM，但不改变位置
+  // ★ 结构 key：只有进程名+数量变化才重算布局（CPU/MEM变化不触发）
+  const structKey = useMemo(() => {
+    const counts = new Map<string, number>()
+    procs.forEach(p => counts.set(p.name, (counts.get(p.name) ?? 0) + 1))
+    return [...counts.entries()].sort().map(([n, c]) => `${n}:${c}`).join('|')
+  }, [procs])
+  const { nodes: layoutNodes, edges, viewW } = useMemo(() => buildTopology(procs), [structKey])
+  // 用最新 CPU/MEM 数据更新节点（不改变位置和 ID）
   const nodes = useMemo(() => {
-    const procMap = new Map(procs.map(p => [p.pid, p]))
+    // 按名称分组，按 PID 排序（与 buildTopology 一致）
+    const groups = new Map<string, ProcessInfo[]>()
+    procs.forEach(p => {
+      const list = groups.get(p.name) ?? []
+      list.push(p)
+      groups.set(p.name, list)
+    })
+    const procByStableId = new Map<string, ProcessInfo>()
+    groups.forEach((members, name) => {
+      const sorted = [...members].sort((a, b) => a.pid - b.pid)
+      sorted.forEach((p, i) => procByStableId.set(`g-${name}-${i}`, p))
+    })
     return layoutNodes.map(n => {
-      const pid = parseInt(n.id.replace('p', ''))
-      const p = procMap.get(pid)
+      const p = procByStableId.get(n.id)
       return p ? { ...n, cpu: p.cpu_pct, mem: p.mem_mb } : n
     })
   }, [layoutNodes, procs])
