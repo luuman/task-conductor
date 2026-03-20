@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { ProjectKnowledge } from '../../../lib/api/types'
 import styles from './KnowledgePreview.module.css'
 
