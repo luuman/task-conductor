@@ -175,75 +175,58 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 
   const nodes: TopoNode[] = []
   const edges: TopoEdge[] = []
-  const pidToId = new Map<number, string>()
-  const allPids = new Set(procs.map(p => p.pid))
 
-  const groupNames = [...groups.keys()].sort((a, b) => {
-    const aCpu = Math.max(...(groups.get(a)?.map(p => p.cpu_pct) ?? [0]))
-    const bCpu = Math.max(...(groups.get(b)?.map(p => p.cpu_pct) ?? [0]))
-    return bCpu - aCpu
-  })
+  // ★ 按名称字母排序（稳定，不随 CPU 变化）
+  const groupNames = [...groups.keys()].sort()
 
   // 环形布局参数
-  const nodeSize = 64 // 双环节点直径 (outerR*2 + padding)
   const cx = 600, cy = 550
-  const innerR = 240  // 内环半径（组头）
-  const outerR = 480  // 外环半径（子节点）
-
-  // 计算外环最小角度间距（确保节点不重叠）
-  const minAngleGap = (nodeSize + 8) / outerR // 弧长 = 角度 * 半径
+  const innerR = 240
+  const outerR = 480
 
   // 统计外环子节点总数
-  const childCounts = groupNames.map(name => Math.max(groups.get(name)!.length - 1, 0))
-  const totalChildren = childCounts.reduce((s, c) => s + c, 0)
-
-  // 每个组在外环占用的角度：按子节点数分配，没有子节点的组也占一份最小角度
-  const totalSlots = Math.max(totalChildren, groupNames.length)
-  const slotAngle = (Math.PI * 2) / Math.max(totalSlots, 1)
-  // 确保 slotAngle >= minAngleGap
-  const effectiveOuterR = slotAngle < minAngleGap ? (nodeSize + 8) / slotAngle : outerR
-  const actualOuterR = Math.max(effectiveOuterR, outerR)
-
-  const viewW = (cx + actualOuterR + 80) * 2
+  const totalChildren = groupNames.reduce((s, name) => s + Math.max(groups.get(name)!.length - 1, 0), 0)
+  const viewW = (cx + outerR + 100) * 2
 
   // 中心 host 节点
   nodes.push({ id: 'root', label: 'host', x: cx, y: cy, cpu: 0, mem: 0, color: '#545d72' })
 
-  // 内环：组头均匀分布
-  // 外环：所有子节点均匀分布在整个圆上（按组连续排列）
-  let outerIdx = 0
+  // 每个组在圆上占的角度份额 = 1(组头) + 子节点数
+  // 这样组头和子节点之间有合理间距
+  const totalSlots = groupNames.reduce((s, name) => s + groups.get(name)!.length, 0)
+  let slotIdx = 0
 
-  groupNames.forEach((name, gi) => {
+  groupNames.forEach((name) => {
     const members = groups.get(name)!
     const color = procColor(name)
-    const sorted = [...members].sort((a, b) => b.cpu_pct - a.cpu_pct)
+    // ★ 按 PID 排序（PID 不变，顺序稳定）
+    const sorted = [...members].sort((a, b) => a.pid - b.pid)
 
-    // 内环组头
-    const innerAngle = (gi / groupNames.length) * Math.PI * 2 - Math.PI / 2
-    const hx = cx + Math.cos(innerAngle) * innerR
-    const hy = cy + Math.sin(innerAngle) * innerR
-
+    // ★ 组头：放在内环，角度由 slotIdx 决定
+    const headAngle = (slotIdx / totalSlots) * Math.PI * 2 - Math.PI / 2
     const head = sorted[0]
-    const headId = `p${head.pid}`
-    nodes.push({ id: headId, label: name, x: hx, y: hy, cpu: head.cpu_pct, mem: head.mem_mb, color })
-    pidToId.set(head.pid, headId)
+    const headId = `g-${name}-0`  // ★ 用名称+索引作为稳定 ID
+    nodes.push({
+      id: headId, label: name,
+      x: cx + Math.cos(headAngle) * innerR,
+      y: cy + Math.sin(headAngle) * innerR,
+      cpu: head.cpu_pct, mem: head.mem_mb, color,
+    })
     edges.push({ from: 'root', to: headId })
+    slotIdx++
 
-    // 外环子节点：每个子节点占一个 slot
-    sorted.slice(1).forEach((p) => {
-      const outerAngle = (outerIdx / Math.max(totalChildren, 1)) * Math.PI * 2 - Math.PI / 2
-      const childX = cx + Math.cos(outerAngle) * actualOuterR
-      const childY = cy + Math.sin(outerAngle) * actualOuterR
-      const cid = `p${p.pid}`
-      nodes.push({ id: cid, label: name, x: childX, y: childY, cpu: p.cpu_pct, mem: p.mem_mb, color })
-      pidToId.set(p.pid, cid)
-
-      if (p.ppid && allPids.has(p.ppid) && pidToId.has(p.ppid)) {
-        edges.push({ from: pidToId.get(p.ppid)!, to: cid })
-      } else {
-        edges.push({ from: headId, to: cid })
-      }
-      outerIdx++
+    // ★ 子节点：放在外环，紧跟在组头角度之后
+    sorted.slice(1).forEach((p, ci) => {
+      const childAngle = (slotIdx / totalSlots) * Math.PI * 2 - Math.PI / 2
+      const cid = `g-${name}-${ci + 1}`  // ★ 稳定 ID
+      nodes.push({
+        id: cid, label: name,
+        x: cx + Math.cos(childAngle) * outerR,
+        y: cy + Math.sin(childAngle) * outerR,
+        cpu: p.cpu_pct, mem: p.mem_mb, color,
+      })
+      edges.push({ from: headId, to: cid })
+      slotIdx++
     })
   })
 
