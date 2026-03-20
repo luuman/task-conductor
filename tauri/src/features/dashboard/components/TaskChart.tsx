@@ -20,6 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export function TaskChart({ tasks, loading }: Props) {
+  const { t } = useTranslation()
   const statusSegments = useMemo(() => {
     if (tasks.length === 0) return []
     const counts: Record<string, number> = {}
