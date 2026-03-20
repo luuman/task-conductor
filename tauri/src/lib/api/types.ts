@@ -44,6 +44,9 @@ export interface Task {
   stage: string
   status: string
   depends_on: string | null
+  stages: string | null           // JSON list[str]，per-task 阶段
+  prd_content: string | null      // 结构化 PRD JSON
+  interview_status: 'none' | 'active' | 'completed'
   worktree_path: string | null
   branch_name: string | null
   queued_at: string | null
@@ -52,6 +55,20 @@ export interface Task {
   created_at: string
   updated_at: string
   provider?: string
+}
+
+export interface InterviewMessage {
+  id: number
+  task_id: number
+  role: 'user' | 'assistant'
+  content: string
+  metadata?: string | null
+  created_at: string
+}
+
+export interface InterviewStartResponse {
+  system_prompt: string
+  task: Task
 }
 
 export interface StageArtifact {
