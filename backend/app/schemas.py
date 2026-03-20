@@ -58,7 +58,7 @@ class InterviewMessageOut(BaseModel):
     task_id: int
     role: str
     content: str
-    metadata: Optional[str] = None
+    extra: Optional[str] = None
     created_at: datetime
     model_config = {"from_attributes": True}
 
