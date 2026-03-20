@@ -7,6 +7,7 @@ import type {
   InlineEditRequest, InlineEditResponse,
   TranscriptMessage, ConversationNote, FileTreeNode,
   InterviewMessage, InterviewStartResponse,
+  CanvasData, PaginatedMessages,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
