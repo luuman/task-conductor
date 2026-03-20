@@ -1,0 +1,87 @@
+.row {
+  border-bottom: 1px solid var(--tc-border);
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.row td {
+  padding: 10px 12px;
+  font-size: 13px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.titleCell {
+  max-width: 300px;
+  white-space: normal !important;
+}
+
+.title {
+  font-weight: 500;
+  color: var(--tc-foreground);
+}
+
+.desc {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+  margin-top: 2px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: blink 1.4s infinite;
+}
+
+.pulse {
+  animation: pulseAnim 2s infinite;
+}
+
+.depBadge {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--tc-sidebar-item-hover);
+}
+
+.time {
+  color: var(--tc-foreground-secondary);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes pulseAnim {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
