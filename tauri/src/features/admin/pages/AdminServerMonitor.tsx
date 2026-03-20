@@ -101,6 +101,7 @@ function AreaChart({ series, colors, w, h }: { series: number[][]; colors: strin
 
 /* ── 进程卡片 ── */
 function ProcessCard({ proc, onKill }: { proc: ProcessInfo; onKill: (pid: number) => void }) {
+  const { t } = useTranslation()
   const [confirming, setConfirming] = useState(false)
   const color = procColor(proc.name)
   const cpuC = cpuColorRaw(proc.cpu_pct)
