@@ -85,7 +85,7 @@ export function TaskDependencyGraph({ tasks }: Props) {
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <span className={styles.title}>任务依赖图</span>
+        <span className={styles.title}>{t('dashboard.task_dependency')}</span>
       </div>
       <div className={styles.graphContainer}>
         <ReactFlow
