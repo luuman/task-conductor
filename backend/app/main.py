@@ -347,6 +347,7 @@ app.include_router(git_router.router)            # GET /api/projects/{id}/git/st
 app.include_router(chat_router.router)            # GET /api/chat/models
 app.include_router(ai_router.router)              # POST /api/ai/inline-edit
 app.include_router(interview_router.router)       # Interview API
+app.include_router(canvas_router.router)           # Canvas API
 app.include_router(screenshot_router.router)      # POST /api/tools/screenshot
 app.include_router(feishu_router)
 
