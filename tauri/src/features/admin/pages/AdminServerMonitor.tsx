@@ -238,8 +238,10 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid: number) => void }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
-  const { nodes, edges } = useMemo(() => buildTopology(procs), [procs])
+  const { nodes, edges, viewW } = useMemo(() => buildTopology(procs), [procs])
   const [vb, setVb] = useState({ x: 0, y: 0, w: 1000, h: 380 })
+  const initVb = useMemo(() => ({ x: 0, y: 0, w: Math.max(viewW, 800), h: 380 }), [viewW])
+  useEffect(() => { setVb(initVb) }, [initVb])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const panRef = useRef<{ startX: number; startY: number; vbx: number; vby: number } | null>(null)
   const dragRef = useRef<{ nodeId: string; dx: number; dy: number } | null>(null)
