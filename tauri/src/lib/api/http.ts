@@ -345,6 +345,41 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<string>(`/api/projects/${projectId}/git/branch-diff?${params}`)
   }
 
+  // ─── Interview API ───
+
+  startInterview(taskId: number) {
+    return this.fetch<InterviewStartResponse>(`/api/tasks/${taskId}/interview/start`, { method: 'POST' })
+  }
+
+  saveInterviewMessage(taskId: number, data: { role: string; content: string; metadata?: string }) {
+    return this.fetch<InterviewMessage>(`/api/tasks/${taskId}/interview/message`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  getInterviewMessages(taskId: number) {
+    return this.fetch<InterviewMessage[]>(`/api/tasks/${taskId}/interview/messages`)
+  }
+
+  async updatePrd(taskId: number, prd: string) {
+    const result = await this.fetch<Task>(`/api/tasks/${taskId}/prd`, {
+      method: 'PUT',
+      body: JSON.stringify({ prd }),
+    })
+    cache.invalidate(`task:${taskId}`)
+    return result
+  }
+
+  async completeInterview(taskId: number, data: { prd: string; stages: string[] }) {
+    const result = await this.fetch<Task>(`/api/tasks/${taskId}/interview/complete`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    cache.invalidate(`task:${taskId}`)
+    return result
+  }
+
   // ─── AI API ───
 
   getFileTree(projectId: number, depth = 3) {
