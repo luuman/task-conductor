@@ -47,6 +47,8 @@ export interface Task {
   stages: string | null           // JSON list[str]，per-task 阶段
   prd_content: string | null      // 结构化 PRD JSON
   interview_status: 'none' | 'active' | 'completed'
+  claude_session_id?: string | null
+  canvas_data?: string | null
   worktree_path: string | null
   branch_name: string | null
   queued_at: string | null
