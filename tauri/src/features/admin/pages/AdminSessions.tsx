@@ -1329,7 +1329,7 @@ function SessionGroup({
         const isSelected = selectedId === s.session_id
         const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
         const tags = s.note?.tags ?? []
-        const time = relativeTime(s.last_seen_at || s.started_at)
+        const time = relativeTime(s.last_seen_at || s.started_at, t)
 
         return (
           <button
