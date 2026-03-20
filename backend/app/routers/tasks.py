@@ -74,7 +74,8 @@ async def advance_stage(
     if not pipeline_engine.can_proceed(t.stage, t.status):
         raise HTTPException(400, f"Cannot advance: stage={t.stage} status={t.status}")
     try:
-        next_stage = pipeline_engine.next_stage(t.stage)
+        task_stages = get_task_stages(t)
+        next_stage = pipeline_engine.next_stage(t.stage, stages=task_stages)
     except StageTransitionError as e:
         raise HTTPException(400, str(e))
 
