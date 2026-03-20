@@ -439,6 +439,7 @@ export interface ApiAdapter {
   getProjectKnowledge(projectId: number): Promise<ProjectKnowledge[]>
   getTasks(projectId: number): Promise<Task[]>
   getTask(taskId: number): Promise<Task>
+  getTaskArtifacts(taskId: number): Promise<StageArtifact[]>
   createTask(projectId: number, data: { title: string; description?: string }): Promise<Task>
   approveTask(taskId: number, data: { action: 'approve' | 'reject'; reason?: string }): Promise<void>
   advanceTask(taskId: number): Promise<void>
