@@ -60,21 +60,21 @@ function safeDate(iso: string): Date {
 
 // ── Relative time ───────────────────────────────────────────
 
-function relativeTime(iso: string): string {
+function relativeTime(iso: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const d = safeDate(iso)
   const now = new Date()
   const diff = now.getTime() - d.getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return '\u521A\u521A' // 刚刚
-  if (mins < 60) return `${mins}\u5206\u949F\u524D`
+  if (mins < 1) return t('time.just_now')
+  if (mins < 60) return t('time.mins_ago', { n: mins })
   if (d.toDateString() === now.toDateString())
     return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
   const yesterday = new Date(now)
   yesterday.setDate(now.getDate() - 1)
   if (d.toDateString() === yesterday.toDateString())
-    return `\u6628\u5929 ${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}`
-  if (diff < 7 * 86400000) return `${Math.floor(diff / 86400000)}\u5929\u524D`
-  return `${d.getMonth() + 1}\u6708${d.getDate()}\u65E5`
+    return `${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}`
+  if (diff < 7 * 86400000) return t('time.days_ago', { n: Math.floor(diff / 86400000) })
+  return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
 // ── Group sessions by project (cwd) ────────────────────────
