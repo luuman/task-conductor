@@ -1,0 +1,76 @@
+.section {
+  border-radius: 10px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  overflow: hidden;
+}
+
+.header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.body {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.empty {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  text-align: center;
+  padding: 16px 0;
+  margin: 0;
+}
+
+.item {
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item:hover {
+  background: var(--tc-border);
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.taskName {
+  font-size: 12px;
+  color: var(--tc-foreground);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stage {
+  font-size: 10px;
+  color: var(--tc-accent, #007acc);
+  background: color-mix(in srgb, var(--tc-accent, #007acc) 15%, transparent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.snippet {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
