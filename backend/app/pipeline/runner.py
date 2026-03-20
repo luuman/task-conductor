@@ -27,10 +27,7 @@ EXECUTORS = {
 # 需要人工审批后才能推进的阶段
 APPROVAL_STAGES = {"analysis", "prd", "ui", "plan", "test", "deploy"}
 
-STAGE_ORDER = [
-    "input", "analysis", "prd", "ui", "plan",
-    "dev", "test", "deploy", "monitor", "done"
-]
+from .engine import get_task_stages, STAGE_ORDER
 
 
 def _get_context(task_id: int) -> dict:
