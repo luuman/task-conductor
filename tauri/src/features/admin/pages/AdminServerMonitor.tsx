@@ -135,11 +135,11 @@ function ProcessCard({ proc, onKill }: { proc: ProcessInfo; onKill: (pid: number
       {confirming ? (
         <div style={{ display: 'flex', gap: 4 }}>
           <button className={s.pcKill} style={{ opacity: 1, borderColor: 'var(--tc-error)', color: 'var(--tc-error)' }}
-            onClick={() => { onKill(proc.pid); setConfirming(false) }}>确认</button>
-          <button className={s.pcKill} style={{ opacity: 1 }} onClick={() => setConfirming(false)}>取消</button>
+            onClick={() => { onKill(proc.pid); setConfirming(false) }}>{t('common.confirm')}</button>
+          <button className={s.pcKill} style={{ opacity: 1 }} onClick={() => setConfirming(false)}>{t('common.cancel')}</button>
         </div>
       ) : (
-        <button className={s.pcKill} onClick={() => setConfirming(true)}>终止</button>
+        <button className={s.pcKill} onClick={() => setConfirming(true)}>{t('admin_extra.kill')}</button>
       )}
     </div>
   )
