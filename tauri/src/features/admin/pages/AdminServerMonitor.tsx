@@ -257,20 +257,27 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
 
   const getPos = (id: string) => nodePositions.get(id) ?? { x: 0, y: 0 }
 
-  // 缩放
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault()
-    const scale = e.deltaY > 0 ? 1.1 : 0.9
-    setVb(prev => {
-      const nw = prev.w * scale, nh = prev.h * scale
-      if (nw < 200 || nw > 3000) return prev
-      const svg = svgRef.current
-      if (!svg) return prev
-      const rect = svg.getBoundingClientRect()
-      const mx = (e.clientX - rect.left) / rect.width
-      const my = (e.clientY - rect.top) / rect.height
-      return { x: prev.x + (prev.w - nw) * mx, y: prev.y + (prev.h - nh) * my, w: nw, h: nh }
-    })
+  // 缩放（non-passive 才能 preventDefault 阻止外层滚动）
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const scale = e.deltaY > 0 ? 1.1 : 0.9
+      setVb(prev => {
+        const nw = prev.w * scale, nh = prev.h * scale
+        if (nw < 200 || nw > 3000) return prev
+        const svg = svgRef.current
+        if (!svg) return prev
+        const rect = svg.getBoundingClientRect()
+        const mx = (e.clientX - rect.left) / rect.width
+        const my = (e.clientY - rect.top) / rect.height
+        return { x: prev.x + (prev.w - nw) * mx, y: prev.y + (prev.h - nh) * my, w: nw, h: nh }
+      })
+    }
+    wrap.addEventListener('wheel', onWheel, { passive: false })
+    return () => wrap.removeEventListener('wheel', onWheel)
   }, [])
 
   // 平移/拖拽
