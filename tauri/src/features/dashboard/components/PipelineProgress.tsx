@@ -31,10 +31,10 @@ export function PipelineProgress({ tasks, loading }: Props) {
     return (
       <div className={styles.section}>
         <div className={styles.header}>
-          <span className={styles.title}>流水线进度</span>
+          <span className={styles.title}>{t('dashboard.pipeline_progress')}</span>
         </div>
         <div className={styles.body}>
-          <p className={styles.empty}>暂无任务</p>
+          <p className={styles.empty}>{t('dashboard.no_tasks')}</p>
         </div>
       </div>
     )
