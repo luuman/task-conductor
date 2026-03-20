@@ -1689,7 +1689,7 @@ export default function AdminSessions() {
         ) : !fileFound ? (
           <div className={styles.emptyCenter}>
             <span style={{ fontSize: 28 }}>{'\uD83D\uDCC2'}</span>
-            <p style={{ fontSize: 12 }}>{'\u5BF9\u8BDD\u8BB0\u5F55\u6587\u4EF6\u672A\u627E\u5230'}</p>
+            <p style={{ fontSize: 12 }}>{t('admin_extra.conversation_file_not_found')}</p>
           </div>
         ) : transcript.length === 0 ? (
           <div className={styles.emptyCenter}>
