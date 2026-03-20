@@ -119,6 +119,8 @@ export function Layout() {
     </AppShell>
     <NotificationPanel />
     <CommandMenu open={cmdOpen} onClose={handleCmdClose} />
+    <FloatingAssistant />
+    <PrdSidebar />
   </>
   )
 }
