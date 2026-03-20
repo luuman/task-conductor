@@ -105,7 +105,7 @@ export function TaskChart({ tasks, loading }: Props) {
         )}
 
         {/* Trend line */}
-        <div className={styles.trendLabel}>14 天活动趋势</div>
+        <div className={styles.trendLabel}>{t('dashboard.trend_14d')}</div>
         <svg viewBox={`0 0 ${svgW} ${svgH}`} className={styles.svg} preserveAspectRatio="none">
           <polyline
             points={points}
