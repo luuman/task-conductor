@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务器监控 V2 Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0c0e12;
+    --bg2: #12151c;
+    --bg3: #181c26;
+    --bg4: #1e2330;
+    --border: #252b3a;
+    --border2: #2e3648;
+    --text: #e2e6f0;
+    --text2: #8891a5;
+    --text3: #4f5870;
+    --blue: #60a5fa;
+    --green: #34d399;
+    --orange: #f97316;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --red: #f87171;
+    --cyan: #22d3ee;
+    --amber: #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    padding: 32px 40px;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Header ── */
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+  .page-header .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+  }
+  .page-sub {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 28px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 顶部 Gauge 行 ── */
+  .gauge-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .gauge-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .gauge-svg-wrap { flex-shrink: 0; }
+  .gauge-info { flex: 1; min-width: 0; }
+  .gauge-info-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 2px;
+  }
+  .gauge-info-val {
+    font-size: 22px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.1;
+  }
+  .gauge-info-sub {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .gauge-spark {
+    margin-top: 6px;
+  }
+
+  /* ── 双栏 ── */
+  .dual-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* ── 通用 Section 卡片 ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px 10px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .card-hint {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .card-body {
+    padding: 0 18px 16px;
+  }
+
+  /* ── CPU 热力网格 ── */
+  .heatmap {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 3px;
+    margin-bottom: 12px;
+  }
+  .heat-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s;
+    min-height: 22px;
+  }
+  .heat-cell:hover {
+    transform: scale(1.2);
+    z-index: 2;
+  }
+  .heat-cell::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 0;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .heat-cell:hover::after { opacity: 1; }
+
+  /* ── 面积图 ── */
+  .area-wrap {
+    position: relative;
+    margin: 8px 0;
+  }
+  .area-wrap svg { display: block; width: 100%; }
+  .area-overlay {
+    position: absolute;
+    top: 4px;
+    right: 0;
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 统计行 ── */
+  .stat-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+  }
+  .stat-item { display: flex; gap: 4px; align-items: center; }
+  .stat-dot {
+    width: 6px; height: 6px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  /* ── 内存条形图 ── */
+  .mem-bars { margin: 8px 0 12px; }
+  .mem-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .mem-bar-label {
+    font-size: 10px;
+    color: var(--text3);
+    width: 48px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .mem-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg4);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .mem-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .mem-bar-val {
+    font-size: 10px;
+    color: var(--text2);
+    width: 50px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 网络双线图 ── */
+  .net-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .net-stat {
+    background: var(--bg3);
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .net-stat-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .net-stat-val {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 磁盘IO 双列 ── */
+  .disk-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .disk-metric {
+    text-align: center;
+    padding: 10px;
+    background: var(--bg3);
+    border-radius: 6px;
+  }
+  .disk-metric-val {
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.2;
+  }
+  .disk-metric-unit {
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .disk-metric-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px;
+  }
+  .disk-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .disk-bar-track {
+    flex: 1;
+    height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .disk-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+  .disk-bar-label {
+    font-size: 9px;
+    color: var(--text3);
+    width: 30px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 温度传感器 ── */
+  .sensor-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .sensor-row:last-child { border-bottom: none; }
+  .sensor-name { color: var(--text2); }
+  .sensor-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  /* ══════════════════════════════════════════════
+     Claude 进程树 (方案 B)
+  ══════════════════════════════════════════════ */
+  .tree-section {
+    margin-bottom: 14px;
+  }
+  .tree-svg {
+    width: 100%;
+    height: 220px;
+  }
+
+  /* ══════════════════════════════════════════════
+     Claude 详情卡片 (方案 D)
+  ══════════════════════════════════════════════ */
+  .claude-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .cl-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .cl-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-1px);
+  }
+  .cl-card-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+  }
+  .cl-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .cl-card-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .cl-card-name {
+    font-weight: 600;
+    font-size: 13px;
+    flex: 1;
+  }
+  .cl-card-pid {
+    font-size: 9px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .cl-card-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .cl-card-gauges {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .mg { text-align: center; }
+  .mg svg { display: block; margin: 0 auto 2px; }
+  .mg-label {
+    font-size: 9px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .cl-card-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    font-size: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .cl-card-meta dt { color: var(--text3); }
+  .cl-card-meta dd {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+  }
+  .cl-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .cl-btn {
+    flex: 1;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Outfit', sans-serif;
+  }
+  .cl-btn:hover { border-color: var(--blue); color: var(--text); }
+  .cl-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── 三栏底部 ── */
+  .triple-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* ── 全宽 ── */
+  .full-row {
+    margin-bottom: 14px;
+  }
+
+  /* ── section label ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="page-header">
+  <h1>服务器性能监控</h1>
+  <span class="live-dot"></span>
+</div>
+<p class="page-sub">sichengli-MS-7E06 · Linux · 运行 4h · 693 进程 · 每 3s 刷新</p>
+
+<!-- ═══════ 顶部 4 Gauge ═══════ -->
+<div class="gauge-row" id="gaugeRow"></div>
+
+<!-- ═══════ CPU + 内存 双栏 ═══════ -->
+<div class="dual-row">
+  <!-- CPU -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#60a5fa22;color:var(--blue)">⚡</div>
+        CPU
+      </div>
+      <div class="card-hint">Load: 0.64 / 0.43 / 0.31 · 15 活跃</div>
+    </div>
+    <div class="card-body">
+      <!-- 热力网格 -->
+      <div class="heatmap" id="cpuHeatmap"></div>
+      <!-- 面积图 -->
+      <div class="area-wrap">
+        <svg id="cpuArea" viewBox="0 0 400 80" preserveAspectRatio="none" height="80"></svg>
+        <div class="area-overlay">60s</div>
+      </div>
+      <!-- 统计 -->
+      <div class="stat-row">
+        <span class="stat-item">User: 3.2%</span>
+        <span class="stat-item">Sys: 1.1%</span>
+        <span class="stat-item">IO: 0.3%</span>
+        <span class="stat-item">Ctx/s: 4.2k</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 内存 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#34d39922;color:var(--green)">▦</div>
+        内存
+      </div>
+      <div class="card-hint">14.22 / 31.11 GB · 16.88 GB 可用</div>
+    </div>
+    <div class="card-body">
+      <!-- 面积图 -->
+      <div class="area-wrap">
+        <svg id="memArea" viewBox="0 0 400 80" preserveAspectRatio="none" height="80"></svg>
+        <div class="area-overlay">60s</div>
+      </div>
+      <!-- 分段条形 -->
+      <div class="mem-bars">
+        <div class="mem-bar-row">
+          <span class="mem-bar-label">Used</span>
+          <div class="mem-bar-track"><div class="mem-bar-fill" style="width:46%;background:var(--green)"></div></div>
+          <span class="mem-bar-val">14.22 GB</span>
+        </div>
+        <div class="mem-bar-row">
+          <span class="mem-bar-label">Cached</span>
+          <div class="mem-bar-track"><div class="mem-bar-fill" style="width:36%;background:var(--blue)"></div></div>
+          <span class="mem-bar-val">11.30 GB</span>
+        </div>
+        <div class="mem-bar-row">
+          <span class="mem-bar-label">Buffers</span>
+          <div class="mem-bar-track"><div class="mem-bar-fill" style="width:3%;background:var(--text3)"></div></div>
+          <span class="mem-bar-val">1.02 GB</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-item">Free: 5.26 GB</span>
+        <span class="stat-item">Avail: 16.88 GB</span>
+        <span class="stat-item">Swap: 0 / 2 GB</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 网络 + 磁盘IO + 温度 三栏 ═══════ -->
+<div class="triple-row">
+  <!-- 网络 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#22d3ee22;color:var(--cyan)">⇅</div>
+        网络
+      </div>
+      <div class="card-hint">enp4s0: 192.168.1.100</div>
+    </div>
+    <div class="card-body">
+      <div class="area-wrap">
+        <svg id="netArea" viewBox="0 0 300 60" preserveAspectRatio="none" height="60"></svg>
+      </div>
+      <div class="net-stats">
+        <div class="net-stat">
+          <span class="net-stat-label">↓ In</span>
+          <span class="net-stat-val" style="color:var(--green)">12.4 <small style="font-size:10px">KB/s</small></span>
+        </div>
+        <div class="net-stat">
+          <span class="net-stat-label">↑ Out</span>
+          <span class="net-stat-val" style="color:var(--cyan)">3.8 <small style="font-size:10px">KB/s</small></span>
+        </div>
+        <div class="net-stat">
+          <span class="net-stat-label">Recv</span>
+          <span class="net-stat-val">842 MB</span>
+        </div>
+        <div class="net-stat">
+          <span class="net-stat-label">Sent</span>
+          <span class="net-stat-val">156 MB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 磁盘 IO -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#f9731622;color:var(--orange)">◉</div>
+        磁盘 I/O
+      </div>
+      <div class="card-hint">nvme0n1</div>
+    </div>
+    <div class="card-body">
+      <div class="disk-metrics">
+        <div class="disk-metric">
+          <div class="disk-metric-val" style="color:var(--green)">2.45</div>
+          <div class="disk-metric-unit">MB/s</div>
+          <div class="disk-metric-label">Read</div>
+        </div>
+        <div class="disk-metric">
+          <div class="disk-metric-val" style="color:var(--orange)">0.82</div>
+          <div class="disk-metric-unit">MB/s</div>
+          <div class="disk-metric-label">Write</div>
+        </div>
+        <div class="disk-metric">
+          <div class="disk-metric-val">1.2k</div>
+          <div class="disk-metric-label">RIOPS</div>
+        </div>
+        <div class="disk-metric">
+          <div class="disk-metric-val">340</div>
+          <div class="disk-metric-label">WIOPS</div>
+        </div>
+      </div>
+      <div class="disk-bar-row">
+        <span class="disk-bar-label">Util</span>
+        <div class="disk-bar-track"><div class="disk-bar-fill" style="width:12%;background:var(--orange)"></div></div>
+        <span class="disk-bar-label">12%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 温度 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#f8717122;color:var(--red)">🌡</div>
+        传感器
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="sensor-row"><span class="sensor-name">CPU Package</span><span class="sensor-val" style="color:var(--green)">52°C</span></div>
+      <div class="sensor-row"><span class="sensor-name">Core 0</span><span class="sensor-val">48°C</span></div>
+      <div class="sensor-row"><span class="sensor-name">Core 1</span><span class="sensor-val">50°C</span></div>
+      <div class="sensor-row"><span class="sensor-name">NVMe</span><span class="sensor-val">38°C</span></div>
+      <div class="sensor-row"><span class="sensor-name">GPU Edge</span><span class="sensor-val" style="color:var(--amber)">61°C</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Claude 进程区 ═══════ -->
+<div class="section-label">Claude 进程</div>
+
+<!-- 进程树 (方案 B) -->
+<div class="full-row">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <div class="card-title-icon" style="background:#a78bfa22;color:var(--purple)">⬡</div>
+        进程拓扑
+      </div>
+      <div class="card-hint">5 进程 · 3 活跃 · 2 空闲</div>
+    </div>
+    <div class="card-body">
+      <svg class="tree-svg" id="treeSvg" viewBox="0 0 900 220"></svg>
+    </div>
+  </div>
+</div>
+
+<!-- 详情卡片 (方案 D) -->
+<div class="full-row">
+  <div class="claude-cards" id="claudeCards"></div>
+</div>
+
+<script>
+// ── 工具函数 ──
+function gaugeRingSvg(value, color, size = 64) {
+  const r = size * 0.38, sw = size * 0.08
+  const circ = 2 * Math.PI * r
+  const offset = circ - (Math.min(value, 100) / 100) * circ
+  const cx = size / 2, cy = size / 2
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#252b3a" stroke-width="${sw}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+      stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+      style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px"/>
+    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central"
+      fill="${color}" font-size="${size*0.2}" font-weight="600" font-family="JetBrains Mono,monospace">${Math.round(value)}%</text>
+  </svg>`
+}
+
+function miniSparkSvg(data, color, w = 100, h = 24) {
+  if (data.length < 2) return ''
+  const max = Math.max(...data, 1)
+  const pts = data.map((v, i) => `${(i/(data.length-1))*w},${h-(v/max)*(h-3)-1.5}`).join(' ')
+  const fill = pts + ` ${w},${h} 0,${h}`
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block">
+    <polygon points="${fill}" fill="${color}15" />
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.2"/>
+  </svg>`
+}
+
+function areaChart(svgId, seriesData, colors, W, H) {
+  const svg = document.getElementById(svgId)
+  const N = seriesData[0].length
+  const stacked = seriesData.map((_, si) =>
+    Array.from({length:N}, (_, i) => seriesData.slice(0,si+1).reduce((s,arr)=>s+arr[i],0))
+  )
+  const maxY = Math.max(...stacked[stacked.length-1]) * 1.15
+
+  // grid
+  for (let p of [25,50,75]) {
+    const y = H - (p/maxY)*H
+    if (y<0||y>H) continue
+    const l = document.createElementNS('http://www.w3.org/2000/svg','line')
+    l.setAttribute('x1',0);l.setAttribute('y1',y);l.setAttribute('x2',W);l.setAttribute('y2',y)
+    l.setAttribute('stroke','#1a1f2a');l.setAttribute('stroke-width','0.5')
+    svg.appendChild(l)
+  }
+
+  for (let si=stacked.length-1; si>=0; si--) {
+    const upper=stacked[si], lower=si>0?stacked[si-1]:Array(N).fill(0)
+    let d=`M0,${H}`
+    for(let i=0;i<N;i++) d+=` L${(i/(N-1))*W},${H-(lower[i]/maxY)*H}`
+    for(let i=N-1;i>=0;i--) d+=` L${(i/(N-1))*W},${H-(upper[i]/maxY)*H}`
+    d+=' Z'
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path')
+    path.setAttribute('d',d)
+    path.setAttribute('fill',colors[si]+'30')
+    path.setAttribute('stroke',colors[si])
+    path.setAttribute('stroke-width','1.2')
+    svg.appendChild(path)
+  }
+}
+
+function genData(base, N=60, jitter=2) {
+  const d=[]; let v=base
+  for(let i=0;i<N;i++){v=Math.max(0.5,Math.min(base*3,v+(Math.random()-0.48)*jitter));d.push(v)}
+  return d
+}
+
+// ═══════ 顶部 Gauge ═══════
+;(function() {
+  const gauges = [
+    {label:'CPU', value:4, total:'24C/32T', color:'var(--blue)', spark:genData(4,20,1.5)},
+    {label:'MEM', value:46, total:'14.2/31.1 GB', color:'var(--green)', spark:genData(46,20,2)},
+    {label:'DISK', value:80, total:'1384/1832 GB', color:'var(--amber)', spark:genData(80,20,0.5)},
+    {label:'SWAP', value:0, total:'0/2 GB', color:'var(--text3)', spark:genData(0.1,20,0.1)},
+  ]
+  const row = document.getElementById('gaugeRow')
+  gauges.forEach(g => {
+    const c = g.value > 80 ? 'var(--red)' : g.value > 50 ? 'var(--amber)' : g.color
+    const div = document.createElement('div')
+    div.className = 'gauge-card'
+    div.innerHTML = `
+      <div class="gauge-svg-wrap">${gaugeRingSvg(g.value, c, 64)}</div>
+      <div class="gauge-info">
+        <div class="gauge-info-label">${g.label}</div>
+        <div class="gauge-info-val" style="color:${c}">${g.value}%</div>
+        <div class="gauge-info-sub">${g.total}</div>
+        <div class="gauge-spark">${miniSparkSvg(g.spark, c, 100, 20)}</div>
+      </div>
+    `
+    row.appendChild(div)
+  })
+})()
+
+// ═══════ CPU 热力图 ═══════
+;(function() {
+  const heatmap = document.getElementById('cpuHeatmap')
+  const cores = [8.4,0.7,3.3,0.7,2.7,0,3.7,0.3,6.7,0,25.2,0.3,5.6,0,4.1,0,2.7,1,1.7,0.7,0,0,0,0]
+  cores.forEach((v, i) => {
+    const cell = document.createElement('div')
+    cell.className = 'heat-cell'
+    const intensity = Math.min(v/30, 1)
+    const r = Math.round(96 + intensity * 152)
+    const g = Math.round(165 - intensity * 100)
+    const b = Math.round(250 - intensity * 130)
+    cell.style.background = intensity < 0.05 ? 'var(--bg4)' : `rgba(${r},${g},${b},${0.25 + intensity * 0.6})`
+    cell.setAttribute('data-label', `C${i}: ${v}%`)
+    cell.title = `Core ${i}: ${v}%`
+    heatmap.appendChild(cell)
+  })
+})()
+
+// ═══════ CPU 面积图 ═══════
+areaChart('cpuArea', [genData(2,60,1), genData(1.5,60,0.8)], ['#60a5fa','#a78bfa'], 400, 80)
+
+// ═══════ 内存面积图 ═══════
+areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5fa'], 400, 80)
+
+// ═══════ 网络双线图 ═══════
+;(function() {
+  const svg = document.getElementById('netArea')
+  const W=300, H=60
+  const inD=genData(12,60,5), outD=genData(4,60,2)
+  const max=Math.max(...inD,...outD)*1.2
+  function line(data,color){
+    const pts=data.map((v,i)=>`${(i/59)*W},${H-(v/max)*H}`).join(' ')
+    const fill=pts+` ${W},${H} 0,${H}`
+    const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon')
+    poly.setAttribute('points',fill);poly.setAttribute('fill',color+'18')
+    svg.appendChild(poly)
+    const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline')
+    pl.setAttribute('points',pts);pl.setAttribute('fill','none')
+    pl.setAttribute('stroke',color);pl.setAttribute('stroke-width','1.5')
+    svg.appendChild(pl)
+  }
+  line(inD,'#34d399')
+  line(outD,'#22d3ee')
+})()
+
+// ═══════ 进程树 (方案 B) ═══════
+;(function() {
+  const svg = document.getElementById('treeSvg')
+  const nodes = [
+    {id:0, x:450, y:35, r:22, label:'Host', sub:'', color:'#60a5fa'},
+    {id:1, x:160, y:120, r:20, label:'主会话', sub:'10.3% · 431MB', color:'#60a5fa'},
+    {id:2, x:450, y:120, r:14, label:'后台任务', sub:'1.2% · 210MB', color:'#34d399'},
+    {id:3, x:700, y:120, r:13, label:'Pipeline', sub:'0.5% · 180MB', color:'#f97316'},
+    {id:4, x:80, y:200, r:17, label:'Sub #1', sub:'6% · 482MB', color:'#a78bfa'},
+    {id:5, x:250, y:200, r:18, label:'Sub #2', sub:'5.3% · 591MB', color:'#f472b6'},
+  ]
+  const edges = [[0,1],[0,2],[0,3],[1,4],[1,5]]
+
+  edges.forEach(([f,t])=>{
+    const a=nodes[f], b=nodes[t]
+    const l=document.createElementNS('http://www.w3.org/2000/svg','line')
+    l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',b.x);l.setAttribute('y2',b.y)
+    l.setAttribute('stroke','#252b3a');l.setAttribute('stroke-width','1.5');l.setAttribute('stroke-dasharray','5 3')
+    svg.appendChild(l)
+    const dot=document.createElementNS('http://www.w3.org/2000/svg','circle')
+    dot.setAttribute('r','2.5');dot.setAttribute('fill',b.color)
+    const am=document.createElementNS('http://www.w3.org/2000/svg','animateMotion')
+    am.setAttribute('dur',`${1.5+Math.random()*0.8}s`);am.setAttribute('repeatCount','indefinite')
+    am.setAttribute('path',`M${a.x},${a.y} L${b.x},${b.y}`)
+    dot.appendChild(am);svg.appendChild(dot)
+  })
+
+  nodes.forEach(n=>{
+    // glow
+    const glow=document.createElementNS('http://www.w3.org/2000/svg','circle')
+    glow.setAttribute('cx',n.x);glow.setAttribute('cy',n.y);glow.setAttribute('r',n.r+4)
+    glow.setAttribute('fill','none');glow.setAttribute('stroke',n.color);glow.setAttribute('stroke-width','0.8');glow.setAttribute('opacity','0.25')
+    svg.appendChild(glow)
+    // circle
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle')
+    c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r',n.r)
+    c.setAttribute('fill',n.color+'22');c.setAttribute('stroke',n.color);c.setAttribute('stroke-width','1.5')
+    svg.appendChild(c)
+    // label
+    const t1=document.createElementNS('http://www.w3.org/2000/svg','text')
+    t1.setAttribute('x',n.x);t1.setAttribute('y',n.y - (n.sub?4:0))
+    t1.setAttribute('text-anchor','middle');t1.setAttribute('dominant-baseline','central')
+    t1.setAttribute('fill','#e2e6f0');t1.setAttribute('font-size','9');t1.setAttribute('font-weight','600')
+    t1.setAttribute('font-family','JetBrains Mono,monospace')
+    t1.textContent=n.label;svg.appendChild(t1)
+    if(n.sub){
+      const t2=document.createElementNS('http://www.w3.org/2000/svg','text')
+      t2.setAttribute('x',n.x);t2.setAttribute('y',n.y+9)
+      t2.setAttribute('text-anchor','middle');t2.setAttribute('fill','#8891a5');t2.setAttribute('font-size','7')
+      t2.setAttribute('font-family','JetBrains Mono,monospace')
+      t2.textContent=n.sub;svg.appendChild(t2)
+    }
+  })
+})()
+
+// ═══════ Claude 详情卡片 (方案 D) ═══════
+;(function() {
+  const grid = document.getElementById('claudeCards')
+  const PROCS = [
+    {pid:14821,label:'主会话',cpu:10.3,mem:431,session:'abc-1234',cwd:'task-conductor',uptime:'2h 14m',status:'active',role:'main',tools:['Read','Edit','Bash']},
+    {pid:14890,label:'Subagent #1',cpu:6.0,mem:482,session:'abc-1234-s1',cwd:'task-conductor',uptime:'1h 38m',status:'active',role:'subagent',tools:['Grep','Glob']},
+    {pid:15102,label:'Subagent #2',cpu:5.3,mem:591,session:'abc-1234-s2',cwd:'task-conductor',uptime:'0h 52m',status:'active',role:'subagent',tools:['Read','WebFetch']},
+    {pid:15340,label:'后台任务',cpu:1.2,mem:210,session:'def-5678',cwd:'another-proj',uptime:'4h 05m',status:'idle',role:'main',tools:[]},
+    {pid:15501,label:'Pipeline #3',cpu:0.5,mem:180,session:'ghi-9012',cwd:'task-conductor',uptime:'0h 12m',status:'idle',role:'pipeline',tools:['Bash']},
+  ]
+  const COLORS=['#60a5fa','#a78bfa','#f472b6','#34d399','#f97316']
+  const statusColors={active:'#34d399',idle:'#f97316'}
+  const statusLabels={active:'运行中',idle:'空闲'}
+  const roleIcons={main:'◉',subagent:'◎',pipeline:'▸'}
+
+  function mg(value,max,color,sz=44){
+    const r=sz*0.36,sw=sz*0.1,circ=2*Math.PI*r
+    const off=circ-(Math.min(value,max)/max)*circ
+    const cx=sz/2,cy=sz/2
+    return `<svg viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#252b3a" stroke-width="${sw}"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+        stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round"
+        style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px"/>
+      <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central"
+        fill="${color}" font-size="${sz*0.22}" font-weight="600" font-family="JetBrains Mono,monospace">${typeof value==='number'&&value<100?value.toFixed(1):Math.round(value)}</text>
+    </svg>`
+  }
+
+  PROCS.forEach((p,i)=>{
+    const card=document.createElement('div')
+    card.className='cl-card'
+    const sc=statusColors[p.status]
+    card.innerHTML=`
+      <div class="cl-card-bar" style="background:${COLORS[i]}"></div>
+      <div class="cl-card-head">
+        <div class="cl-card-icon" style="background:${COLORS[i]}18;color:${COLORS[i]}">${roleIcons[p.role]||'◉'}</div>
+        <div>
+          <div class="cl-card-name">${p.label}</div>
+          <div class="cl-card-pid">PID ${p.pid}</div>
+        </div>
+        <span class="cl-card-badge" style="background:${sc}18;color:${sc}">${statusLabels[p.status]}</span>
+      </div>
+      <div class="cl-card-gauges">
+        <div class="mg">${mg(p.cpu,20,p.cpu>8?'#f97316':'#60a5fa')}<div class="mg-label">CPU %</div></div>
+        <div class="mg">${mg(p.mem,700,p.mem>450?'#f97316':'#34d399')}<div class="mg-label">MEM MB</div></div>
+      </div>
+      <dl class="cl-card-meta">
+        <dt>会话</dt><dd>${p.session.slice(0,12)}</dd>
+        <dt>目录</dt><dd>${p.cwd}</dd>
+        <dt>运行</dt><dd>${p.uptime}</dd>
+        <dt>工具</dt><dd>${p.tools.join(', ')||'—'}</dd>
+      </dl>
+      <div class="cl-card-actions">
+        <button class="cl-btn">查看会话</button>
+        <button class="cl-btn danger">终止</button>
+      </div>
+    `
+    grid.appendChild(card)
+  })
+})()
+</script>
+</body>
+</html>
