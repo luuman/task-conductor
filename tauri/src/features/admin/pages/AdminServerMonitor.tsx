@@ -253,7 +253,18 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid: number) => void }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
-  const { nodes, edges, viewW } = useMemo(() => buildTopology(procs), [procs])
+  // 只在进程结构（pid 集合）变化时重算布局，CPU/MEM 变化不触发
+  const pidKey = useMemo(() => procs.map(p => p.pid).sort().join(','), [procs])
+  const { nodes: layoutNodes, edges, viewW } = useMemo(() => buildTopology(procs), [pidKey])
+  // 用最新数据更新 CPU/MEM，但不改变位置
+  const nodes = useMemo(() => {
+    const procMap = new Map(procs.map(p => [p.pid, p]))
+    return layoutNodes.map(n => {
+      const pid = parseInt(n.id.replace('p', ''))
+      const p = procMap.get(pid)
+      return p ? { ...n, cpu: p.cpu_pct, mem: p.mem_mb } : n
+    })
+  }, [layoutNodes, procs])
   const initVb = useMemo(() => ({ x: 0, y: 0, w: Math.max(viewW, 900), h: 700 }), [viewW])
   const [vb, setVb] = useState({ x: 0, y: 0, w: 900, h: 700 })
   const vbInitialized = useRef(false)
