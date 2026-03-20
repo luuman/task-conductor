@@ -371,6 +371,10 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<ProcessList>('/api/metrics/processes')
   }
 
+  killProcess(pid: number) {
+    return this.fetch<{ ok: boolean; pid: number; name: string }>(`/api/metrics/processes/${pid}/kill`, { method: 'POST' })
+  }
+
   getClaudeOverview() {
     return this.fetch<ClaudeOverview>('/api/claude-config/overview')
   }
