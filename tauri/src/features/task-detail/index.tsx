@@ -100,7 +100,7 @@ export default function TaskDetailPage() {
       <div className={styles.metaGrid}>
         <div className={styles.metaCard}>
           <div className={styles.metaLabel}>{t('task_detail.stage', '\u5F53\u524D\u9636\u6BB5')}</div>
-          <div className={styles.metaValue}>{task.stage}</div>
+          <div className={styles.metaValue}>{t(`stages.${task.stage}`)}</div>
         </div>
         <div className={styles.metaCard}>
           <div className={styles.metaLabel}>{t('task_detail.created', '\u521B\u5EFA\u65F6\u95F4')}</div>
