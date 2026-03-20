@@ -125,6 +125,7 @@ async def handle_chat_ws(ws: WebSocket):
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
                 cwd=work_dir,
+                stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
                 env=env,
