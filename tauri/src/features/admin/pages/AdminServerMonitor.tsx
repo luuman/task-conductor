@@ -228,10 +228,10 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
         edges.push({ from: headId, to: cid })
       }
     })
-    idx++
+    curX += groupW + groupGap
   })
 
-  return { nodes, edges }
+  return { nodes, edges, viewW }
 }
 
 /* ── 拓扑图组件 ── */
