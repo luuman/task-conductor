@@ -611,7 +611,7 @@ export default function AdminServerMonitor() {
   const handleKill = useCallback(async (pid: number) => {
     try {
       const res = await api.killProcess(pid)
-      setKillMsg(`已终止 ${res.name} (PID ${res.pid})`)
+      setKillMsg(t('admin_extra.killed_process', { name: res.name, pid: res.pid }))
       fetchAll()
     } catch {
       setKillMsg(`终止 PID ${pid} 失败`)
