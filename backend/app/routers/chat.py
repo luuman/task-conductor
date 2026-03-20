@@ -117,9 +117,11 @@ async def handle_chat_ws(ws: WebSocket):
 
         work_dir = cwd or os.path.expanduser("~")
 
-        # 清除 CLAUDECODE 环境变量，允许从 Claude Code 会话内启动子进程
+        # 清除 Claude Code 环境变量，允许从会话内启动子进程
         env = {**os.environ}
-        env.pop("CLAUDECODE", None)
+        for k in list(env):
+            if k.startswith("CLAUDE") or k == "CLAUDECODE":
+                env.pop(k, None)
 
         try:
             proc = await asyncio.create_subprocess_exec(
