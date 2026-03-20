@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTaskManagerData } from './hooks/useTaskManagerData'
 import { TaskTable } from './components/TaskTable'
 import { TaskFilters } from './components/TaskFilters'
 import { CreateTaskModal } from './components/CreateTaskModal'
 import { Button } from '../../ui/button'
+import { useChatStore } from '../../lib/store/chat'
 import styles from './task-manager.module.css'
 
 export default function TaskManagerPage() {
