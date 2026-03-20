@@ -1,0 +1,147 @@
+.empty {
+  text-align: center;
+  padding: 32px 0;
+  font-size: 13px;
+  color: var(--tc-foreground-secondary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.itemHeader:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.itemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stageBadge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #3b82f620;
+  color: #3b82f6;
+}
+
+.typeBadge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground-secondary);
+}
+
+.confBar {
+  width: 60px;
+  height: 6px;
+  background: var(--tc-border);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.confFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.confLabel {
+  position: absolute;
+  right: -28px;
+  top: -4px;
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+}
+
+.retryBadge {
+  font-size: 10px;
+  color: #f59e0b;
+  background: #f59e0b20;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.chevron {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+}
+
+.itemBody {
+  padding: 12px 14px;
+  border-top: 1px solid var(--tc-border);
+}
+
+.content {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tc-foreground);
+  background: var(--tc-sidebar-item-hover);
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  font-family: 'Geist Mono', monospace;
+}
+
+.meta {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+}
+
+.meta strong {
+  color: var(--tc-foreground);
+}
+
+.meta ul {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+.meta li {
+  margin-bottom: 2px;
+}
+
+.errorLog {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.errorLog pre {
+  margin: 4px 0 0;
+  padding: 8px;
+  border-radius: 6px;
+  background: #ef444410;
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
