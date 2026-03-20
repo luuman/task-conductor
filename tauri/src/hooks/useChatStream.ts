@@ -44,6 +44,8 @@ export function useChatStream() {
           fullText += text
           s.appendCurrentReply(text)
         } else if (msg.type === 'chat_done') {
+          const sessionId = msg.data?.session_id
+          if (sessionId) s.setClaudeSessionId(sessionId)
           s.setIsGenerating(false)
           s.setCurrentReply('')
           s.addMessage({
