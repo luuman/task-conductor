@@ -10,16 +10,17 @@ interface Props {
 }
 
 export function ProjectOverview({ project, tasks, loading }: Props) {
+  const { t } = useTranslation()
   const total = tasks.length
-  const inProgress = tasks.filter((t) => t.status === 'running' || t.status === 'in_progress').length
-  const completed = tasks.filter((t) => t.status === 'completed' || t.status === 'done').length
+  const inProgress = tasks.filter((tk) => tk.status === 'running' || tk.status === 'in_progress').length
+  const completed = tasks.filter((tk) => tk.status === 'completed' || tk.status === 'done').length
   const rate = total > 0 ? Math.round((completed / total) * 100) : 0
 
   const kpis = [
-    { label: '总任务', value: total },
-    { label: '进行中', value: inProgress },
-    { label: '已完成', value: completed },
-    { label: '完成率', value: `${rate}%` },
+    { label: t('dashboard.total_tasks'), value: total },
+    { label: t('dashboard.in_progress'), value: inProgress },
+    { label: t('dashboard.completed'), value: completed },
+    { label: t('dashboard.completion_rate'), value: `${rate}%` },
   ]
 
   if (loading) {
