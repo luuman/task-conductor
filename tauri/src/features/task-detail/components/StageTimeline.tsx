@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import styles from './StageTimeline.module.css'
 
 const STAGES = ['input', 'analysis', 'prd', 'ui', 'plan', 'dev', 'test', 'deploy', 'monitor', 'done']
@@ -9,6 +10,7 @@ interface StageTimelineProps {
 }
 
 export function StageTimeline({ currentStage, status }: StageTimelineProps) {
+  const { t } = useTranslation()
   const currentIdx = STAGES.indexOf(currentStage)
 
   return (
@@ -25,8 +27,8 @@ export function StageTimeline({ currentStage, status }: StageTimelineProps) {
                 <span className={styles.pulse} />
               ) : null}
             </div>
-            <span className={styles.label}>{stage}</span>
-            {APPROVAL_STAGES.has(stage) && <span className={styles.approval}>{'\u5BA1'}</span>}
+            <span className={styles.label}>{t(`stages.${stage}`)}</span>
+            {APPROVAL_STAGES.has(stage) && <span className={styles.approval}>{t('stages.approval_tag', '审')}</span>}
             {i < STAGES.length - 1 && <div className={`${styles.line} ${i < currentIdx ? styles.lineDone : ''}`} />}
           </div>
         )
