@@ -184,25 +184,43 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
   })
 
   // 环形布局参数
-  const cx = 450, cy = 350           // 中心点
-  const innerR = 140                   // 内环半径（组头）
-  const outerR = 280                   // 外环半径（子节点）
-  const viewW = (cx + outerR + 80) * 2 // 视口宽度
+  const nodeSize = 64 // 双环节点直径 (outerR*2 + padding)
+  const cx = 450, cy = 400
+  const innerR = 160  // 内环半径（组头）
+  const outerR = 320  // 外环半径（子节点）
+
+  // 计算外环最小角度间距（确保节点不重叠）
+  const minAngleGap = (nodeSize + 8) / outerR // 弧长 = 角度 * 半径
+
+  // 统计外环子节点总数
+  const childCounts = groupNames.map(name => Math.max(groups.get(name)!.length - 1, 0))
+  const totalChildren = childCounts.reduce((s, c) => s + c, 0)
+
+  // 每个组在外环占用的角度：按子节点数分配，没有子节点的组也占一份最小角度
+  const totalSlots = Math.max(totalChildren, groupNames.length)
+  const slotAngle = (Math.PI * 2) / Math.max(totalSlots, 1)
+  // 确保 slotAngle >= minAngleGap
+  const effectiveOuterR = slotAngle < minAngleGap ? (nodeSize + 8) / slotAngle : outerR
+  const actualOuterR = Math.max(effectiveOuterR, outerR)
+
+  const viewW = (cx + actualOuterR + 80) * 2
 
   // 中心 host 节点
   nodes.push({ id: 'root', label: 'host', x: cx, y: cy, cpu: 0, mem: 0, color: '#545d72' })
 
-  // 统计所有子节点总数，用于外环分配
-  const allChildren: { proc: ProcessInfo; parentId: string; color: string }[] = []
-
   // 内环：组头均匀分布
+  // 外环：所有子节点均匀分布在整个圆上（按组连续排列）
+  let outerIdx = 0
+
   groupNames.forEach((name, gi) => {
     const members = groups.get(name)!
     const color = procColor(name)
     const sorted = [...members].sort((a, b) => b.cpu_pct - a.cpu_pct)
-    const angle = (gi / groupNames.length) * Math.PI * 2 - Math.PI / 2 // 从顶部开始
-    const hx = cx + Math.cos(angle) * innerR
-    const hy = cy + Math.sin(angle) * innerR
+
+    // 内环组头
+    const innerAngle = (gi / groupNames.length) * Math.PI * 2 - Math.PI / 2
+    const hx = cx + Math.cos(innerAngle) * innerR
+    const hy = cy + Math.sin(innerAngle) * innerR
 
     const head = sorted[0]
     const headId = `p${head.pid}`
@@ -210,47 +228,23 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
     pidToId.set(head.pid, headId)
     edges.push({ from: 'root', to: headId })
 
-    // 收集子节点
-    sorted.slice(1).forEach(p => {
-      allChildren.push({ proc: p, parentId: headId, color })
+    // 外环子节点：每个子节点占一个 slot
+    sorted.slice(1).forEach((p) => {
+      const outerAngle = (outerIdx / Math.max(totalChildren, 1)) * Math.PI * 2 - Math.PI / 2
+      const childX = cx + Math.cos(outerAngle) * actualOuterR
+      const childY = cy + Math.sin(outerAngle) * actualOuterR
+      const cid = `p${p.pid}`
+      nodes.push({ id: cid, label: name, x: childX, y: childY, cpu: p.cpu_pct, mem: p.mem_mb, color })
+      pidToId.set(p.pid, cid)
+
+      if (p.ppid && allPids.has(p.ppid) && pidToId.has(p.ppid)) {
+        edges.push({ from: pidToId.get(p.ppid)!, to: cid })
+      } else {
+        edges.push({ from: headId, to: cid })
+      }
+      outerIdx++
     })
   })
-
-  // 外环：子节点围绕各自父节点的角度附近分布
-  if (allChildren.length > 0) {
-    // 按父节点分组，在父节点角度附近扇形展开
-    const childByParent = new Map<string, typeof allChildren>()
-    allChildren.forEach(c => {
-      const list = childByParent.get(c.parentId) ?? []
-      list.push(c)
-      childByParent.set(c.parentId, list)
-    })
-
-    childByParent.forEach((children, parentId) => {
-      const parentNode = nodes.find(n => n.id === parentId)
-      if (!parentNode) return
-      // 父节点角度
-      const parentAngle = Math.atan2(parentNode.y - cy, parentNode.x - cx)
-      // 子节点在父节点角度附近扇形展开
-      const spread = Math.min(0.6, (children.length * 0.15)) // 扇形角度
-      children.forEach((c, ci) => {
-        const offset = children.length <= 1 ? 0 : (ci / (children.length - 1) - 0.5) * spread * 2
-        const angle = parentAngle + offset
-        const childX = cx + Math.cos(angle) * outerR
-        const childY = cy + Math.sin(angle) * outerR
-        const cid = `p${c.proc.pid}`
-        nodes.push({ id: cid, label: c.proc.name, x: childX, y: childY, cpu: c.proc.cpu_pct, mem: c.proc.mem_mb, color: c.color })
-        pidToId.set(c.proc.pid, cid)
-
-        // ppid 优先连父进程
-        if (c.proc.ppid && allPids.has(c.proc.ppid) && pidToId.has(c.proc.ppid)) {
-          edges.push({ from: pidToId.get(c.proc.ppid)!, to: cid })
-        } else {
-          edges.push({ from: parentId, to: cid })
-        }
-      })
-    })
-  }
 
   return { nodes, edges, viewW }
 }
