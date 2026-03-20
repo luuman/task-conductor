@@ -579,5 +579,20 @@
     "monitor": "监控",
     "done": "完成",
     "approval_tag": "审"
+  },
+  "statuses": {
+    "pending": "待处理",
+    "running": "运行中",
+    "waiting_review": "待审批",
+    "approved": "已批准",
+    "done": "已完成",
+    "failed": "失败",
+    "rejected": "已拒绝"
+  },
+  "time": {
+    "just_now": "刚刚",
+    "mins_ago": "{{n}}分钟前",
+    "hours_ago": "{{n}}小时前",
+    "days_ago": "{{n}}天前"
   }
 }
