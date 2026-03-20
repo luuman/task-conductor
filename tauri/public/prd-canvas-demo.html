@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>PRD 需求画布 — 设计 Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f0f17; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #ccc; display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── 左侧需求列表 ── */
+  .sidebar { width: 240px; background: #13131d; border-right: 1px solid #1e1e2e; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-header { padding: 16px; font-size: 13px; font-weight: 600; color: #888; border-bottom: 1px solid #1e1e2e; display: flex; justify-content: space-between; align-items: center; }
+  .sidebar-header button { background: #007acc; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; }
+  .req-list { flex: 1; overflow-y: auto; padding: 8px; }
+  .req-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; transition: background .15s; display: flex; align-items: center; gap: 10px; }
+  .req-item:hover { background: #1a1a28; }
+  .req-item.active { background: #1e2a3a; border: 1px solid #007acc44; }
+  .req-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .req-dot.active { background: #10b981; animation: pulse 2s infinite; }
+  .req-dot.waiting { background: #f59e0b; }
+  .req-dot.draft { background: #6b7280; }
+  .req-dot.done { background: #3b82f6; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .req-info { flex: 1; min-width: 0; }
+  .req-title { font-size: 13px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .req-meta { font-size: 11px; color: #666; margin-top: 2px; }
+
+  /* ── 右侧主区域 ── */
+  .main { flex: 1; display: flex; flex-direction: column; }
+
+  /* 顶部标签栏 */
+  .tab-bar { display: flex; align-items: center; padding: 0 16px; height: 40px; background: #13131d; border-bottom: 1px solid #1e1e2e; gap: 4px; }
+  .tab { padding: 6px 14px; font-size: 12px; color: #888; cursor: pointer; border-radius: 6px; transition: all .15s; }
+  .tab:hover { background: #1a1a28; color: #bbb; }
+  .tab.active { background: #1e2a3a; color: #fff; }
+  .tab-indicator { font-size: 10px; margin-left: 4px; }
+
+  /* 内容区二分 */
+  .workspace { flex: 1; display: flex; overflow: hidden; }
+
+  /* ── 左半：对话 ── */
+  .chat-panel { width: 360px; border-right: 1px solid #1e1e2e; display: flex; flex-direction: column; background: #11111a; flex-shrink: 0; }
+  .chat-header { padding: 12px 16px; font-size: 12px; color: #666; border-bottom: 1px solid #1e1e2e; display: flex; justify-content: space-between; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 90%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+  .msg-user { align-self: flex-end; background: #007acc; color: #fff; border-bottom-right-radius: 4px; }
+  .msg-ai { align-self: flex-start; background: #1e1e2e; color: #ccc; border-bottom-left-radius: 4px; }
+  .msg-ai .node-ref { display: inline-block; background: #007acc33; color: #60a5fa; padding: 1px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; margin: 2px 0; }
+  .msg-ai .action-tag { display: inline-block; background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-top: 6px; }
+  .chat-input-area { padding: 12px; border-top: 1px solid #1e1e2e; display: flex; gap: 8px; }
+  .chat-input { flex: 1; background: #0f0f17; border: 1px solid #2a2a3a; border-radius: 8px; padding: 8px 12px; color: #ccc; font-size: 13px; outline: none; resize: none; font-family: inherit; }
+  .chat-input:focus { border-color: #007acc; }
+  .chat-send { background: #007acc; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: 13px; }
+
+  /* ── 右半：画布 ── */
+  .canvas-panel { flex: 1; position: relative; background: #0d0d14; overflow: hidden; }
+  .canvas-toolbar { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 5; }
+  .canvas-toolbar button { background: #1e1e2e; color: #888; border: 1px solid #2a2a3a; border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer; }
+  .canvas-toolbar button:hover { background: #2a2a3e; color: #ccc; }
+  .canvas-toolbar button.active { background: #007acc33; color: #60a5fa; border-color: #007acc55; }
+
+  /* 画布内容 - 模拟 */
+  .canvas-world { position: absolute; inset: 0; }
+
+  /* ── 模块卡片 ── */
+  .module-card {
+    position: absolute; border-radius: 12px; background: #16162266;
+    border: 1px solid #2a2a3a; backdrop-filter: blur(8px);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: box-shadow .2s, border-color .2s;
+  }
+  .module-card:hover { border-color: #007acc55; box-shadow: 0 0 20px #007acc15; }
+  .module-card-header {
+    padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #1e1e2e22; background: #1a1a2a66;
+  }
+  .module-icon { font-size: 16px; }
+  .module-name { font-size: 13px; font-weight: 600; color: #eee; flex: 1; }
+  .module-status { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+  .status-confirmed { background: #10b98122; color: #10b981; }
+  .status-discussing { background: #f59e0b22; color: #f59e0b; }
+  .status-draft { background: #6b728022; color: #6b7280; }
+  .module-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .feature-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #aaa; }
+  .feature-check { color: #10b981; }
+  .feature-pending { color: #6b7280; }
+
+  /* ── 线稿/Wireframe ── */
+  .wireframe-card {
+    position: absolute; border-radius: 10px; background: #1a1a28;
+    border: 1px dashed #3a3a5a; overflow: hidden;
+  }
+  .wireframe-header { padding: 6px 10px; background: #22223a; display: flex; align-items: center; gap: 6px; }
+  .wireframe-dots { display: flex; gap: 4px; }
+  .wireframe-dots span { width: 6px; height: 6px; border-radius: 50%; }
+  .wireframe-title { font-size: 10px; color: #888; }
+  .wireframe-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .wf-bar { height: 8px; border-radius: 4px; background: #2a2a40; }
+  .wf-input { height: 28px; border-radius: 6px; border: 1px solid #3a3a5a; background: #16162a; display: flex; align-items: center; padding: 0 8px; }
+  .wf-input span { font-size: 10px; color: #555; }
+  .wf-btn { height: 26px; border-radius: 6px; background: #007acc44; display: flex; align-items: center; justify-content: center; }
+  .wf-btn span { font-size: 10px; color: #60a5fa; }
+  .wf-avatar { width: 24px; height: 24px; border-radius: 50%; background: #3a3a5a; }
+  .wf-row { display: flex; gap: 8px; align-items: center; }
+  .wf-text { height: 6px; border-radius: 3px; background: #2a2a40; flex: 1; }
+  .wf-label { font-size: 9px; color: #555; position: absolute; bottom: 4px; right: 8px; }
+  .wf-qr { width: 50px; height: 50px; border-radius: 4px; background: #2a2a40; display: flex; align-items: center; justify-content: center; }
+  .wf-qr span { font-size: 20px; filter: grayscale(1) opacity(0.4); }
+  .wf-divider { height: 1px; background: #2a2a40; margin: 4px 0; }
+
+  /* ── 连接线 SVG ── */
+  .connections { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .connections path { fill: none; stroke-width: 1.5; stroke-linecap: round; }
+
+  /* ── 分组标签 ── */
+  .group-label {
+    position: absolute; font-size: 11px; color: #444; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .group-area {
+    position: absolute; border-radius: 16px; border: 1px solid #ffffff08;
+    background: #ffffff03;
+  }
+
+  /* ── 需求指标 ── */
+  .metrics-bar { position: absolute; bottom: 12px; left: 12px; display: flex; gap: 12px; z-index: 5; }
+  .metric { background: #1e1e2e; border: 1px solid #2a2a3a; border-radius: 8px; padding: 6px 12px; font-size: 11px; color: #888; }
+  .metric b { color: #ccc; }
+
+  /* ── 画布标注 ── */
+  .canvas-note {
+    position: absolute; background: #f59e0b22; border: 1px solid #f59e0b44;
+    border-radius: 6px; padding: 6px 10px; font-size: 10px; color: #f59e0b;
+    max-width: 160px;
+  }
+  .canvas-note::before { content: '💡'; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ── 左侧需求列表 ── -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    需求会话
+    <button>+ 新需求</button>
+  </div>
+  <div class="req-list">
+    <div class="req-item active">
+      <span class="req-dot active"></span>
+      <div class="req-info">
+        <div class="req-title">用户登录系统</div>
+        <div class="req-meta">对话中 · 6个模块 · 2分钟前</div>
+      </div>
+    </div>
+    <div class="req-item">
+      <span class="req-dot waiting"></span>
+      <div class="req-info">
+        <div class="req-title">消息推送服务</div>
+        <div class="req-meta">等待确认 · 3个模块</div>
+      </div>
+    </div>
+    <div class="req-item">
+      <span class="req-dot done"></span>
+      <div class="req-info">
+        <div class="req-title">数据报表导出</div>
+        <div class="req-meta">PRD 已确认 · 开发中</div>
+      </div>
+    </div>
+    <div class="req-item">
+      <span class="req-dot draft"></span>
+      <div class="req-info">
+        <div class="req-title">权限管理</div>
+        <div class="req-meta">草稿 · 待沟通</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 右侧主区域 ── -->
+<div class="main">
+  <!-- 标签栏 -->
+  <div class="tab-bar">
+    <div class="tab active">📋 需求画布</div>
+    <div class="tab">📄 PRD 文档</div>
+    <div class="tab">🔗 依赖关系</div>
+    <div class="tab">📊 进度总览</div>
+  </div>
+
+  <div class="workspace">
+    <!-- ── 对话面板 ── -->
+    <div class="chat-panel">
+      <div class="chat-header">
+        <span>AI 需求访谈</span>
+        <span style="color:#10b981">● 在线</span>
+      </div>
+      <div class="chat-messages">
+        <div class="msg msg-user">我想做一个用户登录系统，支持微信扫码和手机验证码登录</div>
+        <div class="msg msg-ai">
+          好的，这是一个较完整的认证系统需求。我已为你创建任务并生成初步需求结构：
+          <br><br>
+          <span class="node-ref">🔐 用户认证</span>
+          <span class="node-ref">📱 微信 OAuth</span>
+          <span class="node-ref">💬 短信验证</span>
+          <br>
+          <span class="action-tag">✨ 已生成 3 个功能模块 + 界面线稿</span>
+          <br><br>
+          几个需要确认的点：<br>
+          1. 微信登录是只支持扫码还是也要支持公众号授权？<br>
+          2. 验证码有效期和重发间隔？<br>
+          3. 需要记住登录状态吗？Token 过期策略？
+        </div>
+        <div class="msg msg-user">扫码 + 公众号都要。验证码 5 分钟有效，60 秒重发。Token 7 天过期，支持刷新</div>
+        <div class="msg msg-ai">
+          明白，已更新需求画布：
+          <br><br>
+          <span class="node-ref">📱 微信 OAuth</span> 已拆分为扫码 + 公众号两个子模块
+          <br>
+          <span class="node-ref">🔑 Token 管理</span> 新增模块
+          <br>
+          <span class="action-tag">🖼️ 已更新登录页线稿</span>
+          <br><br>
+          我在画布右侧生成了登录页的界面线稿，你看一下布局是否合理？左侧微信扫码，右侧手机验证码，底部第三方登录入口。
+        </div>
+        <div class="msg msg-user">界面线稿看着不错，手机验证码区域加一个倒计时按钮</div>
+        <div class="msg msg-ai">
+          已更新 <span class="node-ref">📱 登录页线稿</span>，倒计时按钮已添加。
+          <br><br>
+          接下来我建议讨论：<br>
+          1. 注册流程（新用户首次微信登录自动注册？）<br>
+          2. 安全策略（登录失败次数限制、IP 封禁）<br>
+          <br>
+          要继续细化哪部分？
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" placeholder="描述你的需求..." rows="1"></textarea>
+        <button class="chat-send">发送</button>
+      </div>
+    </div>
+
+    <!-- ── 画布面板 ── -->
+    <div class="canvas-panel">
+      <div class="canvas-toolbar">
+        <button class="active">自动布局</button>
+        <button>自由摆放</button>
+        <button>适应屏幕</button>
+        <button>导出 PRD</button>
+      </div>
+
+      <div class="canvas-world">
+        <!-- 连接线 -->
+        <svg class="connections" width="100%" height="100%">
+          <!-- 认证 → OAuth -->
+          <path d="M 262 125 C 310 125, 320 80, 370 80" stroke="#007acc55" />
+          <!-- 认证 → 短信 -->
+          <path d="M 262 145 C 320 145, 320 185, 370 185" stroke="#007acc55" />
+          <!-- 认证 → Token -->
+          <path d="M 262 165 C 330 165, 330 290, 370 290" stroke="#007acc55" />
+          <!-- OAuth → 登录页线稿 -->
+          <path d="M 560 80 C 610 80, 610 120, 640 120" stroke="#a855f755" stroke-dasharray="4 4" />
+          <!-- 短信 → 登录页线稿 -->
+          <path d="M 560 195 C 610 195, 615 180, 640 180" stroke="#a855f755" stroke-dasharray="4 4" />
+          <!-- 认证 → 安全策略 -->
+          <path d="M 200 180 C 200 340, 150 360, 150 390" stroke="#ef444455" />
+        </svg>
+
+        <!-- 分组区域 -->
+        <div class="group-area" style="left:20px;top:20px;width:570px;height:340px;"></div>
+        <div class="group-label" style="left:30px;top:28px;">核心认证模块</div>
+
+        <div class="group-area" style="left:620px;top:20px;width:340px;height:340px;border-color:#a855f711;background:#a855f703;"></div>
+        <div class="group-label" style="left:630px;top:28px;color:#a855f766;">界面线稿</div>
+
+        <!-- ── 功能模块卡片 ── -->
+
+        <!-- 用户认证（核心） -->
+        <div class="module-card" style="left:40px;top:60px;width:222px;">
+          <div class="module-card-header">
+            <span class="module-icon">🔐</span>
+            <span class="module-name">用户认证</span>
+            <span class="module-status status-discussing">讨论中</span>
+          </div>
+          <div class="module-body">
+            <div class="feature-item"><span class="feature-check">✓</span> 多方式登录入口</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 统一认证接口</div>
+            <div class="feature-item"><span class="feature-pending">○</span> 新用户自动注册</div>
+            <div class="feature-item"><span class="feature-pending">○</span> 登录状态管理</div>
+          </div>
+        </div>
+
+        <!-- 微信 OAuth -->
+        <div class="module-card" style="left:370px;top:50px;width:190px;">
+          <div class="module-card-header">
+            <span class="module-icon">📱</span>
+            <span class="module-name">微信 OAuth</span>
+            <span class="module-status status-confirmed">已确认</span>
+          </div>
+          <div class="module-body">
+            <div class="feature-item"><span class="feature-check">✓</span> PC 扫码登录</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 公众号授权</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 回调处理</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 用户信息获取</div>
+          </div>
+        </div>
+
+        <!-- 短信验证 -->
+        <div class="module-card" style="left:370px;top:155px;width:190px;">
+          <div class="module-card-header">
+            <span class="module-icon">💬</span>
+            <span class="module-name">短信验证</span>
+            <span class="module-status status-confirmed">已确认</span>
+          </div>
+          <div class="module-body">
+            <div class="feature-item"><span class="feature-check">✓</span> 验证码发送</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 5分钟有效期</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 60秒重发限制</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 倒计时按钮</div>
+          </div>
+        </div>
+
+        <!-- Token 管理 -->
+        <div class="module-card" style="left:370px;top:268px;width:190px;">
+          <div class="module-card-header">
+            <span class="module-icon">🔑</span>
+            <span class="module-name">Token 管理</span>
+            <span class="module-status status-confirmed">已确认</span>
+          </div>
+          <div class="module-body">
+            <div class="feature-item"><span class="feature-check">✓</span> JWT 签发</div>
+            <div class="feature-item"><span class="feature-check">✓</span> 7天过期</div>
+            <div class="feature-item"><span class="feature-check">✓</span> Refresh Token</div>
+          </div>
+        </div>
+
+        <!-- 安全策略（待讨论） -->
+        <div class="module-card" style="left:40px;top:390px;width:222px;border-color:#ef444433;">
+          <div class="module-card-header">
+            <span class="module-icon">🛡️</span>
+            <span class="module-name">安全策略</span>
+            <span class="module-status status-draft">待讨论</span>
+          </div>
+          <div class="module-body">
+            <div class="feature-item"><span class="feature-pending">○</span> 登录失败次数限制</div>
+            <div class="feature-item"><span class="feature-pending">○</span> IP 封禁策略</div>
+            <div class="feature-item"><span class="feature-pending">○</span> 异常登录检测</div>
+          </div>
+        </div>
+
+        <!-- ── 界面线稿 ── -->
+
+        <!-- 登录页线稿 -->
+        <div class="wireframe-card" style="left:640px;top:55px;width:280px;height:290px;">
+          <div class="wireframe-header">
+            <div class="wireframe-dots">
+              <span style="background:#ef4444"></span>
+              <span style="background:#f59e0b"></span>
+              <span style="background:#10b981"></span>
+            </div>
+            <span class="wireframe-title">登录页 — 桌面端</span>
+          </div>
+          <div class="wireframe-body" style="display:flex;flex-direction:row;gap:16px;padding:14px;">
+            <!-- 左侧：微信扫码 -->
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;">
+              <div style="font-size:10px;color:#666;margin-bottom:4px;">微信扫码登录</div>
+              <div class="wf-qr"><span>⊞</span></div>
+              <div style="font-size:9px;color:#555;">打开微信扫一扫</div>
+            </div>
+            <!-- 分隔 -->
+            <div style="width:1px;background:#2a2a40;"></div>
+            <!-- 右侧：手机验证码 -->
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:10px;color:#666;margin-bottom:4px;">手机号登录</div>
+              <div class="wf-input"><span>+86  手机号</span></div>
+              <div style="display:flex;gap:6px;">
+                <div class="wf-input" style="flex:1;"><span>验证码</span></div>
+                <div class="wf-btn" style="width:60px;flex-shrink:0;"><span style="font-size:9px;">获取验证码</span></div>
+              </div>
+              <div class="wf-btn"><span>登 录</span></div>
+              <div class="wf-divider"></div>
+              <div style="display:flex;justify-content:center;gap:16px;">
+                <div class="wf-avatar" style="width:20px;height:20px;background:#10b98133;"></div>
+                <div class="wf-avatar" style="width:20px;height:20px;background:#3b82f633;"></div>
+                <div class="wf-avatar" style="width:20px;height:20px;background:#ef444433;"></div>
+              </div>
+              <div style="font-size:8px;color:#444;text-align:center;">其他登录方式</div>
+            </div>
+          </div>
+          <div class="wf-label">🖼️ AI 生成线稿 · 点击编辑</div>
+        </div>
+
+        <!-- 画布标注 -->
+        <div class="canvas-note" style="left:640px;top:360px;">
+          用户确认：加倒计时按钮，发送后 60s 内不可重复点击
+        </div>
+
+        <div class="canvas-note" style="left:290px;top:395px;background:#3b82f622;border-color:#3b82f644;color:#60a5fa;">
+          AI 建议：先讨论安全策略再进入开发
+        </div>
+      </div>
+
+      <!-- 底部指标 -->
+      <div class="metrics-bar">
+        <div class="metric">模块 <b>5</b></div>
+        <div class="metric">已确认 <b>3/5</b></div>
+        <div class="metric">功能点 <b>18</b></div>
+        <div class="metric">线稿 <b>1</b></div>
+        <div class="metric">预计工期 <b>~2周</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
