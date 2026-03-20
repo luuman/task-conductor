@@ -162,7 +162,7 @@ interface TopoEdge {
 }
 
 function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEdge[]; viewW: number } {
-  if (!procs.length) return { nodes: [], edges: [] }
+  if (!procs.length) return { nodes: [], edges: [], viewW: 800 }
 
   // 按名称分组
   const groups = new Map<string, ProcessInfo[]>()
@@ -174,7 +174,6 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 
   const nodes: TopoNode[] = []
   const edges: TopoEdge[] = []
-
   const pidToId = new Map<number, string>()
   const allPids = new Set(procs.map(p => p.pid))
 
@@ -184,52 +183,74 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
     return bCpu - aCpu
   })
 
-  // 计算布局尺寸：每组至少 120px 宽，子节点间距 80px
-  const childSpacing = 80
-  const groupGap = 40 // 组之间额外间距
-  // 预计算每组宽度
-  const groupWidths = groupNames.map(name => {
-    const count = groups.get(name)!.length
-    return count <= 1 ? 80 : (count - 1) * childSpacing
-  })
-  const totalWidth = groupWidths.reduce((s, w) => s + w, 0) + (groupNames.length - 1) * groupGap + 200
-  const viewW = Math.max(totalWidth, 800)
+  // 环形布局参数
+  const cx = 450, cy = 350           // 中心点
+  const innerR = 140                   // 内环半径（组头）
+  const outerR = 280                   // 外环半径（子节点）
+  const viewW = (cx + outerR + 80) * 2 // 视口宽度
 
-  // 根节点
-  nodes.push({ id: 'root', label: 'host', x: viewW / 2, y: 40, cpu: 0, mem: 0, color: '#545d72' })
+  // 中心 host 节点
+  nodes.push({ id: 'root', label: 'host', x: cx, y: cy, cpu: 0, mem: 0, color: '#545d72' })
 
-  let curX = 100
+  // 统计所有子节点总数，用于外环分配
+  const allChildren: { proc: ProcessInfo; parentId: string; color: string }[] = []
+
+  // 内环：组头均匀分布
   groupNames.forEach((name, gi) => {
     const members = groups.get(name)!
     const color = procColor(name)
     const sorted = [...members].sort((a, b) => b.cpu_pct - a.cpu_pct)
-    const groupW = groupWidths[gi]
-    const gx = curX + groupW / 2
+    const angle = (gi / groupNames.length) * Math.PI * 2 - Math.PI / 2 // 从顶部开始
+    const hx = cx + Math.cos(angle) * innerR
+    const hy = cy + Math.sin(angle) * innerR
 
-    // 组头
     const head = sorted[0]
     const headId = `p${head.pid}`
-    nodes.push({ id: headId, label: name, x: gx, y: 160, cpu: head.cpu_pct, mem: head.mem_mb, color })
+    nodes.push({ id: headId, label: name, x: hx, y: hy, cpu: head.cpu_pct, mem: head.mem_mb, color })
     pidToId.set(head.pid, headId)
     edges.push({ from: 'root', to: headId })
 
-    // 子节点
-    sorted.slice(1).forEach((p, ci) => {
-      const cid = `p${p.pid}`
-      const childCount = sorted.length - 1
-      const cx = curX + (childCount <= 1 ? groupW / 2 : (ci / (childCount - 1)) * groupW)
-      nodes.push({ id: cid, label: name, x: cx, y: 300, cpu: p.cpu_pct, mem: p.mem_mb, color })
-      pidToId.set(p.pid, cid)
-
-      // 如果 ppid 在当前进程列表中，连到父进程
-      if (p.ppid && allPids.has(p.ppid) && pidToId.has(p.ppid)) {
-        edges.push({ from: pidToId.get(p.ppid)!, to: cid })
-      } else {
-        edges.push({ from: headId, to: cid })
-      }
+    // 收集子节点
+    sorted.slice(1).forEach(p => {
+      allChildren.push({ proc: p, parentId: headId, color })
     })
-    curX += groupW + groupGap
   })
+
+  // 外环：子节点围绕各自父节点的角度附近分布
+  if (allChildren.length > 0) {
+    // 按父节点分组，在父节点角度附近扇形展开
+    const childByParent = new Map<string, typeof allChildren>()
+    allChildren.forEach(c => {
+      const list = childByParent.get(c.parentId) ?? []
+      list.push(c)
+      childByParent.set(c.parentId, list)
+    })
+
+    childByParent.forEach((children, parentId) => {
+      const parentNode = nodes.find(n => n.id === parentId)
+      if (!parentNode) return
+      // 父节点角度
+      const parentAngle = Math.atan2(parentNode.y - cy, parentNode.x - cx)
+      // 子节点在父节点角度附近扇形展开
+      const spread = Math.min(0.6, (children.length * 0.15)) // 扇形角度
+      children.forEach((c, ci) => {
+        const offset = children.length <= 1 ? 0 : (ci / (children.length - 1) - 0.5) * spread * 2
+        const angle = parentAngle + offset
+        const childX = cx + Math.cos(angle) * outerR
+        const childY = cy + Math.sin(angle) * outerR
+        const cid = `p${c.proc.pid}`
+        nodes.push({ id: cid, label: c.proc.name, x: childX, y: childY, cpu: c.proc.cpu_pct, mem: c.proc.mem_mb, color: c.color })
+        pidToId.set(c.proc.pid, cid)
+
+        // ppid 优先连父进程
+        if (c.proc.ppid && allPids.has(c.proc.ppid) && pidToId.has(c.proc.ppid)) {
+          edges.push({ from: pidToId.get(c.proc.ppid)!, to: cid })
+        } else {
+          edges.push({ from: parentId, to: cid })
+        }
+      })
+    })
+  }
 
   return { nodes, edges, viewW }
 }
