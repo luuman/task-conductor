@@ -1,0 +1,113 @@
+.section {
+  border-radius: 10px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  overflow: hidden;
+}
+
+.header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--tc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.stageLabels {
+  display: flex;
+  gap: 0;
+}
+
+.stageLabel {
+  width: 48px;
+  text-align: center;
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+}
+
+.body {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  text-align: center;
+  padding: 16px 0;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.taskName {
+  width: 140px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--tc-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stages {
+  display: flex;
+  flex: 1;
+}
+
+.stageCell {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pending {
+  background: var(--tc-border);
+}
+
+.done {
+  background: var(--tc-success, #22c55e);
+}
+
+.current {
+  background: var(--tc-accent, #007acc);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.line {
+  flex: 1;
+  height: 2px;
+  background: var(--tc-border);
+  margin: 0 2px;
+}
+
+.lineDone {
+  background: var(--tc-success, #22c55e);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
