@@ -186,6 +186,7 @@ export interface SystemMetrics {
 
 export interface ProcessInfo {
   pid: number
+  ppid: number
   name: string
   cpu_pct: number
   mem_mb: number
