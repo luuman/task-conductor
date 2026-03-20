@@ -1163,9 +1163,20 @@ areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5
   })
 
   // 双环嵌套节点
+  // 建立关联关系图（自己 + 直接父 + 直接子）
+  const related = {}
+  nodes.forEach(n => related[n.id] = new Set([n.id]))
+  edges.forEach(([pId, cId]) => {
+    related[pId].add(cId)
+    related[cId].add(pId)
+  })
+  // 存储所有节点 group，用于 hover 置灰
+  const nodeGroups = new Map() // id → g element
+
   function drawDualRing(n) {
-    const g = el('g', {})
+    const g = el('g', { 'data-nid': n.id })
     g.style.cursor = 'pointer'
+    g.style.transition = 'opacity 0.25s'
 
     const outerR = 28       // 外环半径（CPU）
     const outerSW = 5       // 外环线宽
