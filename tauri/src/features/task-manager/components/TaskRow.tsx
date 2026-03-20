@@ -81,7 +81,7 @@ export function TaskRow({ task, onApprove, onAdvance }: TaskRowProps) {
         )}
       </td>
       <td className={styles.time}>
-        {timeAgo(task.started_at ?? task.created_at)}
+        {timeAgo(task.started_at ?? task.created_at, t)}
       </td>
       <td className={styles.actions}>
         {task.status === 'waiting_review' && (
