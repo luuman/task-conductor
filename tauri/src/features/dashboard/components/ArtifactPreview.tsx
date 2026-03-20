@@ -7,6 +7,7 @@ interface Props {
 }
 
 export function ArtifactPreview({ tasks }: Props) {
+  const { t } = useTranslation()
   // Show most recently active tasks with meaningful stages
   const active = tasks
     .filter((t) => t.stage !== 'input' && t.stage !== 'done')
