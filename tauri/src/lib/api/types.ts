@@ -446,6 +446,47 @@ export interface TranscriptMessage {
   model?: string | null
 }
 
+export interface PaginatedMessages {
+  messages: InterviewMessage[]
+  total: number
+  has_more: boolean
+}
+
+export interface CanvasData {
+  task_id: number
+  canvas_data: string | null
+}
+
+export interface CanvasNodeData {
+  id: string
+  type: 'module' | 'wireframe' | 'note' | 'group'
+  x: number
+  y: number
+  width: number
+  height: number
+  title: string
+  icon?: string
+  status?: string
+  features?: string[]
+  color?: string
+  content?: string
+}
+
+export interface CanvasEdgeData {
+  id: string
+  source: string
+  target: string
+  color?: string
+}
+
+export interface CanvasState {
+  nodes: CanvasNodeData[]
+  edges: CanvasEdgeData[]
+  zoom?: number
+  panX?: number
+  panY?: number
+}
+
 export interface ConversationNote {
   alias?: string | null
   notes?: string | null
