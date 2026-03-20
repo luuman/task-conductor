@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Task } from '../../../lib/api/types'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import styles from './TaskChart.module.css'
