@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>TaskConductor Canvas Demo — pixi.js LOD</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d14; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+  #app { width: 100vw; height: 100vh; }
+  /* HUD */
+  .hud { position: fixed; top: 16px; left: 16px; color: #888; font-size: 12px; z-index: 10; pointer-events: none; }
+  .hud b { color: #ccc; }
+  .toolbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+  .toolbar button {
+    background: #1e1e2e; color: #ccc; border: 1px solid #333; border-radius: 8px;
+    padding: 8px 16px; cursor: pointer; font-size: 13px; transition: all .15s;
+  }
+  .toolbar button:hover { background: #2a2a3e; border-color: #555; }
+  .toolbar button.active { background: #007acc; border-color: #007acc; color: #fff; }
+  .legend { position: fixed; top: 16px; right: 16px; color: #888; font-size: 11px; z-index: 10; }
+  .legend div { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@8.6.6/dist/pixi.min.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<div class="hud">
+  <div>缩放: <b id="hud-zoom">100%</b> · 节点: <b id="hud-nodes">0</b> · FPS: <b id="hud-fps">60</b></div>
+  <div style="margin-top:4px;color:#555">滚轮缩放 · 拖拽平移 · 点击选中 · 双击编辑</div>
+</div>
+<div class="legend">
+  <div><span class="dot" style="background:#10b981"></span> 已完成</div>
+  <div><span class="dot" style="background:#3b82f6"></span> 进行中</div>
+  <div><span class="dot" style="background:#f59e0b"></span> 等待审批</div>
+  <div><span class="dot" style="background:#6b7280"></span> 待开始</div>
+  <div><span class="dot" style="background:#ef4444"></span> 失败</div>
+</div>
+<div class="toolbar">
+  <button id="btn-auto" class="active">自动布局</button>
+  <button id="btn-add">+ 添加任务</button>
+  <button id="btn-fit">适应屏幕</button>
+  <button id="btn-toggle">切换 LOD</button>
+</div>
+
+<script>
+// ─── 配置 ──────────────────────────────────────────
+const COLORS = {
+  done: 0x10b981, running: 0x3b82f6, waiting_review: 0xf59e0b,
+  pending: 0x6b7280, failed: 0xef4444, approved: 0x8b5cf6,
+};
+const STAGE_NAMES = ['input','analysis','prd','ui','plan','dev','test','deploy','monitor','done'];
+const PROJECT_COLORS = [0x3b82f6, 0xa855f7, 0xf59e0b, 0x10b981, 0xef4444, 0x06b6d4];
+
+// ─── 生成 mock 数据 ──────────────────────────────────
+function generateTasks(count) {
+  const tasks = [];
+  const projects = ['TaskConductor', 'AI Platform', '数据中台', '移动端', '运维工具', '文档系统'];
+  for (let i = 0; i < count; i++) {
+    const projIdx = Math.floor(Math.random() * projects.length);
+    const stageIdx = Math.floor(Math.random() * STAGE_NAMES.length);
+    const statuses = ['done','running','waiting_review','pending','failed'];
+    const status = stageIdx === STAGE_NAMES.length - 1 ? 'done' : statuses[Math.floor(Math.random() * statuses.length)];
+    const deps = [];
+    if (i > 0 && Math.random() > 0.6) deps.push(Math.floor(Math.random() * i));
+    if (i > 1 && Math.random() > 0.8) deps.push(Math.floor(Math.random() * i));
+    tasks.push({
+      id: i,
+      title: `${projects[projIdx]}-${['用户认证','数据同步','API网关','搜索引擎','通知系统','缓存优化','日志收集','监控面板','权限管理','报表导出','文件上传','消息队列','自动部署','单元测试','性能优化','数据迁移','接口文档','错误处理','负载均衡','安全加固'][i % 20]} #${i}`,
+      project: projects[projIdx],
+      projectColor: PROJECT_COLORS[projIdx],
+      stage: STAGE_NAMES[stageIdx],
+      stageIdx,
+      status,
+      color: COLORS[status] || COLORS.pending,
+      progress: stageIdx / (STAGE_NAMES.length - 1),
+      deps,
+      x: 0, y: 0,
+      prd: Math.random() > 0.5 ? '包含3个功能模块，预计2周完成' : null,
+    });
+  }
+  return tasks;
+}
+
+// ─── Dagre-like 简易自动布局 ──────────────────────────
+function autoLayout(tasks, W, H) {
+  // 按项目分组，每组内按阶段排序
+  const groups = {};
+  tasks.forEach(t => {
+    if (!groups[t.project]) groups[t.project] = [];
+    groups[t.project].push(t);
+  });
+  const projNames = Object.keys(groups);
+  const cols = Math.ceil(Math.sqrt(projNames.length));
+  const groupW = 1800, groupH = 1200;
+
+  projNames.forEach((proj, gi) => {
+    const gx = (gi % cols) * groupW;
+    const gy = Math.floor(gi / cols) * groupH;
+    const items = groups[proj].sort((a,b) => a.stageIdx - b.stageIdx);
+    const perRow = Math.ceil(Math.sqrt(items.length));
+    items.forEach((t, i) => {
+      t.x = gx + (i % perRow) * 260 + 100;
+      t.y = gy + Math.floor(i / perRow) * 140 + 100;
+    });
+  });
+}
+
+// ─── Pixi.js 初始化 ──────────────────────────────────
+(async () => {
+const app = new PIXI.Application();
+await app.init({
+  resizeTo: document.getElementById('app'),
+  background: 0x0d0d14,
+  antialias: true,
+  resolution: window.devicePixelRatio || 1,
+  autoDensity: true,
+});
+document.getElementById('app').appendChild(app.canvas);
+
+const TASK_COUNT = 300;
+const tasks = generateTasks(TASK_COUNT);
+autoLayout(tasks, app.screen.width, app.screen.height);
+document.getElementById('hud-nodes').textContent = TASK_COUNT;
+
+// 世界容器（平移+缩放）
+const world = new PIXI.Container();
+app.stage.addChild(world);
+
+let zoom = 0.6, panX = 0, panY = 0;
+let selectedTask = null;
+let forceLod = null; // null=auto, 'far','mid','near'
+
+function updateTransform() {
+  world.scale.set(zoom);
+  world.position.set(panX, panY);
+  document.getElementById('hud-zoom').textContent = Math.round(zoom * 100) + '%';
+}
+
+// ─── 渲染层 ──────────────────────────────────────────
+const edgeLayer = new PIXI.Container();
+const cardLayer = new PIXI.Container();
+const labelLayer = new PIXI.Container();
+world.addChild(edgeLayer);
+world.addChild(cardLayer);
+world.addChild(labelLayer);
+
+// 依赖线 graphics
+const edgeGfx = new PIXI.Graphics();
+edgeLayer.addChild(edgeGfx);
+
+function drawEdges() {
+  edgeGfx.clear();
+  tasks.forEach(t => {
+    t.deps.forEach(depId => {
+      const dep = tasks[depId];
+      if (!dep) return;
+      // 贝塞尔曲线
+      const sx = dep.x + 220, sy = dep.y + 40;
+      const ex = t.x, ey = t.y + 40;
+      const mx = (sx + ex) / 2;
+      edgeGfx.moveTo(sx, sy);
+      edgeGfx.bezierCurveTo(mx, sy, mx, ey, ex, ey);
+      edgeGfx.stroke({ width: 1.5, color: 0x333355, alpha: 0.5 });
+    });
+  });
+}
+
+// ─── LOD 渲染 ──────────────────────────────────────────
+// 每张卡片的容器
+const cardContainers = [];
+
+function getLod() {
+  if (forceLod) return forceLod;
+  if (zoom < 0.25) return 'far';
+  if (zoom < 0.6) return 'mid';
+  return 'near';
+}
+
+function createCard(t) {
+  const c = new PIXI.Container();
+  c.position.set(t.x, t.y);
+  c.eventMode = 'static';
+  c.cursor = 'pointer';
+  c._task = t;
+
+  // 所有 LOD 层
+  c._far = createFarCard(t);
+  c._mid = createMidCard(t);
+  c._near = createNearCard(t);
+
+  c.addChild(c._far);
+  c.addChild(c._mid);
+  c.addChild(c._near);
+
+  // 拖拽
+  let dragging = false, dragOff = {x:0,y:0};
+  c.on('pointerdown', (e) => {
+    dragging = true;
+    const wp = world.toLocal(e.global);
+    dragOff.x = wp.x - t.x;
+    dragOff.y = wp.y - t.y;
+    selectedTask = t;
+    e.stopPropagation();
+  });
+  c.on('globalpointermove', (e) => {
+    if (!dragging) return;
+    const wp = world.toLocal(e.global);
+    t.x = wp.x - dragOff.x;
+    t.y = wp.y - dragOff.y;
+    c.position.set(t.x, t.y);
+    drawEdges();
+  });
+  c.on('pointerup', () => { dragging = false; });
+  c.on('pointerupoutside', () => { dragging = false; });
+
+  cardContainers.push(c);
+  cardLayer.addChild(c);
+  return c;
+}
+
+// LOD=far: 色块
+function createFarCard(t) {
+  const g = new PIXI.Graphics();
+  g.roundRect(0, 0, 220, 28, 4);
+  g.fill({ color: t.color, alpha: 0.6 });
+  // 细进度条
+  if (t.progress > 0) {
+    g.roundRect(0, 24, 220 * t.progress, 4, 2);
+    g.fill({ color: t.color, alpha: 0.9 });
+  }
+  return g;
+}
+
+// LOD=mid: 摘要卡片
+function createMidCard(t) {
+  const c = new PIXI.Container();
+  // 背景
+  const bg = new PIXI.Graphics();
+  bg.roundRect(0, 0, 220, 64, 6);
+  bg.fill({ color: 0x1a1a2e, alpha: 0.95 });
+  bg.roundRect(0, 0, 4, 64, 2);
+  bg.fill({ color: t.color });
+  c.addChild(bg);
+  // 标题
+  const title = new PIXI.Text({ text: t.title.length > 22 ? t.title.slice(0,22)+'…' : t.title, style: { fontSize: 12, fill: 0xcccccc, fontFamily: 'system-ui' } });
+  title.position.set(12, 8);
+  c.addChild(title);
+  // 阶段
+  const stage = new PIXI.Text({ text: t.stage, style: { fontSize: 10, fill: 0x888888, fontFamily: 'system-ui' } });
+  stage.position.set(12, 28);
+  c.addChild(stage);
+  // 进度条
+  const bar = new PIXI.Graphics();
+  bar.roundRect(12, 48, 196, 6, 3);
+  bar.fill({ color: 0x333355 });
+  bar.roundRect(12, 48, 196 * t.progress, 6, 3);
+  bar.fill({ color: t.color });
+  c.addChild(bar);
+  return c;
+}
+
+// LOD=near: 完整卡片
+function createNearCard(t) {
+  const c = new PIXI.Container();
+  // 背景 + 阴影
+  const shadow = new PIXI.Graphics();
+  shadow.roundRect(3, 3, 220, 100, 8);
+  shadow.fill({ color: 0x000000, alpha: 0.3 });
+  c.addChild(shadow);
+
+  const bg = new PIXI.Graphics();
+  bg.roundRect(0, 0, 220, 100, 8);
+  bg.fill({ color: 0x1e1e2e });
+  bg.roundRect(0, 0, 220, 100, 8);
+  bg.stroke({ width: 1, color: t.color, alpha: 0.4 });
+  // 左边色条
+  bg.roundRect(0, 0, 4, 100, 2);
+  bg.fill({ color: t.color });
+  c.addChild(bg);
+
+  // 状态圆点
+  const dot = new PIXI.Graphics();
+  dot.circle(200, 14, 5);
+  dot.fill({ color: t.color });
+  c.addChild(dot);
+
+  // 标题
+  const title = new PIXI.Text({ text: t.title.length > 26 ? t.title.slice(0,26)+'…' : t.title, style: { fontSize: 13, fill: 0xeeeeee, fontFamily: 'system-ui', fontWeight: '600' } });
+  title.position.set(14, 10);
+  c.addChild(title);
+
+  // 项目 + 阶段
+  const meta = new PIXI.Text({ text: `${t.project} · ${t.stage}`, style: { fontSize: 10, fill: 0x888888, fontFamily: 'system-ui' } });
+  meta.position.set(14, 32);
+  c.addChild(meta);
+
+  // PRD 摘要
+  if (t.prd) {
+    const prd = new PIXI.Text({ text: `📄 ${t.prd}`, style: { fontSize: 10, fill: 0x666688, fontFamily: 'system-ui', wordWrap: true, wordWrapWidth: 190 } });
+    prd.position.set(14, 50);
+    c.addChild(prd);
+  }
+
+  // 进度条
+  const bar = new PIXI.Graphics();
+  bar.roundRect(14, 84, 192, 6, 3);
+  bar.fill({ color: 0x333355 });
+  bar.roundRect(14, 84, 192 * t.progress, 6, 3);
+  bar.fill({ color: t.color });
+  c.addChild(bar);
+
+  // 阶段文字
+  const stageLabel = new PIXI.Text({ text: `${Math.round(t.progress*100)}%`, style: { fontSize: 9, fill: 0x666666, fontFamily: 'system-ui' } });
+  stageLabel.position.set(180, 72);
+  c.addChild(stageLabel);
+
+  return c;
+}
+
+// 创建所有卡片
+tasks.forEach(t => createCard(t));
+drawEdges();
+
+// LOD 切换
+let currentLod = '';
+function updateLod() {
+  const lod = getLod();
+  if (lod === currentLod) return;
+  currentLod = lod;
+  cardContainers.forEach(c => {
+    c._far.visible = lod === 'far';
+    c._mid.visible = lod === 'mid';
+    c._near.visible = lod === 'near';
+  });
+  // 边线透明度
+  edgeGfx.alpha = lod === 'far' ? 0.2 : lod === 'mid' ? 0.5 : 0.8;
+}
+updateLod();
+updateTransform();
+
+// ─── 平移 & 缩放 ──────────────────────────────────────
+let isPanning = false, lastPan = {x:0,y:0};
+
+app.canvas.addEventListener('pointerdown', (e) => {
+  if (e.target === app.canvas) {
+    isPanning = true;
+    lastPan = {x: e.clientX, y: e.clientY};
+  }
+});
+window.addEventListener('pointermove', (e) => {
+  if (!isPanning) return;
+  panX += e.clientX - lastPan.x;
+  panY += e.clientY - lastPan.y;
+  lastPan = {x: e.clientX, y: e.clientY};
+  updateTransform();
+});
+window.addEventListener('pointerup', () => { isPanning = false; });
+
+app.canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.92 : 1.08;
+  const oldZoom = zoom;
+  zoom = Math.max(0.05, Math.min(3, zoom * factor));
+  // 缩放到鼠标位置
+  const rect = app.canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  panX = mx - (mx - panX) * (zoom / oldZoom);
+  panY = my - (my - panY) * (zoom / oldZoom);
+  updateTransform();
+  updateLod();
+}, { passive: false });
+
+// ─── FPS 计数 ──────────────────────────────────────────
+let frameCount = 0, lastFpsTime = performance.now();
+app.ticker.add(() => {
+  frameCount++;
+  const now = performance.now();
+  if (now - lastFpsTime > 500) {
+    document.getElementById('hud-fps').textContent = Math.round(frameCount / ((now - lastFpsTime) / 1000));
+    frameCount = 0;
+    lastFpsTime = now;
+  }
+});
+
+// ─── 项目分组标签 ──────────────────────────────────────
+function drawGroupLabels() {
+  labelLayer.removeChildren();
+  const groups = {};
+  tasks.forEach(t => {
+    if (!groups[t.project]) groups[t.project] = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, color: t.projectColor };
+    const g = groups[t.project];
+    g.minX = Math.min(g.minX, t.x - 40);
+    g.minY = Math.min(g.minY, t.y - 50);
+    g.maxX = Math.max(g.maxX, t.x + 260);
+    g.maxY = Math.max(g.maxY, t.y + 140);
+  });
+  Object.entries(groups).forEach(([name, g]) => {
+    // 分组边框
+    const border = new PIXI.Graphics();
+    border.roundRect(g.minX, g.minY, g.maxX - g.minX, g.maxY - g.minY, 12);
+    border.stroke({ width: 1, color: g.color, alpha: 0.15 });
+    border.roundRect(g.minX, g.minY, g.maxX - g.minX, g.maxY - g.minY, 12);
+    border.fill({ color: g.color, alpha: 0.03 });
+    labelLayer.addChild(border);
+    // 标签
+    const label = new PIXI.Text({ text: name, style: { fontSize: 16, fill: g.color, fontFamily: 'system-ui', fontWeight: '700', alpha: 0.6 } });
+    label.position.set(g.minX + 12, g.minY + 8);
+    label.alpha = 0.5;
+    labelLayer.addChild(label);
+  });
+}
+drawGroupLabels();
+
+// ─── 工具栏 ──────────────────────────────────────────
+document.getElementById('btn-auto').onclick = () => {
+  autoLayout(tasks, app.screen.width, app.screen.height);
+  cardContainers.forEach(c => c.position.set(c._task.x, c._task.y));
+  drawEdges();
+  drawGroupLabels();
+};
+
+document.getElementById('btn-fit').onclick = () => {
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  tasks.forEach(t => {
+    minX = Math.min(minX, t.x);
+    minY = Math.min(minY, t.y);
+    maxX = Math.max(maxX, t.x + 220);
+    maxY = Math.max(maxY, t.y + 100);
+  });
+  const w = maxX - minX + 100, h = maxY - minY + 100;
+  zoom = Math.min(app.screen.width / w, app.screen.height / h, 1.5);
+  panX = (app.screen.width - w * zoom) / 2 - minX * zoom;
+  panY = (app.screen.height - h * zoom) / 2 - minY * zoom;
+  updateTransform();
+  updateLod();
+};
+
+document.getElementById('btn-add').onclick = () => {
+  const i = tasks.length;
+  const wp = world.toLocal({ x: app.screen.width/2, y: app.screen.height/2 });
+  const t = {
+    id: i, title: `新任务 #${i}`, project: '新项目', projectColor: 0x06b6d4,
+    stage: 'input', stageIdx: 0, status: 'pending', color: COLORS.pending,
+    progress: 0, deps: [], x: wp.x, y: wp.y, prd: null,
+  };
+  tasks.push(t);
+  createCard(t);
+  updateLod();
+  document.getElementById('hud-nodes').textContent = tasks.length;
+};
+
+document.getElementById('btn-toggle').onclick = () => {
+  const modes = [null, 'far', 'mid', 'near'];
+  const idx = modes.indexOf(forceLod);
+  forceLod = modes[(idx + 1) % modes.length];
+  const btn = document.getElementById('btn-toggle');
+  btn.textContent = forceLod ? `LOD: ${forceLod}` : '切换 LOD';
+  updateLod();
+};
+
+// 初始适应屏幕
+document.getElementById('btn-fit').click();
+
+})();
+</script>
+</body>
+</html>
