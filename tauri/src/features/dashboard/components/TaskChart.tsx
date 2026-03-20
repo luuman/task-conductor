@@ -56,7 +56,7 @@ export function TaskChart({ tasks, loading }: Props) {
   if (loading) {
     return (
       <div className={styles.section}>
-        <div className={styles.header}><span className={styles.title}>任务分布</span></div>
+        <div className={styles.header}><span className={styles.title}>{t('dashboard.task_distribution')}</span></div>
         <div className={styles.body}>
           <Skeleton variant="rect" width="100%" height={24} borderRadius={6} />
           <Skeleton variant="rect" width="100%" height={80} borderRadius={6} />
@@ -76,7 +76,7 @@ export function TaskChart({ tasks, loading }: Props) {
 
   return (
     <div className={styles.section}>
-      <div className={styles.header}><span className={styles.title}>任务分布</span></div>
+      <div className={styles.header}><span className={styles.title}>{t('dashboard.task_distribution')}</span></div>
       <div className={styles.body}>
         {/* Status bar */}
         {tasks.length > 0 ? (
