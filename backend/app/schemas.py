@@ -43,6 +43,8 @@ class TaskOut(BaseModel):
     stages: Optional[str] = None             # JSON list[str]，per-task 阶段
     prd_content: Optional[str] = None        # 结构化 PRD JSON
     interview_status: str = "none"           # none|active|completed
+    claude_session_id: Optional[str] = None  # 关联的 Claude 会话
+    canvas_data: Optional[str] = None        # Canvas JSON 数据
     worktree_path: Optional[str] = None
     branch_name: Optional[str] = None
     queued_at: Optional[datetime] = None
