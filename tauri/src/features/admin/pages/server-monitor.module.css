@@ -1,318 +1,644 @@
-/* ── Gauge ring row ── */
+/* ══════════════════════════════════════════════
+   Server Monitor V2
+   ══════════════════════════════════════════════ */
+
+/* ── 顶部 Gauge 行 ── */
 .gaugeRow {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
   margin-bottom: 20px;
 }
 
-.gauge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.gaugeSvg { flex-shrink: 0; }
-
-.gaugeValue {
-  font-size: 14px;
-  font-weight: 700;
-  fill: var(--tc-foreground);
-  font-family: 'Geist Mono', monospace;
-}
-
-.gaugeLabel {
-  font-size: 8px;
-  fill: var(--tc-foreground-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.gaugeSub {
-  font-size: 10px;
-  color: var(--tc-foreground-secondary);
-  text-align: center;
-  font-family: 'Geist Mono', monospace;
-}
-
-/* ── Dual column layout (CPU | Memory) ── */
-.dualCol {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-/* ── Combo card: left info + right processes ── */
-.comboCard {
-  border-radius: 10px;
-  border: 1px solid var(--tc-border);
+.gaugeCard {
   background: var(--tc-panel-bg);
-  overflow: hidden;
-}
-
-.comboCardHeader {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--tc-border);
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 14px;
 }
 
-.comboCardBody {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 0;
-}
+.gaugeSvgWrap { flex-shrink: 0; }
 
-.comboLeft {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-right: 1px solid var(--tc-border);
-  overflow-y: auto;
-}
+.gaugeInfo { flex: 1; min-width: 0; }
 
-.comboRight {
-  padding: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-content: flex-start;
-  overflow-y: auto;
-  max-height: 500px;
-}
-
-/* ── Bar / progress ── */
-.barRow {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.barMeta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.barLabel {
-  font-size: 11px;
-  color: var(--tc-foreground-secondary);
+.gaugeInfoLabel {
+  font-size: 10px;
+  color: var(--tc-foreground-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
   font-family: 'Geist Mono', monospace;
+  margin-bottom: 1px;
 }
 
-.barDetail {
+.gaugeInfoVal {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.1;
+}
+
+.gaugeInfoSub {
   font-size: 10px;
   color: var(--tc-foreground-secondary);
   font-family: 'Geist Mono', monospace;
 }
 
-.barTrack {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--tc-border);
+.gaugeSpark { margin-top: 4px; }
+
+/* ── 双栏 ── */
+.dualRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+/* ── 通用卡片 ── */
+.card {
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
   overflow: hidden;
 }
 
-.barFill {
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px 8px;
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tc-foreground);
+}
+
+.cardTitleIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.cardHint {
+  font-size: 10px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+}
+
+.cardBody {
+  padding: 0 16px 14px;
+}
+
+/* ── CPU 热力网格 ── */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.heatCell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s;
+  min-height: 18px;
+}
+
+.heatCell:hover {
+  transform: scale(1.2);
+  z-index: 2;
+}
+
+/* ── 面积图容器 ── */
+.areaWrap {
+  position: relative;
+  margin: 6px 0;
+}
+
+.areaWrap svg { display: block; width: 100%; }
+
+.areaOverlay {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ── 统计行 ── */
+.statRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+}
+
+/* ── 内存条形 ── */
+.memBars { margin: 6px 0 10px; }
+
+.memBarRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.memBarLabel {
+  font-size: 10px;
+  color: var(--tc-foreground-tertiary);
+  width: 48px;
+  text-align: right;
+  font-family: 'Geist Mono', monospace;
+}
+
+.memBarTrack {
+  flex: 1;
+  height: 5px;
+  background: var(--tc-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.memBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.memBarVal {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  width: 56px;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ── 三栏 ── */
+.tripleRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+/* ── 网络统计 ── */
+.netStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.netStat {
+  background: var(--tc-content-bg);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.netStatLabel {
+  font-size: 10px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+}
+
+.netStatVal {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ── 磁盘 IO ── */
+.diskMetrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.diskMetric {
+  text-align: center;
+  padding: 8px;
+  background: var(--tc-content-bg);
+  border-radius: 6px;
+}
+
+.diskMetricVal {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.2;
+}
+
+.diskMetricUnit {
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
+}
+
+.diskMetricLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+  margin-top: 2px;
+}
+
+.diskBarRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.diskBarTrack {
+  flex: 1;
+  height: 4px;
+  background: var(--tc-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.diskBarFill {
   height: 100%;
   border-radius: 2px;
 }
 
-/* ── Core grid ── */
-.coreGrid {
+.diskBarLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
+  width: 30px;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ── 传感器 ── */
+.sensorRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--tc-border);
+  font-size: 12px;
+}
+
+.sensorRow:last-child { border-bottom: none; }
+
+.sensorName { color: var(--tc-foreground-secondary); }
+
+.sensorVal {
+  font-family: 'Geist Mono', monospace;
+  font-weight: 500;
+}
+
+/* ── Section 分隔 ── */
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tc-foreground-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: 'Geist Mono', monospace;
+  margin: 20px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionLabel::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--tc-border);
+}
+
+/* ── 进程总览卡片 ── */
+.procGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+.pc {
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.pc:hover {
+  border-color: var(--tc-border-active);
+  transform: translateY(-1px);
+}
+
+.pcBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.pcHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pcDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.pcName {
+  font-weight: 600;
+  font-size: 11px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pcPid {
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+}
+
+.pcMetrics {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pcMetric { flex: 1; }
+
+.pcMetricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+
+.pcMetricLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+}
+
+.pcMetricVal {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+}
+
+.pcTrack {
+  height: 3px;
+  background: var(--tc-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pcFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.pcKill {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 3px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tc-foreground-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  opacity: 0;
+}
+
+.pc:hover .pcKill { opacity: 1; }
+
+.pcKill:hover {
+  border-color: var(--tc-error);
+  color: var(--tc-error);
+}
+
+/* ── 拓扑图 ── */
+.topoWrap {
+  position: relative;
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--tc-content-bg);
+  cursor: grab;
+}
+
+.topoWrap:active { cursor: grabbing; }
+
+.topoSvg {
+  display: block;
+  width: 100%;
+  height: 460px;
+  user-select: none;
+}
+
+.topoControls {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
   gap: 4px;
 }
 
-/* ── Stat rows ── */
-.statRow {
+.topoCtrlBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  color: var(--tc-foreground-secondary);
+  font-size: 14px;
+  cursor: pointer;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: 'Geist Mono', monospace;
+}
+
+.topoCtrlBtn:hover {
+  border-color: var(--tc-border-active);
+  color: var(--tc-foreground);
+}
+
+.topoLegend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
   flex-wrap: wrap;
+}
+
+.topoLegendDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ── Claude 详情卡片 ── */
+.claudeCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 12px;
 }
 
-.statItem {
-  font-size: 11px;
-  color: var(--tc-foreground-secondary);
-  font-family: 'Geist Mono', monospace;
-}
-
-/* ── Tags ── */
-.tagGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tag {
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: var(--tc-sidebar-item-hover);
-  color: var(--tc-foreground-secondary);
-  font-family: 'Geist Mono', monospace;
-}
-
-/* ── Process card grid ── */
-.procGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px;
-}
-
-/* ── Process card ── */
-.procCard {
-  width: 120px;
-  border-radius: 6px;
-  border: 1px solid var(--tc-border);
-  border-left: 3px solid var(--tc-border);
+.clCard {
   background: var(--tc-content-bg);
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  cursor: default;
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s;
 }
 
-.procCard:hover {
-  border-color: color-mix(in srgb, var(--tc-border-active) 40%, var(--tc-border));
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+.clCard:hover {
+  border-color: var(--tc-border-active);
+  transform: translateY(-1px);
 }
 
-.procCardHeader {
+.clCardBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.clCardHead {
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-width: 0;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.procDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.clCardIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
-.procCardName {
-  font-size: 11px;
+.clCardName {
   font-weight: 600;
-  color: var(--tc-foreground);
-  font-family: 'Geist Mono', monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px;
   flex: 1;
-  min-width: 0;
 }
 
-.procCardPid {
+.clCardPid {
   font-size: 9px;
-  color: var(--tc-foreground-secondary);
+  color: var(--tc-foreground-tertiary);
   font-family: 'Geist Mono', monospace;
-  flex-shrink: 0;
 }
 
-.procCardBody {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.procMetricVal {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--tc-foreground);
-  font-family: 'Geist Mono', monospace;
-  line-height: 1;
-}
-
-.procMetricSub {
+.clCardBadge {
   font-size: 9px;
-  color: var(--tc-foreground-secondary);
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.clCardGauges {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.miniGauge { text-align: center; }
+.miniGauge svg { display: block; margin: 0 auto 2px; }
+
+.miniGaugeLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-tertiary);
   font-family: 'Geist Mono', monospace;
 }
 
-.procCardFooter {
-  display: flex;
-  gap: 4px;
-  justify-content: flex-end;
-}
-
-/* ── Kill buttons ── */
-.killBtn {
+.clCardMeta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 10px;
   font-size: 10px;
-  padding: 2px 10px;
-  border-radius: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--tc-border);
+}
+
+.clCardMetaDt { color: var(--tc-foreground-tertiary); }
+
+.clCardMetaDd {
+  text-align: right;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+}
+
+.clCardActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.clBtn {
+  flex: 1;
+  padding: 5px;
+  border-radius: 5px;
   border: 1px solid var(--tc-border);
   background: transparent;
   color: var(--tc-foreground-secondary);
+  font-size: 10px;
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.killBtn:hover {
+.clBtn:hover {
+  border-color: var(--tc-border-active);
+  color: var(--tc-foreground);
+}
+
+.clBtnDanger:hover {
   border-color: var(--tc-error);
   color: var(--tc-error);
-  background: color-mix(in srgb, var(--tc-error) 8%, transparent);
-}
-
-.killConfirm {
-  font-size: 10px;
-  padding: 2px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--tc-error);
-  background: color-mix(in srgb, var(--tc-error) 15%, transparent);
-  color: var(--tc-error);
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.15s;
-}
-
-.killConfirm:hover {
-  background: color-mix(in srgb, var(--tc-error) 25%, transparent);
-}
-
-.killCancel {
-  font-size: 10px;
-  padding: 2px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--tc-border);
-  background: transparent;
-  color: var(--tc-foreground-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.killCancel:hover {
-  color: var(--tc-foreground);
-}
-
-/* ── Sparkline ── */
-.sparkWrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sparkLabel {
-  font-size: 10px;
-  color: var(--tc-foreground-secondary);
-  width: 36px;
-  flex-shrink: 0;
-  font-family: 'Geist Mono', monospace;
-}
-
-.sparkSvg {
-  width: 100%;
-  height: auto;
 }
 
 /* ── Toast ── */
@@ -336,9 +662,31 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Live dot ── */
+.liveDot {
+  width: 8px;
+  height: 8px;
+  background: var(--tc-success);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+}
+
 /* ── Responsive ── */
+@media (max-width: 1100px) {
+  .tripleRow { grid-template-columns: 1fr 1fr; }
+}
+
 @media (max-width: 900px) {
-  .dualCol {
-    grid-template-columns: 1fr;
-  }
+  .dualRow { grid-template-columns: 1fr; }
+  .gaugeRow { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .tripleRow { grid-template-columns: 1fr; }
 }
