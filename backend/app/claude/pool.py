@@ -47,6 +47,7 @@ class ClaudePool:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
             env=env,
+            limit=16 * 1024 * 1024,  # 16MB，避免长 JSON 行超限
         )
         self._processes[task_id] = proc
 
