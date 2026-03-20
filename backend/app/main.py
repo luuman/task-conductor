@@ -58,11 +58,14 @@ def _print_table(rows: list[tuple[str, str]], title: str = "") -> None:
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
 
-    # 飞书字段迁移
+    # 字段迁移
     from sqlalchemy import text
     for col_sql in [
         "ALTER TABLE projects ADD COLUMN feishu_chat_id VARCHAR(100)",
         "ALTER TABLE projects ADD COLUMN feishu_sync BOOLEAN DEFAULT 0",
+        "ALTER TABLE tasks ADD COLUMN stages TEXT",
+        "ALTER TABLE tasks ADD COLUMN prd_content TEXT",
+        "ALTER TABLE tasks ADD COLUMN interview_status VARCHAR(20) DEFAULT 'none'",
     ]:
         try:
             with engine.connect() as conn:
