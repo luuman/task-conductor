@@ -403,7 +403,7 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
           const toCenterDx = mx - (nodes[0]?.x ?? 600)
           const toCenterDy = my - (nodes[0]?.y ?? 550)
           const dist = Math.hypot(toCenterDx, toCenterDy) || 1
-          const bulge = 30 // 曲线外凸程度
+          const bulge = 50 // 曲线外凸程度
           const cpx = mx + (toCenterDx / dist) * bulge
           const cpy = my + (toCenterDy / dist) * bulge
           const d = `M${from.x},${from.y} Q${cpx},${cpy} ${to.x},${to.y}`
@@ -423,7 +423,7 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
           const toCenterDx = mx - (nodes[0]?.x ?? 600)
           const toCenterDy = my - (nodes[0]?.y ?? 550)
           const dist = Math.hypot(toCenterDx, toCenterDy) || 1
-          const bulge = 30
+          const bulge = 50
           const cpx = mx + (toCenterDx / dist) * bulge
           const cpy = my + (toCenterDy / dist) * bulge
           return (
