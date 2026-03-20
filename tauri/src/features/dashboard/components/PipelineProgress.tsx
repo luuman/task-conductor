@@ -43,7 +43,7 @@ export function PipelineProgress({ tasks, loading }: Props) {
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <span className={styles.title}>流水线进度</span>
+        <span className={styles.title}>{t('dashboard.pipeline_progress')}</span>
         <span className={styles.stageLabels}>
           {STAGES.map((s) => (
             <span key={s} className={styles.stageLabel}>{s}</span>
