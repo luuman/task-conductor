@@ -268,7 +268,7 @@ export default function AdminServerMonitor() {
                 )}
               </div>
               <div className={s.comboRight}>
-                {procs ? procs.by_cpu.map((p) => (
+                {procs ? groupAndSort(procs.by_cpu, 'cpu_pct').map((p) => (
                   <ProcessCard key={p.pid} proc={p} color={getProcessColor(p.name, colorMap)}
                     metric={`${p.cpu_pct}%`} metricLabel="CPU" subMetric={`${p.mem_mb}MB`} subLabel="MEM" onKill={handleKill} />
                 )) : Array.from({ length: 6 }).map((_, i) => (
