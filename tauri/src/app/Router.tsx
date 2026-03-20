@@ -19,6 +19,7 @@ const AdminServerMonitor = lazy(() => import('../features/admin/pages/AdminServe
 const FilesPage         = lazy(() => import('../features/files'))
 const GitPage           = lazy(() => import('../features/git'))
 const TaskManagerPage   = lazy(() => import('../features/task-manager'))
+const TaskDetailPage    = lazy(() => import('../features/task-detail'))
 
 const PlaceholderPage = lazy(() =>
   Promise.resolve({ default: () => <div className="placeholder-page">Coming soon</div> })
