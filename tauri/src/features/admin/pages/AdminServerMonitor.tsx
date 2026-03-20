@@ -344,7 +344,6 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
         ref={svgRef}
         className={s.topoSvg}
         viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
-        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
       >
         <defs>
