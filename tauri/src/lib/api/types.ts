@@ -195,6 +195,7 @@ export interface ProcessInfo {
 export interface ProcessList {
   by_cpu: ProcessInfo[]
   by_mem: ProcessInfo[]
+  all: ProcessInfo[]
 }
 
 export interface HookEntry {
