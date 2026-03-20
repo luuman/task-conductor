@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude 进程可视化 — 4 种方案 Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d0f12;
+    --bg2: #141820;
+    --bg3: #1a1f2a;
+    --border: #262d3a;
+    --text: #e4e8f0;
+    --text2: #8891a5;
+    --text3: #545d72;
+    --accent: #60a5fa;
+    --green: #34d399;
+    --orange: #f97316;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --red: #f87171;
+    --cyan: #22d3ee;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    padding: 40px 48px;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .page-hint {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 48px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 方案标题 ── */
+  .scheme {
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .scheme-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+  .scheme-tag.b { background: var(--green); }
+  .scheme-tag.c { background: var(--orange); }
+  .scheme-tag.d { background: var(--purple); }
+
+  .scheme-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .scheme-desc {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 20px;
+  }
+
+  /* ══════════════════════════════════════════════
+     方案 A: 气泡图
+  ══════════════════════════════════════════════ */
+  .bubble-container {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+  }
+  .bubble-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+    animation: bubbleIn 0.8s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .bubble:hover {
+    transform: scale(1.08);
+    z-index: 10;
+  }
+  @keyframes bubbleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .bubble-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .bubble-stat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+  }
+  .bubble-legend {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .bubble-legend span::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── 气泡 tooltip ── */
+  .bubble-tip {
+    display: none;
+    position: absolute;
+    background: #1e2330;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    z-index: 20;
+    pointer-events: none;
+    min-width: 180px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .bubble:hover .bubble-tip { display: block; }
+  .bubble-tip b { color: var(--accent); }
+
+  /* ══════════════════════════════════════════════
+     方案 B: 进程树 / 拓扑
+  ══════════════════════════════════════════════ */
+  .tree-container {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tree-svg {
+    width: 100%;
+    height: 320px;
+  }
+  .tree-node {
+    cursor: pointer;
+  }
+  .tree-node:hover .tree-node-bg {
+    filter: brightness(1.3);
+  }
+
+  /* ══════════════════════════════════════════════
+     方案 C: 堆叠面积图
+  ══════════════════════════════════════════════ */
+  .area-container {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .area-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .area-header h3 {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .area-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg3);
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .area-tab {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+  }
+  .area-tab.active {
+    background: var(--border);
+    color: var(--text);
+  }
+  .area-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .area-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+  }
+  .area-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* ══════════════════════════════════════════════
+     方案 D: 卡片 + 环形图
+  ══════════════════════════════════════════════ */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .proc-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+    animation: cardIn 0.5s ease both;
+  }
+  .proc-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .proc-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .proc-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .proc-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .proc-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .proc-card-name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .proc-card-pid {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .proc-card-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .proc-card-gauges {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 12px 0 16px;
+  }
+  .mini-gauge {
+    text-align: center;
+  }
+  .mini-gauge svg {
+    display: block;
+    margin: 0 auto 4px;
+  }
+  .mini-gauge-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .mini-gauge-val {
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .proc-card-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    font-size: 11px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .proc-card-meta dt {
+    color: var(--text3);
+  }
+  .proc-card-meta dd {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+  }
+  .proc-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .proc-card-btn {
+    flex: 1;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .proc-card-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .proc-card-btn.danger:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  /* ── 分隔线 ── */
+  .divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 48px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Claude 进程可视化 Mockup</h1>
+<p class="page-hint">4 种图形化方案对比 · 模拟数据</p>
+
+<!-- ════════════════════════════════════════════════════
+     方案 A: 气泡图
+════════════════════════════════════════════════════ -->
+<div class="scheme">
+  <span class="scheme-tag">方案 A</span>
+  <div class="scheme-title">气泡图</div>
+  <p class="scheme-desc">面积 = 内存占用，颜色深浅 = CPU 负载，hover 看详情。一眼看出谁最"胖"、谁最"忙"。</p>
+  <div class="bubble-container">
+    <div class="bubble-canvas" id="bubbleCanvas"></div>
+    <div class="bubble-legend">
+      <span>面积 = 内存</span>
+      <span>颜色深浅 = CPU</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════════════
+     方案 B: 进程树
+════════════════════════════════════════════════════ -->
+<div class="scheme">
+  <span class="scheme-tag b">方案 B</span>
+  <div class="scheme-title">进程树 / 拓扑图</div>
+  <p class="scheme-desc">展示主进程 → subagent 父子关系，节点大小 = 内存，连线动画表示活跃通信。</p>
+  <div class="tree-container">
+    <svg class="tree-svg" id="treeSvg" viewBox="0 0 900 320"></svg>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════════════
+     方案 C: 堆叠面积图
+════════════════════════════════════════════════════ -->
+<div class="scheme">
+  <span class="scheme-tag c">方案 C</span>
+  <div class="scheme-title">实时堆叠面积图</div>
+  <p class="scheme-desc">类似 Activity Monitor，每个 Claude 进程一层颜色，实时展示 CPU/内存随时间变化。</p>
+  <div class="area-container">
+    <div class="area-header">
+      <h3>Claude 进程 CPU 占用趋势</h3>
+      <div class="area-tabs">
+        <button class="area-tab active">CPU</button>
+        <button class="area-tab">内存</button>
+        <button class="area-tab">60s</button>
+        <button class="area-tab">5m</button>
+      </div>
+    </div>
+    <svg id="areaSvg" width="100%" height="200" viewBox="0 0 800 200" preserveAspectRatio="none"></svg>
+    <div class="area-legend" id="areaLegend"></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════════════
+     方案 D: 卡片 + 环形图
+════════════════════════════════════════════════════ -->
+<div class="scheme">
+  <span class="scheme-tag d">方案 D</span>
+  <div class="scheme-title">详情卡片 + 双环仪表</div>
+  <p class="scheme-desc">每个 Claude 进程一张卡片，CPU/内存各一个环形仪表，底部显示会话 ID、项目目录、运行时长等元数据。</p>
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<script>
+// ── Mock 数据 ──────────────────────────────────────
+const PROCS = [
+  { pid: 14821, name: 'claude', label: '主会话', cpu: 10.3, mem: 431, session: 'abc-1234', cwd: '~/code2/task-conductor', uptime: '2h 14m', status: 'active', role: 'main', tools: ['Read', 'Edit', 'Bash'] },
+  { pid: 14890, name: 'claude', label: 'Subagent #1', cpu: 6.0, mem: 482, session: 'abc-1234-sub1', cwd: '~/code2/task-conductor', uptime: '1h 38m', status: 'active', role: 'subagent', parent: 14821, tools: ['Grep', 'Glob'] },
+  { pid: 15102, name: 'claude', label: 'Subagent #2', cpu: 5.3, mem: 591, session: 'abc-1234-sub2', cwd: '~/code2/task-conductor', uptime: '0h 52m', status: 'active', role: 'subagent', parent: 14821, tools: ['Read', 'WebFetch'] },
+  { pid: 15340, name: 'claude', label: '后台任务', cpu: 1.2, mem: 210, session: 'def-5678', cwd: '~/code2/another-proj', uptime: '4h 05m', status: 'idle', role: 'main', tools: [] },
+  { pid: 15501, name: 'claude', label: 'Pipeline #3', cpu: 0.5, mem: 180, session: 'ghi-9012', cwd: '~/code2/task-conductor', uptime: '0h 12m', status: 'idle', role: 'pipeline', tools: ['Bash'] },
+]
+
+const COLORS = ['#60a5fa', '#a78bfa', '#f472b6', '#34d399', '#f97316']
+
+// ═══════════════════════════════════════════════════
+// 方案 A: 气泡图
+// ═══════════════════════════════════════════════════
+;(function renderBubbles() {
+  const canvas = document.getElementById('bubbleCanvas')
+  const rect = canvas.getBoundingClientRect()
+  // 预设位置（避免重叠）
+  const positions = [
+    { x: 0.25, y: 0.35 },
+    { x: 0.50, y: 0.50 },
+    { x: 0.72, y: 0.30 },
+    { x: 0.15, y: 0.65 },
+    { x: 0.60, y: 0.72 },
+  ]
+
+  PROCS.forEach((p, i) => {
+    const size = Math.max(60, Math.sqrt(p.mem) * 4.2)
+    const opacity = 0.35 + Math.min(p.cpu / 15, 1) * 0.65
+    const color = COLORS[i]
+    const pos = positions[i]
+
+    const el = document.createElement('div')
+    el.className = 'bubble'
+    el.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: calc(${pos.x * 100}% - ${size/2}px);
+      top: calc(${pos.y * 100}% - ${size/2}px);
+      background: radial-gradient(circle at 35% 35%, ${color}dd, ${color}66);
+      opacity: ${opacity};
+      box-shadow: 0 0 ${p.cpu * 3}px ${color}44, inset 0 0 ${size/3}px rgba(255,255,255,0.08);
+      animation-delay: ${i * 0.12}s;
+    `
+    el.innerHTML = `
+      <span class="bubble-name">${p.label}</span>
+      <span class="bubble-stat">${p.mem}MB · ${p.cpu}%</span>
+      <div class="bubble-tip" style="top:${size+8}px; left:50%; transform:translateX(-50%);">
+        <b>${p.label}</b><br>
+        PID: ${p.pid}<br>
+        CPU: ${p.cpu}% · MEM: ${p.mem}MB<br>
+        会话: ${p.session}<br>
+        目录: ${p.cwd}<br>
+        运行: ${p.uptime}
+      </div>
+    `
+    canvas.appendChild(el)
+  })
+})()
+
+// ═══════════════════════════════════════════════════
+// 方案 B: 进程树
+// ═══════════════════════════════════════════════════
+;(function renderTree() {
+  const svg = document.getElementById('treeSvg')
+
+  const nodes = [
+    { id: 0, x: 450, y: 50, r: 30, label: 'Claude Code\nHost', color: '#60a5fa', cpu: '—', mem: '—' },
+    { id: 1, x: 200, y: 160, r: 26, label: '主会话\nPID 14821', color: '#60a5fa', cpu: '10.3%', mem: '431MB' },
+    { id: 2, x: 500, y: 160, r: 18, label: '后台任务\nPID 15340', color: '#34d399', cpu: '1.2%', mem: '210MB' },
+    { id: 3, x: 750, y: 160, r: 16, label: 'Pipeline\nPID 15501', color: '#f97316', cpu: '0.5%', mem: '180MB' },
+    { id: 4, x: 120, y: 280, r: 22, label: 'Sub #1\nPID 14890', color: '#a78bfa', cpu: '6%', mem: '482MB' },
+    { id: 5, x: 290, y: 280, r: 24, label: 'Sub #2\nPID 15102', color: '#f472b6', cpu: '5.3%', mem: '591MB' },
+  ]
+
+  const edges = [
+    [0, 1], [0, 2], [0, 3], [1, 4], [1, 5]
+  ]
+
+  // 连线
+  edges.forEach(([from, to]) => {
+    const a = nodes[from], b = nodes[to]
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y)
+    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y)
+    line.setAttribute('stroke', '#2a3244')
+    line.setAttribute('stroke-width', '2')
+    line.setAttribute('stroke-dasharray', '6 4')
+    svg.appendChild(line)
+
+    // 动画圆点
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    dot.setAttribute('r', '3')
+    dot.setAttribute('fill', b.color)
+    const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion')
+    anim.setAttribute('dur', `${1.5 + Math.random()}s`)
+    anim.setAttribute('repeatCount', 'indefinite')
+    anim.setAttribute('path', `M${a.x},${a.y} L${b.x},${b.y}`)
+    dot.appendChild(anim)
+    svg.appendChild(dot)
+  })
+
+  // 节点
+  nodes.forEach(n => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.classList.add('tree-node')
+
+    // 光晕
+    const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    glow.setAttribute('cx', n.x); glow.setAttribute('cy', n.y)
+    glow.setAttribute('r', n.r + 6)
+    glow.setAttribute('fill', 'none')
+    glow.setAttribute('stroke', n.color)
+    glow.setAttribute('stroke-width', '1')
+    glow.setAttribute('opacity', '0.3')
+    g.appendChild(glow)
+
+    // 主圆
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    circle.classList.add('tree-node-bg')
+    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y)
+    circle.setAttribute('r', n.r)
+    circle.setAttribute('fill', n.color + '33')
+    circle.setAttribute('stroke', n.color)
+    circle.setAttribute('stroke-width', '2')
+    g.appendChild(circle)
+
+    // 标签
+    const lines = n.label.split('\n')
+    lines.forEach((line, i) => {
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+      text.setAttribute('x', n.x)
+      text.setAttribute('y', n.y + (i - (lines.length-1)/2) * 12)
+      text.setAttribute('text-anchor', 'middle')
+      text.setAttribute('dominant-baseline', 'central')
+      text.setAttribute('fill', '#e4e8f0')
+      text.setAttribute('font-size', i === 0 ? '10' : '8')
+      text.setAttribute('font-family', 'JetBrains Mono, monospace')
+      text.setAttribute('font-weight', i === 0 ? '600' : '400')
+      text.textContent = line
+      g.appendChild(text)
+    })
+
+    // 右下角 CPU 标注
+    if (n.cpu !== '—') {
+      const badge = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+      badge.setAttribute('x', n.x + n.r + 4)
+      badge.setAttribute('y', n.y + n.r - 2)
+      badge.setAttribute('fill', n.color)
+      badge.setAttribute('font-size', '9')
+      badge.setAttribute('font-family', 'JetBrains Mono, monospace')
+      badge.textContent = `${n.cpu} · ${n.mem}`
+      g.appendChild(badge)
+    }
+
+    svg.appendChild(g)
+  })
+})()
+
+// ═══════════════════════════════════════════════════
+// 方案 C: 堆叠面积图
+// ═══════════════════════════════════════════════════
+;(function renderArea() {
+  const svg = document.getElementById('areaSvg')
+  const legend = document.getElementById('areaLegend')
+  const W = 800, H = 200
+  const N = 60 // 60 个时间点
+
+  const labels = ['主会话', 'Sub #1', 'Sub #2', '后台任务', 'Pipeline']
+  const baseCpu = [10, 6, 5, 1.2, 0.5]
+  const colors = COLORS
+
+  // 生成模拟数据
+  const series = baseCpu.map((base, si) => {
+    const data = []
+    let v = base
+    for (let i = 0; i < N; i++) {
+      v = Math.max(0.1, Math.min(30, v + (Math.random() - 0.48) * 3))
+      data.push(v)
+    }
+    return data
+  })
+
+  // 累加
+  const stacked = series.map((_, si) =>
+    Array.from({ length: N }, (_, i) =>
+      series.slice(0, si + 1).reduce((sum, s) => sum + s[i], 0)
+    )
+  )
+
+  const maxY = Math.max(...stacked[stacked.length - 1]) * 1.1
+
+  // 画 Y 轴网格
+  for (let pct = 0; pct <= 100; pct += 25) {
+    const y = H - (pct / 100) * H * (100 / maxY) / 100 * (maxY / 100) * H / H * H / maxY * pct / 100 * maxY / 100
+    // simplified
+    const yy = H - (pct / maxY) * H
+    if (yy < 0 || yy > H) continue
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    line.setAttribute('x1', 0); line.setAttribute('y1', yy)
+    line.setAttribute('x2', W); line.setAttribute('y2', yy)
+    line.setAttribute('stroke', '#1e2536'); line.setAttribute('stroke-width', '1')
+    svg.appendChild(line)
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    text.setAttribute('x', 4); text.setAttribute('y', yy - 3)
+    text.setAttribute('fill', '#545d72'); text.setAttribute('font-size', '9')
+    text.setAttribute('font-family', 'JetBrains Mono, monospace')
+    text.textContent = `${pct}%`
+    svg.appendChild(text)
+  }
+
+  // 从后往前画面积
+  for (let si = stacked.length - 1; si >= 0; si--) {
+    const upper = stacked[si]
+    const lower = si > 0 ? stacked[si - 1] : Array(N).fill(0)
+
+    let d = `M0,${H}`
+    for (let i = 0; i < N; i++) {
+      d += ` L${(i / (N - 1)) * W},${H - (lower[i] / maxY) * H}`
+    }
+    for (let i = N - 1; i >= 0; i--) {
+      d += ` L${(i / (N - 1)) * W},${H - (upper[i] / maxY) * H}`
+    }
+    d += ' Z'
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path.setAttribute('d', d)
+    path.setAttribute('fill', colors[si] + '55')
+    path.setAttribute('stroke', colors[si])
+    path.setAttribute('stroke-width', '1.5')
+    svg.appendChild(path)
+  }
+
+  // 图例
+  labels.forEach((label, i) => {
+    const item = document.createElement('div')
+    item.className = 'area-legend-item'
+    item.innerHTML = `<div class="area-legend-dot" style="background:${colors[i]}"></div>${label} (${baseCpu[i]}%)`
+    legend.appendChild(item)
+  })
+})()
+
+// ═══════════════════════════════════════════════════
+// 方案 D: 卡片 + 环形图
+// ═══════════════════════════════════════════════════
+;(function renderCards() {
+  const grid = document.getElementById('cardsGrid')
+
+  function miniGaugeSvg(value, max, color, size = 52) {
+    const r = size * 0.38, sw = size * 0.09
+    const circ = 2 * Math.PI * r
+    const offset = circ - (Math.min(value, max) / max) * circ
+    const cx = size / 2, cy = size / 2
+    return `
+      <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#262d3a" stroke-width="${sw}" />
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+          stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+          style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px;transition:stroke-dashoffset 0.6s" />
+        <text x="${cx}" y="${cx}" text-anchor="middle" dominant-baseline="central"
+          fill="${color}" font-size="11" font-weight="600" font-family="JetBrains Mono,monospace">
+          ${typeof value === 'number' && value < 100 ? value.toFixed(1) : Math.round(value)}
+        </text>
+      </svg>
+    `
+  }
+
+  const statusColors = { active: '#34d399', idle: '#f97316' }
+  const statusLabels = { active: '运行中', idle: '空闲' }
+  const roleIcons = { main: '◉', subagent: '◎', pipeline: '▸' }
+
+  PROCS.forEach((p, i) => {
+    const card = document.createElement('div')
+    card.className = 'proc-card'
+    card.style.animationDelay = `${i * 0.08}s`
+    card.style.setProperty('--accent', COLORS[i])
+    card.querySelector?.('::before')
+    card.innerHTML = `
+      <style>.proc-card:nth-child(${i+1})::before { background: ${COLORS[i]}; }</style>
+      <div class="proc-card-head">
+        <div class="proc-card-icon" style="background:${COLORS[i]}22;color:${COLORS[i]};font-size:18px;">
+          ${roleIcons[p.role] || '◉'}
+        </div>
+        <div class="proc-card-info">
+          <div class="proc-card-name">${p.label}</div>
+          <div class="proc-card-pid">PID ${p.pid} · ${p.role}</div>
+        </div>
+        <span class="proc-card-status" style="background:${statusColors[p.status]}22;color:${statusColors[p.status]}">
+          ${statusLabels[p.status]}
+        </span>
+      </div>
+      <div class="proc-card-gauges">
+        <div class="mini-gauge">
+          ${miniGaugeSvg(p.cpu, 20, p.cpu > 8 ? '#f97316' : '#60a5fa')}
+          <div class="mini-gauge-label">CPU %</div>
+        </div>
+        <div class="mini-gauge">
+          ${miniGaugeSvg(p.mem, 700, p.mem > 450 ? '#f97316' : '#34d399')}
+          <div class="mini-gauge-label">MEM MB</div>
+        </div>
+      </div>
+      <dl class="proc-card-meta">
+        <dt>会话 ID</dt><dd>${p.session.slice(0,12)}</dd>
+        <dt>工作目录</dt><dd>${p.cwd.split('/').pop()}</dd>
+        <dt>运行时长</dt><dd>${p.uptime}</dd>
+        <dt>最近工具</dt><dd>${p.tools.join(', ') || '—'}</dd>
+      </dl>
+      <div class="proc-card-actions">
+        <button class="proc-card-btn">查看会话</button>
+        <button class="proc-card-btn danger">终止</button>
+      </div>
+    `
+    grid.appendChild(card)
+  })
+})()
+</script>
+</body>
+</html>
