@@ -568,6 +568,11 @@ export interface ApiAdapter {
   updatePrd(taskId: number, prd: string): Promise<Task>
   completeInterview(taskId: number, data: { prd: string; stages: string[] }): Promise<Task>
 
+  // ─── Canvas ───
+  getCanvasData(taskId: number): Promise<CanvasData>
+  saveCanvasData(taskId: number, data: string): Promise<CanvasData>
+  getInterviewMessagesPaginated(taskId: number, beforeId?: number, limit?: number): Promise<PaginatedMessages>
+
   // ─── AI ───
   aiInlineEdit(req: InlineEditRequest): Promise<InlineEditResponse>
 
