@@ -62,8 +62,9 @@
 }
 
 .comboCardBody {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
 }
 
 .comboLeft {
@@ -71,7 +72,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-bottom: 1px solid var(--tc-border);
+  border-right: 1px solid var(--tc-border);
+  overflow-y: auto;
 }
 
 .comboRight {
@@ -81,7 +83,7 @@
   gap: 6px;
   align-content: flex-start;
   overflow-y: auto;
-  max-height: 360px;
+  max-height: 500px;
 }
 
 /* ── Bar / progress ── */
