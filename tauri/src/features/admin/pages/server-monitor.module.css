@@ -155,18 +155,19 @@
 .procCardHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
 }
 
 .procDot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .procCardName {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--tc-foreground);
   font-family: 'Geist Mono', monospace;
@@ -174,10 +175,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+  min-width: 0;
 }
 
 .procCardPid {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--tc-foreground-secondary);
   font-family: 'Geist Mono', monospace;
   flex-shrink: 0;
@@ -185,17 +187,17 @@
 
 .procCardBody {
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
 .procMetric {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
 }
 
 .procMetricVal {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--tc-foreground);
   font-family: 'Geist Mono', monospace;
@@ -203,7 +205,7 @@
 }
 
 .procMetricLabel {
-  font-size: 9px;
+  font-size: 8px;
   color: var(--tc-foreground-secondary);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -211,7 +213,7 @@
 
 .procCardFooter {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   justify-content: flex-end;
 }
 
