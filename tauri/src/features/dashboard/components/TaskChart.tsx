@@ -101,7 +101,7 @@ export function TaskChart({ tasks, loading }: Props) {
             </div>
           </>
         ) : (
-          <p className={styles.empty}>暂无任务数据</p>
+          <p className={styles.empty}>{t('dashboard.no_task_data')}</p>
         )}
 
         {/* Trend line */}
