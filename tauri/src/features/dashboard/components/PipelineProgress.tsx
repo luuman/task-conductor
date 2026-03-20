@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Task } from '../../../lib/api/types'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import styles from './PipelineProgress.module.css'
@@ -50,7 +51,7 @@ export function PipelineProgress({ tasks, loading }: Props) {
       </div>
       <div className={styles.body}>
         {tasks.map((task) => {
-          const currentIdx = STAGES.indexOf(task.current_stage)
+          const currentIdx = STAGES.indexOf(task.stage)
           return (
             <div key={task.id} className={styles.row}>
               <span className={styles.taskName} title={task.title}>
