@@ -518,6 +518,13 @@ export interface ApiAdapter {
   gitBranchFiles(projectId: number, branch: string, base?: string): Promise<BranchFileChange[]>
   gitBranchDiff(projectId: number, branch: string, file: string, base?: string): Promise<string>
 
+  // ─── Interview ───
+  startInterview(taskId: number): Promise<InterviewStartResponse>
+  saveInterviewMessage(taskId: number, data: { role: string; content: string; metadata?: string }): Promise<InterviewMessage>
+  getInterviewMessages(taskId: number): Promise<InterviewMessage[]>
+  updatePrd(taskId: number, prd: string): Promise<Task>
+  completeInterview(taskId: number, data: { prd: string; stages: string[] }): Promise<Task>
+
   // ─── AI ───
   aiInlineEdit(req: InlineEditRequest): Promise<InlineEditResponse>
 
