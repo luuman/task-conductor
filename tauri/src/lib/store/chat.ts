@@ -61,6 +61,7 @@ export const useChatStore = create<ChatStore>()((set) => ({
   currentReply: '',
   isGenerating: false,
   systemPrompt: '',
+  claudeSessionId: null,
 
   prdContent: null,
   prdSidebarOpen: false,
