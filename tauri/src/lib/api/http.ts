@@ -351,7 +351,7 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<InterviewStartResponse>(`/api/tasks/${taskId}/interview/start`, { method: 'POST' })
   }
 
-  saveInterviewMessage(taskId: number, data: { role: string; content: string; metadata?: string }) {
+  saveInterviewMessage(taskId: number, data: { role: string; content: string; extra?: string }) {
     return this.fetch<InterviewMessage>(`/api/tasks/${taskId}/interview/message`, {
       method: 'POST',
       body: JSON.stringify(data),
