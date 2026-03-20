@@ -63,7 +63,7 @@ export function TaskRow({ task, onApprove, onAdvance }: TaskRowProps) {
           className={styles.badge}
           style={{ background: `${STAGE_COLORS[task.stage] ?? '#6b7280'}20`, color: STAGE_COLORS[task.stage] ?? '#6b7280' }}
         >
-          {task.stage}
+          {t(`stages.${task.stage}`)}
         </span>
       </td>
       <td>
@@ -72,7 +72,7 @@ export function TaskRow({ task, onApprove, onAdvance }: TaskRowProps) {
           style={{ background: `${STATUS_COLORS[task.status] ?? '#6b7280'}20`, color: STATUS_COLORS[task.status] ?? '#6b7280' }}
         >
           {task.status === 'running' && <span className={styles.dot} />}
-          {task.status}
+          {t(`statuses.${task.status}`)}
         </span>
       </td>
       <td>
