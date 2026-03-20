@@ -161,7 +161,7 @@ interface TopoEdge {
   to: string
 }
 
-function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEdge[] } {
+function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEdge[]; viewW: number } {
   if (!procs.length) return { nodes: [], edges: [] }
 
   // 按名称分组
