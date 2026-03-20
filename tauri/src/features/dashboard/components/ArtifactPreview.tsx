@@ -17,11 +17,11 @@ export function ArtifactPreview({ tasks }: Props) {
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <span className={styles.title}>阶段产物</span>
+        <span className={styles.title}>{t('dashboard.stage_artifacts')}</span>
       </div>
       <div className={styles.body}>
         {active.length === 0 ? (
-          <p className={styles.empty}>暂无活跃阶段</p>
+          <p className={styles.empty}>{t('dashboard.no_active_stages')}</p>
         ) : (
           active.map((t) => (
             <div key={t.id} className={styles.item}>
