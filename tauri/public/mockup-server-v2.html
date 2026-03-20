@@ -1227,29 +1227,45 @@ areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5
       fill: n.color + '15'
     }))
 
-    // CPU 百分比（外环上方）
-    const cpuText = el('text', {
-      x: n.x, y: n.y - outerR - 7,
-      'text-anchor': 'middle', fill: cpuColor,
-      'font-size': '9', 'font-weight': '600',
-      'font-family': 'JetBrains Mono,monospace'
-    })
-    cpuText.textContent = n.cpu > 0 ? n.cpu + '%' : ''
-    g.appendChild(cpuText)
+    // CPU% 沿外环顶部弧线显示
+    if (n.cpu > 0) {
+      const cpuPathId = 'cpu-arc-' + n.id
+      const cpuArcPath = el('path', {
+        id: cpuPathId,
+        d: `M${n.x - outerR},${n.y} A${outerR},${outerR} 0 0,1 ${n.x + outerR},${n.y}`,
+        fill: 'none', stroke: 'none'
+      })
+      g.appendChild(cpuArcPath)
+      const cpuTp = el('text', {
+        fill: cpuColor, 'font-size': '7.5', 'font-weight': '700',
+        'font-family': 'JetBrains Mono,monospace'
+      })
+      const cpuUse = el('textPath', { href: '#' + cpuPathId, startOffset: '50%', 'text-anchor': 'middle' })
+      cpuUse.textContent = n.cpu + '%'
+      cpuTp.appendChild(cpuUse)
+      g.appendChild(cpuTp)
+    }
 
-    // MEM 值（外环下方）
-    const memText = el('text', {
-      x: n.x, y: n.y + outerR + 13,
-      'text-anchor': 'middle', fill: memColor,
-      'font-size': '8', 'font-weight': '500',
+    // MEM 沿内环底部弧线显示
+    const memPathId = 'mem-arc-' + n.id
+    const memArcPath = el('path', {
+      id: memPathId,
+      d: `M${n.x + innerR},${n.y} A${innerR},${innerR} 0 0,1 ${n.x - innerR},${n.y}`,
+      fill: 'none', stroke: 'none'
+    })
+    g.appendChild(memArcPath)
+    const memTp = el('text', {
+      fill: memColor, 'font-size': '7', 'font-weight': '600',
       'font-family': 'JetBrains Mono,monospace'
     })
-    memText.textContent = n.mem > 1000 ? (n.mem/1024).toFixed(1)+'G' : n.mem + 'M'
-    g.appendChild(memText)
+    const memUse = el('textPath', { href: '#' + memPathId, startOffset: '50%', 'text-anchor': 'middle' })
+    memUse.textContent = n.mem > 1000 ? (n.mem/1024).toFixed(1)+'G' : n.mem + 'M'
+    memTp.appendChild(memUse)
+    g.appendChild(memTp)
 
     // 中心文字（进程名）
     const nameText = el('text', {
-      x: n.x, y: n.y,
+      x: n.x, y: n.y + 1,
       'text-anchor': 'middle', 'dominant-baseline': 'central',
       fill: '#e2e6f0', 'font-size': '8', 'font-weight': '600',
       'font-family': 'JetBrains Mono,monospace'
