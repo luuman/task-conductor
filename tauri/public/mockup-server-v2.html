@@ -1363,8 +1363,9 @@ areaChart('memArea', [genData(14,60,0.5), genData(11,60,0.3)], ['#34d399','#60a5
   // ── 节点拖拽 ──────────────────────────────
   // 重新渲染连线和节点的函数
   function redraw() {
-    // 清空 SVG
+    // 清空 SVG 和 nodeGroups
     while (svg.firstChild) svg.removeChild(svg.firstChild)
+    nodeGroups.clear()
     // 重画连线
     edges.forEach(([fId, tId]) => {
       const a = nodeMap[fId], b = nodeMap[tId]
