@@ -1722,7 +1722,7 @@ export default function AdminSessions() {
               {showJumpBtn && (
                 <button className={styles.jumpToBottom} onClick={jumpToBottom}>
                   <IconChevronDown size={14} />
-                  <span>{'\u6700\u65B0'}</span>
+                  <span>{t('admin_extra.latest')}</span>
                 </button>
               )}
             </div>
