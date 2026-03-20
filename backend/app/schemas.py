@@ -28,7 +28,7 @@ class ProjectOut(BaseModel):
 
 class TaskCreate(BaseModel):
     title: str
-    description: str
+    description: Optional[str] = ""
     depends_on: Optional[list[int]] = None   # 前置任务 ID 列表
 
 
