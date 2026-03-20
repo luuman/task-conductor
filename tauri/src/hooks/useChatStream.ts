@@ -12,14 +12,11 @@ function getWsBaseUrl(): string {
 
 export function useChatStream() {
   const wsRef = useRef<WebSocket | null>(null)
-  const {
-    setIsGenerating, setCurrentReply, appendCurrentReply,
-    addMessage, systemPrompt, pageContext,
-  } = useChatStore()
 
   const send = useCallback((message: string) => {
-    setIsGenerating(true)
-    setCurrentReply('')
+    const store = useChatStore.getState()
+    store.setIsGenerating(true)
+    store.setCurrentReply('')
 
     const baseUrl = getWsBaseUrl()
     const ws = new WebSocket(`${baseUrl}/ws/chat`)
@@ -28,6 +25,7 @@ export function useChatStream() {
     let fullText = ''
 
     ws.onopen = () => {
+      const { systemPrompt, pageContext } = useChatStore.getState()
       ws.send(JSON.stringify({
         type: 'chat',
         message,
@@ -39,14 +37,15 @@ export function useChatStream() {
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data)
+        const s = useChatStore.getState()
         if (msg.type === 'chat_chunk') {
           const text = msg.data?.text || ''
           fullText += text
-          appendCurrentReply(text)
+          s.appendCurrentReply(text)
         } else if (msg.type === 'chat_done') {
-          setIsGenerating(false)
-          setCurrentReply('')
-          addMessage({
+          s.setIsGenerating(false)
+          s.setCurrentReply('')
+          s.addMessage({
             id: Date.now(),
             task_id: 0,
             role: 'assistant',
@@ -55,9 +54,9 @@ export function useChatStream() {
           })
           ws.close()
         } else if (msg.type === 'chat_error') {
-          setIsGenerating(false)
-          setCurrentReply('')
-          addMessage({
+          s.setIsGenerating(false)
+          s.setCurrentReply('')
+          s.addMessage({
             id: Date.now(),
             task_id: 0,
             role: 'assistant',
@@ -72,15 +71,15 @@ export function useChatStream() {
     }
 
     ws.onerror = () => {
-      setIsGenerating(false)
-      setCurrentReply('')
+      useChatStore.getState().setIsGenerating(false)
+      useChatStore.getState().setCurrentReply('')
     }
 
     ws.onclose = () => {
-      setIsGenerating(false)
+      useChatStore.getState().setIsGenerating(false)
       wsRef.current = null
     }
-  }, [systemPrompt, pageContext, setIsGenerating, setCurrentReply, appendCurrentReply, addMessage])
+  }, [])
 
   const stop = useCallback(() => {
     const ws = wsRef.current
