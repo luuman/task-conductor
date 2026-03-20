@@ -135,16 +135,17 @@
 
 /* ── Process card ── */
 .procCard {
-  width: 150px;
-  border-radius: 8px;
+  width: 120px;
+  border-radius: 6px;
   border: 1px solid var(--tc-border);
   border-left: 3px solid var(--tc-border);
   background: var(--tc-content-bg);
-  padding: 8px 10px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: default;
 }
 
 .procCard:hover {
