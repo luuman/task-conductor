@@ -115,10 +115,10 @@ export default function AdminLayout() {
             <>
               {/* User info */}
               <div className={sidebarStyles.userInfo}>
-                <div className={sidebarStyles.userAvatar}>U</div>
+                <div className={sidebarStyles.userAvatar}>{t('admin_extra.user').charAt(0)}</div>
                 <div className={sidebarStyles.userMeta}>
-                  <span className={sidebarStyles.userName}>User</span>
-                  <span className={sidebarStyles.userRole}>Admin</span>
+                  <span className={sidebarStyles.userName}>{t('admin_extra.user')}</span>
+                  <span className={sidebarStyles.userRole}>{t('admin_extra.admin_role')}</span>
                 </div>
               </div>
               {/* Back button */}
