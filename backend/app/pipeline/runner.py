@@ -59,10 +59,14 @@ async def run_pipeline(task_id: int, worktree_path: str):
         task = db.get(Task, task_id)
         if not task:
             return
-        # input 阶段等同于从 analysis 开始
-        current_stage = task.stage if task.stage != "input" else "analysis"
+        task_stages = get_task_stages(task)
+        # input 阶段等同于从第一个非-input 阶段开始
+        if task.stage == "input":
+            current_stage = task_stages[1] if len(task_stages) > 1 else "analysis"
+        else:
+            current_stage = task.stage
         project_id = task.project_id
-        title, description = task.title, task.description
+        title, description = task.title, task.description or ""
 
     while current_stage != "done":
         executor = EXECUTORS.get(current_stage)
