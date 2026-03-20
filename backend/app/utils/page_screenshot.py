@@ -32,6 +32,11 @@ from pathlib import Path
 import httpx
 
 
+def _client(timeout: int = 30) -> httpx.AsyncClient:
+    """创建不走代理的 httpx 客户端"""
+    return httpx.AsyncClient(timeout=timeout, proxy=None)
+
+
 @dataclass
 class ScreenshotResult:
     """截图结果"""
