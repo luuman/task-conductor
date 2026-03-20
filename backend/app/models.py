@@ -66,11 +66,16 @@ class Task(Base):
     queued_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    # 灵活阶段 & PRD
+    stages: Mapped[Optional[str]] = mapped_column(Text, nullable=True)            # JSON list[str]，per-task 阶段
+    prd_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)       # 结构化 PRD JSON
+    interview_status: Mapped[str] = mapped_column(String(20), default="none")     # none|active|completed
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     project: Mapped["Project"] = relationship(back_populates="tasks")
     artifacts: Mapped[list["StageArtifact"]] = relationship(back_populates="task")
     instances: Mapped[list["ClaudeInstance"]] = relationship(back_populates="task")
+    interview_messages: Mapped[list["InterviewMessage"]] = relationship(back_populates="task")
 
 
 class StageArtifact(Base):
