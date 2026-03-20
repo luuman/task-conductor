@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Project, Task } from '../../../lib/api/types'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import styles from './ProjectOverview.module.css'
