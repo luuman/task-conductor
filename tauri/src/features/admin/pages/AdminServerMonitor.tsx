@@ -464,7 +464,7 @@ function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid
           const nw = p.w * 1.25, nh = p.h * 1.25
           return nw > 3000 ? p : { x: p.x + (p.w - nw) / 2, y: p.y + (p.h - nh) / 2, w: nw, h: nh }
         })}>−</button>
-        <button className={s.topoCtrlBtn} onClick={() => setVb({ x: 0, y: 0, w: 1000, h: 380 })}>⟳</button>
+        <button className={s.topoCtrlBtn} onClick={() => setVb(initVb)}>⟳</button>
       </div>
     </div>
   )
