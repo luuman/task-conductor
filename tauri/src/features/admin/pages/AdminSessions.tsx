@@ -1653,7 +1653,7 @@ export default function AdminSessions() {
             <div className={styles.listEmptyCenter}>
               <span className={styles.listEmptyIcon}>{'\u2317'}</span>
               <p className={styles.listEmptyText}>
-                {search ? '\u65E0\u5339\u914D\u7ED3\u679C' : t('admin.sessions.no_sessions')}
+                {search ? t('admin_extra.no_match_results') : t('admin.sessions.no_sessions')}
               </p>
             </div>
           ) : (
