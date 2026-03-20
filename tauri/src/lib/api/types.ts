@@ -476,7 +476,7 @@ export interface CanvasEdgeData {
   id: string
   source: string
   target: string
-  color?: string
+  color?: number
 }
 
 export interface CanvasState {
