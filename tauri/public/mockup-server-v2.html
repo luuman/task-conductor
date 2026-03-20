@@ -469,95 +469,109 @@
     margin-bottom: 14px;
   }
 
-  /* ── 进程总览表格 ── */
-  .proc-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
+  /* ── 进程总览卡片 ── */
+  .proc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
   }
-  .proc-table th {
-    text-align: left;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-family: 'JetBrains Mono', monospace;
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.15s;
-  }
-  .proc-table th:hover { color: var(--text2); }
-  .proc-table th.sorted { color: var(--blue); }
-  .proc-table td {
-    padding: 7px 10px;
-    border-bottom: 1px solid #1a1f2a;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    vertical-align: middle;
-  }
-  .proc-table tr:hover td {
+  .pc {
     background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.15s;
   }
-  .proc-table tr:last-child td { border-bottom: none; }
-  .pt-name-cell {
+  .pc:hover {
+    border-color: var(--border2);
+    transform: translateY(-1px);
+  }
+  .pc-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+  }
+  .pc-head {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
+    margin-bottom: 10px;
   }
-  .pt-dot {
+  .pc-dot {
     width: 8px; height: 8px;
-    border-radius: 2px;
+    border-radius: 3px;
     flex-shrink: 0;
   }
-  .pt-name {
-    font-weight: 500;
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
+  .pc-name {
+    font-weight: 600;
     font-size: 12px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .pt-pid {
+  .pc-pid {
+    font-size: 9px;
     color: var(--text3);
-    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
   }
-  .pt-bar-cell {
+  .pc-metrics {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 8px;
   }
-  .pt-bar {
-    width: 80px;
-    height: 4px;
+  .pc-metric {
+    flex: 1;
+  }
+  .pc-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .pc-metric-label {
+    font-size: 9px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pc-metric-val {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pc-track {
+    height: 3px;
     background: var(--bg4);
     border-radius: 2px;
     overflow: hidden;
-    flex-shrink: 0;
   }
-  .pt-bar-fill {
+  .pc-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.4s ease;
+    transition: width 0.5s ease;
   }
-  .pt-val {
-    min-width: 48px;
-    text-align: right;
-  }
-  .pt-kill-btn {
-    padding: 3px 8px;
+  .pc-kill {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 4px;
     border-radius: 4px;
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
     background: transparent;
     color: var(--text3);
     font-size: 10px;
     cursor: pointer;
     transition: all 0.15s;
     font-family: 'Outfit', sans-serif;
+    opacity: 0;
+    transition: opacity 0.15s;
   }
-  .pt-kill-btn:hover {
+  .pc:hover .pc-kill { opacity: 1; }
+  .pc-kill:hover {
     border-color: var(--red);
     color: var(--red);
+    background: rgba(248,113,113,0.06);
   }
 
   /* ── 全宽 ── */
