@@ -332,9 +332,26 @@ def get_top_processes():
         except Exception:
             pass
     return {
-        "by_cpu": sorted(procs, key=lambda x: -x["cpu_pct"])[:8],
-        "by_mem": sorted(procs, key=lambda x: -x["mem_mb"])[:8],
+        "by_cpu": sorted(procs, key=lambda x: -x["cpu_pct"])[:15],
+        "by_mem": sorted(procs, key=lambda x: -x["mem_mb"])[:15],
     }
+
+
+@router.post("/processes/{pid}/kill", summary="终止进程")
+def kill_process(pid: int):
+    """通过 PID 终止指定进程（发送 SIGTERM）"""
+    import signal
+    try:
+        p = psutil.Process(pid)
+        name = p.name()
+        p.send_signal(signal.SIGTERM)
+        return {"ok": True, "pid": pid, "name": name}
+    except psutil.NoSuchProcess:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"进程 {pid} 不存在")
+    except psutil.AccessDenied:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail=f"无权限终止进程 {pid}")
 
 
 # ── Claude Code 专属指标 ─────────────────────────────────────────
