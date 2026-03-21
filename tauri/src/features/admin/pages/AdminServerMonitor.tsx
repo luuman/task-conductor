@@ -497,7 +497,7 @@ function ProcessTopology({ procs, onKill: _onKill }: { procs: ProcessInfo[]; onK
 }
 
 /* ── Claude 详情卡片 ── */
-function ClaudeCard({ proc, color, index }: { proc: ProcessInfo; color: string; index: number }) {
+function ClaudeCard({ proc, color, index: _index }: { proc: ProcessInfo; color: string; index: number }) {
   const isActive = proc.cpu_pct > 1
   const statusColor = isActive ? '#34d399' : '#f97316'
   const statusLabel = isActive ? '运行中' : '空闲'
