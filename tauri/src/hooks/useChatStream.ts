@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { useChatStore } from '../lib/store/chat'
+import type { TranscriptMessage } from '../lib/api/types'
 
 function getWsBaseUrl(): string {
   const tunnelUrl = localStorage.getItem('tc_tunnel_url')
@@ -8,6 +9,14 @@ function getWsBaseUrl(): string {
   }
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   return `${protocol}//${window.location.host}`
+}
+
+function makeTextMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
+  return {
+    role,
+    ts: new Date().toISOString(),
+    blocks: [{ type: 'text', text }],
+  }
 }
 
 export function useChatStream() {
@@ -49,24 +58,12 @@ export function useChatStream() {
           if (sessionId) s.setClaudeSessionId(sessionId)
           s.setIsGenerating(false)
           s.setCurrentReply('')
-          s.addMessage({
-            id: Date.now(),
-            task_id: 0,
-            role: 'assistant',
-            content: msg.data?.full_text || fullText,
-            created_at: new Date().toISOString(),
-          })
+          s.addMessage(makeTextMsg('assistant', msg.data?.full_text || fullText))
           ws.close()
         } else if (msg.type === 'chat_error') {
           s.setIsGenerating(false)
           s.setCurrentReply('')
-          s.addMessage({
-            id: Date.now(),
-            task_id: 0,
-            role: 'assistant',
-            content: `错误: ${msg.data?.error || '未知错误'}`,
-            created_at: new Date().toISOString(),
-          })
+          s.addMessage(makeTextMsg('assistant', `错误: ${msg.data?.error || '未知错误'}`))
           ws.close()
         }
       } catch {
@@ -79,13 +76,7 @@ export function useChatStream() {
       if (s.isGenerating) {
         s.setIsGenerating(false)
         s.setCurrentReply('')
-        s.addMessage({
-          id: Date.now(),
-          task_id: 0,
-          role: 'assistant',
-          content: '连接失败：无法连接到后端服务，请确认后端已启动。',
-          created_at: new Date().toISOString(),
-        })
+        s.addMessage(makeTextMsg('assistant', '连接失败：无法连接到后端服务，请确认后端已启动。'))
       }
     }
 
@@ -95,13 +86,7 @@ export function useChatStream() {
       if (s.isGenerating && !fullText) {
         s.setIsGenerating(false)
         s.setCurrentReply('')
-        s.addMessage({
-          id: Date.now(),
-          task_id: 0,
-          role: 'assistant',
-          content: '连接已断开，请重试。',
-          created_at: new Date().toISOString(),
-        })
+        s.addMessage(makeTextMsg('assistant', '连接已断开，请重试。'))
       } else {
         s.setIsGenerating(false)
       }
