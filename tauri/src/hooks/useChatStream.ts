@@ -19,6 +19,14 @@ function makeTextMsg(role: 'user' | 'assistant', text: string): TranscriptMessag
   }
 }
 
+function makeToolMsg(toolName: string, input?: Record<string, unknown>): TranscriptMessage {
+  return {
+    role: 'assistant',
+    ts: new Date().toISOString(),
+    blocks: [{ type: 'tool_use', tool_name: toolName, tool_input: input || {} }],
+  }
+}
+
 export function useChatStream() {
   const wsRef = useRef<WebSocket | null>(null)
   const sendTsRef = useRef(0)
