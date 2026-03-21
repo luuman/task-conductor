@@ -18,6 +18,7 @@ export interface TranscriptViewerProps {
   selectedId: string | null
   isFirstLoad: React.MutableRefObject<boolean>
   autoExpand?: boolean
+  scrollRef?: React.RefObject<HTMLDivElement | null>
   className?: string
 }
 
