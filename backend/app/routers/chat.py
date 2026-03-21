@@ -128,51 +128,57 @@ async def handle_chat_ws(ws: WebSocket):
         _last_thinking_len = 0
 
         try:
-            _msg_count = 0
             async for message in query(prompt=message, options=opts):
-                _msg_count += 1
-                logger.info(f"[AgentSDK] msg#{_msg_count} type={type(message).__name__}")
-                if isinstance(message, AssistantMessage):
-                    for block in message.content:
-                        if isinstance(block, TextBlock):
-                            # partial 模式下 text 是累积的，做增量 diff
-                            current_text = block.text or ""
-                            if len(current_text) > _last_sent_len:
-                                delta = current_text[_last_sent_len:]
-                                _last_sent_len = len(current_text)
-                                full_text = current_text
+                # ── StreamEvent：逐 token 流式推送 ──
+                if isinstance(message, StreamEvent):
+                    evt = message.event
+                    evt_type = evt.get("type", "")
+
+                    if evt_type == "content_block_delta":
+                        delta = evt.get("delta", {})
+                        delta_type = delta.get("type", "")
+
+                        if delta_type == "text_delta":
+                            text = delta.get("text", "")
+                            if text:
+                                full_text += text
                                 await _send({
                                     "type": "chat_chunk",
                                     "data": {
-                                        "text": delta,
+                                        "text": text,
                                         "session_id": result_session_id,
                                         "done": False,
                                     },
                                     "ts": _ts(),
                                 })
-                        elif isinstance(block, ThinkingBlock):
-                            thinking = getattr(block, "thinking", "") or ""
-                            if len(thinking) > _last_thinking_len:
-                                delta = thinking[_last_thinking_len:]
-                                _last_thinking_len = len(thinking)
+                        elif delta_type == "thinking_delta":
+                            text = delta.get("thinking", "")
+                            if text:
                                 await _send({
                                     "type": "chat_thinking",
                                     "data": {
-                                        "text": delta,
+                                        "text": text,
                                         "session_id": result_session_id,
                                     },
                                     "ts": _ts(),
                                 })
-                        elif isinstance(block, ToolUseBlock):
+
+                    elif evt_type == "content_block_start":
+                        block = evt.get("content_block", {})
+                        if block.get("type") == "tool_use":
                             await _send({
                                 "type": "chat_tool_use",
                                 "data": {
-                                    "tool": block.name,
-                                    "input": block.input if hasattr(block, "input") else {},
+                                    "tool": block.get("name", ""),
+                                    "input": {},
                                     "session_id": result_session_id,
                                 },
                                 "ts": _ts(),
                             })
+
+                # ── AssistantMessage：完整消息（用于兜底）──
+                elif isinstance(message, AssistantMessage):
+                    pass  # 流式数据已由 StreamEvent 推送
 
                 elif isinstance(message, ResultMessage):
                     # 提取 session_id 和统计信息
