@@ -110,6 +110,20 @@ async def handle_chat_ws(ws: WebSocket):
             await c.query(message)
 
             async for msg in c.receive_messages():
+                _t = type(msg).__name__
+                if isinstance(msg, StreamEvent):
+                    _et = msg.event.get("type", "")
+                    _dt = msg.event.get("delta", {}).get("type", "")
+                    if _et != "content_block_delta" or _dt != "input_json_delta":
+                        # 跳过 input_json_delta 的刷屏，其他全打印
+                        logger.info(f"[Chat] {_t}({_et}) {json.dumps(msg.event, ensure_ascii=False, default=str)[:200]}")
+                elif isinstance(msg, UserMessage):
+                    logger.info(f"[Chat] {_t} content={[str(b)[:150] for b in (msg.content or [])]}")
+                elif isinstance(msg, ResultMessage):
+                    logger.info(f"[Chat] {_t} session={getattr(msg, 'session_id', '?')} cost=${getattr(msg, 'total_cost_usd', 0)}")
+                else:
+                    logger.info(f"[Chat] {_t}")
+
                 # ── StreamEvent：逐 token 推送 ──
                 if isinstance(msg, StreamEvent):
                     evt = msg.event
