@@ -136,7 +136,6 @@ async def handle_chat_ws(ws: WebSocket):
             active_proc = proc
 
             full_text = ""
-            final_text = ""
             result_session_id = session_id or ""
 
             async for line in proc.stdout:
