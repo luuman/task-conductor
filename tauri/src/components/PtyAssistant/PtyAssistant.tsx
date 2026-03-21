@@ -20,7 +20,7 @@ export function PtyAssistant() {
   const {
     isOpen, isMinimized, messages, currentReply, isGenerating, ptyAlive,
     position, toggle, minimize, restore, close,
-    addMessage, setMessages, setPosition,
+    addMessage, setPosition,
   } = usePtyChatStore()
   const { connect, send, stop, reconnect } = usePtyStream()
   const [input, setInput] = useState('')
