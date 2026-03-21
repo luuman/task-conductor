@@ -75,6 +75,7 @@ async def handle_chat_ws(ws: WebSocket):
             permission_mode="bypassPermissions",
             include_partial_messages=True,
             cwd=cwd or os.path.expanduser("~"),
+            cli_path="claude",  # 用系统 CLI，而非 bundled，确保 hooks 生效
         )
         if model:
             opts.model = model
