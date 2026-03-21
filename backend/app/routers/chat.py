@@ -43,11 +43,10 @@ async def handle_chat_ws(ws: WebSocket):
     """
     await ws.accept()
 
-    from claude_code_sdk import (
-        ClaudeSDKClient, ClaudeCodeOptions,
-        AssistantMessage, ResultMessage, UserMessage,
+    from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
+    from claude_agent_sdk.types import (
+        AssistantMessage, ResultMessage, UserMessage, StreamEvent,
     )
-    from claude_code_sdk.types import StreamEvent
 
     client: Optional[ClaudeSDKClient] = None
     stream_task: Optional[asyncio.Task] = None
