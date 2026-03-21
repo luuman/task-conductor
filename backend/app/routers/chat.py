@@ -267,7 +267,7 @@ async def handle_chat_ws(ws: WebSocket):
                 # 中断当前 Claude 执行
                 if client:
                     try:
-                        client.interrupt()
+                        await client.interrupt()
                     except Exception:
                         pass
                 await _send({
