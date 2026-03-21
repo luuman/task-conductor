@@ -143,14 +143,12 @@ export function PtyAssistant() {
     }
   }, [isOpen, isMinimized]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 关闭时清理
+  // 组件卸载时清理
   useEffect(() => {
     return () => {
       disconnect()
-      resizeObserverRef.current?.disconnect()
       termRef.current?.dispose()
       termRef.current = null
-      fitAddonRef.current = null
     }
   }, [disconnect])
 
