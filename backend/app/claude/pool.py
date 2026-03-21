@@ -128,11 +128,11 @@ class ClaudePool:
                 logger.debug("ClaudeSDKClient disconnect error (ignored)")
             self._clients.pop(task_id, None)
 
-    def kill(self, task_id: int):
+    async def kill(self, task_id: int):
         """中断指定任务的 Claude 执行"""
         client = self._clients.get(task_id)
         if client:
             try:
-                client.interrupt()
+                await client.interrupt()
             except Exception:
                 logger.warning(f"Failed to interrupt task {task_id}")
