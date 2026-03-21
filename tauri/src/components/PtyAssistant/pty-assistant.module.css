@@ -22,69 +22,68 @@
   box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
 }
 
-/* ── 悬浮面板（左下角） ── */
+/* ── 悬浮面板 ── */
 .panel {
   position: fixed;
   bottom: 80px;
   left: 24px;
-  width: 520px;
-  height: 600px;
-  background: var(--tc-bg, #111119ee);
-  border: 1px solid rgba(16, 185, 129, 0.15);
-  border-radius: 14px;
+  width: 620px;
+  height: 500px;
+  background: #0d0d14;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
   z-index: 9998;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.08);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(16, 185, 129, 0.05);
   overflow: hidden;
 }
 .panelMinimized {
-  height: 44px;
-  width: 300px;
+  height: 38px;
+  width: 280px;
 }
 
 /* ── 头部 ── */
 .header {
-  padding: 8px 12px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: move;
   user-select: none;
-  border-bottom: 1px solid var(--tc-border, #1e1e2e);
-  background: linear-gradient(180deg, rgba(16, 185, 129, 0.06) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(16, 185, 129, 0.04);
   flex-shrink: 0;
 }
 .headerAvatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
   background: linear-gradient(135deg, #10b981, #06b6d4);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
   flex-shrink: 0;
 }
 .headerTitle {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--tc-text-primary, #ddd);
-  letter-spacing: 0.3px;
+  color: var(--tc-text-primary, #d4d4d8);
+  font-family: 'Geist Mono', monospace;
 }
 .headerBadge {
   font-size: 9px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(16, 185, 129, 0.12);
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(16, 185, 129, 0.15);
   color: #10b981;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 .headerStatus {
-  font-size: 10px;
+  font-size: 9px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -92,14 +91,14 @@
 }
 .headerStatus::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
 }
 .statusAlive { color: #10b981; }
 .statusAlive::before {
   background: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.6);
   animation: pulse 2s infinite;
 }
 .statusDead { color: #ef4444; }
@@ -113,12 +112,12 @@
 .headerBtn {
   background: none;
   border: none;
-  color: var(--tc-text-secondary, #555);
+  color: #52525b;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
-  border-radius: 5px;
-  font-size: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,168 +128,32 @@
   color: #10b981;
 }
 
-/* ── 左侧会话目录 ── */
-.chatSidebar {
-  width: 160px;
-  background: rgba(0, 0, 0, 0.2);
-  border-right: 1px solid var(--tc-border, #1e1e2e);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-.chatSidebarHeader {
-  padding: 8px 10px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--tc-text-secondary, #666);
-  border-bottom: 1px solid var(--tc-border, #1e1e2e);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.chatSidebarNewBtn {
-  background: none;
-  border: none;
-  color: #10b981;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 0 4px;
-  border-radius: 4px;
-  line-height: 1;
-}
-.chatSidebarNewBtn:hover {
-  background: rgba(16, 185, 129, 0.1);
-}
-.chatSidebarList {
+/* ── 终端容器 ── */
+.termContainer {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
   padding: 4px;
-  scrollbar-width: none;
-}
-.chatSidebarList::-webkit-scrollbar { display: none; }
-.chatSidebarItem {
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-bottom: 1px;
-  transition: all 0.1s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.chatSidebarItem:hover {
-  background: rgba(16, 185, 129, 0.06);
-}
-.chatSidebarItemActive {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-.chatSidebarDot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.chatSidebarItemInfo {
-  flex: 1;
-  min-width: 0;
-}
-.chatSidebarItemTitle {
-  font-size: 11px;
-  color: var(--tc-text-primary, #ccc);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.chatSidebarItemMeta {
-  font-size: 9px;
-  color: var(--tc-text-secondary, #555);
-  margin-top: 1px;
+  background: #0d0d14;
 }
 
-/* ── 聊天主区域 ── */
-.chatMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
+/* xterm.js 样式覆盖 */
+.termContainer :global(.xterm) {
+  height: 100%;
 }
-
-/* ── 消息区域 ── */
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 8px 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.termContainer :global(.xterm-viewport) {
   scrollbar-width: thin;
   scrollbar-color: rgba(16, 185, 129, 0.15) transparent;
 }
-.messages::-webkit-scrollbar { width: 4px; }
-.messages::-webkit-scrollbar-track { background: transparent; }
-.messages::-webkit-scrollbar-thumb {
+.termContainer :global(.xterm-viewport::-webkit-scrollbar) {
+  width: 4px;
+}
+.termContainer :global(.xterm-viewport::-webkit-scrollbar-track) {
+  background: transparent;
+}
+.termContainer :global(.xterm-viewport::-webkit-scrollbar-thumb) {
   background: rgba(16, 185, 129, 0.15);
   border-radius: 2px;
 }
-.messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.3);
-}
-
-/* ── 输入区 ── */
-.inputArea {
-  display: flex;
-  gap: 8px;
-  padding: 8px 10px;
-  border-top: 1px solid var(--tc-border, #1e1e2e);
-  background: rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
-  align-items: flex-end;
-}
-.input {
-  flex: 1;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--tc-border, #2a2a3a);
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: var(--tc-text-primary, #ccc);
-  font-size: 13px;
-  resize: none;
-  outline: none;
-  font-family: inherit;
-  min-height: 36px;
-  max-height: 100px;
-  transition: border-color 0.15s;
-}
-.input:focus {
-  border-color: rgba(16, 185, 129, 0.5);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.08);
-}
-.input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.sendBtn {
-  background: #10b981;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: all 0.1s;
-}
-.sendBtn:hover { background: #059669; }
-.sendBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ── Resize 手柄（8方向） ── */
 .resizeN, .resizeS { position: absolute; left: 6px; right: 6px; height: 5px; z-index: 5; }
@@ -304,52 +167,3 @@
 .resizeNW { top: -3px; left: -3px; cursor: nw-resize; }
 .resizeSE { bottom: -3px; right: -3px; cursor: se-resize; }
 .resizeSW { bottom: -3px; left: -3px; cursor: sw-resize; }
-
-/* ── 空状态 ── */
-.empty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--tc-text-secondary, #555);
-  font-size: 12px;
-  text-align: center;
-  padding: 32px 20px;
-  line-height: 1.8;
-  gap: 12px;
-}
-.emptyIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-}
-.emptyTitle {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--tc-text-primary, #ccc);
-}
-.emptyDesc {
-  font-size: 11px;
-  color: var(--tc-text-secondary, #666);
-  max-width: 240px;
-}
-.emptyFeatures {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-}
-.emptyFeature {
-  font-size: 9px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(16, 185, 129, 0.06);
-  border: 1px solid rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
