@@ -78,12 +78,30 @@ export function useChatStream() {
           if (current) {
             s.addMessage(makeTextMsg('assistant', current))
             s.setCurrentReply('')
+            fullTextRef.current = ''
           }
           // 添加独立的 tool_use 消息（渲染组件会展示工具卡片）
           const tool = msg.data?.tool || ''
           const input = msg.data?.input || {}
           if (tool) {
             s.addMessage(makeToolMsg(tool, input))
+          }
+
+        } else if (msg.type === 'chat_tool_result') {
+          // 工具执行结果 — 添加带结果的 tool_use 消息
+          const result = msg.data?.result || ''
+          const isError = msg.data?.is_error || false
+          if (result) {
+            s.addMessage({
+              role: 'assistant',
+              ts: new Date().toISOString(),
+              blocks: [{
+                type: 'tool_use',
+                tool_name: 'Result',
+                tool_result: result.slice(0, 2000),
+                tool_error: isError,
+              }],
+            })
           }
 
         } else if (msg.type === 'chat_done') {
