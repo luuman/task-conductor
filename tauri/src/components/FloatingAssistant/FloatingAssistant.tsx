@@ -5,7 +5,7 @@ import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
-import type { Project, Task } from '../../lib/api/types'
+import type { Project, Task, AiSession } from '../../lib/api/types'
 import styles from './FloatingAssistant.module.css'
 
 // ── 会话数据 ──
