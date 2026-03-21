@@ -7,4 +7,4 @@ export {
   AutoExpandCtx,
 } from './ChatRenderer'
 
-export type { ChatMessageListProps, AssistantTurn } from './ChatRenderer'
+export type { ChatMessageListProps, AssistantTurn, GroupedTurnItem } from './ChatRenderer'
