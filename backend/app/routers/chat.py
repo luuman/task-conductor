@@ -101,113 +101,66 @@ async def handle_chat_ws(ws: WebSocket):
 
         c = await _init_client(cwd=cwd, model=model, system_prompt=system_prompt)
 
+        import re as _re
         full_text = ""
         result_session_id = current_session_id or ""
-        # tool_use_id → {name, input_buf}，用于匹配工具调用和结果
-        _pending_tools: dict[str, dict] = {}
-        _current_tool_id = ""
-        _current_tool_name = ""
-        _tool_input_buf = ""
+        _tool_queue: list[tuple[str, dict]] = []  # (name, input) 按顺序
+        _cur_tool = ""
+        _input_buf = ""
 
         try:
             await c.query(message)
 
             async for msg in c.receive_messages():
-                # ── StreamEvent：逐 token 推送 ──
+                # ── StreamEvent ──
                 if isinstance(msg, StreamEvent):
                     evt = msg.event
-                    evt_type = evt.get("type", "")
+                    et = evt.get("type", "")
 
-                    if evt_type == "content_block_delta":
-                        delta = evt.get("delta", {})
-                        delta_type = delta.get("type", "")
+                    if et == "content_block_delta":
+                        d = evt.get("delta", {})
+                        dt = d.get("type", "")
+                        if dt == "text_delta":
+                            t = d.get("text", "")
+                            if t:
+                                full_text += t
+                                await _send({"type": "chat_chunk", "data": {"text": t, "session_id": result_session_id, "done": False}, "ts": _ts()})
+                        elif dt == "thinking_delta":
+                            t = d.get("thinking", "")
+                            if t:
+                                await _send({"type": "chat_thinking", "data": {"text": t, "session_id": result_session_id}, "ts": _ts()})
+                        elif dt == "input_json_delta":
+                            _input_buf += d.get("partial_json", "")
 
-                        if delta_type == "text_delta":
-                            text = delta.get("text", "")
-                            if text:
-                                full_text += text
-                                await _send({
-                                    "type": "chat_chunk",
-                                    "data": {
-                                        "text": text,
-                                        "session_id": result_session_id,
-                                        "done": False,
-                                    },
-                                    "ts": _ts(),
-                                })
-                        elif delta_type == "thinking_delta":
-                            text = delta.get("thinking", "")
-                            if text:
-                                await _send({
-                                    "type": "chat_thinking",
-                                    "data": {
-                                        "text": text,
-                                        "session_id": result_session_id,
-                                    },
-                                    "ts": _ts(),
-                                })
-                        elif delta_type == "input_json_delta":
-                            _tool_input_buf += delta.get("partial_json", "")
+                    elif et == "content_block_start":
+                        bl = evt.get("content_block", {})
+                        if bl.get("type") == "tool_use":
+                            _cur_tool = bl.get("name", "")
+                            _input_buf = ""
+                            # 立即通知前端（用于显示药丸/卡片）
+                            await _send({"type": "chat_tool_use", "data": {"tool": _cur_tool, "session_id": result_session_id}, "ts": _ts()})
 
-                    elif evt_type == "content_block_start":
-                        block = evt.get("content_block", {})
-                        if block.get("type") == "tool_use":
-                            _current_tool_id = block.get("id", "")
-                            _current_tool_name = block.get("name", "")
-                            _tool_input_buf = ""
-                            logger.info(f"[Chat] TOOL_START id={_current_tool_id} name={_current_tool_name}")
+                    elif et == "content_block_stop":
+                        if _cur_tool:
+                            ti = {}
+                            try:
+                                if _input_buf: ti = json.loads(_input_buf)
+                            except Exception:
+                                pass
+                            _tool_queue.append((_cur_tool, ti))
+                            _cur_tool = ""
+                            _input_buf = ""
 
-                    elif evt_type == "content_block_stop":
-                        logger.info(f"[Chat] BLOCK_STOP cur_id={_current_tool_id} cur_name={_current_tool_name}")
-                        if _current_tool_id and _current_tool_name:
-                            tool_input = {}
-                            if _tool_input_buf:
-                                try:
-                                    tool_input = json.loads(_tool_input_buf)
-                                except json.JSONDecodeError:
-                                    tool_input = {"raw": _tool_input_buf}
-                            _pending_tools[_current_tool_id] = {
-                                "name": _current_tool_name,
-                                "input": tool_input,
-                            }
-                            _current_tool_id = ""
-                            _current_tool_name = ""
-                            _tool_input_buf = ""
-
-                # ── UserMessage：工具结果 → 合并发送 chat_tool_complete ──
+                # ── UserMessage：工具结果 ──
                 elif isinstance(msg, UserMessage):
-                    logger.info(f"[Chat] USER_MSG pending_keys={list(_pending_tools.keys())} blocks={len(msg.content or [])}")
-                    for block in (msg.content or []):
-                        tool_use_id = getattr(block, "tool_use_id", "")
-                        logger.info(f"[Chat] RESULT block_type={type(block).__name__} tool_use_id={tool_use_id} match={tool_use_id in _pending_tools}")
-                        content = getattr(block, "content", "")
-                        is_error = getattr(block, "is_error", False)
-                        # 用 tool_use_id 匹配到对应的工具调用
-                        tool_info = _pending_tools.pop(tool_use_id, {})
-                        tool_name = tool_info.get("name", "Tool")
-                        tool_input = tool_info.get("input", {})
-                        result_str = str(content)[:5000] if content else ""
-                        # Read 工具结果去掉 cat -n 行号前缀（如 "     1→"）
-                        if tool_name == "Read" and result_str:
-                            import re
-                            lines = result_str.split("\n")
-                            cleaned = []
-                            for line in lines:
-                                cleaned.append(re.sub(r'^\s*\d+→', '', line))
-                            result_str = "\n".join(cleaned)
-                        payload = {
-                            "type": "chat_tool_complete",
-                            "data": {
-                                "tool": tool_name,
-                                "input": tool_input,
-                                "result": result_str,
-                                "is_error": is_error,
-                                "session_id": result_session_id,
-                            },
-                            "ts": _ts(),
-                        }
-                        logger.info(f"[Chat] >>> chat_tool_complete: tool={tool_name} input_keys={list(tool_input.keys())} result_len={len(result_str)}")
-                        await _send(payload)
+                    for bl in (msg.content or []):
+                        content = getattr(bl, "content", "")
+                        is_err = getattr(bl, "is_error", False)
+                        name, ti = _tool_queue.pop(0) if _tool_queue else ("Tool", {})
+                        rs = str(content)[:5000] if content else ""
+                        if name == "Read" and rs:
+                            rs = _re.sub(r'(?m)^\s*\d+→', '', rs)
+                        await _send({"type": "chat_tool_result", "data": {"tool": name, "input": ti, "result": rs, "is_error": is_err, "session_id": result_session_id}, "ts": _ts()})
 
                 # ── ResultMessage：回合结束 ──
                 elif isinstance(msg, ResultMessage):
