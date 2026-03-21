@@ -73,27 +73,18 @@ export function useChatStream() {
           // 思考过程不混入正文
           // 可以在这里展示一个"正在思考..."指示器
 
-        } else if (msg.type === 'chat_tool_use') {
-          // 先 flush 当前累积的文字为一条消息
+        } else if (msg.type === 'chat_tool_complete') {
+          // 合并事件：工具名+输入+结果一次到位
           const current = s.currentReply.trim()
           if (current) {
             s.addMessage(makeTextMsg('assistant', current))
             s.setCurrentReply('')
             fullTextRef.current = ''
           }
-          // 入队，等 result 到达后合并
-          pendingToolsRef.current.push({
-            tool: msg.data?.tool || '',
-            input: msg.data?.input || {},
-          })
-
-        } else if (msg.type === 'chat_tool_result') {
-          // 工具结果到达 — 出队最早的 pending tool，合并为完整消息
+          const toolName = msg.data?.tool || 'Tool'
+          const toolInput = msg.data?.input || {}
           const result = msg.data?.result || ''
           const isError = msg.data?.is_error || false
-          const pending = pendingToolsRef.current.shift()
-          const toolName = pending?.tool || 'Tool'
-          const toolInput = pending?.input || {}
 
           s.addMessage({
             role: 'assistant',
