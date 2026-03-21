@@ -72,18 +72,17 @@ async def handle_chat_ws(ws: WebSocket):
         if client is not None:
             return client
 
-        opts = ClaudeAgentOptions(
+        opts = ClaudeCodeOptions(
             permission_mode="bypassPermissions",
             include_partial_messages=True,
             cwd=cwd or os.path.expanduser("~"),
-            cli_path="claude",  # 用系统 CLI，而非 bundled，确保 hooks 生效
         )
         if model:
             opts.model = model
         if system_prompt:
             opts.system_prompt = system_prompt
 
-        c = ClaudeSDKClient(options=opts)
+        c = ClaudeSDKClient(opts)
         await c.connect()
         client = c
         logger.info("[Chat] ClaudeSDKClient connected")
