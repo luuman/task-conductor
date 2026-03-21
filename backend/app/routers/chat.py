@@ -10,7 +10,7 @@ from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from app.claude.stream import parse_line, extract_text
+from app.claude.stream import parse_line, extract_text, extract_final_text
 
 router = APIRouter(prefix="/api/chat", tags=["聊天"])
 
