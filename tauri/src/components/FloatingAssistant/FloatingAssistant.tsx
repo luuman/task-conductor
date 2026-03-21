@@ -278,22 +278,31 @@ export function FloatingAssistant() {
                     <button className={styles.chatSidebarNewBtn} onClick={handleNewSession} title="新对话">+</button>
                   </div>
                   <div className={styles.chatSidebarList}>
-                    {sessions.map(s => (
-                      <div
-                        key={s.id}
-                        className={`${styles.chatSidebarItem} ${s.id === activeSessionId ? styles.chatSidebarItemActive : ''}`}
-                        onClick={() => setActiveSessionId(s.id)}
-                      >
-                        <span className={styles.chatSidebarDot} style={{ background: s.id === activeSessionId ? '#10b981' : '#6b7280' }} />
-                        <div className={styles.chatSidebarItemInfo}>
-                          <div className={styles.chatSidebarItemTitle}>{s.title}</div>
-                          <div className={styles.chatSidebarItemMeta}>
-                            {s.lastMessage ? s.lastMessage.slice(0, 15) + (s.lastMessage.length > 15 ? '...' : '') : '空对话'}
-                            {' · '}{formatTime(s.updatedAt)}
+                    {sessions.map(s => {
+                      const statusColor = s.status === 'active' ? '#10b981' : s.status === 'idle' ? '#f59e0b' : '#6b7280'
+                      const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
+                      const isActive = s.session_id === activeSessionId
+                      return (
+                        <div
+                          key={s.session_id}
+                          className={`${styles.chatSidebarItem} ${isActive ? styles.chatSidebarItemActive : ''}`}
+                          onClick={() => switchToSession(s.session_id)}
+                        >
+                          <span className={styles.chatSidebarDot} style={{ background: statusColor }} />
+                          <div className={styles.chatSidebarItemInfo}>
+                            <div className={styles.chatSidebarItemTitle}>{title}</div>
+                            <div className={styles.chatSidebarItemMeta}>
+                              {s.event_count} 事件 · {formatTime(s.last_seen_at || s.started_at)}
+                            </div>
                           </div>
                         </div>
+                      )
+                    })}
+                    {sessions.length === 0 && (
+                      <div style={{ padding: '12px 8px', fontSize: 11, color: '#444', textAlign: 'center' }}>
+                        暂无会话记录<br/>发送消息开始对话
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               )}
