@@ -45,7 +45,7 @@ async def handle_chat_ws(ws: WebSocket):
 
     from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
     from claude_agent_sdk.types import (
-        AssistantMessage, ResultMessage, StreamEvent,
+        AssistantMessage, ResultMessage, StreamEvent, UserMessage,
     )
 
     client: Optional[ClaudeSDKClient] = None
