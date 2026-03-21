@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
