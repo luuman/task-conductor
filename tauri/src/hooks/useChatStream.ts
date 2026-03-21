@@ -80,38 +80,32 @@ export function useChatStream() {
             s.setCurrentReply('')
             fullTextRef.current = ''
           }
-          // 添加独立的 tool_use 消息（渲染组件会展示工具卡片）
-          const tool = msg.data?.tool || ''
-          const input = msg.data?.input || {}
-          if (tool) {
-            s.addMessage(makeToolMsg(tool, input))
+          // 暂存工具调用信息，等 result 到达后一起添加
+          pendingToolRef.current = {
+            tool: msg.data?.tool || '',
+            input: msg.data?.input || {},
           }
 
         } else if (msg.type === 'chat_tool_result') {
-          // 工具结果 — 找到最后一条 tool_use 消息，附加 result
+          // 工具结果到达 — 和暂存的 tool_use 合并为一条完整消息
           const result = msg.data?.result || ''
           const isError = msg.data?.is_error || false
-          if (result) {
-            const msgs = s.messages
-            // 从后往前找最后一条 tool_use 消息
-            for (let i = msgs.length - 1; i >= 0; i--) {
-              const block = msgs[i].blocks[0]
-              if (block?.type === 'tool_use' && !block.tool_result) {
-                // 更新该消息的 block，附加结果
-                const updated = [...msgs]
-                updated[i] = {
-                  ...updated[i],
-                  blocks: [{
-                    ...block,
-                    tool_result: result.slice(0, 3000),
-                    tool_error: isError,
-                  }],
-                }
-                s.setMessages(updated)
-                break
-              }
-            }
-          }
+          const pending = pendingToolRef.current
+          const toolName = pending?.tool || 'Tool'
+          const toolInput = pending?.input || {}
+          pendingToolRef.current = null
+
+          s.addMessage({
+            role: 'assistant',
+            ts: new Date().toISOString(),
+            blocks: [{
+              type: 'tool_use' as const,
+              tool_name: toolName,
+              tool_input: toolInput,
+              tool_result: result.slice(0, 3000) || null,
+              tool_error: isError,
+            }],
+          })
 
         } else if (msg.type === 'chat_done') {
           const ft = fullTextRef.current
