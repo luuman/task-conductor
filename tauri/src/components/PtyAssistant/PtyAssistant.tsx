@@ -5,6 +5,7 @@ import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
 import type { Project, TranscriptMessage } from '../../lib/api/types'
 import { ChatMessageList } from '../ChatRenderer'
+import { useSessionData } from '../SessionChat/useSessionData'
 import styles from './pty-assistant.module.css'
 
 function makeTextMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
@@ -19,10 +20,11 @@ export function PtyAssistant() {
   const {
     isOpen, isMinimized, messages, currentReply, isGenerating, ptyAlive,
     position, toggle, minimize, restore, close,
-    addMessage, setPosition,
+    addMessage, setMessages, setPosition,
   } = usePtyChatStore()
   const { connect, send, stop, reconnect } = usePtyStream()
   const [input, setInput] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isFirstLoadRef = useRef(true)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -31,6 +33,13 @@ export function PtyAssistant() {
   const [projectCwd, setProjectCwd] = useState<string | null>(null)
   const apiRef = useRef(new HttpAdapter('local-http'))
   const hasConnectedRef = useRef(false)
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
+
+  // 会话列表（复用 useSessionData）
+  const {
+    sessions,
+    selectSession: sharedSelectSession,
+  } = useSessionData({ filterByCwd: projectCwd || undefined })
 
   // 拉取项目 cwd
   useEffect(() => {
@@ -136,6 +145,27 @@ export function PtyAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [])
 
+  // 切换到已有会话（resume）
+  const switchToSession = useCallback((sessionId: string) => {
+    isFirstLoadRef.current = true
+    setActiveSessionId(sessionId)
+    sharedSelectSession(sessionId)
+
+    // 清空当前消息，重新连接 PTY 并 resume
+    const store = usePtyChatStore.getState()
+    store.setMessages([])
+    store.setCurrentReply('')
+    hasConnectedRef.current = true
+    reconnect(projectCwd || undefined, sessionId)
+
+    // 加载历史 transcript
+    apiRef.current.getTranscript(sessionId).then(({ messages: msgs }) => {
+      if (msgs?.length) {
+        usePtyChatStore.getState().setMessages(msgs)
+      }
+    }).catch(() => {})
+  }, [sharedSelectSession, reconnect, projectCwd])
+
   const handleSend = useCallback(() => {
     const text = input.trim()
     if (!text || isGenerating) return
@@ -158,13 +188,23 @@ export function PtyAssistant() {
 
   // 新对话
   const handleNewSession = useCallback(() => {
+    setActiveSessionId(null)
     const store = usePtyChatStore.getState()
     store.setMessages([])
     store.setCurrentReply('')
-    hasConnectedRef.current = false
-    reconnect(projectCwd || undefined)
     hasConnectedRef.current = true
+    reconnect(projectCwd || undefined)
   }, [reconnect, projectCwd])
+
+  const now = new Date()
+  const formatTime = (ts: string) => {
+    const d = new Date(ts)
+    const diff = now.getTime() - d.getTime()
+    if (diff < 60000) return '刚刚'
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
+    return `${Math.floor(diff / 86400000)}天前`
+  }
 
   const displayMessages = currentReply
     ? [...messages, makeTextMsg('assistant', currentReply)]
@@ -196,6 +236,7 @@ export function PtyAssistant() {
             </span>
             <div className={styles.headerSpacer} />
             <div className={styles.headerActions}>
+              <button className={styles.headerBtn} onClick={() => setSidebarOpen(v => !v)} title="会话列表">☰</button>
               {!ptyAlive && (
                 <button className={styles.headerBtn} onClick={handleReconnect} title="重连">↻</button>
               )}
@@ -208,38 +249,77 @@ export function PtyAssistant() {
           </div>
 
           {!isMinimized && (
-            <div className={styles.chatMain}>
-              {/* 消息列表 */}
-              <div className={styles.messages}>
-                {displayMessages.length === 0 && (
-                  <div className={styles.empty}>
-                    {ptyAlive ? (
-                      <>PTY 模式已就绪<br/>交互式 Claude，多轮对话无冷启动<br/>直接输入开始对话</>
-                    ) : (
-                      <>正在连接 PTY 进程...<br/>请稍候</>
+            <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              {/* 左侧会话目录 */}
+              {sidebarOpen && (
+                <div className={styles.chatSidebar}>
+                  <div className={styles.chatSidebarHeader}>
+                    <span>会话</span>
+                    <button className={styles.chatSidebarNewBtn} onClick={handleNewSession} title="新对话">+</button>
+                  </div>
+                  <div className={styles.chatSidebarList}>
+                    {sessions.map(s => {
+                      const statusColor = s.status === 'active' ? '#10b981' : s.status === 'idle' ? '#f59e0b' : '#6b7280'
+                      const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
+                      const isActive = s.session_id === activeSessionId
+                      return (
+                        <div
+                          key={s.session_id}
+                          className={`${styles.chatSidebarItem} ${isActive ? styles.chatSidebarItemActive : ''}`}
+                          onClick={() => switchToSession(s.session_id)}
+                        >
+                          <span className={styles.chatSidebarDot} style={{ background: statusColor }} />
+                          <div className={styles.chatSidebarItemInfo}>
+                            <div className={styles.chatSidebarItemTitle}>{title}</div>
+                            <div className={styles.chatSidebarItemMeta}>
+                              {s.event_count} 事件 · {formatTime(s.last_seen_at || s.started_at)}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {sessions.length === 0 && (
+                      <div style={{ padding: '12px 8px', fontSize: 11, color: '#444', textAlign: 'center' }}>
+                        暂无会话记录<br/>发送消息开始对话
+                      </div>
                     )}
                   </div>
-                )}
-                <ChatMessageList messages={displayMessages} />
-                <div ref={messagesEndRef} />
-              </div>
+                </div>
+              )}
 
-              {/* 输入区 */}
-              <div className={styles.inputArea}>
-                <textarea
-                  className={styles.input}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={ptyAlive ? '输入消息...' : '等待 PTY 连接...'}
-                  rows={1}
-                  disabled={!ptyAlive}
-                />
-                {isGenerating ? (
-                  <button className={styles.sendBtn} onClick={stop}>停止</button>
-                ) : (
-                  <button className={styles.sendBtn} onClick={handleSend} disabled={!input.trim() || !ptyAlive}>发送</button>
-                )}
+              {/* 右侧聊天主体 */}
+              <div className={styles.chatMain}>
+                <div className={styles.messages}>
+                  {displayMessages.length === 0 && (
+                    <div className={styles.empty}>
+                      {ptyAlive ? (
+                        <>PTY 模式已就绪<br/>交互式 Claude，多轮对话无冷启动<br/>直接输入或从左侧选择会话 resume</>
+                      ) : (
+                        <>正在连接 PTY 进程...<br/>请稍候</>
+                      )}
+                    </div>
+                  )}
+                  <ChatMessageList messages={displayMessages} />
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* 输入区 */}
+                <div className={styles.inputArea}>
+                  <textarea
+                    className={styles.input}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={ptyAlive ? '输入消息...' : '等待 PTY 连接...'}
+                    rows={1}
+                    disabled={!ptyAlive}
+                  />
+                  {isGenerating ? (
+                    <button className={styles.sendBtn} onClick={stop}>停止</button>
+                  ) : (
+                    <button className={styles.sendBtn} onClick={handleSend} disabled={!input.trim() || !ptyAlive}>发送</button>
+                  )}
+                </div>
               </div>
             </div>
           )}
