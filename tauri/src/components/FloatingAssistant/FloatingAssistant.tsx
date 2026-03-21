@@ -5,7 +5,8 @@ import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
-import type { Project, Task, AiSession } from '../../lib/api/types'
+import type { Project, Task, AiSession, TranscriptMessage } from '../../lib/api/types'
+import { ChatMessageList } from '../ChatRenderer'
 import styles from './FloatingAssistant.module.css'
 
 interface ProjectInfo {
@@ -52,6 +53,14 @@ function buildSystemPrompt(ctx: PageContext, project?: ProjectInfo | null): stri
 
   parts.push('\n## 回复要求\n- 用中文回复\n- 回复简洁直接\n- 涉及代码用 Markdown 格式\n- 当用户描述需求时，主动追问细节')
   return parts.join('\n')
+}
+
+function makeTextMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
+  return {
+    role,
+    ts: new Date().toISOString(),
+    blocks: [{ type: 'text', text }],
+  }
 }
 
 // ── 主组件 ──
@@ -129,7 +138,12 @@ export function FloatingAssistant() {
     if (messages.length === 0) return
     const last = messages[messages.length - 1]
     if (last.role !== 'assistant') return
-    const prdMatch = last.content.match(/---PRD---\s*([\s\S]*?)\s*---PRD---/)
+    // Extract text from blocks
+    const content = last.blocks
+      .filter(b => b.type === 'text')
+      .map(b => b.text || '')
+      .join('\n')
+    const prdMatch = content.match(/---PRD---\s*([\s\S]*?)\s*---PRD---/)
     if (prdMatch) {
       try {
         const prd = prdMatch[1].trim()
@@ -202,31 +216,11 @@ export function FloatingAssistant() {
     store.setCurrentReply('')
     store.setClaudeSessionId(sessionId)
 
-    // 从后端加载 transcript
+    // 从后端加载 transcript — 直接使用 TranscriptMessage[]
     const api = new HttpAdapter('local-http')
     api.getTranscript(sessionId).then(({ messages: transcriptMsgs }) => {
       if (!transcriptMsgs?.length) return
-      let idCounter = 1
-      const mapped = transcriptMsgs.map(tm => {
-        // 将 TranscriptMessage blocks 合并为纯文本
-        const text = tm.blocks
-          .map(b => {
-            if (b.type === 'text' && b.text) return b.text
-            if (b.type === 'tool_use' && b.tool_name) return `\`${b.tool_name}\` 工具调用`
-            return ''
-          })
-          .filter(Boolean)
-          .join('\n')
-        return {
-          id: idCounter++,
-          task_id: 0,
-          role: tm.role as 'user' | 'assistant',
-          content: text,
-          created_at: tm.ts || new Date().toISOString(),
-        }
-      }).filter(m => m.content.trim())
-
-      useChatStore.getState().setMessages(mapped)
+      useChatStore.getState().setMessages(transcriptMsgs)
     }).catch(() => {})
   }, [])
 
@@ -234,7 +228,7 @@ export function FloatingAssistant() {
     const text = input.trim()
     if (!text || isGenerating) return
     setInput('')
-    addMessage({ id: Date.now(), task_id: 0, role: 'user', content: text, created_at: new Date().toISOString() })
+    addMessage(makeTextMsg('user', text))
     send(text)
   }, [input, isGenerating, addMessage, send])
 
@@ -263,6 +257,11 @@ export function FloatingAssistant() {
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
     return `${Math.floor(diff / 86400000)}天前`
   }
+
+  // Build streaming message for display
+  const displayMessages = currentReply
+    ? [...messages, makeTextMsg('assistant', currentReply)]
+    : messages
 
   return (
     <>
@@ -335,12 +334,9 @@ export function FloatingAssistant() {
 
               {/* 右侧聊天主体 */}
               <div className={styles.chatMain}>
-                {/* Tab 栏 */}
-                {/* 不用 tab 栏了，侧边栏已经有会话切换 */}
-
                 {/* 消息列表 */}
                 <div className={styles.messages}>
-                  {messages.length === 0 && !currentReply && (
+                  {displayMessages.length === 0 && (
                     <div className={styles.empty}>
                       {projectInfo ? (
                         <>项目 <strong>{projectInfo.name}</strong><br/>向我描述你的需求<br/>我会帮你分析、创建任务、生成 PRD</>
@@ -349,31 +345,7 @@ export function FloatingAssistant() {
                       )}
                     </div>
                   )}
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`${styles.msgWrap} ${msg.role === 'user' ? styles.msgWrapUser : styles.msgWrapAi}`}>
-                      {msg.role === 'assistant' && <div className={styles.msgAvatar}>🤖</div>}
-                      <div className={styles.msgContent}>
-                        <div className={`${styles.bubble} ${msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi}`}>
-                          {msg.role === 'assistant' ? (
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                          ) : msg.content}
-                        </div>
-                        <span className={styles.msgTime}>
-                          {new Date(msg.created_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  {currentReply && (
-                    <div className={`${styles.msgWrap} ${styles.msgWrapAi}`}>
-                      <div className={styles.msgAvatar}>🤖</div>
-                      <div className={styles.msgContent}>
-                        <div className={`${styles.bubble} ${styles.bubbleAi} ${styles.bubbleStreaming}`}>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentReply}</ReactMarkdown>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <ChatMessageList messages={displayMessages} />
                   <div ref={messagesEndRef} />
                 </div>
 
