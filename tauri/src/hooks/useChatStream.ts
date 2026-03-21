@@ -74,7 +74,7 @@ export function useChatStream() {
           // 可以在这里展示一个"正在思考..."指示器
 
         } else if (msg.type === 'chat_tool_complete') {
-          // 合并事件：工具名+输入+结果一次到位
+          console.log('[ChatStream] tool_complete:', JSON.stringify(msg.data).slice(0, 200))
           const current = s.currentReply.trim()
           if (current) {
             s.addMessage(makeTextMsg('assistant', current))
