@@ -131,6 +131,7 @@ async def handle_chat_ws(ws: WebSocket):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
                 env=env,
+                limit=16 * 1024 * 1024,  # 16MB，避免长 JSON 行超限
             )
             active_proc = proc
 
