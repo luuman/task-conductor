@@ -20,7 +20,7 @@ export function SessionChat({
   layout, filterByCwd, onSessionSelect, className,
 }: SessionChatProps) {
   const {
-    sessions, sessionsLoading, selectedId, selectedSession,
+    sessions, sessionsLoading, selectedId,
     selectSession, clearSelection, transcript, transcriptLoading,
     fileFound, isFirstLoad,
   } = useSessionData({ filterByCwd })
