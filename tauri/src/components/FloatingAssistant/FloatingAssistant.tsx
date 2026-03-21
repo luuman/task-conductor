@@ -120,12 +120,14 @@ export function FloatingAssistant() {
     ]).then(([projects, tasks]) => {
       const proj = projects.find((p: Project) => p.id === pid)
       if (proj) {
+        const repoUrl = (proj as Project & { repo_url: string }).repo_url || ''
         setProjectInfo({
           name: proj.name,
-          repo_url: (proj as Project & { repo_url: string }).repo_url || '',
+          repo_url: repoUrl,
           taskCount: tasks.length,
           tasks: tasks.slice(0, 10).map((t: Task) => ({ id: t.id, title: t.title, stage: t.stage, status: t.status })),
         })
+        setProjectCwd(repoUrl || null)
       }
     }).catch(() => {})
   }, [activeProjectId])
