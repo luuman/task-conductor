@@ -87,10 +87,10 @@ async def handle_chat_ws(ws: WebSocket):
         )
 
         # 构建选项
-        # MCP 注入暂时通过 ~/.claude.json 全局配置，不在此处指定
-        # 避免 SDK spawn 的 CLI 连接 MCP 失败导致 exit code 1
+        # MCP 通过 ~/.claude.json 全局配置自动加载
         opts = ClaudeAgentOptions(
             permission_mode="bypassPermissions",
+            include_partial_messages=True,  # 流式：每个 token 都推送
         )
 
         # 使用传入的 session_id 或当前会话的 session_id 实现多轮
