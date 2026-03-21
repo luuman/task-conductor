@@ -27,13 +27,18 @@ export function useChatStream() {
     store.setIsGenerating(true)
     store.setCurrentReply('')
 
+    const sendTs = performance.now()
+    console.log(`[ChatStream] 发送消息: "${message.slice(0, 50)}..." @ ${new Date().toISOString()}`)
+
     const baseUrl = getWsBaseUrl()
     const ws = new WebSocket(`${baseUrl}/ws/chat`)
     wsRef.current = ws
 
     let fullText = ''
+    let firstChunkLogged = false
 
     ws.onopen = () => {
+      console.log(`[ChatStream] WebSocket 连接建立, 耗时: ${(performance.now() - sendTs).toFixed(0)}ms`)
       const { systemPrompt, pageContext, claudeSessionId, projectCwd } = useChatStore.getState()
       ws.send(JSON.stringify({
         type: 'chat',
