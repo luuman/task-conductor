@@ -80,50 +80,111 @@ export function FloatingAssistant() {
   const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
+  const transcriptCache = useRef<Map<string, TranscriptMessage[]>>(new Map())
+  const repoUrlRef = useRef('')
+  const apiRef = useRef(new HttpAdapter('local-http'))
 
-  // 拉取项目信息 + 会话列表
+  // 过滤当前项目会话的工具函数
+  const filterProjectSessions = useCallback((allSessions: AiSession[]) => {
+    const repoUrl = repoUrlRef.current
+    return (repoUrl
+      ? allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(repoUrl))
+      : allSessions
+    ).filter((s: AiSession) => !!s.summary)
+  }, [])
+
+  // 刷新会话列表
+  const refreshSessions = useCallback(() => {
+    apiRef.current.getSessions().then((allSessions) => {
+      setSessions(filterProjectSessions(allSessions))
+    }).catch(() => {})
+  }, [filterProjectSessions])
+
+  // 拉取项目信息 + 初始化会话列表
   useEffect(() => {
     if (!activeProjectId) { setProjectInfo(null); setSessions([]); return }
-    const api = new HttpAdapter('local-http')
     const pid = Number(activeProjectId)
     Promise.all([
-      api.getProjects(),
-      api.getTasks(pid),
-      api.getSessions(),
+      apiRef.current.getProjects(),
+      apiRef.current.getTasks(pid),
+      apiRef.current.getSessions(),
     ]).then(([projects, tasks, allSessions]) => {
       const proj = projects.find((p: Project) => p.id === pid)
       if (proj) {
         const repoUrl = (proj as Project & { repo_url: string }).repo_url || ''
+        repoUrlRef.current = repoUrl
         setProjectInfo({
           name: proj.name, repo_url: repoUrl,
           taskCount: tasks.length,
           tasks: tasks.slice(0, 10).map((t: Task) => ({ id: t.id, title: t.title, stage: t.stage, status: t.status })),
         })
         setProjectCwd(repoUrl || null)
-        // 过滤当前项目的会话（cwd 匹配 + 有实际消息）
-        const projectSessions = (repoUrl
-          ? allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(repoUrl))
-          : allSessions
-        ).filter((s: AiSession) => !!s.summary)
-        setSessions(projectSessions)
+        setSessions(filterProjectSessions(allSessions))
       }
     }).catch(() => {})
-  }, [activeProjectId, setProjectCwd])
+  }, [activeProjectId, setProjectCwd, filterProjectSessions])
 
-  // 当 claude 返回 session_id 时，刷新会话列表
+  // 会话列表定时刷新（5秒）
+  useEffect(() => {
+    if (!activeProjectId) return
+    const id = setInterval(refreshSessions, 5000)
+    return () => clearInterval(id)
+  }, [activeProjectId, refreshSessions])
+
+  // 刷新当前选中会话的 transcript
+  const refreshTranscript = useCallback((sid: string) => {
+    apiRef.current.getTranscript(sid).then(({ messages: msgs }) => {
+      if (!msgs?.length) return
+      transcriptCache.current.set(sid, msgs)
+      // 只有当前选中的会话才更新 store
+      if (useChatStore.getState().claudeSessionId === sid) {
+        useChatStore.getState().setMessages(msgs)
+      }
+    }).catch(() => {})
+  }, [])
+
+  // WebSocket 实时刷新（活跃会话）+ fallback 轮询
+  useEffect(() => {
+    if (!activeSessionId) return
+    const sid = activeSessionId
+    const session = sessions.find(s => s.session_id === sid)
+    if (!session || session.status !== 'active') {
+      // 非活跃会话只轮询一次
+      return
+    }
+
+    // WS 监听事件
+    const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/session/${sid}`
+    const channel = `fa-session:${sid}`
+    wsManager.connect(channel, wsUrl)
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
+    const unsub = wsManager.subscribe(channel, () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        refreshTranscript(sid)
+        refreshSessions()
+      }, 500)
+    })
+
+    // Fallback 轮询 10 秒
+    const pollId = setInterval(() => refreshTranscript(sid), 10000)
+
+    return () => {
+      unsub()
+      if (debounceTimer) clearTimeout(debounceTimer)
+      wsManager.disconnect(channel)
+      clearInterval(pollId)
+    }
+  }, [activeSessionId, sessions, refreshTranscript, refreshSessions])
+
+  // 当 claude 返回 session_id 时，刷新会话列表并选中
   const claudeSessionId = useChatStore((s) => s.claudeSessionId)
   useEffect(() => {
-    if (!claudeSessionId || !projectInfo?.repo_url) return
-    const api = new HttpAdapter('local-http')
-    api.getSessions().then((allSessions) => {
-      const projectSessions = allSessions
-        .filter((s: AiSession) => s.cwd && s.cwd.startsWith(projectInfo.repo_url))
-        .filter((s: AiSession) => !!s.summary)
-      setSessions(projectSessions)
-      // 自动选中当前会话
-      setActiveSessionId(claudeSessionId)
-    }).catch(() => {})
-  }, [claudeSessionId, projectInfo?.repo_url])
+    if (!claudeSessionId) return
+    setActiveSessionId(claudeSessionId)
+    // 延迟刷新，等 session 数据落库
+    setTimeout(refreshSessions, 1000)
+  }, [claudeSessionId, refreshSessions])
 
   // system prompt
   useEffect(() => {
