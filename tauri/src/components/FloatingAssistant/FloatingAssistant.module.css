@@ -283,6 +283,7 @@
   gap: 3px;
   max-width: 85%;
   min-width: 0;
+  overflow: hidden;
 }
 .msgWrapUser .msgContent {
   align-items: flex-end;
