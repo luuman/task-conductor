@@ -76,7 +76,6 @@ export function FloatingAssistant() {
   const isFirstLoadRef = useRef(true)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
-  const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
   const repoUrlRef = useRef('')
