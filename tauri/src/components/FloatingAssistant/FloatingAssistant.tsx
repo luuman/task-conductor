@@ -75,6 +75,7 @@ export function FloatingAssistant() {
   const [sessions, setSessions] = useState<AiSession[]>([])
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const isFirstLoad = useRef(true)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
   const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null)
