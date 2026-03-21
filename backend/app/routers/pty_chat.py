@@ -34,9 +34,10 @@ def strip_ansi(text: str) -> str:
 class PtySession:
     """管理单个 PTY Claude 进程"""
 
-    def __init__(self, session_id: str, cwd: str):
+    def __init__(self, session_id: str, cwd: str, resume_session_id: Optional[str] = None):
         self.session_id = session_id
         self.cwd = cwd
+        self.resume_session_id = resume_session_id
         self.child: Optional[pexpect.spawn] = None
         self.created_at = datetime.utcnow()
         self._lock = asyncio.Lock()
@@ -50,9 +51,13 @@ class PtySession:
         # 设置 TERM 以获得更干净的输出
         env["TERM"] = "dumb"
 
+        args = ["--dangerously-skip-permissions"]
+        if self.resume_session_id:
+            args.extend(["--resume", self.resume_session_id])
+
         self.child = pexpect.spawn(
             "claude",
-            args=["--dangerously-skip-permissions"],
+            args=args,
             cwd=self.cwd,
             env=env,
             encoding="utf-8",
@@ -62,7 +67,7 @@ class PtySession:
         )
         # 等待初始 prompt
         self.child.setecho(False)
-        logger.info(f"PTY session {self.session_id} spawned, cwd={self.cwd}")
+        logger.info(f"PTY session {self.session_id} spawned, cwd={self.cwd}, resume={self.resume_session_id}")
 
     def is_alive(self) -> bool:
         return self.child is not None and self.child.isalive()
