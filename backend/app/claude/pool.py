@@ -56,7 +56,7 @@ class ClaudePool:
             cwd=worktree_path,
         )
 
-        client = ClaudeSDKClient(options=opts)
+        client = ClaudeSDKClient(opts)
         self._clients[task_id] = client
 
         try:
