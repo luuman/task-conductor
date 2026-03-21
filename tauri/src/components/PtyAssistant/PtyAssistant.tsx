@@ -231,6 +231,7 @@ export function PtyAssistant() {
           <div className={styles.header} onMouseDown={handleDragStart}>
             <div className={styles.headerAvatar}>⚡</div>
             <span className={styles.headerTitle}>PTY 助手</span>
+            <span className={styles.headerBadge}>interactive</span>
             <span className={`${styles.headerStatus} ${ptyAlive ? styles.statusAlive : styles.statusDead}`}>
               {ptyAlive ? '运行中' : '未连接'}
             </span>
