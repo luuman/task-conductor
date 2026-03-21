@@ -82,20 +82,19 @@ export function useChatStream() {
             s.setCurrentReply('')
             fullTextRef.current = ''
           }
-          // 暂存工具调用信息，等 result 到达后一起添加
-          pendingToolRef.current = {
+          // 入队，等 result 到达后合并
+          pendingToolsRef.current.push({
             tool: msg.data?.tool || '',
             input: msg.data?.input || {},
-          }
+          })
 
         } else if (msg.type === 'chat_tool_result') {
-          // 工具结果到达 — 和暂存的 tool_use 合并为一条完整消息
+          // 工具结果到达 — 出队最早的 pending tool，合并为完整消息
           const result = msg.data?.result || ''
           const isError = msg.data?.is_error || false
-          const pending = pendingToolRef.current
+          const pending = pendingToolsRef.current.shift()
           const toolName = pending?.tool || 'Tool'
           const toolInput = pending?.input || {}
-          pendingToolRef.current = null
 
           s.addMessage({
             role: 'assistant',
