@@ -77,6 +77,7 @@ export const useChatStore = create<ChatStore>()((set) => ({
   close: () => set({ isOpen: false, isMinimized: false }),
   setPosition: (pos) => set({ position: pos }),
   setPageContext: (ctx) => set({ pageContext: ctx }),
+  setProjectCwd: (cwd) => set({ projectCwd: cwd }),
   setActiveTaskId: (id) => set({ activeTaskId: id, messages: [], currentReply: '' }),
   addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
   setMessages: (msgs) => set({ messages: msgs }),
