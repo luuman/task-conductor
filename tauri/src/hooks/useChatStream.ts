@@ -71,6 +71,7 @@ export function useChatStream() {
           s.addMessage(makeTextMsg('assistant', msg.data?.full_text || fullText))
           ws.close()
         } else if (msg.type === 'chat_error') {
+          console.error(`[ChatStream] 错误, 耗时: ${(performance.now() - sendTs).toFixed(0)}ms, error:`, msg.data?.error)
           s.setIsGenerating(false)
           s.setCurrentReply('')
           s.addMessage(makeTextMsg('assistant', `错误: ${msg.data?.error || '未知错误'}`))
