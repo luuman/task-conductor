@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { TranscriptMessage } from '../api/types'
 
 export interface PageContext {
