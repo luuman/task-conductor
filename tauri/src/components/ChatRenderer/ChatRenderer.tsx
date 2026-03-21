@@ -666,15 +666,37 @@ function AskUserQuestionView({ input, result }: { input: Record<string, unknown>
   )
 }
 
-// ── OutputBlock (generic markdown result) ───────────────────
+// ── OutputBlock (generic result with auto code detection) ───
 
 function OutputBlock({ result, isError }: { result: string; isError: boolean }) {
+  // 检测是否是代码内容（多行、有缩进、或包含代码特征）
+  const looksLikeCode = useMemo(() => {
+    const lines = result.split('\n')
+    if (lines.length < 3) return false
+    const codePatterns = /^(import |from |def |class |function |const |let |var |export |async |await |return |if |for |while |#include|package )/m
+    return codePatterns.test(result)
+  }, [result])
+
+  const highlighted = useMemo(() => {
+    if (!looksLikeCode) return null
+    try {
+      const auto = hljs.highlightAuto(result)
+      if (auto.relevance > 3) return auto.value
+    } catch { /* fall through */ }
+    return null
+  }, [result, looksLikeCode])
+
   return (
     <div className={styles.outputWrap} style={isError ? { borderColor: 'rgba(244,63,94,0.3)' } : undefined}>
       <div className={`${styles.outputBody} ${isError ? styles.outputBodyError : ''}`}>
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-          {result}
-        </ReactMarkdown>
+        {highlighted ? (
+          <pre className={`hljs ${styles.bashCardOutput}`}
+               dangerouslySetInnerHTML={{ __html: highlighted }} />
+        ) : (
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+            {result}
+          </ReactMarkdown>
+        )}
       </div>
     </div>
   )
