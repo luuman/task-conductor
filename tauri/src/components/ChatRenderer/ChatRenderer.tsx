@@ -158,7 +158,7 @@ export function groupMessagesIntoTurns(messages: TranscriptMessage[]): GroupedTu
       if (!currentTurn) { currentTurn = newTurn(); currentTurnStart = mi }
       currentTurn.texts.push(block.text)
     } else if (block.type === 'tool_use') {
-      if (!currentTurn) currentTurn = newTurn()
+      if (!currentTurn) { currentTurn = newTurn(); currentTurnStart = mi }
       currentTurn.allBlocks.push(block)
       const tn = block.tool_name || ''
       if (READONLY_TOOLS.has(tn)) {
