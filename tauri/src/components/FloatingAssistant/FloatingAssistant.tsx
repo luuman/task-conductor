@@ -64,10 +64,8 @@ export function FloatingAssistant() {
   const { send, stop } = useChatStream()
   const [input, setInput] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [sessions, setSessions] = useState<ChatSession[]>([
-    { id: '1', title: '新对话', lastMessage: '', updatedAt: new Date().toISOString(), active: true },
-  ])
-  const [activeSessionId, setActiveSessionId] = useState('1')
+  const [sessions, setSessions] = useState<AiSession[]>([])
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
@@ -75,12 +73,16 @@ export function FloatingAssistant() {
   const activeProjectId = useAppStore((s) => s.activeProjectId)
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
 
-  // 拉取项目信息
+  // 拉取项目信息 + 会话列表
   useEffect(() => {
-    if (!activeProjectId) { setProjectInfo(null); return }
+    if (!activeProjectId) { setProjectInfo(null); setSessions([]); return }
     const api = new HttpAdapter('local-http')
     const pid = Number(activeProjectId)
-    Promise.all([api.getProjects(), api.getTasks(pid)]).then(([projects, tasks]) => {
+    Promise.all([
+      api.getProjects(),
+      api.getTasks(pid),
+      api.getSessions(),
+    ]).then(([projects, tasks, allSessions]) => {
       const proj = projects.find((p: Project) => p.id === pid)
       if (proj) {
         const repoUrl = (proj as Project & { repo_url: string }).repo_url || ''
@@ -90,9 +92,27 @@ export function FloatingAssistant() {
           tasks: tasks.slice(0, 10).map((t: Task) => ({ id: t.id, title: t.title, stage: t.stage, status: t.status })),
         })
         setProjectCwd(repoUrl || null)
+        // 过滤当前项目的会话（cwd 匹配项目路径）
+        const projectSessions = repoUrl
+          ? allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(repoUrl))
+          : allSessions
+        setSessions(projectSessions)
       }
     }).catch(() => {})
   }, [activeProjectId, setProjectCwd])
+
+  // 当 claude 返回 session_id 时，刷新会话列表
+  const claudeSessionId = useChatStore((s) => s.claudeSessionId)
+  useEffect(() => {
+    if (!claudeSessionId || !projectInfo?.repo_url) return
+    const api = new HttpAdapter('local-http')
+    api.getSessions().then((allSessions) => {
+      const projectSessions = allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(projectInfo.repo_url))
+      setSessions(projectSessions)
+      // 自动选中当前会话
+      setActiveSessionId(claudeSessionId)
+    }).catch(() => {})
+  }, [claudeSessionId, projectInfo?.repo_url])
 
   // system prompt
   useEffect(() => {
