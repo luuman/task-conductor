@@ -409,8 +409,17 @@ export function FloatingAssistant() {
             </div>
           )}
 
-          {/* Resize 手柄 */}
-          {!isMinimized && <div className={styles.resizeHandle} onMouseDown={handleResizeStart} />}
+          {/* 8方向 Resize 手柄 */}
+          {!isMinimized && <>
+            <div className={styles.resizeN} onMouseDown={(e) => handleEdgeResize(e, { top: true })} />
+            <div className={styles.resizeS} onMouseDown={(e) => handleEdgeResize(e, { bottom: true })} />
+            <div className={styles.resizeE} onMouseDown={(e) => handleEdgeResize(e, { right: true })} />
+            <div className={styles.resizeW} onMouseDown={(e) => handleEdgeResize(e, { left: true })} />
+            <div className={styles.resizeNE} onMouseDown={(e) => handleEdgeResize(e, { top: true, right: true })} />
+            <div className={styles.resizeNW} onMouseDown={(e) => handleEdgeResize(e, { top: true, left: true })} />
+            <div className={styles.resizeSE} onMouseDown={(e) => handleEdgeResize(e, { bottom: true, right: true })} />
+            <div className={styles.resizeSW} onMouseDown={(e) => handleEdgeResize(e, { bottom: true, left: true })} />
+          </>}
         </div>
       )}
     </>
