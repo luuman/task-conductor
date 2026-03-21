@@ -3,7 +3,6 @@
 
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IconChevronRight } from '../../ui/icon'
 import type { AiSession } from '../../lib/api/types'
 import styles from './session-chat.module.css'
 
