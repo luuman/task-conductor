@@ -1,0 +1,288 @@
+/* ── FAB 按钮（左下角） ── */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ── 悬浮面板（左下角） ── */
+.panel {
+  position: fixed;
+  bottom: 80px;
+  left: 24px;
+  width: 460px;
+  height: 560px;
+  background: #111119ee;
+  border: 1px solid var(--tc-border, #2a2a3a);
+  border-radius: 14px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+.panelMinimized {
+  height: 44px;
+  width: 300px;
+}
+
+/* ── 头部 ── */
+.header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: move;
+  user-select: none;
+  border-bottom: 1px solid var(--tc-border, #1e1e2e);
+  background: #16162288;
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+.headerAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.headerTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tc-text-primary, #ddd);
+}
+.headerStatus {
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+.headerStatus::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.statusAlive {
+  color: #10b981;
+}
+.statusAlive::before {
+  background: #10b981;
+  animation: pulse 2s infinite;
+}
+.statusDead {
+  color: #ef4444;
+}
+.statusDead::before {
+  background: #ef4444;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.headerSpacer {
+  flex: 1;
+}
+.headerActions {
+  display: flex;
+  gap: 2px;
+}
+.headerBtn {
+  background: none;
+  border: none;
+  color: var(--tc-text-secondary, #555);
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.headerBtn:hover {
+  background: var(--tc-bg-hover, #2a2a3a);
+  color: var(--tc-text-primary, #ccc);
+}
+
+/* ── 聊天主区域 ── */
+.chatMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── 消息区域 ── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: none;
+}
+.messages::-webkit-scrollbar { display: none; }
+
+/* ── 消息行 ── */
+.msgWrap {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.msgWrapUser { flex-direction: row-reverse; }
+.msgWrapAi { flex-direction: row; }
+.msgAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.msgAvatarUser {
+  background: linear-gradient(135deg, #007acc, #a855f7);
+}
+.msgAvatarAi {
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+}
+.msgContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 85%;
+  min-width: 0;
+  overflow: hidden;
+}
+.msgWrapUser .msgContent { align-items: flex-end; }
+
+/* ── 气泡 ── */
+.bubble {
+  padding: 9px 13px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.bubbleUser {
+  background: #10b981;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  white-space: pre-wrap;
+}
+.bubbleAi {
+  background: #1e1e2e;
+  color: var(--tc-text-primary, #ccc);
+  border-bottom-left-radius: 4px;
+}
+.bubbleStreaming { opacity: 0.85; }
+
+/* ── AI 气泡内 Markdown ── */
+.bubbleAi p { margin: 0 0 8px; }
+.bubbleAi p:last-child { margin-bottom: 0; }
+.bubbleAi ul, .bubbleAi ol { margin: 4px 0; padding-left: 18px; }
+.bubbleAi li { margin: 2px 0; }
+.bubbleAi code { background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px; font-size: 12px; font-family: 'Geist Mono', monospace; }
+.bubbleAi pre { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow-x: auto; margin: 6px 0; max-width: 100%; }
+.bubbleAi pre code { background: none; padding: 0; }
+.bubbleAi strong { color: #fff; }
+.bubbleAi h1, .bubbleAi h2, .bubbleAi h3 { font-size: 13px; color: #fff; margin: 8px 0 4px; }
+.bubbleAi a { color: #60a5fa; text-decoration: none; }
+.bubbleAi a:hover { text-decoration: underline; }
+.bubbleAi hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0; }
+.bubbleAi blockquote { border-left: 2px solid #10b981; padding-left: 8px; margin: 4px 0; color: #888; }
+.bubbleAi table { border-collapse: collapse; font-size: 12px; margin: 6px 0; width: 100%; }
+.bubbleAi th, .bubbleAi td { border: 1px solid rgba(255,255,255,0.1); padding: 4px 8px; text-align: left; }
+.bubbleAi th { background: rgba(255,255,255,0.04); color: #aaa; }
+
+/* ── 输入区 ── */
+.inputArea {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--tc-border, #1e1e2e);
+  background: #13131dee;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+.input {
+  flex: 1;
+  background: #0d0d14;
+  border: 1px solid var(--tc-border, #2a2a3a);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--tc-text-primary, #ccc);
+  font-size: 13px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  min-height: 36px;
+  max-height: 100px;
+}
+.input:focus { border-color: #10b981; }
+.sendBtn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sendBtn:hover { opacity: 0.9; }
+.sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Resize 手柄（8方向） ── */
+.resizeN, .resizeS { position: absolute; left: 6px; right: 6px; height: 5px; z-index: 5; }
+.resizeE, .resizeW { position: absolute; top: 6px; bottom: 6px; width: 5px; z-index: 5; }
+.resizeN  { top: -2px; cursor: n-resize; }
+.resizeS  { bottom: -2px; cursor: s-resize; }
+.resizeE  { right: -2px; cursor: e-resize; }
+.resizeW  { left: -2px; cursor: w-resize; }
+.resizeNE, .resizeNW, .resizeSE, .resizeSW { position: absolute; width: 12px; height: 12px; z-index: 6; }
+.resizeNE { top: -3px; right: -3px; cursor: ne-resize; }
+.resizeNW { top: -3px; left: -3px; cursor: nw-resize; }
+.resizeSE { bottom: -3px; right: -3px; cursor: se-resize; }
+.resizeSW { bottom: -3px; left: -3px; cursor: sw-resize; }
+
+/* ── 空状态 ── */
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tc-text-secondary, #555);
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+  line-height: 1.8;
+}
