@@ -8,15 +8,6 @@ import { HttpAdapter } from '../../lib/api/http'
 import type { Project, Task, AiSession } from '../../lib/api/types'
 import styles from './FloatingAssistant.module.css'
 
-// ── 会话数据 ──
-interface ChatSession {
-  id: string
-  title: string
-  lastMessage: string
-  updatedAt: string
-  active: boolean
-}
-
 interface ProjectInfo {
   name: string
   repo_url: string
