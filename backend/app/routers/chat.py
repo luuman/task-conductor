@@ -83,7 +83,7 @@ async def handle_chat_ws(ws: WebSocket):
         from claude_agent_sdk import query, ClaudeAgentOptions
         from claude_agent_sdk.types import (
             AssistantMessage, ResultMessage, TextBlock, ThinkingBlock,
-            ToolUseBlock,
+            ToolUseBlock, StreamEvent,
         )
 
         # 构建选项
