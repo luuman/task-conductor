@@ -27,6 +27,7 @@ export function SessionChat({
 
   const [search, setSearch] = useState('')
   const [autoExpand, setAutoExpand] = useState(true)
+  const transcriptScrollRef = useRef<HTMLDivElement>(null)
 
   const handleSelect = (s: AiSession) => {
     selectSession(s.session_id)
