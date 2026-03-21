@@ -176,8 +176,10 @@ async def handle_chat_ws(ws: WebSocket):
 
                 # ── UserMessage：工具结果 → 合并发送 chat_tool_complete ──
                 elif isinstance(msg, UserMessage):
+                    logger.info(f"[Chat] USER_MSG pending_keys={list(_pending_tools.keys())} blocks={len(msg.content or [])}")
                     for block in (msg.content or []):
                         tool_use_id = getattr(block, "tool_use_id", "")
+                        logger.info(f"[Chat] RESULT block_type={type(block).__name__} tool_use_id={tool_use_id} match={tool_use_id in _pending_tools}")
                         content = getattr(block, "content", "")
                         is_error = getattr(block, "is_error", False)
                         # 用 tool_use_id 匹配到对应的工具调用
