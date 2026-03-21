@@ -111,7 +111,7 @@ async def handle_chat_ws(ws: WebSocket):
         try:
             await c.query(message)
 
-            async for msg in c.receive_response():
+            async for msg in c.receive_messages():
                 # ── StreamEvent ──
                 if isinstance(msg, StreamEvent):
                     evt = msg.event
