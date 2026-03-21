@@ -79,10 +79,12 @@ export function SessionChat({
         selectedId={selectedId}
         isFirstLoad={isFirstLoad}
         autoExpand={autoExpand}
+        scrollRef={transcriptScrollRef}
       />
       {hasQuestions && (
         <QuestionNav
           transcript={transcript}
+          transcriptScrollRef={transcriptScrollRef}
           autoExpand={autoExpand}
           onAutoExpandChange={setAutoExpand}
         />
