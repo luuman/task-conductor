@@ -183,6 +183,7 @@ class PtySession:
 
                 idle_count = 0
                 cleaned = strip_ansi(chunk)
+                cleaned = clean_cli_noise(cleaned)
 
                 if not cleaned:
                     continue
