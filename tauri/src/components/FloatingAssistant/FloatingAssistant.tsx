@@ -324,18 +324,28 @@ export function FloatingAssistant() {
                     </div>
                   )}
                   {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`${styles.message} ${msg.role === 'user' ? styles.messageUser : styles.messageAssistant}`}
-                    >
-                      {msg.role === 'assistant' ? (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                      ) : msg.content}
+                    <div key={msg.id} className={`${styles.msgWrap} ${msg.role === 'user' ? styles.msgWrapUser : styles.msgWrapAi}`}>
+                      {msg.role === 'assistant' && <div className={styles.msgAvatar}>🤖</div>}
+                      <div className={styles.msgContent}>
+                        <div className={`${styles.bubble} ${msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi}`}>
+                          {msg.role === 'assistant' ? (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                          ) : msg.content}
+                        </div>
+                        <span className={styles.msgTime}>
+                          {new Date(msg.created_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
                     </div>
                   ))}
                   {currentReply && (
-                    <div className={styles.streaming}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentReply}</ReactMarkdown>
+                    <div className={`${styles.msgWrap} ${styles.msgWrapAi}`}>
+                      <div className={styles.msgAvatar}>🤖</div>
+                      <div className={styles.msgContent}>
+                        <div className={`${styles.bubble} ${styles.bubbleAi} ${styles.bubbleStreaming}`}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentReply}</ReactMarkdown>
+                        </div>
+                      </div>
                     </div>
                   )}
                   <div ref={messagesEndRef} />
