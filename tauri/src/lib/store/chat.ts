@@ -29,6 +29,7 @@ interface ChatStore {
 
   // 页面上下文
   pageContext: PageContext
+  projectCwd: string | null
 
   // Actions
   toggle(): void
