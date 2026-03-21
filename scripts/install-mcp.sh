@@ -30,8 +30,7 @@ with open(path, 'r') as f:
 
 servers = data.setdefault('mcpServers', {})
 servers['task-conductor'] = {
-    'type': 'http',
-    'url': url
+    'url': url + '/sse'
 }
 
 with open(path, 'w') as f:
