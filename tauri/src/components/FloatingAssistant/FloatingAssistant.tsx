@@ -263,19 +263,32 @@ export function FloatingAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [setPosition])
 
-  // Resize
-  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+  // Resize（支持 8 个方向）
+  type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
+  const handleResizeStart = useCallback((dir: ResizeDir) => (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     const panel = panelRef.current
     if (!panel) return
-    resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: panel.offsetWidth, startH: panel.offsetHeight }
+    const rect = panel.getBoundingClientRect()
+    const start = { x: e.clientX, y: e.clientY, w: rect.width, h: rect.height, left: rect.left, top: rect.top }
     const handleMove = (ev: MouseEvent) => {
-      if (!resizeRef.current || !panelRef.current) return
-      panelRef.current.style.width = Math.max(350, resizeRef.current.startW + ev.clientX - resizeRef.current.startX) + 'px'
-      panelRef.current.style.height = Math.max(300, resizeRef.current.startH + ev.clientY - resizeRef.current.startY) + 'px'
+      if (!panelRef.current) return
+      const dx = ev.clientX - start.x
+      const dy = ev.clientY - start.y
+      let newW = start.w, newH = start.h, newX = start.left, newY = start.top
+      if (dir.includes('e')) newW = Math.max(350, start.w + dx)
+      if (dir.includes('w')) { newW = Math.max(350, start.w - dx); newX = start.left + start.w - newW }
+      if (dir.includes('s')) newH = Math.max(300, start.h + dy)
+      if (dir.includes('n')) { newH = Math.max(300, start.h - dy); newY = start.top + start.h - newH }
+      panelRef.current.style.width = newW + 'px'
+      panelRef.current.style.height = newH + 'px'
+      panelRef.current.style.left = newX + 'px'
+      panelRef.current.style.top = newY + 'px'
+      panelRef.current.style.right = 'auto'
+      panelRef.current.style.bottom = 'auto'
     }
-    const handleUp = () => { resizeRef.current = null; document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp) }
+    const handleUp = () => { document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp) }
     document.addEventListener('mousemove', handleMove)
     document.addEventListener('mouseup', handleUp)
   }, [])
