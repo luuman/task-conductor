@@ -182,7 +182,7 @@ async def handle_chat_ws(ws: WebSocket):
                         tool_info = _pending_tools.pop(tool_use_id, {})
                         tool_name = tool_info.get("name", "Tool")
                         tool_input = tool_info.get("input", {})
-                        await _send({
+                        payload = {
                             "type": "chat_tool_complete",
                             "data": {
                                 "tool": tool_name,
@@ -192,7 +192,9 @@ async def handle_chat_ws(ws: WebSocket):
                                 "session_id": result_session_id,
                             },
                             "ts": _ts(),
-                        })
+                        }
+                        logger.info(f"[Chat] >>> chat_tool_complete: tool={tool_name} input_keys={list(tool_input.keys())} result_len={len(str(content))}")
+                        await _send(payload)
 
                 # ── ResultMessage：回合结束 ──
                 elif isinstance(msg, ResultMessage):
