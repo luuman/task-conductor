@@ -143,14 +143,14 @@ export function FloatingAssistant() {
   // 快捷键：Ctrl+← / Ctrl+→ 切换会话
   useEffect(() => {
     const handler = (e: globalThis.KeyboardEvent) => {
-      if (!isOpen || !e.ctrlKey) return
-      const idx = sessions.findIndex(s => s.id === activeSessionId)
+      if (!isOpen || !e.ctrlKey || sessions.length === 0) return
+      const idx = sessions.findIndex(s => s.session_id === activeSessionId)
       if (e.key === 'ArrowLeft' && idx > 0) {
         e.preventDefault()
-        setActiveSessionId(sessions[idx - 1].id)
+        switchToSession(sessions[idx - 1].session_id)
       } else if (e.key === 'ArrowRight' && idx < sessions.length - 1) {
         e.preventDefault()
-        setActiveSessionId(sessions[idx + 1].id)
+        switchToSession(sessions[idx + 1].session_id)
       }
     }
     window.addEventListener('keydown', handler)
