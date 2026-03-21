@@ -310,29 +310,7 @@ export function FloatingAssistant() {
               {/* 右侧聊天主体 */}
               <div className={styles.chatMain}>
                 {/* Tab 栏 */}
-                {sessions.length > 1 && (
-                  <div className={styles.tabBar}>
-                    {sessions.map(s => (
-                      <div
-                        key={s.id}
-                        className={`${styles.tab} ${s.id === activeSessionId ? styles.tabActive : ''}`}
-                        onClick={() => setActiveSessionId(s.id)}
-                      >
-                        {s.title}
-                        {sessions.length > 1 && (
-                          <button className={styles.tabClose} onClick={(e) => {
-                            e.stopPropagation()
-                            setSessions(prev => prev.filter(ss => ss.id !== s.id))
-                            if (activeSessionId === s.id) {
-                              const remaining = sessions.filter(ss => ss.id !== s.id)
-                              if (remaining.length) setActiveSessionId(remaining[0].id)
-                            }
-                          }}>×</button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* 不用 tab 栏了，侧边栏已经有会话切换 */}
 
                 {/* 消息列表 */}
                 <div className={styles.messages}>
