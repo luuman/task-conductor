@@ -16,10 +16,43 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
-# ANSI 转义码正则
-ANSI_RE = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]|\x1b\].*?\x07|\x1b[()][AB012]|\x1b\[[\?]?[0-9;]*[hlm]')
+# ANSI 转义码正则（全面匹配）
+ANSI_RE = re.compile(
+    r'\x1b\[[0-9;]*[a-zA-Z]'   # CSI sequences: ESC[...X
+    r'|\x1b\].*?\x07'           # OSC sequences: ESC]...BEL
+    r'|\x1b[()][AB012]'         # Character set
+    r'|\x1b\[[\?]?[0-9;]*[hlm]' # Mode set/reset
+    r'|\x1b[=>]'                # Keypad modes
+    r'|\x1b\[\d*[ABCDJK]'      # Cursor movement & erase
+    r'|\x1b\[\d*;\d*[Hf]'      # Cursor positioning
+    r'|\x1b7|\x1b8'             # Save/restore cursor
+    r'|\x1b\[s|\x1b\[u'        # Save/restore cursor (alt)
+    r'|\r'                       # Carriage return
+)
 # Claude CLI prompt 检测：等待输入的提示符
 PROMPT_RE = re.compile(r'[>❯]\s*$')
+# CLI 状态栏噪音过滤
+STATUS_LINE_RE = re.compile(
+    r'(Opus|Sonnet|Haiku)\s+[\d.]+'  # 模型名+版本
+    r'|░+|▓+'                         # 进度条字符
+    r'|\d+%/\d+k'                     # 百分比/token
+    r'|\$[\d.]+(/h)?'                  # 费用
+    r'|⏱\s*\d+'                       # 计时器
+    r'|[↓↑]\d+'                       # 上下箭头流量
+    r'|●\s*\$'                         # 状态指示
+    r'|\+\d+/-\d+'                     # diff 统计
+    r'|bypass\s*permissions'           # 权限模式
+    r'|shift\+tab\s*to\s*cycle'        # 快捷键提示
+    r'|ctrl\+g\s*to\s*edit'            # 快捷键提示
+    r'|IDE\s*extension'                # IDE 扩展提示
+    r'|⏵⏵'                            # 播放图标
+    r'|🌿\s*\w+'                       # git 分支
+    r'|📁\s*\w+'                       # 目录
+    r'|v\d+\.\d+\.\d+'                 # 版本号
+    r'|○\s*low'                        # effort 级别
+    r'|/effort'                        # effort 标签
+    r'|context\)'                      # context 标签
+)
 # 输出结束检测：超过此时长无新输出视为结束
 OUTPUT_IDLE_TIMEOUT = 1.5  # 秒
 # 每次读取的字节数
@@ -29,6 +62,31 @@ READ_CHUNK = 256
 def strip_ansi(text: str) -> str:
     """去除 ANSI 转义码"""
     return ANSI_RE.sub('', text)
+
+
+def clean_cli_noise(text: str) -> str:
+    """过滤 Claude CLI 状态栏噪音"""
+    lines = text.split('\n')
+    cleaned = []
+    for line in lines:
+        stripped = line.strip()
+        # 跳过空行序列、纯分隔线、状态栏
+        if not stripped:
+            # 保留单个空行，避免连续多个
+            if cleaned and cleaned[-1] != '':
+                cleaned.append('')
+            continue
+        if set(stripped) <= set('─━═─ '):
+            continue
+        if STATUS_LINE_RE.search(stripped):
+            continue
+        cleaned.append(line)
+    # 去首尾空行
+    while cleaned and cleaned[0] == '':
+        cleaned.pop(0)
+    while cleaned and cleaned[-1] == '':
+        cleaned.pop()
+    return '\n'.join(cleaned)
 
 
 class PtySession:
