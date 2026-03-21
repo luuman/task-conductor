@@ -351,6 +351,10 @@ app.include_router(canvas_router.router)           # Canvas API
 app.include_router(screenshot_router.router)      # POST /api/tools/screenshot
 app.include_router(feishu_router)
 
+# ── MCP Server（SSE 端点，供 Claude Code 调用）──────────────────
+from .mcp_server import mcp as _mcp_server
+app.mount("/mcp", _mcp_server.sse_app())
+
 
 # ── 基础 endpoints ─────────────────────────────────────────────
 
