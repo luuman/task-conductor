@@ -54,7 +54,7 @@ interface ChatStore {
   closePrdSidebar(): void
 }
 
-export const useChatStore = create<ChatStore>()((set) => ({
+export const useChatStore = create<ChatStore>()(persist((set) => ({
   isOpen: false,
   isMinimized: false,
   position: { x: -1, y: -1 }, // -1 表示使用默认位置（右下角）
