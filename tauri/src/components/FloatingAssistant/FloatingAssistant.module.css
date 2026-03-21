@@ -247,10 +247,15 @@
 .messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  scrollbar-width: none;
+}
+.messages::-webkit-scrollbar {
+  display: none;
 }
 
 /* 消息行 */
