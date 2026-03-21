@@ -3,6 +3,9 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useChatStore } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
+import { useAppStore } from '../../lib/store/app'
+import { HttpAdapter } from '../../lib/api/http'
+import type { Project, Task } from '../../lib/api/types'
 import styles from './FloatingAssistant.module.css'
 
 interface ProjectInfo {
