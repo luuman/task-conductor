@@ -109,10 +109,31 @@ export function FloatingAssistant() {
     document.addEventListener('mouseup', handleMouseUp)
   }, [setPosition])
 
+  // 拉取项目信息
+  useEffect(() => {
+    if (!activeProjectId) { setProjectInfo(null); return }
+    const api = new HttpAdapter('local-http')
+    const pid = Number(activeProjectId)
+    Promise.all([
+      api.getProjects(),
+      api.getTasks(pid),
+    ]).then(([projects, tasks]) => {
+      const proj = projects.find((p: Project) => p.id === pid)
+      if (proj) {
+        setProjectInfo({
+          name: proj.name,
+          repo_url: (proj as Project & { repo_url: string }).repo_url || '',
+          taskCount: tasks.length,
+          tasks: tasks.slice(0, 10).map((t: Task) => ({ id: t.id, title: t.title, stage: t.stage, status: t.status })),
+        })
+      }
+    }).catch(() => {})
+  }, [activeProjectId])
+
   // 页面上下文变化时更新 system prompt
   useEffect(() => {
-    setSystemPrompt(buildSystemPrompt(pageContext))
-  }, [pageContext, setSystemPrompt])
+    setSystemPrompt(buildSystemPrompt(pageContext, projectInfo))
+  }, [pageContext, projectInfo, setSystemPrompt])
 
   // 滚动到底部
   useEffect(() => {
