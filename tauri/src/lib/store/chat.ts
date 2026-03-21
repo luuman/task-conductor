@@ -69,6 +69,7 @@ export const useChatStore = create<ChatStore>()((set) => ({
   prdSidebarOpen: false,
 
   pageContext: { page: 'dashboard' },
+  projectCwd: null,
 
   toggle: () => set((s) => ({ isOpen: !s.isOpen, isMinimized: false })),
   minimize: () => set({ isMinimized: true }),
