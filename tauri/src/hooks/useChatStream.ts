@@ -55,10 +55,15 @@ export function useChatStream() {
         const msg = JSON.parse(event.data)
         const s = useChatStore.getState()
         if (msg.type === 'chat_chunk') {
+          if (!firstChunkLogged) {
+            firstChunkLogged = true
+            console.log(`[ChatStream] 首个 chunk 到达 (TTFC): ${(performance.now() - sendTs).toFixed(0)}ms`)
+          }
           const text = msg.data?.text || ''
           fullText += text
           s.appendCurrentReply(text)
         } else if (msg.type === 'chat_done') {
+          console.log(`[ChatStream] 回答完成, 总耗时: ${(performance.now() - sendTs).toFixed(0)}ms, 文本长度: ${(msg.data?.full_text || fullText).length}`)
           const sessionId = msg.data?.session_id
           if (sessionId) s.setClaudeSessionId(sessionId)
           s.setIsGenerating(false)
