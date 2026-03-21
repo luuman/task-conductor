@@ -282,6 +282,7 @@ export function FloatingAssistant() {
 
   // 切换到已有会话，加载历史消息（带缓存）
   const switchToSession = useCallback((sessionId: string) => {
+    isFirstLoad.current = true
     setActiveSessionId(sessionId)
     const store = useChatStore.getState()
     store.setCurrentReply('')
