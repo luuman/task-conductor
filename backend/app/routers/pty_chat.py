@@ -193,9 +193,9 @@ class PtyManager:
             cls._instance._sessions = {}
         return cls._instance
 
-    def create(self, ws_id: str, cwd: str) -> PtySession:
+    def create(self, ws_id: str, cwd: str, resume_session_id: Optional[str] = None) -> PtySession:
         self.cleanup(ws_id)
-        session = PtySession(session_id=ws_id, cwd=cwd)
+        session = PtySession(session_id=ws_id, cwd=cwd, resume_session_id=resume_session_id)
         session.spawn()
         self._sessions[ws_id] = session
         return session
