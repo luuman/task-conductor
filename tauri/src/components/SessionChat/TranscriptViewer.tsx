@@ -191,7 +191,7 @@ export function TranscriptViewer({
           )}
           <div className={styles.transcriptBody}>
             {groupMessagesIntoTurns(transcript).map((item, i) => (
-              <div key={i} data-msg-index={i}>
+              <div key={i} data-msg-index={item.startIndex}>
                 {item.kind === 'user' ? (
                   <UserCard msg={item.msg} />
                 ) : (
