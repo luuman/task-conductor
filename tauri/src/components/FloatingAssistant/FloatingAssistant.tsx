@@ -271,21 +271,24 @@ export function FloatingAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [])
 
-  // 切换到已有会话，加载历史消息
+  // 切换到已有会话，加载历史消息（带缓存）
   const switchToSession = useCallback((sessionId: string) => {
     setActiveSessionId(sessionId)
     const store = useChatStore.getState()
-    store.setMessages([])
     store.setCurrentReply('')
     store.setClaudeSessionId(sessionId)
 
-    // 从后端加载 transcript — 直接使用 TranscriptMessage[]
-    const api = new HttpAdapter('local-http')
-    api.getTranscript(sessionId).then(({ messages: transcriptMsgs }) => {
-      if (!transcriptMsgs?.length) return
-      useChatStore.getState().setMessages(transcriptMsgs)
-    }).catch(() => {})
-  }, [])
+    // 先从缓存显示
+    const cached = transcriptCache.current.get(sessionId)
+    if (cached) {
+      store.setMessages(cached)
+    } else {
+      store.setMessages([])
+    }
+
+    // 然后拉取最新（无论有无缓存都拉，确保最新）
+    refreshTranscript(sessionId)
+  }, [refreshTranscript])
 
   const handleSend = useCallback(() => {
     const text = input.trim()
