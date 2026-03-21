@@ -180,7 +180,7 @@ async def handle_chat_ws(ws: WebSocket):
                         },
                         "ts": _ts(),
                     })
-                    # receive_response() 在 ResultMessage 后自动停止
+                    break
 
         except asyncio.CancelledError:
             raise
