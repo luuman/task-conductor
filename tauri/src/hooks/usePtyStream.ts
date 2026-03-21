@@ -23,7 +23,7 @@ export function usePtyStream() {
   const cwdRef = useRef<string | null>(null)
 
   // 建立长连接
-  const connect = useCallback((cwd?: string) => {
+  const connect = useCallback((cwd?: string, resumeSessionId?: string) => {
     if (wsRef.current && wsRef.current.readyState <= WebSocket.OPEN) return
 
     cwdRef.current = cwd || null
@@ -33,10 +33,11 @@ export function usePtyStream() {
     reconnectRef.current = true
 
     ws.onopen = () => {
-      console.log('[PtyStream] WebSocket 连接建立，发送 init')
+      console.log('[PtyStream] WebSocket 连接建立，发送 init', resumeSessionId ? `resume=${resumeSessionId}` : '')
       ws.send(JSON.stringify({
         type: 'init',
         cwd: cwd || undefined,
+        resume_session_id: resumeSessionId || undefined,
       }))
     }
 
