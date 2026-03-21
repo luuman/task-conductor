@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { InterviewMessage } from '../api/types'
+import type { TranscriptMessage } from '../api/types'
 
 export interface PageContext {
   page: string
@@ -17,7 +17,7 @@ interface ChatStore {
 
   // 当前访谈上下文
   activeTaskId: number | null
-  messages: InterviewMessage[]
+  messages: TranscriptMessage[]
   currentReply: string
   isGenerating: boolean
   systemPrompt: string
@@ -40,8 +40,8 @@ interface ChatStore {
   setPageContext(ctx: PageContext): void
   setProjectCwd(cwd: string | null): void
   setActiveTaskId(id: number | null): void
-  addMessage(msg: InterviewMessage): void
-  setMessages(msgs: InterviewMessage[]): void
+  addMessage(msg: TranscriptMessage): void
+  setMessages(msgs: TranscriptMessage[]): void
   setCurrentReply(text: string): void
   appendCurrentReply(text: string): void
   setIsGenerating(v: boolean): void
