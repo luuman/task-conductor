@@ -38,6 +38,7 @@ interface ChatStore {
   close(): void
   setPosition(pos: { x: number; y: number }): void
   setPageContext(ctx: PageContext): void
+  setProjectCwd(cwd: string | null): void
   setActiveTaskId(id: number | null): void
   addMessage(msg: InterviewMessage): void
   setMessages(msgs: InterviewMessage[]): void
