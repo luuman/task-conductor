@@ -123,38 +123,44 @@ async def handle_chat_ws(ws: WebSocket):
 
         result_session_id = resume_id or ""
         full_text = ""
+        # 用于增量 diff：记录上次已发送的文本长度
+        _last_sent_len = 0
+        _last_thinking_len = 0
 
         try:
             async for message in query(prompt=message, options=opts):
                 if isinstance(message, AssistantMessage):
                     for block in message.content:
                         if isinstance(block, TextBlock):
-                            text = block.text
-                            if text:
-                                full_text += text
+                            # partial 模式下 text 是累积的，做增量 diff
+                            current_text = block.text or ""
+                            if len(current_text) > _last_sent_len:
+                                delta = current_text[_last_sent_len:]
+                                _last_sent_len = len(current_text)
+                                full_text = current_text
                                 await _send({
                                     "type": "chat_chunk",
                                     "data": {
-                                        "text": text,
+                                        "text": delta,
                                         "session_id": result_session_id,
                                         "done": False,
                                     },
                                     "ts": _ts(),
                                 })
                         elif isinstance(block, ThinkingBlock):
-                            # 推送思考过程
                             thinking = getattr(block, "thinking", "") or ""
-                            if thinking:
+                            if len(thinking) > _last_thinking_len:
+                                delta = thinking[_last_thinking_len:]
+                                _last_thinking_len = len(thinking)
                                 await _send({
                                     "type": "chat_thinking",
                                     "data": {
-                                        "text": thinking,
+                                        "text": delta,
                                         "session_id": result_session_id,
                                     },
                                     "ts": _ts(),
                                 })
                         elif isinstance(block, ToolUseBlock):
-                            # 推送工具调用信息
                             await _send({
                                 "type": "chat_tool_use",
                                 "data": {
