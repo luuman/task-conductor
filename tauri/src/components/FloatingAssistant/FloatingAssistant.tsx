@@ -192,9 +192,17 @@ export function FloatingAssistant() {
     setSystemPrompt(buildSystemPrompt(pageContext, projectInfo))
   }, [pageContext, projectInfo, setSystemPrompt])
 
-  // 滚动到底部
+  // 滚动到底部：首次加载直接定位，后续新消息平滑滚动
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!messages.length && !currentReply) return
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
+      })
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages, currentReply])
 
   // PRD 检测
