@@ -34,6 +34,8 @@ export function useChatStream() {
   const firstChunkRef = useRef(false)
   // 待发送消息队列：WS 还在连接时暂存
   const pendingRef = useRef<string | null>(null)
+  // 暂存工具调用信息，等 result 到达后合并
+  const pendingToolRef = useRef<{ tool: string; input: Record<string, unknown> } | null>(null)
 
   const _ensureWs = useCallback((): WebSocket => {
     const existing = wsRef.current
