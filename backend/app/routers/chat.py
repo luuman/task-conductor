@@ -155,8 +155,10 @@ async def handle_chat_ws(ws: WebSocket):
                             _current_tool_id = block.get("id", "")
                             _current_tool_name = block.get("name", "")
                             _tool_input_buf = ""
+                            logger.info(f"[Chat] TOOL_START id={_current_tool_id} name={_current_tool_name}")
 
                     elif evt_type == "content_block_stop":
+                        logger.info(f"[Chat] BLOCK_STOP cur_id={_current_tool_id} cur_name={_current_tool_name}")
                         if _current_tool_id and _current_tool_name:
                             tool_input = {}
                             if _tool_input_buf:
