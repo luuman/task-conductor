@@ -135,6 +135,7 @@ async def handle_chat_ws(ws: WebSocket):
             active_proc = proc
 
             full_text = ""
+            final_text = ""
             result_session_id = session_id or ""
 
             async for line in proc.stdout:
@@ -143,10 +144,11 @@ async def handle_chat_ws(ws: WebSocket):
                 if not event:
                     continue
 
-                # 尝试从 result 事件中获取 session_id
+                # 尝试从 system 事件中获取 session_id
                 if event.get("type") == "system" and event.get("session_id"):
                     result_session_id = event["session_id"]
 
+                # 流式增量文本 → 立即推送
                 text = extract_text(event)
                 if text:
                     full_text += text
@@ -160,13 +162,18 @@ async def handle_chat_ws(ws: WebSocket):
                         "ts": _ts(),
                     })
 
+                # 最终完整文本（兜底，不发 chunk）
+                ft = extract_final_text(event)
+                if ft:
+                    final_text = ft
+
             await proc.wait()
 
             await _send({
                 "type": "chat_done",
                 "data": {
                     "session_id": result_session_id,
-                    "full_text": full_text,
+                    "full_text": full_text or final_text,
                 },
                 "ts": _ts(),
             })
