@@ -63,7 +63,7 @@ export function FloatingAssistant() {
   const {
     isOpen, isMinimized, messages, currentReply, isGenerating,
     pageContext, position, toggle, minimize, restore, close,
-    addMessage, setSystemPrompt, setPosition,
+    addMessage, setSystemPrompt, setPosition, setProjectCwd,
   } = useChatStore()
   const { send, stop } = useChatStream()
   const [input, setInput] = useState('')
