@@ -103,7 +103,7 @@ export function FloatingAssistant() {
         const projectSessions = (repoUrl
           ? allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(repoUrl))
           : allSessions
-        ).filter((s: AiSession) => s.event_count > 0 || s.summary)
+        ).filter((s: AiSession) => !!s.summary)
         setSessions(projectSessions)
       }
     }).catch(() => {})
