@@ -119,9 +119,9 @@ export function usePtyStream() {
     }
   }, [])
 
-  const reconnect = useCallback((cwd?: string) => {
+  const reconnect = useCallback((cwd?: string, resumeSessionId?: string) => {
     disconnect()
-    setTimeout(() => connect(cwd), 100)
+    setTimeout(() => connect(cwd, resumeSessionId), 100)
   }, [connect, disconnect])
 
   // 组件卸载时断开
