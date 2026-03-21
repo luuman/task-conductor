@@ -281,7 +281,7 @@ export function FloatingAssistant() {
           style={position.x >= 0 ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : undefined}
         >
           {/* 头部 */}
-          <div className={styles.header} onMouseDown={handleDragStart} style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2, borderRadius: '14px 14px 0 0' }}>
+          <div className={styles.header} onMouseDown={handleDragStart}>
             <div className={styles.headerAvatar}>🤖</div>
             <span className={styles.headerTitle}>AI 助手</span>
             <span className={styles.headerOnline}>在线</span>
@@ -295,7 +295,7 @@ export function FloatingAssistant() {
           </div>
 
           {!isMinimized && (
-            <div style={{ display: 'flex', flex: 1, marginTop: 44 }}>
+            <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
               {/* 左侧会话目录 */}
               {sidebarOpen && (
                 <div className={styles.chatSidebar}>
