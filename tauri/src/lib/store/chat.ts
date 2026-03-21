@@ -91,4 +91,11 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   togglePrdSidebar: () => set((s) => ({ prdSidebarOpen: !s.prdSidebarOpen })),
   openPrdSidebar: () => set({ prdSidebarOpen: true }),
   closePrdSidebar: () => set({ prdSidebarOpen: false }),
+}), {
+  name: 'tc-chat',
+  partialize: (state) => ({
+    messages: state.messages.slice(-50),  // 只保留最近 50 条
+    claudeSessionId: state.claudeSessionId,
+    projectCwd: state.projectCwd,
+  }),
 }))
