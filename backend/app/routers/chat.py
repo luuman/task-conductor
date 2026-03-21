@@ -145,12 +145,28 @@ async def handle_chat_ws(ws: WebSocket):
                 if not event:
                     continue
 
+                etype = event.get("type", "")
+
                 # 尝试从 system 事件中获取 session_id
-                if event.get("type") == "system" and event.get("session_id"):
+                if etype == "system" and event.get("session_id"):
                     result_session_id = event["session_id"]
 
-                # 流式增量文本 → 立即推送
-                text = extract_text(event)
+                # 提取文本（与 executor.py 逻辑一致）
+                text = ""
+                if etype == "assistant":
+                    msg = event.get("message", {})
+                    for block in msg.get("content", []):
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            text += block.get("text", "")
+                elif etype == "result":
+                    text = event.get("result", "")
+                elif etype == "content_block_delta":
+                    delta = event.get("delta", {})
+                    if delta.get("type") == "text_delta":
+                        text = delta.get("text", "")
+                elif etype == "text":
+                    text = event.get("content", "")
+
                 if text:
                     full_text += text
                     await _send({
@@ -162,11 +178,6 @@ async def handle_chat_ws(ws: WebSocket):
                         },
                         "ts": _ts(),
                     })
-
-                # 最终完整文本（兜底，不发 chunk）
-                ft = extract_final_text(event)
-                if ft:
-                    final_text = ft
 
             await proc.wait()
 
