@@ -1,158 +1,212 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import '@xterm/xterm/css/xterm.css'
-import { usePtyChatStore } from '../../lib/store/pty-chat'
+import { usePtyChatStore, generateSessionId, type PtySession } from '../../lib/store/pty-chat'
 import { usePtyStream } from '../../hooks/usePtyStream'
 import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
 import type { Project } from '../../lib/api/types'
 import styles from './pty-assistant.module.css'
 
+const TERM_OPTIONS = {
+  cursorBlink: true,
+  fontSize: 13,
+  fontFamily: "'Geist Mono', 'Cascadia Code', 'Fira Code', monospace",
+  theme: {
+    background: '#0d0d14',
+    foreground: '#d4d4d8',
+    cursor: '#10b981',
+    selectionBackground: 'rgba(16, 185, 129, 0.25)',
+    black: '#09090b',
+    red: '#ef4444',
+    green: '#10b981',
+    yellow: '#f59e0b',
+    blue: '#3b82f6',
+    magenta: '#a855f7',
+    cyan: '#06b6d4',
+    white: '#d4d4d8',
+    brightBlack: '#52525b',
+    brightRed: '#f87171',
+    brightGreen: '#34d399',
+    brightYellow: '#fbbf24',
+    brightBlue: '#60a5fa',
+    brightMagenta: '#c084fc',
+    brightCyan: '#22d3ee',
+    brightWhite: '#fafafa',
+  },
+  allowTransparency: true,
+  scrollback: 5000,
+} as const
+
 export function PtyAssistant() {
   const {
-    isOpen, isMinimized, ptyAlive,
-    position, toggle, minimize, restore, close, setPosition,
+    isOpen, isMinimized, position, sidebarOpen, sessions, activeSessionId,
+    toggle, minimize, restore, close, setPosition, setSidebarOpen,
+    addSession, removeSession, setActiveSession,
   } = usePtyChatStore()
-  const { connect, write, resize, disconnect, reconnect } = usePtyStream()
-  const termRef = useRef<Terminal | null>(null)
-  const fitAddonRef = useRef<FitAddon | null>(null)
+  const { connectSession, writeToSession, resizeSession, disconnectSession, disconnectAll } = usePtyStream()
+
+  // sessionId → { term, fitAddon, container }
+  const termMapRef = useRef<Map<string, { term: Terminal; fitAddon: FitAddon }>>(new Map())
   const termContainerRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
-  const activeProjectId = useAppStore((s) => s.activeProjectId)
-  const [projectCwd, setProjectCwd] = useState<string | null>(null)
-  const apiRef = useRef(new HttpAdapter('local-http'))
-  const hasConnectedRef = useRef(false)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
+
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
+  const projectCwdRef = useRef<string | null>(null)
+  const apiRef = useRef(new HttpAdapter('local-http'))
 
   // 拉取项目 cwd
   useEffect(() => {
-    if (!activeProjectId) { setProjectCwd(null); return }
+    if (!activeProjectId) { projectCwdRef.current = null; return }
     apiRef.current.getProjects().then((projects) => {
       const proj = projects.find((p: Project) => p.id === Number(activeProjectId))
       if (proj) {
-        setProjectCwd((proj as Project & { repo_url: string }).repo_url || null)
+        projectCwdRef.current = (proj as Project & { repo_url: string }).repo_url || null
       }
     }).catch(() => {})
   }, [activeProjectId])
 
-  // 关闭时清理终端和连接
-  useEffect(() => {
-    if (!isOpen) {
-      // 面板关闭 → 清理一切
-      disconnect()
-      resizeObserverRef.current?.disconnect()
-      resizeObserverRef.current = null
-      termRef.current?.dispose()
-      termRef.current = null
-      fitAddonRef.current = null
-      hasConnectedRef.current = false
+  // 创建新会话
+  const createNewSession = useCallback(() => {
+    const id = generateSessionId()
+    const session: PtySession = {
+      id,
+      label: `终端 ${sessions.length + 1}`,
+      alive: false,
+      createdAt: Date.now(),
     }
-  }, [isOpen, disconnect])
+    addSession(session)
+    return id
+  }, [sessions.length, addSession])
 
-  // 初始化 xterm
+  // 挂载终端到 DOM 并连接
+  const mountTerminal = useCallback((sessionId: string) => {
+    const container = termContainerRef.current
+    if (!container) return
+
+    // 已有终端 → 显示它
+    const existing = termMapRef.current.get(sessionId)
+    if (existing) {
+      // 隐藏所有终端，显示当前
+      container.childNodes.forEach((child) => {
+        (child as HTMLElement).style.display = 'none'
+      })
+      const el = container.querySelector(`[data-session="${sessionId}"]`) as HTMLElement
+      if (el) {
+        el.style.display = 'block'
+        requestAnimationFrame(() => existing.fitAddon.fit())
+      }
+      return
+    }
+
+    // 创建终端 wrapper
+    const wrapper = document.createElement('div')
+    wrapper.setAttribute('data-session', sessionId)
+    wrapper.style.width = '100%'
+    wrapper.style.height = '100%'
+
+    // 隐藏其他终端
+    container.childNodes.forEach((child) => {
+      (child as HTMLElement).style.display = 'none'
+    })
+    container.appendChild(wrapper)
+
+    const term = new Terminal(TERM_OPTIONS)
+    const fitAddon = new FitAddon()
+    term.loadAddon(fitAddon)
+    term.loadAddon(new WebLinksAddon())
+    term.open(wrapper)
+    termMapRef.current.set(sessionId, { term, fitAddon })
+
+    requestAnimationFrame(() => {
+      fitAddon.fit()
+
+      // 用户输入 → WebSocket
+      term.onData((data) => {
+        writeToSession(sessionId, data)
+      })
+
+      // 连接 PTY
+      connectSession(sessionId, {
+        cwd: projectCwdRef.current || undefined,
+        cols: term.cols,
+        rows: term.rows,
+        onData: (data) => term.write(data),
+      })
+    })
+  }, [connectSession, writeToSession])
+
+  // 切换活跃会话
+  const switchSession = useCallback((sessionId: string) => {
+    setActiveSession(sessionId)
+    // 延迟一帧确保 DOM 更新
+    requestAnimationFrame(() => mountTerminal(sessionId))
+  }, [setActiveSession, mountTerminal])
+
+  // 关闭（删除）会话
+  const closeSession = useCallback((sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    disconnectSession(sessionId)
+    const entry = termMapRef.current.get(sessionId)
+    if (entry) {
+      entry.term.dispose()
+      termMapRef.current.delete(sessionId)
+    }
+    // 删除 DOM
+    const container = termContainerRef.current
+    const el = container?.querySelector(`[data-session="${sessionId}"]`)
+    el?.remove()
+    removeSession(sessionId)
+  }, [disconnectSession, removeSession])
+
+  // 面板打开时，确保有至少一个会话
+  useEffect(() => {
+    if (!isOpen || isMinimized) return
+
+    if (sessions.length === 0) {
+      const id = createNewSession()
+      requestAnimationFrame(() => mountTerminal(id))
+    } else if (activeSessionId) {
+      requestAnimationFrame(() => mountTerminal(activeSessionId))
+    }
+  }, [isOpen, isMinimized]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 监听容器大小变化 → 自动 fit
   useEffect(() => {
     if (!isOpen || isMinimized) return
     const container = termContainerRef.current
     if (!container) return
 
-    // 已有终端则跳过
-    if (termRef.current) {
-      requestAnimationFrame(() => fitAddonRef.current?.fit())
-      return
-    }
-
-    const term = new Terminal({
-      cursorBlink: true,
-      fontSize: 13,
-      fontFamily: "'Geist Mono', 'Cascadia Code', 'Fira Code', monospace",
-      theme: {
-        background: '#0d0d14',
-        foreground: '#d4d4d8',
-        cursor: '#10b981',
-        selectionBackground: 'rgba(16, 185, 129, 0.25)',
-        black: '#09090b',
-        red: '#ef4444',
-        green: '#10b981',
-        yellow: '#f59e0b',
-        blue: '#3b82f6',
-        magenta: '#a855f7',
-        cyan: '#06b6d4',
-        white: '#d4d4d8',
-        brightBlack: '#52525b',
-        brightRed: '#f87171',
-        brightGreen: '#34d399',
-        brightYellow: '#fbbf24',
-        brightBlue: '#60a5fa',
-        brightMagenta: '#c084fc',
-        brightCyan: '#22d3ee',
-        brightWhite: '#fafafa',
-      },
-      allowTransparency: true,
-      scrollback: 5000,
-    })
-
-    const fitAddon = new FitAddon()
-    const webLinksAddon = new WebLinksAddon()
-    term.loadAddon(fitAddon)
-    term.loadAddon(webLinksAddon)
-
-    term.open(container)
-    termRef.current = term
-    fitAddonRef.current = fitAddon
-
-    // 初始 fit
-    requestAnimationFrame(() => {
-      fitAddon.fit()
-
-      // 用户输入 → WebSocket → PTY
-      term.onData((data) => {
-        write(data)
-      })
-
-      // 连接 PTY
-      if (!hasConnectedRef.current) {
-        hasConnectedRef.current = true
-        connect({
-          cwd: projectCwd || undefined,
-          cols: term.cols,
-          rows: term.rows,
-          onData: (data) => {
-            term.write(data)
-          },
+    const observer = new ResizeObserver(() => {
+      const sid = usePtyChatStore.getState().activeSessionId
+      if (!sid) return
+      const entry = termMapRef.current.get(sid)
+      if (entry) {
+        requestAnimationFrame(() => {
+          entry.fitAddon.fit()
+          resizeSession(sid, entry.term.cols, entry.term.rows)
         })
       }
     })
-
-    // 监听容器大小变化
-    const observer = new ResizeObserver(() => {
-      requestAnimationFrame(() => {
-        if (fitAddonRef.current && termRef.current) {
-          fitAddonRef.current.fit()
-          resize(termRef.current.cols, termRef.current.rows)
-        }
-      })
-    })
     observer.observe(container)
     resizeObserverRef.current = observer
+    return () => observer.disconnect()
+  }, [isOpen, isMinimized, resizeSession])
 
-    return () => {
-      observer.disconnect()
-    }
-  }, [isOpen, isMinimized]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 组件卸载时清理
+  // 组件卸载 → 全部清理
   useEffect(() => {
     return () => {
-      disconnect()
-      termRef.current?.dispose()
-      termRef.current = null
+      disconnectAll()
+      termMapRef.current.forEach(({ term }) => term.dispose())
+      termMapRef.current.clear()
     }
-  }, [disconnect])
+  }, [disconnectAll])
 
-  // Ctrl+Shift+J 快捷键
+  // Ctrl+Shift+J
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'J') {
@@ -184,7 +238,7 @@ export function PtyAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [setPosition])
 
-  // 8方向 Resize
+  // Resize
   const handleEdgeResize = useCallback((e: React.MouseEvent, edges: { top?: boolean; bottom?: boolean; left?: boolean; right?: boolean }) => {
     e.preventDefault()
     e.stopPropagation()
@@ -203,50 +257,43 @@ export function PtyAssistant() {
         const newW = Math.max(400, start.w - dx)
         s.width = newW + 'px'
         s.left = (start.l + start.w - newW) + 'px'
-        s.right = 'auto'
-        s.bottom = 'auto'
-        s.top = start.t + 'px'
+        s.right = 'auto'; s.bottom = 'auto'; s.top = start.t + 'px'
       }
       if (edges.top) {
         const newH = Math.max(300, start.h - dy)
         s.height = newH + 'px'
         s.top = (start.t + start.h - newH) + 'px'
-        s.right = 'auto'
-        s.bottom = 'auto'
-        s.left = start.l + 'px'
+        s.right = 'auto'; s.bottom = 'auto'; s.left = start.l + 'px'
       }
-      // 触发 resize
-      requestAnimationFrame(() => fitAddonRef.current?.fit())
     }
     const handleUp = () => {
       document.removeEventListener('mousemove', handleMove)
       document.removeEventListener('mouseup', handleUp)
-      requestAnimationFrame(() => {
-        fitAddonRef.current?.fit()
-        if (termRef.current) resize(termRef.current.cols, termRef.current.rows)
-      })
+      // refit
+      const sid = usePtyChatStore.getState().activeSessionId
+      if (sid) {
+        const entry = termMapRef.current.get(sid)
+        if (entry) {
+          requestAnimationFrame(() => {
+            entry.fitAddon.fit()
+            resizeSession(sid, entry.term.cols, entry.term.rows)
+          })
+        }
+      }
     }
     document.addEventListener('mousemove', handleMove)
     document.addEventListener('mouseup', handleUp)
-  }, [resize])
+  }, [resizeSession])
 
-  const handleReconnect = useCallback(() => {
-    termRef.current?.clear()
-    hasConnectedRef.current = true
-    reconnect({
-      cwd: projectCwd || undefined,
-      cols: termRef.current?.cols || 120,
-      rows: termRef.current?.rows || 40,
-      onData: (data) => {
-        termRef.current?.write(data)
-      },
-    })
-  }, [reconnect, projectCwd])
+  const handleNewSession = useCallback(() => {
+    const id = createNewSession()
+    requestAnimationFrame(() => mountTerminal(id))
+  }, [createNewSession, mountTerminal])
 
   return (
     <>
       {!isOpen && (
-        <button className={styles.fab} onClick={toggle} title="PTY 终端 (Ctrl+Shift+J)">
+        <button className={styles.fab} onClick={toggle} title="Claude Terminal (Ctrl+Shift+J)">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="4 17 10 11 4 5" />
             <line x1="12" y1="19" x2="20" y2="19" />
@@ -265,27 +312,59 @@ export function PtyAssistant() {
             <div className={styles.headerAvatar}>⚡</div>
             <span className={styles.headerTitle}>Claude Terminal</span>
             <span className={styles.headerBadge}>PTY</span>
-            <span className={`${styles.headerStatus} ${ptyAlive ? styles.statusAlive : styles.statusDead}`}>
-              {ptyAlive ? '运行中' : '未连接'}
-            </span>
+            {activeSessionId && (
+              <span className={`${styles.headerStatus} ${
+                sessions.find(s => s.id === activeSessionId)?.alive ? styles.statusAlive : styles.statusDead
+              }`}>
+                {sessions.find(s => s.id === activeSessionId)?.alive ? '运行中' : '连接中'}
+              </span>
+            )}
             <div className={styles.headerSpacer} />
             <div className={styles.headerActions}>
-              {!ptyAlive && (
-                <button className={styles.headerBtn} onClick={handleReconnect} title="重连">↻</button>
-              )}
+              <button className={styles.headerBtn} onClick={() => setSidebarOpen(!sidebarOpen)} title="会话列表">☰</button>
+              <button className={styles.headerBtn} onClick={handleNewSession} title="新终端">+</button>
               <button className={styles.headerBtn} onClick={isMinimized ? restore : minimize} title={isMinimized ? '展开' : '最小化'}>
                 {isMinimized ? '□' : '—'}
               </button>
-              <button className={styles.headerBtn} onClick={close} title="关闭">×</button>
+              <button className={styles.headerBtn} onClick={close} title="隐藏">×</button>
             </div>
           </div>
 
-          {/* 终端区域 */}
           {!isMinimized && (
-            <div className={styles.termContainer} ref={termContainerRef} />
+            <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              {/* 侧边栏 */}
+              {sidebarOpen && (
+                <div className={styles.sidebar}>
+                  <div className={styles.sidebarHeader}>
+                    <span>会话</span>
+                    <button className={styles.sidebarNewBtn} onClick={handleNewSession} title="新终端">+</button>
+                  </div>
+                  <div className={styles.sidebarList}>
+                    {sessions.map(s => (
+                      <div
+                        key={s.id}
+                        className={`${styles.sidebarItem} ${s.id === activeSessionId ? styles.sidebarItemActive : ''}`}
+                        onClick={() => switchSession(s.id)}
+                      >
+                        <span className={styles.sidebarDot} style={{ background: s.alive ? '#10b981' : '#52525b' }} />
+                        <span className={styles.sidebarLabel}>{s.label}</span>
+                        <button
+                          className={styles.sidebarCloseBtn}
+                          onClick={(e) => closeSession(s.id, e)}
+                          title="关闭会话"
+                        >×</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 终端区域 */}
+              <div className={styles.termContainer} ref={termContainerRef} />
+            </div>
           )}
 
-          {/* 8方向 Resize 手柄 */}
+          {/* Resize 手柄 */}
           {!isMinimized && <>
             <div className={styles.resizeN} onMouseDown={(e) => handleEdgeResize(e, { top: true })} />
             <div className={styles.resizeS} onMouseDown={(e) => handleEdgeResize(e, { bottom: true })} />
