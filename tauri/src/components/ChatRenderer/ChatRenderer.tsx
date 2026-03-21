@@ -119,24 +119,30 @@ export interface AssistantTurn {
   allBlocks: TranscriptBlock[]
 }
 
-export function groupMessagesIntoTurns(messages: TranscriptMessage[]): Array<{ kind: 'user'; msg: TranscriptMessage } | { kind: 'turn'; turn: AssistantTurn }> {
-  const result: Array<{ kind: 'user'; msg: TranscriptMessage } | { kind: 'turn'; turn: AssistantTurn }> = []
+export type GroupedTurnItem =
+  | { kind: 'user'; msg: TranscriptMessage; startIndex: number }
+  | { kind: 'turn'; turn: AssistantTurn; startIndex: number }
+
+export function groupMessagesIntoTurns(messages: TranscriptMessage[]): GroupedTurnItem[] {
+  const result: GroupedTurnItem[] = []
   let currentTurn: AssistantTurn | null = null
+  let currentTurnStart = 0
 
   const flushTurn = () => {
     if (!currentTurn) return
     if (currentTurn.texts.length || currentTurn.allBlocks.length) {
-      result.push({ kind: 'turn', turn: currentTurn })
+      result.push({ kind: 'turn', turn: currentTurn, startIndex: currentTurnStart })
     }
     currentTurn = null
   }
 
   const newTurn = (): AssistantTurn => ({ texts: [], reads: [], edits: [], bashes: [], others: [], allBlocks: [] })
 
-  for (const msg of messages) {
+  for (let mi = 0; mi < messages.length; mi++) {
+    const msg = messages[mi]
     if (msg.role === 'user') {
       flushTurn()
-      result.push({ kind: 'user', msg })
+      result.push({ kind: 'user', msg, startIndex: mi })
       continue
     }
     // assistant message
@@ -149,7 +155,7 @@ export function groupMessagesIntoTurns(messages: TranscriptMessage[]): Array<{ k
       if (currentTurn && (currentTurn.reads.length || currentTurn.edits.length || currentTurn.bashes.length || currentTurn.others.length)) {
         flushTurn()
       }
-      if (!currentTurn) currentTurn = newTurn()
+      if (!currentTurn) { currentTurn = newTurn(); currentTurnStart = mi }
       currentTurn.texts.push(block.text)
     } else if (block.type === 'tool_use') {
       if (!currentTurn) currentTurn = newTurn()
