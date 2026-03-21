@@ -254,8 +254,9 @@ async def handle_pty_chat_ws(ws: WebSocket):
             elif msg_type == "init":
                 # 初始化 PTY 会话
                 cwd = msg.get("cwd") or os.path.expanduser("~")
+                resume_sid = msg.get("resume_session_id")
                 try:
-                    session = pty_manager.create(ws_id, cwd)
+                    session = pty_manager.create(ws_id, cwd, resume_session_id=resume_sid)
                     # 等待 Claude CLI 初始化完成
                     await asyncio.sleep(3)
                     # 清空初始化输出
