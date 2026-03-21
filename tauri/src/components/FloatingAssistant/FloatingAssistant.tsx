@@ -166,11 +166,15 @@ export function FloatingAssistant() {
                     key={msg.id}
                     className={`${styles.message} ${msg.role === 'user' ? styles.messageUser : styles.messageAssistant}`}
                   >
-                    {msg.content}
+                    {msg.role === 'assistant' ? (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    ) : msg.content}
                   </div>
                 ))}
                 {currentReply && (
-                  <div className={styles.streaming}>{currentReply}</div>
+                  <div className={styles.streaming}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentReply}</ReactMarkdown>
+                  </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
