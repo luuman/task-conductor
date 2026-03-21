@@ -24,10 +24,11 @@ export interface TranscriptViewerProps {
 
 export function TranscriptViewer({
   transcript, loading, fileFound, selectedId,
-  isFirstLoad, autoExpand = true, className,
+  isFirstLoad, autoExpand = true, scrollRef, className,
 }: TranscriptViewerProps) {
   const { t } = useTranslation()
-  const transcriptRef = useRef<HTMLDivElement>(null)
+  const internalRef = useRef<HTMLDivElement>(null)
+  const transcriptRef = scrollRef ?? internalRef
   const bottomRef = useRef<HTMLDivElement>(null)
   const [showJumpBtn, setShowJumpBtn] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null)
