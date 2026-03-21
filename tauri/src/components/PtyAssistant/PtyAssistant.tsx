@@ -293,10 +293,22 @@ export function PtyAssistant() {
                 <div className={styles.messages}>
                   {displayMessages.length === 0 && (
                     <div className={styles.empty}>
+                      <div className={styles.emptyIcon}>⚡</div>
                       {ptyAlive ? (
-                        <>PTY 模式已就绪<br/>交互式 Claude，多轮对话无冷启动<br/>直接输入或从左侧选择会话 resume</>
+                        <>
+                          <div className={styles.emptyTitle}>PTY 模式就绪</div>
+                          <div className={styles.emptyDesc}>交互式 Claude 进程已启动，多轮对话无冷启动延迟</div>
+                          <div className={styles.emptyFeatures}>
+                            <span className={styles.emptyFeature}>长连接</span>
+                            <span className={styles.emptyFeature}>即时响应</span>
+                            <span className={styles.emptyFeature}>Resume 会话</span>
+                          </div>
+                        </>
                       ) : (
-                        <>正在连接 PTY 进程...<br/>请稍候</>
+                        <>
+                          <div className={styles.emptyTitle}>正在连接...</div>
+                          <div className={styles.emptyDesc}>正在启动 Claude 交互进程，请稍候</div>
+                        </>
                       )}
                     </div>
                   )}
