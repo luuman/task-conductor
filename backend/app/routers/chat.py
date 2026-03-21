@@ -185,7 +185,7 @@ async def handle_chat_ws(ws: WebSocket):
                 "type": "chat_done",
                 "data": {
                     "session_id": result_session_id,
-                    "full_text": full_text or final_text,
+                    "full_text": full_text,
                 },
                 "ts": _ts(),
             })
