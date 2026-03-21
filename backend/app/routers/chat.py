@@ -1,11 +1,12 @@
 """
-聊天路由 - 通过 WebSocket 与 Claude 进行自由对话
-使用 Anthropic API 实现真正的 token 级流式输出
+聊天路由 - 通过 WebSocket 与 Claude CLI 进行自由对话
+使用 --output-format text 模式实现逐字符流式输出
 """
 
 import asyncio
 import json
 import logging
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -23,65 +24,27 @@ AVAILABLE_MODELS = [
 ]
 
 
-def _load_tc_config() -> dict:
-    """从 tc_global_config.json 读取配置"""
-    from .tc_config import _read
-    return _read()
-
-
-def _get_api_key(config: dict) -> str:
-    """从配置中获取 API key，优先级：config.api.apiKey > env ANTHROPIC_API_KEY"""
-    import os
-    key = config.get("api", {}).get("apiKey", "")
-    if not key:
-        key = os.environ.get("ANTHROPIC_API_KEY", "")
-    return key
-
-
 @router.get("/models", summary="获取可用模型列表")
 def get_models():
     """返回可用的 Claude 模型列表"""
     return AVAILABLE_MODELS
 
 
-# ── 会话历史管理（内存存储，按 session_id） ──────────────────────────
-
-_session_histories: dict[str, list[dict]] = {}
-
-
-def _get_history(session_id: str) -> list[dict]:
-    return _session_histories.get(session_id, [])
-
-
-def _append_history(session_id: str, role: str, content: str):
-    if session_id not in _session_histories:
-        _session_histories[session_id] = []
-    _session_histories[session_id].append({"role": role, "content": content})
-    # 保留最近 50 轮对话（100 条消息）
-    if len(_session_histories[session_id]) > 100:
-        _session_histories[session_id] = _session_histories[session_id][-100:]
-
-
 # ── WebSocket 聊天处理 ──────────────────────────────────────────
+
+# 流式读取缓冲：每积攒 N 字节或 T 毫秒发送一次
+CHUNK_FLUSH_BYTES = 6       # 几个字符就推一次，体验更流畅
+CHUNK_FLUSH_INTERVAL = 0.05  # 50ms 强制 flush
 
 
 async def handle_chat_ws(ws: WebSocket):
     """
     处理 /ws/chat WebSocket 连接。
-
-    前端发送：
-      {"type": "chat", "message": "...", "session_id": "可选", "model": "可选"}
-      {"type": "stop"}   — 中断当前生成
-      {"type": "ping"}   — 心跳
-
-    后端返回：
-      {"type": "chat_chunk", "data": {"text": "...", "session_id": "...", "done": false}, "ts": "..."}
-      {"type": "chat_done",  "data": {"session_id": "...", "full_text": "..."}, "ts": "..."}
-      {"type": "chat_error", "data": {"error": "..."}, "ts": "..."}
-      {"type": "pong", "ts": "..."}
+    使用 claude CLI text 模式，逐字符流式推送。
     """
     await ws.accept()
 
+    active_proc: Optional[asyncio.subprocess.Process] = None
     stream_task: Optional[asyncio.Task] = None
 
     def _ts() -> str:
@@ -93,102 +56,167 @@ async def handle_chat_ws(ws: WebSocket):
         except Exception:
             pass
 
-    async def _run_api_stream(
+    async def _run_claude(
         message: str,
         session_id: Optional[str] = None,
         model: Optional[str] = None,
+        cwd: Optional[str] = None,
         system_prompt: Optional[str] = None,
+        append_system_prompt: Optional[str] = None,
+        effort: Optional[str] = None,
+        allowed_tools: Optional[list[str]] = None,
+        disallowed_tools: Optional[list[str]] = None,
+        permission_mode: Optional[str] = None,
+        max_budget: Optional[float] = None,
+        continue_session: bool = False,
     ):
-        """使用 Anthropic API 流式生成回复"""
-        import anthropic
+        """启动 claude -p 子进程，text 模式流式读取"""
+        nonlocal active_proc
 
-        config = _load_tc_config()
-        api_key = _get_api_key(config)
-        if not api_key:
-            await _send({
-                "type": "chat_error",
-                "data": {"error": "未配置 API Key，请在设置中配置 api.apiKey 或设置环境变量 ANTHROPIC_API_KEY"},
-                "ts": _ts(),
-            })
-            return
+        cmd = [
+            "claude", "-p", message,
+            "--dangerously-skip-permissions",
+            "--output-format", "text",
+        ]
 
-        # 确定模型
-        model_id = model or config.get("model", {}).get("model", "claude-sonnet-4-6")
-        max_tokens = config.get("model", {}).get("maxTokens", 4096)
-        endpoint = config.get("api", {}).get("endpoint", "https://api.anthropic.com")
+        if session_id:
+            cmd.extend(["--resume", session_id])
+        elif continue_session:
+            cmd.append("--continue")
 
-        # 生成/复用 session_id
-        import uuid
-        sid = session_id or str(uuid.uuid4())
+        if model:
+            cmd.extend(["--model", model])
 
-        # 构建消息列表（含历史）
-        history = _get_history(sid)
-        messages = [*history, {"role": "user", "content": message}]
-
-        # 构建 API 参数
-        api_kwargs: dict = {
-            "model": model_id,
-            "max_tokens": max_tokens,
-            "messages": messages,
-        }
         if system_prompt:
-            api_kwargs["system"] = system_prompt
+            cmd.extend(["--system-prompt", system_prompt])
 
-        client = anthropic.AsyncAnthropic(
-            api_key=api_key,
-            base_url=endpoint if endpoint != "https://api.anthropic.com" else None,
-        )
+        if append_system_prompt:
+            cmd.extend(["--append-system-prompt", append_system_prompt])
 
-        full_text = ""
+        if effort and effort in ("low", "medium", "high"):
+            cmd.extend(["--effort", effort])
+
+        if allowed_tools:
+            cmd.extend(["--allowed-tools", ",".join(allowed_tools)])
+
+        if disallowed_tools:
+            cmd.extend(["--disallowed-tools", ",".join(disallowed_tools)])
+
+        if permission_mode and permission_mode in ("acceptEdits", "bypassPermissions", "default", "plan", "auto"):
+            cmd.extend(["--permission-mode", permission_mode])
+
+        if max_budget and max_budget > 0:
+            cmd.extend(["--max-budget-usd", str(max_budget)])
+
+        work_dir = cwd or os.path.expanduser("~")
+
+        # 清除 Claude Code 环境变量
+        env = {**os.environ}
+        for k in list(env):
+            if k.startswith("CLAUDE") or k == "CLAUDECODE":
+                env.pop(k, None)
 
         try:
-            async with client.messages.stream(**api_kwargs) as stream:
-                async for text in stream.text_stream:
-                    full_text += text
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                cwd=work_dir,
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env=env,
+            )
+            active_proc = proc
+
+            full_text = ""
+            result_session_id = session_id or ""
+
+            # 从 stderr 异步提取 session_id
+            async def _read_stderr():
+                nonlocal result_session_id
+                while True:
+                    line = await proc.stderr.readline()
+                    if not line:
+                        break
+                    text = line.decode("utf-8", errors="replace").strip()
+                    # Claude CLI 可能在 stderr 输出 session info
+                    if "session_id" in text or "Session:" in text:
+                        # 尝试提取 UUID 格式的 session_id
+                        import re
+                        m = re.search(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', text)
+                        if m:
+                            result_session_id = m.group(0)
+
+            stderr_task = asyncio.create_task(_read_stderr())
+
+            # 流式读 stdout：按小块读取，定时 flush
+            buf = ""
+            while True:
+                try:
+                    chunk = await asyncio.wait_for(
+                        proc.stdout.read(64),  # 每次最多读 64 字节
+                        timeout=CHUNK_FLUSH_INTERVAL,
+                    )
+                except asyncio.TimeoutError:
+                    # 超时：如果 buf 有内容就 flush
+                    if buf:
+                        full_text += buf
+                        await _send({
+                            "type": "chat_chunk",
+                            "data": {"text": buf, "session_id": result_session_id, "done": False},
+                            "ts": _ts(),
+                        })
+                        buf = ""
+                    continue
+
+                if not chunk:
+                    # EOF
+                    break
+
+                text = chunk.decode("utf-8", errors="replace")
+                buf += text
+
+                # 达到阈值就推送
+                if len(buf) >= CHUNK_FLUSH_BYTES:
+                    full_text += buf
                     await _send({
                         "type": "chat_chunk",
-                        "data": {
-                            "text": text,
-                            "session_id": sid,
-                            "done": False,
-                        },
+                        "data": {"text": buf, "session_id": result_session_id, "done": False},
                         "ts": _ts(),
                     })
+                    buf = ""
 
-            # 保存到历史
-            _append_history(sid, "user", message)
-            _append_history(sid, "assistant", full_text)
+            # flush 剩余
+            if buf:
+                full_text += buf
+                await _send({
+                    "type": "chat_chunk",
+                    "data": {"text": buf, "session_id": result_session_id, "done": False},
+                    "ts": _ts(),
+                })
+
+            await proc.wait()
+            await stderr_task
 
             await _send({
                 "type": "chat_done",
-                "data": {
-                    "session_id": sid,
-                    "full_text": full_text,
-                },
+                "data": {"session_id": result_session_id, "full_text": full_text},
                 "ts": _ts(),
             })
 
         except asyncio.CancelledError:
+            if active_proc and active_proc.returncode is None:
+                active_proc.kill()
+                await active_proc.wait()
             raise
-        except anthropic.AuthenticationError:
-            await _send({
-                "type": "chat_error",
-                "data": {"error": "API Key 无效，请检查配置"},
-                "ts": _ts(),
-            })
-        except anthropic.RateLimitError:
-            await _send({
-                "type": "chat_error",
-                "data": {"error": "API 请求频率超限，请稍后再试"},
-                "ts": _ts(),
-            })
         except Exception as e:
-            logger.exception("API stream error")
+            logger.exception("Claude CLI error")
             await _send({
                 "type": "chat_error",
                 "data": {"error": str(e)},
                 "ts": _ts(),
             })
+        finally:
+            active_proc = None
 
     try:
         while True:
@@ -231,7 +259,6 @@ async def handle_chat_ws(ws: WebSocket):
                     })
                     continue
 
-                # 如果有正在进行的生成，先取消
                 if stream_task and not stream_task.done():
                     stream_task.cancel()
                     try:
@@ -240,11 +267,19 @@ async def handle_chat_ws(ws: WebSocket):
                         pass
 
                 stream_task = asyncio.create_task(
-                    _run_api_stream(
+                    _run_claude(
                         message=message,
                         session_id=msg.get("session_id"),
                         model=msg.get("model"),
+                        cwd=msg.get("cwd"),
                         system_prompt=msg.get("system_prompt"),
+                        append_system_prompt=msg.get("append_system_prompt"),
+                        effort=msg.get("effort"),
+                        allowed_tools=msg.get("allowed_tools"),
+                        disallowed_tools=msg.get("disallowed_tools"),
+                        permission_mode=msg.get("permission_mode"),
+                        max_budget=msg.get("max_budget"),
+                        continue_session=msg.get("continue", False),
                     )
                 )
 
@@ -262,3 +297,5 @@ async def handle_chat_ws(ws: WebSocket):
                 await stream_task
             except asyncio.CancelledError:
                 pass
+        if active_proc and active_proc.returncode is None:
+            active_proc.kill()
