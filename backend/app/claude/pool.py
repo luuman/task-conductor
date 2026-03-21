@@ -50,11 +50,10 @@ class ClaudePool:
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         metric = metrics_store.start_call(task_id)
 
-        opts = ClaudeAgentOptions(
+        opts = ClaudeCodeOptions(
             permission_mode="bypassPermissions",
             include_partial_messages=True,
             cwd=worktree_path,
-            cli_path="claude",
         )
 
         client = ClaudeSDKClient(options=opts)
