@@ -234,7 +234,7 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
 }
 
 /* ── 拓扑图组件 ── */
-function ProcessTopology({ procs, onKill }: { procs: ProcessInfo[]; onKill: (pid: number) => void }) {
+function ProcessTopology({ procs, onKill: _onKill }: { procs: ProcessInfo[]; onKill: (pid: number) => void }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   // ★ 结构 key：只有进程名+数量变化才重算布局（CPU/MEM变化不触发）
