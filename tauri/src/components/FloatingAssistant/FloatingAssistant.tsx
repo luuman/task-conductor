@@ -194,15 +194,23 @@ export function FloatingAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [])
 
+  // 切换到已有会话
+  const switchToSession = useCallback((sessionId: string) => {
+    setActiveSessionId(sessionId)
+    const store = useChatStore.getState()
+    store.setMessages([])
+    store.setCurrentReply('')
+    store.setClaudeSessionId(sessionId)
+    // 可以在这里从后端加载历史消息（transcript）
+  }, [])
+
   const handleSend = useCallback(() => {
     const text = input.trim()
     if (!text || isGenerating) return
     setInput('')
     addMessage({ id: Date.now(), task_id: 0, role: 'user', content: text, created_at: new Date().toISOString() })
-    // 更新会话最后消息
-    setSessions(prev => prev.map(s => s.id === activeSessionId ? { ...s, lastMessage: text, updatedAt: new Date().toISOString() } : s))
     send(text)
-  }, [input, isGenerating, addMessage, send, activeSessionId])
+  }, [input, isGenerating, addMessage, send])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -211,15 +219,13 @@ export function FloatingAssistant() {
     }
   }, [handleSend])
 
+  // 新对话：清空状态，发第一条消息时自动创建会话
   const handleNewSession = useCallback(() => {
-    const id = String(Date.now())
-    const session: ChatSession = { id, title: '新对话', lastMessage: '', updatedAt: new Date().toISOString(), active: true }
-    setSessions(prev => [...prev, session])
-    setActiveSessionId(id)
-    // 清空当前消息
-    useChatStore.getState().setMessages([])
-    useChatStore.getState().setCurrentReply('')
-    useChatStore.getState().setClaudeSessionId(null)
+    setActiveSessionId(null)
+    const store = useChatStore.getState()
+    store.setMessages([])
+    store.setCurrentReply('')
+    store.setClaudeSessionId(null)
   }, [])
 
   const now = new Date()
