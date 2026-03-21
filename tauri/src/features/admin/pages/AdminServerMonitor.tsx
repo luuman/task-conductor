@@ -185,7 +185,7 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
   const outerR = 480
 
   // 统计外环子节点总数
-  const totalChildren = groupNames.reduce((s, name) => s + Math.max(groups.get(name)!.length - 1, 0), 0)
+  const _totalChildren = groupNames.reduce((s, name) => s + Math.max(groups.get(name)!.length - 1, 0), 0) // reserved
   const viewW = (cx + outerR + 100) * 2
 
   // 中心 host 节点
