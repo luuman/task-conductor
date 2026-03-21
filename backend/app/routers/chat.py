@@ -182,18 +182,27 @@ async def handle_chat_ws(ws: WebSocket):
                         tool_info = _pending_tools.pop(tool_use_id, {})
                         tool_name = tool_info.get("name", "Tool")
                         tool_input = tool_info.get("input", {})
+                        result_str = str(content)[:5000] if content else ""
+                        # Read 工具结果去掉 cat -n 行号前缀（如 "     1→"）
+                        if tool_name == "Read" and result_str:
+                            import re
+                            lines = result_str.split("\n")
+                            cleaned = []
+                            for line in lines:
+                                cleaned.append(re.sub(r'^\s*\d+→', '', line))
+                            result_str = "\n".join(cleaned)
                         payload = {
                             "type": "chat_tool_complete",
                             "data": {
                                 "tool": tool_name,
                                 "input": tool_input,
-                                "result": str(content)[:5000] if content else "",
+                                "result": result_str,
                                 "is_error": is_error,
                                 "session_id": result_session_id,
                             },
                             "ts": _ts(),
                         }
-                        logger.info(f"[Chat] >>> chat_tool_complete: tool={tool_name} input_keys={list(tool_input.keys())} result_len={len(str(content))}")
+                        logger.info(f"[Chat] >>> chat_tool_complete: tool={tool_name} input_keys={list(tool_input.keys())} result_len={len(result_str)}")
                         await _send(payload)
 
                 # ── ResultMessage：回合结束 ──
