@@ -128,7 +128,10 @@ async def handle_chat_ws(ws: WebSocket):
         _last_thinking_len = 0
 
         try:
+            _msg_count = 0
             async for message in query(prompt=message, options=opts):
+                _msg_count += 1
+                logger.info(f"[AgentSDK] msg#{_msg_count} type={type(message).__name__}")
                 if isinstance(message, AssistantMessage):
                     for block in message.content:
                         if isinstance(block, TextBlock):
