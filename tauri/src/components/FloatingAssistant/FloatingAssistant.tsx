@@ -3,9 +3,9 @@ import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
-import { wsManager } from '../../lib/ws'
-import type { Project, Task, AiSession, TranscriptMessage } from '../../lib/api/types'
+import type { Project, Task, TranscriptMessage } from '../../lib/api/types'
 import { ChatMessageList } from '../ChatRenderer'
+import { useSessionData } from '../SessionChat/useSessionData'
 import styles from './FloatingAssistant.module.css'
 
 interface ProjectInfo {
@@ -72,44 +72,32 @@ export function FloatingAssistant() {
   const { send, stop } = useChatStream()
   const [input, setInput] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [sessions, setSessions] = useState<AiSession[]>([])
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const isFirstLoad = useRef(true)
+  const isFirstLoadRef = useRef(true)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
   const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
-  const transcriptCache = useRef<Map<string, TranscriptMessage[]>>(new Map())
   const repoUrlRef = useRef('')
   const apiRef = useRef(new HttpAdapter('local-http'))
 
-  // 过滤当前项目会话的工具函数
-  const filterProjectSessions = useCallback((allSessions: AiSession[]) => {
-    const repoUrl = repoUrlRef.current
-    return (repoUrl
-      ? allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(repoUrl))
-      : allSessions
-    ).filter((s: AiSession) => !!s.summary)
-  }, [])
+  // Use shared session data hook
+  const {
+    sessions,
+    selectSession: sharedSelectSession,
+    selectedId: activeSessionId,
+    clearSelection: sharedClearSelection,
+  } = useSessionData({ filterByCwd: repoUrlRef.current || undefined })
 
-  // 刷新会话列表
-  const refreshSessions = useCallback(() => {
-    apiRef.current.getSessions().then((allSessions) => {
-      setSessions(filterProjectSessions(allSessions))
-    }).catch(() => {})
-  }, [filterProjectSessions])
-
-  // 拉取项目信息 + 初始化会话列表
+  // 拉取项目信息
   useEffect(() => {
-    if (!activeProjectId) { setProjectInfo(null); setSessions([]); return }
+    if (!activeProjectId) { setProjectInfo(null); return }
     const pid = Number(activeProjectId)
     Promise.all([
       apiRef.current.getProjects(),
       apiRef.current.getTasks(pid),
-      apiRef.current.getSessions(),
-    ]).then(([projects, tasks, allSessions]) => {
+    ]).then(([projects, tasks]) => {
       const proj = projects.find((p: Project) => p.id === pid)
       if (proj) {
         const repoUrl = (proj as Project & { repo_url: string }).repo_url || ''
@@ -120,72 +108,16 @@ export function FloatingAssistant() {
           tasks: tasks.slice(0, 10).map((t: Task) => ({ id: t.id, title: t.title, stage: t.stage, status: t.status })),
         })
         setProjectCwd(repoUrl || null)
-        setSessions(filterProjectSessions(allSessions))
       }
     }).catch(() => {})
-  }, [activeProjectId, setProjectCwd, filterProjectSessions])
+  }, [activeProjectId, setProjectCwd])
 
-  // 会话列表定时刷新（5秒）
-  useEffect(() => {
-    if (!activeProjectId) return
-    const id = setInterval(refreshSessions, 5000)
-    return () => clearInterval(id)
-  }, [activeProjectId, refreshSessions])
-
-  // 刷新当前选中会话的 transcript
-  const refreshTranscript = useCallback((sid: string) => {
-    apiRef.current.getTranscript(sid).then(({ messages: msgs }) => {
-      if (!msgs?.length) return
-      transcriptCache.current.set(sid, msgs)
-      // 只有当前选中的会话才更新 store
-      if (useChatStore.getState().claudeSessionId === sid) {
-        useChatStore.getState().setMessages(msgs)
-      }
-    }).catch(() => {})
-  }, [])
-
-  // WebSocket 实时刷新（活跃会话）+ fallback 轮询
-  useEffect(() => {
-    if (!activeSessionId) return
-    const sid = activeSessionId
-    const session = sessions.find(s => s.session_id === sid)
-    if (!session || session.status !== 'active') {
-      // 非活跃会话只轮询一次
-      return
-    }
-
-    // WS 监听事件
-    const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/session/${sid}`
-    const channel = `fa-session:${sid}`
-    wsManager.connect(channel, wsUrl)
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null
-    const unsub = wsManager.subscribe(channel, () => {
-      if (debounceTimer) clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => {
-        refreshTranscript(sid)
-        refreshSessions()
-      }, 500)
-    })
-
-    // Fallback 轮询 10 秒
-    const pollId = setInterval(() => refreshTranscript(sid), 10000)
-
-    return () => {
-      unsub()
-      if (debounceTimer) clearTimeout(debounceTimer)
-      wsManager.disconnect(channel)
-      clearInterval(pollId)
-    }
-  }, [activeSessionId, sessions, refreshTranscript, refreshSessions])
-
-  // 当 claude 返回 session_id 时，刷新会话列表并选中
+  // 当 claude 返回 session_id 时，选中该会话
   const claudeSessionId = useChatStore((s) => s.claudeSessionId)
   useEffect(() => {
     if (!claudeSessionId) return
-    setActiveSessionId(claudeSessionId)
-    // 延迟刷新，等 session 数据落库
-    setTimeout(refreshSessions, 1000)
-  }, [claudeSessionId, refreshSessions])
+    sharedSelectSession(claudeSessionId)
+  }, [claudeSessionId, sharedSelectSession])
 
   // system prompt
   useEffect(() => {
@@ -195,8 +127,8 @@ export function FloatingAssistant() {
   // 滚动到底部：首次加载直接定位，后续新消息平滑滚动
   useEffect(() => {
     if (!messages.length && !currentReply) return
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false
+    if (isFirstLoadRef.current) {
+      isFirstLoadRef.current = false
       requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
       })
@@ -210,7 +142,6 @@ export function FloatingAssistant() {
     if (messages.length === 0) return
     const last = messages[messages.length - 1]
     if (last.role !== 'assistant') return
-    // Extract text from blocks
     const content = last.blocks
       .filter(b => b.type === 'text')
       .map(b => b.text || '')
@@ -241,7 +172,7 @@ export function FloatingAssistant() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [isOpen, sessions, activeSessionId])
+  }, [isOpen, sessions, activeSessionId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 拖拽移动
   const handleDragStart = useCallback((e: React.MouseEvent) => {
@@ -263,55 +194,39 @@ export function FloatingAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [setPosition])
 
-  // Resize（支持 8 个方向）
-  type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
-  const handleResizeStart = useCallback((dir: ResizeDir) => (e: React.MouseEvent) => {
+  // Resize
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     const panel = panelRef.current
     if (!panel) return
-    const rect = panel.getBoundingClientRect()
-    const start = { x: e.clientX, y: e.clientY, w: rect.width, h: rect.height, left: rect.left, top: rect.top }
+    resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: panel.offsetWidth, startH: panel.offsetHeight }
     const handleMove = (ev: MouseEvent) => {
-      if (!panelRef.current) return
-      const dx = ev.clientX - start.x
-      const dy = ev.clientY - start.y
-      let newW = start.w, newH = start.h, newX = start.left, newY = start.top
-      if (dir.includes('e')) newW = Math.max(350, start.w + dx)
-      if (dir.includes('w')) { newW = Math.max(350, start.w - dx); newX = start.left + start.w - newW }
-      if (dir.includes('s')) newH = Math.max(300, start.h + dy)
-      if (dir.includes('n')) { newH = Math.max(300, start.h - dy); newY = start.top + start.h - newH }
-      panelRef.current.style.width = newW + 'px'
-      panelRef.current.style.height = newH + 'px'
-      panelRef.current.style.left = newX + 'px'
-      panelRef.current.style.top = newY + 'px'
-      panelRef.current.style.right = 'auto'
-      panelRef.current.style.bottom = 'auto'
+      if (!resizeRef.current || !panelRef.current) return
+      panelRef.current.style.width = Math.max(350, resizeRef.current.startW + ev.clientX - resizeRef.current.startX) + 'px'
+      panelRef.current.style.height = Math.max(300, resizeRef.current.startH + ev.clientY - resizeRef.current.startY) + 'px'
     }
-    const handleUp = () => { document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp) }
+    const handleUp = () => { resizeRef.current = null; document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp) }
     document.addEventListener('mousemove', handleMove)
     document.addEventListener('mouseup', handleUp)
   }, [])
 
-  // 切换到已有会话，加载历史消息（带缓存）
+  // 切换到已有会话，加载历史消息
   const switchToSession = useCallback((sessionId: string) => {
-    isFirstLoad.current = true
-    setActiveSessionId(sessionId)
+    isFirstLoadRef.current = true
+    sharedSelectSession(sessionId)
     const store = useChatStore.getState()
     store.setCurrentReply('')
     store.setClaudeSessionId(sessionId)
 
-    // 先从缓存显示
-    const cached = transcriptCache.current.get(sessionId)
-    if (cached) {
-      store.setMessages(cached)
-    } else {
-      store.setMessages([])
-    }
-
-    // 然后拉取最新（无论有无缓存都拉，确保最新）
-    refreshTranscript(sessionId)
-  }, [refreshTranscript])
+    // Load transcript into chat store
+    apiRef.current.getTranscript(sessionId).then(({ messages: msgs }) => {
+      if (!msgs?.length) return
+      if (useChatStore.getState().claudeSessionId === sessionId) {
+        useChatStore.getState().setMessages(msgs)
+      }
+    }).catch(() => {})
+  }, [sharedSelectSession])
 
   const handleSend = useCallback(() => {
     const text = input.trim()
@@ -328,14 +243,14 @@ export function FloatingAssistant() {
     }
   }, [handleSend])
 
-  // 新对话：清空状态，发第一条消息时自动创建会话
+  // 新对话
   const handleNewSession = useCallback(() => {
-    setActiveSessionId(null)
+    sharedClearSelection()
     const store = useChatStore.getState()
     store.setMessages([])
     store.setCurrentReply('')
     store.setClaudeSessionId(null)
-  }, [])
+  }, [sharedClearSelection])
 
   const now = new Date()
   const formatTime = (ts: string) => {
@@ -465,17 +380,8 @@ export function FloatingAssistant() {
             </div>
           )}
 
-          {/* Resize 手柄（8个方向） */}
-          {!isMinimized && <>
-            <div className={styles.resizeN} onMouseDown={handleResizeStart('n')} />
-            <div className={styles.resizeS} onMouseDown={handleResizeStart('s')} />
-            <div className={styles.resizeE} onMouseDown={handleResizeStart('e')} />
-            <div className={styles.resizeW} onMouseDown={handleResizeStart('w')} />
-            <div className={styles.resizeNE} onMouseDown={handleResizeStart('ne')} />
-            <div className={styles.resizeNW} onMouseDown={handleResizeStart('nw')} />
-            <div className={styles.resizeSE} onMouseDown={handleResizeStart('se')} />
-            <div className={styles.resizeSW} onMouseDown={handleResizeStart('sw')} />
-          </>}
+          {/* Resize 手柄 */}
+          {!isMinimized && <div className={styles.resizeHandle} onMouseDown={handleResizeStart} />}
         </div>
       )}
     </>
