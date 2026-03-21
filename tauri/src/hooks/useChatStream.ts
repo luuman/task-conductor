@@ -67,27 +67,44 @@ export function useChatStream() {
           const text = msg.data?.text || ''
           fullTextRef.current += text
           s.appendCurrentReply(text)
+
         } else if (msg.type === 'chat_thinking') {
-          // 可选：显示思考过程
-          const text = msg.data?.text || ''
-          if (text) s.appendCurrentReply(text)
+          // 思考过程不混入正文
+          // 可以在这里展示一个"正在思考..."指示器
+
         } else if (msg.type === 'chat_tool_use') {
+          // 先 flush 当前累积的文字为一条消息
+          const current = s.currentReply.trim()
+          if (current) {
+            s.addMessage(makeTextMsg('assistant', current))
+            s.setCurrentReply('')
+          }
+          // 添加独立的 tool_use 消息（渲染组件会展示工具卡片）
           const tool = msg.data?.tool || ''
-          if (tool) s.appendCurrentReply(`\n🔧 调用工具: ${tool}\n`)
+          const input = msg.data?.input || {}
+          if (tool) {
+            s.addMessage(makeToolMsg(tool, input))
+          }
+
         } else if (msg.type === 'chat_done') {
           const ft = fullTextRef.current
           console.log(`[ChatStream] 回答完成, 总耗时: ${(performance.now() - sendTsRef.current).toFixed(0)}ms, 文本长度: ${(msg.data?.full_text || ft).length}`)
           const sessionId = msg.data?.session_id
           if (sessionId) s.setClaudeSessionId(sessionId)
           s.setIsGenerating(false)
+          // flush 最后的文字
+          const remaining = s.currentReply.trim()
+          if (remaining) {
+            s.addMessage(makeTextMsg('assistant', remaining))
+          }
           s.setCurrentReply('')
-          s.addMessage(makeTextMsg('assistant', msg.data?.full_text || ft))
-          // 不关闭 WS，保持复用
+
         } else if (msg.type === 'chat_error') {
           console.error(`[ChatStream] 错误, 耗时: ${(performance.now() - sendTsRef.current).toFixed(0)}ms, error:`, msg.data?.error)
           s.setIsGenerating(false)
           s.setCurrentReply('')
           s.addMessage(makeTextMsg('assistant', `错误: ${msg.data?.error || '未知错误'}`))
+
         } else if (msg.type === 'session_reset') {
           console.log('[ChatStream] 会话已重置')
         }
