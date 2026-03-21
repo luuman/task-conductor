@@ -1,5 +1,5 @@
 """
-聊天路由 - 通过 Claude Agent SDK ClaudeSDKClient 持久连接实现多轮对话
+聊天路由 - 通过 claude_code_sdk ClaudeSDKClient 持久连接实现多轮对话
 特点：
 - 单个 WebSocket 连接内保持同一个 Claude 进程（无重复冷启动）
 - StreamEvent 逐 token 流式推送
