@@ -8,27 +8,32 @@ function getWsBaseUrl(): string {
   return `${protocol}//${window.location.host}`
 }
 
+/**
+ * 管理多个 PTY WebSocket 连接。
+ * 每个 session 有独立的 WebSocket 和 PTY 进程。
+ */
 export function usePtyStream() {
-  const wsRef = useRef<WebSocket | null>(null)
-  const onDataRef = useRef<((data: string) => void) | null>(null)
+  // sessionId → WebSocket
+  const wsMapRef = useRef<Map<string, WebSocket>>(new Map())
 
-  const connect = useCallback((opts: {
+  const connectSession = useCallback((sessionId: string, opts: {
     cwd?: string
     cols?: number
     rows?: number
     onData: (data: string) => void
+    onReady?: () => void
+    onClose?: () => void
   }) => {
-    if (wsRef.current && wsRef.current.readyState <= WebSocket.OPEN) return
+    // 已有连接则跳过
+    if (wsMapRef.current.has(sessionId)) return
 
-    onDataRef.current = opts.onData
     const baseUrl = getWsBaseUrl()
     const ws = new WebSocket(`${baseUrl}/ws/pty-chat`)
-    wsRef.current = ws
-
     ws.binaryType = 'arraybuffer'
+    wsMapRef.current.set(sessionId, ws)
 
     ws.onopen = () => {
-      console.log('[PtyStream] WebSocket 连接建立')
+      console.log(`[PtyStream:${sessionId}] WebSocket 连接建立`)
       ws.send(JSON.stringify({
         type: 'init',
         cwd: opts.cwd || undefined,
@@ -39,62 +44,57 @@ export function usePtyStream() {
 
     ws.onmessage = (event) => {
       if (event.data instanceof ArrayBuffer) {
-        // 二进制：PTY 输出 → xterm
         const text = new TextDecoder().decode(event.data)
-        onDataRef.current?.(text)
+        opts.onData(text)
       } else {
-        // JSON 控制消息
         try {
           const msg = JSON.parse(event.data)
           if (msg.type === 'pty_ready') {
-            console.log('[PtyStream] PTY 就绪')
-            usePtyChatStore.getState().setPtyAlive(true)
+            console.log(`[PtyStream:${sessionId}] PTY 就绪`)
+            usePtyChatStore.getState().updateSessionAlive(sessionId, true)
+            opts.onReady?.()
           }
         } catch { /* ignore */ }
       }
     }
 
     ws.onerror = () => {
-      usePtyChatStore.getState().setPtyAlive(false)
+      usePtyChatStore.getState().updateSessionAlive(sessionId, false)
     }
 
     ws.onclose = () => {
-      usePtyChatStore.getState().setPtyAlive(false)
-      wsRef.current = null
+      usePtyChatStore.getState().updateSessionAlive(sessionId, false)
+      wsMapRef.current.delete(sessionId)
+      opts.onClose?.()
     }
   }, [])
 
-  const write = useCallback((data: string) => {
-    const ws = wsRef.current
+  const writeToSession = useCallback((sessionId: string, data: string) => {
+    const ws = wsMapRef.current.get(sessionId)
     if (ws && ws.readyState === WebSocket.OPEN) {
-      // 发送用户输入为二进制
       ws.send(new TextEncoder().encode(data))
     }
   }, [])
 
-  const resize = useCallback((cols: number, rows: number) => {
-    const ws = wsRef.current
+  const resizeSession = useCallback((sessionId: string, cols: number, rows: number) => {
+    const ws = wsMapRef.current.get(sessionId)
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'resize', cols, rows }))
     }
   }, [])
 
-  const disconnect = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close()
-      wsRef.current = null
+  const disconnectSession = useCallback((sessionId: string) => {
+    const ws = wsMapRef.current.get(sessionId)
+    if (ws) {
+      ws.close()
+      wsMapRef.current.delete(sessionId)
     }
   }, [])
 
-  const reconnect = useCallback((opts: {
-    cwd?: string
-    cols?: number
-    rows?: number
-    onData: (data: string) => void
-  }) => {
-    disconnect()
-    setTimeout(() => connect(opts), 100)
-  }, [connect, disconnect])
+  const disconnectAll = useCallback(() => {
+    wsMapRef.current.forEach((ws) => ws.close())
+    wsMapRef.current.clear()
+  }, [])
 
-  return { connect, write, resize, disconnect, reconnect }
+  return { connectSession, writeToSession, resizeSession, disconnectSession, disconnectAll }
 }
