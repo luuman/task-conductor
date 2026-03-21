@@ -73,30 +73,58 @@ export function useChatStream() {
           // 思考过程不混入正文
           // 可以在这里展示一个"正在思考..."指示器
 
-        } else if (msg.type === 'chat_tool_complete') {
-          console.log('[ChatStream] tool_complete:', JSON.stringify(msg.data).slice(0, 200))
+        } else if (msg.type === 'chat_tool_use') {
+          // 工具调用开始 — flush 文字 + 添加无结果的 tool 消息
           const current = s.currentReply.trim()
           if (current) {
             s.addMessage(makeTextMsg('assistant', current))
             s.setCurrentReply('')
             fullTextRef.current = ''
           }
+          s.addMessage(makeToolMsg(msg.data?.tool || 'Tool', {}))
+
+        } else if (msg.type === 'chat_tool_result') {
+          // 工具结果到达 — 替换最后一条同名 tool 消息（附加 result）
           const toolName = msg.data?.tool || 'Tool'
           const toolInput = msg.data?.input || {}
           const result = msg.data?.result || ''
           const isError = msg.data?.is_error || false
-
-          s.addMessage({
-            role: 'assistant',
-            ts: new Date().toISOString(),
-            blocks: [{
-              type: 'tool_use' as const,
-              tool_name: toolName,
-              tool_input: toolInput,
-              tool_result: result.slice(0, 3000) || null,
-              tool_error: isError,
-            }],
-          })
+          const msgs = s.messages
+          // 从后往前找到最后一条同名且无 result 的 tool 消息
+          let found = false
+          for (let i = msgs.length - 1; i >= 0; i--) {
+            const b = msgs[i].blocks[0]
+            if (b?.type === 'tool_use' && b.tool_name === toolName && !b.tool_result) {
+              const updated = [...msgs]
+              updated[i] = {
+                ...updated[i],
+                blocks: [{
+                  type: 'tool_use' as const,
+                  tool_name: toolName,
+                  tool_input: toolInput,
+                  tool_result: result.slice(0, 3000) || null,
+                  tool_error: isError,
+                }],
+              }
+              s.setMessages(updated)
+              found = true
+              break
+            }
+          }
+          if (!found) {
+            // 没找到匹配的，直接添加完整消息
+            s.addMessage({
+              role: 'assistant',
+              ts: new Date().toISOString(),
+              blocks: [{
+                type: 'tool_use' as const,
+                tool_name: toolName,
+                tool_input: toolInput,
+                tool_result: result.slice(0, 3000) || null,
+                tool_error: isError,
+              }],
+            })
+          }
 
         } else if (msg.type === 'chat_done') {
           const ft = fullTextRef.current
