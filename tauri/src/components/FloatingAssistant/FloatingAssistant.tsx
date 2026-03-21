@@ -99,10 +99,11 @@ export function FloatingAssistant() {
           tasks: tasks.slice(0, 10).map((t: Task) => ({ id: t.id, title: t.title, stage: t.stage, status: t.status })),
         })
         setProjectCwd(repoUrl || null)
-        // 过滤当前项目的会话（cwd 匹配项目路径）
-        const projectSessions = repoUrl
+        // 过滤当前项目的会话（cwd 匹配 + 有实际消息）
+        const projectSessions = (repoUrl
           ? allSessions.filter((s: AiSession) => s.cwd && s.cwd.startsWith(repoUrl))
           : allSessions
+        ).filter((s: AiSession) => s.event_count > 0 || s.summary)
         setSessions(projectSessions)
       }
     }).catch(() => {})
