@@ -103,6 +103,8 @@ async def handle_chat_ws(ws: WebSocket):
 
         full_text = ""
         result_session_id = current_session_id or ""
+        _tool_input_buf = ""
+        _current_tool_name = ""
 
         try:
             await c.query(message)
@@ -141,15 +143,48 @@ async def handle_chat_ws(ws: WebSocket):
                                     },
                                     "ts": _ts(),
                                 })
+                        elif delta_type == "input_json_delta":
+                            _tool_input_buf += delta.get("partial_json", "")
 
                     elif evt_type == "content_block_start":
                         block = evt.get("content_block", {})
                         if block.get("type") == "tool_use":
+                            _current_tool_name = block.get("name", "")
+                            _tool_input_buf = ""
+
+                    elif evt_type == "content_block_stop":
+                        if _current_tool_name:
+                            tool_input = {}
+                            if _tool_input_buf:
+                                try:
+                                    tool_input = json.loads(_tool_input_buf)
+                                except json.JSONDecodeError:
+                                    tool_input = {"raw": _tool_input_buf}
                             await _send({
                                 "type": "chat_tool_use",
                                 "data": {
-                                    "tool": block.get("name", ""),
-                                    "input": {},
+                                    "tool": _current_tool_name,
+                                    "input": tool_input,
+                                    "session_id": result_session_id,
+                                },
+                                "ts": _ts(),
+                            })
+                            _current_tool_name = ""
+                            _tool_input_buf = ""
+
+                # ── UserMessage：工具执行结果 ──
+                elif isinstance(msg, UserMessage):
+                    for block in (msg.content or []):
+                        content = getattr(block, "content", "")
+                        is_error = getattr(block, "is_error", False)
+                        tool_use_id = getattr(block, "tool_use_id", "")
+                        if content:
+                            await _send({
+                                "type": "chat_tool_result",
+                                "data": {
+                                    "tool_use_id": tool_use_id,
+                                    "result": str(content)[:5000],
+                                    "is_error": is_error,
                                     "session_id": result_session_id,
                                 },
                                 "ts": _ts(),
