@@ -39,12 +39,13 @@ class ClaudePool:
         - {"type": "result", "result": "...", ...}
         - 原始 Anthropic API 流式事件 (content_block_delta 等)
         """
-        from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
-        from claude_agent_sdk.types import (
+        from claude_code_sdk import (
+            ClaudeSDKClient,
+            ClaudeCodeOptions,
             AssistantMessage,
             ResultMessage,
-            StreamEvent,
         )
+        from claude_code_sdk.types import StreamEvent
 
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         metric = metrics_store.start_call(task_id)
