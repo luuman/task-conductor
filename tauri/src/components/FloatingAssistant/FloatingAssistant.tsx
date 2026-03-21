@@ -117,7 +117,7 @@ export function FloatingAssistant() {
     api.getSessions().then((allSessions) => {
       const projectSessions = allSessions
         .filter((s: AiSession) => s.cwd && s.cwd.startsWith(projectInfo.repo_url))
-        .filter((s: AiSession) => s.event_count > 0 || s.summary)
+        .filter((s: AiSession) => !!s.summary)
       setSessions(projectSessions)
       // 自动选中当前会话
       setActiveSessionId(claudeSessionId)
