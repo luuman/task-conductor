@@ -5,22 +5,55 @@ import { useChatStore } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import styles from './FloatingAssistant.module.css'
 
-function buildSystemPrompt(ctx: { page: string; projectId?: number; taskId?: number; taskTitle?: string; taskStage?: string }): string {
-  const base = '你是 TaskConductor AI 助手。根据用户当前页面上下文提供帮助。'
+interface ProjectInfo {
+  name: string
+  repo_url: string
+  taskCount: number
+  tasks: { id: number; title: string; stage: string; status: string }[]
+}
+
+function buildSystemPrompt(
+  ctx: { page: string; projectId?: number; taskId?: number; taskTitle?: string; taskStage?: string },
+  project?: ProjectInfo | null,
+): string {
+  const parts: string[] = []
+  parts.push('你是 TaskConductor AI 助手，帮助用户进行需求分析、任务管理和项目开发。')
+
+  // 注入项目上下文
+  if (project) {
+    parts.push(`\n## 当前项目\n- 名称: ${project.name}\n- 路径: ${project.repo_url || '未设置'}`)
+    if (project.tasks.length > 0) {
+      parts.push(`- 任务数: ${project.taskCount}`)
+      const taskList = project.tasks.slice(0, 10).map(t => `  - [${t.stage}/${t.status}] ${t.title} (ID:${t.id})`).join('\n')
+      parts.push(`- 最近任务:\n${taskList}`)
+    }
+  }
+
+  // 页面上下文
   switch (ctx.page) {
     case 'dashboard':
-      return base + `\n用户在项目概览页（项目ID:${ctx.projectId ?? '未知'}）。可以帮助：创建任务、分析需求。当用户描述需求时，主动开始需求访谈。`
+      parts.push('\n## 当前页面: 项目概览\n用户在查看项目仪表盘。你可以帮助：创建新任务、分析需求、查看项目状态。当用户描述一个需求时，主动引导需求访谈，深入了解细节后生成 PRD。')
+      break
     case 'task-detail':
-      return base + `\n用户在任务"${ctx.taskTitle ?? ''}"详情页（阶段:${ctx.taskStage ?? ''}, 任务ID:${ctx.taskId ?? ''})。可以帮助：编辑PRD、讨论方案、推进阶段。输出PRD时用 ---PRD--- 分隔符附带JSON。`
+      parts.push(`\n## 当前页面: 任务详情\n任务: "${ctx.taskTitle}" (ID:${ctx.taskId}, 阶段:${ctx.taskStage})\n你可以帮助：讨论方案、编辑PRD、推进阶段。输出PRD时用 ---PRD--- 分隔符。`)
+      break
     case 'task-manager':
-      return base + '\n用户在任务列表页。帮助创建/管理任务。'
+      parts.push('\n## 当前页面: 任务管理\n用户在查看/管理任务列表。可以帮助创建任务、批量操作、分析任务依赖。')
+      break
     case 'files':
-      return base + '\n用户在文件编辑页。帮助代码分析和修改建议。'
+      parts.push('\n## 当前页面: 文件管理\n用户在浏览/编辑项目文件。可以帮助代码分析、修改建议、代码审查。')
+      break
     case 'git':
-      return base + '\n用户在Git页面。帮助分支管理和提交建议。'
-    default:
-      return base
+      parts.push('\n## 当前页面: Git 管理\n用户在查看 Git 状态。可以帮助分支管理、提交建议、冲突解决。')
+      break
+    case 'canvas':
+      parts.push('\n## 当前页面: 需求画布\n用户在需求画布页面编辑 PRD。帮助分析需求、生成功能模块、推荐开发阶段。')
+      break
   }
+
+  parts.push('\n## 回复要求\n- 用中文回复\n- 回复简洁直接\n- 涉及代码用 Markdown 格式\n- 当用户描述需求时，主动追问细节，不要只给笼统建议')
+
+  return parts.join('\n')
 }
 
 export function FloatingAssistant() {
