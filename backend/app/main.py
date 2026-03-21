@@ -534,6 +534,19 @@ async def ws_chat(websocket: WebSocket):
     await handle_chat_ws(websocket)
 
 
+@app.websocket("/ws/pty-chat")
+async def ws_pty_chat(websocket: WebSocket):
+    """
+    [WebSocket] PTY 模式与 Claude 交互对话。
+
+    先发送 `{"type": "init", "cwd": "/path"}` 启动 PTY 进程，
+    然后发送 `{"type": "chat", "message": "..."}` 进行多轮对话。
+    进程长期驻留，无需每次重启。
+    """
+    from app.routers.pty_chat import handle_pty_chat_ws
+    await handle_pty_chat_ws(websocket)
+
+
 # ── Claude Code Hook 接收端 ──────────────────────────────────────
 
 @app.post("/hooks/claude", tags=["会话"], summary="接收 Claude Code Hook 事件")
