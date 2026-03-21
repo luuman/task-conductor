@@ -70,6 +70,8 @@ export function FloatingAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
+  const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
 
   // 拖拽 header 移动面板
   const handleDragStart = useCallback((e: React.MouseEvent) => {
