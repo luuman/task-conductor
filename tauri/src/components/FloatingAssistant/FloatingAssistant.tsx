@@ -194,19 +194,48 @@ export function FloatingAssistant() {
     document.addEventListener('mouseup', handleUp)
   }, [setPosition])
 
-  // Resize
-  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+  // 8方向 Resize
+  const handleEdgeResize = useCallback((e: React.MouseEvent, edges: { top?: boolean; bottom?: boolean; left?: boolean; right?: boolean }) => {
     e.preventDefault()
     e.stopPropagation()
     const panel = panelRef.current
     if (!panel) return
-    resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: panel.offsetWidth, startH: panel.offsetHeight }
+    const rect = panel.getBoundingClientRect()
+    const start = { x: e.clientX, y: e.clientY, w: rect.width, h: rect.height, l: rect.left, t: rect.top }
+
     const handleMove = (ev: MouseEvent) => {
-      if (!resizeRef.current || !panelRef.current) return
-      panelRef.current.style.width = Math.max(350, resizeRef.current.startW + ev.clientX - resizeRef.current.startX) + 'px'
-      panelRef.current.style.height = Math.max(300, resizeRef.current.startH + ev.clientY - resizeRef.current.startY) + 'px'
+      if (!panelRef.current) return
+      const dx = ev.clientX - start.x
+      const dy = ev.clientY - start.y
+      const s = panelRef.current.style
+
+      if (edges.right) {
+        s.width = Math.max(350, start.w + dx) + 'px'
+      }
+      if (edges.bottom) {
+        s.height = Math.max(300, start.h + dy) + 'px'
+      }
+      if (edges.left) {
+        const newW = Math.max(350, start.w - dx)
+        s.width = newW + 'px'
+        s.left = (start.l + start.w - newW) + 'px'
+        s.right = 'auto'
+        s.bottom = 'auto'
+        s.top = start.t + 'px'
+      }
+      if (edges.top) {
+        const newH = Math.max(300, start.h - dy)
+        s.height = newH + 'px'
+        s.top = (start.t + start.h - newH) + 'px'
+        s.right = 'auto'
+        s.bottom = 'auto'
+        s.left = start.l + 'px'
+      }
     }
-    const handleUp = () => { resizeRef.current = null; document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp) }
+    const handleUp = () => {
+      document.removeEventListener('mousemove', handleMove)
+      document.removeEventListener('mouseup', handleUp)
+    }
     document.addEventListener('mousemove', handleMove)
     document.addEventListener('mouseup', handleUp)
   }, [])
