@@ -769,7 +769,7 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
 
 // ── ReadGroupStrip (collapsed read-only tools) ──────────────
 
-function ReadGroupStrip({ blocks }: { blocks: TranscriptBlock[] }) {
+export function ReadGroupStrip({ blocks }: { blocks: TranscriptBlock[] }) {
   const [open, setOpen] = useState(false)
 
   const pills = useMemo(() => blocks.map(b => {
