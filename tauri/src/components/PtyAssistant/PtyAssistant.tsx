@@ -38,6 +38,20 @@ export function PtyAssistant() {
     }).catch(() => {})
   }, [activeProjectId])
 
+  // 关闭时清理终端和连接
+  useEffect(() => {
+    if (!isOpen) {
+      // 面板关闭 → 清理一切
+      disconnect()
+      resizeObserverRef.current?.disconnect()
+      resizeObserverRef.current = null
+      termRef.current?.dispose()
+      termRef.current = null
+      fitAddonRef.current = null
+      hasConnectedRef.current = false
+    }
+  }, [isOpen, disconnect])
+
   // 初始化 xterm
   useEffect(() => {
     if (!isOpen || isMinimized) return
@@ -46,7 +60,6 @@ export function PtyAssistant() {
 
     // 已有终端则跳过
     if (termRef.current) {
-      // 重新 fit
       requestAnimationFrame(() => fitAddonRef.current?.fit())
       return
     }
