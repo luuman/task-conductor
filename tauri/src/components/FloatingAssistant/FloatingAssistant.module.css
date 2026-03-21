@@ -102,7 +102,6 @@
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.5;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 
@@ -110,6 +109,7 @@
   align-self: flex-end;
   background: var(--tc-accent, #007acc);
   color: #fff;
+  white-space: pre-wrap;
 }
 
 .messageAssistant {
@@ -117,6 +117,22 @@
   background: var(--tc-bg-secondary, #252526);
   color: var(--tc-text-primary, #ccc);
 }
+
+/* Markdown 在气泡内的样式 */
+.messageAssistant p { margin: 0 0 8px; }
+.messageAssistant p:last-child { margin-bottom: 0; }
+.messageAssistant ul, .messageAssistant ol { margin: 4px 0; padding-left: 18px; }
+.messageAssistant li { margin: 2px 0; }
+.messageAssistant code { background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+.messageAssistant pre { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow-x: auto; margin: 6px 0; }
+.messageAssistant pre code { background: none; padding: 0; }
+.messageAssistant strong { color: #fff; }
+.messageAssistant h1, .messageAssistant h2, .messageAssistant h3 { font-size: 13px; color: #fff; margin: 8px 0 4px; }
+.messageAssistant a { color: var(--tc-accent, #60a5fa); }
+.messageAssistant hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0; }
+.messageAssistant blockquote { border-left: 2px solid var(--tc-accent, #007acc); padding-left: 8px; margin: 4px 0; color: var(--tc-text-secondary); }
+.messageAssistant table { border-collapse: collapse; font-size: 12px; margin: 6px 0; }
+.messageAssistant th, .messageAssistant td { border: 1px solid rgba(255,255,255,0.1); padding: 3px 6px; }
 
 .streaming {
   align-self: flex-start;
@@ -126,9 +142,17 @@
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.5;
-  white-space: pre-wrap;
+  max-width: 85%;
   opacity: 0.8;
 }
+
+.streaming p { margin: 0 0 8px; }
+.streaming p:last-child { margin-bottom: 0; }
+.streaming ul, .streaming ol { margin: 4px 0; padding-left: 18px; }
+.streaming code { background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+.streaming pre { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow-x: auto; margin: 6px 0; }
+.streaming pre code { background: none; padding: 0; }
+.streaming strong { color: #fff; }
 
 .inputArea {
   display: flex;
