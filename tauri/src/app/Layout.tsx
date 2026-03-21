@@ -121,6 +121,7 @@ export function Layout() {
     <NotificationPanel />
     <CommandMenu open={cmdOpen} onClose={handleCmdClose} />
     <FloatingAssistant />
+    <PtyAssistant />
     <PrdSidebar />
   </>
   )
