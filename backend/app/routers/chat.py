@@ -103,27 +103,16 @@ async def handle_chat_ws(ws: WebSocket):
 
         full_text = ""
         result_session_id = current_session_id or ""
-        _tool_input_buf = ""
+        # tool_use_id → {name, input_buf}，用于匹配工具调用和结果
+        _pending_tools: dict[str, dict] = {}
+        _current_tool_id = ""
         _current_tool_name = ""
+        _tool_input_buf = ""
 
         try:
             await c.query(message)
 
             async for msg in c.receive_messages():
-                _t = type(msg).__name__
-                if isinstance(msg, StreamEvent):
-                    _et = msg.event.get("type", "")
-                    _dt = msg.event.get("delta", {}).get("type", "")
-                    if _et != "content_block_delta" or _dt != "input_json_delta":
-                        # 跳过 input_json_delta 的刷屏，其他全打印
-                        logger.info(f"[Chat] {_t}({_et}) {json.dumps(msg.event, ensure_ascii=False, default=str)[:200]}")
-                elif isinstance(msg, UserMessage):
-                    logger.info(f"[Chat] {_t} content={[str(b)[:150] for b in (msg.content or [])]}")
-                elif isinstance(msg, ResultMessage):
-                    logger.info(f"[Chat] {_t} session={getattr(msg, 'session_id', '?')} cost=${getattr(msg, 'total_cost_usd', 0)}")
-                else:
-                    logger.info(f"[Chat] {_t}")
-
                 # ── StreamEvent：逐 token 推送 ──
                 if isinstance(msg, StreamEvent):
                     evt = msg.event
@@ -163,46 +152,47 @@ async def handle_chat_ws(ws: WebSocket):
                     elif evt_type == "content_block_start":
                         block = evt.get("content_block", {})
                         if block.get("type") == "tool_use":
+                            _current_tool_id = block.get("id", "")
                             _current_tool_name = block.get("name", "")
                             _tool_input_buf = ""
 
                     elif evt_type == "content_block_stop":
-                        if _current_tool_name:
+                        if _current_tool_id and _current_tool_name:
                             tool_input = {}
                             if _tool_input_buf:
                                 try:
                                     tool_input = json.loads(_tool_input_buf)
                                 except json.JSONDecodeError:
                                     tool_input = {"raw": _tool_input_buf}
-                            await _send({
-                                "type": "chat_tool_use",
-                                "data": {
-                                    "tool": _current_tool_name,
-                                    "input": tool_input,
-                                    "session_id": result_session_id,
-                                },
-                                "ts": _ts(),
-                            })
+                            _pending_tools[_current_tool_id] = {
+                                "name": _current_tool_name,
+                                "input": tool_input,
+                            }
+                            _current_tool_id = ""
                             _current_tool_name = ""
                             _tool_input_buf = ""
 
-                # ── UserMessage：工具执行结果 ──
+                # ── UserMessage：工具结果 → 合并发送 chat_tool_complete ──
                 elif isinstance(msg, UserMessage):
                     for block in (msg.content or []):
+                        tool_use_id = getattr(block, "tool_use_id", "")
                         content = getattr(block, "content", "")
                         is_error = getattr(block, "is_error", False)
-                        tool_use_id = getattr(block, "tool_use_id", "")
-                        if content:
-                            await _send({
-                                "type": "chat_tool_result",
-                                "data": {
-                                    "tool_use_id": tool_use_id,
-                                    "result": str(content)[:5000],
-                                    "is_error": is_error,
-                                    "session_id": result_session_id,
-                                },
-                                "ts": _ts(),
-                            })
+                        # 用 tool_use_id 匹配到对应的工具调用
+                        tool_info = _pending_tools.pop(tool_use_id, {})
+                        tool_name = tool_info.get("name", "Tool")
+                        tool_input = tool_info.get("input", {})
+                        await _send({
+                            "type": "chat_tool_complete",
+                            "data": {
+                                "tool": tool_name,
+                                "input": tool_input,
+                                "result": str(content)[:5000] if content else "",
+                                "is_error": is_error,
+                                "session_id": result_session_id,
+                            },
+                            "ts": _ts(),
+                        })
 
                 # ── ResultMessage：回合结束 ──
                 elif isinstance(msg, ResultMessage):
