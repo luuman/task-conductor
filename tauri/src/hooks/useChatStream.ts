@@ -88,20 +88,29 @@ export function useChatStream() {
           }
 
         } else if (msg.type === 'chat_tool_result') {
-          // 工具执行结果 — 添加带结果的 tool_use 消息
+          // 工具结果 — 找到最后一条 tool_use 消息，附加 result
           const result = msg.data?.result || ''
           const isError = msg.data?.is_error || false
           if (result) {
-            s.addMessage({
-              role: 'assistant',
-              ts: new Date().toISOString(),
-              blocks: [{
-                type: 'tool_use',
-                tool_name: 'Result',
-                tool_result: result.slice(0, 2000),
-                tool_error: isError,
-              }],
-            })
+            const msgs = s.messages
+            // 从后往前找最后一条 tool_use 消息
+            for (let i = msgs.length - 1; i >= 0; i--) {
+              const block = msgs[i].blocks[0]
+              if (block?.type === 'tool_use' && !block.tool_result) {
+                // 更新该消息的 block，附加结果
+                const updated = [...msgs]
+                updated[i] = {
+                  ...updated[i],
+                  blocks: [{
+                    ...block,
+                    tool_result: result.slice(0, 3000),
+                    tool_error: isError,
+                  }],
+                }
+                s.setMessages(updated)
+                break
+              }
+            }
           }
 
         } else if (msg.type === 'chat_done') {
