@@ -1,6 +1,6 @@
 .page {
   padding: 32px;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   overflow-y: auto;
   height: 100%;
 }
