@@ -822,6 +822,7 @@ export default function AdminServerMonitor() {
   const [sys, setSys] = useState<SystemMetrics | null>(null)
   const [procs, setProcs] = useState<ProcessList | null>(null)
   const [_claude, setClaude] = useState<ClaudeUsage | null>(null)
+  const [sessions, setSessions] = useState<AiSession[]>([])
   const [error, setError] = useState<string | null>(null)
   const [killMsg, setKillMsg] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
