@@ -478,17 +478,17 @@ export function FloatingAssistant() {
                     {showHistory && (
                       <div style={{
                         position: 'absolute', top: '100%', right: 0, marginTop: 4,
-                        width: 240, maxHeight: 320, background: '#111119',
-                        border: '1px solid var(--tc-border, #2a2a3a)', borderRadius: 8,
+                        width: 300, maxHeight: 400, background: '#111119',
+                        border: '1px solid var(--tc-border, #2a2a3a)', borderRadius: 10,
                         boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 20,
                         display: 'flex', flexDirection: 'column', overflow: 'hidden',
                       }}>
-                        <div style={{ padding: '8px 10px', fontSize: 11, fontWeight: 600, color: '#666', borderBottom: '1px solid #1e1e2e' }}>
+                        <div style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: '#888', borderBottom: '1px solid #1e1e2e' }}>
                           历史会话
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: 4 }}>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: 6 }}>
                           {sessions.length === 0 && (
-                            <div style={{ padding: '12px 8px', fontSize: 11, color: '#444', textAlign: 'center' }}>
+                            <div style={{ padding: '20px 12px', fontSize: 12, color: '#444', textAlign: 'center' }}>
                               暂无历史会话
                             </div>
                           )}
@@ -501,20 +501,22 @@ export function FloatingAssistant() {
                                 key={s.session_id}
                                 onClick={() => handleOpenHistory(s)}
                                 style={{
-                                  padding: '6px 8px', borderRadius: 6, cursor: 'pointer',
-                                  marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8,
+                                  padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                                  marginBottom: 3, display: 'flex', alignItems: 'center', gap: 10,
                                   transition: 'background .1s',
+                                  minHeight: 44,
                                 }}
                                 onMouseEnter={e => (e.currentTarget.style.background = '#1a1a28')}
                                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                               >
-                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
+                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{
-                                    fontSize: 11, color: alreadyOpen ? 'var(--tc-accent, #007acc)' : '#ccc',
+                                    fontSize: 13, color: alreadyOpen ? 'var(--tc-accent, #007acc)' : '#ccc',
                                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                    lineHeight: '18px',
                                   }}>{title}</div>
-                                  <div style={{ fontSize: 9, color: '#555', marginTop: 1 }}>
+                                  <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>
                                     {s.event_count} 事件 · {formatTime(s.last_seen_at || s.started_at)}
                                   </div>
                                 </div>
