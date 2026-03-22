@@ -705,9 +705,9 @@ export default function ConversationHistory({ projects: _projects }: Props) {
                      style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
                   <BotIcon size={14} style={{ color: "var(--accent)" }} />
                 </div>
-                <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
+                <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5 overflow-hidden"
                      style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
-                  <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+                  <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)", overflowWrap: "break-word", wordBreak: "break-word" }}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={streamMdComponents as any}>
                       {currentReply}
                     </ReactMarkdown>
