@@ -634,11 +634,12 @@
 
 /* Expanded panel below pill row */
 .pillExpandedPanel {
-  margin-top: 4px;
-  border-radius: 8px;
+  margin-top: 6px;
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--tc-border);
-  animation: pillPanelIn 0.15s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.15);
+  animation: pillPanelIn 0.2s ease-out;
 }
 
 @keyframes pillPanelIn {
