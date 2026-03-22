@@ -239,6 +239,8 @@ class TranscriptMessage(BaseModel):
 class TranscriptResponse(BaseModel):
     messages: list[TranscriptMessage] = []
     file_found: bool = True
+    total: int = 0
+    has_more: bool = False
 
 
 def _extract_tool_result_text(content) -> str:
