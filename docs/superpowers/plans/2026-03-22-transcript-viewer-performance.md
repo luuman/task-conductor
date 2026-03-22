@@ -857,6 +857,7 @@ git commit -m "feat: add Web Worker for syntax highlighting"
 // tauri/src/lib/useHighlight.ts
 import { useState, useEffect } from 'react'
 import { LRUCache } from './lru-cache'
+import hljs from 'highlight.js/lib/core'
 
 // 简单哈希函数
 function simpleHash(str: string): string {
