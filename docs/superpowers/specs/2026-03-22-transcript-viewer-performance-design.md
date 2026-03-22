@@ -112,6 +112,8 @@ function ToolWidget({ block }: { block: TranscriptBlock }) {
 - 首次展开时 `setMounted(true)` 触发内容渲染
 - 再次折叠用 CSS `display: none` 隐藏，不销毁 DOM（避免重复计算 diff/高亮）
 - EditDiffView 的 LCS 计算放在 `useMemo` 内，仅首次渲染触发
+- **`mounted` 不响应全局折叠信号**: ExpandSignalCtx 只控制 `expanded` 状态，不重置 `mounted`。即"全部折叠"后 DOM 保留（display:none），避免下次展开重新计算。这是有意的内存换性能权衡
+- **ReadPillRow 说明**: 当前 `PillExpandedPanel` 已经是条件渲染（仅选中时 mount），主要优化收益来自 Part 4（Worker 高亮），此处不额外改动
 
 #### 文件改动
 
