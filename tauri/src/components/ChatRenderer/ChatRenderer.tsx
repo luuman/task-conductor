@@ -1078,7 +1078,9 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
   const { t } = useTranslation()
   const cmd = String(block.tool_input?.command ?? '')
   const shortCmd = cmd.replace(/^cd [^ ]+ && /, '').slice(0, 150)
-  const result = (block.tool_result || '').trim()
+  // 确保 result 是纯文本（去掉可能混入的 HTML 标签）
+  const rawResult = (block.tool_result || '').trim()
+  const result = rawResult.replace(/<[^>]*>/g, '')
   const isError = block.tool_error === true
   const hasError = isError || result.toLowerCase().includes('error') || result.toLowerCase().includes('fail')
   const noOutput = !result || result === '(Bash completed with no output)'
