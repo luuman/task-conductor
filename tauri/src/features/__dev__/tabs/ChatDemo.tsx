@@ -1,11 +1,8 @@
 /**
- * ChatDemo — 消息体类型样式预览（画布连线版）
- * 三栏：左侧导航 | 中间画布（Raw + 连线 + Styled）| 自动对齐
- *
- * 每条 raw 消息通过贝塞尔曲线连到对应的 styled turn，
- * 多条 raw → 同一 turn 时线条汇聚，直观展示分组效果。
+ * ChatDemo — 消息类型卡片画布
+ * 左列 Raw 卡片 ←连线→ 右列 Styled 卡片，点击展开详情面板
  */
-import { useRef, useState, useMemo, useCallback, useEffect } from 'react'
+import { useRef, useState, useMemo, useCallback, useEffect, type CSSProperties } from 'react'
 import { DEMO_MESSAGES, DEMO_SECTIONS } from './chat-demo-data'
 import type { TranscriptMessage, TranscriptBlock } from '../../../lib/api/types'
 import type { GroupedTurnItem } from '../../../components/ChatRenderer'
@@ -15,16 +12,99 @@ import {
   AssistantTurnCard,
   ExpandSignalCtx,
   AutoExpandCtx,
+  getToolIcon,
 } from '../../../components/ChatRenderer'
 
-// ── 原始渲染 ────────────────────────────────────────
+// ── 颜色系统 ────────────────────────────────────────
+
+const COLORS = [
+  { main: '#58a6ff', bg: 'rgba(88,166,255,0.08)', border: 'rgba(88,166,255,0.25)' },
+  { main: '#3fb950', bg: 'rgba(63,185,80,0.08)', border: 'rgba(63,185,80,0.25)' },
+  { main: '#d29922', bg: 'rgba(210,153,34,0.08)', border: 'rgba(210,153,34,0.25)' },
+  { main: '#f85149', bg: 'rgba(248,81,73,0.08)', border: 'rgba(248,81,73,0.25)' },
+  { main: '#bc8cff', bg: 'rgba(188,140,255,0.08)', border: 'rgba(188,140,255,0.25)' },
+  { main: '#39d2c0', bg: 'rgba(57,210,192,0.08)', border: 'rgba(57,210,192,0.25)' },
+  { main: '#ff7b72', bg: 'rgba(255,123,114,0.08)', border: 'rgba(255,123,114,0.25)' },
+  { main: '#79c0ff', bg: 'rgba(121,192,255,0.08)', border: 'rgba(121,192,255,0.25)' },
+  { main: '#56d364', bg: 'rgba(86,211,100,0.08)', border: 'rgba(86,211,100,0.25)' },
+  { main: '#e3b341', bg: 'rgba(227,179,65,0.08)', border: 'rgba(227,179,65,0.25)' },
+  { main: '#ffa657', bg: 'rgba(255,166,87,0.08)', border: 'rgba(255,166,87,0.25)' },
+  { main: '#a5d6ff', bg: 'rgba(165,214,255,0.08)', border: 'rgba(165,214,255,0.25)' },
+]
+
+// ── 构建 Section 数据 ───────────────────────────────
+
+interface SectionData {
+  label: string
+  msgIndex: number       // DEMO_MESSAGES 中的起始索引
+  turnIndex: number      // turns 中的对应索引
+  color: typeof COLORS[0]
+  // 提取的元信息
+  type: string           // 简短类型标识
+  icon: string           // emoji
+  msgCount: number       // 该 section 包含的消息数
+}
+
+function getTypeIcon(label: string): string {
+  if (label.includes('用户')) return '👤'
+  if (label.includes('Markdown')) return '📝'
+  if (label.includes('代码')) return '💻'
+  if (label.includes('Mermaid')) return '📊'
+  if (label.includes('Task N')) return '📋'
+  if (label.includes('System')) return '⚙️'
+  if (label.includes('Read') && label.includes('Grep')) return '🔍'
+  if (label.includes('Read') && label.includes('ERROR')) return '❌'
+  if (label.includes('Edit') && label.includes('diff')) return '✏️'
+  if (label.includes('MultiEdit')) return '✏️'
+  if (label.includes('Write')) return '📄'
+  if (label.includes('Bash') && label.includes('error')) return '🔴'
+  if (label.includes('Bash') && label.includes('静默')) return '🔇'
+  if (label.includes('Bash') && label.includes('JSON')) return '📦'
+  if (label.includes('Bash') && label.includes('Python')) return '🐍'
+  if (label.includes('Bash') && label.includes('测试')) return '✅'
+  if (label.includes('Bash') && label.includes('git')) return '📜'
+  if (label.includes('Bash') && label.includes('build')) return '🏗️'
+  if (label.includes('Bash') && label.includes('ERROR')) return '💥'
+  if (label.includes('Agent')) return '🤖'
+  if (label.includes('AskUser') && label.includes('有')) return '❓'
+  if (label.includes('AskUser') && label.includes('无')) return '⏳'
+  if (label.includes('WebSearch')) return '🌐'
+  if (label.includes('WebFetch')) return '📡'
+  if (label.includes('Skill')) return '🎯'
+  if (label.includes('TaskCreate')) return '📌'
+  if (label.includes('Unknown')) return '❔'
+  if (label.includes('Edit') && label.includes('ERROR')) return '🚫'
+  return '📎'
+}
+
+function buildSections(
+  turns: GroupedTurnItem[],
+): SectionData[] {
+  return DEMO_SECTIONS.map((sec, i) => {
+    const turnIdx = turns.findIndex(t => t.startIndex >= sec.index)
+    const nextSec = DEMO_SECTIONS[i + 1]
+    const endIdx = nextSec ? nextSec.index : DEMO_MESSAGES.length
+    return {
+      label: sec.label,
+      msgIndex: sec.index,
+      turnIndex: turnIdx >= 0 ? turnIdx : turns.length - 1,
+      color: COLORS[i % COLORS.length],
+      type: sec.label.replace(/^\d+\w*\.\s*/, ''),
+      icon: getTypeIcon(sec.label),
+      msgCount: endIdx - sec.index,
+    }
+  })
+}
+
+// ── 原始渲染（迷你版） ─────────────────────────────
 
 function RawBlock({ block }: { block: TranscriptBlock }) {
   if (block.type === 'text') {
     return (
       <div style={{
         padding: '8px 12px', fontSize: 12, lineHeight: 1.6,
-        color: 'var(--tc-foreground)', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+        color: 'var(--tc-foreground)', whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
       }}>
         {block.text}
       </div>
@@ -46,9 +126,7 @@ function RawBlock({ block }: { block: TranscriptBlock }) {
           {block.tool_name || 'Tool'}
         </span>
         {block.tool_error && (
-          <span style={{ fontSize: 9, color: '#f85149', background: 'rgba(248,81,73,0.1)', padding: '1px 6px', borderRadius: 3 }}>
-            ERROR
-          </span>
+          <span style={{ fontSize: 9, color: '#f85149', background: 'rgba(248,81,73,0.1)', padding: '1px 6px', borderRadius: 3 }}>ERROR</span>
         )}
       </div>
       {block.tool_input && (
@@ -79,111 +157,60 @@ function RawBlock({ block }: { block: TranscriptBlock }) {
   )
 }
 
-function RawMessage({ msg }: { msg: TranscriptMessage }) {
-  const isUser = msg.role === 'user'
+function RawMessages({ msgs }: { msgs: TranscriptMessage[] }) {
   return (
-    <div style={{
-      display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
-      padding: '6px 12px',
-    }}>
-      <div style={{
-        maxWidth: '90%', borderRadius: 6,
-        border: '1px solid var(--tc-border)',
-        background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          padding: '3px 10px', fontSize: 9, fontWeight: 700,
-          fontFamily: "'Geist Mono', monospace",
-          textTransform: 'uppercase', letterSpacing: '0.5px',
-          color: isUser ? '#eab308' : '#58a6ff',
-          background: isUser ? 'rgba(234,179,8,0.06)' : 'rgba(88,166,255,0.06)',
-          borderBottom: '1px solid var(--tc-border)',
-        }}>
-          {msg.role}
-        </div>
-        {msg.blocks.map((block, i) => (
-          <RawBlock key={i} block={block} />
-        ))}
-      </div>
-    </div>
+    <>
+      {msgs.map((msg, i) => {
+        const isUser = msg.role === 'user'
+        return (
+          <div key={i} style={{ padding: '4px 8px' }}>
+            <div style={{
+              borderRadius: 6, border: '1px solid var(--tc-border)',
+              background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                padding: '3px 10px', fontSize: 9, fontWeight: 700,
+                fontFamily: "'Geist Mono', monospace",
+                textTransform: 'uppercase', letterSpacing: '0.5px',
+                color: isUser ? '#eab308' : '#58a6ff',
+                background: isUser ? 'rgba(234,179,8,0.06)' : 'rgba(88,166,255,0.06)',
+                borderBottom: '1px solid var(--tc-border)',
+              }}>
+                {msg.role}
+              </div>
+              {msg.blocks.map((block, bi) => (
+                <RawBlock key={bi} block={block} />
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </>
   )
 }
 
-// ── 连线颜色 ────────────────────────────────────────
+// ── SVG 连线（卡片间） ─────────────────────────────
 
-const LINE_COLORS = [
-  '#58a6ff', '#3fb950', '#d29922', '#f85149',
-  '#bc8cff', '#39d2c0', '#ff7b72', '#79c0ff',
-  '#56d364', '#e3b341', '#ffa657', '#a5d6ff',
-]
-
-function getLineColor(turnIdx: number): string {
-  return LINE_COLORS[turnIdx % LINE_COLORS.length]
-}
-
-// ── 构建 raw→turn 映射 ─────────────────────────────
-
-function buildMsgToTurnMap(
-  messages: TranscriptMessage[],
-  turns: GroupedTurnItem[],
-): number[] {
-  // msgToTurn[i] = 该 raw 消息对应的 turn 索引
-  const map = new Array(messages.length).fill(0)
-  for (let ti = turns.length - 1; ti >= 0; ti--) {
-    const start = turns[ti].startIndex
-    // 从 start 到下一个 turn 的 start - 1 都属于这个 turn
-    const end = ti + 1 < turns.length ? turns[ti + 1].startIndex : messages.length
-    for (let mi = start; mi < end; mi++) {
-      map[mi] = ti
-    }
-  }
-  return map
-}
-
-// ── SVG 连线层 ──────────────────────────────────────
-
-interface LineData {
-  rawY: number
-  styledY: number
+interface LineInfo {
+  fromY: number
+  toY: number
   color: string
-  turnIdx: number
-  msgIdx: number
 }
 
-function ConnectingLines({
-  lines, height, gapWidth,
-}: {
-  lines: LineData[]
-  height: number
-  gapWidth: number
-}) {
-  if (lines.length === 0) return null
-
+function CardLines({ lines, containerH }: { lines: LineInfo[]; containerH: number }) {
+  if (!lines.length || containerH <= 0) return null
+  const W = 80
   return (
-    <svg
-      width={gapWidth}
-      height={height}
-      style={{ display: 'block', flexShrink: 0 }}
-    >
-      {lines.map((line, i) => {
-        const x1 = 0
-        const x2 = gapWidth
-        const cpOffset = gapWidth * 0.45
-        const d = `M ${x1},${line.rawY} C ${x1 + cpOffset},${line.rawY} ${x2 - cpOffset},${line.styledY} ${x2},${line.styledY}`
+    <svg width={W} height={containerH} style={{ display: 'block', flexShrink: 0 }}>
+      {lines.map((l, i) => {
+        const cp = W * 0.4
+        const d = `M 0,${l.fromY} C ${cp},${l.fromY} ${W - cp},${l.toY} ${W},${l.toY}`
         return (
           <g key={i}>
-            <path
-              d={d}
-              fill="none"
-              stroke={line.color}
-              strokeWidth={1.5}
-              strokeOpacity={0.4}
-            />
-            {/* 左端点 */}
-            <circle cx={x1 + 2} cy={line.rawY} r={2.5} fill={line.color} opacity={0.6} />
-            {/* 右端点 */}
-            <circle cx={x2 - 2} cy={line.styledY} r={2.5} fill={line.color} opacity={0.6} />
+            <path d={d} fill="none" stroke={l.color} strokeWidth={1.5} strokeOpacity={0.5} />
+            <circle cx={2} cy={l.fromY} r={3} fill={l.color} opacity={0.7} />
+            <circle cx={W - 2} cy={l.toY} r={3} fill={l.color} opacity={0.7} />
           </g>
         )
       })}
@@ -191,266 +218,183 @@ function ConnectingLines({
   )
 }
 
-// ── 主组件 ──────────────────────────────────────────
+// ── 类型卡片 ────────────────────────────────────────
 
-const GAP_WIDTH = 60
+const cardBase: CSSProperties = {
+  padding: '10px 14px',
+  borderRadius: 8,
+  cursor: 'pointer',
+  transition: 'all 0.2s',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  userSelect: 'none',
+}
 
-export function ChatDemo() {
-  const rawRefs = useRef<(HTMLDivElement | null)[]>([])
-  const styledRefs = useRef<(HTMLDivElement | null)[]>([])
-  const [activeSection, setActiveSection] = useState(0)
-  const [expandSignal, setExpandSignal] = useState(0)
-  const [autoExpand] = useState(true)
+function TypeCard({
+  section,
+  active,
+  onClick,
+}: {
+  section: SectionData
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        ...cardBase,
+        background: active ? section.color.bg : 'rgba(255,255,255,0.02)',
+        border: `1.5px solid ${active ? section.color.main : 'var(--tc-border)'}`,
+        boxShadow: active ? `0 0 12px ${section.color.border}` : 'none',
+      }}
+      onMouseEnter={e => {
+        if (!active) {
+          e.currentTarget.style.borderColor = section.color.border
+          e.currentTarget.style.background = section.color.bg
+        }
+      }}
+      onMouseLeave={e => {
+        if (!active) {
+          e.currentTarget.style.borderColor = 'var(--tc-border)'
+          e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+        }
+      }}
+    >
+      <span style={{ fontSize: 18, flexShrink: 0 }}>{section.icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 12, fontWeight: 600,
+          color: active ? section.color.main : 'var(--tc-foreground)',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {section.type}
+        </div>
+        <div style={{
+          fontSize: 9, color: 'var(--tc-foreground-secondary)',
+          fontFamily: "'Geist Mono', monospace",
+          marginTop: 2,
+        }}>
+          {section.msgCount} msg
+        </div>
+      </div>
+      <span style={{
+        fontSize: 10, color: section.color.main, opacity: 0.6,
+        fontFamily: "'Geist Mono', monospace",
+      }}>
+        #{DEMO_SECTIONS.findIndex(s => s.label === section.label) + 1}
+      </span>
+    </div>
+  )
+}
 
-  const rawScrollRef = useRef<HTMLDivElement>(null)
-  const styledScrollRef = useRef<HTMLDivElement>(null)
-  const isScrolling = useRef(false)
+// ── 详情面板 ────────────────────────────────────────
 
-  const [lines, setLines] = useState<LineData[]>([])
-  const [canvasHeight, setCanvasHeight] = useState(0)
-  const [tick, setTick] = useState(0) // force re-calc
+function DetailPanel({
+  section,
+  messages,
+  turns,
+  onClose,
+}: {
+  section: SectionData
+  messages: TranscriptMessage[]
+  turns: GroupedTurnItem[]
+  onClose: () => void
+}) {
+  const [expandSignal] = useState(1)
 
-  const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
-  const msgToTurn = useMemo(() => buildMsgToTurnMap(DEMO_MESSAGES, turns), [turns])
+  // 提取该 section 涉及的 raw 消息
+  const secIdx = DEMO_SECTIONS.findIndex(s => s.label === section.label)
+  const nextSec = DEMO_SECTIONS[secIdx + 1]
+  const startMsg = section.msgIndex
+  const endMsg = nextSec ? nextSec.index : messages.length
+  const rawMsgs = messages.slice(startMsg, endMsg)
 
-  // 同步滚动
-  const handleScroll = useCallback((source: 'raw' | 'styled') => {
-    if (isScrolling.current) return
-    isScrolling.current = true
-    const from = source === 'raw' ? rawScrollRef.current : styledScrollRef.current
-    const to = source === 'raw' ? styledScrollRef.current : rawScrollRef.current
-    if (from && to) {
-      const ratio = from.scrollTop / (from.scrollHeight - from.clientHeight || 1)
-      to.scrollTop = ratio * (to.scrollHeight - to.clientHeight || 1)
-    }
-    // 触发连线重算
-    setTick(t => t + 1)
-    requestAnimationFrame(() => { isScrolling.current = false })
-  }, [])
-
-  // 计算连线位置
-  useEffect(() => {
-    const rawScroll = rawScrollRef.current
-    const styledScroll = styledScrollRef.current
-    if (!rawScroll || !styledScroll) return
-
-    const rawRect = rawScroll.getBoundingClientRect()
-    const viewTop = rawRect.top
-    const viewBottom = rawRect.bottom
-
-    const newLines: LineData[] = []
-
-    for (let mi = 0; mi < DEMO_MESSAGES.length; mi++) {
-      const rawEl = rawRefs.current[mi]
-      const turnIdx = msgToTurn[mi]
-      const styledEl = styledRefs.current[turnIdx]
-      if (!rawEl || !styledEl) continue
-
-      const rawElRect = rawEl.getBoundingClientRect()
-      const styledElRect = styledEl.getBoundingClientRect()
-
-      // raw 元素中心 Y（相对于 scroll 容器顶部）
-      const rawCenterY = (rawElRect.top + rawElRect.bottom) / 2 - viewTop
-      // styled 元素中心 Y
-      const styledCenterY = (styledElRect.top + styledElRect.bottom) / 2 - viewTop
-
-      // 只画可见区域内的线
-      if (rawCenterY < -50 || rawCenterY > viewBottom - viewTop + 50) continue
-      if (styledCenterY < -50 || styledCenterY > viewBottom - viewTop + 50) continue
-
-      newLines.push({
-        rawY: rawCenterY,
-        styledY: styledCenterY,
-        color: getLineColor(turnIdx),
-        turnIdx,
-        msgIdx: mi,
-      })
-    }
-
-    setLines(newLines)
-    setCanvasHeight(rawRect.height)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick, msgToTurn, expandSignal])
-
-  // 初始计算 + resize 监听
-  useEffect(() => {
-    const timer = setTimeout(() => setTick(1), 300)
-
-    const obs = new ResizeObserver(() => setTick(t => t + 1))
-    if (rawScrollRef.current) obs.observe(rawScrollRef.current)
-    if (styledScrollRef.current) obs.observe(styledScrollRef.current)
-
-    return () => {
-      clearTimeout(timer)
-      obs.disconnect()
-    }
-  }, [])
-
-  const scrollTo = useCallback((msgIndex: number, sectionIdx: number) => {
-    rawRefs.current[msgIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    const turnIdx = turns.findIndex(t => t.startIndex >= msgIndex)
-    const target = turnIdx >= 0 ? turnIdx : turns.length - 1
-    styledRefs.current[target]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    setActiveSection(sectionIdx)
-    setTimeout(() => setTick(t => t + 1), 400)
-  }, [turns])
+  // 提取该 section 涉及的 turns
+  const turnStart = section.turnIndex
+  const turnEnd = nextSec
+    ? (turns.findIndex(t => t.startIndex >= nextSec.index))
+    : turns.length
+  const sectionTurns = turns.slice(turnStart, turnEnd > turnStart ? turnEnd : turnStart + 1)
 
   return (
     <ExpandSignalCtx.Provider value={expandSignal}>
-      <AutoExpandCtx.Provider value={autoExpand}>
-        <div style={{ display: 'flex', height: 'calc(100vh - 160px)', gap: 0 }}>
-
-          {/* ── 左侧：导航 ── */}
+      <AutoExpandCtx.Provider value={true}>
+        <div style={{
+          flex: 1, display: 'flex', flexDirection: 'column',
+          borderLeft: '1px solid var(--tc-border)',
+          minWidth: 0, overflow: 'hidden',
+        }}>
+          {/* Header */}
           <div style={{
-            width: 180, flexShrink: 0,
-            borderRight: '1px solid var(--tc-border)',
-            display: 'flex', flexDirection: 'column',
+            padding: '10px 16px',
+            display: 'flex', alignItems: 'center', gap: 10,
+            borderBottom: `2px solid ${section.color.main}`,
+            background: section.color.bg,
+            flexShrink: 0,
           }}>
-            <div style={{
-              padding: '4px 12px 8px', fontSize: 10, fontWeight: 700,
-              color: 'var(--tc-foreground-secondary)',
-              textTransform: 'uppercase', letterSpacing: '0.5px',
-            }}>
-              消息类型 ({DEMO_SECTIONS.length})
+            <span style={{ fontSize: 20 }}>{section.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: section.color.main }}>
+                {section.label}
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginTop: 1 }}>
+                {rawMsgs.length} raw messages → {sectionTurns.length} styled turns
+              </div>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              {DEMO_SECTIONS.map((sec, i) => (
-                <button
-                  key={i}
-                  onClick={() => scrollTo(sec.index, i)}
-                  style={{
-                    display: 'block', width: '100%', textAlign: 'left',
-                    padding: '5px 12px', border: 'none',
-                    background: activeSection === i ? 'rgba(0, 122, 204, 0.1)' : 'transparent',
-                    color: activeSection === i ? 'var(--tc-border-active)' : 'var(--tc-foreground-secondary)',
-                    fontSize: 11, cursor: 'pointer', transition: 'all 0.15s',
-                    borderLeft: activeSection === i ? '2px solid var(--tc-border-active)' : '2px solid transparent',
-                  }}
-                  onMouseEnter={e => {
-                    if (activeSection !== i) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
-                  }}
-                  onMouseLeave={e => {
-                    if (activeSection !== i) e.currentTarget.style.background = 'transparent'
-                  }}
-                >
-                  {sec.label}
-                </button>
-              ))}
-            </div>
-
-            {/* 控制 */}
-            <div style={{ padding: '8px 12px', borderTop: '1px solid var(--tc-border)' }}>
-              <button
-                onClick={() => { setExpandSignal(s => s + 1); setTimeout(() => setTick(t => t + 1), 300) }}
-                style={{
-                  width: '100%', padding: '4px 8px', marginBottom: 4,
-                  fontSize: 10, border: '1px solid var(--tc-border)',
-                  borderRadius: 4, background: 'var(--tc-panel-bg)',
-                  color: 'var(--tc-foreground-secondary)', cursor: 'pointer',
-                }}
-              >
-                全部展开
-              </button>
-              <button
-                onClick={() => { setExpandSignal(s => s - 1); setTimeout(() => setTick(t => t + 1), 300) }}
-                style={{
-                  width: '100%', padding: '4px 8px',
-                  fontSize: 10, border: '1px solid var(--tc-border)',
-                  borderRadius: 4, background: 'var(--tc-panel-bg)',
-                  color: 'var(--tc-foreground-secondary)', cursor: 'pointer',
-                }}
-              >
-                全部收起
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              style={{
+                width: 28, height: 28, borderRadius: 6,
+                border: '1px solid var(--tc-border)',
+                background: 'var(--tc-panel-bg)',
+                color: 'var(--tc-foreground-secondary)',
+                cursor: 'pointer', fontSize: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              ✕
+            </button>
           </div>
 
-          {/* ── 中间画布区：Raw + SVG连线 + Styled ── */}
-          <div style={{ flex: 1, display: 'flex', minWidth: 0, overflow: 'hidden' }}>
-
-            {/* Raw 列 */}
+          {/* 对比区 */}
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            {/* Raw */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <div style={{
-                padding: '6px 12px', fontSize: 10, fontWeight: 700,
+                padding: '5px 12px', fontSize: 9, fontWeight: 700,
                 textTransform: 'uppercase', letterSpacing: '0.5px',
                 color: '#8b949e', background: 'var(--tc-panel-bg)',
                 borderBottom: '1px solid var(--tc-border)',
-                flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+                flexShrink: 0,
               }}>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: '#8b949e', opacity: 0.5,
-                }} />
-                RAW — 未优化
+                RAW
               </div>
-              <div
-                ref={rawScrollRef}
-                onScroll={() => handleScroll('raw')}
-                style={{
-                  flex: 1, overflowY: 'auto',
-                  background: 'var(--tc-content-bg)', padding: '8px 0',
-                }}
-              >
-                {DEMO_MESSAGES.map((msg, i) => (
-                  <div key={i} ref={el => { rawRefs.current[i] = el }}>
-                    <RawMessage msg={msg} />
-                  </div>
-                ))}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
+                <RawMessages msgs={rawMsgs} />
               </div>
             </div>
 
-            {/* SVG 连线 */}
+            {/* Divider */}
             <div style={{
-              width: GAP_WIDTH, flexShrink: 0,
-              background: 'rgba(0,0,0,0.15)',
-              borderLeft: '1px solid var(--tc-border)',
-              borderRight: '1px solid var(--tc-border)',
-              overflow: 'hidden',
-              position: 'relative',
-            }}>
-              {/* 顶部标签 */}
-              <div style={{
-                height: 29, // 与列头高度对齐
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderBottom: '1px solid var(--tc-border)',
-                background: 'var(--tc-panel-bg)',
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </div>
-              <ConnectingLines
-                lines={lines}
-                height={canvasHeight}
-                gapWidth={GAP_WIDTH}
-              />
-            </div>
+              width: 1, background: 'var(--tc-border)', flexShrink: 0,
+            }} />
 
-            {/* Styled 列 */}
+            {/* Styled */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <div style={{
-                padding: '6px 12px', fontSize: 10, fontWeight: 700,
+                padding: '5px 12px', fontSize: 9, fontWeight: 700,
                 textTransform: 'uppercase', letterSpacing: '0.5px',
                 color: '#58a6ff', background: 'var(--tc-panel-bg)',
                 borderBottom: '1px solid var(--tc-border)',
-                flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+                flexShrink: 0,
               }}>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: '#58a6ff',
-                }} />
-                STYLED — 当前样式
+                STYLED
               </div>
-              <div
-                ref={styledScrollRef}
-                onScroll={() => handleScroll('styled')}
-                style={{
-                  flex: 1, overflowY: 'auto',
-                  background: 'var(--tc-content-bg)', padding: '8px 0',
-                }}
-              >
-                {turns.map((item, i) => (
-                  <div key={i} ref={el => { styledRefs.current[i] = el }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
+                {sectionTurns.map((item, i) => (
+                  <div key={i}>
                     {item.kind === 'user'
                       ? <UserCard msg={item.msg} />
                       : <AssistantTurnCard turn={item.turn} />
@@ -459,10 +403,174 @@ export function ChatDemo() {
                 ))}
               </div>
             </div>
-
           </div>
         </div>
       </AutoExpandCtx.Provider>
     </ExpandSignalCtx.Provider>
+  )
+}
+
+// ── 主组件 ──────────────────────────────────────────
+
+export function ChatDemo() {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null)
+  const leftRefs = useRef<(HTMLDivElement | null)[]>([])
+  const rightRefs = useRef<(HTMLDivElement | null)[]>([])
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [lines, setLines] = useState<LineInfo[]>([])
+  const [containerH, setContainerH] = useState(0)
+
+  const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
+  const sections = useMemo(() => buildSections(turns), [turns])
+
+  // 计算连线
+  const updateLines = useCallback(() => {
+    const cEl = containerRef.current
+    if (!cEl) return
+    const cRect = cEl.getBoundingClientRect()
+    setContainerH(cRect.height)
+
+    const newLines: LineInfo[] = []
+    for (let i = 0; i < sections.length; i++) {
+      const lEl = leftRefs.current[i]
+      const rEl = rightRefs.current[i]
+      if (!lEl || !rEl) continue
+      const lRect = lEl.getBoundingClientRect()
+      const rRect = rEl.getBoundingClientRect()
+      newLines.push({
+        fromY: (lRect.top + lRect.bottom) / 2 - cRect.top,
+        toY: (rRect.top + rRect.bottom) / 2 - cRect.top,
+        color: sections[i].color.main,
+      })
+    }
+    setLines(newLines)
+  }, [sections])
+
+  useEffect(() => {
+    const timer = setTimeout(updateLines, 100)
+    const obs = new ResizeObserver(updateLines)
+    if (containerRef.current) obs.observe(containerRef.current)
+    return () => { clearTimeout(timer); obs.disconnect() }
+  }, [updateLines])
+
+  // 滚动同步
+  const leftScrollRef = useRef<HTMLDivElement>(null)
+  const rightScrollRef = useRef<HTMLDivElement>(null)
+  const scrollLock = useRef(false)
+
+  const syncScroll = useCallback((source: 'left' | 'right') => {
+    if (scrollLock.current) return
+    scrollLock.current = true
+    const from = source === 'left' ? leftScrollRef.current : rightScrollRef.current
+    const to = source === 'left' ? rightScrollRef.current : leftScrollRef.current
+    if (from && to) {
+      const ratio = from.scrollTop / (from.scrollHeight - from.clientHeight || 1)
+      to.scrollTop = ratio * (to.scrollHeight - to.clientHeight || 1)
+    }
+    updateLines()
+    requestAnimationFrame(() => { scrollLock.current = false })
+  }, [updateLines])
+
+  const handleClick = useCallback((idx: number) => {
+    setActiveIdx(prev => prev === idx ? null : idx)
+  }, [])
+
+  return (
+    <div style={{ display: 'flex', height: 'calc(100vh - 160px)', gap: 0 }}>
+
+      {/* ── 卡片画布区 ── */}
+      <div
+        ref={containerRef}
+        style={{
+          width: activeIdx !== null ? 380 : '100%',
+          flexShrink: 0,
+          display: 'flex',
+          overflow: 'hidden',
+          transition: 'width 0.3s ease',
+          borderRight: activeIdx !== null ? 'none' : undefined,
+        }}
+      >
+        {/* 左列 Raw 卡片 */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <div style={{
+            padding: '8px 14px', fontSize: 10, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+            color: '#8b949e', background: 'var(--tc-panel-bg)',
+            borderBottom: '1px solid var(--tc-border)',
+            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#8b949e', opacity: 0.5 }} />
+            RAW 类型
+          </div>
+          <div
+            ref={leftScrollRef}
+            onScroll={() => syncScroll('left')}
+            style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}
+          >
+            {sections.map((sec, i) => (
+              <div key={i} ref={el => { leftRefs.current[i] = el }}>
+                <TypeCard section={sec} active={activeIdx === i} onClick={() => handleClick(i)} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SVG 连线 */}
+        <div style={{
+          width: 80, flexShrink: 0,
+          background: 'rgba(0,0,0,0.1)',
+          borderLeft: '1px solid var(--tc-border)',
+          borderRight: '1px solid var(--tc-border)',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{
+            height: 33,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderBottom: '1px solid var(--tc-border)',
+            background: 'var(--tc-panel-bg)',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </div>
+          <CardLines lines={lines} containerH={containerH} />
+        </div>
+
+        {/* 右列 Styled 卡片 */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <div style={{
+            padding: '8px 14px', fontSize: 10, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+            color: '#58a6ff', background: 'var(--tc-panel-bg)',
+            borderBottom: '1px solid var(--tc-border)',
+            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#58a6ff' }} />
+            STYLED 类型
+          </div>
+          <div
+            ref={rightScrollRef}
+            onScroll={() => syncScroll('right')}
+            style={{ flex: 1, overflowY: 'auto', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}
+          >
+            {sections.map((sec, i) => (
+              <div key={i} ref={el => { rightRefs.current[i] = el }}>
+                <TypeCard section={sec} active={activeIdx === i} onClick={() => handleClick(i)} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── 详情面板 ── */}
+      {activeIdx !== null && (
+        <DetailPanel
+          section={sections[activeIdx]}
+          messages={DEMO_MESSAGES}
+          turns={turns}
+          onClose={() => setActiveIdx(null)}
+        />
+      )}
+    </div>
   )
 }
