@@ -1209,7 +1209,8 @@ export default function AdminServerMonitor() {
 
             <div className={s.claudeCards}>
               {claudeProcs.map((p, i) => (
-                <ClaudeCard key={p.pid} proc={p} color={CLAUDE_COLORS[i % CLAUDE_COLORS.length]} index={i} onKill={handleKill} />
+                <ClaudeCard key={p.pid} proc={p} color={CLAUDE_COLORS[i % CLAUDE_COLORS.length]}
+                  index={i} onKill={handleKill} session={activeSessions[i]} />
               ))}
             </div>
           </>
