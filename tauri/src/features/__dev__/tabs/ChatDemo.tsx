@@ -12,7 +12,6 @@ import {
   AssistantTurnCard,
   ExpandSignalCtx,
   AutoExpandCtx,
-  getToolIcon,
 } from '../../../components/ChatRenderer'
 
 // ── 颜色系统 ────────────────────────────────────────
