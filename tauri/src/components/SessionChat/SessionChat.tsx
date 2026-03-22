@@ -1,7 +1,7 @@
 // SessionChat.tsx — Composed session chat component
 // Provides 'full' (3-column) and 'compact' (single-column) layout variants.
 
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { AiSession } from '../../lib/api/types'
 import { useSessionData } from './useSessionData'
 import { SessionList } from './SessionList'
