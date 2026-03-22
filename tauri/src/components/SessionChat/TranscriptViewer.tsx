@@ -149,8 +149,10 @@ export function TranscriptViewer({
         <Virtuoso
           ref={virtuosoRef}
           data={turns}
+          firstItemIndex={Math.max(0, total - transcript.length)}
           initialTopMostItemIndex={turns.length > 0 ? turns.length - 1 : 0}
           followOutput="smooth"
+          startReached={hasMore ? onLoadMore : undefined}
           computeItemKey={(_index, item) => item.startIndex}
           increaseViewportBy={400}
           rangeChanged={handleRangeChanged}
