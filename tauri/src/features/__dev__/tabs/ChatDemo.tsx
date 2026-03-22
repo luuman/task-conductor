@@ -336,7 +336,7 @@ function ChatDemoCanvas() {
   const { nodes: initNodes, edges: initEdges } = useMemo(() => buildGraph(turns), [turns])
   const [nodes, , onNodesChange] = useNodesState(initNodes)
   const [edges, , onEdgesChange] = useEdgesState(initEdges)
-  const { fitView, setCenter } = useReactFlow()
+  const { fitView, fitBounds } = useReactFlow()
 
   useEffect(() => { setTimeout(() => fitView({ padding: 0.06, duration: 500 }), 300) }, [fitView])
 
@@ -344,9 +344,17 @@ function ChatDemoCanvas() {
     const r = nodes.find(n => n.id === `raw-${idx}`)
     const s = nodes.find(n => n.id === `styled-${idx}`)
     if (r && s) {
-      setCenter((r.position.x + s.position.x + 480) / 2, (r.position.y + s.position.y) / 2, { zoom: 0.5, duration: 500 })
+      // 计算包围两个节点的矩形
+      const x = Math.min(r.position.x, s.position.x)
+      const y = Math.min(r.position.y, s.position.y)
+      const right = Math.max(r.position.x + RAW_W, s.position.x + STYLED_W)
+      const bottom = Math.max(r.position.y, s.position.y) + 500 // 估算高度
+      fitBounds(
+        { x, y, width: right - x, height: bottom - y },
+        { padding: 0.15, duration: 600 },
+      )
     }
-  }, [nodes, setCenter])
+  }, [nodes, fitBounds])
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
