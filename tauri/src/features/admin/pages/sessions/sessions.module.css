@@ -1659,8 +1659,8 @@
 .mermaidWrap {
   margin: 8px 0;
   padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--tc-border);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.2);
   overflow-x: auto;
   display: flex;
