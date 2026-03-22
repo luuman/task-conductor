@@ -912,8 +912,16 @@ export function useHighlight(code: string, language?: string): { html: string; l
 
     const w = getWorker()
     if (!w) {
-      // 降级：直接返回纯文本（不在主线程跑 hljs）
-      setHtml(code)
+      // 降级：主线程同步高亮（保持与之前相同的行为）
+      try {
+        const result = language
+          ? hljs.highlight(code, { language, ignoreIllegals: true }).value
+          : hljs.highlightAuto(code).value
+        cache.set(key, result)
+        setHtml(result)
+      } catch {
+        setHtml(code)
+      }
       setLoading(false)
       return
     }
