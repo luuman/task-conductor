@@ -1242,6 +1242,9 @@ export function AssistantTurnCard({ turn }: { turn: AssistantTurn }) {
   )
 }
 
+export const MemoUserCard = memo(UserCard)
+export const MemoAssistantTurnCard = memo(AssistantTurnCard)
+
 // ── ChatMessageList ─────────────────────────────────────────
 
 export interface ChatMessageListProps {
