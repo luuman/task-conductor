@@ -22,7 +22,7 @@ export function SessionChat({
   const {
     sessions, sessionsLoading, selectedId,
     selectSession, clearSelection, transcript, transcriptLoading,
-    fileFound, isFirstLoad, loadMore, hasMore, total,
+    fileFound, isFirstLoad, loadMore, hasMore, total, allQuestions,
   } = useSessionData({ filterByCwd })
 
   const [search, setSearch] = useState('')
