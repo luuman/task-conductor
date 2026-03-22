@@ -1032,10 +1032,13 @@ function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolTy
 export function EditInlineCard({ block }: { block: TranscriptBlock }) {
   const input = block.tool_input || {}
   const hasEditData = Boolean(input.old_string || input.new_string)
+  const filePath = String(input.file_path || '')
+  const fileName = filePath.split('/').pop() || filePath
+  const [expanded, setExpanded] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
+  // No diff data — just show file name badge
   if (!hasEditData) {
-    const filePath = String(input.file_path || '')
-    const fileName = filePath.split('/').pop() || filePath
     return (
       <div className={styles.bashCardHeader}>
         <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
@@ -1045,7 +1048,28 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
     )
   }
 
-  return <EditDiffView input={input} />
+  const handleToggle = () => {
+    if (!mounted) setMounted(true)
+    setExpanded(v => !v)
+  }
+
+  return (
+    <div>
+      <button className={`${styles.toolHeader} ${styles.toolHeaderClickable}`} onClick={handleToggle} style={{ width: '100%' }}>
+        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
+        <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
+        <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', marginLeft: 'auto' }}>
+          ▶
+        </span>
+      </button>
+      {mounted && (
+        <div style={{ display: expanded ? 'block' : 'none' }}>
+          <EditDiffView input={input} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ── Guess best hljs language for command output ─────────────
