@@ -248,6 +248,21 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
       .catch(() => setLoadingMore(false))
   }, [hasMore, loadedFrom, loadingMore])
 
+  // Load all remaining older messages at once (for QuestionNav jump to unloaded area)
+  const loadAll = useCallback(() => {
+    const sid = selectedIdRef.current
+    if (!sid || loadedFrom <= 0) return
+    setLoadingMore(true)
+    api.getTranscript(sid, { limit: loadedFrom, offset: 0 })
+      .then(r => {
+        setTranscript(prev => [...r.messages, ...prev])
+        setLoadedFrom(0)
+        setHasMore(false)
+        setLoadingMore(false)
+      })
+      .catch(() => setLoadingMore(false))
+  }, [loadedFrom])
+
   // Clear selection
   const clearSelection = useCallback(() => {
     selectedIdRef.current = null
