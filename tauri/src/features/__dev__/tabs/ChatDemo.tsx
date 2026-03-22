@@ -1,6 +1,6 @@
 /**
- * ChatDemo — 大画布散落式卡片展示
- * Raw 节点 ←连线→ Styled 节点，交错分布，右侧悬浮导航
+ * ChatDemo — 散落式画布，每组 = Raw卡片 ←连线→ Styled卡片
+ * 无外框、无头像，纯内容展示
  */
 import { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
@@ -25,8 +25,11 @@ import type { TranscriptMessage, TranscriptBlock } from '../../../lib/api/types'
 import type { GroupedTurnItem } from '../../../components/ChatRenderer'
 import {
   groupMessagesIntoTurns,
-  UserCard,
-  AssistantTurnCard,
+  RichTextBlock,
+  ReadPillRow,
+  EditInlineCard,
+  BashStatusLine,
+  ToolWidget,
   ExpandSignalCtx,
   AutoExpandCtx,
 } from '../../../components/ChatRenderer'
@@ -71,9 +74,9 @@ function getIcon(label: string): string {
   return '📎'
 }
 
-// ── Raw 迷你渲染 ────────────────────────────────────
+// ── Raw 节点：纯内容，无外框 ────────────────────────
 
-function RawBlockMini({ block }: { block: TranscriptBlock }) {
+function RawBlockContent({ block }: { block: TranscriptBlock }) {
   if (block.type === 'text') {
     return (
       <div style={{
@@ -86,27 +89,21 @@ function RawBlockMini({ block }: { block: TranscriptBlock }) {
   }
   return (
     <div style={{
-      margin: '3px 0', border: '1px solid var(--tc-border)',
-      borderRadius: 4, overflow: 'hidden',
+      margin: '3px 6px', border: '1px solid var(--tc-border)', borderRadius: 4, overflow: 'hidden',
     }}>
       <div style={{
-        padding: '3px 8px', fontSize: 10,
-        fontFamily: "'Geist Mono', monospace",
-        background: 'var(--tc-panel-bg)',
-        borderBottom: '1px solid var(--tc-border)',
+        padding: '3px 8px', fontSize: 10, fontFamily: "'Geist Mono', monospace",
+        background: 'var(--tc-panel-bg)', borderBottom: '1px solid var(--tc-border)',
         display: 'flex', alignItems: 'center', gap: 6,
       }}>
-        <span style={{ fontWeight: 600, color: 'var(--tc-foreground)' }}>
-          {block.tool_name || 'Tool'}
-        </span>
+        <span style={{ fontWeight: 600, color: 'var(--tc-foreground)' }}>{block.tool_name || 'Tool'}</span>
         {block.tool_error && (
           <span style={{ fontSize: 8, color: '#f85149', background: 'rgba(248,81,73,0.1)', padding: '0 4px', borderRadius: 2 }}>ERR</span>
         )}
       </div>
       {block.tool_input && (
         <pre style={{
-          margin: 0, padding: '4px 8px', fontSize: 9,
-          fontFamily: "'Geist Mono', monospace",
+          margin: 0, padding: '4px 8px', fontSize: 9, fontFamily: "'Geist Mono', monospace",
           color: 'var(--tc-foreground-secondary)', background: 'var(--tc-content-bg)',
           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
           borderBottom: block.tool_result ? '1px solid var(--tc-border)' : undefined,
@@ -116,11 +113,9 @@ function RawBlockMini({ block }: { block: TranscriptBlock }) {
       )}
       {block.tool_result && (
         <pre style={{
-          margin: 0, padding: '4px 8px', fontSize: 9,
-          fontFamily: "'Geist Mono', monospace",
+          margin: 0, padding: '4px 8px', fontSize: 9, fontFamily: "'Geist Mono', monospace",
           color: block.tool_error ? '#fda4af' : 'var(--tc-foreground-secondary)',
-          background: 'var(--tc-content-bg)',
-          whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+          background: 'var(--tc-content-bg)', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
         }}>
           {block.tool_result}
         </pre>
@@ -129,115 +124,112 @@ function RawBlockMini({ block }: { block: TranscriptBlock }) {
   )
 }
 
-// ── 节点数据类型 ────────────────────────────────────
+interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
+interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
 
-interface RawNodeData {
-  label: string
-  color: string
-  icon: string
-  messages: TranscriptMessage[]
-  [key: string]: unknown
-}
+const READONLY_TOOLS = new Set(['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'])
+const WRITE_TOOLS = new Set(['Edit', 'MultiEdit', 'Write'])
 
-interface StyledNodeData {
-  label: string
-  color: string
-  icon: string
-  turns: GroupedTurnItem[]
-  rawCount: number
-  [key: string]: unknown
-}
-
-// ── Raw 节点 ────────────────────────────────────────
-
-const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => {
-  return (
+const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
+  <div style={{
+    width: 340, borderRadius: 10,
+    border: `1.5px solid ${data.color}40`,
+    background: 'var(--tc-content-bg)',
+    overflow: 'hidden',
+    boxShadow: `0 2px 12px ${data.color}10`,
+  }}>
+    <Handle type="source" position={Position.Right}
+      style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
     <div style={{
-      width: 340,
-      borderRadius: 10,
-      border: `1.5px solid ${data.color}40`,
-      background: 'var(--tc-content-bg)',
-      overflow: 'hidden',
-      boxShadow: `0 2px 12px ${data.color}15`,
+      padding: '6px 10px', fontSize: 10, fontWeight: 700,
+      color: data.color, background: `${data.color}08`,
+      borderBottom: `1px solid ${data.color}20`,
+      display: 'flex', alignItems: 'center', gap: 6,
     }}>
-      <Handle type="source" position={Position.Right}
-        style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-      <div style={{
-        padding: '8px 12px',
-        background: `${data.color}10`,
-        borderBottom: `1px solid ${data.color}25`,
-        display: 'flex', alignItems: 'center', gap: 8,
-      }}>
-        <span style={{ fontSize: 15 }}>{data.icon}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: data.color }}>RAW</span>
-        <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-          {data.label}
-        </span>
-      </div>
-      <div>
-        {data.messages.map((msg, i) => (
-          <div key={i} style={{ borderBottom: i < data.messages.length - 1 ? '1px solid var(--tc-border)' : undefined }}>
-            <div style={{
-              padding: '2px 8px', fontSize: 8, fontWeight: 700,
-              fontFamily: "'Geist Mono', monospace",
-              textTransform: 'uppercase', letterSpacing: '0.5px',
-              color: msg.role === 'user' ? '#eab308' : '#58a6ff',
-              background: msg.role === 'user' ? 'rgba(234,179,8,0.04)' : 'rgba(88,166,255,0.04)',
-            }}>
-              {msg.role}
-            </div>
-            {msg.blocks.map((b, bi) => <RawBlockMini key={bi} block={b} />)}
-          </div>
-        ))}
-      </div>
+      <span style={{ fontSize: 13 }}>{data.icon}</span>
+      <span>RAW</span>
+      <span style={{ fontWeight: 400, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
+        {data.label}
+      </span>
     </div>
-  )
-})
+    {data.messages.map((msg, i) => (
+      <div key={i} style={{ borderBottom: i < data.messages.length - 1 ? '1px solid var(--tc-border)' : undefined }}>
+        <div style={{
+          padding: '2px 8px', fontSize: 8, fontWeight: 700,
+          fontFamily: "'Geist Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.5px',
+          color: msg.role === 'user' ? '#eab308' : '#58a6ff',
+          background: msg.role === 'user' ? 'rgba(234,179,8,0.04)' : 'rgba(88,166,255,0.04)',
+        }}>
+          {msg.role}
+        </div>
+        {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
+      </div>
+    ))}
+  </div>
+))
 RawNode.displayName = 'RawNode'
 
-// ── Styled 节点 ─────────────────────────────────────
+// ── Styled 节点：无头像，纯内容 ─────────────────────
 
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => {
+  // 把 turn 里的内容拆成独立 block 渲染，不走 AssistantTurnCard（去掉头像/气泡）
   return (
     <ExpandSignalCtx.Provider value={1}>
       <AutoExpandCtx.Provider value={true}>
         <div style={{
-          width: 480,
-          borderRadius: 10,
+          width: 480, borderRadius: 10,
           border: `1.5px solid ${data.color}40`,
           background: 'var(--tc-content-bg)',
           overflow: 'hidden',
-          boxShadow: `0 2px 12px ${data.color}15`,
+          boxShadow: `0 2px 12px ${data.color}10`,
         }}>
           <Handle type="target" position={Position.Left}
             style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
           <div style={{
-            padding: '8px 12px',
-            background: `${data.color}10`,
-            borderBottom: `1px solid ${data.color}25`,
-            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 10px', fontSize: 10, fontWeight: 700,
+            color: data.color, background: `${data.color}08`,
+            borderBottom: `1px solid ${data.color}20`,
+            display: 'flex', alignItems: 'center', gap: 6,
           }}>
-            <span style={{ fontSize: 15 }}>{data.icon}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: data.color }}>STYLED</span>
-            <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
+            <span style={{ fontSize: 13 }}>{data.icon}</span>
+            <span>STYLED</span>
+            <span style={{ fontWeight: 400, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
               {data.label}
             </span>
-            <span style={{
-              marginLeft: 'auto', fontSize: 9,
-              color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace",
-            }}>
+            <span style={{ marginLeft: 'auto', fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
               {data.rawCount} msg → {data.turns.length} turn
             </span>
           </div>
-          <div>
-            {data.turns.map((item, i) => (
-              <div key={i}>
-                {item.kind === 'user'
-                  ? <UserCard msg={item.msg} />
-                  : <AssistantTurnCard turn={item.turn} />
-                }
-              </div>
-            ))}
+          <div style={{ padding: '8px 12px' }}>
+            {data.turns.map((item, i) => {
+              if (item.kind === 'user') {
+                // 用户消息：纯文本，无头像无气泡
+                const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
+                if (!text) return null
+                return (
+                  <div key={i} style={{
+                    padding: '8px 12px', borderRadius: 8, marginBottom: 6,
+                    background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
+                  }}>
+                    <RichTextBlock text={text} />
+                  </div>
+                )
+              }
+              // assistant turn：直接渲染内部组件
+              const { turn } = item
+              return (
+                <div key={i} style={{
+                  padding: '8px 12px', borderRadius: 8, marginBottom: 6,
+                  background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
+                }}>
+                  {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
+                  {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
+                  {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
+                  {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
+                  {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
+                </div>
+              )
+            })}
           </div>
         </div>
       </AutoExpandCtx.Provider>
@@ -248,21 +240,17 @@ StyledNode.displayName = 'StyledNode'
 
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 
-// ── 散落式布局 ──────────────────────────────────────
-// 蛇形排列：每行放 N 对，行间交错偏移，产生散落感
+// ── 散落布局 ────────────────────────────────────────
 
-const PAIR_GAP_X = 160  // Raw 和 Styled 之间的水平间距
 const RAW_W = 340
 const STYLED_W = 480
-const PAIR_W = RAW_W + PAIR_GAP_X + STYLED_W  // 一对的总宽度
-const COLS = 3           // 每行放几对
-const COL_GAP = 120      // 列间距
-const ROW_GAP = 100      // 行间基础间距
+const PAIR_GAP = 180
+const COLS = 3
+const COL_SPAN = RAW_W + PAIR_GAP + STYLED_W + 140
 
-// 伪随机偏移（确定性，基于索引）
 function jitter(idx: number, range: number): number {
-  const seed = Math.sin(idx * 127.1 + 311.7) * 43758.5453
-  return ((seed - Math.floor(seed)) - 0.5) * range
+  const s = Math.sin(idx * 127.1 + 311.7) * 43758.5453
+  return ((s - Math.floor(s)) - 0.5) * range
 }
 
 function buildGraph(turns: GroupedTurnItem[]) {
@@ -279,125 +267,78 @@ function buildGraph(turns: GroupedTurnItem[]) {
     const icon = getIcon(sec.label)
 
     const turnStart = turns.findIndex(t => t.startIndex >= startMsg)
-    const turnEnd = nextSec
-      ? turns.findIndex(t => t.startIndex >= nextSec.index)
-      : turns.length
+    const turnEnd = nextSec ? turns.findIndex(t => t.startIndex >= nextSec.index) : turns.length
     const sectionTurns = turns.slice(
       turnStart >= 0 ? turnStart : 0,
       turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
     )
 
-    // 散落布局：行列 + 随机偏移
     const col = si % COLS
     const row = Math.floor(si / COLS)
-    const baseX = col * (PAIR_W + COL_GAP)
-    const baseY = row * (600 + ROW_GAP)
+    const rowShift = row % 2 === 1 ? COL_SPAN * 0.35 : 0
 
-    // 交错：奇数行右移半格
-    const rowShift = row % 2 === 1 ? (PAIR_W + COL_GAP) * 0.4 : 0
-
-    const rawX = baseX + rowShift + jitter(si * 2, 60)
-    const rawY = baseY + jitter(si * 2, 80)
-    const styledX = rawX + RAW_W + PAIR_GAP_X + jitter(si * 2 + 1, 40)
-    const styledY = rawY + jitter(si * 3, 60)
-
-    const rawId = `raw-${si}`
-    const styledId = `styled-${si}`
+    const rx = col * COL_SPAN + rowShift + jitter(si * 2, 80)
+    const ry = row * 700 + jitter(si * 3, 100)
 
     nodes.push({
-      id: rawId,
-      type: 'rawNode',
-      position: { x: rawX, y: styledY },
+      id: `raw-${si}`, type: 'rawNode',
+      position: { x: rx, y: ry },
       data: { label: sec.label, color, icon, messages: rawMsgs },
     })
-
     nodes.push({
-      id: styledId,
-      type: 'styledNode',
-      position: { x: styledX, y: rawY },
+      id: `styled-${si}`, type: 'styledNode',
+      position: { x: rx + RAW_W + PAIR_GAP + jitter(si * 5, 50), y: ry + jitter(si * 7, 60) },
       data: { label: sec.label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
     })
-
     edges.push({
-      id: `e-${si}`,
-      source: rawId,
-      target: styledId,
+      id: `e-${si}`, source: `raw-${si}`, target: `styled-${si}`,
       style: { stroke: color, strokeWidth: 2, opacity: 0.45 },
       type: 'default',
-      animated: false,
     })
   }
-
   return { nodes, edges }
 }
 
 // ── 悬浮导航 ────────────────────────────────────────
 
-function FloatingNav({
-  sections,
-  onJump,
-}: {
-  sections: typeof DEMO_SECTIONS
-  onJump: (idx: number) => void
-}) {
+function FloatingNav({ sections, onJump }: { sections: typeof DEMO_SECTIONS; onJump: (i: number) => void }) {
   const [collapsed, setCollapsed] = useState(false)
-
   return (
     <div style={{
       position: 'absolute', top: 12, right: 12, zIndex: 10,
-      width: collapsed ? 36 : 180,
-      borderRadius: 10,
+      width: collapsed ? 36 : 180, borderRadius: 10,
       border: '1px solid var(--tc-border)',
-      background: 'rgba(30,30,30,0.92)',
-      backdropFilter: 'blur(12px)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-      overflow: 'hidden',
+      background: 'rgba(30,30,30,0.92)', backdropFilter: 'blur(12px)',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.4)', overflow: 'hidden',
       transition: 'width 0.2s ease',
     }}>
-      <button
-        onClick={() => setCollapsed(v => !v)}
-        style={{
-          width: '100%', padding: collapsed ? '8px' : '8px 12px',
-          display: 'flex', alignItems: 'center', gap: 6,
-          border: 'none', background: 'none', cursor: 'pointer',
-          borderBottom: collapsed ? 'none' : '1px solid var(--tc-border)',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-        }}
-      >
+      <button onClick={() => setCollapsed(v => !v)} style={{
+        width: '100%', padding: collapsed ? '8px' : '8px 12px',
+        display: 'flex', alignItems: 'center', gap: 6,
+        border: 'none', background: 'none', cursor: 'pointer',
+        borderBottom: collapsed ? 'none' : '1px solid var(--tc-border)',
+        justifyContent: collapsed ? 'center' : 'flex-start',
+      }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round">
           <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
           <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
         </svg>
-        {!collapsed && (
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#58a6ff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            导航 ({sections.length})
-          </span>
-        )}
+        {!collapsed && <span style={{ fontSize: 10, fontWeight: 700, color: '#58a6ff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>导航 ({sections.length})</span>}
       </button>
       {!collapsed && (
         <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', padding: '4px 0' }}>
           {sections.map((sec, i) => (
-            <button
-              key={i}
-              onClick={() => onJump(i)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                width: '100%', padding: '4px 10px',
-                border: 'none', background: 'none',
-                cursor: 'pointer', textAlign: 'left',
-                transition: 'background 0.15s',
-                fontSize: 10.5, color: 'var(--tc-foreground-secondary)',
-              }}
+            <button key={i} onClick={() => onJump(i)} style={{
+              display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '4px 10px',
+              border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left',
+              transition: 'background 0.15s', fontSize: 10.5, color: 'var(--tc-foreground-secondary)',
+            }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
             >
               <span style={{ fontSize: 12, flexShrink: 0 }}>{getIcon(sec.label)}</span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                {sec.label}
-              </span>
-              <span style={{ fontSize: 8, color: PALETTE[i % PALETTE.length], fontFamily: "'Geist Mono', monospace", flexShrink: 0 }}>
-                #{i + 1}
-              </span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{sec.label}</span>
+              <span style={{ fontSize: 8, color: PALETTE[i % PALETTE.length], fontFamily: "'Geist Mono', monospace", flexShrink: 0 }}>#{i + 1}</span>
             </button>
           ))}
         </div>
@@ -406,61 +347,41 @@ function FloatingNav({
   )
 }
 
-// ── 画布主体 ────────────────────────────────────────
+// ── 画布 ────────────────────────────────────────────
 
 function ChatDemoCanvas() {
   const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
   const { nodes: initNodes, edges: initEdges } = useMemo(() => buildGraph(turns), [turns])
-
   const [nodes, , onNodesChange] = useNodesState(initNodes)
   const [edges, , onEdgesChange] = useEdgesState(initEdges)
   const { fitView, setCenter } = useReactFlow()
 
-  useEffect(() => {
-    setTimeout(() => fitView({ padding: 0.08, duration: 500 }), 300)
-  }, [fitView])
+  useEffect(() => { setTimeout(() => fitView({ padding: 0.06, duration: 500 }), 300) }, [fitView])
 
   const handleJump = useCallback((idx: number) => {
-    const rawNode = nodes.find(n => n.id === `raw-${idx}`)
-    const styledNode = nodes.find(n => n.id === `styled-${idx}`)
-    if (rawNode && styledNode) {
-      const cx = (rawNode.position.x + styledNode.position.x + 480) / 2
-      const cy = (rawNode.position.y + styledNode.position.y) / 2 + 100
-      setCenter(cx, cy, { zoom: 0.55, duration: 500 })
+    const r = nodes.find(n => n.id === `raw-${idx}`)
+    const s = nodes.find(n => n.id === `styled-${idx}`)
+    if (r && s) {
+      setCenter((r.position.x + s.position.x + 480) / 2, (r.position.y + s.position.y) / 2, { zoom: 0.5, duration: 500 })
     }
   }, [nodes, setCenter])
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        fitView
-        minZoom={0.05}
-        maxZoom={1.2}
-        defaultEdgeOptions={{ type: 'default' }}
+        nodes={nodes} edges={edges}
+        onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes} fitView
+        minZoom={0.03} maxZoom={1.2}
         proOptions={{ hideAttribution: true }}
         style={{ background: 'var(--tc-content-bg)' }}
       >
         <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="rgba(255,255,255,0.03)" />
-        <Controls
-          position="bottom-left"
-          style={{ background: 'var(--tc-panel-bg)', border: '1px solid var(--tc-border)', borderRadius: 8 }}
-        />
-        <MiniMap
-          position="bottom-right"
-          style={{
-            background: 'rgba(30,30,30,0.9)',
-            border: '1px solid var(--tc-border)', borderRadius: 8,
-          }}
+        <Controls position="bottom-left" style={{ background: 'var(--tc-panel-bg)', border: '1px solid var(--tc-border)', borderRadius: 8 }} />
+        <MiniMap position="bottom-right"
+          style={{ background: 'rgba(30,30,30,0.9)', border: '1px solid var(--tc-border)', borderRadius: 8 }}
           maskColor="rgba(0,0,0,0.5)"
-          nodeColor={n => {
-            const idx = parseInt(n.id.split('-')[1])
-            return PALETTE[idx % PALETTE.length]
-          }}
+          nodeColor={n => PALETTE[parseInt(n.id.split('-')[1]) % PALETTE.length]}
         />
       </ReactFlow>
       <FloatingNav sections={DEMO_SECTIONS} onJump={handleJump} />
@@ -468,14 +389,10 @@ function ChatDemoCanvas() {
   )
 }
 
-// ── 导出 ────────────────────────────────────────────
-
 export function ChatDemo() {
   return (
     <div style={{ height: 'calc(100vh - 160px)', width: '100%' }}>
-      <ReactFlowProvider>
-        <ChatDemoCanvas />
-      </ReactFlowProvider>
+      <ReactFlowProvider><ChatDemoCanvas /></ReactFlowProvider>
     </div>
   )
 }
