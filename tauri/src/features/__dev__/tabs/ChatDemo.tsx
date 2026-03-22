@@ -136,8 +136,8 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
     border: '1px solid transparent',
     background: 'transparent',
   }}>
-    <Handle type="source" position={Position.Right} id="right"
-      style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}`, zIndex: 1 }} />
+    <Handle type="source" position={Position.Right}
+      style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
     {data.messages.map((msg, i) => {
       const isUser = msg.role === 'user'
       return (
