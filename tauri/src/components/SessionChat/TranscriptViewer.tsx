@@ -148,7 +148,6 @@ export function TranscriptViewer({
           initialTopMostItemIndex={turns.length > 0 ? turns.length - 1 : 0}
           followOutput="smooth"
           computeItemKey={(_index, item) => item.startIndex}
-          defaultItemSize={200}
           increaseViewportBy={400}
           rangeChanged={handleRangeChanged}
           atBottomStateChange={(atBottom) => setShowJumpBtn(!atBottom)}
