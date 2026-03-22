@@ -497,11 +497,12 @@ function ProcessTopology({ procs, onKill: _onKill }: { procs: ProcessInfo[]; onK
 }
 
 /* ── Claude 详情卡片 ── */
-function ClaudeCard({ proc, color, index: _index }: { proc: ProcessInfo; color: string; index: number }) {
+function ClaudeCard({ proc, color, index, onKill }: { proc: ProcessInfo; color: string; index: number; onKill: (pid: number) => void }) {
+  const { t } = useTranslation()
   const isActive = proc.cpu_pct > 1
   const statusColor = isActive ? '#34d399' : '#f97316'
   const statusLabel = isActive ? '运行中' : '空闲'
-  const roleIcon = '◉'
+  const [confirming, setConfirming] = useState(false)
 
   const gaugeSize = 44
   const gR = gaugeSize * 0.36, gSW = gaugeSize * 0.1
@@ -518,9 +519,9 @@ function ClaudeCard({ proc, color, index: _index }: { proc: ProcessInfo; color: 
     <div className={s.clCard}>
       <div className={s.clCardBar} style={{ background: color }} />
       <div className={s.clCardHead}>
-        <div className={s.clCardIcon} style={{ background: color + '18', color }}>{roleIcon}</div>
-        <div>
-          <div className={s.clCardName}>{proc.name} ({proc.pid})</div>
+        <div className={s.clCardIdx} style={{ background: color + '18', color }}>#{index + 1}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className={s.clCardName}>claude ({proc.pid})</div>
           <div className={s.clCardPid}>PID {proc.pid}</div>
         </div>
         <span className={s.clCardBadge} style={{ background: statusColor + '18', color: statusColor }}>{statusLabel}</span>
@@ -558,6 +559,17 @@ function ClaudeCard({ proc, color, index: _index }: { proc: ProcessInfo; color: 
         <dt className={s.clCardMetaDt}>CPU</dt><dd className={s.clCardMetaDd}>{proc.cpu_pct}%</dd>
         <dt className={s.clCardMetaDt}>内存</dt><dd className={s.clCardMetaDd}>{fmtMem(proc.mem_mb)}</dd>
       </dl>
+      {confirming ? (
+        <div className={s.clCardActions}>
+          <button className={`${s.clBtn} ${s.clBtnDanger}`}
+            onClick={() => { onKill(proc.pid); setConfirming(false) }}>{t('common.confirm')}</button>
+          <button className={s.clBtn} onClick={() => setConfirming(false)}>{t('common.cancel')}</button>
+        </div>
+      ) : (
+        <button className={`${s.clBtn} ${s.clBtnKill}`} onClick={() => setConfirming(true)}>
+          Kill
+        </button>
+      )}
     </div>
   )
 }
