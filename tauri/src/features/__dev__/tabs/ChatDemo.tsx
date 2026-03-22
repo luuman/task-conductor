@@ -189,12 +189,12 @@ const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => {
             display: 'flex', alignItems: 'center', gap: 6,
           }}>
             <span style={{ fontSize: 13 }}>{data.icon}</span>
-            <span>STYLED</span>
+            <span>渲染效果</span>
             <span style={{ fontWeight: 400, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
               {data.label}
             </span>
             <span style={{ marginLeft: 'auto', fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-              {data.rawCount} msg → {data.turns.length} turn
+              {data.rawCount} 条消息 → {data.turns.length} 轮对话
             </span>
           </div>
           <div style={{ padding: '8px 12px' }}>
