@@ -834,10 +834,11 @@ export default function AdminServerMonitor() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [sysData, procData, claudeData] = await Promise.all([
+      const [sysData, procData, claudeData, sessData] = await Promise.all([
         api.getSystemMetrics().catch(() => null),
         api.getProcesses().catch(() => null),
         api.getClaudeUsage().catch(() => null),
+        api.getSessions().catch(() => null),
       ])
       if (sysData) {
         setSys(sysData)
@@ -848,6 +849,7 @@ export default function AdminServerMonitor() {
       }
       if (procData) setProcs(procData)
       if (claudeData) setClaude(claudeData)
+      if (sessData) setSessions(sessData)
       setError(null)
     } catch {
       setError(t('admin_extra.cannot_connect'))
