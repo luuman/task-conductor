@@ -63,6 +63,9 @@ export function SessionChat({
           selectedId={selectedId}
           isFirstLoad={isFirstLoad}
           autoExpand={autoExpand}
+          onLoadMore={loadMore}
+          hasMore={hasMore}
+          total={total}
         />
       </div>
     )
