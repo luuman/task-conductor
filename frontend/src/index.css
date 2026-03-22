@@ -72,6 +72,10 @@ body {
 ::-webkit-scrollbar-track  { background: transparent; }
 ::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 2px; }
 
+/* ── Hide scrollbar utility ─────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ── Tailwind v4 custom utilities ────────────────────────────── */
 @utility bg-app           { background-color: var(--background); }
 @utility bg-app-secondary { background-color: var(--background-secondary); }
