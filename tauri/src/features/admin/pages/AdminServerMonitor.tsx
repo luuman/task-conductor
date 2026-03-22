@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import { api } from '../../../lib/api'
-import type { SystemMetrics, ProcessList, ProcessInfo, ClaudeUsage } from '../../../lib/api/types'
+import type { SystemMetrics, ProcessList, ProcessInfo, ClaudeUsage, AiSession } from '../../../lib/api/types'
 import styles from '../admin.module.css'
 import s from './server-monitor.module.css'
 
