@@ -166,8 +166,8 @@ const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
         border: '1px solid transparent',
         background: 'transparent',
       }}>
-        <Handle type="target" position={Position.Left} id="left"
-          style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}`, zIndex: 1 }} />
+        <Handle type="target" position={Position.Left}
+          style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
         {data.turns.map((item, i) => {
           if (item.kind === 'user') {
             const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
