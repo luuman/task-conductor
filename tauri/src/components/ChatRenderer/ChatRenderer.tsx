@@ -1130,7 +1130,7 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
   if (!hasEditData) {
     return (
       <div className={styles.bashCardHeader}>
-        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.bashCardIcon}>{fileExtIcon(filePath, 14)}</span>
         <span className={styles.editCardFile} title={filePath}>{fileName}</span>
         <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
       </div>
@@ -1145,7 +1145,7 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
   return (
     <div>
       <button className={`${styles.toolHeader} ${styles.toolHeaderClickable}`} onClick={handleToggle} style={{ width: '100%' }}>
-        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.bashCardIcon}>{fileExtIcon(filePath, 14)}</span>
         <span className={styles.editCardFile} title={filePath}>{fileName}</span>
         <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
         <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', marginLeft: 'auto' }}>
