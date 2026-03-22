@@ -628,6 +628,56 @@
   color: var(--tc-foreground-secondary);
 }
 
+.clCardActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.clBtn {
+  flex: 1;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid var(--tc-border);
+  background: transparent;
+  color: var(--tc-foreground-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.clBtn:hover {
+  border-color: var(--tc-border-active);
+  color: var(--tc-foreground);
+}
+
+.clBtnDanger {
+  border-color: var(--tc-error);
+  color: var(--tc-error);
+}
+
+.clBtnKill {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tc-foreground-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  opacity: 0;
+}
+
+.clCard:hover .clBtnKill { opacity: 1; }
+
+.clBtnKill:hover {
+  border-color: var(--tc-error);
+  color: var(--tc-error);
+}
+
 /* ── Claude 独立集群可视化 ── */
 .claudeClusterWrap {
   display: flex;
