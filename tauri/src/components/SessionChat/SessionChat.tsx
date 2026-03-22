@@ -27,7 +27,11 @@ export function SessionChat({
 
   const [search, setSearch] = useState('')
   const [autoExpand, setAutoExpand] = useState(true)
-  const transcriptScrollRef = useRef<HTMLDivElement>(null)
+  const scrollToIndexRef = useRef<((index: number) => void) | null>(null)
+
+  const handleJumpToQuestion = useCallback((ref: { scrollToIndex: (index: number) => void }) => {
+    scrollToIndexRef.current = ref.scrollToIndex
+  }, [])
 
   const handleSelect = (s: AiSession) => {
     selectSession(s.session_id)
