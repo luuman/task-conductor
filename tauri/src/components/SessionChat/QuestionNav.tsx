@@ -34,8 +34,9 @@ export function QuestionNav({
     // Check if the target is now loaded
     if (targetMsgIndex >= loadedFrom) {
       pendingJumpRef.current = null
+      const relativeMsgIndex = targetMsgIndex - loadedFrom
       const turns = groupMessagesIntoTurns(transcript)
-      const turnIndex = turns.findIndex(turn => turn.startIndex >= targetMsgIndex)
+      const turnIndex = turns.findIndex(turn => turn.startIndex >= relativeMsgIndex)
       if (turnIndex >= 0) {
         scrollToIndexRef?.current?.(turnIndex)
       }
