@@ -144,7 +144,7 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
       display: 'flex', alignItems: 'center', gap: 6,
     }}>
       <span style={{ fontSize: 13 }}>{data.icon}</span>
-      <span>RAW</span>
+      <span>原始数据</span>
       <span style={{ fontWeight: 400, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
         {data.label}
       </span>
