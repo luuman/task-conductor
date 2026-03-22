@@ -149,7 +149,7 @@ RawNode.displayName = 'RawNode'
 
 // ── 文件图标映射 ────────────────────────────────────
 
-function getFileIcon(filePath: string): string {
+export function getFileIcon(filePath: string): string {
   const ext = filePath.split('.').pop()?.toLowerCase() || ''
   const map: Record<string, string> = {
     ts: 'file_type_typescript.svg', tsx: 'file_type_typescript.svg',
