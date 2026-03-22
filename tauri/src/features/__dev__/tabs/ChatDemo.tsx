@@ -275,111 +275,9 @@ function buildGraph(turns: GroupedTurnItem[]): { nodes: Node[]; pairs: PairPosit
   return { nodes, pairs }
 }
 
-// ── SVG 连线覆盖层（5 种风格可切换）──────────────────
+// ── SVG 连线覆盖层 ──────────────────────────────────
 
-type LineStyle = 'bezier' | 'straight' | 'step' | 'arc' | 'glow'
-
-const LINE_STYLE_LABELS: { key: LineStyle; label: string }[] = [
-  { key: 'bezier', label: '贝塞尔曲线' },
-  { key: 'straight', label: '直线' },
-  { key: 'step', label: '阶梯折线' },
-  { key: 'arc', label: '圆弧' },
-  { key: 'glow', label: '发光渐变' },
-]
-
-function renderLine(
-  p: PairPosition, i: number, zoom: number, style: LineStyle,
-) {
-  const x1 = p.rawX + RAW_W
-  const y1 = p.rawY + 30
-  const x2 = p.styledX
-  const y2 = p.styledY + 30
-  const gap = x2 - x1
-  const sw = 2 / zoom
-  const r = 4 / zoom
-
-  switch (style) {
-    case 'bezier': {
-      const cpx = gap * 0.4
-      const d = `M ${x1},${y1} C ${x1 + cpx},${y1} ${x2 - cpx},${y2} ${x2},${y2}`
-      return (
-        <g key={i}>
-          <path d={d} fill="none" stroke={p.color} strokeWidth={sw} strokeOpacity={0.5} />
-          <circle cx={x1} cy={y1} r={r} fill={p.color} opacity={0.7} />
-          <circle cx={x2} cy={y2} r={r} fill={p.color} opacity={0.7} />
-        </g>
-      )
-    }
-    case 'straight': {
-      return (
-        <g key={i}>
-          <line x1={x1} y1={y1} x2={x2} y2={y2}
-            stroke={p.color} strokeWidth={sw} strokeOpacity={0.4} />
-          <circle cx={x1} cy={y1} r={r} fill={p.color} opacity={0.6} />
-          <circle cx={x2} cy={y2} r={r} fill={p.color} opacity={0.6} />
-        </g>
-      )
-    }
-    case 'step': {
-      const mx = x1 + gap / 2
-      const d = `M ${x1},${y1} H ${mx} V ${y2} H ${x2}`
-      return (
-        <g key={i}>
-          <path d={d} fill="none" stroke={p.color} strokeWidth={sw} strokeOpacity={0.45}
-            strokeLinejoin="round" />
-          <circle cx={x1} cy={y1} r={r} fill={p.color} opacity={0.6} />
-          <circle cx={x2} cy={y2} r={r} fill={p.color} opacity={0.6} />
-        </g>
-      )
-    }
-    case 'arc': {
-      const dy = y2 - y1
-      const rx = gap / 2
-      const ry = Math.max(Math.abs(dy) / 2, 40)
-      const sweep = dy >= 0 ? 1 : 0
-      const d = `M ${x1},${y1} A ${rx},${ry} 0 0,${sweep} ${x2},${y2}`
-      return (
-        <g key={i}>
-          <path d={d} fill="none" stroke={p.color} strokeWidth={sw} strokeOpacity={0.45} />
-          <circle cx={x1} cy={y1} r={r} fill={p.color} opacity={0.6} />
-          <circle cx={x2} cy={y2} r={r} fill={p.color} opacity={0.6} />
-        </g>
-      )
-    }
-    case 'glow': {
-      const cpx = gap * 0.4
-      const d = `M ${x1},${y1} C ${x1 + cpx},${y1} ${x2 - cpx},${y2} ${x2},${y2}`
-      const gradId = `grad-${i}`
-      const filterId = `glow-${i}`
-      return (
-        <g key={i}>
-          <defs>
-            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={p.color} stopOpacity={0.8} />
-              <stop offset="50%" stopColor={p.color} stopOpacity={0.3} />
-              <stop offset="100%" stopColor={p.color} stopOpacity={0.8} />
-            </linearGradient>
-            <filter id={filterId}>
-              <feGaussianBlur stdDeviation={3 / zoom} result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <path d={d} fill="none" stroke={`url(#${gradId})`}
-            strokeWidth={3 / zoom} filter={`url(#${filterId})`} />
-          <circle cx={x1} cy={y1} r={5 / zoom} fill={p.color} opacity={0.9}
-            filter={`url(#${filterId})`} />
-          <circle cx={x2} cy={y2} r={5 / zoom} fill={p.color} opacity={0.9}
-            filter={`url(#${filterId})`} />
-        </g>
-      )
-    }
-  }
-}
-
-function SvgLines({ pairs, lineStyle }: { pairs: PairPosition[]; lineStyle: LineStyle }) {
+function SvgLines({ pairs }: { pairs: PairPosition[] }) {
   const { x: vx, y: vy, zoom } = useViewport()
 
   return (
@@ -393,7 +291,21 @@ function SvgLines({ pairs, lineStyle }: { pairs: PairPosition[]; lineStyle: Line
       }}
     >
       <g transform={`translate(${vx}, ${vy}) scale(${zoom})`}>
-        {pairs.map((p, i) => renderLine(p, i, zoom, lineStyle))}
+        {pairs.map((p, i) => {
+          const x1 = p.rawX + RAW_W
+          const y1 = p.rawY + 30
+          const x2 = p.styledX
+          const y2 = p.styledY + 30
+          const cpx = (x2 - x1) * 0.4
+          const d = `M ${x1},${y1} C ${x1 + cpx},${y1} ${x2 - cpx},${y2} ${x2},${y2}`
+          return (
+            <g key={i}>
+              <path d={d} fill="none" stroke={p.color} strokeWidth={2 / zoom} strokeOpacity={0.5} />
+              <circle cx={x1} cy={y1} r={4 / zoom} fill={p.color} opacity={0.7} />
+              <circle cx={x2} cy={y2} r={4 / zoom} fill={p.color} opacity={0.7} />
+            </g>
+          )
+        })}
       </g>
     </svg>
   )
