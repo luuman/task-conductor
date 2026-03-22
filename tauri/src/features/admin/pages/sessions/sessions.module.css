@@ -614,6 +614,17 @@
   cursor: pointer;
 }
 
+.pillBadge {
+  font-size: 8px;
+  font-family: 'Geist Mono', monospace;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
 .pillActive {
   border-color: rgba(0, 122, 204, 0.5);
   background: rgba(0, 122, 204, 0.1);
