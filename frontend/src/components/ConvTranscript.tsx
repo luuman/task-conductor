@@ -577,9 +577,9 @@ function UserCard({ msg }: { msg: TranscriptMessage }) {
   if (!text) return null;
   return (
     <div className="flex items-start gap-3 px-4 py-2 justify-end">
-      <div className="min-w-0 max-w-[75%] rounded-lg px-3.5 py-2.5"
+      <div className="min-w-0 max-w-[75%] rounded-lg px-3.5 py-2.5 overflow-hidden"
            style={{ background: "var(--background-tertiary)", border: "1px solid var(--border)" }}>
-        <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+        <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)", overflowWrap: "break-word", wordBreak: "break-word" }}>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{text}</ReactMarkdown>
         </div>
       </div>
