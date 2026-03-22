@@ -1095,11 +1095,13 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
 
   const resultHtml = useMemo(() => {
     if (!result || noOutput) return null
+    // 先 HTML 转义，保证纯文本安全
+    const escaped = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     const lang = guessOutputLang(result, cmd)
     if (lang) {
       try {
         if (hljs.getLanguage(lang)) {
-          return hljs.highlight(result, { language: lang }).value
+          return hljs.highlight(result, { language: 'bash' }).value
         }
       } catch { /* fall through */ }
     }
@@ -1109,7 +1111,11 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
         if (auto.relevance > 5) return auto.value
       } catch { /* fall through */ }
     }
-    return highlightLog(result)
+    // fallback：对转义后的文本做简单着色，避免双重转义
+    return escaped
+      .replace(/\b(error|Error|ERROR|fail|FAIL|failed|FAILED)\b/g, '<span class="hljs-deletion">$1</span>')
+      .replace(/\b(success|Success|pass|PASS|ok|OK|done|Done)\b/g, '<span class="hljs-addition">$1</span>')
+      .replace(/\b(\d+(?:\.\d+)?(?:ms|s|m|KB|MB|GB|%)?)\b/g, '<span class="hljs-number">$1</span>')
   }, [result, noOutput, cmd])
 
   return (
