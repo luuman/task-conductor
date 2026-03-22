@@ -17,7 +17,7 @@ export function ChatDemo() {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
   const [activeSection, setActiveSection] = useState(0)
   const [expandSignal, setExpandSignal] = useState(0)
-  const [autoExpand, setAutoExpand] = useState(true)
+  const [autoExpand] = useState(true)
 
   const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
 
