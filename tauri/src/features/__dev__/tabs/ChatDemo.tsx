@@ -237,22 +237,36 @@ StyledNode.displayName = 'StyledNode'
 
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 
-// ── 散落布局 ────────────────────────────────────────
+// ── 散落布局（无重叠） ─────────────────────────────
 
 const RAW_W = 340
 const STYLED_W = 480
-const PAIR_GAP = 180
+const PAIR_GAP = 180    // raw 和 styled 之间
 const COLS = 3
-const COL_SPAN = RAW_W + PAIR_GAP + STYLED_W + 140
+const COL_GAP = 160     // 列间距
+const ROW_PAD = 80      // 行间额外间距
+const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
 
-function jitter(idx: number, range: number): number {
-  const s = Math.sin(idx * 127.1 + 311.7) * 43758.5453
-  return ((s - Math.floor(s)) - 0.5) * range
+// 估算一个 section 的内容高度（粗略，宁多不少）
+function estimateHeight(msgCount: number, turnCount: number): number {
+  const rawH = msgCount * 90 + 50   // 每条消息约 90px
+  const styledH = turnCount * 140 + 60
+  return Math.max(rawH, styledH, 200)
 }
 
 function buildGraph(turns: GroupedTurnItem[]) {
   const nodes: Node[] = []
   const edges: Edge[] = []
+
+  // 先计算每个 section 的高度
+  const heights: number[] = []
+  const sectionData: Array<{
+    rawMsgs: TranscriptMessage[]
+    sectionTurns: GroupedTurnItem[]
+    color: string
+    icon: string
+    label: string
+  }> = []
 
   for (let si = 0; si < DEMO_SECTIONS.length; si++) {
     const sec = DEMO_SECTIONS[si]
@@ -260,8 +274,6 @@ function buildGraph(turns: GroupedTurnItem[]) {
     const startMsg = sec.index
     const endMsg = nextSec ? nextSec.index : DEMO_MESSAGES.length
     const rawMsgs = DEMO_MESSAGES.slice(startMsg, endMsg)
-    const color = PALETTE[si % PALETTE.length]
-    const icon = getIcon(sec.label)
 
     const turnStart = turns.findIndex(t => t.startIndex >= startMsg)
     const turnEnd = nextSec ? turns.findIndex(t => t.startIndex >= nextSec.index) : turns.length
@@ -270,29 +282,45 @@ function buildGraph(turns: GroupedTurnItem[]) {
       turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
     )
 
-    const col = si % COLS
-    const row = Math.floor(si / COLS)
-    const rowShift = row % 2 === 1 ? COL_SPAN * 0.35 : 0
+    heights.push(estimateHeight(rawMsgs.length, sectionTurns.length))
+    sectionData.push({
+      rawMsgs, sectionTurns,
+      color: PALETTE[si % PALETTE.length],
+      icon: getIcon(sec.label),
+      label: sec.label,
+    })
+  }
 
-    const rx = col * COL_SPAN + rowShift + jitter(si * 2, 80)
-    const ry = row * 700 + jitter(si * 3, 100)
+  // 按列分配，逐列累加 Y（瀑布流式）
+  const colY = new Array(COLS).fill(0)
+
+  for (let si = 0; si < DEMO_SECTIONS.length; si++) {
+    // 找当前最矮的列
+    const col = colY.indexOf(Math.min(...colY))
+    const { rawMsgs, sectionTurns, color, icon, label } = sectionData[si]
+
+    const x = col * (PAIR_TOTAL + COL_GAP)
+    const y = colY[col]
 
     nodes.push({
       id: `raw-${si}`, type: 'rawNode',
-      position: { x: rx, y: ry },
-      data: { label: sec.label, color, icon, messages: rawMsgs },
+      position: { x, y },
+      data: { label, color, icon, messages: rawMsgs },
     })
     nodes.push({
       id: `styled-${si}`, type: 'styledNode',
-      position: { x: rx + RAW_W + PAIR_GAP + jitter(si * 5, 50), y: ry + jitter(si * 7, 60) },
-      data: { label: sec.label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
+      position: { x: x + RAW_W + PAIR_GAP, y },
+      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
     })
     edges.push({
       id: `e-${si}`, source: `raw-${si}`, target: `styled-${si}`,
       style: { stroke: color, strokeWidth: 2, opacity: 0.45 },
       type: 'default',
     })
+
+    colY[col] += heights[si] + ROW_PAD
   }
+
   return { nodes, edges }
 }
 
