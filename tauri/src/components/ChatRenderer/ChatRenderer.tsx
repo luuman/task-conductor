@@ -589,19 +589,10 @@ function BashOutput({ command, result, isError }: { command: string; result: str
 function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
   const stripped = stripLineNumbers(result)
   const lineCount = stripped.split('\n').length
-  const lang = guessLang(filePath)
+  const lang = guessLang(filePath) || undefined
   const fileName = filePath.split('/').pop() || filePath
 
-  const highlighted = useMemo(() => {
-    try {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(stripped, { language: lang }).value
-      }
-      return hljs.highlightAuto(stripped).value
-    } catch {
-      return null
-    }
-  }, [stripped, lang])
+  const { html: highlighted } = useHighlight(stripped, lang)
 
   return (
     <div className={styles.readWrap}>
