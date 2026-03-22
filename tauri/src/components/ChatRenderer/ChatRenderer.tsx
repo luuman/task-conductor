@@ -1116,42 +1116,18 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
   const hasError = isError || result.toLowerCase().includes('error') || result.toLowerCase().includes('fail')
   const noOutput = !result || result === '(Bash completed with no output)'
 
-  const cmdHighlighted = useMemo(() => {
-    try {
-      return hljs.highlight(shortCmd, { language: 'bash' }).value
-    } catch {
-      return null
-    }
-  }, [shortCmd])
+  const { html: cmdHtml } = useHighlight(shortCmd, 'bash')
 
+  // Detect language from file extension or command
+  const resultLang = useMemo(() => guessOutputLang(result, cmd), [result, cmd])
+  const { html: resultHighlighted } = useHighlight(result || '', resultLang || undefined)
+  // Apply terminal-style fallback coloring when no language was detected and worker returned plain escaped text
   const resultHtml = useMemo(() => {
     if (!result || noOutput) return null
-    // 先 HTML 转义，保证纯文本安全
-    const escaped = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    const lang = guessOutputLang(result, cmd)
-    if (lang) {
-      try {
-        if (hljs.getLanguage(lang)) {
-          return hljs.highlight(result, { language: lang }).value
-        }
-      } catch { /* fall through */ }
-    }
-    if (result.length < 2000 && result.split('\n').length > 3) {
-      try {
-        const auto = hljs.highlightAuto(result)
-        // 只有高置信度且确实产生了高亮 span 才使用
-        if (auto.relevance > 8 && auto.value.includes('class="hljs-')) return auto.value
-      } catch { /* fall through */ }
-    }
-    // fallback：对已转义文本做终端风格着色
-    return escaped
-      .replace(/((?:\/[\w.@-]+)+(?:\.\w+)?(?:\(\d+[,:]?\d*\))?)/g, '<span class="hljs-string">$1</span>')
-      .replace(/\b(error|Error|ERROR|fail|FAIL|failed|FAILED|fatal|FATAL)\b/g, '<span class="hljs-deletion">$1</span>')
-      .replace(/\b(warning|Warning|WARN|warn|deprecated|DEPRECATED)\b/g, '<span class="hljs-comment">$1</span>')
-      .replace(/\b(success|Success|SUCCESS|pass|PASS|passed|ok|OK|done|Done|DONE)\b/g, '<span class="hljs-addition">$1</span>')
-      .replace(/\b(\d+(?:\.\d+)?(?:ms|s|m|KB|MB|GB|%)?)\b/g, '<span class="hljs-number">$1</span>')
-      .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
-  }, [result, noOutput, cmd])
+    if (resultHighlighted) return resultHighlighted
+    // fallback: terminal-style coloring on escaped text
+    return highlightLog(result)
+  }, [result, noOutput, resultHighlighted])
 
   return (
     <div className={styles.bashCard}>
