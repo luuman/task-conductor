@@ -496,6 +496,72 @@ function ProcessTopology({ procs, onKill: _onKill }: { procs: ProcessInfo[]; onK
   )
 }
 
+/* ── Claude 详情卡片 ── */
+function ClaudeCard({ proc, color, index: _index }: { proc: ProcessInfo; color: string; index: number }) {
+  const isActive = proc.cpu_pct > 1
+  const statusColor = isActive ? '#34d399' : '#f97316'
+  const statusLabel = isActive ? '运行中' : '空闲'
+  const roleIcon = '◉'
+
+  const gaugeSize = 44
+  const gR = gaugeSize * 0.36, gSW = gaugeSize * 0.1
+  const cpuCirc = 2 * Math.PI * gR
+  const cpuOff = cpuCirc - (Math.min(proc.cpu_pct, 20) / 20) * cpuCirc
+  const memCirc = 2 * Math.PI * gR
+  const memOff = memCirc - (Math.min(proc.mem_mb, 700) / 700) * memCirc
+
+  const cpuC = proc.cpu_pct > 8 ? '#f97316' : '#60a5fa'
+  const mC = proc.mem_mb > 450 ? '#f97316' : '#34d399'
+  const cx = gaugeSize / 2, cy = gaugeSize / 2
+
+  return (
+    <div className={s.clCard}>
+      <div className={s.clCardBar} style={{ background: color }} />
+      <div className={s.clCardHead}>
+        <div className={s.clCardIcon} style={{ background: color + '18', color }}>{roleIcon}</div>
+        <div>
+          <div className={s.clCardName}>{proc.name} ({proc.pid})</div>
+          <div className={s.clCardPid}>PID {proc.pid}</div>
+        </div>
+        <span className={s.clCardBadge} style={{ background: statusColor + '18', color: statusColor }}>{statusLabel}</span>
+      </div>
+      <div className={s.clCardGauges}>
+        <div className={s.miniGauge}>
+          <svg viewBox={`0 0 ${gaugeSize} ${gaugeSize}`} width={gaugeSize} height={gaugeSize}>
+            <circle cx={cx} cy={cy} r={gR} fill="none" stroke="var(--tc-border)" strokeWidth={gSW} />
+            <circle cx={cx} cy={cy} r={gR} fill="none" stroke={cpuC} strokeWidth={gSW}
+              strokeDasharray={cpuCirc} strokeDashoffset={cpuOff} strokeLinecap="round"
+              style={{ transform: 'rotate(-90deg)', transformOrigin: `${cx}px ${cy}px` }} />
+            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
+              fill={cpuC} fontSize="10" fontWeight="600" fontFamily="'Geist Mono', monospace">
+              {proc.cpu_pct.toFixed(1)}
+            </text>
+          </svg>
+          <div className={s.miniGaugeLabel}>CPU %</div>
+        </div>
+        <div className={s.miniGauge}>
+          <svg viewBox={`0 0 ${gaugeSize} ${gaugeSize}`} width={gaugeSize} height={gaugeSize}>
+            <circle cx={cx} cy={cy} r={gR} fill="none" stroke="var(--tc-border)" strokeWidth={gSW} />
+            <circle cx={cx} cy={cy} r={gR} fill="none" stroke={mC} strokeWidth={gSW}
+              strokeDasharray={memCirc} strokeDashoffset={memOff} strokeLinecap="round"
+              style={{ transform: 'rotate(-90deg)', transformOrigin: `${cx}px ${cy}px` }} />
+            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
+              fill={mC} fontSize="10" fontWeight="600" fontFamily="'Geist Mono', monospace">
+              {Math.round(proc.mem_mb)}
+            </text>
+          </svg>
+          <div className={s.miniGaugeLabel}>MEM MB</div>
+        </div>
+      </div>
+      <dl className={s.clCardMeta}>
+        <dt className={s.clCardMetaDt}>PID</dt><dd className={s.clCardMetaDd}>{proc.pid}</dd>
+        <dt className={s.clCardMetaDt}>CPU</dt><dd className={s.clCardMetaDd}>{proc.cpu_pct}%</dd>
+        <dt className={s.clCardMetaDt}>内存</dt><dd className={s.clCardMetaDd}>{fmtMem(proc.mem_mb)}</dd>
+      </dl>
+    </div>
+  )
+}
+
 /* ── Claude 独立拓扑可视化 ── */
 function ClaudeCluster({ procs, colors }: { procs: ProcessInfo[]; colors: string[] }) {
   const svgRef = useRef<SVGSVGElement>(null)
