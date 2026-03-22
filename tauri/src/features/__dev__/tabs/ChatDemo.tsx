@@ -1,5 +1,5 @@
 /**
- * ChatDemo — 先用最小用例验证连线，再渲染完整内容
+ * ChatDemo — 画布卡片 + SVG 手绘连线（不依赖 xyflow edge）
  */
 import { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
@@ -8,13 +8,10 @@ import {
   MiniMap,
   Controls,
   useNodesState,
-  useEdgesState,
   useReactFlow,
+  useViewport,
   ReactFlowProvider,
-  Handle,
-  Position,
   type Node,
-  type Edge,
   type NodeProps,
   BackgroundVariant,
 } from '@xyflow/react'
@@ -73,7 +70,7 @@ function getIcon(label: string): string {
   return '📎'
 }
 
-// ── Raw 内容渲染 ────────────────────────────────────
+// ── Raw 内容 ────────────────────────────────────────
 
 function RawBlockContent({ block }: { block: TranscriptBlock }) {
   if (block.type === 'text') {
@@ -125,35 +122,12 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
 
 // ── 节点数据 ────────────────────────────────────────
 
-interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
-interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
+interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; pairIndex: number; [k: string]: unknown }
+interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; pairIndex: number; [k: string]: unknown }
 
-// ── 简单标签节点（用于 source/target，保证连线可见）──
+// ── Raw 节点 ────────────────────────────────────────
 
-interface LabelNodeData { label: string; color: string; icon: string; side: 'raw' | 'styled'; [k: string]: unknown }
-
-const LabelNode = memo(({ data }: NodeProps<Node<LabelNodeData>>) => (
-  <div style={{
-    padding: '6px 12px', borderRadius: 6,
-    background: `${data.color}15`,
-    border: `1.5px solid ${data.color}50`,
-    fontSize: 11, fontWeight: 600,
-    color: data.color,
-    display: 'flex', alignItems: 'center', gap: 6,
-    minWidth: 100,
-  }}>
-    <Handle type="target" position={Position.Left} style={{ background: data.color, width: 6, height: 6 }} />
-    <span>{data.icon}</span>
-    <span>{data.label}</span>
-    <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 4 }}>{data.side === 'raw' ? '原始' : '渲染'}</span>
-    <Handle type="source" position={Position.Right} style={{ background: data.color, width: 6, height: 6 }} />
-  </div>
-))
-LabelNode.displayName = 'LabelNode'
-
-// ── 内容节点（不参与连线，只展示内容）────────────────
-
-const RawContentNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
+const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
   <div style={{ width: 340 }}>
     {data.messages.map((msg, i) => {
       const isUser = msg.role === 'user'
@@ -171,7 +145,9 @@ const RawContentNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
     })}
   </div>
 ))
-RawContentNode.displayName = 'RawContentNode'
+RawNode.displayName = 'RawNode'
+
+// ── Styled 节点 ─────────────────────────────────────
 
 function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
   return (
@@ -211,22 +187,16 @@ function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
   )
 }
 
-const StyledContentNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
+const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
   <div style={{ width: 480 }}>
     <StyledContentInner turns={data.turns} />
   </div>
 ))
-StyledContentNode.displayName = 'StyledContentNode'
+StyledNode.displayName = 'StyledNode'
 
-const nodeTypes = {
-  labelNode: LabelNode,
-  rawContent: RawContentNode,
-  styledContent: StyledContentNode,
-}
+const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 
 // ── 布局 ────────────────────────────────────────────
-// 每组 3 个节点：rawLabel ——连线——> styledLabel
-//                rawContent（下方）  styledContent（下方）
 
 const RAW_W = 340
 const STYLED_W = 480
@@ -235,25 +205,26 @@ const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
 const COL_GAP = 160
 const ROW_PAD = 100
 const COLS = 2
-const LABEL_H = 36
 
 function estimateH(msgCount: number, turnCount: number): number {
-  const raw = msgCount * 160 + 60
-  const styled = turnCount * 250 + 60
-  return Math.max(raw, styled, 300)
+  return Math.max(msgCount * 160 + 60, turnCount * 250 + 60, 300)
 }
 
-function buildGraph(turns: GroupedTurnItem[]) {
+// 存储每对节点的位置，供 SVG 连线使用
+interface PairPosition {
+  rawX: number; rawY: number
+  styledX: number; styledY: number
+  color: string
+}
+
+function buildGraph(turns: GroupedTurnItem[]): { nodes: Node[]; pairs: PairPosition[] } {
   const nodes: Node[] = []
-  const edges: Edge[] = []
+  const pairs: PairPosition[] = []
 
   const secs: Array<{
     rawMsgs: TranscriptMessage[]
     sectionTurns: GroupedTurnItem[]
-    color: string
-    icon: string
-    label: string
-    height: number
+    color: string; icon: string; label: string; height: number
   }> = []
 
   for (let si = 0; si < DEMO_SECTIONS.length; si++) {
@@ -262,14 +233,12 @@ function buildGraph(turns: GroupedTurnItem[]) {
     const startMsg = sec.index
     const endMsg = nextSec ? nextSec.index : DEMO_MESSAGES.length
     const rawMsgs = DEMO_MESSAGES.slice(startMsg, endMsg)
-
     const turnStart = turns.findIndex(t => t.startIndex >= startMsg)
     const turnEnd = nextSec ? turns.findIndex(t => t.startIndex >= nextSec.index) : turns.length
     const sectionTurns = turns.slice(
       turnStart >= 0 ? turnStart : 0,
       turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
     )
-
     secs.push({
       rawMsgs, sectionTurns,
       color: PALETTE[si % PALETTE.length],
@@ -284,50 +253,76 @@ function buildGraph(turns: GroupedTurnItem[]) {
   for (let si = 0; si < secs.length; si++) {
     const col = colY.indexOf(Math.min(...colY))
     const { rawMsgs, sectionTurns, color, icon, label, height } = secs[si]
-    const x = col * (PAIR_TOTAL + COL_GAP)
+    const rawX = col * (PAIR_TOTAL + COL_GAP)
     const y = colY[col]
+    const styledX = rawX + RAW_W + PAIR_GAP
 
-    // 标签节点（用于连线）
     nodes.push({
-      id: `rawLabel-${si}`,
-      type: 'labelNode',
-      position: { x: x + RAW_W / 2 - 60, y },
-      data: { label, color, icon, side: 'raw' },
-    })
-    nodes.push({
-      id: `styledLabel-${si}`,
-      type: 'labelNode',
-      position: { x: x + RAW_W + PAIR_GAP + STYLED_W / 2 - 60, y },
-      data: { label, color, icon, side: 'styled' },
-    })
-
-    // 连线：rawLabel → styledLabel
-    edges.push({
-      id: `e-${si}`,
-      source: `rawLabel-${si}`,
-      target: `styledLabel-${si}`,
-      type: 'default',
-      style: { stroke: color, strokeWidth: 2 },
-    })
-
-    // 内容节点（在标签下方）
-    nodes.push({
-      id: `rawContent-${si}`,
-      type: 'rawContent',
-      position: { x, y: y + LABEL_H + 10 },
-      data: { label, color, icon, messages: rawMsgs },
+      id: `raw-${si}`, type: 'rawNode',
+      position: { x: rawX, y },
+      data: { label, color, icon, messages: rawMsgs, pairIndex: si },
     })
     nodes.push({
-      id: `styledContent-${si}`,
-      type: 'styledContent',
-      position: { x: x + RAW_W + PAIR_GAP, y: y + LABEL_H + 10 },
-      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
+      id: `styled-${si}`, type: 'styledNode',
+      position: { x: styledX, y },
+      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length, pairIndex: si },
     })
 
-    colY[col] += height + LABEL_H + ROW_PAD
+    pairs.push({ rawX, rawY: y, styledX, styledY: y, color })
+    colY[col] += height + ROW_PAD
   }
 
-  return { nodes, edges }
+  return { nodes, pairs }
+}
+
+// ── SVG 连线覆盖层（跟随 viewport 变换）─────────────
+
+function SvgLines({ pairs }: { pairs: PairPosition[] }) {
+  const { x: vx, y: vy, zoom } = useViewport()
+
+  // 计算 SVG 需要覆盖的世界坐标范围
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+  for (const p of pairs) {
+    minX = Math.min(minX, p.rawX)
+    minY = Math.min(minY, p.rawY, p.styledY)
+    maxX = Math.max(maxX, p.styledX + STYLED_W)
+    maxY = Math.max(maxY, p.rawY + 200, p.styledY + 200)
+  }
+  const pad = 100
+  minX -= pad; minY -= pad; maxX += pad; maxY += pad
+  const w = maxX - minX
+  const h = maxY - minY
+
+  return (
+    <svg
+      style={{
+        position: 'absolute',
+        left: 0, top: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+        zIndex: 1,
+      }}
+    >
+      <g transform={`translate(${vx}, ${vy}) scale(${zoom})`}>
+        {pairs.map((p, i) => {
+          // 从 raw 右边中点 → styled 左边中点
+          const x1 = p.rawX + RAW_W
+          const y1 = p.rawY + 30 // 大约节点顶部偏移
+          const x2 = p.styledX
+          const y2 = p.styledY + 30
+          const cpx = (x2 - x1) * 0.4
+          const d = `M ${x1},${y1} C ${x1 + cpx},${y1} ${x2 - cpx},${y2} ${x2},${y2}`
+          return (
+            <g key={i}>
+              <path d={d} fill="none" stroke={p.color} strokeWidth={2 / zoom} strokeOpacity={0.5} />
+              <circle cx={x1} cy={y1} r={4 / zoom} fill={p.color} opacity={0.7} />
+              <circle cx={x2} cy={y2} r={4 / zoom} fill={p.color} opacity={0.7} />
+            </g>
+          )
+        })}
+      </g>
+    </svg>
+  )
 }
 
 // ── 悬浮导航 ────────────────────────────────────────
@@ -381,9 +376,8 @@ function FloatingNav({ sections, onJump }: { sections: typeof DEMO_SECTIONS; onJ
 
 function ChatDemoCanvas() {
   const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
-  const { nodes: initNodes, edges: initEdges } = useMemo(() => buildGraph(turns), [turns])
+  const { nodes: initNodes, pairs } = useMemo(() => buildGraph(turns), [turns])
   const [nodes, , onNodesChange] = useNodesState(initNodes)
-  const [edges, , onEdgesChange] = useEdgesState(initEdges)
   const { fitView, fitBounds } = useReactFlow()
 
   useEffect(() => {
@@ -391,25 +385,20 @@ function ChatDemoCanvas() {
   }, [fitView])
 
   const handleJump = useCallback((idx: number) => {
-    const r = nodes.find(n => n.id === `rawLabel-${idx}`)
-    const s = nodes.find(n => n.id === `styledLabel-${idx}`)
-    if (!r || !s) return
-    const x = Math.min(r.position.x, s.position.x) - 60
-    const y = r.position.y - 20
-    const right = Math.max(r.position.x, s.position.x) + STYLED_W + 60
+    const p = pairs[idx]
+    if (!p) return
     fitBounds(
-      { x, y, width: right - x, height: 660 },
+      { x: p.rawX - 30, y: p.rawY - 30, width: PAIR_TOTAL + 60, height: 660 },
       { padding: 0.08, duration: 600 },
     )
-  }, [nodes, fitBounds])
+  }, [pairs, fitBounds])
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={[]}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         nodesDraggable={false}
@@ -423,12 +412,11 @@ function ChatDemoCanvas() {
         <MiniMap position="bottom-right"
           style={{ background: 'rgba(30,30,30,0.9)', border: '1px solid var(--tc-border)', borderRadius: 8 }}
           maskColor="rgba(0,0,0,0.5)"
-          nodeColor={n => {
-            const idx = parseInt(n.id.replace(/\D+/g, '') || '0')
-            return PALETTE[idx % PALETTE.length]
-          }}
+          nodeColor={n => PALETTE[parseInt(n.id.split('-')[1]) % PALETTE.length]}
         />
       </ReactFlow>
+      {/* SVG 连线覆盖在 ReactFlow 上方 */}
+      <SvgLines pairs={pairs} />
       <FloatingNav sections={DEMO_SECTIONS} onJump={handleJump} />
     </div>
   )
@@ -436,62 +424,8 @@ function ChatDemoCanvas() {
 
 export function ChatDemo() {
   return (
-    <div style={{ height: 'calc(100vh - 160px)', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* 最小连线测试——如果这里能看到线，说明 xyflow 没问题 */}
-      <EdgeTestBlock />
-      {/* 完整画布 */}
-      <div style={{ flex: 1 }}>
-        <ReactFlowProvider><ChatDemoCanvas /></ReactFlowProvider>
-      </div>
-    </div>
-  )
-}
-
-// ── 内联最小测试 ────────────────────────────────────
-
-function SimpleSource({ data }: NodeProps) {
-  return (
-    <div style={{ padding: 12, background: '#1e1e2e', border: '2px solid #58a6ff', borderRadius: 8, color: '#fff' }}>
-      {String(data?.label ?? 'A')}
-      <Handle type="source" position={Position.Right} style={{ background: '#58a6ff' }} />
-    </div>
-  )
-}
-function SimpleTarget({ data }: NodeProps) {
-  return (
-    <div style={{ padding: 12, background: '#1e1e2e', border: '2px solid #3fb950', borderRadius: 8, color: '#fff' }}>
-      <Handle type="target" position={Position.Left} style={{ background: '#3fb950' }} />
-      {String(data?.label ?? 'B')}
-    </div>
-  )
-}
-const simpleTypes = { simpleSource: SimpleSource, simpleTarget: SimpleTarget }
-const testNodes: Node[] = [
-  { id: 'x', type: 'simpleSource', position: { x: 0, y: 50 }, data: { label: 'Raw' } },
-  { id: 'y', type: 'simpleTarget', position: { x: 300, y: 50 }, data: { label: 'Styled' } },
-]
-const testEdges: Edge[] = [
-  { id: 'xy', source: 'x', target: 'y' },
-]
-
-function EdgeTestInner() {
-  const [n, , onN] = useNodesState(testNodes)
-  const [e, , onE] = useEdgesState(testEdges)
-  return (
-    <ReactFlow nodes={n} edges={e} onNodesChange={onN} onEdgesChange={onE}
-      nodeTypes={simpleTypes} fitView style={{ background: '#111' }} />
-  )
-}
-
-function EdgeTestBlock() {
-  return (
-    <div style={{ height: 160, border: '2px dashed #f85149', borderRadius: 8, margin: 4, position: 'relative' }}>
-      <div style={{ position: 'absolute', top: 4, left: 8, fontSize: 10, color: '#f85149', zIndex: 10, fontWeight: 700 }}>
-        连线测试（如果看不到线，是 xyflow 全局问题）
-      </div>
-      <ReactFlowProvider>
-        <EdgeTestInner />
-      </ReactFlowProvider>
+    <div style={{ height: 'calc(100vh - 160px)', width: '100%' }}>
+      <ReactFlowProvider><ChatDemoCanvas /></ReactFlowProvider>
     </div>
   )
 }
