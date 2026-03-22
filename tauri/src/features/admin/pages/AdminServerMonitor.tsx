@@ -903,6 +903,15 @@ export default function AdminServerMonitor() {
   // 拓扑图用的非 claude 进程
   const nonClaudeProcs = useMemo(() => allProcs.filter(p => p.name !== 'claude'), [allProcs])
 
+  // 活跃会话（最近 10 分钟内有活动）
+  const activeSessions = useMemo(() => {
+    const cutoff = Date.now() - 10 * 60 * 1000
+    return sessions.filter(s => {
+      const lastSeen = new Date(s.last_seen_at ?? s.started_at).getTime()
+      return lastSeen > cutoff
+    })
+  }, [sessions])
+
   const CLAUDE_COLORS = ['#60a5fa', '#a78bfa', '#f472b6', '#34d399', '#f97316']
 
   return (
