@@ -127,112 +127,69 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
 interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
 interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
 
+// Raw 节点：纯内容，无外壳
 const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
-  <div style={{
-    width: 340, borderRadius: 10,
-    border: `1.5px solid ${data.color}40`,
-    background: 'var(--tc-content-bg)',
-    overflow: 'hidden',
-    boxShadow: `0 2px 12px ${data.color}10`,
-  }}>
+  <div style={{ width: 340 }}>
     <Handle type="source" position={Position.Right}
       style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-    <div style={{
-      padding: '6px 10px', fontSize: 10, fontWeight: 700,
-      color: data.color, background: `${data.color}08`,
-      borderBottom: `1px solid ${data.color}20`,
-      display: 'flex', alignItems: 'center', gap: 6,
-    }}>
-      <span style={{ fontSize: 13 }}>{data.icon}</span>
-      <span>原始数据</span>
-      <span style={{ fontWeight: 400, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-        {data.label}
-      </span>
-    </div>
-    {data.messages.map((msg, i) => (
-      <div key={i} style={{ borderBottom: i < data.messages.length - 1 ? '1px solid var(--tc-border)' : undefined }}>
-        <div style={{
-          padding: '2px 8px', fontSize: 8, fontWeight: 700,
-          fontFamily: "'Geist Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.5px',
-          color: msg.role === 'user' ? '#eab308' : '#58a6ff',
-          background: msg.role === 'user' ? 'rgba(234,179,8,0.04)' : 'rgba(88,166,255,0.04)',
+    {data.messages.map((msg, i) => {
+      const isUser = msg.role === 'user'
+      return (
+        <div key={i} style={{
+          marginBottom: i < data.messages.length - 1 ? 6 : 0,
+          borderRadius: 8,
+          border: `1px solid ${isUser ? 'var(--tc-border)' : 'rgba(88,166,255,0.15)'}`,
+          background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
+          overflow: 'hidden',
         }}>
-          {msg.role}
+          {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
         </div>
-        {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
-      </div>
-    ))}
+      )
+    })}
   </div>
 ))
 RawNode.displayName = 'RawNode'
 
-// ── Styled 节点：无头像，纯内容 ─────────────────────
-
-const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => {
-  // 把 turn 里的内容拆成独立 block 渲染，不走 AssistantTurnCard（去掉头像/气泡）
-  return (
-    <ExpandSignalCtx.Provider value={1}>
-      <AutoExpandCtx.Provider value={true}>
-        <div style={{
-          width: 480, borderRadius: 10,
-          border: `1.5px solid ${data.color}40`,
-          background: 'var(--tc-content-bg)',
-          overflow: 'hidden',
-          boxShadow: `0 2px 12px ${data.color}10`,
-        }}>
-          <Handle type="target" position={Position.Left}
-            style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-          <div style={{
-            padding: '6px 10px', fontSize: 10, fontWeight: 700,
-            color: data.color, background: `${data.color}08`,
-            borderBottom: `1px solid ${data.color}20`,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            <span style={{ fontSize: 13 }}>{data.icon}</span>
-            <span>渲染效果</span>
-            <span style={{ fontWeight: 400, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-              {data.label}
-            </span>
-            <span style={{ marginLeft: 'auto', fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-              {data.rawCount} 条消息 → {data.turns.length} 轮对话
-            </span>
-          </div>
-          <div style={{ padding: '8px 12px' }}>
-            {data.turns.map((item, i) => {
-              if (item.kind === 'user') {
-                // 用户消息：纯文本，无头像无气泡
-                const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
-                if (!text) return null
-                return (
-                  <div key={i} style={{
-                    padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-                    background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
-                  }}>
-                    <RichTextBlock text={text} />
-                  </div>
-                )
-              }
-              // assistant turn：直接渲染内部组件
-              const { turn } = item
-              return (
-                <div key={i} style={{
-                  padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-                  background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
-                }}>
-                  {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
-                  {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
-                  {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
-                  {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
-                  {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </AutoExpandCtx.Provider>
-    </ExpandSignalCtx.Provider>
-  )
-})
+// Styled 节点：纯内容，无外壳，无头像
+const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
+  <ExpandSignalCtx.Provider value={1}>
+    <AutoExpandCtx.Provider value={true}>
+      <div style={{ width: 480 }}>
+        <Handle type="target" position={Position.Left}
+          style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
+        {data.turns.map((item, i) => {
+          if (item.kind === 'user') {
+            const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
+            if (!text) return null
+            return (
+              <div key={i} style={{
+                padding: '8px 12px', borderRadius: 8, marginBottom: 6,
+                background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
+                fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
+              }}>
+                <RichTextBlock text={text} />
+              </div>
+            )
+          }
+          const { turn } = item
+          return (
+            <div key={i} style={{
+              padding: '8px 12px', borderRadius: 8, marginBottom: 6,
+              background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
+              fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
+            }}>
+              {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
+              {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
+              {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
+              {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
+              {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
+            </div>
+          )
+        })}
+      </div>
+    </AutoExpandCtx.Provider>
+  </ExpandSignalCtx.Provider>
+))
 StyledNode.displayName = 'StyledNode'
 
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
