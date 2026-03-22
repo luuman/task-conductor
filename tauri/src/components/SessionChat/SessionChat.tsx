@@ -38,7 +38,7 @@ export function SessionChat({
     onSessionSelect?.(s)
   }
 
-  const hasQuestions = transcript.length > 0 && !transcriptLoading && fileFound && selectedId != null
+  const hasQuestions = allQuestions.length > 0 && !transcriptLoading && fileFound && selectedId != null
 
   const showProjName = !filterByCwd
 
