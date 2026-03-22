@@ -37,9 +37,11 @@ export interface UseSessionDataReturn {
 
   // Pagination
   loadMore(): void
+  loadAll(): void
   hasMore: boolean
   loadingMore: boolean
   total: number
+  loadedFrom: number
 
   // All questions (full list from /questions API)
   allQuestions: QuestionItem[]
