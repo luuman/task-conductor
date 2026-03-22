@@ -508,6 +508,7 @@ export interface ApiAdapter {
   getSessions(): Promise<AiSession[]>
   getSessionEvents(sessionId: string): Promise<SessionEvent[]>
   getTranscript(sessionId: string, params?: { limit?: number; offset?: number }): Promise<{ messages: TranscriptMessage[]; file_found: boolean; total: number; has_more: boolean }>
+  getQuestions(sessionId: string): Promise<{ questions: Array<{ index: number; text: string }>; total: number }>
   getSessionNote(sessionId: string): Promise<ConversationNote>
   updateSessionNote(sessionId: string, data: Partial<ConversationNote>): Promise<ConversationNote>
   healthCheck(): Promise<boolean>
