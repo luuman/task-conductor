@@ -437,11 +437,11 @@
 .toolError {
   font-size: 9px;
   font-family: 'Geist Mono', monospace;
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
   flex-shrink: 0;
   color: #f85149;
-  background: rgba(244, 63, 94, 0.1);
+  background: rgba(244, 63, 94, 0.12);
 }
 
 .toolPreview {
