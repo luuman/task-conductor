@@ -127,9 +127,6 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
 interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
 interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
 
-const READONLY_TOOLS = new Set(['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'])
-const WRITE_TOOLS = new Set(['Edit', 'MultiEdit', 'Write'])
-
 const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
   <div style={{
     width: 340, borderRadius: 10,
