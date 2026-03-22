@@ -201,7 +201,33 @@ const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
 ))
 StyledNode.displayName = 'StyledNode'
 
+// ── 自定义 Edge ─────────────────────────────────────
+
+function DemoEdge({
+  id, sourceX, sourceY, targetX, targetY,
+  sourcePosition, targetPosition, data,
+}: EdgeProps) {
+  const color = (data as Record<string, unknown>)?.color as string ?? '#58a6ff'
+  const [edgePath] = getBezierPath({
+    sourceX, sourceY, targetX, targetY,
+    sourcePosition, targetPosition,
+    curvature: 0.3,
+  })
+  return (
+    <path
+      id={id}
+      d={edgePath}
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeOpacity={0.5}
+      strokeLinecap="round"
+    />
+  )
+}
+
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
+const edgeTypes = { demo: DemoEdge }
 
 // ── 布局 ────────────────────────────────────────────
 
