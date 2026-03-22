@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { FileTreeMap } from './tabs/FileTreeMap'
+import { ChatDemo } from './tabs/ChatDemo'
 import {
   Icon,
   IconChevronLeft,
