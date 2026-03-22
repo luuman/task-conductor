@@ -563,6 +563,19 @@
   flex-shrink: 0;
 }
 
+.clCardIdx {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Geist Mono', monospace;
+  flex-shrink: 0;
+}
+
 .clCardName {
   font-weight: 600;
   font-size: 13px;
