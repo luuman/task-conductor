@@ -52,9 +52,10 @@ export function QuestionNav({
       return
     }
 
-    // Target is loaded → find turnIndex and scroll
+    // Target is loaded → convert absolute msgIndex to relative, find turnIndex and scroll
+    const relativeMsgIndex = msgIndex - loadedFrom
     const turns = groupMessagesIntoTurns(transcript)
-    const turnIndex = turns.findIndex(turn => turn.startIndex >= msgIndex)
+    const turnIndex = turns.findIndex(turn => turn.startIndex >= relativeMsgIndex)
     if (turnIndex >= 0) {
       scrollToIndexRef?.current?.(turnIndex)
     }
