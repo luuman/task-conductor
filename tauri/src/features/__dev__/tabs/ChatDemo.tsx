@@ -273,8 +273,8 @@ function buildInitialGraph(turns: GroupedTurnItem[]) {
       id: `e-${si}`,
       source: `raw-${si}`,
       target: `styled-${si}`,
-      style: { stroke: color, strokeWidth: 2, opacity: 0.5 },
-      type: 'smoothstep',
+      type: 'demo',
+      data: { color },
     })
   }
 
