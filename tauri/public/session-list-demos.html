@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session List Demos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-hover: #2a2d2e;
+    --fg-primary: #cccccc;
+    --fg-secondary: #969696;
+    --accent: #007acc;
+    --accent-bg: #094771;
+    --border: #3c3c3c;
+    --border-active: #007acc;
+    --success: #56d364;
+    --warning: #e3b341;
+    --stopped: #8b949e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #111;
+    color: var(--fg-primary);
+    padding: 24px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: var(--fg-secondary);
+    margin-bottom: 28px;
+  }
+
+  .demos {
+    display: grid;
+    grid-template-columns: repeat(4, 280px);
+    gap: 24px;
+    justify-content: center;
+  }
+
+  .demo-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .demo-label {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--accent);
+  }
+
+  .demo-desc {
+    text-align: center;
+    font-size: 11px;
+    color: var(--fg-secondary);
+    line-height: 1.5;
+  }
+
+  .sidebar {
+    width: 280px;
+    height: 620px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ──────────────────────────────────────
+     Shared header & search styles
+     ────────────────────────────────────── */
+  .s-header {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .s-header .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-primary);
+  }
+
+  .s-header .action-btn {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--fg-secondary);
+    cursor: pointer;
+  }
+
+  .s-search {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .s-search input {
+    width: 100%;
+    font-size: 11px;
+    font-family: inherit;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-hover);
+    color: var(--fg-primary);
+    outline: none;
+  }
+
+  .s-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Status dots */
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-active { background: var(--success); }
+  .dot-idle { background: var(--warning); }
+  .dot-stopped { background: var(--stopped); }
+
+  /* Tag pills */
+  .tag {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(0,122,204,0.12);
+    color: var(--accent);
+  }
+
+  /* ══════════════════════════════════════
+     DEMO A — 日期分组 + 卡片
+     ══════════════════════════════════════ */
+  .a-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--fg-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 14px 6px;
+  }
+
+  .a-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 14px;
+    margin: 2px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .a-item:hover {
+    background: var(--bg-hover);
+  }
+
+  .a-item.active {
+    background: var(--accent-bg);
+  }
+
+  .a-avatar {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(0,122,204,0.1);
+    border: 1px solid rgba(0,122,204,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+
+  .a-content { flex: 1; min-width: 0; }
+
+  .a-title-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  }
+
+  .a-title {
+    font-size: 12px; font-weight: 500; color: var(--fg-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1;
+  }
+
+  .a-time {
+    font-size: 10px; color: var(--fg-secondary); flex-shrink: 0;
+  }
+
+  .a-summary {
+    font-size: 11px; color: var(--fg-secondary); margin-top: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .a-meta {
+    display: flex; align-items: center; gap: 6px; margin-top: 4px;
+  }
+
+  .a-badge {
+    font-size: 9px; padding: 1px 6px; border-radius: 4px;
+    background: rgba(255,255,255,0.06); color: var(--fg-secondary);
+  }
+
+  /* ══════════════════════════════════════
+     DEMO B — ChatGPT 风格紧凑列表
+     ══════════════════════════════════════ */
+  .b-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--fg-secondary);
+    padding: 14px 14px 6px;
+  }
+
+  .b-item {
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 6px;
+    margin: 1px 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .b-item:hover {
+    background: var(--bg-hover);
+  }
+
+  .b-item.active {
+    background: var(--bg-hover);
+  }
+
+  .b-item.active .b-title {
+    color: #fff;
+  }
+
+  .b-icon {
+    width: 16px; height: 16px; flex-shrink: 0;
+    color: var(--fg-secondary);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .b-icon svg {
+    width: 16px; height: 16px;
+  }
+
+  .b-title {
+    font-size: 12px; color: var(--fg-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1;
+  }
+
+  .b-actions {
+    display: none;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .b-item:hover .b-actions { display: flex; }
+  .b-item:hover .b-time-hover { display: none; }
+
+  .b-time-hover {
+    font-size: 10px; color: var(--fg-secondary); flex-shrink: 0;
+  }
+
+  .b-action-dot {
+    width: 20px; height: 20px; border-radius: 4px; border: none;
+    background: transparent; color: var(--fg-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+
+  .b-action-dot:hover { background: rgba(255,255,255,0.1); }
+
+  .b-active-indicator {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ══════════════════════════════════════
+     DEMO C — VS Code 资源管理器风格
+     ══════════════════════════════════════ */
+  .c-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .c-tab {
+    flex: 1;
+    padding: 8px 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--fg-secondary);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .c-tab.active {
+    color: var(--fg-primary);
+    border-bottom-color: var(--accent);
+  }
+
+  .c-tab:hover {
+    color: var(--fg-primary);
+  }
+
+  .c-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .c-item:hover {
+    background: var(--bg-hover);
+  }
+
+  .c-item.active {
+    background: rgba(0,122,204,0.08);
+    border-left-color: var(--accent);
+  }
+
+  .c-item-main {
+    flex: 1; min-width: 0;
+    padding: 5px 10px 5px 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .c-status-bar {
+    width: 3px;
+    align-self: stretch;
+    flex-shrink: 0;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .c-status-active { background: var(--success); }
+  .c-status-idle { background: var(--warning); }
+  .c-status-stopped { background: transparent; }
+
+  .c-title {
+    font-size: 11px; color: var(--fg-primary); font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1; font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  }
+
+  .c-badge {
+    font-size: 9px; padding: 0 5px; height: 16px;
+    border-radius: 8px; display: flex; align-items: center;
+    background: rgba(255,255,255,0.06); color: var(--fg-secondary);
+    flex-shrink: 0;
+  }
+
+  .c-badge-active {
+    background: rgba(86,211,100,0.15); color: var(--success);
+  }
+
+  .c-time {
+    font-size: 9px; color: var(--fg-secondary); flex-shrink: 0;
+    padding-right: 10px;
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  }
+
+  .c-separator {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 12px;
+  }
+
+  .c-section-badge {
+    font-size: 10px; padding: 6px 12px;
+    color: var(--fg-secondary); font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-secondary);
+  }
+
+  .c-section-count {
+    font-size: 9px; padding: 0 5px; height: 14px;
+    border-radius: 7px; display: flex; align-items: center;
+    background: rgba(255,255,255,0.06); color: var(--fg-secondary);
+  }
+
+  /* ══════════════════════════════════════
+     DEMO D — 双区域富卡片
+     ══════════════════════════════════════ */
+  .d-section {
+    padding: 0 0 4px;
+  }
+
+  .d-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px 6px;
+  }
+
+  .d-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--fg-secondary);
+  }
+
+  .d-section-count {
+    font-size: 10px; color: var(--fg-secondary);
+  }
+
+  .d-card {
+    margin: 3px 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .d-card:hover {
+    border-color: rgba(255,255,255,0.12);
+    background: var(--bg-hover);
+  }
+
+  .d-card.active {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .d-card-row1 {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .d-card-title {
+    font-size: 12px; font-weight: 500; color: var(--fg-primary);
+    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .d-card-time {
+    font-size: 10px; color: var(--fg-secondary); flex-shrink: 0;
+  }
+
+  .d-card-row2 {
+    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+  }
+
+  .d-model-badge {
+    font-size: 9px; padding: 2px 6px; border-radius: 4px;
+    background: rgba(0,122,204,0.12); color: var(--accent);
+    font-weight: 500;
+  }
+
+  .d-stat {
+    font-size: 9px; color: var(--fg-secondary);
+    display: flex; align-items: center; gap: 3px;
+  }
+
+  .d-stat-icon {
+    font-size: 10px; opacity: 0.6;
+  }
+
+  .d-card-summary {
+    font-size: 11px; color: var(--fg-secondary); margin-top: 6px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .d-tags {
+    display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;
+  }
+
+  .d-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+
+  .d-progress-bar {
+    height: 2px; border-radius: 1px; background: var(--border);
+    margin-top: 6px; overflow: hidden;
+  }
+
+  .d-progress-fill {
+    height: 100%; border-radius: 1px; background: var(--accent);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Session List 侧边栏优化方案</h1>
+<p class="subtitle">4 种不同风格的会话列表设计，请选择你喜欢的方案</p>
+
+<div class="demos">
+
+<!-- ══════════ DEMO A ══════════ -->
+<div class="demo-col">
+  <div class="demo-label">A. 日期分组 + 头像卡片</div>
+  <p class="demo-desc">按日期分组，每条会话带头像和摘要预览<br>类似 Telegram / iMessage 风格</p>
+  <div class="sidebar">
+    <div class="s-header">
+      <span class="title">会话记录</span>
+      <button class="action-btn">+ 新会话</button>
+    </div>
+    <div class="s-search">
+      <input placeholder="搜索会话..." />
+    </div>
+    <div class="s-body">
+      <!-- 今天 -->
+      <div class="a-section-label">今天</div>
+      <div class="a-item active">
+        <div class="a-avatar">🤖</div>
+        <div class="a-content">
+          <div class="a-title-row">
+            <span class="a-title">重构用户认证模块</span>
+            <span class="a-time">14:32</span>
+          </div>
+          <div class="a-summary">已完成 JWT token 刷新逻辑的重写...</div>
+          <div class="a-meta">
+            <span class="dot dot-active"></span>
+            <span class="a-badge">42 events</span>
+            <span class="tag">auth</span>
+          </div>
+        </div>
+      </div>
+      <div class="a-item">
+        <div class="a-avatar">🤖</div>
+        <div class="a-content">
+          <div class="a-title-row">
+            <span class="a-title">修复 WebSocket 重连问题</span>
+            <span class="a-time">11:15</span>
+          </div>
+          <div class="a-summary">断线重连后消息队列未清空导致重复...</div>
+          <div class="a-meta">
+            <span class="dot dot-idle"></span>
+            <span class="a-badge">28 events</span>
+            <span class="tag">websocket</span>
+          </div>
+        </div>
+      </div>
+      <div class="a-item">
+        <div class="a-avatar">🤖</div>
+        <div class="a-content">
+          <div class="a-title-row">
+            <span class="a-title">添加 i18n 支持</span>
+            <span class="a-time">09:45</span>
+          </div>
+          <div class="a-summary">为 Settings 页面添加中英文切换...</div>
+          <div class="a-meta">
+            <span class="dot dot-stopped"></span>
+            <span class="a-badge">15 events</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 昨天 -->
+      <div class="a-section-label">昨天</div>
+      <div class="a-item">
+        <div class="a-avatar">🤖</div>
+        <div class="a-content">
+          <div class="a-title-row">
+            <span class="a-title">优化 Dashboard 性能</span>
+            <span class="a-time">16:20</span>
+          </div>
+          <div class="a-summary">使用 React.memo 减少不必要的渲染...</div>
+          <div class="a-meta">
+            <span class="dot dot-stopped"></span>
+            <span class="a-badge">56 events</span>
+            <span class="tag">perf</span>
+          </div>
+        </div>
+      </div>
+      <div class="a-item">
+        <div class="a-avatar">🤖</div>
+        <div class="a-content">
+          <div class="a-title-row">
+            <span class="a-title">数据库迁移脚本</span>
+            <span class="a-time">10:05</span>
+          </div>
+          <div class="a-summary">新增 ProjectKnowledge 表和索引...</div>
+          <div class="a-meta">
+            <span class="dot dot-stopped"></span>
+            <span class="a-badge">33 events</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 更早 -->
+      <div class="a-section-label">上周</div>
+      <div class="a-item">
+        <div class="a-avatar">🤖</div>
+        <div class="a-content">
+          <div class="a-title-row">
+            <span class="a-title">实现 Pipeline Engine</span>
+            <span class="a-time">3/18</span>
+          </div>
+          <div class="a-summary">完成 9 阶段状态机和审批流程...</div>
+          <div class="a-meta">
+            <span class="dot dot-stopped"></span>
+            <span class="a-badge">128 events</span>
+            <span class="tag">pipeline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DEMO B ══════════ -->
+<div class="demo-col">
+  <div class="demo-label">B. ChatGPT 极简列表</div>
+  <p class="demo-desc">极简单行列表，hover 显示操作按钮<br>类似 ChatGPT / Claude.ai 侧边栏</p>
+  <div class="sidebar">
+    <div class="s-header">
+      <span class="title">会话记录</span>
+      <button class="action-btn">+ 新会话</button>
+    </div>
+    <div class="s-search">
+      <input placeholder="搜索会话..." />
+    </div>
+    <div class="s-body">
+      <div class="b-section-label">今天</div>
+      <div class="b-item active">
+        <span class="b-active-indicator"></span>
+        <span class="b-title">重构用户认证模块</span>
+        <span class="b-time-hover">14:32</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">修复 WebSocket 重连问题</span>
+        <span class="b-time-hover">11:15</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">添加 i18n 支持</span>
+        <span class="b-time-hover">09:45</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+
+      <div class="b-section-label">昨天</div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">优化 Dashboard 性能</span>
+        <span class="b-time-hover">16:20</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">数据库迁移脚本</span>
+        <span class="b-time-hover">10:05</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+
+      <div class="b-section-label">过去 7 天</div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">实现 Pipeline Engine</span>
+        <span class="b-time-hover">3/18</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">Hook 安装脚本调试</span>
+        <span class="b-time-hover">3/17</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">前端三栏布局实现</span>
+        <span class="b-time-hover">3/16</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+
+      <div class="b-section-label">过去 30 天</div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">Tauri 桌面端初始化</span>
+        <span class="b-time-hover">3/10</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+      <div class="b-item">
+        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="b-title">Claude 观测层搭建</span>
+        <span class="b-time-hover">3/5</span>
+        <div class="b-actions">
+          <button class="b-action-dot">✎</button>
+          <button class="b-action-dot">⋯</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DEMO C ══════════ -->
+<div class="demo-col">
+  <div class="demo-label">C. VS Code 资源管理器</div>
+  <p class="demo-desc">高信息密度，Tab 切换视图<br>左侧状态条 + 等宽字体 + 内联统计</p>
+  <div class="sidebar">
+    <div class="s-header">
+      <span class="title">会话记录</span>
+      <button class="action-btn">+ 新会话</button>
+    </div>
+    <div class="c-tabs">
+      <button class="c-tab active">全部</button>
+      <button class="c-tab">活跃</button>
+      <button class="c-tab">已完成</button>
+    </div>
+    <div class="s-search">
+      <input placeholder="搜索会话..." />
+    </div>
+    <div class="s-body">
+      <div class="c-section-badge">
+        活跃会话
+        <span class="c-section-count">2</span>
+      </div>
+      <div class="c-item active">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-active"></span>
+          <span class="c-title">重构用户认证模块</span>
+          <span class="c-badge c-badge-active">LIVE</span>
+        </div>
+        <span class="c-time">14:32</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-idle"></span>
+          <span class="c-title">修复 WebSocket 重连</span>
+          <span class="c-badge">28</span>
+        </div>
+        <span class="c-time">11:15</span>
+      </div>
+
+      <div class="c-separator"></div>
+
+      <div class="c-section-badge">
+        历史会话
+        <span class="c-section-count">8</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">添加 i18n 支持</span>
+          <span class="c-badge">15</span>
+        </div>
+        <span class="c-time">09:45</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">优化 Dashboard 性能</span>
+          <span class="c-badge">56</span>
+        </div>
+        <span class="c-time">昨天</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">数据库迁移脚本</span>
+          <span class="c-badge">33</span>
+        </div>
+        <span class="c-time">昨天</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">实现 Pipeline Engine</span>
+          <span class="c-badge">128</span>
+        </div>
+        <span class="c-time">3/18</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">Hook 安装脚本调试</span>
+          <span class="c-badge">22</span>
+        </div>
+        <span class="c-time">3/17</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">前端三栏布局实现</span>
+          <span class="c-badge">67</span>
+        </div>
+        <span class="c-time">3/16</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">Tauri 桌面端初始化</span>
+          <span class="c-badge">45</span>
+        </div>
+        <span class="c-time">3/10</span>
+      </div>
+      <div class="c-item">
+        <div class="c-item-main">
+          <span class="c-status-bar c-status-stopped"></span>
+          <span class="c-title">Claude 观测层搭建</span>
+          <span class="c-badge">89</span>
+        </div>
+        <span class="c-time">3/5</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DEMO D ══════════ -->
+<div class="demo-col">
+  <div class="demo-label">D. 双区域富卡片</div>
+  <p class="demo-desc">活跃/历史分区，卡片带模型标签和进度条<br>信息最丰富，适合深度监控</p>
+  <div class="sidebar">
+    <div class="s-header">
+      <span class="title">会话记录</span>
+      <button class="action-btn">+ 新会话</button>
+    </div>
+    <div class="s-search">
+      <input placeholder="搜索会话..." />
+    </div>
+    <div class="s-body">
+      <!-- Active Section -->
+      <div class="d-section">
+        <div class="d-section-header">
+          <span class="d-section-title">● 活跃中</span>
+          <span class="d-section-count">2 个会话</span>
+        </div>
+
+        <div class="d-card active">
+          <div class="d-card-row1">
+            <span class="d-live-dot"></span>
+            <span class="d-card-title">重构用户认证模块</span>
+            <span class="d-card-time">14:32</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Opus 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 42 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 23m</span>
+          </div>
+          <div class="d-card-summary">已完成 JWT token 刷新逻辑的重写，正在处理...</div>
+          <div class="d-tags">
+            <span class="tag">auth</span>
+            <span class="tag">refactor</span>
+          </div>
+          <div class="d-progress-bar"><div class="d-progress-fill" style="width: 65%"></div></div>
+        </div>
+
+        <div class="d-card">
+          <div class="d-card-row1">
+            <span class="dot dot-idle"></span>
+            <span class="d-card-title">修复 WebSocket 重连</span>
+            <span class="d-card-time">11:15</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Sonnet 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 28 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 12m</span>
+          </div>
+          <div class="d-card-summary">等待用户输入... 需要确认重连策略</div>
+        </div>
+      </div>
+
+      <!-- History Section -->
+      <div class="d-section">
+        <div class="d-section-header">
+          <span class="d-section-title">历史记录</span>
+          <span class="d-section-count">6 个会话</span>
+        </div>
+
+        <div class="d-card">
+          <div class="d-card-row1">
+            <span class="dot dot-stopped"></span>
+            <span class="d-card-title">添加 i18n 支持</span>
+            <span class="d-card-time">09:45</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Sonnet 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 15 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 8m</span>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <div class="d-card-row1">
+            <span class="dot dot-stopped"></span>
+            <span class="d-card-title">优化 Dashboard 性能</span>
+            <span class="d-card-time">昨天</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Opus 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 56 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 35m</span>
+          </div>
+          <div class="d-tags">
+            <span class="tag">perf</span>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <div class="d-card-row1">
+            <span class="dot dot-stopped"></span>
+            <span class="d-card-title">数据库迁移脚本</span>
+            <span class="d-card-time">昨天</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Sonnet 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 33 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 18m</span>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <div class="d-card-row1">
+            <span class="dot dot-stopped"></span>
+            <span class="d-card-title">实现 Pipeline Engine</span>
+            <span class="d-card-time">3/18</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Opus 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 128 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 1h 12m</span>
+          </div>
+          <div class="d-tags">
+            <span class="tag">pipeline</span>
+            <span class="tag">backend</span>
+          </div>
+        </div>
+
+        <div class="d-card">
+          <div class="d-card-row1">
+            <span class="dot dot-stopped"></span>
+            <span class="d-card-title">Hook 安装脚本调试</span>
+            <span class="d-card-time">3/17</span>
+          </div>
+          <div class="d-card-row2">
+            <span class="d-model-badge">Sonnet 4</span>
+            <span class="d-stat"><span class="d-stat-icon">⚡</span> 22 events</span>
+            <span class="d-stat"><span class="d-stat-icon">⏱</span> 10m</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
