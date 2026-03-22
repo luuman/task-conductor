@@ -259,6 +259,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     totalRef.current = 0
     setLoadedFrom(0)
     setHasMore(false)
+    setAllQuestions([])
   }, [])
 
   // WS: subscribe to active session for real-time refresh
