@@ -290,9 +290,6 @@ function SvgLines({ pairs }: { pairs: PairPosition[] }) {
   }
   const pad = 100
   minX -= pad; minY -= pad; maxX += pad; maxY += pad
-  const w = maxX - minX
-  const h = maxY - minY
-
   return (
     <svg
       style={{
