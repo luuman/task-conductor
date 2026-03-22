@@ -185,10 +185,10 @@ const CARD_STYLES: { key: CardStyle; label: string; desc: string }[] = [
 function getUserCardStyle(style: CardStyle): React.CSSProperties {
   const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
   switch (style) {
-    case 'A': return { ...base, padding: '8px 12px', borderRadius: 8, marginBottom: 6, background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)' }
-    case 'B': return { ...base, padding: '10px 14px', borderRadius: 12, marginBottom: 8, background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }
+    case 'A': return { ...base, padding: '10px 16px', borderRadius: 16, marginBottom: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }
+    case 'B': return { ...base, padding: '10px 14px', borderRadius: 16, marginBottom: 8, background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }
     case 'C': return { ...base, padding: '8px 12px', borderRadius: 0, marginBottom: 4, borderLeft: '3px solid #eab308', background: 'transparent' }
-    case 'D': return { ...base, padding: '12px 16px', borderRadius: 14, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid var(--tc-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }
+    case 'D': return { ...base, padding: '12px 16px', borderRadius: 18, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }
     case 'E': return { ...base, padding: '4px 8px', borderRadius: 0, marginBottom: 2, background: 'var(--tc-sidebar-item-hover)', borderBottom: '1px solid var(--tc-border)', fontSize: 11.5 }
   }
 }
