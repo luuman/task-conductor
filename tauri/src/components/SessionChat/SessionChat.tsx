@@ -91,6 +91,9 @@ export function SessionChat({
         isFirstLoad={isFirstLoad}
         autoExpand={autoExpand}
         onJumpToQuestion={handleJumpToQuestion}
+        onLoadMore={loadMore}
+        hasMore={hasMore}
+        total={total}
       />
       {hasQuestions && (
         <QuestionNav
