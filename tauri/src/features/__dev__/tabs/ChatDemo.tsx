@@ -237,11 +237,13 @@ function buildInitialGraph(turns: GroupedTurnItem[]) {
       id: `raw-${si}`, type: 'rawNode',
       position: { x: 0, y: 0 },
       data: { label: sec.label, color, icon, messages: rawMsgs },
+      style: { width: RAW_W + 8 },
     })
     nodes.push({
       id: `styled-${si}`, type: 'styledNode',
       position: { x: RAW_W + PAIR_GAP, y: 0 },
       data: { label: sec.label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
+      style: { width: STYLED_W + 8 },
     })
     edges.push({
       id: `e-${si}`,
