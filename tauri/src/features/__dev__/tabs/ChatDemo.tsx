@@ -249,8 +249,6 @@ function buildInitialGraph(turns: GroupedTurnItem[]) {
       id: `e-${si}`,
       source: `raw-${si}`,
       target: `styled-${si}`,
-      sourceHandle: 'right',
-      targetHandle: 'left',
       style: { stroke: color, strokeWidth: 2, opacity: 0.5 },
       type: 'smoothstep',
     })
