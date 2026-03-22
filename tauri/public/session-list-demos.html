@@ -3,1004 +3,610 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Session List Demos</title>
+<title>Session List — 8 种方案对比</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg-primary: #1e1e1e;
-    --bg-secondary: #252526;
-    --bg-hover: #2a2d2e;
-    --fg-primary: #cccccc;
-    --fg-secondary: #969696;
+    --bg0: #111114;
+    --bg1: #1e1e1e;
+    --bg2: #252526;
+    --bg3: #2a2d2e;
+    --fg1: #cccccc;
+    --fg2: #969696;
+    --fg3: #636363;
     --accent: #007acc;
     --accent-bg: #094771;
     --border: #3c3c3c;
-    --border-active: #007acc;
-    --success: #56d364;
-    --warning: #e3b341;
-    --stopped: #8b949e;
+    --green: #56d364;
+    --yellow: #e3b341;
+    --gray: #8b949e;
+    --red: #f44747;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #111;
-    color: var(--fg-primary);
-    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg0);
+    color: var(--fg1);
+    padding: 20px;
+    min-height: 100vh;
   }
 
-  h1 {
-    text-align: center;
-    font-size: 20px;
-    margin-bottom: 8px;
-    color: #fff;
-  }
+  h1 { text-align: center; font-size: 18px; color: #fff; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 12px; color: var(--fg2); margin-bottom: 20px; }
+  .loading-msg { text-align: center; padding: 40px; color: var(--fg2); }
 
-  .subtitle {
-    text-align: center;
-    font-size: 13px;
-    color: var(--fg-secondary);
-    margin-bottom: 28px;
-  }
-
-  .demos {
+  .grid {
     display: grid;
     grid-template-columns: repeat(4, 280px);
-    gap: 24px;
+    gap: 20px;
     justify-content: center;
   }
 
-  .demo-col {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  .col { display: flex; flex-direction: column; gap: 8px; }
+
+  .label {
+    text-align: center; font-size: 13px; font-weight: 700; color: #fff;
+    padding: 5px 10px; border-radius: 6px; background: var(--accent);
   }
 
-  .demo-label {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 6px;
-    background: var(--accent);
+  .desc {
+    text-align: center; font-size: 10px; color: var(--fg2); line-height: 1.5;
+    min-height: 30px;
   }
 
-  .demo-desc {
-    text-align: center;
-    font-size: 11px;
-    color: var(--fg-secondary);
-    line-height: 1.5;
+  .panel {
+    width: 280px; height: 580px; background: var(--bg1);
+    border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; display: flex; flex-direction: column;
   }
 
-  .sidebar {
-    width: 280px;
-    height: 620px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ──────────────────────────────────────
-     Shared header & search styles
-     ────────────────────────────────────── */
-  .s-header {
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+  /* shared header */
+  .hdr {
+    padding: 8px 12px; display: flex; align-items: center;
+    justify-content: space-between; border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
-
-  .s-header .title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--fg-primary);
+  .hdr-title { font-size: 11px; font-weight: 600; }
+  .hdr-btn {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+    border: none; background: transparent; color: var(--fg2); cursor: pointer;
   }
+  .hdr-btn:hover { background: var(--bg3); color: var(--accent); }
 
-  .s-header .action-btn {
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 4px;
-    border: none;
-    background: transparent;
-    color: var(--fg-secondary);
-    cursor: pointer;
+  /* shared search */
+  .srch {
+    padding: 6px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-
-  .s-search {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+  .srch input {
+    width: 100%; font-size: 11px; padding: 5px 8px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg3); color: var(--fg1);
+    outline: none; font-family: inherit;
   }
+  .srch input:focus { border-color: var(--accent); }
+  .srch input::placeholder { color: var(--fg3); }
 
-  .s-search input {
-    width: 100%;
-    font-size: 11px;
-    font-family: inherit;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--bg-hover);
-    color: var(--fg-primary);
-    outline: none;
-  }
+  .body { flex: 1; overflow-y: auto; }
 
-  .s-body {
-    flex: 1;
-    overflow-y: auto;
-  }
+  /* dots */
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+  .dot-active { background: var(--green); }
+  .dot-idle { background: var(--yellow); }
+  .dot-stopped { background: var(--gray); }
+  .dot-pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-  /* Status dots */
-  .dot {
-    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-  }
-  .dot-active { background: var(--success); }
-  .dot-idle { background: var(--warning); }
-  .dot-stopped { background: var(--stopped); }
-
-  /* Tag pills */
+  /* tags */
   .tag {
-    font-size: 9px;
-    padding: 1px 6px;
-    border-radius: 999px;
-    background: rgba(0,122,204,0.12);
-    color: var(--accent);
+    font-size: 8px; padding: 1px 5px; border-radius: 999px;
+    background: rgba(0,122,204,.12); color: var(--accent);
   }
 
-  /* ══════════════════════════════════════
-     DEMO A — 日期分组 + 卡片
-     ══════════════════════════════════════ */
-  .a-section-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--fg-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 12px 14px 6px;
-  }
-
-  .a-item {
-    display: flex;
-    gap: 10px;
-    padding: 10px 14px;
-    margin: 2px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s;
-    position: relative;
-  }
-
-  .a-item:hover {
-    background: var(--bg-hover);
-  }
-
-  .a-item.active {
-    background: var(--accent-bg);
-  }
-
-  .a-avatar {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: rgba(0,122,204,0.1);
-    border: 1px solid rgba(0,122,204,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
-  }
-
-  .a-content { flex: 1; min-width: 0; }
-
-  .a-title-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 6px;
-  }
-
-  .a-title {
-    font-size: 12px; font-weight: 500; color: var(--fg-primary);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    flex: 1;
-  }
-
-  .a-time {
-    font-size: 10px; color: var(--fg-secondary); flex-shrink: 0;
-  }
-
-  .a-summary {
-    font-size: 11px; color: var(--fg-secondary); margin-top: 3px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-
-  .a-meta {
-    display: flex; align-items: center; gap: 6px; margin-top: 4px;
-  }
-
-  .a-badge {
-    font-size: 9px; padding: 1px 6px; border-radius: 4px;
-    background: rgba(255,255,255,0.06); color: var(--fg-secondary);
-  }
-
-  /* ══════════════════════════════════════
-     DEMO B — ChatGPT 风格紧凑列表
-     ══════════════════════════════════════ */
-  .b-section-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--fg-secondary);
-    padding: 14px 14px 6px;
-  }
-
-  .b-item {
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: background 0.15s;
-    border-radius: 6px;
-    margin: 1px 6px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .b-item:hover {
-    background: var(--bg-hover);
-  }
-
-  .b-item.active {
-    background: var(--bg-hover);
-  }
-
-  .b-item.active .b-title {
-    color: #fff;
-  }
-
-  .b-icon {
-    width: 16px; height: 16px; flex-shrink: 0;
-    color: var(--fg-secondary);
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .b-icon svg {
-    width: 16px; height: 16px;
-  }
-
-  .b-title {
-    font-size: 12px; color: var(--fg-primary);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    flex: 1;
-  }
-
-  .b-actions {
-    display: none;
-    gap: 2px;
-    flex-shrink: 0;
-  }
-
-  .b-item:hover .b-actions { display: flex; }
-  .b-item:hover .b-time-hover { display: none; }
-
-  .b-time-hover {
-    font-size: 10px; color: var(--fg-secondary); flex-shrink: 0;
-  }
-
-  .b-action-dot {
-    width: 20px; height: 20px; border-radius: 4px; border: none;
-    background: transparent; color: var(--fg-secondary); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 12px;
-  }
-
-  .b-action-dot:hover { background: rgba(255,255,255,0.1); }
-
-  .b-active-indicator {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--success);
-    flex-shrink: 0;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* ══════════════════════════════════════
-     DEMO C — VS Code 资源管理器风格
-     ══════════════════════════════════════ */
-  .c-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  .c-tab {
-    flex: 1;
-    padding: 8px 0;
-    text-align: center;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--fg-secondary);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  .c-tab.active {
-    color: var(--fg-primary);
-    border-bottom-color: var(--accent);
-  }
-
-  .c-tab:hover {
-    color: var(--fg-primary);
-  }
-
-  .c-item {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    padding: 0;
-    cursor: pointer;
-    transition: background 0.15s;
-    border-left: 2px solid transparent;
-  }
-
-  .c-item:hover {
-    background: var(--bg-hover);
-  }
-
-  .c-item.active {
-    background: rgba(0,122,204,0.08);
-    border-left-color: var(--accent);
-  }
-
-  .c-item-main {
-    flex: 1; min-width: 0;
-    padding: 5px 10px 5px 12px;
-    display: flex; align-items: center; gap: 6px;
-  }
-
-  .c-status-bar {
-    width: 3px;
-    align-self: stretch;
-    flex-shrink: 0;
-    border-radius: 0 2px 2px 0;
-  }
-
-  .c-status-active { background: var(--success); }
-  .c-status-idle { background: var(--warning); }
-  .c-status-stopped { background: transparent; }
-
-  .c-title {
-    font-size: 11px; color: var(--fg-primary); font-weight: 500;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    flex: 1; font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  }
-
-  .c-badge {
-    font-size: 9px; padding: 0 5px; height: 16px;
-    border-radius: 8px; display: flex; align-items: center;
-    background: rgba(255,255,255,0.06); color: var(--fg-secondary);
-    flex-shrink: 0;
-  }
-
-  .c-badge-active {
-    background: rgba(86,211,100,0.15); color: var(--success);
-  }
-
-  .c-time {
-    font-size: 9px; color: var(--fg-secondary); flex-shrink: 0;
-    padding-right: 10px;
-    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  }
-
-  .c-separator {
-    height: 1px;
-    background: var(--border);
-    margin: 4px 12px;
-  }
-
-  .c-section-badge {
-    font-size: 10px; padding: 6px 12px;
-    color: var(--fg-secondary); font-weight: 500;
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg-secondary);
-  }
-
-  .c-section-count {
-    font-size: 9px; padding: 0 5px; height: 14px;
-    border-radius: 7px; display: flex; align-items: center;
-    background: rgba(255,255,255,0.06); color: var(--fg-secondary);
-  }
-
-  /* ══════════════════════════════════════
-     DEMO D — 双区域富卡片
-     ══════════════════════════════════════ */
-  .d-section {
-    padding: 0 0 4px;
-  }
-
-  .d-section-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px 6px;
-  }
-
-  .d-section-title {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: var(--fg-secondary);
-  }
-
-  .d-section-count {
-    font-size: 10px; color: var(--fg-secondary);
-  }
-
-  .d-card {
-    margin: 3px 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg-secondary);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .d-card:hover {
-    border-color: rgba(255,255,255,0.12);
-    background: var(--bg-hover);
-  }
-
-  .d-card.active {
-    border-color: var(--accent);
-    background: var(--accent-bg);
-  }
-
-  .d-card-row1 {
-    display: flex; align-items: center; gap: 8px;
-  }
-
-  .d-card-title {
-    font-size: 12px; font-weight: 500; color: var(--fg-primary);
-    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-
-  .d-card-time {
-    font-size: 10px; color: var(--fg-secondary); flex-shrink: 0;
-  }
-
-  .d-card-row2 {
-    display: flex; align-items: center; gap: 6px; margin-top: 6px;
-  }
-
-  .d-model-badge {
-    font-size: 9px; padding: 2px 6px; border-radius: 4px;
-    background: rgba(0,122,204,0.12); color: var(--accent);
-    font-weight: 500;
-  }
-
-  .d-stat {
-    font-size: 9px; color: var(--fg-secondary);
-    display: flex; align-items: center; gap: 3px;
-  }
-
-  .d-stat-icon {
-    font-size: 10px; opacity: 0.6;
-  }
-
-  .d-card-summary {
-    font-size: 11px; color: var(--fg-secondary); margin-top: 6px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-
-  .d-tags {
-    display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;
-  }
-
-  .d-live-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--success);
-    animation: pulse 2s infinite;
-    flex-shrink: 0;
-  }
-
-  .d-progress-bar {
-    height: 2px; border-radius: 1px; background: var(--border);
-    margin-top: 6px; overflow: hidden;
-  }
-
-  .d-progress-fill {
-    height: 100%; border-radius: 1px; background: var(--accent);
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
+
+  /* ═══════ A: 日期分组 + 头像 ═══════ */
+  .a-sec { font-size: 10px; font-weight: 600; color: var(--fg3); padding: 10px 12px 4px; letter-spacing: .5px; }
+  .a-it {
+    display: flex; gap: 8px; padding: 8px 12px; margin: 1px 6px;
+    border-radius: 8px; cursor: pointer; transition: background .12s;
+  }
+  .a-it:hover { background: var(--bg3); }
+  .a-it.sel { background: var(--accent-bg); }
+  .a-av {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(0,122,204,.08); border: 1px solid rgba(0,122,204,.15);
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+  }
+  .a-c { flex: 1; min-width: 0; }
+  .a-r1 { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .a-ti { font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .a-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .a-sum { font-size: 10px; color: var(--fg2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .a-meta { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+  .a-ev { font-size: 9px; color: var(--fg3); }
+
+  /* ═══════ B: ChatGPT 极简 ═══════ */
+  .b-sec { font-size: 10px; font-weight: 600; color: var(--fg3); padding: 12px 12px 4px; }
+  .b-it {
+    display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+    margin: 1px 6px; border-radius: 6px; cursor: pointer; transition: background .12s;
+  }
+  .b-it:hover { background: var(--bg3); }
+  .b-it.sel { background: var(--bg3); }
+  .b-it.sel .b-ti { color: #fff; }
+  .b-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--fg3); }
+  .b-ic svg { width: 16px; height: 16px; }
+  .b-ti { font-size: 12px; color: var(--fg1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .b-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .b-acts { display: none; gap: 2px; flex-shrink: 0; }
+  .b-it:hover .b-acts { display: flex; }
+  .b-it:hover .b-tm { display: none; }
+  .b-ab { width: 20px; height: 20px; border-radius: 4px; border: none; background: transparent; color: var(--fg2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .b-ab:hover { background: rgba(255,255,255,.1); }
+
+  /* ═══════ C: VS Code 风格 ═══════ */
+  .c-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .c-tab {
+    flex: 1; padding: 7px 0; text-align: center; font-size: 10px; font-weight: 500;
+    color: var(--fg2); border: none; background: transparent; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all .12s;
+  }
+  .c-tab.act { color: var(--fg1); border-bottom-color: var(--accent); }
+  .c-sec2 { font-size: 10px; font-weight: 500; color: var(--fg2); padding: 8px 10px 4px; background: var(--bg2); display: flex; align-items: center; gap: 6px; }
+  .c-cnt { font-size: 9px; padding: 0 5px; height: 14px; border-radius: 7px; display: flex; align-items: center; background: rgba(255,255,255,.06); color: var(--fg3); }
+  .c-it {
+    display: flex; align-items: center; padding: 4px 10px;
+    cursor: pointer; transition: background .12s; border-left: 2px solid transparent;
+  }
+  .c-it:hover { background: var(--bg3); }
+  .c-it.sel { background: rgba(0,122,204,.08); border-left-color: var(--accent); }
+  .c-bar { width: 3px; align-self: stretch; flex-shrink: 0; border-radius: 0 2px 2px 0; margin-right: 6px; }
+  .c-bar-a { background: var(--green); }
+  .c-bar-i { background: var(--yellow); }
+  .c-bar-s { background: transparent; }
+  .c-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'SF Mono','Consolas',monospace; }
+  .c-badge { font-size: 9px; padding: 0 5px; height: 15px; border-radius: 8px; display: flex; align-items: center; background: rgba(255,255,255,.06); color: var(--fg3); flex-shrink: 0; margin: 0 4px; }
+  .c-badge-live { background: rgba(86,211,100,.15); color: var(--green); }
+  .c-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; font-family: 'SF Mono','Consolas',monospace; }
+
+  /* ═══════ D: 富卡片 ═══════ */
+  .d-sh { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 4px; }
+  .d-st { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--fg3); }
+  .d-sc { font-size: 9px; color: var(--fg3); }
+  .d-cd {
+    margin: 3px 8px; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    cursor: pointer; transition: all .12s;
+  }
+  .d-cd:hover { border-color: rgba(255,255,255,.12); background: var(--bg3); }
+  .d-cd.sel { border-color: var(--accent); background: var(--accent-bg); }
+  .d-r1 { display: flex; align-items: center; gap: 6px; }
+  .d-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .d-r2 { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .d-mb { font-size: 8px; padding: 1px 5px; border-radius: 4px; background: rgba(0,122,204,.12); color: var(--accent); font-weight: 600; }
+  .d-stat { font-size: 9px; color: var(--fg3); }
+  .d-sum { font-size: 10px; color: var(--fg2); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d-tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+  .d-prog { height: 2px; border-radius: 1px; background: var(--border); margin-top: 5px; overflow: hidden; }
+  .d-prog-fill { height: 100%; border-radius: 1px; background: var(--accent); }
+
+  /* ═══════ E: 时间轴 ═══════ */
+  .e-line { position: relative; padding-left: 24px; }
+  .e-line::before {
+    content: ''; position: absolute; left: 14px; top: 0; bottom: 0;
+    width: 1px; background: var(--border);
+  }
+  .e-node {
+    position: relative; padding: 6px 10px 6px 0; cursor: pointer;
+    transition: background .12s; border-radius: 0 6px 6px 0; margin-right: 6px;
+  }
+  .e-node:hover { background: var(--bg3); }
+  .e-node.sel { background: var(--accent-bg); }
+  .e-dot-wrap {
+    position: absolute; left: -18px; top: 10px;
+    width: 10px; height: 10px; border-radius: 50%; background: var(--bg1);
+    display: flex; align-items: center; justify-content: center; z-index: 1;
+  }
+  .e-dot-inner { width: 6px; height: 6px; border-radius: 50%; }
+  .e-r1 { display: flex; align-items: center; gap: 4px; }
+  .e-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .e-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .e-r2 { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .e-ev { font-size: 9px; color: var(--fg3); }
+  .e-date-label {
+    position: relative; font-size: 9px; font-weight: 600; color: var(--fg3);
+    padding: 8px 10px 4px 0; letter-spacing: .3px;
+  }
+  .e-date-label::before {
+    content: ''; position: absolute; left: -18px; top: 12px;
+    width: 8px; height: 8px; border-radius: 2px; background: var(--border); z-index: 1;
+  }
+
+  /* ═══════ F: 棋盘缩略图 ═══════ */
+  .f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px; }
+  .f-card {
+    padding: 8px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg2); cursor: pointer; transition: all .12s;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .f-card:hover { border-color: rgba(255,255,255,.12); }
+  .f-card.sel { border-color: var(--accent); background: var(--accent-bg); }
+  .f-head { display: flex; align-items: center; gap: 4px; }
+  .f-ti { font-size: 10px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .f-meta { font-size: 8px; color: var(--fg3); display: flex; align-items: center; gap: 4px; }
+  .f-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; margin-top: 2px; }
+  .f-bar-fill { height: 100%; border-radius: 2px; }
+
+  /* ═══════ G: Notion 数据库 ═══════ */
+  .g-cols {
+    display: grid; grid-template-columns: auto 1fr 50px 50px;
+    padding: 6px 10px; font-size: 9px; font-weight: 600; color: var(--fg3);
+    border-bottom: 1px solid var(--border); gap: 6px; align-items: center;
+    flex-shrink: 0;
+  }
+  .g-row {
+    display: grid; grid-template-columns: auto 1fr 50px 50px;
+    padding: 5px 10px; gap: 6px; align-items: center; cursor: pointer;
+    transition: background .12s; border-bottom: 1px solid rgba(60,60,60,.3);
+  }
+  .g-row:hover { background: var(--bg3); }
+  .g-row.sel { background: rgba(0,122,204,.08); }
+  .g-status {
+    font-size: 9px; padding: 1px 6px; border-radius: 4px; text-align: center;
+    font-weight: 500; white-space: nowrap;
+  }
+  .g-s-active { background: rgba(86,211,100,.12); color: var(--green); }
+  .g-s-idle { background: rgba(227,179,65,.12); color: var(--yellow); }
+  .g-s-stopped { background: rgba(139,148,158,.1); color: var(--gray); }
+  .g-ti { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .g-ev { font-size: 10px; color: var(--fg2); text-align: right; }
+  .g-tm { font-size: 10px; color: var(--fg3); text-align: right; }
+
+  /* ═══════ H: 气泡预览 ═══════ */
+  .h-it {
+    padding: 8px 12px; cursor: pointer; transition: background .12s;
+    border-bottom: 1px solid rgba(60,60,60,.2);
+  }
+  .h-it:hover { background: var(--bg3); }
+  .h-it.sel { background: var(--accent-bg); border-left: 2px solid var(--accent); }
+  .h-r1 { display: flex; align-items: center; gap: 6px; }
+  .h-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .h-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .h-preview {
+    margin-top: 5px; padding: 6px 8px; border-radius: 6px;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(60,60,60,.4);
+    font-size: 10px; color: var(--fg2); line-height: 1.4;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .h-foot { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .h-ev { font-size: 9px; color: var(--fg3); }
 </style>
 </head>
 <body>
 
-<h1>Session List 侧边栏优化方案</h1>
-<p class="subtitle">4 种不同风格的会话列表设计，请选择你喜欢的方案</p>
+<h1>Session List 侧边栏 — 8 种方案</h1>
+<p class="subtitle">数据来自本地 API /api/sessions，点击可模拟选中效果</p>
+<p id="status" class="loading-msg">正在加载会话数据...</p>
+<div id="root" class="grid" style="display:none"></div>
 
-<div class="demos">
+<script>
+// ── Fetch real data ──
+const API = location.port === '7071'
+  ? `${location.protocol}//${location.hostname}:8765`
+  : `${location.protocol}//${location.host}`
 
-<!-- ══════════ DEMO A ══════════ -->
-<div class="demo-col">
-  <div class="demo-label">A. 日期分组 + 头像卡片</div>
-  <p class="demo-desc">按日期分组，每条会话带头像和摘要预览<br>类似 Telegram / iMessage 风格</p>
-  <div class="sidebar">
-    <div class="s-header">
-      <span class="title">会话记录</span>
-      <button class="action-btn">+ 新会话</button>
-    </div>
-    <div class="s-search">
-      <input placeholder="搜索会话..." />
-    </div>
-    <div class="s-body">
-      <!-- 今天 -->
-      <div class="a-section-label">今天</div>
-      <div class="a-item active">
-        <div class="a-avatar">🤖</div>
-        <div class="a-content">
-          <div class="a-title-row">
-            <span class="a-title">重构用户认证模块</span>
-            <span class="a-time">14:32</span>
-          </div>
-          <div class="a-summary">已完成 JWT token 刷新逻辑的重写...</div>
+async function loadSessions() {
+  try {
+    const r = await fetch(`${API}/api/sessions`)
+    if (!r.ok) throw new Error(r.status)
+    const data = await r.json()
+    // filter sessions with summary
+    return data.filter(s => s.summary).slice(0, 20)
+  } catch(e) {
+    console.warn('API fetch failed:', e)
+    return null
+  }
+}
+
+// ── Helpers ──
+function relTime(iso) {
+  if (!iso) return ''
+  const d = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z')
+  const now = new Date()
+  const diff = now - d
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return '刚刚'
+  if (mins < 60) return `${mins}分钟前`
+  const hrs = Math.floor(mins / 60)
+  if (d.toDateString() === now.toDateString())
+    return d.toLocaleTimeString('zh', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const y = new Date(now); y.setDate(now.getDate() - 1)
+  if (d.toDateString() === y.toDateString()) return '昨天 ' + d.toLocaleTimeString('zh', { hour: '2-digit', minute: '2-digit', hour12: false })
+  if (diff < 7 * 86400000) return `${Math.floor(diff / 86400000)}天前`
+  return `${d.getMonth()+1}/${d.getDate()}`
+}
+
+function dateGroup(iso) {
+  if (!iso) return '更早'
+  const d = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z')
+  const now = new Date()
+  if (d.toDateString() === now.toDateString()) return '今天'
+  const y = new Date(now); y.setDate(now.getDate() - 1)
+  if (d.toDateString() === y.toDateString()) return '昨天'
+  if (now - d < 7 * 86400000) return '过去 7 天'
+  if (now - d < 30 * 86400000) return '过去 30 天'
+  return '更早'
+}
+
+function dotCls(s) {
+  return s === 'active' ? 'dot-active' : s === 'idle' ? 'dot-idle' : 'dot-stopped'
+}
+
+function title(s) {
+  return s.note?.alias || s.summary || s.session_id.slice(0, 8)
+}
+
+function esc(str) {
+  const d = document.createElement('div')
+  d.textContent = str || ''
+  return d.innerHTML
+}
+
+function groupByDate(sessions) {
+  const groups = []
+  const map = new Map()
+  for (const s of sessions) {
+    const g = dateGroup(s.last_seen_at || s.started_at)
+    if (!map.has(g)) { map.set(g, []); groups.push(g) }
+    map.get(g).push(s)
+  }
+  return groups.map(g => ({ label: g, items: map.get(g) }))
+}
+
+const chatIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+
+function setupClick(panel) {
+  panel.addEventListener('click', e => {
+    const it = e.target.closest('[data-sid]')
+    if (!it) return
+    panel.querySelectorAll('[data-sid]').forEach(el => el.classList.remove('sel'))
+    it.classList.add('sel')
+  })
+}
+
+// ── Renderers ──
+
+function renderA(sessions) {
+  const groups = groupByDate(sessions)
+  let h = ''
+  groups.forEach(g => {
+    h += `<div class="a-sec">${g.label}</div>`
+    g.items.forEach((s, i) => {
+      const tags = (s.note?.tags || []).slice(0, 2)
+      h += `<div class="a-it${i===0 && g.label==='今天' ? ' sel':''}" data-sid="${s.session_id}">
+        <div class="a-av">🤖</div>
+        <div class="a-c">
+          <div class="a-r1"><span class="a-ti">${esc(title(s))}</span><span class="a-tm">${relTime(s.last_seen_at||s.started_at)}</span></div>
+          ${s.summary ? `<div class="a-sum">${esc(s.summary)}</div>` : ''}
           <div class="a-meta">
-            <span class="dot dot-active"></span>
-            <span class="a-badge">42 events</span>
-            <span class="tag">auth</span>
+            <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></span>
+            <span class="a-ev">${s.event_count} events</span>
+            ${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}
           </div>
         </div>
-      </div>
-      <div class="a-item">
-        <div class="a-avatar">🤖</div>
-        <div class="a-content">
-          <div class="a-title-row">
-            <span class="a-title">修复 WebSocket 重连问题</span>
-            <span class="a-time">11:15</span>
-          </div>
-          <div class="a-summary">断线重连后消息队列未清空导致重复...</div>
-          <div class="a-meta">
-            <span class="dot dot-idle"></span>
-            <span class="a-badge">28 events</span>
-            <span class="tag">websocket</span>
-          </div>
-        </div>
-      </div>
-      <div class="a-item">
-        <div class="a-avatar">🤖</div>
-        <div class="a-content">
-          <div class="a-title-row">
-            <span class="a-title">添加 i18n 支持</span>
-            <span class="a-time">09:45</span>
-          </div>
-          <div class="a-summary">为 Settings 页面添加中英文切换...</div>
-          <div class="a-meta">
-            <span class="dot dot-stopped"></span>
-            <span class="a-badge">15 events</span>
-          </div>
-        </div>
-      </div>
+      </div>`
+    })
+  })
+  return h
+}
 
-      <!-- 昨天 -->
-      <div class="a-section-label">昨天</div>
-      <div class="a-item">
-        <div class="a-avatar">🤖</div>
-        <div class="a-content">
-          <div class="a-title-row">
-            <span class="a-title">优化 Dashboard 性能</span>
-            <span class="a-time">16:20</span>
-          </div>
-          <div class="a-summary">使用 React.memo 减少不必要的渲染...</div>
-          <div class="a-meta">
-            <span class="dot dot-stopped"></span>
-            <span class="a-badge">56 events</span>
-            <span class="tag">perf</span>
-          </div>
-        </div>
-      </div>
-      <div class="a-item">
-        <div class="a-avatar">🤖</div>
-        <div class="a-content">
-          <div class="a-title-row">
-            <span class="a-title">数据库迁移脚本</span>
-            <span class="a-time">10:05</span>
-          </div>
-          <div class="a-summary">新增 ProjectKnowledge 表和索引...</div>
-          <div class="a-meta">
-            <span class="dot dot-stopped"></span>
-            <span class="a-badge">33 events</span>
-          </div>
-        </div>
-      </div>
+function renderB(sessions) {
+  const groups = groupByDate(sessions)
+  let h = ''
+  groups.forEach(g => {
+    h += `<div class="b-sec">${g.label}</div>`
+    g.items.forEach((s, i) => {
+      const isActive = s.status === 'active'
+      h += `<div class="b-it${i===0 && g.label==='今天' ? ' sel':''}" data-sid="${s.session_id}">
+        ${isActive ? '<span class="dot dot-active dot-pulse" style="margin-top:0"></span>' : `<span class="b-ic">${chatIcon}</span>`}
+        <span class="b-ti">${esc(title(s))}</span>
+        <span class="b-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+        <div class="b-acts"><button class="b-ab">✎</button><button class="b-ab">⋯</button></div>
+      </div>`
+    })
+  })
+  return h
+}
 
-      <!-- 更早 -->
-      <div class="a-section-label">上周</div>
-      <div class="a-item">
-        <div class="a-avatar">🤖</div>
-        <div class="a-content">
-          <div class="a-title-row">
-            <span class="a-title">实现 Pipeline Engine</span>
-            <span class="a-time">3/18</span>
-          </div>
-          <div class="a-summary">完成 9 阶段状态机和审批流程...</div>
-          <div class="a-meta">
-            <span class="dot dot-stopped"></span>
-            <span class="a-badge">128 events</span>
-            <span class="tag">pipeline</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+function renderC(sessions) {
+  const active = sessions.filter(s => s.status === 'active' || s.status === 'idle')
+  const history = sessions.filter(s => s.status !== 'active' && s.status !== 'idle')
+  let h = `<div class="c-sec2">活跃会话 <span class="c-cnt">${active.length}</span></div>`
+  active.forEach((s, i) => {
+    const barCls = s.status === 'active' ? 'c-bar-a' : 'c-bar-i'
+    h += `<div class="c-it${i===0?' sel':''}" data-sid="${s.session_id}">
+      <span class="c-bar ${barCls}"></span>
+      <span class="c-ti">${esc(title(s))}</span>
+      ${s.status==='active' ? '<span class="c-badge c-badge-live">LIVE</span>' : `<span class="c-badge">${s.event_count}</span>`}
+      <span class="c-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+    </div>`
+  })
+  h += `<div class="c-sec2" style="margin-top:2px">历史会话 <span class="c-cnt">${history.length}</span></div>`
+  history.forEach(s => {
+    h += `<div class="c-it" data-sid="${s.session_id}">
+      <span class="c-bar c-bar-s"></span>
+      <span class="c-ti">${esc(title(s))}</span>
+      <span class="c-badge">${s.event_count}</span>
+      <span class="c-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+    </div>`
+  })
+  return h
+}
 
-<!-- ══════════ DEMO B ══════════ -->
-<div class="demo-col">
-  <div class="demo-label">B. ChatGPT 极简列表</div>
-  <p class="demo-desc">极简单行列表，hover 显示操作按钮<br>类似 ChatGPT / Claude.ai 侧边栏</p>
-  <div class="sidebar">
-    <div class="s-header">
-      <span class="title">会话记录</span>
-      <button class="action-btn">+ 新会话</button>
-    </div>
-    <div class="s-search">
-      <input placeholder="搜索会话..." />
-    </div>
-    <div class="s-body">
-      <div class="b-section-label">今天</div>
-      <div class="b-item active">
-        <span class="b-active-indicator"></span>
-        <span class="b-title">重构用户认证模块</span>
-        <span class="b-time-hover">14:32</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
+function renderD(sessions) {
+  const active = sessions.filter(s => s.status === 'active' || s.status === 'idle')
+  const history = sessions.filter(s => s.status !== 'active' && s.status !== 'idle')
+  let h = ''
+  if (active.length) {
+    h += `<div class="d-sh"><span class="d-st">● 活跃中</span><span class="d-sc">${active.length} 个会话</span></div>`
+    active.forEach((s, i) => {
+      const tags = (s.note?.tags || []).slice(0, 3)
+      h += `<div class="d-cd${i===0?' sel':''}" data-sid="${s.session_id}">
+        <div class="d-r1">
+          <span class="dot ${dotCls(s.status)} dot-pulse"></span>
+          <span class="d-ti">${esc(title(s))}</span>
+          <span class="d-tm">${relTime(s.last_seen_at||s.started_at)}</span>
         </div>
-      </div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">修复 WebSocket 重连问题</span>
-        <span class="b-time-hover">11:15</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
+        <div class="d-r2">
+          <span class="d-mb">${s.provider || 'Claude'}</span>
+          <span class="d-stat">⚡ ${s.event_count}</span>
         </div>
+        ${s.summary ? `<div class="d-sum">${esc(s.summary)}</div>` : ''}
+        ${tags.length ? `<div class="d-tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+        <div class="d-prog"><div class="d-prog-fill" style="width:${Math.min(100, s.event_count)}%"></div></div>
+      </div>`
+    })
+  }
+  h += `<div class="d-sh"><span class="d-st">历史记录</span><span class="d-sc">${history.length} 个会话</span></div>`
+  history.forEach(s => {
+    h += `<div class="d-cd" data-sid="${s.session_id}">
+      <div class="d-r1">
+        <span class="dot dot-stopped"></span>
+        <span class="d-ti">${esc(title(s))}</span>
+        <span class="d-tm">${relTime(s.last_seen_at||s.started_at)}</span>
       </div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">添加 i18n 支持</span>
-        <span class="b-time-hover">09:45</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
+      <div class="d-r2">
+        <span class="d-mb">${s.provider || 'Claude'}</span>
+        <span class="d-stat">⚡ ${s.event_count}</span>
       </div>
+    </div>`
+  })
+  return h
+}
 
-      <div class="b-section-label">昨天</div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">优化 Dashboard 性能</span>
-        <span class="b-time-hover">16:20</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
+function renderE(sessions) {
+  const groups = groupByDate(sessions)
+  let h = '<div class="e-line">'
+  groups.forEach(g => {
+    h += `<div class="e-date-label">${g.label}</div>`
+    g.items.forEach((s, i) => {
+      h += `<div class="e-node${i===0 && g.label==='今天' ? ' sel':''}" data-sid="${s.session_id}">
+        <div class="e-dot-wrap"><div class="e-dot-inner ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></div></div>
+        <div class="e-r1"><span class="e-ti">${esc(title(s))}</span><span class="e-tm">${relTime(s.last_seen_at||s.started_at)}</span></div>
+        <div class="e-r2">
+          <span class="e-ev">${s.event_count} events</span>
+          ${(s.note?.tags||[]).slice(0,2).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
         </div>
-      </div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">数据库迁移脚本</span>
-        <span class="b-time-hover">10:05</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
-      </div>
+      </div>`
+    })
+  })
+  h += '</div>'
+  return h
+}
 
-      <div class="b-section-label">过去 7 天</div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">实现 Pipeline Engine</span>
-        <span class="b-time-hover">3/18</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
-      </div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">Hook 安装脚本调试</span>
-        <span class="b-time-hover">3/17</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
-      </div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">前端三栏布局实现</span>
-        <span class="b-time-hover">3/16</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
-      </div>
+function renderF(sessions) {
+  let h = '<div class="f-grid">'
+  sessions.forEach((s, i) => {
+    const colors = ['var(--accent)', 'var(--green)', 'var(--yellow)', '#e06c75', '#c678dd', '#56b6c2', '#d19a66']
+    const color = colors[i % colors.length]
+    h += `<div class="f-card${i===0?' sel':''}" data-sid="${s.session_id}">
+      <div class="f-head"><span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></span></div>
+      <div class="f-ti">${esc(title(s))}</div>
+      <div class="f-meta"><span>${s.event_count} ev</span><span>${relTime(s.last_seen_at||s.started_at)}</span></div>
+      <div class="f-bar"><div class="f-bar-fill" style="width:${Math.min(100,s.event_count*1.2)}%;background:${color}"></div></div>
+    </div>`
+  })
+  h += '</div>'
+  return h
+}
 
-      <div class="b-section-label">过去 30 天</div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">Tauri 桌面端初始化</span>
-        <span class="b-time-hover">3/10</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
-      </div>
-      <div class="b-item">
-        <span class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <span class="b-title">Claude 观测层搭建</span>
-        <span class="b-time-hover">3/5</span>
-        <div class="b-actions">
-          <button class="b-action-dot">✎</button>
-          <button class="b-action-dot">⋯</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+function renderG(sessions) {
+  let h = ''
+  sessions.forEach((s, i) => {
+    const stCls = s.status === 'active' ? 'g-s-active' : s.status === 'idle' ? 'g-s-idle' : 'g-s-stopped'
+    const stLabel = s.status === 'active' ? '运行中' : s.status === 'idle' ? '空闲' : '已结束'
+    h += `<div class="g-row${i===0?' sel':''}" data-sid="${s.session_id}">
+      <span class="g-status ${stCls}">${stLabel}</span>
+      <span class="g-ti">${esc(title(s))}</span>
+      <span class="g-ev">${s.event_count}</span>
+      <span class="g-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+    </div>`
+  })
+  return h
+}
 
-<!-- ══════════ DEMO C ══════════ -->
-<div class="demo-col">
-  <div class="demo-label">C. VS Code 资源管理器</div>
-  <p class="demo-desc">高信息密度，Tab 切换视图<br>左侧状态条 + 等宽字体 + 内联统计</p>
-  <div class="sidebar">
-    <div class="s-header">
-      <span class="title">会话记录</span>
-      <button class="action-btn">+ 新会话</button>
-    </div>
-    <div class="c-tabs">
-      <button class="c-tab active">全部</button>
-      <button class="c-tab">活跃</button>
-      <button class="c-tab">已完成</button>
-    </div>
-    <div class="s-search">
-      <input placeholder="搜索会话..." />
-    </div>
-    <div class="s-body">
-      <div class="c-section-badge">
-        活跃会话
-        <span class="c-section-count">2</span>
+function renderH(sessions) {
+  let h = ''
+  sessions.forEach((s, i) => {
+    const tags = (s.note?.tags || []).slice(0, 3)
+    h += `<div class="h-it${i===0?' sel':''}" data-sid="${s.session_id}">
+      <div class="h-r1">
+        <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}" style="margin-top:3px"></span>
+        <span class="h-ti">${esc(title(s))}</span>
+        <span class="h-tm">${relTime(s.last_seen_at||s.started_at)}</span>
       </div>
-      <div class="c-item active">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-active"></span>
-          <span class="c-title">重构用户认证模块</span>
-          <span class="c-badge c-badge-active">LIVE</span>
-        </div>
-        <span class="c-time">14:32</span>
+      ${s.summary ? `<div class="h-preview">${esc(s.summary)}</div>` : ''}
+      <div class="h-foot">
+        <span class="h-ev">${s.event_count} events</span>
+        ${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
       </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-idle"></span>
-          <span class="c-title">修复 WebSocket 重连</span>
-          <span class="c-badge">28</span>
-        </div>
-        <span class="c-time">11:15</span>
-      </div>
+    </div>`
+  })
+  return h
+}
 
-      <div class="c-separator"></div>
+// ── Build page ──
+const demos = [
+  { id: 'A', label: 'A. 日期分组 + 头像', desc: '按日期分组，头像 + 摘要预览<br>类似 Telegram / iMessage', render: renderA, tabs: false },
+  { id: 'B', label: 'B. ChatGPT 极简', desc: '单行文本，hover 显示操作<br>类似 ChatGPT / Claude.ai', render: renderB, tabs: false },
+  { id: 'C', label: 'C. VS Code 资源管理器', desc: 'Tab 切换 + 左侧状态条<br>高密度等宽字体', render: renderC, tabs: true },
+  { id: 'D', label: 'D. 双区域富卡片', desc: '活跃/历史分区，模型标签 + 进度条<br>信息最丰富', render: renderD, tabs: false },
+  { id: 'E', label: 'E. 时间轴', desc: '垂直时间线 + 节点标记<br>按日期串联的历史视图', render: renderE, tabs: false },
+  { id: 'F', label: 'F. 棋盘缩略图', desc: '双列网格卡片 + 彩色进度条<br>一览无余的缩略图视图', render: renderF, tabs: false },
+  { id: 'G', label: 'G. Notion 表格', desc: '四列表格：状态 / 标题 / 事件 / 时间<br>数据库风格', render: renderG, tabs: false, tableHeader: true },
+  { id: 'H', label: 'H. 气泡预览', desc: '消息预览卡片 + 标签<br>聚焦最后一条对话内容', render: renderH, tabs: false },
+]
 
-      <div class="c-section-badge">
-        历史会话
-        <span class="c-section-count">8</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">添加 i18n 支持</span>
-          <span class="c-badge">15</span>
-        </div>
-        <span class="c-time">09:45</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">优化 Dashboard 性能</span>
-          <span class="c-badge">56</span>
-        </div>
-        <span class="c-time">昨天</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">数据库迁移脚本</span>
-          <span class="c-badge">33</span>
-        </div>
-        <span class="c-time">昨天</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">实现 Pipeline Engine</span>
-          <span class="c-badge">128</span>
-        </div>
-        <span class="c-time">3/18</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">Hook 安装脚本调试</span>
-          <span class="c-badge">22</span>
-        </div>
-        <span class="c-time">3/17</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">前端三栏布局实现</span>
-          <span class="c-badge">67</span>
-        </div>
-        <span class="c-time">3/16</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">Tauri 桌面端初始化</span>
-          <span class="c-badge">45</span>
-        </div>
-        <span class="c-time">3/10</span>
-      </div>
-      <div class="c-item">
-        <div class="c-item-main">
-          <span class="c-status-bar c-status-stopped"></span>
-          <span class="c-title">Claude 观测层搭建</span>
-          <span class="c-badge">89</span>
-        </div>
-        <span class="c-time">3/5</span>
-      </div>
-    </div>
-  </div>
-</div>
+async function init() {
+  const sessions = await loadSessions()
+  const statusEl = document.getElementById('status')
+  const rootEl = document.getElementById('root')
 
-<!-- ══════════ DEMO D ══════════ -->
-<div class="demo-col">
-  <div class="demo-label">D. 双区域富卡片</div>
-  <p class="demo-desc">活跃/历史分区，卡片带模型标签和进度条<br>信息最丰富，适合深度监控</p>
-  <div class="sidebar">
-    <div class="s-header">
-      <span class="title">会话记录</span>
-      <button class="action-btn">+ 新会话</button>
-    </div>
-    <div class="s-search">
-      <input placeholder="搜索会话..." />
-    </div>
-    <div class="s-body">
-      <!-- Active Section -->
-      <div class="d-section">
-        <div class="d-section-header">
-          <span class="d-section-title">● 活跃中</span>
-          <span class="d-section-count">2 个会话</span>
-        </div>
+  if (!sessions || sessions.length === 0) {
+    statusEl.textContent = '未能获取会话数据，请确保后端运行在 localhost:8765'
+    return
+  }
 
-        <div class="d-card active">
-          <div class="d-card-row1">
-            <span class="d-live-dot"></span>
-            <span class="d-card-title">重构用户认证模块</span>
-            <span class="d-card-time">14:32</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Opus 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 42 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 23m</span>
-          </div>
-          <div class="d-card-summary">已完成 JWT token 刷新逻辑的重写，正在处理...</div>
-          <div class="d-tags">
-            <span class="tag">auth</span>
-            <span class="tag">refactor</span>
-          </div>
-          <div class="d-progress-bar"><div class="d-progress-fill" style="width: 65%"></div></div>
-        </div>
+  statusEl.style.display = 'none'
+  rootEl.style.display = 'grid'
 
-        <div class="d-card">
-          <div class="d-card-row1">
-            <span class="dot dot-idle"></span>
-            <span class="d-card-title">修复 WebSocket 重连</span>
-            <span class="d-card-time">11:15</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Sonnet 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 28 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 12m</span>
-          </div>
-          <div class="d-card-summary">等待用户输入... 需要确认重连策略</div>
+  demos.forEach(demo => {
+    const col = document.createElement('div')
+    col.className = 'col'
+    col.innerHTML = `
+      <div class="label">${demo.label}</div>
+      <div class="desc">${demo.desc}</div>
+      <div class="panel">
+        <div class="hdr">
+          <span class="hdr-title">会话记录</span>
+          <button class="hdr-btn">+ 新会话</button>
         </div>
+        ${demo.tabs ? '<div class="c-tabs"><button class="c-tab act">全部</button><button class="c-tab">活跃</button><button class="c-tab">已完成</button></div>' : ''}
+        ${demo.tableHeader ? '' : '<div class="srch"><input placeholder="搜索会话..." /></div>'}
+        ${demo.tableHeader ? '<div class="g-cols"><span>状态</span><span>会话</span><span style="text-align:right">事件</span><span style="text-align:right">时间</span></div>' : ''}
+        <div class="body">${demo.render(sessions)}</div>
       </div>
+    `
+    rootEl.appendChild(col)
+    setupClick(col)
+  })
+}
 
-      <!-- History Section -->
-      <div class="d-section">
-        <div class="d-section-header">
-          <span class="d-section-title">历史记录</span>
-          <span class="d-section-count">6 个会话</span>
-        </div>
-
-        <div class="d-card">
-          <div class="d-card-row1">
-            <span class="dot dot-stopped"></span>
-            <span class="d-card-title">添加 i18n 支持</span>
-            <span class="d-card-time">09:45</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Sonnet 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 15 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 8m</span>
-          </div>
-        </div>
-
-        <div class="d-card">
-          <div class="d-card-row1">
-            <span class="dot dot-stopped"></span>
-            <span class="d-card-title">优化 Dashboard 性能</span>
-            <span class="d-card-time">昨天</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Opus 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 56 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 35m</span>
-          </div>
-          <div class="d-tags">
-            <span class="tag">perf</span>
-          </div>
-        </div>
-
-        <div class="d-card">
-          <div class="d-card-row1">
-            <span class="dot dot-stopped"></span>
-            <span class="d-card-title">数据库迁移脚本</span>
-            <span class="d-card-time">昨天</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Sonnet 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 33 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 18m</span>
-          </div>
-        </div>
-
-        <div class="d-card">
-          <div class="d-card-row1">
-            <span class="dot dot-stopped"></span>
-            <span class="d-card-title">实现 Pipeline Engine</span>
-            <span class="d-card-time">3/18</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Opus 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 128 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 1h 12m</span>
-          </div>
-          <div class="d-tags">
-            <span class="tag">pipeline</span>
-            <span class="tag">backend</span>
-          </div>
-        </div>
-
-        <div class="d-card">
-          <div class="d-card-row1">
-            <span class="dot dot-stopped"></span>
-            <span class="d-card-title">Hook 安装脚本调试</span>
-            <span class="d-card-time">3/17</span>
-          </div>
-          <div class="d-card-row2">
-            <span class="d-model-badge">Sonnet 4</span>
-            <span class="d-stat"><span class="d-stat-icon">⚡</span> 22 events</span>
-            <span class="d-stat"><span class="d-stat-icon">⏱</span> 10m</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</div>
+init()
+</script>
 </body>
 </html>
