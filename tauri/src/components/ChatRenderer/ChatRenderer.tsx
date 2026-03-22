@@ -627,7 +627,7 @@ function EditDiffView({ input }: { input: Record<string, unknown> }) {
   return (
     <div className={styles.diffWrap}>
       <div className={styles.diffHeader}>
-        <IconWrench size={12} />
+        {fileExtIcon(filePath, 14)}
         <span className={styles.diffFilePath} title={filePath}>{fileName}</span>
         <span style={{ flex: 1 }} />
         <span className={styles.diffStats}>
