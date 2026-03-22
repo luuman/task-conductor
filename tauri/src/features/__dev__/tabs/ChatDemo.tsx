@@ -368,6 +368,7 @@ function ChatDemoCanvas() {
         nodes={nodes} edges={edges}
         onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes} fitView
+        nodesDraggable={false}
         minZoom={0.03} maxZoom={1.2}
         proOptions={{ hideAttribution: true }}
         style={{ background: 'var(--tc-content-bg)' }}
