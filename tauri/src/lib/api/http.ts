@@ -99,6 +99,12 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<{ messages: TranscriptMessage[]; file_found: boolean; total: number; has_more: boolean }>(url)
   }
 
+  getQuestions(sessionId: string) {
+    return this.fetch<{ questions: Array<{ index: number; text: string }>; total: number }>(
+      `/api/sessions/${encodeURIComponent(sessionId)}/questions`
+    )
+  }
+
   getSessionNote(sessionId: string) {
     return this.fetch<ConversationNote>(`/api/sessions/${encodeURIComponent(sessionId)}/note`)
   }
