@@ -97,7 +97,7 @@ export interface AiSession {
   cwd?: string
   status?: string
   summary?: string | null
-  note?: { alias?: string | null; notes?: string | null; tags?: string[] }
+  note?: { alias?: string | null; notes?: string | null; tags?: string[]; linked_task_id?: number | null }
 }
 
 export interface SessionEvent {
