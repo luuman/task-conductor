@@ -1134,8 +1134,8 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
       <div className={`${styles.bashCardHeader} ${hasError ? styles.bashCardHeaderErr : ''}`}>
         <span className={styles.bashCardIcon}>{getToolIcon('Bash', 12)}</span>
         <span className={styles.bashCardPrompt}>$</span>
-        {cmdHighlighted ? (
-          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: cmdHighlighted }} />
+        {cmdHtml ? (
+          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: cmdHtml }} />
         ) : (
           <code className={styles.bashCardCmd}>{shortCmd}</code>
         )}
