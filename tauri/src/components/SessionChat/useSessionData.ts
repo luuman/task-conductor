@@ -194,6 +194,11 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
       setHasMore(false)
     }
 
+    // Fetch full question list (lightweight)
+    api.getQuestions(id)
+      .then(r => setAllQuestions(r.questions))
+      .catch(() => setAllQuestions([]))
+
     // Fetch latest (last 50 messages)
     api.getTranscript(id, { limit: 50 })
       .then(r => {
