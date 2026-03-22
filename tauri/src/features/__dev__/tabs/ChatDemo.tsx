@@ -262,12 +262,12 @@ const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 // ── 布局 ────────────────────────────────────────────
 
 const RAW_W = 340
-const STYLED_W = 480
+const STYLED_W = 5 * 420 + 4 * 16  // 5 方案 × 420px + 4 间距
 const PAIR_GAP = 200
 const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
-const COL_GAP = 160
-const ROW_PAD = 100
-const COLS = 2
+const COL_GAP = 200
+const ROW_PAD = 120
+const COLS = 1  // 单列（太宽了放不下 2 列）
 
 function estimateH(msgCount: number, turnCount: number): number {
   return Math.max(msgCount * 160 + 60, turnCount * 250 + 60, 300)
