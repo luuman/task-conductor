@@ -177,7 +177,7 @@ export interface SessionListProps {
 
 export function SessionList({
   sessions, selectedId, onSelect, onClearSelection,
-  search, onSearchChange, loading, compact, showProjectName = true, className,
+  search, onSearchChange, loading, compact: _compact, showProjectName = true, className,
 }: SessionListProps) {
   const { t } = useTranslation()
 
