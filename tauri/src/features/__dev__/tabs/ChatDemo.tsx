@@ -1,6 +1,6 @@
 /**
- * ChatDemo — 散落式画布，每组 = Raw卡片 ←连线→ Styled卡片
- * 无外框、无头像，纯内容展示
+ * ChatDemo — 画布卡片对比展示
+ * Raw 节点 ←连线→ Styled 节点，右侧悬浮导航
  */
 import { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
@@ -14,10 +14,8 @@ import {
   ReactFlowProvider,
   Handle,
   Position,
-  getBezierPath,
   type Node,
   type Edge,
-  type EdgeProps,
   type NodeProps,
   BackgroundVariant,
 } from '@xyflow/react'
@@ -76,7 +74,7 @@ function getIcon(label: string): string {
   return '📎'
 }
 
-// ── Raw 节点：纯内容，无外框 ────────────────────────
+// ── Raw 内容渲染 ────────────────────────────────────
 
 function RawBlockContent({ block }: { block: TranscriptBlock }) {
   if (block.type === 'text') {
@@ -126,109 +124,88 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
   )
 }
 
+// ── 节点数据 ────────────────────────────────────────
+
 interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
 interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
 
-// Raw 节点：Handle 在最外层，与内容平级（和 MindMapNode 一致）
+// ── Raw 节点：div 包裹，Handle 在 div 内 ────────────
+
 const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
-  <>
+  <div style={{ width: 340, position: 'relative' }}>
     <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-    <div style={{ width: 340 }}>
-      {data.messages.map((msg, i) => {
-        const isUser = msg.role === 'user'
-        return (
-          <div key={i} style={{
-            marginBottom: i < data.messages.length - 1 ? 6 : 0,
-            borderRadius: 8,
-            border: `1px solid ${isUser ? 'var(--tc-border)' : 'rgba(88,166,255,0.15)'}`,
-            background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
-            overflow: 'hidden',
-          }}>
-            {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
-          </div>
-        )
-      })}
-    </div>
-    <Handle type="source" position={Position.Right}
-      style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-  </>
+    {data.messages.map((msg, i) => {
+      const isUser = msg.role === 'user'
+      return (
+        <div key={i} style={{
+          marginBottom: i < data.messages.length - 1 ? 6 : 0,
+          borderRadius: 8,
+          border: `1px solid ${isUser ? 'var(--tc-border)' : 'rgba(88,166,255,0.15)'}`,
+          background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
+          overflow: 'hidden',
+        }}>
+          {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
+        </div>
+      )
+    })}
+    <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+  </div>
 ))
 RawNode.displayName = 'RawNode'
 
-// Styled 节点：Handle 在最外层
-const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
-  <ExpandSignalCtx.Provider value={1}>
-    <AutoExpandCtx.Provider value={true}>
-      <>
-        <Handle type="target" position={Position.Left}
-          style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-        <div style={{ width: 480 }}>
-          {data.turns.map((item, i) => {
-            if (item.kind === 'user') {
-              const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
-              if (!text) return null
-              return (
-                <div key={i} style={{
-                  padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-                  background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
-                  fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
-                }}>
-                  <RichTextBlock text={text} />
-                </div>
-              )
-            }
-            const { turn } = item
+// ── Styled 节点内部渲染 ─────────────────────────────
+
+function StyledContent({ turns }: { turns: GroupedTurnItem[] }) {
+  return (
+    <ExpandSignalCtx.Provider value={1}>
+      <AutoExpandCtx.Provider value={true}>
+        {turns.map((item, i) => {
+          if (item.kind === 'user') {
+            const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
+            if (!text) return null
             return (
               <div key={i} style={{
                 padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-                background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
+                background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
                 fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
               }}>
-                {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
-                {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
-                {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
-                {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
-                {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
+                <RichTextBlock text={text} />
               </div>
             )
-          })}
-        </div>
-        <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
-      </>
-    </AutoExpandCtx.Provider>
-  </ExpandSignalCtx.Provider>
-))
-StyledNode.displayName = 'StyledNode'
-
-// ── 自定义 Edge ─────────────────────────────────────
-
-function DemoEdge({
-  id, sourceX, sourceY, targetX, targetY,
-  sourcePosition, targetPosition, data,
-}: EdgeProps) {
-  const color = (data as Record<string, unknown>)?.color as string ?? '#58a6ff'
-  const [edgePath] = getBezierPath({
-    sourceX, sourceY, targetX, targetY,
-    sourcePosition, targetPosition,
-    curvature: 0.3,
-  })
-  return (
-    <path
-      id={id}
-      d={edgePath}
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-      strokeOpacity={0.5}
-      strokeLinecap="round"
-    />
+          }
+          const { turn } = item
+          return (
+            <div key={i} style={{
+              padding: '8px 12px', borderRadius: 8, marginBottom: 6,
+              background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
+              fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
+            }}>
+              {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
+              {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
+              {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
+              {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
+              {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
+            </div>
+          )
+        })}
+      </AutoExpandCtx.Provider>
+    </ExpandSignalCtx.Provider>
   )
 }
 
-const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
-const edgeTypes = { demo: DemoEdge }
+// Styled 节点：div 包裹，Handle 在 div 内（不用 Fragment/Provider 包裹）
+const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
+  <div style={{ width: 480, position: 'relative' }}>
+    <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+    <StyledContent turns={data.turns} />
+    <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+  </div>
+))
+StyledNode.displayName = 'StyledNode'
 
-// ── 布局（一次性计算，不做二次重排） ─────────────────
+const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
+
+// ── 布局 ────────────────────────────────────────────
 
 const RAW_W = 340
 const STYLED_W = 480
@@ -238,9 +215,7 @@ const COL_GAP = 160
 const ROW_PAD = 100
 const COLS = 2
 
-// 根据消息数量估算行高（宁多不少）
 function estimateH(msgCount: number, turnCount: number): number {
-  // 每条 raw 消息大约 100~200px，每个 styled turn 约 150~300px
   const raw = msgCount * 160 + 60
   const styled = turnCount * 250 + 60
   return Math.max(raw, styled, 300)
@@ -250,7 +225,6 @@ function buildGraph(turns: GroupedTurnItem[]) {
   const nodes: Node[] = []
   const edges: Edge[] = []
 
-  // 预计算每个 section 的高度
   const secs: Array<{
     rawMsgs: TranscriptMessage[]
     sectionTurns: GroupedTurnItem[]
@@ -283,7 +257,6 @@ function buildGraph(turns: GroupedTurnItem[]) {
     })
   }
 
-  // 瀑布流分列
   const colY = new Array(COLS).fill(0)
 
   for (let si = 0; si < secs.length; si++) {
@@ -308,8 +281,8 @@ function buildGraph(turns: GroupedTurnItem[]) {
       id: `e-${si}`,
       source: `raw-${si}`,
       target: `styled-${si}`,
-      type: 'demo',
-      data: { color },
+      type: 'default',
+      style: { stroke: color, strokeWidth: 2 },
     })
 
     colY[col] += height + ROW_PAD
@@ -385,9 +358,8 @@ function ChatDemoCanvas() {
     const x = Math.min(r.position.x, s.position.x)
     const y = Math.min(r.position.y, s.position.y)
     const right = Math.max(r.position.x + RAW_W, s.position.x + STYLED_W)
-    const bottom = y + 600
     fitBounds(
-      { x: x - 30, y: y - 30, width: right - x + 60, height: bottom - y + 60 },
+      { x: x - 30, y: y - 30, width: right - x + 60, height: 660 },
       { padding: 0.08, duration: 600 },
     )
   }, [nodes, fitBounds])
@@ -395,11 +367,15 @@ function ChatDemoCanvas() {
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
-        nodes={nodes} edges={edges}
-        onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        fitView
         nodesDraggable={false}
-        minZoom={0.03} maxZoom={1.2}
+        minZoom={0.03}
+        maxZoom={1.2}
         proOptions={{ hideAttribution: true }}
         style={{ background: 'var(--tc-content-bg)' }}
       >
