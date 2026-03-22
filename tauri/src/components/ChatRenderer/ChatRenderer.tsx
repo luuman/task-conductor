@@ -434,6 +434,12 @@ export const mdComponents: Components = {
     if (className?.includes('language-')) {
       const lang = className.replace('language-', '')
       const raw = String(children).replace(/\n$/, '')
+
+      // ── Mermaid 图表 ──
+      if (lang === 'mermaid') {
+        return <MermaidBlock code={raw} />
+      }
+
       let highlighted: string | null = null
       try {
         if (hljs.getLanguage(lang)) {
