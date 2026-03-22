@@ -90,8 +90,13 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<SessionEvent[]>(`/api/sessions/${encodeURIComponent(sessionId)}/events`)
   }
 
-  getTranscript(sessionId: string) {
-    return this.fetch<{ messages: TranscriptMessage[]; file_found: boolean }>(`/api/sessions/${encodeURIComponent(sessionId)}/transcript`)
+  getTranscript(sessionId: string, params?: { limit?: number; offset?: number }) {
+    const searchParams = new URLSearchParams()
+    if (params?.limit != null) searchParams.set('limit', String(params.limit))
+    if (params?.offset != null) searchParams.set('offset', String(params.offset))
+    const qs = searchParams.toString()
+    const url = `/api/sessions/${encodeURIComponent(sessionId)}/transcript${qs ? `?${qs}` : ''}`
+    return this.fetch<{ messages: TranscriptMessage[]; file_found: boolean; total: number; has_more: boolean }>(url)
   }
 
   getSessionNote(sessionId: string) {
