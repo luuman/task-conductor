@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
 import hljs from 'highlight.js/lib/core'
 import '../../styles/hljs-ayu-dark.css'
+import { useHighlight } from '../../lib/useHighlight'
 import {
   IconTerminal, IconFileText, IconPencil, IconWrench, IconSearch,
   IconFolderOpen, IconGlobe, IconBot, IconCircleHelp, IconChevronRight,
