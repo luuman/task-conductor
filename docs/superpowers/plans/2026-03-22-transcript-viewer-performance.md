@@ -57,25 +57,33 @@ const toggle = useCallback(() => {
 
 现有 effect（line ~716-721）保持不变，它只调用 `setOpen(signal > 0)`，不影响 `mounted`。无需改动。
 
-- [ ] **Step 3: 用 mounted + display:none 包裹 toolBody 渲染**
+- [ ] **Step 3: 用 mounted + display:none 包裹内联 body 渲染**
 
-找到 ToolWidget 的 body 渲染部分（line ~784-793），将条件渲染从 `{open && ...}` 改为 `mounted` 控制 mount、`display` 控制可见：
+找到 ToolWidget 的 body 渲染部分（line ~784-793）。注意：body 内容是直接内联渲染的（没有 `toolBody` 变量），需要将 `{open && (...)}` 改为 `{mounted && (...)}`，同时用 `display` 控制可见性：
 
 ```tsx
-// 现有（约 line 784）:
-{open && toolBody && (
+// 现有（约 line 784-793）:
+{open && (
   <div className={styles.toolBody}>
-    {toolBody}
+    {!!hasEditData && <EditDiffView input={block.tool_input!} />}
+    {isBash && hasResult && <BashOutput ... />}
+    {isRead && hasResult && <ReadFileView ... />}
+    ...
   </div>
 )}
 
 // 改为:
-{mounted && toolBody && (
+{mounted && (
   <div className={styles.toolBody} style={{ display: open ? 'block' : 'none' }}>
-    {toolBody}
+    {!!hasEditData && <EditDiffView input={block.tool_input!} />}
+    {isBash && hasResult && <BashOutput ... />}
+    {isRead && hasResult && <ReadFileView ... />}
+    ...
   </div>
 )}
 ```
+
+只需将 `open` 改为 `mounted`，并添加 `style={{ display: open ? 'block' : 'none' }}`。内部子组件保持不变。
 
 - [ ] **Step 4: 验证编译通过**
 
