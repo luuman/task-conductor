@@ -12,6 +12,11 @@ export interface UseSessionDataOptions {
   transcriptPollInterval?: number // fallback transcript poll (default 10000)
 }
 
+export interface QuestionItem {
+  index: number
+  text: string
+}
+
 export interface UseSessionDataReturn {
   // Session list
   sessions: AiSession[]
@@ -35,6 +40,9 @@ export interface UseSessionDataReturn {
   hasMore: boolean
   loadingMore: boolean
   total: number
+
+  // All questions (full list from /questions API)
+  allQuestions: QuestionItem[]
 
   // Scroll
   isFirstLoad: React.MutableRefObject<boolean>
