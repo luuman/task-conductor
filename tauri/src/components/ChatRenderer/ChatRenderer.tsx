@@ -1,7 +1,7 @@
 // ChatRenderer.tsx — Shared transcript message rendering components
 // Extracted from AdminSessions.tsx for reuse in FloatingAssistant and other contexts.
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, createContext, useContext, type ReactNode } from 'react'
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState, createContext, useContext, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
