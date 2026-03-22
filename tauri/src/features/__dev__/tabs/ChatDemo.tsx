@@ -235,7 +235,6 @@ export function ChatDemo() {
     if (!rawScroll || !styledScroll) return
 
     const rawRect = rawScroll.getBoundingClientRect()
-    const styledRect = styledScroll.getBoundingClientRect()
     const viewTop = rawRect.top
     const viewBottom = rawRect.bottom
 
