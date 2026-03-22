@@ -210,6 +210,9 @@ export default function DevToolsPage() {
         <button className={styles.tab} data-active={tab === 'file-map'} onClick={() => setTab('file-map')}>
           File Map
         </button>
+        <button className={styles.tab} data-active={tab === 'chat-demo'} onClick={() => setTab('chat-demo')}>
+          Chat Demo (13)
+        </button>
       </div>
 
       {(tab === 'file-icons' || tab === 'ui-icons') && (
