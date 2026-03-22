@@ -169,19 +169,18 @@ export function getFileIcon(filePath: string): string {
   return `/file-icons/${map[ext] || 'file_type_default.svg'}`
 }
 
-// ── 卡片风格定义 ────────────────────────────────────
+// ── 卡片风格定义（5 种方案）────────────────────────
 
 type CardStyle = 'A' | 'B' | 'C' | 'D' | 'E'
 
 const CARD_STYLES: { key: CardStyle; label: string; desc: string }[] = [
-  { key: 'A', label: '当前', desc: '现有默认样式' },
-  { key: 'B', label: '毛玻璃', desc: '半透明背景 + 模糊' },
-  { key: 'C', label: '线框', desc: '无背景 + 左侧色条' },
-  { key: 'D', label: '卡片', desc: '阴影浮起 + 圆角大' },
-  { key: 'E', label: '紧凑', desc: '小间距 + 无圆角' },
+  { key: 'A', label: '默认', desc: '深色圆角卡片' },
+  { key: 'B', label: '毛玻璃', desc: '半透明模糊背景' },
+  { key: 'C', label: '线框', desc: '无背景 + 左色条' },
+  { key: 'D', label: '浮起', desc: '大圆角 + 深阴影' },
+  { key: 'E', label: '紧凑', desc: '零圆角 + 小间距' },
 ]
 
-// 各风格的容器样式
 function getUserCardStyle(style: CardStyle): React.CSSProperties {
   const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
   switch (style) {
@@ -204,13 +203,8 @@ function getAssistantCardStyle(style: CardStyle): React.CSSProperties {
   }
 }
 
-// ── Styled 节点 ─────────────────────────────────────
-
-// 全局卡片风格 context
-const CardStyleCtx = createContext<CardStyle>('A')
-
-function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
-  const cardStyle = useContext(CardStyleCtx)
+// 单个风格的渲染
+function StyledContentWithStyle({ turns, style }: { turns: GroupedTurnItem[]; style: CardStyle }) {
   return (
     <ExpandSignalCtx.Provider value={1}>
       <AutoExpandCtx.Provider value={true}>
@@ -219,14 +213,14 @@ function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
             const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
             if (!text) return null
             return (
-              <div key={i} style={getUserCardStyle(cardStyle)}>
+              <div key={i} style={getUserCardStyle(style)}>
                 <RichTextBlock text={text} />
               </div>
             )
           }
           const { turn } = item
           return (
-            <div key={i} style={getAssistantCardStyle(cardStyle)}>
+            <div key={i} style={getAssistantCardStyle(style)}>
               {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
               {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
               {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
@@ -240,9 +234,25 @@ function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
   )
 }
 
+// ── Styled 节点：5 种方案横向排列 ───────────────────
+
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
-  <div style={{ width: 480 }}>
-    <StyledContentInner turns={data.turns} />
+  <div style={{ display: 'flex', gap: 16 }}>
+    {CARD_STYLES.map(s => (
+      <div key={s.key} style={{ width: 420, flexShrink: 0 }}>
+        {/* 方案标签 */}
+        <div style={{
+          marginBottom: 6, padding: '4px 10px',
+          borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: 'rgba(88,166,255,0.1)', border: '1px solid rgba(88,166,255,0.2)',
+        }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#58a6ff' }}>{s.key}</span>
+          <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)' }}>{s.label}</span>
+          <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', opacity: 0.6 }}>{s.desc}</span>
+        </div>
+        <StyledContentWithStyle turns={data.turns} style={s.key} />
+      </div>
+    ))}
   </div>
 ))
 StyledNode.displayName = 'StyledNode'
