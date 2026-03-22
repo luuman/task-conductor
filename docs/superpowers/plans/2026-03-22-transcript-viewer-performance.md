@@ -419,22 +419,37 @@ const jumpToQuestion = useCallback((msgIndex: number) => {
 
 - [ ] **Step 3: 修改 SessionChat.tsx 传递新 props**
 
-在 `SessionChat.tsx` 中：
+在 `SessionChat.tsx` 中，用 `useRef` + `useCallback` 稳定回调引用：
 
 ```tsx
-const [jumpHandler, setJumpHandler] = useState<{ scrollToIndex: (i: number) => void } | null>(null)
+const jumpHandlerRef = useRef<{ scrollToIndex: (i: number) => void } | null>(null)
+
+const handleJumpReady = useCallback((handler: { scrollToIndex: (i: number) => void }) => {
+  jumpHandlerRef.current = handler
+}, [])
+
+// turns 用于 msgIndex → turnIndex 映射
+const turns = useMemo(() => groupMessagesIntoTurns(transcript), [transcript])
+
+const handleJumpToIndex = useCallback((msgIndex: number) => {
+  // 将 QuestionNav 的 msgIndex 映射到 turns 数组中的 turnIndex
+  const turnIndex = turns.findIndex(t => t.startIndex >= msgIndex)
+  if (turnIndex >= 0) {
+    jumpHandlerRef.current?.scrollToIndex(turnIndex)
+  }
+}, [turns])
 
 // 传给 TranscriptViewer
 <TranscriptViewer
   ...
-  onJumpToQuestion={(handler) => setJumpHandler(handler)}
+  onJumpToQuestion={handleJumpReady}
 />
 
 // 传给 QuestionNav
 {hasQuestions && (
   <QuestionNav
     transcript={transcript}
-    onJumpToIndex={(turnIndex) => jumpHandler?.scrollToIndex(turnIndex)}
+    onJumpToIndex={handleJumpToIndex}
     autoExpand={autoExpand}
     onAutoExpandChange={setAutoExpand}
   />
