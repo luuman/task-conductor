@@ -1051,6 +1051,27 @@ export default function AdminServerMonitor() {
           </div>
         </div>
 
+        {/* ═══ Claude 独立展示 ═══ */}
+        {claudeProcs.length > 0 && (
+          <>
+            <div className={s.sectionLabel}>Claude 进程</div>
+            <div className={s.card} style={{ marginBottom: 14 }}>
+              <div className={s.cardHead}>
+                <div className={s.cardTitle}>
+                  <div className={s.cardTitleIcon} style={{ background: '#a78bfa22', color: '#a78bfa' }}>◉</div>
+                  Claude 实例集群
+                </div>
+                <div className={s.cardHint}>
+                  {claudeProcs.length} 个实例 · {claudeProcs.filter(p => p.cpu_pct > 1).length} 活跃
+                </div>
+              </div>
+              <div className={s.cardBody}>
+                <ClaudeCluster procs={claudeProcs} colors={CLAUDE_COLORS} />
+              </div>
+            </div>
+          </>
+        )}
+
         {/* ═══ 进程拓扑 ═══ */}
         <div className={s.sectionLabel}>进程拓扑</div>
         <div className={s.card} style={{ marginBottom: 14 }}>
@@ -1059,16 +1080,16 @@ export default function AdminServerMonitor() {
               <div className={s.cardTitleIcon} style={{ background: '#a78bfa22', color: '#a78bfa' }}>⬡</div>
               进程关系图
             </div>
-            <div className={s.cardHint}>双环：外环 = CPU% · 内环 = MEM · 拖拽/缩放</div>
+            <div className={s.cardHint}>双环：外环 = CPU% · 内环 = MEM · 拖拽/缩放（不含 Claude）</div>
           </div>
           <div className={s.cardBody}>
-            {allProcs.length ? (
+            {nonClaudeProcs.length ? (
               <>
-                <ProcessTopology procs={allProcs} onKill={handleKill} />
+                <ProcessTopology procs={nonClaudeProcs} onKill={handleKill} />
                 <div className={s.topoLegend}>
                   <span><span className={s.topoLegendDot} style={{ background: '#60a5fa' }} />外环 = CPU%</span>
                   <span><span className={s.topoLegendDot} style={{ background: '#34d399' }} />内环 = MEM</span>
-                  {Object.entries(PROC_PALETTE).slice(0, 5).map(([name, color]) => (
+                  {Object.entries(PROC_PALETTE).filter(([n]) => n !== 'claude').slice(0, 5).map(([name, color]) => (
                     <span key={name}><span className={s.topoLegendDot} style={{ background: color }} />{name}</span>
                   ))}
                 </div>
@@ -1076,18 +1097,6 @@ export default function AdminServerMonitor() {
             ) : <Skeleton variant="text" width="100%" height={300} />}
           </div>
         </div>
-
-        {/* ═══ Claude 详情 ═══ */}
-        {claudeProcs.length > 0 && (
-          <>
-            <div className={s.sectionLabel}>Claude 进程详情</div>
-            <div className={s.claudeCards}>
-              {claudeProcs.map((p, i) => (
-                <ClaudeCard key={p.pid} proc={p} color={CLAUDE_COLORS[i % CLAUDE_COLORS.length]} index={i} />
-              ))}
-            </div>
-          </>
-        )}
       </div>
     </div>
   )
