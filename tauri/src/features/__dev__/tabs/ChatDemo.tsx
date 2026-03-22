@@ -376,11 +376,9 @@ function SvgLines({ pairs }: { pairs: PairPosition[] }) {
 
 // ── 悬浮导航 ────────────────────────────────────────
 
-function FloatingNav({ sections, onJump, cardStyle, onStyleChange }: {
+function FloatingNav({ sections, onJump }: {
   sections: typeof DEMO_SECTIONS
   onJump: (i: number) => void
-  cardStyle: CardStyle
-  onStyleChange: (s: CardStyle) => void
 }) {
   const [collapsed, setCollapsed] = useState(false)
   return (
