@@ -46,10 +46,13 @@ const turns = useMemo(() => groupMessagesIntoTurns(transcript), [transcript])
 
 关键适配：
 - **动态高度**: Virtuoso 默认支持，自动测量每行高度
+- **高度预估**: 提供 `estimateSize` 回调减少布局抖动：`(index) => turns[index].kind === 'user' ? 80 : 300`
+- **稳定 key**: 使用 `computeItemKey={(index, item) => item.startIndex}` 避免分页 prepend 时 index 漂移导致 remount
 - **滚动到底部**: 用 `followOutput="smooth"` 替代手动 `scrollIntoView`
 - **Jump to bottom 按钮**: 用 Virtuoso 的 `atBottomStateChange` 回调控制显示/隐藏
-- **Sticky question header**: 用 `rangeChanged` 回调获取当前可见的第一条消息索引，匹配到对应 question，替代当前的 IntersectionObserver 方案
-- **scrollRef 传递**: Virtuoso 暴露 `scrollerRef` prop，传给 QuestionNav 用于跳转
+- **Sticky question header 迁移**: 移除 IntersectionObserver，改用 `rangeChanged` 回调。回调提供 `{ startIndex, endIndex }`，从 `turns` 数组中反查最近的 user 消息作为 `currentQuestion`。具体：遍历 `turns[startIndex..endIndex]`，找最后一个 `kind === 'user'` 的 turn 提取文本
+- **QuestionNav 跳转迁移**: TranscriptViewer 持有 `VirtuosoHandle` ref（替代原 `HTMLDivElement` scrollRef），QuestionNav 通过回调 `onJumpToQuestion(turnIndex)` 调用 `virtuosoRef.current.scrollToIndex({ index: turnIndex, align: 'start' })`，替代当前的 `querySelectorAll('[data-msg-index]')` + `scrollIntoView`
+- **scrollRef 接口变更**: `TranscriptViewerProps.scrollRef` 类型从 `RefObject<HTMLDivElement>` 改为传入 `onJumpToQuestion` 回调，由 TranscriptViewer 内部持有 VirtuosoHandle
 
 #### 组件 Memo
 
