@@ -497,7 +497,9 @@ function ProcessTopology({ procs, onKill: _onKill }: { procs: ProcessInfo[]; onK
 }
 
 /* ── Claude 详情卡片 ── */
-function ClaudeCard({ proc, color, index, onKill }: { proc: ProcessInfo; color: string; index: number; onKill: (pid: number) => void }) {
+function ClaudeCard({ proc, color, index, onKill, session }: {
+  proc: ProcessInfo; color: string; index: number; onKill: (pid: number) => void; session?: AiSession
+}) {
   const { t } = useTranslation()
   const isActive = proc.cpu_pct > 1
   const statusColor = isActive ? '#34d399' : '#f97316'
@@ -515,17 +517,36 @@ function ClaudeCard({ proc, color, index, onKill }: { proc: ProcessInfo; color: 
   const mC = proc.mem_mb > 450 ? '#f97316' : '#34d399'
   const cx = gaugeSize / 2, cy = gaugeSize / 2
 
+  // 从 cwd 提取项目名
+  const projectName = session?.cwd?.split('/').filter(Boolean).pop() ?? null
+  const alias = session?.note?.alias
+  const summary = session?.summary
+
   return (
     <div className={s.clCard}>
       <div className={s.clCardBar} style={{ background: color }} />
       <div className={s.clCardHead}>
         <div className={s.clCardIdx} style={{ background: color + '18', color }}>#{index + 1}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className={s.clCardName}>claude ({proc.pid})</div>
+          <div className={s.clCardName}>{alias || `claude (${proc.pid})`}</div>
           <div className={s.clCardPid}>PID {proc.pid}</div>
         </div>
         <span className={s.clCardBadge} style={{ background: statusColor + '18', color: statusColor }}>{statusLabel}</span>
       </div>
+
+      {/* 需求/上下文 */}
+      {session && (
+        <div className={s.clCardContext}>
+          {summary && <div className={s.clCardSummary}>{summary}</div>}
+          {projectName && (
+            <div className={s.clCardCwd} title={session.cwd}>
+              <span className={s.clCardCwdIcon}>&#128193;</span>
+              {projectName}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className={s.clCardGauges}>
         <div className={s.miniGauge}>
           <svg viewBox={`0 0 ${gaugeSize} ${gaugeSize}`} width={gaugeSize} height={gaugeSize}>
