@@ -1,13 +1,14 @@
-// TranscriptViewer.tsx — Center transcript area with scroll management
-// Extracted from AdminSessions for reuse.
+// TranscriptViewer.tsx — Center transcript area with react-virtuoso virtual scrolling
+// Replaces full DOM rendering with virtualized list for performance.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { IconChevronDown, IconUser } from '../../ui/icon'
 import type { TranscriptMessage } from '../../lib/api/types'
 import {
   ExpandSignalCtx, AutoExpandCtx,
-  groupMessagesIntoTurns, UserCard, AssistantTurnCard,
+  groupMessagesIntoTurns, MemoUserCard, MemoAssistantTurnCard,
 } from '../ChatRenderer'
 import styles from './session-chat.module.css'
 
@@ -18,54 +19,61 @@ export interface TranscriptViewerProps {
   selectedId: string | null
   isFirstLoad: React.MutableRefObject<boolean>
   autoExpand?: boolean
-  scrollRef?: React.RefObject<HTMLDivElement | null>
+  onJumpToQuestion?: (ref: { scrollToIndex: (index: number) => void }) => void
   className?: string
 }
 
 export function TranscriptViewer({
   transcript, loading, fileFound, selectedId,
-  isFirstLoad, autoExpand = true, scrollRef, className,
+  isFirstLoad, autoExpand = true, onJumpToQuestion, className,
 }: TranscriptViewerProps) {
   const { t } = useTranslation()
-  const internalRef = useRef<HTMLDivElement>(null)
-  const transcriptRef = scrollRef ?? internalRef
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const virtuosoRef = useRef<VirtuosoHandle>(null)
   const [showJumpBtn, setShowJumpBtn] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null)
   const [expandSignal, setExpandSignal] = useState(0)
 
-  // Track if user is near bottom
-  const checkNearBottom = useCallback(() => {
-    const el = transcriptRef.current
-    if (!el) return false
-    return el.scrollHeight - el.scrollTop - el.clientHeight < 80
-  }, [])
+  const turns = useMemo(() => groupMessagesIntoTurns(transcript), [transcript])
 
-  // Scroll listener to toggle jump button
+  // Expose scrollToIndex to parent for QuestionNav
   useEffect(() => {
-    const el = transcriptRef.current
-    if (!el) return
-    const onScroll = () => setShowJumpBtn(!checkNearBottom())
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [checkNearBottom, transcript])
-
-  // Scroll to bottom only on first load
-  useEffect(() => {
-    if (!transcript.length) return
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false
-      requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'auto' })
-        setShowJumpBtn(false)
+    if (onJumpToQuestion && virtuosoRef.current) {
+      onJumpToQuestion({
+        scrollToIndex: (index: number) => {
+          virtuosoRef.current?.scrollToIndex({ index, align: 'start', behavior: 'smooth' })
+        },
       })
     }
-  }, [transcript, isFirstLoad])
+  }, [onJumpToQuestion, turns])
 
-  const jumpToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    setShowJumpBtn(false)
-  }, [])
+  // Extract question indices for rangeChanged matching
+  const questionIndices = useMemo(() => {
+    const result: Array<{ turnIndex: number; text: string }> = []
+    turns.forEach((item, i) => {
+      if (item.kind === 'user') {
+        const text = item.msg.blocks
+          .filter(b => b.type === 'text')
+          .map(b => b.text || '')
+          .join(' ')
+          .trim()
+          .slice(0, 200)
+        if (text) result.push({ turnIndex: i, text })
+      }
+    })
+    return result
+  }, [turns])
+
+  // rangeChanged → update sticky question header
+  const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
+    let found: string | null = null
+    for (let i = questionIndices.length - 1; i >= 0; i--) {
+      if (questionIndices[i].turnIndex <= startIndex) {
+        found = questionIndices[i].text
+        break
+      }
+    }
+    setCurrentQuestion(found)
+  }, [questionIndices])
 
   // Sync expand signal when transcript changes
   useEffect(() => {
@@ -77,59 +85,6 @@ export function TranscriptViewer({
   useEffect(() => {
     setExpandSignal(prev => autoExpand ? Math.abs(prev) + 1 : -(Math.abs(prev) + 1))
   }, [autoExpand])
-
-  // Extract questions for IntersectionObserver
-  const questions = useMemo(() => {
-    return transcript
-      .map((msg, i) => ({ msg, i }))
-      .filter(({ msg }) => msg.role === 'user')
-      .map(({ msg, i }) => ({
-        text: msg.blocks
-          .filter(b => b.type === 'text')
-          .map(b => b.text)
-          .join(' ')
-          .trim()
-          .slice(0, 200),
-        msgIndex: i,
-      }))
-      .filter(q => q.text)
-  }, [transcript])
-
-  // IntersectionObserver for sticky question header
-  useEffect(() => {
-    const container = transcriptRef.current
-    if (!container || questions.length === 0) return
-
-    const timer = setTimeout(() => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              const idx = Number((entry.target as HTMLElement).dataset.msgIndex)
-              const q = questions.find(q => q.msgIndex === idx)
-              if (q) setCurrentQuestion(q.text.slice(0, 200))
-            }
-          }
-        },
-        { root: container, rootMargin: '-40px 0px 0px 0px', threshold: 0.1 }
-      )
-
-      const qIndices = new Set(questions.map(q => q.msgIndex))
-      const elements = container.querySelectorAll('[data-msg-index]')
-      elements.forEach(el => {
-        const idx = Number((el as HTMLElement).dataset.msgIndex)
-        if (qIndices.has(idx)) observer.observe(el)
-      })
-
-      ;(container as unknown as Record<string, unknown>).__convObserver = observer
-    }, 100)
-
-    return () => {
-      clearTimeout(timer)
-      const obs = (transcriptRef.current as unknown as Record<string, unknown> | null)?.__convObserver as IntersectionObserver | undefined
-      if (obs) obs.disconnect()
-    }
-  }, [questions])
 
   // ── Render states ──
 
@@ -181,33 +136,36 @@ export function TranscriptViewer({
     <div className={`${styles.centerPanel} ${className ?? ''}`}>
       <AutoExpandCtx.Provider value={autoExpand}>
       <ExpandSignalCtx.Provider value={expandSignal}>
-        <div ref={transcriptRef} className={styles.transcriptScroll}>
-          {/* Sticky question header */}
-          {currentQuestion && (
-            <div className={styles.stickyQuestion}>
-              <span style={{ flexShrink: 0, display: 'flex' }}><IconUser size={12} /></span>
-              <span className={styles.stickyQuestionText}>{currentQuestion}</span>
+        {currentQuestion && (
+          <div className={styles.stickyQuestion}>
+            <span style={{ flexShrink: 0, display: 'flex' }}><IconUser size={12} /></span>
+            <span className={styles.stickyQuestionText}>{currentQuestion}</span>
+          </div>
+        )}
+        <Virtuoso
+          ref={virtuosoRef}
+          data={turns}
+          initialTopMostItemIndex={turns.length > 0 ? turns.length - 1 : 0}
+          followOutput="smooth"
+          computeItemKey={(_index, item) => item.startIndex}
+          defaultItemSize={200}
+          increaseViewportBy={400}
+          rangeChanged={handleRangeChanged}
+          atBottomStateChange={(atBottom) => setShowJumpBtn(!atBottom)}
+          itemContent={(_index, item) => (
+            <div data-msg-index={item.startIndex}>
+              {item.kind === 'user'
+                ? <MemoUserCard msg={item.msg} />
+                : <MemoAssistantTurnCard turn={item.turn} />}
             </div>
           )}
-          <div className={styles.transcriptBody}>
-            {groupMessagesIntoTurns(transcript).map((item, i) => (
-              <div key={i} data-msg-index={item.startIndex}>
-                {item.kind === 'user' ? (
-                  <UserCard msg={item.msg} />
-                ) : (
-                  <AssistantTurnCard turn={item.turn} />
-                )}
-              </div>
-            ))}
-            <div ref={bottomRef} />
-          </div>
-          {showJumpBtn && (
-            <button className={styles.jumpToBottom} onClick={jumpToBottom}>
-              <IconChevronDown size={14} />
-              <span>{t('admin_extra.latest')}</span>
-            </button>
-          )}
-        </div>
+        />
+        {showJumpBtn && (
+          <button className={styles.jumpToBottom} onClick={() => virtuosoRef.current?.scrollToIndex({ index: turns.length - 1, behavior: 'smooth' })}>
+            <IconChevronDown size={14} />
+            <span>{t('admin_extra.latest')}</span>
+          </button>
+        )}
       </ExpandSignalCtx.Provider>
       </AutoExpandCtx.Provider>
     </div>
