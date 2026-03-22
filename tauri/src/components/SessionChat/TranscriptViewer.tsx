@@ -28,7 +28,8 @@ export interface TranscriptViewerProps {
 
 export function TranscriptViewer({
   transcript, loading, fileFound, selectedId,
-  isFirstLoad: _isFirstLoad, autoExpand = true, onJumpToQuestion, className,
+  isFirstLoad: _isFirstLoad, autoExpand = true, onJumpToQuestion,
+  onLoadMore, hasMore, total = 0, className,
 }: TranscriptViewerProps) {
   const { t } = useTranslation()
   const virtuosoRef = useRef<VirtuosoHandle>(null)
