@@ -36,6 +36,8 @@ export function SessionChat({
 
   const hasQuestions = transcript.length > 0 && !transcriptLoading && fileFound && selectedId != null
 
+  const showProjName = !filterByCwd
+
   if (layout === 'compact') {
     return (
       <div className={`${styles.root} ${styles.rootCompact} ${className ?? ''}`}>
@@ -48,6 +50,7 @@ export function SessionChat({
           onSearchChange={setSearch}
           loading={sessionsLoading}
           compact
+          showProjectName={showProjName}
         />
         <TranscriptViewer
           transcript={transcript}
@@ -71,6 +74,7 @@ export function SessionChat({
         search={search}
         onSearchChange={setSearch}
         loading={sessionsLoading}
+        showProjectName={showProjName}
       />
       <TranscriptViewer
         transcript={transcript}
