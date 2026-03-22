@@ -194,37 +194,17 @@ StyledNode.displayName = 'StyledNode'
 
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 
-// ── 散落布局（无重叠） ─────────────────────────────
+// ── 布局 ────────────────────────────────────────────
 
 const RAW_W = 340
 const STYLED_W = 480
-const PAIR_GAP = 180    // raw 和 styled 之间
-const COLS = 3
-const COL_GAP = 160     // 列间距
-const ROW_PAD = 80      // 行间额外间距
-const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
+const PAIR_GAP = 200
 
-// 估算一个 section 的内容高度（粗略，宁多不少）
-function estimateHeight(msgCount: number, turnCount: number): number {
-  const rawH = msgCount * 90 + 50   // 每条消息约 90px
-  const styledH = turnCount * 140 + 60
-  return Math.max(rawH, styledH, 200)
-}
-
-function buildGraph(turns: GroupedTurnItem[]) {
+function buildInitialGraph(turns: GroupedTurnItem[]) {
   const nodes: Node[] = []
   const edges: Edge[] = []
 
-  // 先计算每个 section 的高度
-  const heights: number[] = []
-  const sectionData: Array<{
-    rawMsgs: TranscriptMessage[]
-    sectionTurns: GroupedTurnItem[]
-    color: string
-    icon: string
-    label: string
-  }> = []
-
+  // 初始全部 y=0，等渲染后用实际高度重排
   for (let si = 0; si < DEMO_SECTIONS.length; si++) {
     const sec = DEMO_SECTIONS[si]
     const nextSec = DEMO_SECTIONS[si + 1]
@@ -239,44 +219,28 @@ function buildGraph(turns: GroupedTurnItem[]) {
       turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
     )
 
-    heights.push(estimateHeight(rawMsgs.length, sectionTurns.length))
-    sectionData.push({
-      rawMsgs, sectionTurns,
-      color: PALETTE[si % PALETTE.length],
-      icon: getIcon(sec.label),
-      label: sec.label,
-    })
-  }
-
-  // 按列分配，逐列累加 Y（瀑布流式）
-  const colY = new Array(COLS).fill(0)
-
-  for (let si = 0; si < DEMO_SECTIONS.length; si++) {
-    // 找当前最矮的列
-    const col = colY.indexOf(Math.min(...colY))
-    const { rawMsgs, sectionTurns, color, icon, label } = sectionData[si]
-
-    const x = col * (PAIR_TOTAL + COL_GAP)
-    const y = colY[col]
+    const color = PALETTE[si % PALETTE.length]
+    const icon = getIcon(sec.label)
 
     nodes.push({
       id: `raw-${si}`, type: 'rawNode',
-      position: { x, y },
-      data: { label, color, icon, messages: rawMsgs },
+      position: { x: 0, y: 0 },
+      data: { label: sec.label, color, icon, messages: rawMsgs },
     })
     nodes.push({
       id: `styled-${si}`, type: 'styledNode',
-      position: { x: x + RAW_W + PAIR_GAP, y },
-      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
+      position: { x: RAW_W + PAIR_GAP, y: 0 },
+      data: { label: sec.label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
     })
     edges.push({
-      id: `e-${si}`, source: `raw-${si}`, target: `styled-${si}`,
-      sourceHandle: 'right', targetHandle: 'left',
+      id: `e-${si}`,
+      source: `raw-${si}`,
+      target: `styled-${si}`,
+      sourceHandle: 'right',
+      targetHandle: 'left',
       style: { stroke: color, strokeWidth: 2, opacity: 0.5 },
       type: 'smoothstep',
     })
-
-    colY[col] += heights[si] + ROW_PAD
   }
 
   return { nodes, edges }
