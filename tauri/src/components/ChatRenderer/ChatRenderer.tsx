@@ -692,7 +692,7 @@ function ReadFileView({ filePath, result }: { filePath: string; result: string }
   return (
     <div className={styles.readWrap}>
       <div className={styles.readHeader}>
-        <IconFileText size={12} />
+        {fileExtIcon(filePath, 14)}
         <span className={styles.readFilePath} title={filePath}>{fileName}</span>
         <span style={{ flex: 1 }} />
         <span className={styles.readLineCount}>{lineCount} lines</span>
