@@ -170,7 +170,7 @@ export function TranscriptViewer({
           )}
         />
         {showJumpBtn && (
-          <button className={styles.jumpToBottom} onClick={() => virtuosoRef.current?.scrollToIndex({ index: turns.length - 1, behavior: 'smooth' })}>
+          <button className={styles.jumpToBottom} onClick={() => virtuosoRef.current?.scrollToIndex({ index: firstItemIdx + turns.length - 1, behavior: 'smooth' })}>
             <IconChevronDown size={14} />
             <span>{t('admin_extra.latest')}</span>
           </button>
