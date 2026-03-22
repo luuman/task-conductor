@@ -196,10 +196,10 @@ function getUserCardStyle(style: CardStyle): React.CSSProperties {
 function getAssistantCardStyle(style: CardStyle): React.CSSProperties {
   const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
   switch (style) {
-    case 'A': return { ...base, padding: '8px 12px', borderRadius: 8, marginBottom: 6, background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)' }
-    case 'B': return { ...base, padding: '10px 14px', borderRadius: 12, marginBottom: 8, background: 'rgba(88,166,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(88,166,255,0.1)', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }
+    case 'A': return { ...base, padding: '12px 16px', borderRadius: 16, marginBottom: 8, background: 'rgba(30,30,40,0.6)', border: '1px solid rgba(255,255,255,0.06)' }
+    case 'B': return { ...base, padding: '10px 14px', borderRadius: 16, marginBottom: 8, background: 'rgba(88,166,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(88,166,255,0.1)', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }
     case 'C': return { ...base, padding: '8px 12px', borderRadius: 0, marginBottom: 4, borderLeft: '3px solid #58a6ff', background: 'transparent' }
-    case 'D': return { ...base, padding: '12px 16px', borderRadius: 14, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid rgba(88,166,255,0.15)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }
+    case 'D': return { ...base, padding: '12px 16px', borderRadius: 18, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }
     case 'E': return { ...base, padding: '4px 8px', borderRadius: 0, marginBottom: 2, background: 'rgba(68,119,255,0.03)', borderBottom: '1px solid var(--tc-border)', fontSize: 11.5 }
   }
 }
