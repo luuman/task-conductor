@@ -1,51 +1,66 @@
 // QuestionNav.tsx — Right panel question navigation
-// Uses Virtuoso scrollToIndex API for virtual-scroll-compatible jumping.
+// Shows ALL questions from the /questions API, handles jump to unloaded areas.
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TranscriptMessage } from '../../lib/api/types'
+import type { QuestionItem } from './useSessionData'
 import { groupMessagesIntoTurns } from '../ChatRenderer'
 import styles from './session-chat.module.css'
 
 export interface QuestionNavProps {
   transcript: TranscriptMessage[]
+  allQuestions: QuestionItem[]
+  loadedFrom: number
   scrollToIndexRef?: React.RefObject<((index: number) => void) | null>
+  onLoadAll?: () => void
   autoExpand: boolean
   onAutoExpandChange: (v: boolean) => void
   className?: string
 }
 
 export function QuestionNav({
-  transcript, scrollToIndexRef, autoExpand, onAutoExpandChange, className,
+  transcript, allQuestions, loadedFrom, scrollToIndexRef,
+  onLoadAll, autoExpand, onAutoExpandChange, className,
 }: QuestionNavProps) {
   const { t } = useTranslation()
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1)
+  const pendingJumpRef = useRef<number | null>(null)
 
-  // Build questions list using grouped turns (same grouping as TranscriptViewer)
-  const questions = useMemo(() => {
-    const turns = groupMessagesIntoTurns(transcript)
-    const result: Array<{ text: string; turnIndex: number }> = []
-    turns.forEach((item, i) => {
-      if (item.kind === 'user') {
-        const text = item.msg.blocks
-          .filter(b => b.type === 'text')
-          .map(b => b.text || '')
-          .join(' ')
-          .trim()
-          .slice(0, 200)
-        if (text) result.push({ text, turnIndex: i })
+  // When transcript updates (after loadAll), check if we have a pending jump
+  useEffect(() => {
+    if (pendingJumpRef.current == null) return
+    const targetMsgIndex = pendingJumpRef.current
+    // Check if the target is now loaded
+    if (targetMsgIndex >= loadedFrom) {
+      pendingJumpRef.current = null
+      const turns = groupMessagesIntoTurns(transcript)
+      const turnIndex = turns.findIndex(turn => turn.startIndex >= targetMsgIndex)
+      if (turnIndex >= 0) {
+        scrollToIndexRef?.current?.(turnIndex)
       }
-    })
-    return result
-  }, [transcript])
+    }
+  }, [transcript, loadedFrom, scrollToIndexRef])
 
-  // Jump to question using Virtuoso scrollToIndex
-  const jumpToQuestion = useCallback((qIdx: number, turnIndex: number) => {
+  const jumpToQuestion = useCallback((qIdx: number, msgIndex: number) => {
     setActiveQuestionIdx(qIdx)
-    scrollToIndexRef?.current?.(turnIndex)
-  }, [scrollToIndexRef])
 
-  if (questions.length === 0) return null
+    if (msgIndex < loadedFrom) {
+      // Target not loaded yet → load all, then scroll after re-render
+      pendingJumpRef.current = msgIndex
+      onLoadAll?.()
+      return
+    }
+
+    // Target is loaded → find turnIndex and scroll
+    const turns = groupMessagesIntoTurns(transcript)
+    const turnIndex = turns.findIndex(turn => turn.startIndex >= msgIndex)
+    if (turnIndex >= 0) {
+      scrollToIndexRef?.current?.(turnIndex)
+    }
+  }, [loadedFrom, transcript, scrollToIndexRef, onLoadAll])
+
+  if (allQuestions.length === 0) return null
 
   return (
     <div className={`${styles.rightPanel} ${className ?? ''}`}>
@@ -68,10 +83,10 @@ export function QuestionNav({
         </span>
       </div>
       <div className={styles.rightBody}>
-        {questions.map((q, i) => (
+        {allQuestions.map((q, i) => (
           <button
-            key={i}
-            onClick={() => jumpToQuestion(i, q.turnIndex)}
+            key={q.index}
+            onClick={() => jumpToQuestion(i, q.index)}
             className={activeQuestionIdx === i ? styles.questionItemActive : styles.questionItem}
           >
             <span className={styles.questionNum}>{i + 1}</span>
