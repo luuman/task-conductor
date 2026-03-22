@@ -70,16 +70,18 @@ export function TranscriptViewer({
   }, [turns])
 
   // rangeChanged → update sticky question header
+  // startIndex from Virtuoso is in virtual space, convert to data-array index
   const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
+    const dataIndex = startIndex - firstItemIdx
     let found: string | null = null
     for (let i = questionIndices.length - 1; i >= 0; i--) {
-      if (questionIndices[i].turnIndex <= startIndex) {
+      if (questionIndices[i].turnIndex <= dataIndex) {
         found = questionIndices[i].text
         break
       }
     }
     setCurrentQuestion(found)
-  }, [questionIndices])
+  }, [questionIndices, firstItemIdx])
 
   // Sync expand signal when transcript changes
   useEffect(() => {
