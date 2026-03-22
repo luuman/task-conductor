@@ -277,7 +277,7 @@ def get_transcript(
     transcript_path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
 
     if not _os.path.exists(transcript_path):
-        return TranscriptResponse(messages=[], file_found=False)
+        return TranscriptResponse(messages=[], file_found=False, total=0, has_more=False)
 
     # ── 第一遍：解析所有消息，同时收集 tool_result ──
     messages: list[TranscriptMessage] = []
