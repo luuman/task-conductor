@@ -330,10 +330,10 @@ function ChatDemoCanvas() {
       pairHeights.push(Math.max(rh, sh))
     }
 
-    // 瀑布流 3 列
-    const COLS = 3
-    const COL_GAP = 120
-    const ROW_PAD = 60
+    // 瀑布流 2 列（减少重叠风险）
+    const COLS = 2
+    const COL_GAP = 160
+    const ROW_PAD = 100  // 充足间距
     const colY = new Array(COLS).fill(0)
     const pairTotal = RAW_W + PAIR_GAP + STYLED_W
 
