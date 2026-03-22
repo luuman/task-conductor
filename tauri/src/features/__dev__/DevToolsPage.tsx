@@ -498,6 +498,9 @@ export default function DevToolsPage() {
       {/* ── File Map Tab ───────────────────────────────── */}
       {tab === 'file-map' && <FileTreeMap />}
 
+      {/* ── Chat Demo Tab ──────────────────────────────── */}
+      {tab === 'chat-demo' && <ChatDemo />}
+
       {/* ── File Icons Tab ─────────────────────────────── */}
       {tab === 'file-icons' && (
         <div className={styles.section}>
