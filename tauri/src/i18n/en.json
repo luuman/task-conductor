@@ -151,7 +151,12 @@
       "pill_read": "Read",
       "pill_search": "Search",
       "bash_pass": "✓ pass",
-      "bash_fail": "fail"
+      "bash_fail": "fail",
+      "section_active": "Active",
+      "section_history": "History",
+      "status_active": "Running",
+      "status_idle": "Idle",
+      "status_stopped": "Stopped"
     }
   },
   "claudeConfig": {
