@@ -137,6 +137,28 @@ export function getToolIcon(toolName: string, size = 13): ReactNode {
   }
 }
 
+// ── 文件类型图标（从 /file-icons/ 加载 SVG）─────────────────
+
+export function fileExtIcon(filePath: string, size = 14): ReactNode {
+  const ext = filePath.split('.').pop()?.toLowerCase() || ''
+  const map: Record<string, string> = {
+    ts: 'file_type_typescript.svg', tsx: 'file_type_typescript.svg',
+    js: 'file_type_js.svg', jsx: 'file_type_js.svg',
+    py: 'file_type_python.svg', rs: 'file_type_rust.svg',
+    go: 'file_type_go.svg', java: 'file_type_java.svg',
+    css: 'file_type_css.svg', scss: 'file_type_scss.svg',
+    json: 'file_type_json.svg', yaml: 'file_type_yaml.svg', yml: 'file_type_yaml.svg',
+    toml: 'file_type_toml.svg', md: 'file_type_markdown.svg',
+    sh: 'file_type_shell.svg', bash: 'file_type_shell.svg',
+    html: 'file_type_html@2x.png', xml: 'file_type_html@2x.png',
+    kt: 'file_type_kotlin.svg', dart: 'file_type_dart.svg',
+    c: 'file_type_c.svg', cpp: 'file_type_cpp.svg', h: 'file_type_c.svg',
+  }
+  const file = map[ext]
+  if (!file) return <IconFileText size={size} color="currentColor" />
+  return <img src={`/file-icons/${file}`} alt={ext} style={{ width: size, height: size, display: 'block' }} />
+}
+
 // ── Block grouping for smart layout ─────────────────────────
 
 export const READONLY_TOOLS = new Set(['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'])
