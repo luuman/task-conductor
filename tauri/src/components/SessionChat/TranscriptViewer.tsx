@@ -38,17 +38,19 @@ export function TranscriptViewer({
   const [expandSignal, setExpandSignal] = useState(0)
 
   const turns = useMemo(() => groupMessagesIntoTurns(transcript), [transcript])
+  const firstItemIdx = Math.max(0, total - transcript.length)
 
   // Expose scrollToIndex to parent for QuestionNav
+  // Convert data-array index → virtual index by adding firstItemIndex offset
   useEffect(() => {
     if (onJumpToQuestion && virtuosoRef.current) {
       onJumpToQuestion({
-        scrollToIndex: (index: number) => {
-          virtuosoRef.current?.scrollToIndex({ index, align: 'start', behavior: 'smooth' })
+        scrollToIndex: (dataIndex: number) => {
+          virtuosoRef.current?.scrollToIndex({ index: firstItemIdx + dataIndex, align: 'start', behavior: 'smooth' })
         },
       })
     }
-  }, [onJumpToQuestion, turns])
+  }, [onJumpToQuestion, turns, firstItemIdx])
 
   // Extract question indices for rangeChanged matching
   const questionIndices = useMemo(() => {
