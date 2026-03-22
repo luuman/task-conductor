@@ -160,7 +160,12 @@ RawNode.displayName = 'RawNode'
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
   <ExpandSignalCtx.Provider value={1}>
     <AutoExpandCtx.Provider value={true}>
-      <div style={{ width: 480, position: 'relative', minHeight: 20 }}>
+      <div style={{
+        width: 480, position: 'relative', minHeight: 20,
+        padding: 4, borderRadius: 10,
+        border: '1px solid transparent',
+        background: 'transparent',
+      }}>
         <Handle type="target" position={Position.Left} id="left"
           style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}`, zIndex: 1 }} />
         {data.turns.map((item, i) => {
