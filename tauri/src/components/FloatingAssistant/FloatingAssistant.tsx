@@ -106,7 +106,7 @@ export function FloatingAssistant() {
   const {
     sessions,
     selectSession: sharedSelectSession,
-    selectedId: activeSessionId,
+    selectedId: _activeSessionId,
     clearSelection: sharedClearSelection,
   } = useSessionData({ filterByCwd: repoUrlRef.current || undefined })
 
