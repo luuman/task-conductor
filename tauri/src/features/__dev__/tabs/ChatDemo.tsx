@@ -403,7 +403,7 @@ function ChatDemoCanvas() {
       <ReactFlow
         nodes={nodes} edges={edges}
         onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes} fitView
+        nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView
         nodesDraggable={false}
         minZoom={0.03} maxZoom={1.2}
         proOptions={{ hideAttribution: true }}
