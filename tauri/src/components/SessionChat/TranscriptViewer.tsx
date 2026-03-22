@@ -20,6 +20,9 @@ export interface TranscriptViewerProps {
   isFirstLoad: React.MutableRefObject<boolean>
   autoExpand?: boolean
   onJumpToQuestion?: (ref: { scrollToIndex: (index: number) => void }) => void
+  onLoadMore?: () => void
+  hasMore?: boolean
+  total?: number
   className?: string
 }
 
