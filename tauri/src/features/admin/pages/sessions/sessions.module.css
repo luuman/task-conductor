@@ -797,19 +797,19 @@
   margin-left: auto;
   font-size: 9px;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 2px 10px;
+  border-radius: 10px;
   flex-shrink: 0;
   letter-spacing: 0.3px;
 }
 
 .bashCardPass {
-  background: rgba(86, 211, 100, 0.1);
+  background: rgba(86, 211, 100, 0.12);
   color: #56d364;
 }
 
 .bashCardFail {
-  background: rgba(248, 81, 73, 0.1);
+  background: rgba(248, 81, 73, 0.12);
   color: #f85149;
 }
 
