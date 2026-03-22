@@ -318,9 +318,11 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     fileFound,
     refreshTranscript,
     loadMore,
+    loadAll,
     hasMore,
     loadingMore,
     total,
+    loadedFrom,
     allQuestions,
     isFirstLoad,
   }
