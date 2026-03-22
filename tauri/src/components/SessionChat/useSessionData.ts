@@ -82,6 +82,9 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
   const totalRef = useRef(0)
   const selectedIdRef = useRef<string | null>(null)
 
+  // All questions (fetched from /questions endpoint for full QuestionNav)
+  const [allQuestions, setAllQuestions] = useState<QuestionItem[]>([])
+
   // Scroll
   const isFirstLoad = useRef(true)
 
