@@ -356,10 +356,10 @@
 .userBubble {
   min-width: 0;
   max-width: 75%;
-  border-radius: 8px;
-  padding: 10px 14px;
-  background: var(--tc-sidebar-item-hover);
-  border: 1px solid var(--tc-border);
+  border-radius: 16px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ── Assistant bubble ── */
@@ -367,10 +367,10 @@
   min-width: 0;
   max-width: 100%;
   width: fit-content;
-  border-radius: 8px;
-  padding: 10px 14px;
-  background: rgba(68, 119, 255, 0.04);
-  border: 1px solid rgba(68, 119, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px 16px;
+  background: rgba(30, 30, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* ── Tool widget ── */
