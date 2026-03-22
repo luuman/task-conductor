@@ -1217,6 +1217,8 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
     return highlightLog(result)
   }, [result, noOutput, resultHighlighted])
 
+  const lineCount = result ? result.split('\n').length : 0
+
   return (
     <div className={styles.bashCard}>
       <div className={`${styles.bashCardHeader} ${hasError ? styles.bashCardHeaderErr : ''}`}>
@@ -1226,6 +1228,9 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
           <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: cmdHtml }} />
         ) : (
           <code className={styles.bashCardCmd}>{shortCmd}</code>
+        )}
+        {!noOutput && lineCount > 0 && (
+          <span className={styles.bashCardLines}>{lineCount} lines</span>
         )}
         <span className={`${styles.bashCardBadge} ${hasError ? styles.bashCardFail : styles.bashCardPass}`}>
           {hasError ? t('admin.sessions.bash_fail') : t('admin.sessions.bash_pass')}
