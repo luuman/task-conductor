@@ -370,71 +370,28 @@ function FloatingNav({ sections, onJump }: { sections: typeof DEMO_SECTIONS; onJ
 
 function ChatDemoCanvas() {
   const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
-  const { nodes: initNodes, edges: initEdges } = useMemo(() => buildInitialGraph(turns), [turns])
-  const [nodes, setNodes, onNodesChange] = useNodesState(initNodes)
+  const { nodes: initNodes, edges: initEdges } = useMemo(() => buildGraph(turns), [turns])
+  const [nodes, , onNodesChange] = useNodesState(initNodes)
   const [edges, , onEdgesChange] = useEdgesState(initEdges)
-  const { fitView, fitBounds, getInternalNode } = useReactFlow()
-  const initialized = useNodesInitialized()
-  const didLayout = useRef(false)
+  const { fitView, fitBounds } = useReactFlow()
 
-  // 节点渲染后用实际高度重排
   useEffect(() => {
-    if (!initialized || didLayout.current) return
-    didLayout.current = true
-
-    // 读取每对节点的实际高度
-    const pairHeights: number[] = []
-    for (let si = 0; si < DEMO_SECTIONS.length; si++) {
-      const rawNode = getInternalNode(`raw-${si}`)
-      const styledNode = getInternalNode(`styled-${si}`)
-      const rh = rawNode?.measured?.height ?? 200
-      const sh = styledNode?.measured?.height ?? 200
-      pairHeights.push(Math.max(rh, sh))
-    }
-
-    // 瀑布流 2 列（减少重叠风险）
-    const COLS = 2
-    const COL_GAP = 160
-    const ROW_PAD = 100  // 充足间距
-    const colY = new Array(COLS).fill(0)
-    const pairTotal = RAW_W + PAIR_GAP + STYLED_W
-
-    setNodes(prev => {
-      const updated = [...prev]
-      for (let si = 0; si < DEMO_SECTIONS.length; si++) {
-        const col = colY.indexOf(Math.min(...colY))
-        const x = col * (pairTotal + COL_GAP)
-        const y = colY[col]
-
-        const rawIdx = updated.findIndex(n => n.id === `raw-${si}`)
-        const styledIdx = updated.findIndex(n => n.id === `styled-${si}`)
-        if (rawIdx >= 0) updated[rawIdx] = { ...updated[rawIdx], position: { x, y } }
-        if (styledIdx >= 0) updated[styledIdx] = { ...updated[styledIdx], position: { x: x + RAW_W + PAIR_GAP, y } }
-
-        colY[col] += pairHeights[si] + ROW_PAD
-      }
-      return updated
-    })
-
-    setTimeout(() => fitView({ padding: 0.05, duration: 500 }), 100)
-  }, [initialized, getInternalNode, setNodes, fitView])
+    setTimeout(() => fitView({ padding: 0.05, duration: 500 }), 300)
+  }, [fitView])
 
   const handleJump = useCallback((idx: number) => {
     const r = nodes.find(n => n.id === `raw-${idx}`)
     const s = nodes.find(n => n.id === `styled-${idx}`)
-    if (r && s) {
-      const rawH = getInternalNode(`raw-${idx}`)?.measured?.height ?? 300
-      const styledH = getInternalNode(`styled-${idx}`)?.measured?.height ?? 300
-      const x = Math.min(r.position.x, s.position.x)
-      const y = Math.min(r.position.y, s.position.y)
-      const right = Math.max(r.position.x + RAW_W, s.position.x + STYLED_W)
-      const bottom = Math.max(r.position.y + rawH, s.position.y + styledH)
-      fitBounds(
-        { x: x - 20, y: y - 20, width: right - x + 40, height: bottom - y + 40 },
-        { padding: 0.08, duration: 600 },
-      )
-    }
-  }, [nodes, fitBounds, getInternalNode])
+    if (!r || !s) return
+    const x = Math.min(r.position.x, s.position.x)
+    const y = Math.min(r.position.y, s.position.y)
+    const right = Math.max(r.position.x + RAW_W, s.position.x + STYLED_W)
+    const bottom = y + 600
+    fitBounds(
+      { x: x - 30, y: y - 30, width: right - x + 60, height: bottom - y + 60 },
+      { padding: 0.08, duration: 600 },
+    )
+  }, [nodes, fitBounds])
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
