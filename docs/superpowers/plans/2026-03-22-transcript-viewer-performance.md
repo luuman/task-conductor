@@ -1012,7 +1012,44 @@ git commit -m "perf: move BashStatusLine syntax highlighting to Web Worker"
 
 ---
 
-## Task 13: 最终集成验证
+## Task 13: ReadFileView 适配 useHighlight
+
+**Files:**
+- Modify: `tauri/src/components/ChatRenderer/ChatRenderer.tsx` (ReadFileView 函数)
+
+- [ ] **Step 1: 找到 ReadFileView 中的 hljs 调用**
+
+ReadFileView 在展示文件内容时使用 `hljs.highlightAuto()` 对大文件做语法高亮。找到该调用并替换为 `useHighlight`：
+
+```tsx
+// 旧: const highlighted = useMemo(() => hljs.highlightAuto(result).value, [result])
+// 新:
+const detectedLang = filePath.match(/\.(ts|tsx)$/) ? 'typescript'
+  : filePath.match(/\.(py)$/) ? 'python'
+  : filePath.match(/\.(rs)$/) ? 'rust'
+  : filePath.match(/\.(css)$/) ? 'css'
+  : filePath.match(/\.(json)$/) ? 'json'
+  : filePath.match(/\.(sh|bash)$/) ? 'bash'
+  : undefined
+const { html: highlighted, loading: hljsLoading } = useHighlight(result, detectedLang)
+```
+
+基于文件扩展名推断语言，避免 `highlightAuto` 的昂贵自动检测。
+
+- [ ] **Step 2: 验证编译通过**
+
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && npx tsc --noEmit`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add tauri/src/components/ChatRenderer/ChatRenderer.tsx
+git commit -m "perf: move ReadFileView syntax highlighting to Web Worker"
+```
+
+---
+
+## Task 14: 最终集成验证
 
 - [ ] **Step 1: TypeScript 全量检查**
 
