@@ -463,6 +463,7 @@ function ChatDemoCanvas() {
   }, [pairs, fitBounds])
 
   return (
+    <CardStyleCtx.Provider value={cardStyle}>
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
         nodes={nodes}
