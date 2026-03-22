@@ -78,7 +78,7 @@ export function AppRouter() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/task/:id"       element={<TaskDetailPage />} />
             <Route path="/task-manager"   element={<TaskManagerPage />} />
-            <Route path="/sessions"       element={<PlaceholderPage />} />
+            <Route path="/sessions"       element={<SessionsPage />} />
             <Route path="/chat"           element={<PlaceholderPage />} />
             <Route path="/config"         element={<PlaceholderPage />} />
             <Route path="/knowledge"      element={<PlaceholderPage />} />
