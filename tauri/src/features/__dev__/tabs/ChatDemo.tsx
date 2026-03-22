@@ -335,7 +335,6 @@ function FloatingNav({ sections, onJump }: { sections: typeof DEMO_SECTIONS; onJ
             >
               <span style={{ fontSize: 12, flexShrink: 0 }}>{getIcon(sec.label)}</span>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{sec.label}</span>
-              <span style={{ fontSize: 8, color: PALETTE[i % PALETTE.length], fontFamily: "'Geist Mono', monospace", flexShrink: 0 }}>#{i + 1}</span>
             </button>
           ))}
         </div>
