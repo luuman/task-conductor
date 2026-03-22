@@ -391,9 +391,25 @@ if (!workerAvailable) {
 | 大文件高亮 | 主线程阻塞 100-500ms | 零阻塞（异步） |
 | 网络传输 | 全量数 MB | 首批 ~50KB |
 
+## 范围说明
+
+- **TranscriptViewer** 是本次优化的唯一目标
+- **ChatMessageList**（ChatRenderer.tsx 中的另一个消费者，用于 FloatingAssistant 等小数据场景）不在本次范围内，保持原有渲染方式。它处理的数据量远小于会话历史，不需要虚拟滚动
+
 ## 实施顺序
 
 1. Part 2 (懒渲染) — 最小改动，立即见效
 2. Part 1 (虚拟滚动 + memo) — 核心优化
 3. Part 3 (后端分页) — 与虚拟滚动的 startReached 联动
 4. Part 4 (Worker 高亮) — 独立模块，可并行开发
+
+## Review 修复记录
+
+基于 spec review 反馈修复的问题：
+1. [Critical] 后端分页不再声称反向读取优化，明确全量解析仅减少传输量
+2. [Critical] `loadMore` offset 计算改用 `loadedFrom` 索引跟踪，消除重复/遗漏
+3. [Important] 补充 Virtuoso sticky question + QuestionNav 跳转的完整迁移方案
+4. [Important] 补充 ExpandSignalCtx vs mounted 的交互说明
+5. [Important] Worker 改为懒初始化 + LRU 缓存 + unmount 安全
+6. [Suggestion] 补充 WebSocket 实时更新与分页的交互设计
+7. [Suggestion] 补充 `estimateSize` 和 `computeItemKey` 配置
