@@ -443,6 +443,7 @@ function FloatingNav({ sections, onJump, cardStyle, onStyleChange }: {
 // ── 画布 ────────────────────────────────────────────
 
 function ChatDemoCanvas() {
+  const [cardStyle, setCardStyle] = useState<CardStyle>('A')
   const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
   const { nodes: initNodes, pairs } = useMemo(() => buildGraph(turns), [turns])
   const [nodes, , onNodesChange] = useNodesState(initNodes)
