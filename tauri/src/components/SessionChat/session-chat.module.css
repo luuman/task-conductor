@@ -1,0 +1,1627 @@
+/* Sessions page — 3-column layout */
+
+/* ── Root ── */
+.root {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  background: var(--tc-content-bg);
+}
+
+/* ── Left panel (session list) ── */
+.leftPanel {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--tc-border);
+  overflow: hidden;
+}
+
+.leftHeader {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
+}
+
+.leftTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+}
+
+.newChatBtn {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.newChatBtn:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-border-active);
+}
+
+.searchWrap {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  width: 100%;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: var(--tc-border-active);
+}
+
+.searchInput::placeholder {
+  color: var(--tc-foreground-secondary);
+}
+
+.leftBody {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Project groups ── */
+.group {
+  /* no special styling, just a container */
+}
+
+.groupHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: none;
+  border-bottom: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.groupHeader:hover {
+  background: var(--tc-sidebar-item-hover);
+}
+
+.groupChevron {
+  font-size: 8px;
+  opacity: 0.5;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+  color: var(--tc-foreground-secondary);
+}
+
+.groupName {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupActiveBadge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(86, 211, 100, 0.15);
+  color: #56d364;
+  flex-shrink: 0;
+}
+
+.groupCount {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+}
+
+/* ── Session items ── */
+.sessionItem {
+  width: 100%;
+  padding: 6px 10px 6px 16px;
+  text-align: left;
+  border: none;
+  border-left: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: block;
+}
+
+.sessionItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sessionItemActive {
+  composes: sessionItem;
+  border-left-color: var(--tc-border-active);
+  background: var(--tc-sidebar-item-hover);
+}
+
+.sessionRow1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sessionTitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+.sessionRow2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+  margin-left: 12px;
+}
+
+.sessionTime {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.sessionEvents {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.sessionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+  margin-left: 12px;
+}
+
+.sessionTag {
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(0, 122, 204, 0.12);
+  color: var(--tc-border-active);
+}
+
+/* ── Status dot ── */
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.statusDotActive {
+  composes: statusDot;
+  background: #56d364;
+}
+
+.statusDotIdle {
+  composes: statusDot;
+  background: #e3b341;
+}
+
+.statusDotStopped {
+  composes: statusDot;
+  background: #8b949e;
+}
+
+/* ── Center panel (transcript) ── */
+.centerPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.transcriptScroll {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.transcriptBody {
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Jump to bottom button ── */
+.jumpToBottom {
+  position: sticky;
+  bottom: 12px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: background 0.15s, color 0.15s;
+  z-index: 10;
+}
+
+.jumpToBottom:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+}
+
+/* ── Message rows ── */
+.msgRowRight {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 16px;
+}
+
+.msgRowRight .bubbleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.msgRowLeft {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 16px;
+}
+
+/* ── Avatars ── */
+.avatarUser {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
+  margin-top: 2px;
+}
+
+.avatarBot {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: rgba(0, 122, 204, 0.08);
+  border: 1px solid rgba(0, 122, 204, 0.15);
+  margin-top: 2px;
+}
+
+/* ── Bubble wrapper (for hover copy) ── */
+.bubbleWrap {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.bubbleWrap:hover > .msgCopyBtn {
+  opacity: 1;
+}
+
+/* ── User bubble ── */
+.userBubble {
+  min-width: 0;
+  max-width: 75%;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: var(--tc-sidebar-item-hover);
+  border: 1px solid var(--tc-border);
+}
+
+/* ── Assistant bubble ── */
+.assistantBubble {
+  min-width: 0;
+  max-width: 100%;
+  width: fit-content;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: rgba(68, 119, 255, 0.04);
+  border: 1px solid rgba(68, 119, 255, 0.12);
+}
+
+/* ── Tool widget ── */
+.toolWidget {
+  margin: 4px 0;
+}
+
+.toolHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: default;
+  transition: background 0.15s;
+  border-radius: 4px;
+}
+
+.toolHeaderClickable {
+  cursor: pointer;
+}
+
+.toolHeaderClickable:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.toolIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--tc-foreground-secondary);
+}
+
+.toolName {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  flex-shrink: 0;
+}
+
+.toolParam {
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  background: var(--tc-content-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+.toolEditInfo {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  margin-left: 6px;
+}
+
+.toolError {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  color: #f85149;
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.toolPreview {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.toolChevron {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--tc-foreground-secondary);
+}
+
+.toolBody {
+  padding: 4px 0;
+}
+
+/* ── Read group strip (collapsed read-only tools) ── */
+.readGroupStrip {
+  margin: 4px 0;
+}
+
+.readGroupHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.readGroupHeader:hover {
+  opacity: 0.8;
+}
+
+.readGroupChevron {
+  flex-shrink: 0;
+  color: var(--tc-foreground-secondary);
+  display: flex;
+  align-items: center;
+  transition: transform 0.15s;
+}
+
+.readGroupPills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.readGroupPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readGroupPillIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+}
+
+.readGroupPillText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readGroupBody {
+  padding: 2px 0 2px 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  margin-left: 4px;
+}
+
+/* ── Scheme C: Smart grouping ── */
+
+/* Pill row wrapper (contains pill row + expanded panel) */
+.pillRowWrap {
+  margin: 6px 0;
+}
+
+/* Pill row (read-only tools) */
+.pillRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  padding: 4px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.pillLabel {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  margin: 2px 4px 2px 0;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.15s;
+  cursor: default;
+}
+
+.pill:hover {
+  border-color: rgba(0, 122, 204, 0.3);
+  background: rgba(0, 122, 204, 0.06);
+}
+
+.pillGrep {
+  border-left: 2px solid rgba(0, 122, 204, 0.4);
+  padding-left: 8px;
+}
+
+.pillIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.pillText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pillClickable {
+  cursor: pointer;
+}
+
+.pillActive {
+  border-color: rgba(0, 122, 204, 0.5);
+  background: rgba(0, 122, 204, 0.1);
+  color: var(--tc-foreground);
+}
+
+/* Expanded panel below pill row */
+.pillExpandedPanel {
+  margin-top: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  animation: pillPanelIn 0.15s ease-out;
+}
+
+@keyframes pillPanelIn {
+  from { opacity: 0; max-height: 0; }
+  to   { opacity: 1; max-height: 600px; }
+}
+
+/* Search result header */
+.searchResultHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.searchResultPattern {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-accent, #007acc);
+  font-weight: 600;
+}
+
+.searchResultCount {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Search result file list */
+.searchResultList {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.searchResultItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  transition: background 0.1s;
+  cursor: default;
+}
+
+.searchResultItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.searchResultItemIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+}
+
+.searchResultItemName {
+  color: var(--tc-foreground);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.searchResultItemPath {
+  color: var(--tc-foreground-secondary);
+  opacity: 0.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 4px;
+  font-size: 10px;
+}
+
+/* Raw search output fallback */
+.searchResultRaw {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.6;
+  background: var(--tc-content-bg);
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--tc-foreground-secondary);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* Edit inline — file name for Write without diff */
+.editCardFile {
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+  color: var(--tc-accent, #007acc);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Bash terminal card */
+.bashCard {
+  margin: 5px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.bashCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.bashCardHeaderErr {
+  border-left: 2px solid rgba(248, 81, 73, 0.4);
+}
+
+.bashCardIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.bashCardPrompt {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 700;
+  color: #56d364;
+  flex-shrink: 0;
+}
+
+.bashCardCmd {
+  font-size: 10.5px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.bashCardBadge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.bashCardPass {
+  background: rgba(86, 211, 100, 0.1);
+  color: #56d364;
+}
+
+.bashCardFail {
+  background: rgba(248, 81, 73, 0.1);
+  color: #f85149;
+}
+
+.bashCardOutput {
+  padding: 6px 10px;
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.5;
+  color: var(--tc-foreground-secondary);
+  background: rgba(0, 0, 0, 0.15);
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.bashCardOutputErr {
+  color: #fda4af;
+}
+
+/* ── Diff view ── */
+.diffWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.diffHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.diffFilePath {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diffStats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  flex-shrink: 0;
+}
+
+.diffStatsAdd {
+  color: #56d364;
+}
+
+.diffStatsDel {
+  color: #f85149;
+}
+
+.diffBody {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.7;
+  background: var(--tc-content-bg);
+  overflow-x: auto;
+}
+
+.diffLineAdd {
+  display: flex;
+  min-width: fit-content;
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.diffLineDel {
+  display: flex;
+  min-width: fit-content;
+  background: rgba(244, 63, 94, 0.07);
+}
+
+.diffLineCtx {
+  display: flex;
+  min-width: fit-content;
+}
+
+.diffSign {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 600;
+  user-select: none;
+}
+
+.diffSignAdd {
+  color: #56d364;
+}
+
+.diffSignDel {
+  color: #f85149;
+}
+
+.diffText {
+  flex: 1;
+  white-space: pre;
+  padding-right: 16px;
+}
+
+.diffTextAdd {
+  color: #86efac;
+}
+
+.diffTextDel {
+  color: #fda4af;
+}
+
+.diffTextCtx {
+  color: var(--tc-foreground-secondary);
+  opacity: 0.6;
+}
+
+.diffFold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 0;
+  background: var(--tc-panel-bg);
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  border-top: 1px solid var(--tc-border);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+/* ── Bash output ── */
+.bashWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.bashHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.bashPrompt {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 700;
+  color: var(--tc-border-active);
+}
+
+.bashCmd {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bashOutput {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground-secondary);
+}
+
+.bashOutputError {
+  color: #f85149;
+}
+
+/* ── Read file view ── */
+.readWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.readHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.readFilePath {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.readLineCount {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.readBody {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.7;
+  background: var(--tc-content-bg);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── Agent result ── */
+.agentWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.agentHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--tc-panel-bg);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.agentDesc {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.agentBody {
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  background: var(--tc-content-bg);
+}
+
+/* ── AskUserQuestion ── */
+.askWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+  margin-top: 8px;
+}
+
+.askHeader {
+  composes: toolHeader;
+  padding: 8px 12px;
+  background: rgba(234, 179, 8, 0.06);
+  border-bottom: 1px solid rgba(234, 179, 8, 0.15);
+  color: #eab308;
+}
+
+.askTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #eab308;
+}
+
+.askBody {
+  padding: 12px 16px;
+  background: var(--tc-content-bg);
+}
+
+.askQuestion {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  margin: 0;
+}
+
+.askAnswer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+}
+
+.askAnswerText {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground-secondary);
+  margin: 0;
+}
+
+/* ── Generic output block ── */
+.outputWrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  margin-top: 8px;
+}
+
+.outputBody {
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+  background: var(--tc-content-bg);
+}
+
+.outputBodyError {
+  color: #f85149;
+}
+
+/* ── Markdown content styling ── */
+.mdContent {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+}
+
+.mdP {
+  margin: 0 0 6px 0;
+}
+
+.mdP:last-child {
+  margin-bottom: 0;
+}
+
+.mdH1 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 12px 0 4px;
+  color: var(--tc-foreground);
+}
+
+.mdH2 {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 8px 0 4px;
+  color: var(--tc-foreground);
+}
+
+.mdH3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 6px 0 2px;
+  color: var(--tc-foreground);
+}
+
+.mdUl {
+  list-style: disc;
+  padding-left: 16px;
+  margin: 0 0 6px 0;
+}
+
+.mdOl {
+  list-style: decimal;
+  padding-left: 16px;
+  margin: 0 0 6px 0;
+}
+
+.mdLi {
+  line-height: 1.6;
+}
+
+.mdStrong {
+  font-weight: 600;
+  color: var(--tc-foreground);
+}
+
+.mdEm {
+  font-style: italic;
+  color: var(--tc-foreground-secondary);
+}
+
+.mdCodeBlock {
+  display: block;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 6px 0;
+  overflow-x: auto;
+  white-space: pre;
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+}
+
+.mdCodeBlockPlain {
+  display: block;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 6px 0;
+  overflow-x: auto;
+  white-space: pre;
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground-secondary);
+  border: 1px solid var(--tc-border);
+}
+
+.mdInlineCode {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--tc-panel-bg);
+  color: var(--tc-border-active);
+}
+
+.mdPre {
+  position: relative;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+.mdPre:hover > .codeCopyBtn {
+  opacity: 1;
+}
+
+.mdBlockquote {
+  padding-left: 12px;
+  border-left: 2px solid var(--tc-border-active);
+  color: var(--tc-foreground-secondary);
+  margin: 6px 0;
+}
+
+.mdHr {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid var(--tc-border);
+}
+
+.mdLink {
+  color: var(--tc-border-active);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s;
+}
+
+.mdLink:hover {
+  opacity: 0.8;
+}
+
+.mdTableWrap {
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.mdTable {
+  font-size: 11px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.mdTh {
+  padding: 4px 8px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+}
+
+.mdTd {
+  padding: 4px 8px;
+  border: 1px solid var(--tc-border);
+}
+
+/* ── Sticky question header ── */
+.stickyQuestion {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  backdrop-filter: blur(12px);
+  background: rgba(30, 30, 30, 0.85);
+  border-bottom: 1px solid var(--tc-border);
+}
+
+.stickyQuestionText {
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* ── Right panel (question nav) ── */
+.rightPanel {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--tc-border);
+  overflow: hidden;
+}
+
+.rightHeader {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
+}
+
+.rightTitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground-secondary);
+}
+
+.expandToggleWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.expandLabel {
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+}
+
+.expandToggle {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--tc-border);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.expandDot {
+  position: absolute;
+  top: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+}
+
+.rightBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.questionItem {
+  width: 100%;
+  text-align: left;
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--tc-foreground-secondary);
+}
+
+.questionItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--tc-foreground);
+}
+
+.questionItemActive {
+  composes: questionItem;
+  background: rgba(0, 122, 204, 0.08);
+  color: var(--tc-border-active);
+}
+
+.questionNum {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  width: 16px;
+  text-align: right;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.questionItemActive .questionNum {
+  color: var(--tc-border-active);
+  opacity: 1;
+}
+
+.questionText {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ── Empty / loading states ── */
+.emptyCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.loadingCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 12px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.listLoadingCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.listEmptyCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 128px;
+  gap: 8px;
+  padding: 0 12px;
+  text-align: center;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+
+.listEmptyIcon {
+  font-size: 24px;
+}
+
+.listEmptyText {
+  font-size: 11px;
+}
+
+/* ── Task Notification Card ── */
+.taskNotification {
+  margin: 6px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid;
+  font-size: 12px;
+}
+
+.taskNotifHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.taskNotifTitle {
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--tc-foreground);
+}
+
+.taskNotifStatus {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+.taskNotifSummary {
+  font-size: 12px;
+  color: var(--tc-foreground);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.taskNotifMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.taskNotifLabel {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.taskNotifCode {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── System Reminder ── */
+.systemReminder {
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 11px;
+}
+
+.systemReminderSummary {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tc-foreground-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.systemReminderSummary::before {
+  content: '\25B8';
+  font-size: 8px;
+  transition: transform 0.15s;
+}
+
+.systemReminder[open] > .systemReminderSummary::before {
+  transform: rotate(90deg);
+}
+
+.systemReminderBody {
+  padding: 0 10px 8px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.5;
+}
+
+/* ── Copy button (shared base) ── */
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--tc-border);
+  border-radius: 6px;
+  background: var(--tc-panel-bg);
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+}
+
+/* ── Message-level copy (top-right of bubble) ── */
+.msgCopyBtn {
+  position: absolute;
+  top: 4px;
+  right: -32px;
+  opacity: 0;
+}
+
+/* ── Code block copy (top-right inside pre) ── */
+.codeCopyBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0;
+  z-index: 2;
+}
