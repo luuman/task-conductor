@@ -338,8 +338,10 @@ return (
         data={turns}
         initialTopMostItemIndex={turns.length - 1}
         followOutput="smooth"
-        computeItemKey={(index, item) => item.startIndex}
+        computeItemKey={(_index, item) => item.startIndex}
+        itemSize={(el) => el.getBoundingClientRect().height}
         defaultItemSize={200}
+        increaseViewportBy={400}
         rangeChanged={handleRangeChanged}
         atBottomStateChange={(atBottom) => setShowJumpBtn(!atBottom)}
         itemContent={(_index, item) => (
