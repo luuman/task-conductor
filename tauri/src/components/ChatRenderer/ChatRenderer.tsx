@@ -1103,7 +1103,7 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
     if (lang) {
       try {
         if (hljs.getLanguage(lang)) {
-          return hljs.highlight(result, { language: 'bash' }).value
+          return hljs.highlight(result, { language: lang }).value
         }
       } catch { /* fall through */ }
     }
