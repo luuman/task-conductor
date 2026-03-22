@@ -1,6 +1,6 @@
 /**
- * ChatDemo — 大画布展示所有消息类型
- * 左列 Raw 节点 ←连线→ 右列 Styled 节点，右侧悬浮导航
+ * ChatDemo — 大画布散落式卡片展示
+ * Raw 节点 ←连线→ Styled 节点，交错分布，右侧悬浮导航
  */
 import { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
@@ -71,19 +71,16 @@ function getIcon(label: string): string {
   return '📎'
 }
 
-// ── Raw 渲染（节点内嵌） ────────────────────────────
+// ── Raw 迷你渲染 ────────────────────────────────────
 
 function RawBlockMini({ block }: { block: TranscriptBlock }) {
   if (block.type === 'text') {
-    const text = block.text || ''
-    const preview = text.length > 200 ? text.slice(0, 200) + '…' : text
     return (
       <div style={{
         padding: '6px 10px', fontSize: 10.5, lineHeight: 1.5,
-        color: 'var(--tc-foreground)', whiteSpace: 'pre-wrap',
-        wordBreak: 'break-word', maxHeight: 140, overflowY: 'auto',
+        color: 'var(--tc-foreground)', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
       }}>
-        {preview}
+        {block.text}
       </div>
     )
   }
@@ -112,7 +109,6 @@ function RawBlockMini({ block }: { block: TranscriptBlock }) {
           fontFamily: "'Geist Mono', monospace",
           color: 'var(--tc-foreground-secondary)', background: 'var(--tc-content-bg)',
           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-          maxHeight: 80, overflowY: 'auto',
           borderBottom: block.tool_result ? '1px solid var(--tc-border)' : undefined,
         }}>
           {JSON.stringify(block.tool_input, null, 2)}
@@ -125,16 +121,15 @@ function RawBlockMini({ block }: { block: TranscriptBlock }) {
           color: block.tool_error ? '#fda4af' : 'var(--tc-foreground-secondary)',
           background: 'var(--tc-content-bg)',
           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-          maxHeight: 80, overflowY: 'auto',
         }}>
-          {String(block.tool_result).slice(0, 300)}
+          {block.tool_result}
         </pre>
       )}
     </div>
   )
 }
 
-// ── 节点类型定义 ────────────────────────────────────
+// ── 节点数据类型 ────────────────────────────────────
 
 interface RawNodeData {
   label: string
@@ -153,11 +148,12 @@ interface StyledNodeData {
   [key: string]: unknown
 }
 
-// Raw 节点
+// ── Raw 节点 ────────────────────────────────────────
+
 const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => {
   return (
     <div style={{
-      width: 320,
+      width: 340,
       borderRadius: 10,
       border: `1.5px solid ${data.color}40`,
       background: 'var(--tc-content-bg)',
@@ -166,7 +162,6 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => {
     }}>
       <Handle type="source" position={Position.Right}
         style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-      {/* Header */}
       <div style={{
         padding: '8px 12px',
         background: `${data.color}10`,
@@ -174,18 +169,12 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => {
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <span style={{ fontSize: 15 }}>{data.icon}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: data.color }}>
-          RAW
-        </span>
-        <span style={{
-          fontSize: 10, color: 'var(--tc-foreground-secondary)',
-          fontFamily: "'Geist Mono', monospace",
-        }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: data.color }}>RAW</span>
+        <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
           {data.label}
         </span>
       </div>
-      {/* Body */}
-      <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+      <div>
         {data.messages.map((msg, i) => (
           <div key={i} style={{ borderBottom: i < data.messages.length - 1 ? '1px solid var(--tc-border)' : undefined }}>
             <div style={{
@@ -206,13 +195,14 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => {
 })
 RawNode.displayName = 'RawNode'
 
-// Styled 节点
+// ── Styled 节点 ─────────────────────────────────────
+
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => {
   return (
     <ExpandSignalCtx.Provider value={1}>
       <AutoExpandCtx.Provider value={true}>
         <div style={{
-          width: 420,
+          width: 480,
           borderRadius: 10,
           border: `1.5px solid ${data.color}40`,
           background: 'var(--tc-content-bg)',
@@ -221,7 +211,6 @@ const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => {
         }}>
           <Handle type="target" position={Position.Left}
             style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-          {/* Header */}
           <div style={{
             padding: '8px 12px',
             background: `${data.color}10`,
@@ -229,25 +218,18 @@ const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => {
             display: 'flex', alignItems: 'center', gap: 8,
           }}>
             <span style={{ fontSize: 15 }}>{data.icon}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: data.color }}>
-              STYLED
-            </span>
-            <span style={{
-              fontSize: 10, color: 'var(--tc-foreground-secondary)',
-              fontFamily: "'Geist Mono', monospace",
-            }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: data.color }}>STYLED</span>
+            <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
               {data.label}
             </span>
             <span style={{
               marginLeft: 'auto', fontSize: 9,
-              color: 'var(--tc-foreground-secondary)',
-              fontFamily: "'Geist Mono', monospace",
+              color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace",
             }}>
               {data.rawCount} msg → {data.turns.length} turn
             </span>
           </div>
-          {/* Body */}
-          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+          <div>
             {data.turns.map((item, i) => (
               <div key={i}>
                 {item.kind === 'user'
@@ -266,18 +248,26 @@ StyledNode.displayName = 'StyledNode'
 
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 
-// ── 布局计算 ────────────────────────────────────────
+// ── 散落式布局 ──────────────────────────────────────
+// 蛇形排列：每行放 N 对，行间交错偏移，产生散落感
 
-const RAW_X = 50
-const STYLED_X = 550
-const START_Y = 50
-const GAP_Y = 60
+const PAIR_GAP_X = 160  // Raw 和 Styled 之间的水平间距
+const RAW_W = 340
+const STYLED_W = 480
+const PAIR_W = RAW_W + PAIR_GAP_X + STYLED_W  // 一对的总宽度
+const COLS = 3           // 每行放几对
+const COL_GAP = 120      // 列间距
+const ROW_GAP = 100      // 行间基础间距
+
+// 伪随机偏移（确定性，基于索引）
+function jitter(idx: number, range: number): number {
+  const seed = Math.sin(idx * 127.1 + 311.7) * 43758.5453
+  return ((seed - Math.floor(seed)) - 0.5) * range
+}
 
 function buildGraph(turns: GroupedTurnItem[]) {
   const nodes: Node[] = []
   const edges: Edge[] = []
-
-  let yOffset = START_Y
 
   for (let si = 0; si < DEMO_SECTIONS.length; si++) {
     const sec = DEMO_SECTIONS[si]
@@ -288,7 +278,6 @@ function buildGraph(turns: GroupedTurnItem[]) {
     const color = PALETTE[si % PALETTE.length]
     const icon = getIcon(sec.label)
 
-    // 对应的 turns
     const turnStart = turns.findIndex(t => t.startIndex >= startMsg)
     const turnEnd = nextSec
       ? turns.findIndex(t => t.startIndex >= nextSec.index)
@@ -298,20 +287,34 @@ function buildGraph(turns: GroupedTurnItem[]) {
       turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
     )
 
+    // 散落布局：行列 + 随机偏移
+    const col = si % COLS
+    const row = Math.floor(si / COLS)
+    const baseX = col * (PAIR_W + COL_GAP)
+    const baseY = row * (600 + ROW_GAP)
+
+    // 交错：奇数行右移半格
+    const rowShift = row % 2 === 1 ? (PAIR_W + COL_GAP) * 0.4 : 0
+
+    const rawX = baseX + rowShift + jitter(si * 2, 60)
+    const rawY = baseY + jitter(si * 2, 80)
+    const styledX = rawX + RAW_W + PAIR_GAP_X + jitter(si * 2 + 1, 40)
+    const styledY = rawY + jitter(si * 3, 60)
+
     const rawId = `raw-${si}`
     const styledId = `styled-${si}`
 
     nodes.push({
       id: rawId,
       type: 'rawNode',
-      position: { x: RAW_X, y: yOffset },
+      position: { x: rawX, y: styledY },
       data: { label: sec.label, color, icon, messages: rawMsgs },
     })
 
     nodes.push({
       id: styledId,
       type: 'styledNode',
-      position: { x: STYLED_X, y: yOffset },
+      position: { x: styledX, y: rawY },
       data: { label: sec.label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
     })
 
@@ -319,15 +322,10 @@ function buildGraph(turns: GroupedTurnItem[]) {
       id: `e-${si}`,
       source: rawId,
       target: styledId,
-      style: { stroke: color, strokeWidth: 2, opacity: 0.5 },
+      style: { stroke: color, strokeWidth: 2, opacity: 0.45 },
       type: 'default',
       animated: false,
     })
-
-    // 估算高度推进
-    const rawH = Math.max(80, rawMsgs.length * 60 + 50)
-    const styledH = Math.max(80, sectionTurns.length * 100 + 50)
-    yOffset += Math.max(rawH, styledH) + GAP_Y
   }
 
   return { nodes, edges }
@@ -346,8 +344,7 @@ function FloatingNav({
 
   return (
     <div style={{
-      position: 'absolute', top: 12, right: 12,
-      zIndex: 10,
+      position: 'absolute', top: 12, right: 12, zIndex: 10,
       width: collapsed ? 36 : 180,
       borderRadius: 10,
       border: '1px solid var(--tc-border)',
@@ -357,7 +354,6 @@ function FloatingNav({
       overflow: 'hidden',
       transition: 'width 0.2s ease',
     }}>
-      {/* Header */}
       <button
         onClick={() => setCollapsed(v => !v)}
         style={{
@@ -369,10 +365,8 @@ function FloatingNav({
         }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round">
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
         </svg>
         {!collapsed && (
           <span style={{ fontSize: 10, fontWeight: 700, color: '#58a6ff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -380,8 +374,6 @@ function FloatingNav({
           </span>
         )}
       </button>
-
-      {/* Items */}
       {!collapsed && (
         <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', padding: '4px 0' }}>
           {sections.map((sec, i) => (
@@ -400,16 +392,10 @@ function FloatingNav({
               onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
             >
               <span style={{ fontSize: 12, flexShrink: 0 }}>{getIcon(sec.label)}</span>
-              <span style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                flex: 1,
-              }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                 {sec.label}
               </span>
-              <span style={{
-                fontSize: 8, color: PALETTE[i % PALETTE.length],
-                fontFamily: "'Geist Mono', monospace", flexShrink: 0,
-              }}>
+              <span style={{ fontSize: 8, color: PALETTE[i % PALETTE.length], fontFamily: "'Geist Mono', monospace", flexShrink: 0 }}>
                 #{i + 1}
               </span>
             </button>
@@ -420,7 +406,7 @@ function FloatingNav({
   )
 }
 
-// ── 内部画布 ────────────────────────────────────────
+// ── 画布主体 ────────────────────────────────────────
 
 function ChatDemoCanvas() {
   const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
@@ -430,18 +416,17 @@ function ChatDemoCanvas() {
   const [edges, , onEdgesChange] = useEdgesState(initEdges)
   const { fitView, setCenter } = useReactFlow()
 
-  // 初始 fitView
   useEffect(() => {
-    setTimeout(() => fitView({ padding: 0.1, duration: 400 }), 200)
+    setTimeout(() => fitView({ padding: 0.08, duration: 500 }), 300)
   }, [fitView])
 
   const handleJump = useCallback((idx: number) => {
     const rawNode = nodes.find(n => n.id === `raw-${idx}`)
     const styledNode = nodes.find(n => n.id === `styled-${idx}`)
     if (rawNode && styledNode) {
-      const cx = (rawNode.position.x + styledNode.position.x + 420) / 2
-      const cy = rawNode.position.y + 100
-      setCenter(cx, cy, { zoom: 0.85, duration: 500 })
+      const cx = (rawNode.position.x + styledNode.position.x + 480) / 2
+      const cy = (rawNode.position.y + styledNode.position.y) / 2 + 100
+      setCenter(cx, cy, { zoom: 0.55, duration: 500 })
     }
   }, [nodes, setCenter])
 
@@ -454,13 +439,13 @@ function ChatDemoCanvas() {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-        minZoom={0.1}
-        maxZoom={1.5}
+        minZoom={0.05}
+        maxZoom={1.2}
         defaultEdgeOptions={{ type: 'default' }}
         proOptions={{ hideAttribution: true }}
         style={{ background: 'var(--tc-content-bg)' }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(255,255,255,0.04)" />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="rgba(255,255,255,0.03)" />
         <Controls
           position="bottom-left"
           style={{ background: 'var(--tc-panel-bg)', border: '1px solid var(--tc-border)', borderRadius: 8 }}
@@ -469,11 +454,10 @@ function ChatDemoCanvas() {
           position="bottom-right"
           style={{
             background: 'rgba(30,30,30,0.9)',
-            border: '1px solid var(--tc-border)',
-            borderRadius: 8,
+            border: '1px solid var(--tc-border)', borderRadius: 8,
           }}
           maskColor="rgba(0,0,0,0.5)"
-          nodeColor={(n) => {
+          nodeColor={n => {
             const idx = parseInt(n.id.split('-')[1])
             return PALETTE[idx % PALETTE.length]
           }}
