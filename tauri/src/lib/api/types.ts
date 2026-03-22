@@ -507,7 +507,7 @@ export interface ApiAdapter {
   advanceTask(taskId: number): Promise<void>
   getSessions(): Promise<AiSession[]>
   getSessionEvents(sessionId: string): Promise<SessionEvent[]>
-  getTranscript(sessionId: string): Promise<{ messages: TranscriptMessage[]; file_found: boolean }>
+  getTranscript(sessionId: string, params?: { limit?: number; offset?: number }): Promise<{ messages: TranscriptMessage[]; file_found: boolean; total: number; has_more: boolean }>
   getSessionNote(sessionId: string): Promise<ConversationNote>
   updateSessionNote(sessionId: string, data: Partial<ConversationNote>): Promise<ConversationNote>
   healthCheck(): Promise<boolean>
