@@ -168,7 +168,7 @@ def get_transcript(session_id: str, limit: int = 50, offset: int | None = None, 
     }
 ```
 
-JSONL 解析优化：当 `offset` 为 null（取最后 N 条）时，从文件尾部反向读取行，避免解析整个文件。使用 `file.seek(0, 2)` 定位到文件末尾反向扫描换行符。
+**关于 JSONL 全量解析**: 后端 transcript 解析是两遍扫描（第一遍构建消息，第二遍关联 tool_result 到对应 tool_use_id），无法做到仅反向读取末尾。分页优化的收益集中在**减少网络传输量**，后端仍全量解析但只序列化/传输 slice。对于极大文件，后续可考虑构建索引缓存（不在本次范围内）。
 
 #### 前端分页加载
 
@@ -176,6 +176,7 @@ JSONL 解析优化：当 `offset` 为 null（取最后 N 条）时，从文件�
 // useSessionData.ts
 const [allMessages, setAllMessages] = useState<TranscriptMessage[]>([])
 const [total, setTotal] = useState(0)
+const [loadedFrom, setLoadedFrom] = useState(0) // 当前已加载的最小消息索引
 const [hasMore, setHasMore] = useState(false)
 
 // 首次加载最新 50 条
@@ -184,17 +185,22 @@ async function loadInitial(sid: string) {
   setAllMessages(r.messages)
   setTotal(r.total)
   setHasMore(r.has_more)
+  setLoadedFrom(Math.max(0, r.total - r.messages.length))
 }
 
-// 向上加载更多
+// 向上加载更多（用 loadedFrom 跟踪，避免重复/遗漏）
 async function loadMore() {
-  if (!hasMore) return
-  const nextOffset = Math.max(0, total - allMessages.length - 50)
-  const r = await api.getTranscript(sid, { limit: 50, offset: nextOffset })
+  if (!hasMore || loadedFrom <= 0) return
+  const nextStart = Math.max(0, loadedFrom - 50)
+  const count = loadedFrom - nextStart
+  const r = await api.getTranscript(sid, { limit: count, offset: nextStart })
   setAllMessages(prev => [...r.messages, ...prev])
-  setHasMore(r.has_more)
+  setLoadedFrom(nextStart)
+  setHasMore(nextStart > 0)
 }
 ```
+
+**WebSocket 实时更新与分页的交互**: 对活跃会话，WebSocket 更新到来时不替换整个 transcript，而是追加新消息到 `allMessages` 末尾并递增 `total`。具体：`refreshTranscript` 改为 `appendNewMessages`，请求 `?offset={total}&limit=50` 获取增量，append 到数组末尾。
 
 Virtuoso 集成：使用 `startReached` 回调触发 `loadMore`，`firstItemIndex` 从 `total - allMessages.length` 开始以保持滚动位置。
 
