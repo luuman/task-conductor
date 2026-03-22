@@ -669,23 +669,31 @@ const loadMore = useCallback(() => {
 
 - [ ] **Step 4: 修改 WebSocket 刷新为增量 append**
 
-修改现有 `refreshTranscript`（line ~91-105）改为增量加载：
+用 `ref` 追踪 `total` 避免 callback 重建导致 WebSocket 断连重连：
 
 ```typescript
+const totalRef = useRef(0)
+// 在 loadInitial 和 loadMore 中同步更新:
+// totalRef.current = newTotal
+
 const appendNewMessages = useCallback((sid: string) => {
-  // 用当前 total 作为 offset，获取新增消息
-  api.getTranscript(sid, { offset: total, limit: 100 })
+  api.getTranscript(sid, { offset: totalRef.current, limit: 100 })
     .then(r => {
       if (r.messages.length > 0) {
         setTranscript(prev => [...prev, ...r.messages])
         setTotal(r.total)
+        totalRef.current = r.total
       }
     })
     .catch(() => {})
-}, [total])
+}, []) // 空依赖，引用稳定
+
+// 同样需要 selectedIdRef:
+const selectedIdRef = useRef<string | null>(null)
+// 在 selectSession 中更新: selectedIdRef.current = id
 ```
 
-在 WebSocket effect（line ~148-173）中将 `refreshTranscript(sid)` 替换为 `appendNewMessages(sid)`。
+在 WebSocket effect（line ~148-173）中将 `refreshTranscript(sid)` 替换为 `appendNewMessages(sid)`。由于 `appendNewMessages` 引用稳定（空依赖），WebSocket effect 不会因 total 变化而重建。
 
 - [ ] **Step 5: 将 loadMore 和分页状态暴露出去**
 
