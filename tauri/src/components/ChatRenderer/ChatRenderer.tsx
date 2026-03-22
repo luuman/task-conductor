@@ -710,7 +710,11 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
   const toolName = block.tool_name || 'Tool'
   const isAskUserInit = toolName === 'AskUserQuestion'
   const [open, setOpen] = useState(autoExpand || isAskUserInit)
-  const toggle = useCallback(() => setOpen(v => !v), [])
+  const [mounted, setMounted] = useState(autoExpand || isAskUserInit)
+  const toggle = useCallback(() => {
+    setMounted(true)
+    setOpen(v => !v)
+  }, [])
 
   // Respond to global expand/collapse signal
   const prevSignal = useRef(signal)
