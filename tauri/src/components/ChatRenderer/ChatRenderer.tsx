@@ -1111,11 +1111,14 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
         if (auto.relevance > 5) return auto.value
       } catch { /* fall through */ }
     }
-    // fallback：对转义后的文本做简单着色，避免双重转义
+    // fallback：对已转义文本做终端风格着色
     return escaped
-      .replace(/\b(error|Error|ERROR|fail|FAIL|failed|FAILED)\b/g, '<span class="hljs-deletion">$1</span>')
-      .replace(/\b(success|Success|pass|PASS|ok|OK|done|Done)\b/g, '<span class="hljs-addition">$1</span>')
+      .replace(/((?:\/[\w.@-]+)+(?:\.\w+)?(?:\(\d+[,:]?\d*\))?)/g, '<span class="hljs-string">$1</span>')
+      .replace(/\b(error|Error|ERROR|fail|FAIL|failed|FAILED|fatal|FATAL)\b/g, '<span class="hljs-deletion">$1</span>')
+      .replace(/\b(warning|Warning|WARN|warn|deprecated|DEPRECATED)\b/g, '<span class="hljs-comment">$1</span>')
+      .replace(/\b(success|Success|SUCCESS|pass|PASS|passed|ok|OK|done|Done|DONE)\b/g, '<span class="hljs-addition">$1</span>')
       .replace(/\b(\d+(?:\.\d+)?(?:ms|s|m|KB|MB|GB|%)?)\b/g, '<span class="hljs-number">$1</span>')
+      .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
   }, [result, noOutput, cmd])
 
   return (
