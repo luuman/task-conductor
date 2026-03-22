@@ -107,30 +107,81 @@ git commit -m "perf: lazy render ToolWidget body — mount on first expand, hide
 
 ---
 
-## Task 2: EditDiffView 懒渲染
+## Task 2: EditInlineCard 懒渲染
 
 **Files:**
-- Modify: `tauri/src/components/ChatRenderer/ChatRenderer.tsx:504-568` (EditDiffView) 及其调用处
+- Modify: `tauri/src/components/ChatRenderer/ChatRenderer.tsx:1028-1045` (EditInlineCard)
 
-- [ ] **Step 1: 找到 EditDiffView 的调用位置**
+注意：EditInlineCard 在 AssistantTurnCard 中直接渲染（line ~1197），不在 ToolWidget 内，因此 Task 1 的 ToolWidget 懒渲染对它无效。需要单独给 EditInlineCard 加折叠/展开机制。
 
-在 ToolWidget 的 `toolBody` 构建逻辑中（约 line 738-780），找到 `<EditDiffView .../>` 的渲染位置。由于 Task 1 已经让整个 `toolBody` 懒渲染，EditDiffView 天然受益——折叠时不 mount，展开时才计算 diff。
+- [ ] **Step 1: 给 EditInlineCard 加 mounted/expanded 状态**
 
-确认 `EditDiffView` 内的 diff 计算已在 `useMemo` 中（line ~510-512）。如果没有，需要包裹：
+将现有的 EditInlineCard（line ~1028-1045）改为默认折叠，显示摘要行，点击展开才渲染 EditDiffView：
 
 ```tsx
-const { lines, added, removed } = useMemo(() => computeDiff(oldStr, newStr), [oldStr, newStr])
+export function EditInlineCard({ block }: { block: TranscriptBlock }) {
+  const input = block.tool_input || {}
+  const hasEditData = Boolean(input.old_string || input.new_string)
+  const filePath = String(input.file_path || '')
+  const fileName = filePath.split('/').pop() || filePath
+  const [expanded, setExpanded] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const autoExpand = useContext(AutoExpandCtx)
+
+  // 无 diff 数据时只显示文件名
+  if (!hasEditData) {
+    return (
+      <div className={styles.bashCardHeader}>
+        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
+        <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
+      </div>
+    )
+  }
+
+  const handleToggle = () => {
+    if (!mounted) setMounted(true)
+    setExpanded(v => !v)
+  }
+
+  return (
+    <div>
+      <button className={`${styles.toolHeader} ${styles.toolHeaderClickable}`} onClick={handleToggle}>
+        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
+        <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
+        <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}>
+          <IconChevronRight size={10} />
+        </span>
+      </button>
+      {mounted && (
+        <div style={{ display: expanded ? 'block' : 'none' }}>
+          <EditDiffView input={input} />
+        </div>
+      )}
+    </div>
+  )
+}
 ```
 
-- [ ] **Step 2: 验证 EditDiffView 的 diff 计算确实在 useMemo 中**
+需要确认 `AutoExpandCtx`、`IconChevronRight` 已在文件内可用。
 
-Read `ChatRenderer.tsx` line 504-520，确认 diff 计算是否已被 `useMemo` 包裹。如果已经是，此 step 为 no-op。
+- [ ] **Step 2: 验证编译通过**
 
-- [ ] **Step 3: Commit（如有改动）**
+Run: `cd /home/sichengli/Documents/code2/task-conductor/tauri && npx tsc --noEmit`
+
+- [ ] **Step 3: 手动验证**
+
+打开包含 Edit 工具调用的会话，确认：
+- Edit 卡片默认显示为单行摘要（文件名 + 勾号）
+- 点击可展开看到 diff
+- 折叠后再展开立即显示
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git add tauri/src/components/ChatRenderer/ChatRenderer.tsx
-git commit -m "perf: ensure EditDiffView diff computation is memoized"
+git commit -m "perf: add lazy rendering to EditInlineCard — collapse by default, mount diff on expand"
 ```
 
 ---
