@@ -405,30 +405,6 @@ function FloatingNav({ sections, onJump }: {
       </button>
       {!collapsed && (
         <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', padding: '4px 0' }}>
-          {/* 卡片风格切换 */}
-          <div style={{ padding: '4px 10px 8px', borderBottom: '1px solid var(--tc-border)', marginBottom: 4 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--tc-foreground-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>
-              卡片风格
-            </div>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {CARD_STYLES.map(s => (
-                <button
-                  key={s.key}
-                  onClick={() => onStyleChange(s.key)}
-                  title={s.desc}
-                  style={{
-                    padding: '3px 8px', borderRadius: 4, fontSize: 10, fontWeight: 600,
-                    border: cardStyle === s.key ? '1.5px solid #58a6ff' : '1px solid var(--tc-border)',
-                    background: cardStyle === s.key ? 'rgba(88,166,255,0.15)' : 'var(--tc-panel-bg)',
-                    color: cardStyle === s.key ? '#58a6ff' : 'var(--tc-foreground-secondary)',
-                    cursor: 'pointer', transition: 'all 0.15s',
-                  }}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
           {sections.map((sec, i) => (
             <button key={i} onClick={() => onJump(i)} style={{
               display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '4px 10px',
