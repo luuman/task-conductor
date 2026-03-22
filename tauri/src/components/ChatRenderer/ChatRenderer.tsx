@@ -44,8 +44,75 @@ hljs.registerLanguage('rust', rust)
 hljs.registerLanguage('java', javaLang)
 hljs.registerLanguage('cpp', cpp)
 
+import mermaid from 'mermaid'
+
 import type { TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
 import styles from '../../features/admin/pages/sessions/sessions.module.css'
+
+// ── Mermaid 初始化 ──────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  darkMode: true,
+  fontFamily: "'Geist Mono', monospace",
+  fontSize: 12,
+  flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+  sequence: { useMaxWidth: true },
+  themeVariables: {
+    primaryColor: '#1a3a5c',
+    primaryTextColor: '#e6edf3',
+    primaryBorderColor: '#30608a',
+    lineColor: '#58a6ff',
+    secondaryColor: '#1c2d3f',
+    tertiaryColor: '#0d1b2a',
+    noteTextColor: '#e6edf3',
+    noteBkgColor: '#1a3a5c',
+    noteBorderColor: '#30608a',
+  },
+})
+
+function MermaidBlock({ code }: { code: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const idBase = useId().replace(/:/g, '_')
+  const [svg, setSvg] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    const id = `mermaid_${idBase}`
+    mermaid.render(id, code).then(
+      ({ svg: rendered }) => { if (!cancelled) setSvg(rendered) },
+      (err) => { if (!cancelled) setError(String(err?.message || err)) },
+    )
+    return () => { cancelled = true }
+  }, [code, idBase])
+
+  if (error) {
+    return (
+      <div className={styles.mermaidError}>
+        <span className={styles.mermaidErrorLabel}>Mermaid Error</span>
+        <pre className={styles.mermaidErrorPre}>{error}</pre>
+        <pre className={styles.mermaidErrorSrc}>{code}</pre>
+      </div>
+    )
+  }
+
+  if (!svg) {
+    return (
+      <div className={styles.mermaidLoading}>
+        Rendering diagram...
+      </div>
+    )
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={styles.mermaidWrap}
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  )
+}
 
 // ── Context ─────────────────────────────────────────────────
 // signal > 0 = expand all (increments), signal < 0 = collapse all (decrements)
