@@ -436,8 +436,62 @@ function ChatDemoCanvas() {
 
 export function ChatDemo() {
   return (
-    <div style={{ height: 'calc(100vh - 160px)', width: '100%' }}>
-      <ReactFlowProvider><ChatDemoCanvas /></ReactFlowProvider>
+    <div style={{ height: 'calc(100vh - 160px)', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* 最小连线测试——如果这里能看到线，说明 xyflow 没问题 */}
+      <EdgeTestBlock />
+      {/* 完整画布 */}
+      <div style={{ flex: 1 }}>
+        <ReactFlowProvider><ChatDemoCanvas /></ReactFlowProvider>
+      </div>
+    </div>
+  )
+}
+
+// ── 内联最小测试 ────────────────────────────────────
+
+function SimpleSource({ data }: NodeProps) {
+  return (
+    <div style={{ padding: 12, background: '#1e1e2e', border: '2px solid #58a6ff', borderRadius: 8, color: '#fff' }}>
+      {String(data?.label ?? 'A')}
+      <Handle type="source" position={Position.Right} style={{ background: '#58a6ff' }} />
+    </div>
+  )
+}
+function SimpleTarget({ data }: NodeProps) {
+  return (
+    <div style={{ padding: 12, background: '#1e1e2e', border: '2px solid #3fb950', borderRadius: 8, color: '#fff' }}>
+      <Handle type="target" position={Position.Left} style={{ background: '#3fb950' }} />
+      {String(data?.label ?? 'B')}
+    </div>
+  )
+}
+const simpleTypes = { simpleSource: SimpleSource, simpleTarget: SimpleTarget }
+const testNodes: Node[] = [
+  { id: 'x', type: 'simpleSource', position: { x: 0, y: 50 }, data: { label: 'Raw' } },
+  { id: 'y', type: 'simpleTarget', position: { x: 300, y: 50 }, data: { label: 'Styled' } },
+]
+const testEdges: Edge[] = [
+  { id: 'xy', source: 'x', target: 'y' },
+]
+
+function EdgeTestInner() {
+  const [n, , onN] = useNodesState(testNodes)
+  const [e, , onE] = useEdgesState(testEdges)
+  return (
+    <ReactFlow nodes={n} edges={e} onNodesChange={onN} onEdgesChange={onE}
+      nodeTypes={simpleTypes} fitView style={{ background: '#111' }} />
+  )
+}
+
+function EdgeTestBlock() {
+  return (
+    <div style={{ height: 160, border: '2px dashed #f85149', borderRadius: 8, margin: 4, position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 4, left: 8, fontSize: 10, color: '#f85149', zIndex: 10, fontWeight: 700 }}>
+        连线测试（如果看不到线，是 xyflow 全局问题）
+      </div>
+      <ReactFlowProvider>
+        <EdgeTestInner />
+      </ReactFlowProvider>
     </div>
   )
 }
