@@ -266,32 +266,86 @@ self.onmessage = (e: MessageEvent<{ id: string; code: string; language?: string 
 
 ```typescript
 // tauri/src/lib/useHighlight.ts
-const worker = new Worker(new URL('./hljs-worker.ts', import.meta.url), { type: 'module' })
-const cache = new Map<string, string>()
-const pending = new Map<string, (html: string) => void>()
 
-worker.onmessage = (e) => {
-  const { id, html } = e.data
-  cache.set(id, html)
-  pending.get(id)?.(html)
-  pending.delete(id)
+// Worker 懒初始化（避免模块加载时的副作用）
+let worker: Worker | null = null
+let workerAvailable = true
+const cache = new LRUCache<string, string>(500) // LRU 限制缓存大小，防止内存泄漏
+const pending = new Map<string, Array<(html: string) => void>>()
+
+function getWorker(): Worker | null {
+  if (!workerAvailable) return null
+  if (!worker) {
+    try {
+      worker = new Worker(new URL('./hljs-worker.ts', import.meta.url), { type: 'module' })
+      worker.onmessage = (e) => {
+        const { id, html } = e.data
+        cache.set(id, html)
+        pending.get(id)?.forEach(cb => cb(html))
+        pending.delete(id)
+      }
+    } catch {
+      workerAvailable = false
+      return null
+    }
+  }
+  return worker
 }
 
 export function useHighlight(code: string, language?: string): { html: string; loading: boolean } {
-  const key = `${language || 'auto'}:${code}`
+  // cache key 用 hash 避免超长 key
+  const key = `${language || 'auto'}:${simpleHash(code)}`
   const cached = cache.get(key)
   const [html, setHtml] = useState(cached || '')
   const [loading, setLoading] = useState(!cached)
 
   useEffect(() => {
     if (cached) { setHtml(cached); setLoading(false); return }
-    pending.set(key, (result) => { setHtml(result); setLoading(false) })
-    worker.postMessage({ id: key, code, language })
+
+    const w = getWorker()
+    if (!w) {
+      // 降级：主线程同步高亮
+      try {
+        const result = language
+          ? hljs.highlight(code, { language }).value
+          : hljs.highlightAuto(code).value
+        cache.set(key, result)
+        setHtml(result)
+      } catch { setHtml(code) }
+      setLoading(false)
+      return
+    }
+
+    // Worker 异步高亮 + unmount 安全
+    let cancelled = false
+    const callbacks = pending.get(key) || []
+    const cb = (result: string) => {
+      if (!cancelled) { setHtml(result); setLoading(false) }
+    }
+    callbacks.push(cb)
+    pending.set(key, callbacks)
+    w.postMessage({ id: key, code, language })
+
+    return () => {
+      cancelled = true
+      const cbs = pending.get(key)
+      if (cbs) {
+        const idx = cbs.indexOf(cb)
+        if (idx >= 0) cbs.splice(idx, 1)
+        if (cbs.length === 0) pending.delete(key)
+      }
+    }
   }, [key])
 
   return { html, loading }
 }
 ```
+
+改进点：
+- **Worker 懒初始化**: 首次调用 `useHighlight` 时才创建 Worker，避免模块加载时的副作用
+- **LRU 缓存**: 限制最大 500 条，防止长时间运行内存泄漏。使用简单 LRU 实现（Map + 淘汰最旧条目）
+- **Unmount 安全**: useEffect 返回 cleanup 设置 `cancelled = true`，Worker 回调不会更新已卸载组件的状态
+- **Cache key 哈希**: 使用 `simpleHash(code)` 替代完整代码字符串作为 key，避免超长 key 占用内存
 
 #### 降级策略
 
