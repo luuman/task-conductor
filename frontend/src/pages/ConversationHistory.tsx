@@ -1,22 +1,56 @@
 // frontend/src/pages/ConversationHistory.tsx
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { List, Plus, Bot as BotIcon, Download, ArrowDown, X, FileText } from "lucide-react";
+import {
+  List, Plus, Bot as BotIcon, Download, ArrowDown, X, FileText,
+  History, MessageSquare,
+} from "lucide-react";
 import hljs from "highlight.js/lib/core";
 import "../styles/hljs-ayu-dark.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api, type ClaudeSession, type TranscriptMessage, type Project } from "../lib/api";
-import { ConvSessionList } from "../components/ConvSessionList";
 import { ConvTranscript } from "../components/ConvTranscript";
 import { ChatInput } from "../components/ChatInput";
 import { useChatWs } from "../hooks/useChatWs";
+
+// ── 类型 ────────────────────────────────────────────────────────
 
 interface Props {
   projects: Project[];
 }
 
-/** 简化版 Markdown 组件（用于流式回复气泡） */
+interface ChatTab {
+  id: string;
+  type: "new" | "history";
+  title: string;
+  session?: ClaudeSession;
+  chatMessages: TranscriptMessage[];
+  transcript: TranscriptMessage[];
+  transcriptLoaded: boolean;
+  fileFound: boolean;
+}
+
+// ── 工具函数 ────────────────────────────────────────────────────
+
+function uid(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+function createNewTab(): ChatTab {
+  return {
+    id: uid(),
+    type: "new",
+    title: "新对话",
+    chatMessages: [],
+    transcript: [],
+    transcriptLoaded: true,
+    fileFound: true,
+  };
+}
+
+// ── Markdown 组件（流式回复） ────────────────────────────────────
+
 const streamMdComponents = {
   p:      ({ children }: { children?: React.ReactNode }) => <p className="mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
   code:   ({ children, className }: { children?: React.ReactNode; className?: string }) => {
@@ -51,7 +85,8 @@ function guessLang(filePath: string): string {
   return map[ext] || "";
 }
 
-/** 文件查看面板 */
+// ── 文件查看面板 ────────────────────────────────────────────────
+
 function FileViewPanel({ file, onClose }: { file: { path: string; name: string; content: string }; onClose: () => void }) {
   const lang = guessLang(file.path);
   const highlighted = useMemo(() => {
@@ -68,7 +103,6 @@ function FileViewPanel({ file, onClose }: { file: { path: string; name: string; 
   return (
     <div className="absolute inset-0 z-20 flex flex-col"
          style={{ background: "var(--background)" }}>
-      {/* 头部 */}
       <div className="flex items-center gap-2 px-4 py-2.5 shrink-0"
            style={{ borderBottom: "1px solid var(--border)", background: "var(--background-secondary)" }}>
         <FileText size={14} style={{ color: "var(--accent)" }} />
@@ -84,7 +118,6 @@ function FileViewPanel({ file, onClose }: { file: { path: string; name: string; 
           <X size={14} />
         </button>
       </div>
-      {/* 代码内容 */}
       <div className="flex-1 overflow-auto">
         {highlighted ? (
           <pre className="hljs px-4 py-3 text-[11px] font-mono leading-[1.7]"
@@ -101,26 +134,222 @@ function FileViewPanel({ file, onClose }: { file: { path: string; name: string; 
   );
 }
 
+// ── Tab 标签项 ──────────────────────────────────────────────────
+
+function TabItem({ tab, active, generating, onSelect, onClose, closable }: {
+  tab: ChatTab;
+  active: boolean;
+  generating: boolean;
+  onSelect: () => void;
+  onClose: () => void;
+  closable: boolean;
+}) {
+  return (
+    <div
+      onClick={onSelect}
+      className="group relative flex items-center gap-1.5 px-3 h-8 cursor-pointer shrink-0 select-none transition-colors"
+      style={{
+        background: active ? "var(--background)" : "transparent",
+        borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
+        color: active ? "var(--text-primary)" : "var(--text-tertiary)",
+      }}
+    >
+      {generating && (
+        <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: "var(--accent)" }} />
+      )}
+      {tab.type === "history" && !generating && (
+        <MessageSquare size={11} className="shrink-0 opacity-50" />
+      )}
+      <span className="text-[11px] font-medium truncate max-w-[120px]">
+        {tab.title}
+      </span>
+      {closable && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity shrink-0"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          <X size={10} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── 历史会话下拉 ────────────────────────────────────────────────
+
+function HistoryDropdown({ sessions, loading, onSelect }: {
+  sessions: ClaudeSession[];
+  loading: boolean;
+  onSelect: (s: ClaudeSession) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return sessions;
+    const q = search.toLowerCase();
+    return sessions.filter(s =>
+      (s.note?.alias ?? "").toLowerCase().includes(q) ||
+      (s.summary ?? "").toLowerCase().includes(q) ||
+      s.cwd.toLowerCase().includes(q)
+    );
+  }, [sessions, search]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => { setOpen(!open); setSearch(""); }}
+        className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors hover:brightness-125"
+        style={{
+          color: open ? "var(--accent)" : "var(--text-tertiary)",
+          background: open ? "var(--accent-subtle)" : "transparent",
+        }}
+        title="历史会话"
+      >
+        <History size={13} />
+        <span>历史</span>
+      </button>
+
+      {open && (
+        <div
+          className="absolute top-full right-0 mt-1 w-[320px] max-h-[420px] rounded-lg shadow-xl overflow-hidden z-50 flex flex-col"
+          style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+        >
+          {/* 搜索 */}
+          <div className="px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="搜索会话..."
+              autoFocus
+              className="w-full text-[11px] font-mono rounded px-2.5 py-1.5 outline-none"
+              style={{
+                background: "var(--background-tertiary)",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+              }}
+            />
+          </div>
+
+          {/* 会话列表 */}
+          <div className="flex-1 overflow-y-auto py-1">
+            {loading ? (
+              <div className="flex items-center justify-center h-20 text-[11px]"
+                   style={{ color: "var(--text-tertiary)" }}>加载中...</div>
+            ) : filtered.length === 0 ? (
+              <div className="flex items-center justify-center h-20 text-[11px]"
+                   style={{ color: "var(--text-tertiary)" }}>
+                {search ? "无匹配结果" : "暂无历史会话"}
+              </div>
+            ) : (
+              filtered.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => { onSelect(s); setOpen(false); }}
+                  className="w-full flex items-start gap-2.5 px-3 py-2 text-left transition-colors hover:bg-white/[0.04]"
+                >
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
+                    s.status === "active" ? "bg-green-400" :
+                    s.status === "idle" ? "bg-yellow-400" : "bg-gray-500"
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[11px] font-medium truncate"
+                         style={{ color: "var(--text-primary)" }}>
+                      {s.note?.alias || s.summary || s.session_id.slice(0, 8)}
+                    </div>
+                    <div className="text-[9px] truncate"
+                         style={{ color: "var(--text-tertiary)" }}>
+                      {s.cwd.split("/").pop()} · {s.event_count} 事件
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── 主组件 ──────────────────────────────────────────────────────
+
 export default function ConversationHistory({ projects: _projects }: Props) {
   const { t } = useTranslation();
+
+  // ── Tab 状态 ──
+  const [tabs, setTabs] = useState<ChatTab[]>(() => [createNewTab()]);
+  const [activeTabId, setActiveTabId] = useState(() => tabs[0].id);
+
+  // ── 历史会话列表（供下拉选择） ──
   const [sessions, setSessions] = useState<ClaudeSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
 
-  const [selectedSession, setSelectedSession] = useState<ClaudeSession | null>(null);
-  const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
-  const [transcriptLoading, setTranscriptLoading] = useState(false);
-  const [fileFound, setFileFound] = useState(true);
-  const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1);
-  const [autoExpand, setAutoExpand] = useState(true);
-
-  // 新对话模式
-  const [isNewChat, setIsNewChat] = useState(false);
-  const [chatMessages, setChatMessages] = useState<TranscriptMessage[]>([]);
-
-  // 文件查看面板
+  // ── 文件查看 ──
   const [viewingFile, setViewingFile] = useState<{ path: string; name: string; content: string } | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
 
+  // ── 右栏展开/折叠 ──
+  const [autoExpand, setAutoExpand] = useState(true);
+
+  // ── 滚动状态 ──
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
+  const prevMsgCountRef = useRef(0);
+
+  // ── 活跃 Tab ──
+  const activeTab = useMemo(() => tabs.find(t => t.id === activeTabId)!, [tabs, activeTabId]);
+  const activeTabIdRef = useRef(activeTabId);
+  activeTabIdRef.current = activeTabId;
+
+  // ── 生成状态追踪（跨 Tab） ──
+  const [generatingTabId, setGeneratingTabId] = useState<string | null>(null);
+  const generatingTabIdRef = useRef<string | null>(null);
+
+  // ── Chat WebSocket ──
+  const handleChatComplete = useCallback((fullText: string) => {
+    const tabId = generatingTabIdRef.current || activeTabIdRef.current;
+    generatingTabIdRef.current = null;
+    setGeneratingTabId(null);
+    setTabs(prev => prev.map(t => t.id === tabId ? {
+      ...t,
+      chatMessages: [...t.chatMessages, {
+        role: "assistant" as const,
+        ts: new Date().toISOString(),
+        blocks: [{ type: "text" as const, text: fullText }],
+      }],
+    } : t));
+  }, []);
+
+  const { send: chatSend, stop: chatStop, isGenerating, currentReply, error: chatError } = useChatWs(handleChatComplete);
+
+  // ── 会话列表轮询 ──
+  const loadSessions = useCallback(() => {
+    api.sessions.list()
+      .then(s => { setSessions(s); setSessionsLoading(false); })
+      .catch(() => setSessionsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    loadSessions();
+    const id = setInterval(loadSessions, 5000);
+    return () => clearInterval(id);
+  }, [loadSessions]);
+
+  // ── 文件打开 ──
   const handleOpenFile = useCallback((filePath: string) => {
     setFileLoading(true);
     api.file.read(filePath)
@@ -136,81 +365,95 @@ export default function ConversationHistory({ projects: _projects }: Props) {
         setViewingFile({ path: filePath, name: filePath.split("/").pop() || filePath, content: t('conversationHistory.fileReadError') });
         setFileLoading(false);
       });
+  }, [t]);
+
+  // ── Tab 操作 ──
+  const handleNewTab = useCallback(() => {
+    const tab = createNewTab();
+    setTabs(prev => [...prev, tab]);
+    setActiveTabId(tab.id);
   }, []);
 
-  const transcriptRef = useRef<HTMLDivElement>(null);
-  const transcriptCache = useRef<Map<string, { messages: TranscriptMessage[]; fileFound: boolean }>>(new Map());
-
-  // Chat WebSocket
-  const handleChatComplete = useCallback((fullText: string) => {
-    setChatMessages(prev => [
-      ...prev,
-      {
-        role: "assistant" as const,
-        ts: new Date().toISOString(),
-        blocks: [{ type: "text" as const, text: fullText }],
-      },
-    ]);
-  }, []);
-
-  const { send: chatSend, stop: chatStop, isGenerating, currentReply, error: chatError } = useChatWs(handleChatComplete);
-
-  const loadSessions = useCallback(() => {
-    api.sessions.list()
-      .then(s => { setSessions(s); setSessionsLoading(false); })
-      .catch(() => setSessionsLoading(false));
-  }, []);
-
-  useEffect(() => {
-    loadSessions();
-    const id = setInterval(loadSessions, 5000);
-    return () => clearInterval(id);
-  }, [loadSessions]);
-
-  // 默认选中第一个会话
-  const autoSelected = useRef(false);
-  useEffect(() => {
-    if (!autoSelected.current && sessions.length > 0 && !selectedSession && !isNewChat) {
-      autoSelected.current = true;
-      handleSelect(sessions[0]);
-    }
-  }, [sessions]);
-
-  const handleSelect = (s: ClaudeSession) => {
-    setIsNewChat(false);
-    setSelectedSession(s);
-    setChatMessages([]);
-    setActiveQuestionIdx(-1);
-    const cached = transcriptCache.current.get(s.session_id);
-    if (cached) {
-      setTranscript(cached.messages);
-      setFileFound(cached.fileFound);
-      setTranscriptLoading(false);
+  const handleOpenHistory = useCallback((session: ClaudeSession) => {
+    // 如果已打开则直接切换
+    const existing = tabs.find(t => t.session?.session_id === session.session_id);
+    if (existing) {
+      setActiveTabId(existing.id);
       return;
     }
-    setTranscriptLoading(true);
-    api.sessions.transcript(s.session_id)
+
+    const tab: ChatTab = {
+      id: uid(),
+      type: "history",
+      title: session.note?.alias || session.summary || session.session_id.slice(0, 8),
+      session,
+      chatMessages: [],
+      transcript: [],
+      transcriptLoaded: false,
+      fileFound: true,
+    };
+    setTabs(prev => [...prev, tab]);
+    setActiveTabId(tab.id);
+
+    // 加载 transcript
+    api.sessions.transcript(session.session_id)
       .then(r => {
-        transcriptCache.current.set(s.session_id, { messages: r.messages, fileFound: r.file_found });
-        setTranscript(r.messages);
-        setFileFound(r.file_found);
-        setTranscriptLoading(false);
+        setTabs(prev => prev.map(t => t.id === tab.id ? {
+          ...t,
+          transcript: r.messages,
+          fileFound: r.file_found,
+          transcriptLoaded: true,
+        } : t));
       })
-      .catch(() => { setTranscript([]); setFileFound(false); setTranscriptLoading(false); });
+      .catch(() => {
+        setTabs(prev => prev.map(t => t.id === tab.id ? {
+          ...t,
+          transcript: [],
+          fileFound: false,
+          transcriptLoaded: true,
+        } : t));
+      });
+  }, [tabs]);
+
+  const handleCloseTab = useCallback((tabId: string) => {
+    setTabs(prev => {
+      if (prev.length <= 1) return prev;
+      const idx = prev.findIndex(t => t.id === tabId);
+      const filtered = prev.filter(t => t.id !== tabId);
+      if (tabId === activeTabId) {
+        const newActive = filtered[Math.min(idx, filtered.length - 1)] || filtered[0];
+        setActiveTabId(newActive.id);
+      }
+      return filtered;
+    });
+  }, [activeTabId]);
+
+  // ── 发送消息 ──
+  const handleChatSend = (message: string, model: string, options?: import("../hooks/useChatWs").ChatOptions) => {
+    generatingTabIdRef.current = activeTabId;
+    setGeneratingTabId(activeTabId);
+
+    setTabs(prev => prev.map(t => t.id === activeTabId ? {
+      ...t,
+      chatMessages: [...t.chatMessages, {
+        role: "user" as const,
+        ts: new Date().toISOString(),
+        blocks: [{ type: "text" as const, text: message }],
+      }],
+      // 首条消息时更新 Tab 标题
+      title: t.chatMessages.length === 0 && t.type === "new"
+        ? message.slice(0, 30) + (message.length > 30 ? "..." : "")
+        : t.title,
+    } : t));
+
+    chatSend(message, model, options);
   };
 
-  const handleNewChat = () => {
-    setIsNewChat(true);
-    setSelectedSession(null);
-    setTranscript([]);
-    setChatMessages([]);
-    setTranscriptLoading(false);
-    setFileFound(true);
-  };
-
-  // 导出对话为 Markdown
+  // ── 导出 ──
   const handleExport = useCallback(() => {
-    const msgs = isNewChat ? chatMessages : [...transcript, ...chatMessages];
+    const msgs = activeTab.type === "new"
+      ? activeTab.chatMessages
+      : [...activeTab.transcript, ...activeTab.chatMessages];
     if (msgs.length === 0) return;
     const lines: string[] = [];
     msgs.forEach(msg => {
@@ -229,28 +472,14 @@ export default function ConversationHistory({ projects: _projects }: Props) {
     a.download = `chat-${new Date().toISOString().slice(0, 10)}.md`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [isNewChat, chatMessages, transcript]);
+  }, [activeTab]);
 
-  const handleChatSend = (message: string, model: string, options?: import("../hooks/useChatWs").ChatOptions) => {
-    // 追加用户消息
-    setChatMessages(prev => [
-      ...prev,
-      {
-        role: "user" as const,
-        ts: new Date().toISOString(),
-        blocks: [{ type: "text" as const, text: message }],
-      },
-    ]);
-    chatSend(message, model, options);
-  };
+  // ── 清空当前 Tab ──
+  const handleClear = useCallback(() => {
+    setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, chatMessages: [] } : t));
+  }, [activeTabId]);
 
-  // 滚动状态追踪
-  const chatBottomRef = useRef<HTMLDivElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-  const [hasNewMessages, setHasNewMessages] = useState(false);
-  const prevMsgCountRef = useRef(0);
-
-  // 监听滚动位置
+  // ── 滚动监听 ──
   useEffect(() => {
     const container = transcriptRef.current;
     if (!container) return;
@@ -262,10 +491,14 @@ export default function ConversationHistory({ projects: _projects }: Props) {
     };
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [selectedSession, isNewChat]);
+  }, [activeTabId]);
 
-  // 新消息到达时：不滚动，仅标记有新消息
-  const totalMsgCount = chatMessages.length + transcript.length;
+  // 新消息提示
+  const displayMessages = activeTab.type === "new"
+    ? activeTab.chatMessages
+    : [...activeTab.transcript, ...activeTab.chatMessages];
+  const totalMsgCount = displayMessages.length;
+
   useEffect(() => {
     if (totalMsgCount <= prevMsgCountRef.current) {
       prevMsgCountRef.current = totalMsgCount;
@@ -282,35 +515,35 @@ export default function ConversationHistory({ projects: _projects }: Props) {
     setHasNewMessages(false);
   }, []);
 
-  // 实时轮询：选中 active 会话时定时刷新 transcript
-  // 更新前记录滚动锚点，更新后恢复，确保当前阅读位置不动
+  // ── 实时轮询：活跃历史会话 ──
   const pendingScrollLock = useRef(false);
   const savedScrollTop = useRef(0);
-  const savedScrollHeight = useRef(0);
 
   useEffect(() => {
-    if (!selectedSession || selectedSession.status !== "active") return;
-    const sid = selectedSession.session_id;
+    if (activeTab.type !== "history" || !activeTab.session || activeTab.session.status !== "active") return;
+    const sid = activeTab.session.session_id;
+    const tabId = activeTab.id;
     const poll = () => {
       api.sessions.transcript(sid)
         .then(r => {
           const container = transcriptRef.current;
           if (container) {
             savedScrollTop.current = container.scrollTop;
-            savedScrollHeight.current = container.scrollHeight;
             pendingScrollLock.current = true;
           }
-          transcriptCache.current.set(sid, { messages: r.messages, fileFound: r.file_found });
-          setTranscript(r.messages);
-          setFileFound(r.file_found);
+          setTabs(prev => prev.map(t => t.id === tabId ? {
+            ...t,
+            transcript: r.messages,
+            fileFound: r.file_found,
+          } : t));
         })
         .catch(() => {});
     };
     const id = setInterval(poll, 3000);
     return () => clearInterval(id);
-  }, [selectedSession]);
+  }, [activeTab.id, activeTab.type, activeTab.session?.session_id, activeTab.session?.status]);
 
-  // 渲染后恢复滚动位置：新内容追加在底部，scrollTop 不变即可保持当前位置
+  // 恢复滚动位置
   useEffect(() => {
     if (!pendingScrollLock.current) return;
     pendingScrollLock.current = false;
@@ -318,12 +551,14 @@ export default function ConversationHistory({ projects: _projects }: Props) {
     if (container) {
       container.scrollTop = savedScrollTop.current;
     }
-  }, [transcript]);
+  }, [activeTab.transcript]);
 
-  // 展示的消息：历史会话模式用 transcript，新对话模式用 chatMessages
-  const displayMessages = isNewChat ? chatMessages : transcript;
+  // 是否在当前 Tab 显示流式内容
+  const showStreamingHere = generatingTabId === activeTabId;
 
-  // 提取用户问题列表（带原始 index）
+  // ── 问题导航 ──
+  const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1);
+
   const questions = useMemo(() => {
     const qs: { text: string; msgIndex: number }[] = [];
     displayMessages.forEach((msg, i) => {
@@ -338,7 +573,6 @@ export default function ConversationHistory({ projects: _projects }: Props) {
     return qs;
   }, [displayMessages]);
 
-  // 跳转到对应问题
   const jumpToQuestion = useCallback((qIdx: number, msgIndex: number) => {
     setActiveQuestionIdx(qIdx);
     const container = transcriptRef.current;
@@ -352,216 +586,257 @@ export default function ConversationHistory({ projects: _projects }: Props) {
     }
   }, []);
 
-  const hasQuestions = questions.length > 0 && !transcriptLoading && fileFound && !isNewChat;
+  const hasQuestions = questions.length > 0 && activeTab.type === "history" && activeTab.transcriptLoaded && activeTab.fileFound;
 
+  // ── 渲染 ──
   return (
-    <div className="flex-1 flex h-full overflow-hidden"
+    <div className="flex-1 flex flex-col h-full overflow-hidden"
          style={{ background: "var(--background)" }}>
 
-      {/* ── 左栏：会话列表 ── */}
-      <div className="w-[260px] shrink-0 flex flex-col overflow-hidden"
-           style={{ borderRight: "1px solid var(--border)" }}>
-        <div className="h-11 flex items-center px-3 shrink-0"
-             style={{ borderBottom: "1px solid var(--border)" }}>
-          <span className="text-[11px] font-semibold flex-1"
-                style={{ color: "var(--text-primary)" }}>{t('conversationHistory.header')}</span>
+      {/* ── 顶部 Tab 栏 ── */}
+      <div
+        className="flex items-center h-10 px-2 shrink-0"
+        style={{ borderBottom: "1px solid var(--border)", background: "var(--background-secondary)" }}
+      >
+        {/* 可滚动的 Tab 列表 */}
+        <div className="flex-1 flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+          {tabs.map(tab => (
+            <TabItem
+              key={tab.id}
+              tab={tab}
+              active={tab.id === activeTabId}
+              generating={generatingTabId === tab.id && isGenerating}
+              onSelect={() => setActiveTabId(tab.id)}
+              onClose={() => handleCloseTab(tab.id)}
+              closable={tabs.length > 1}
+            />
+          ))}
+        </div>
+
+        {/* 右侧按钮 */}
+        <div className="flex items-center gap-1 shrink-0 ml-2">
           <button
-            onClick={handleNewChat}
-            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded transition-colors hover:brightness-125"
-            style={{
-              color: isNewChat ? "var(--accent)" : "var(--text-tertiary)",
-              background: isNewChat ? "var(--accent-subtle)" : "transparent",
-            }}
-            title={t('conversationHistory.newChatTitle')}
+            onClick={handleNewTab}
+            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors hover:brightness-125"
+            style={{ color: "var(--text-tertiary)", background: "transparent" }}
+            title="新建会话"
           >
-            <Plus size={12} />
-            <span>{t('conversationHistory.newChat')}</span>
+            <Plus size={13} />
+            <span>新建</span>
           </button>
+          <HistoryDropdown
+            sessions={sessions}
+            loading={sessionsLoading}
+            onSelect={handleOpenHistory}
+          />
         </div>
-        <ConvSessionList
-          sessions={sessions}
-          loading={sessionsLoading}
-          selectedId={isNewChat ? null : (selectedSession?.id ?? null)}
-          onSelect={handleSelect}
-        />
       </div>
 
-      {/* ── 中栏：对话内容 + 聊天输入 + 文件查看 ── */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* 文件查看面板 */}
-        {viewingFile && (
-          <FileViewPanel file={viewingFile} onClose={() => setViewingFile(null)} />
-        )}
-        {fileLoading && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center"
-               style={{ background: "rgba(0,0,0,0.5)" }}>
-            <span className="text-[12px] font-mono" style={{ color: "var(--text-tertiary)" }}>{t('conversationHistory.loading')}</span>
-          </div>
-        )}
-        {/* 对话内容 */}
-        <div ref={transcriptRef} className="flex-1 overflow-y-auto">
-          {/* 新对话欢迎页（无消息时） */}
-          {isNewChat && chatMessages.length === 0 && !currentReply && (
-            <div className="flex flex-col items-center justify-center h-full gap-3"
-                 style={{ color: "var(--text-tertiary)" }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                   style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
-                <BotIcon size={20} style={{ color: "var(--accent)" }} />
-              </div>
-              <p className="text-[12px]">{t('conversationHistory.startNewChat')}</p>
-              <p className="text-[10px] opacity-50">{t('conversationHistory.startNewChatHint')}</p>
+      {/* ── 内容区 ── */}
+      <div className="flex-1 flex overflow-hidden">
+
+        {/* 中栏：对话内容 + 输入框 */}
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          {/* 文件查看 */}
+          {viewingFile && (
+            <FileViewPanel file={viewingFile} onClose={() => setViewingFile(null)} />
+          )}
+          {fileLoading && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center"
+                 style={{ background: "rgba(0,0,0,0.5)" }}>
+              <span className="text-[12px] font-mono" style={{ color: "var(--text-tertiary)" }}>
+                {t('conversationHistory.loading')}
+              </span>
             </div>
           )}
 
-          {/* 历史 transcript */}
-          {!isNewChat && (
-            <ConvTranscript messages={transcript} loading={transcriptLoading} fileFound={fileFound} scrollRef={transcriptRef} autoExpand={autoExpand} onOpenFile={handleOpenFile} />
-          )}
+          {/* 对话区域 */}
+          <div ref={transcriptRef} className="flex-1 overflow-y-auto">
 
-          {/* 新对话已完成的消息 */}
-          {isNewChat && chatMessages.length > 0 && (
-            <ConvTranscript messages={chatMessages} loading={false} fileFound={true} scrollRef={transcriptRef} autoExpand={autoExpand} onOpenFile={handleOpenFile} />
-          )}
-
-          {/* 流式回复气泡（新对话 & 历史会话共用） */}
-          {currentReply && (
-            <div className="flex items-start gap-3 px-4 py-2 justify-start">
-              <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
-                   style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
-                <BotIcon size={14} style={{ color: "var(--accent)" }} />
+            {/* 新对话欢迎页 */}
+            {activeTab.type === "new" && activeTab.chatMessages.length === 0 && !currentReply && (
+              <div className="flex flex-col items-center justify-center h-full gap-3"
+                   style={{ color: "var(--text-tertiary)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                     style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                  <BotIcon size={20} style={{ color: "var(--accent)" }} />
+                </div>
+                <p className="text-[12px]">{t('conversationHistory.startNewChat')}</p>
+                <p className="text-[10px] opacity-50">{t('conversationHistory.startNewChatHint')}</p>
               </div>
-              <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
-                   style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
-                <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={streamMdComponents as any}>
-                    {currentReply}
-                  </ReactMarkdown>
+            )}
+
+            {/* 历史 transcript（未加载时显示骨架屏） */}
+            {activeTab.type === "history" && !activeTab.transcriptLoaded && (
+              <div className="flex items-center justify-center h-32 text-[11px]"
+                   style={{ color: "var(--text-tertiary)" }}>
+                {t('conversationHistory.loading')}
+              </div>
+            )}
+
+            {/* 历史 transcript */}
+            {activeTab.type === "history" && activeTab.transcriptLoaded && (
+              <ConvTranscript
+                messages={activeTab.transcript}
+                loading={false}
+                fileFound={activeTab.fileFound}
+                scrollRef={transcriptRef}
+                autoExpand={autoExpand}
+                onOpenFile={handleOpenFile}
+              />
+            )}
+
+            {/* 新对话 / 历史会话的追加消息 */}
+            {activeTab.chatMessages.length > 0 && (
+              <ConvTranscript
+                messages={activeTab.chatMessages}
+                loading={false}
+                fileFound={true}
+                scrollRef={transcriptRef}
+                autoExpand={autoExpand}
+                onOpenFile={handleOpenFile}
+              />
+            )}
+
+            {/* 流式回复气泡 */}
+            {showStreamingHere && currentReply && (
+              <div className="flex items-start gap-3 px-4 py-2 justify-start">
+                <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                     style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                  <BotIcon size={14} style={{ color: "var(--accent)" }} />
+                </div>
+                <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
+                     style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
+                  <div className="text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={streamMdComponents as any}>
+                      {currentReply}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* 生成中等待动画 */}
-          {isGenerating && !currentReply && (
-            <div className="flex items-start gap-3 px-4 py-2 justify-start">
-              <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
-                   style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
-                <BotIcon size={14} style={{ color: "var(--accent)" }} />
-              </div>
-              <div className="min-w-0 rounded-lg px-3.5 py-2.5"
-                   style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.2s" }} />
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.4s" }} />
+            {/* 生成等待动画 */}
+            {showStreamingHere && isGenerating && !currentReply && (
+              <div className="flex items-start gap-3 px-4 py-2 justify-start">
+                <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5"
+                     style={{ background: "var(--accent-subtle)", border: "1px solid rgba(68,119,255,0.15)" }}>
+                  <BotIcon size={14} style={{ color: "var(--accent)" }} />
+                </div>
+                <div className="min-w-0 rounded-lg px-3.5 py-2.5"
+                     style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.2s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)", animationDelay: "0.4s" }} />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* 错误提示 */}
-          {chatError && (
-            <div className="px-4 py-2">
-              <div className="text-[11px] px-3 py-2 rounded-lg"
-                   style={{ color: "var(--danger)", background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}>
-                {chatError}
+            {/* 错误提示 */}
+            {chatError && showStreamingHere && (
+              <div className="px-4 py-2">
+                <div className="text-[11px] px-3 py-2 rounded-lg"
+                     style={{ color: "var(--danger)", background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}>
+                  {chatError}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div ref={chatBottomRef} />
-        </div>
-
-        {/* 回到最新按钮 */}
-        {!isAtBottom && (
-          <div className="absolute bottom-16 right-6 z-10">
-            <button
-              onClick={scrollToBottom}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono shadow-lg transition-all hover:scale-105"
-              style={{
-                background: "var(--accent)",
-                color: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-              }}
-            >
-              <ArrowDown size={13} />
-              {hasNewMessages && <span>{t('conversationHistory.newMessages')}</span>}
-            </button>
+            <div ref={chatBottomRef} />
           </div>
-        )}
 
-        {/* 聊天输入框 */}
-        <ChatInput
-          onSend={handleChatSend}
-          onStop={chatStop}
-          isGenerating={isGenerating}
-          onNewChat={handleNewChat}
-          onExport={handleExport}
-          onClear={() => { setChatMessages([]); }}
-        />
-      </div>
-
-      {/* ── 右栏：问题导航 ── */}
-      {hasQuestions && (
-        <div className="w-[220px] shrink-0 flex flex-col overflow-hidden"
-             style={{ borderLeft: "1px solid var(--border)" }}>
-          <div className="h-11 flex items-center gap-1.5 px-3 shrink-0 text-[11px] font-medium"
-               style={{ borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
-            <List size={12} />
-            <span>{t('conversationHistory.questionNav')}</span>
-            <span className="ml-auto flex items-center gap-1.5">
-              <span className="text-[9px]">{autoExpand ? t('conversationHistory.expandMode') : t('conversationHistory.collapseMode')}</span>
+          {/* 回到最新按钮 */}
+          {!isAtBottom && (
+            <div className="absolute bottom-16 right-6 z-10">
               <button
-                onClick={() => setAutoExpand(v => !v)}
-                className="relative w-7 h-[16px] rounded-full transition-colors shrink-0"
-                style={{ background: autoExpand ? "var(--accent)" : "var(--background-tertiary)", border: "1px solid var(--border)" }}
-                title={autoExpand ? t('conversationHistory.switchToCollapse') : t('conversationHistory.switchToExpand')}
-              >
-                <span className="absolute top-[2px] w-2.5 h-2.5 rounded-full transition-all"
-                      style={{
-                        left: autoExpand ? "calc(100% - 12px)" : "2px",
-                        background: autoExpand ? "#fff" : "var(--text-tertiary)",
-                      }} />
-              </button>
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto py-1">
-            {questions.map((q, i) => (
-              <button
-                key={i}
-                onClick={() => jumpToQuestion(i, q.msgIndex)}
-                className="w-full text-left px-3 py-1.5 text-[11px] leading-snug rounded-sm transition-colors group"
+                onClick={scrollToBottom}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono shadow-lg transition-all hover:scale-105"
                 style={{
-                  color: activeQuestionIdx === i ? "var(--accent)" : "var(--text-secondary)",
-                  background: activeQuestionIdx === i ? "var(--accent-subtle)" : "transparent",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
                 }}
               >
-                <div className="flex items-start gap-1.5">
-                  <span className="shrink-0 text-[9px] font-mono tabular-nums mt-[2px] w-4 text-right"
-                        style={{ color: activeQuestionIdx === i ? "var(--accent)" : "var(--text-tertiary)" }}>
-                    {i + 1}
-                  </span>
-                  <span className="line-clamp-2 group-hover:text-[var(--text-primary)] transition-colors">
-                    {q.text}
-                  </span>
-                </div>
+                <ArrowDown size={13} />
+                {hasNewMessages && <span>{t('conversationHistory.newMessages')}</span>}
               </button>
-            ))}
-          </div>
-          {/* 底部导出按钮 */}
-          <div className="shrink-0 px-2 py-2" style={{ borderTop: "1px solid var(--border)" }}>
-            <button
-              onClick={handleExport}
-              className="w-full flex items-center justify-center gap-1.5 text-[10px] py-1.5 rounded-md transition-colors hover:brightness-125"
-              style={{ color: "var(--text-tertiary)", background: "var(--background-tertiary)" }}
-              title={t('conversationHistory.exportAsMarkdown')}
-            >
-              <Download size={11} />
-              <span>{t('conversationHistory.exportChat')}</span>
-            </button>
-          </div>
+            </div>
+          )}
+
+          {/* 聊天输入框 */}
+          <ChatInput
+            onSend={handleChatSend}
+            onStop={chatStop}
+            isGenerating={showStreamingHere && isGenerating}
+            onNewChat={handleNewTab}
+            onExport={handleExport}
+            onClear={handleClear}
+          />
         </div>
-      )}
+
+        {/* ── 右栏：问题导航 ── */}
+        {hasQuestions && (
+          <div className="w-[220px] shrink-0 flex flex-col overflow-hidden"
+               style={{ borderLeft: "1px solid var(--border)" }}>
+            <div className="h-11 flex items-center gap-1.5 px-3 shrink-0 text-[11px] font-medium"
+                 style={{ borderBottom: "1px solid var(--border)", color: "var(--text-tertiary)" }}>
+              <List size={12} />
+              <span>{t('conversationHistory.questionNav')}</span>
+              <span className="ml-auto flex items-center gap-1.5">
+                <span className="text-[9px]">{autoExpand ? t('conversationHistory.expandMode') : t('conversationHistory.collapseMode')}</span>
+                <button
+                  onClick={() => setAutoExpand(v => !v)}
+                  className="relative w-7 h-[16px] rounded-full transition-colors shrink-0"
+                  style={{ background: autoExpand ? "var(--accent)" : "var(--background-tertiary)", border: "1px solid var(--border)" }}
+                  title={autoExpand ? t('conversationHistory.switchToCollapse') : t('conversationHistory.switchToExpand')}
+                >
+                  <span className="absolute top-[2px] w-2.5 h-2.5 rounded-full transition-all"
+                        style={{
+                          left: autoExpand ? "calc(100% - 12px)" : "2px",
+                          background: autoExpand ? "#fff" : "var(--text-tertiary)",
+                        }} />
+                </button>
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto py-1">
+              {questions.map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => jumpToQuestion(i, q.msgIndex)}
+                  className="w-full text-left px-3 py-1.5 text-[11px] leading-snug rounded-sm transition-colors group"
+                  style={{
+                    color: activeQuestionIdx === i ? "var(--accent)" : "var(--text-secondary)",
+                    background: activeQuestionIdx === i ? "var(--accent-subtle)" : "transparent",
+                  }}
+                >
+                  <div className="flex items-start gap-1.5">
+                    <span className="shrink-0 text-[9px] font-mono tabular-nums mt-[2px] w-4 text-right"
+                          style={{ color: activeQuestionIdx === i ? "var(--accent)" : "var(--text-tertiary)" }}>
+                      {i + 1}
+                    </span>
+                    <span className="line-clamp-2 group-hover:text-[var(--text-primary)] transition-colors">
+                      {q.text}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="shrink-0 px-2 py-2" style={{ borderTop: "1px solid var(--border)" }}>
+              <button
+                onClick={handleExport}
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] py-1.5 rounded-md transition-colors hover:brightness-125"
+                style={{ color: "var(--text-tertiary)", background: "var(--background-tertiary)" }}
+                title={t('conversationHistory.exportAsMarkdown')}
+              >
+                <Download size={11} />
+                <span>{t('conversationHistory.exportChat')}</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
