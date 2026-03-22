@@ -256,7 +256,12 @@ def _extract_tool_result_text(content) -> str:
 
 
 @router.get("/{session_id}/transcript", response_model=TranscriptResponse, summary="读取会话对话记录")
-def get_transcript(session_id: str, db: Session = Depends(get_db)):
+def get_transcript(
+    session_id: str,
+    limit: int = 50,
+    offset: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
     """
     从本地 ~/.claude/projects/{project_path}/{session_id}.jsonl 读取完整对话记录。
     两遍解析：第一遍构建消息 + 收集 tool_result，第二遍将 tool_result 关联到对应 tool_use block。
