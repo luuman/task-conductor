@@ -130,7 +130,12 @@ interface StyledNodeData { label: string; color: string; icon: string; turns: Gr
 
 // Raw 节点：纯内容，无外壳
 const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
-  <div style={{ width: 340, position: 'relative', minHeight: 20 }}>
+  <div style={{
+    width: 340, position: 'relative', minHeight: 20,
+    padding: 4, borderRadius: 10,
+    border: '1px solid transparent',
+    background: 'transparent',
+  }}>
     <Handle type="source" position={Position.Right} id="right"
       style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}`, zIndex: 1 }} />
     {data.messages.map((msg, i) => {
