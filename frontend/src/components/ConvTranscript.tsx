@@ -592,9 +592,9 @@ function AssistantCard({ msg }: { msg: TranscriptMessage }) {
   return (
     <div className="flex items-start gap-3 px-4 py-2 justify-start">
       <ClaudeAvatar />
-      <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5"
+      <div className="min-w-0 max-w-[85%] rounded-lg px-3.5 py-2.5 overflow-hidden"
            style={{ background: "rgba(68,119,255,0.04)", border: "1px solid rgba(68,119,255,0.12)" }}>
-        <div className="space-y-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+        <div className="space-y-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-primary)", overflowWrap: "break-word", wordBreak: "break-word" }}>
           {msg.blocks.map((block, i) =>
             block.type === "text" ? (
               <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={mdComponents}>{block.text ?? ""}</ReactMarkdown>
