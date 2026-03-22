@@ -147,9 +147,70 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
 ))
 RawNode.displayName = 'RawNode'
 
+// ── 文件图标映射 ────────────────────────────────────
+
+function getFileIcon(filePath: string): string {
+  const ext = filePath.split('.').pop()?.toLowerCase() || ''
+  const map: Record<string, string> = {
+    ts: 'file_type_typescript.svg', tsx: 'file_type_typescript.svg',
+    js: 'file_type_js.svg', jsx: 'file_type_js.svg',
+    py: 'file_type_python.svg', rs: 'file_type_rust.svg',
+    go: 'file_type_go.svg', java: 'file_type_java.svg',
+    css: 'file_type_css.svg', scss: 'file_type_scss.svg',
+    json: 'file_type_json.svg', yaml: 'file_type_yaml.svg', yml: 'file_type_yaml.svg',
+    toml: 'file_type_toml.svg', md: 'file_type_markdown.svg',
+    sh: 'file_type_shell.svg', bash: 'file_type_shell.svg',
+    svg: 'file_type_image.svg', png: 'file_type_image.svg',
+    html: 'file_type_html@2x.png', xml: 'file_type_html@2x.png',
+    sql: 'file_type_sql@2x.png',
+    kt: 'file_type_kotlin.svg', dart: 'file_type_dart.svg',
+    c: 'file_type_c.svg', cpp: 'file_type_cpp.svg', h: 'file_type_c.svg',
+  }
+  return `/file-icons/${map[ext] || 'file_type_default.svg'}`
+}
+
+// ── 卡片风格定义 ────────────────────────────────────
+
+type CardStyle = 'A' | 'B' | 'C' | 'D' | 'E'
+
+const CARD_STYLES: { key: CardStyle; label: string; desc: string }[] = [
+  { key: 'A', label: '当前', desc: '现有默认样式' },
+  { key: 'B', label: '毛玻璃', desc: '半透明背景 + 模糊' },
+  { key: 'C', label: '线框', desc: '无背景 + 左侧色条' },
+  { key: 'D', label: '卡片', desc: '阴影浮起 + 圆角大' },
+  { key: 'E', label: '紧凑', desc: '小间距 + 无圆角' },
+]
+
+// 各风格的容器样式
+function getUserCardStyle(style: CardStyle): React.CSSProperties {
+  const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
+  switch (style) {
+    case 'A': return { ...base, padding: '8px 12px', borderRadius: 8, marginBottom: 6, background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)' }
+    case 'B': return { ...base, padding: '10px 14px', borderRadius: 12, marginBottom: 8, background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }
+    case 'C': return { ...base, padding: '8px 12px', borderRadius: 0, marginBottom: 4, borderLeft: '3px solid #eab308', background: 'transparent' }
+    case 'D': return { ...base, padding: '12px 16px', borderRadius: 14, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid var(--tc-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }
+    case 'E': return { ...base, padding: '4px 8px', borderRadius: 0, marginBottom: 2, background: 'var(--tc-sidebar-item-hover)', borderBottom: '1px solid var(--tc-border)', fontSize: 11.5 }
+  }
+}
+
+function getAssistantCardStyle(style: CardStyle): React.CSSProperties {
+  const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
+  switch (style) {
+    case 'A': return { ...base, padding: '8px 12px', borderRadius: 8, marginBottom: 6, background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)' }
+    case 'B': return { ...base, padding: '10px 14px', borderRadius: 12, marginBottom: 8, background: 'rgba(88,166,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(88,166,255,0.1)', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }
+    case 'C': return { ...base, padding: '8px 12px', borderRadius: 0, marginBottom: 4, borderLeft: '3px solid #58a6ff', background: 'transparent' }
+    case 'D': return { ...base, padding: '12px 16px', borderRadius: 14, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid rgba(88,166,255,0.15)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }
+    case 'E': return { ...base, padding: '4px 8px', borderRadius: 0, marginBottom: 2, background: 'rgba(68,119,255,0.03)', borderBottom: '1px solid var(--tc-border)', fontSize: 11.5 }
+  }
+}
+
 // ── Styled 节点 ─────────────────────────────────────
 
+// 全局卡片风格 context
+const CardStyleCtx = createContext<CardStyle>('A')
+
 function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
+  const cardStyle = useContext(CardStyleCtx)
   return (
     <ExpandSignalCtx.Provider value={1}>
       <AutoExpandCtx.Provider value={true}>
@@ -158,22 +219,14 @@ function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
             const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
             if (!text) return null
             return (
-              <div key={i} style={{
-                padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-                background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
-                fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
-              }}>
+              <div key={i} style={getUserCardStyle(cardStyle)}>
                 <RichTextBlock text={text} />
               </div>
             )
           }
           const { turn } = item
           return (
-            <div key={i} style={{
-              padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-              background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
-              fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
-            }}>
+            <div key={i} style={getAssistantCardStyle(cardStyle)}>
               {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
               {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
               {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
