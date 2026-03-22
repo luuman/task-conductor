@@ -470,7 +470,7 @@ function ChatDemoCanvas() {
       </ReactFlow>
       {/* SVG 连线覆盖在 ReactFlow 上方 */}
       <SvgLines pairs={pairs} />
-      <FloatingNav sections={DEMO_SECTIONS} onJump={handleJump} cardStyle={cardStyle} onStyleChange={setCardStyle} />
+      <FloatingNav sections={DEMO_SECTIONS} onJump={handleJump} />
     </div>
     </CardStyleCtx.Provider>
   )
