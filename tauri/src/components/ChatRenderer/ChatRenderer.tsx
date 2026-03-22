@@ -1050,11 +1050,13 @@ function guessOutputLang(text: string, cmd: string): string | null {
   if (/^\s*[\[{]/.test(text) && /[\]}]\s*$/.test(text)) return 'json'
   if (/\.(ts|tsx|js|jsx)\(\d+,\d+\):\s*error/.test(text)) return 'typescript'
   if (/Traceback \(most recent call last\)/.test(text)) return 'python'
-  if (/^[\w-]+:\s+.+$/m.test(text) && !text.includes('=')) return 'yaml'
+  if (/\b(def|class|import|from)\b.*:/.test(text)) return 'python'
+  if (/\b(self|None|True|False)\b/.test(text) && /->/.test(text)) return 'python'
   if (/\b(tsc|eslint|tsx?)\b/.test(cmd)) return 'typescript'
   if (/\bpython|pip|pytest\b/.test(cmd)) return 'python'
   if (/\bcargo|rustc\b/.test(cmd)) return 'rust'
   if (/\bgo (build|test|run)\b/.test(cmd)) return 'go'
+  if (/^\s*[\[{]/.test(text)) return 'json'
   return null
 }
 
