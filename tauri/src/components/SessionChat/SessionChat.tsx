@@ -98,7 +98,10 @@ export function SessionChat({
       {hasQuestions && (
         <QuestionNav
           transcript={transcript}
+          allQuestions={allQuestions}
+          loadedFrom={loadedFrom}
           scrollToIndexRef={scrollToIndexRef}
+          onLoadAll={loadAll}
           autoExpand={autoExpand}
           onAutoExpandChange={setAutoExpand}
         />
