@@ -1090,10 +1090,11 @@
 
 /* ── AskUserQuestion ── */
 .askWrap {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(234, 179, 8, 0.25);
+  border: 1px solid rgba(234, 179, 8, 0.2);
   margin-top: 8px;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .askHeader {
