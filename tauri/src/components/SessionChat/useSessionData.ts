@@ -306,6 +306,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     hasMore,
     loadingMore,
     total,
+    allQuestions,
     isFirstLoad,
   }
 }
