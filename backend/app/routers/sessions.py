@@ -380,3 +380,65 @@ def get_transcript(
         total=total,
         has_more=start > 0,
     )
+
+
+@router.get("/{session_id}/questions", summary="获取会话中的用户提问列表")
+def get_questions(session_id: str, db: Session = Depends(get_db)):
+    """轻量级端点：只返回用户提问的文本和在消息数组中的索引，供 QuestionNav 使用。"""
+    s = db.query(ClaudeSession).filter_by(session_id=session_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    cwd = s.cwd or ""
+    project_path = cwd.replace("/", "-")
+    home = _os.path.expanduser("~")
+    transcript_path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
+
+    if not _os.path.exists(transcript_path):
+        return {"questions": [], "total": 0}
+
+    questions: list[dict] = []
+    msg_index = 0
+
+    with open(transcript_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = _json_mod.loads(line)
+            except Exception:
+                continue
+
+            entry_type = entry.get("type", "")
+            msg = entry.get("message", {})
+            role = msg.get("role", "")
+            content = msg.get("content", [])
+
+            is_user = entry_type == "user" or role == "user"
+            is_assistant = role == "assistant" or entry_type == "assistant"
+
+            if is_user:
+                text = ""
+                if isinstance(content, str):
+                    text = content.strip()
+                elif isinstance(content, list):
+                    text_parts = [c.get("text", "") for c in content
+                                  if isinstance(c, dict) and c.get("type") == "text"]
+                    text = " ".join(t.strip() for t in text_parts if t.strip())
+
+                if text:
+                    questions.append({
+                        "index": msg_index,
+                        "text": text[:200],
+                    })
+                    msg_index += 1
+            elif is_assistant:
+                has_blocks = isinstance(content, list) and any(
+                    isinstance(b, dict) and (b.get("type") == "text" or b.get("type") == "tool_use")
+                    for b in content
+                )
+                if has_blocks:
+                    msg_index += 1
+
+    return {"questions": questions, "total": msg_index}
