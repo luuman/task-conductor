@@ -239,6 +239,8 @@ class TranscriptMessage(BaseModel):
 class TranscriptResponse(BaseModel):
     messages: list[TranscriptMessage] = []
     file_found: bool = True
+    total: int = 0
+    has_more: bool = False
 
 
 def _extract_tool_result_text(content) -> str:
@@ -254,7 +256,12 @@ def _extract_tool_result_text(content) -> str:
 
 
 @router.get("/{session_id}/transcript", response_model=TranscriptResponse, summary="读取会话对话记录")
-def get_transcript(session_id: str, db: Session = Depends(get_db)):
+def get_transcript(
+    session_id: str,
+    limit: int = 50,
+    offset: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
     """
     从本地 ~/.claude/projects/{project_path}/{session_id}.jsonl 读取完整对话记录。
     两遍解析：第一遍构建消息 + 收集 tool_result，第二遍将 tool_result 关联到对应 tool_use block。
@@ -270,7 +277,7 @@ def get_transcript(session_id: str, db: Session = Depends(get_db)):
     transcript_path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
 
     if not _os.path.exists(transcript_path):
-        return TranscriptResponse(messages=[], file_found=False)
+        return TranscriptResponse(messages=[], file_found=False, total=0, has_more=False)
 
     # ── 第一遍：解析所有消息，同时收集 tool_result ──
     messages: list[TranscriptMessage] = []
@@ -360,4 +367,16 @@ def get_transcript(session_id: str, db: Session = Depends(get_db)):
                 block.tool_result = result_text
                 block.tool_error = is_error if is_error else None
 
-    return TranscriptResponse(messages=messages)
+    total = len(messages)
+    if offset is None:
+        start = max(0, total - limit)
+    else:
+        start = max(0, min(offset, total))
+    end = min(start + limit, total)
+
+    return TranscriptResponse(
+        messages=messages[start:end],
+        file_found=True,
+        total=total,
+        has_more=start > 0,
+    )

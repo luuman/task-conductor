@@ -1,13 +1,14 @@
 // ChatRenderer.tsx — Shared transcript message rendering components
 // Extracted from AdminSessions.tsx for reuse in FloatingAssistant and other contexts.
 
-import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext, type ReactNode } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState, createContext, useContext, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
 import hljs from 'highlight.js/lib/core'
 import '../../styles/hljs-ayu-dark.css'
+import { useHighlight } from '../../lib/useHighlight'
 import {
   IconTerminal, IconFileText, IconPencil, IconWrench, IconSearch,
   IconFolderOpen, IconGlobe, IconBot, IconCircleHelp, IconChevronRight,
@@ -588,19 +589,10 @@ function BashOutput({ command, result, isError }: { command: string; result: str
 function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
   const stripped = stripLineNumbers(result)
   const lineCount = stripped.split('\n').length
-  const lang = guessLang(filePath)
+  const lang = guessLang(filePath) || undefined
   const fileName = filePath.split('/').pop() || filePath
 
-  const highlighted = useMemo(() => {
-    try {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(stripped, { language: lang }).value
-      }
-      return hljs.highlightAuto(stripped).value
-    } catch {
-      return null
-    }
-  }, [stripped, lang])
+  const { html: highlighted } = useHighlight(stripped, lang)
 
   return (
     <div className={styles.readWrap}>
@@ -710,7 +702,11 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
   const toolName = block.tool_name || 'Tool'
   const isAskUserInit = toolName === 'AskUserQuestion'
   const [open, setOpen] = useState(autoExpand || isAskUserInit)
-  const toggle = useCallback(() => setOpen(v => !v), [])
+  const [mounted, setMounted] = useState(autoExpand || isAskUserInit)
+  const toggle = useCallback(() => {
+    setMounted(true)
+    setOpen(v => !v)
+  }, [])
 
   // Respond to global expand/collapse signal
   const prevSignal = useRef(signal)
@@ -781,8 +777,8 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
           </span>
         )}
       </button>
-      {open && (
-        <div className={styles.toolBody}>
+      {mounted && (
+        <div className={styles.toolBody} style={{ display: open ? 'block' : 'none' }}>
           {!!hasEditData && <EditDiffView input={block.tool_input!} />}
           {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
           {isRead && hasResult && <ReadFileView filePath={String(block.tool_input?.file_path ?? '')} result={block.tool_result!} />}
@@ -1028,10 +1024,13 @@ function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolTy
 export function EditInlineCard({ block }: { block: TranscriptBlock }) {
   const input = block.tool_input || {}
   const hasEditData = Boolean(input.old_string || input.new_string)
+  const filePath = String(input.file_path || '')
+  const fileName = filePath.split('/').pop() || filePath
+  const [expanded, setExpanded] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
+  // No diff data — just show file name badge
   if (!hasEditData) {
-    const filePath = String(input.file_path || '')
-    const fileName = filePath.split('/').pop() || filePath
     return (
       <div className={styles.bashCardHeader}>
         <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
@@ -1041,7 +1040,28 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
     )
   }
 
-  return <EditDiffView input={input} />
+  const handleToggle = () => {
+    if (!mounted) setMounted(true)
+    setExpanded(v => !v)
+  }
+
+  return (
+    <div>
+      <button className={`${styles.toolHeader} ${styles.toolHeaderClickable}`} onClick={handleToggle} style={{ width: '100%' }}>
+        <span className={styles.bashCardIcon}>{getToolIcon(block.tool_name || 'Edit', 12)}</span>
+        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
+        <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
+        <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', marginLeft: 'auto' }}>
+          ▶
+        </span>
+      </button>
+      {mounted && (
+        <div style={{ display: expanded ? 'block' : 'none' }}>
+          <EditDiffView input={input} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ── Guess best hljs language for command output ─────────────
@@ -1087,50 +1107,26 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
   const hasError = isError || result.toLowerCase().includes('error') || result.toLowerCase().includes('fail')
   const noOutput = !result || result === '(Bash completed with no output)'
 
-  const cmdHighlighted = useMemo(() => {
-    try {
-      return hljs.highlight(shortCmd, { language: 'bash' }).value
-    } catch {
-      return null
-    }
-  }, [shortCmd])
+  const { html: cmdHtml } = useHighlight(shortCmd, 'bash')
 
+  // Detect language from file extension or command
+  const resultLang = useMemo(() => guessOutputLang(result, cmd), [result, cmd])
+  const { html: resultHighlighted } = useHighlight(result || '', resultLang || undefined)
+  // Apply terminal-style fallback coloring when no language was detected and worker returned plain escaped text
   const resultHtml = useMemo(() => {
     if (!result || noOutput) return null
-    // 先 HTML 转义，保证纯文本安全
-    const escaped = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    const lang = guessOutputLang(result, cmd)
-    if (lang) {
-      try {
-        if (hljs.getLanguage(lang)) {
-          return hljs.highlight(result, { language: lang }).value
-        }
-      } catch { /* fall through */ }
-    }
-    if (result.length < 2000 && result.split('\n').length > 3) {
-      try {
-        const auto = hljs.highlightAuto(result)
-        // 只有高置信度且确实产生了高亮 span 才使用
-        if (auto.relevance > 8 && auto.value.includes('class="hljs-')) return auto.value
-      } catch { /* fall through */ }
-    }
-    // fallback：对已转义文本做终端风格着色
-    return escaped
-      .replace(/((?:\/[\w.@-]+)+(?:\.\w+)?(?:\(\d+[,:]?\d*\))?)/g, '<span class="hljs-string">$1</span>')
-      .replace(/\b(error|Error|ERROR|fail|FAIL|failed|FAILED|fatal|FATAL)\b/g, '<span class="hljs-deletion">$1</span>')
-      .replace(/\b(warning|Warning|WARN|warn|deprecated|DEPRECATED)\b/g, '<span class="hljs-comment">$1</span>')
-      .replace(/\b(success|Success|SUCCESS|pass|PASS|passed|ok|OK|done|Done|DONE)\b/g, '<span class="hljs-addition">$1</span>')
-      .replace(/\b(\d+(?:\.\d+)?(?:ms|s|m|KB|MB|GB|%)?)\b/g, '<span class="hljs-number">$1</span>')
-      .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
-  }, [result, noOutput, cmd])
+    if (resultHighlighted) return resultHighlighted
+    // fallback: terminal-style coloring on escaped text
+    return highlightLog(result)
+  }, [result, noOutput, resultHighlighted])
 
   return (
     <div className={styles.bashCard}>
       <div className={`${styles.bashCardHeader} ${hasError ? styles.bashCardHeaderErr : ''}`}>
         <span className={styles.bashCardIcon}>{getToolIcon('Bash', 12)}</span>
         <span className={styles.bashCardPrompt}>$</span>
-        {cmdHighlighted ? (
-          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: cmdHighlighted }} />
+        {cmdHtml ? (
+          <code className={`hljs ${styles.bashCardCmd}`} dangerouslySetInnerHTML={{ __html: cmdHtml }} />
         ) : (
           <code className={styles.bashCardCmd}>{shortCmd}</code>
         )}
@@ -1213,6 +1209,9 @@ export function AssistantTurnCard({ turn }: { turn: AssistantTurn }) {
     </div>
   )
 }
+
+export const MemoUserCard = memo(UserCard)
+export const MemoAssistantTurnCard = memo(AssistantTurnCard)
 
 // ── ChatMessageList ─────────────────────────────────────────
 

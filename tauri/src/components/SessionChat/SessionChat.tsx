@@ -1,7 +1,7 @@
 // SessionChat.tsx — Composed session chat component
 // Provides 'full' (3-column) and 'compact' (single-column) layout variants.
 
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { AiSession } from '../../lib/api/types'
 import { useSessionData } from './useSessionData'
 import { SessionList } from './SessionList'
@@ -27,7 +27,11 @@ export function SessionChat({
 
   const [search, setSearch] = useState('')
   const [autoExpand, setAutoExpand] = useState(true)
-  const transcriptScrollRef = useRef<HTMLDivElement>(null)
+  const scrollToIndexRef = useRef<((index: number) => void) | null>(null)
+
+  const handleJumpToQuestion = useCallback((ref: { scrollToIndex: (index: number) => void }) => {
+    scrollToIndexRef.current = ref.scrollToIndex
+  }, [])
 
   const handleSelect = (s: AiSession) => {
     selectSession(s.session_id)
@@ -83,12 +87,12 @@ export function SessionChat({
         selectedId={selectedId}
         isFirstLoad={isFirstLoad}
         autoExpand={autoExpand}
-        scrollRef={transcriptScrollRef}
+        onJumpToQuestion={handleJumpToQuestion}
       />
       {hasQuestions && (
         <QuestionNav
           transcript={transcript}
-          transcriptScrollRef={transcriptScrollRef}
+          scrollToIndexRef={scrollToIndexRef}
           autoExpand={autoExpand}
           onAutoExpandChange={setAutoExpand}
         />

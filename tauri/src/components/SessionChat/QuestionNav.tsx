@@ -1,55 +1,49 @@
 // QuestionNav.tsx — Right panel question navigation
-// Extracted from AdminSessions for reuse.
+// Uses Virtuoso scrollToIndex API for virtual-scroll-compatible jumping.
 
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TranscriptMessage } from '../../lib/api/types'
+import { groupMessagesIntoTurns } from '../ChatRenderer'
 import styles from './session-chat.module.css'
 
 export interface QuestionNavProps {
   transcript: TranscriptMessage[]
-  transcriptScrollRef?: React.RefObject<HTMLDivElement | null>
+  scrollToIndexRef?: React.RefObject<((index: number) => void) | null>
   autoExpand: boolean
   onAutoExpandChange: (v: boolean) => void
   className?: string
 }
 
 export function QuestionNav({
-  transcript, transcriptScrollRef, autoExpand, onAutoExpandChange, className,
+  transcript, scrollToIndexRef, autoExpand, onAutoExpandChange, className,
 }: QuestionNavProps) {
   const { t } = useTranslation()
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(-1)
 
-  // Extract user questions from transcript
+  // Build questions list using grouped turns (same grouping as TranscriptViewer)
   const questions = useMemo(() => {
-    return transcript
-      .map((msg, i) => ({ msg, i }))
-      .filter(({ msg }) => msg.role === 'user')
-      .map(({ msg, i }) => ({
-        text: msg.blocks
+    const turns = groupMessagesIntoTurns(transcript)
+    const result: Array<{ text: string; turnIndex: number }> = []
+    turns.forEach((item, i) => {
+      if (item.kind === 'user') {
+        const text = item.msg.blocks
           .filter(b => b.type === 'text')
-          .map(b => b.text)
+          .map(b => b.text || '')
           .join(' ')
           .trim()
-          .slice(0, 200),
-        msgIndex: i,
-      }))
-      .filter(q => q.text)
+          .slice(0, 200)
+        if (text) result.push({ text, turnIndex: i })
+      }
+    })
+    return result
   }, [transcript])
 
-  // Jump to question
-  const jumpToQuestion = useCallback((qIdx: number, msgIndex: number) => {
+  // Jump to question using Virtuoso scrollToIndex
+  const jumpToQuestion = useCallback((qIdx: number, turnIndex: number) => {
     setActiveQuestionIdx(qIdx)
-    const container = transcriptScrollRef?.current
-    if (!container) return
-    const cards = container.querySelectorAll('[data-msg-index]')
-    for (const card of cards) {
-      if ((card as HTMLElement).dataset.msgIndex === String(msgIndex)) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        return
-      }
-    }
-  }, [transcriptScrollRef])
+    scrollToIndexRef?.current?.(turnIndex)
+  }, [scrollToIndexRef])
 
   if (questions.length === 0) return null
 
@@ -77,7 +71,7 @@ export function QuestionNav({
         {questions.map((q, i) => (
           <button
             key={i}
-            onClick={() => jumpToQuestion(i, q.msgIndex)}
+            onClick={() => jumpToQuestion(i, q.turnIndex)}
             className={activeQuestionIdx === i ? styles.questionItemActive : styles.questionItem}
           >
             <span className={styles.questionNum}>{i + 1}</span>

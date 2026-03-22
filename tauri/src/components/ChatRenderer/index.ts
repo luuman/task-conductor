@@ -2,6 +2,8 @@ export {
   ChatMessageList,
   UserCard,
   AssistantTurnCard,
+  MemoUserCard,
+  MemoAssistantTurnCard,
   groupMessagesIntoTurns,
   ExpandSignalCtx,
   AutoExpandCtx,
