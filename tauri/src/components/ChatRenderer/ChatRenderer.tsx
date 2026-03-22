@@ -1107,10 +1107,11 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
         }
       } catch { /* fall through */ }
     }
-    if (result.length < 2000) {
+    if (result.length < 2000 && result.split('\n').length > 3) {
       try {
         const auto = hljs.highlightAuto(result)
-        if (auto.relevance > 5) return auto.value
+        // 只有高置信度且确实产生了高亮 span 才使用
+        if (auto.relevance > 8 && auto.value.includes('class="hljs-')) return auto.value
       } catch { /* fall through */ }
     }
     // fallback：对已转义文本做终端风格着色
