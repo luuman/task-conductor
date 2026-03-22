@@ -496,68 +496,244 @@ function ProcessTopology({ procs, onKill: _onKill }: { procs: ProcessInfo[]; onK
   )
 }
 
-/* ── Claude 详情卡片 ── */
-function ClaudeCard({ proc, color, index: _index }: { proc: ProcessInfo; color: string; index: number }) {
-  const isActive = proc.cpu_pct > 1
-  const statusColor = isActive ? '#34d399' : '#f97316'
-  const statusLabel = isActive ? '运行中' : '空闲'
-  const roleIcon = '◉'
+/* ── Claude 独立拓扑可视化 ── */
+function ClaudeCluster({ procs, colors }: { procs: ProcessInfo[]; colors: string[] }) {
+  const svgRef = useRef<SVGSVGElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
 
-  const gaugeSize = 44
-  const gR = gaugeSize * 0.36, gSW = gaugeSize * 0.1
-  const cpuCirc = 2 * Math.PI * gR
-  const cpuOff = cpuCirc - (Math.min(proc.cpu_pct, 20) / 20) * cpuCirc
-  const memCirc = 2 * Math.PI * gR
-  const memOff = memCirc - (Math.min(proc.mem_mb, 700) / 700) * memCirc
+  // 布局：中心 hub + 环形排列各进程
+  const cx = 300, cy = 200
+  const radius = procs.length <= 1 ? 0 : Math.min(140, 80 + procs.length * 15)
+  const nodeR = 32, nodeSW = 5, innerNodeR = 22, innerSW = 4
+  const viewW = 600, viewH = 400
 
-  const cpuC = proc.cpu_pct > 8 ? '#f97316' : '#60a5fa'
-  const mC = proc.mem_mb > 450 ? '#f97316' : '#34d399'
-  const cx = gaugeSize / 2, cy = gaugeSize / 2
+  // 汇总指标
+  const totalCpu = procs.reduce((s, p) => s + p.cpu_pct, 0)
+  const totalMem = procs.reduce((s, p) => s + p.mem_mb, 0)
+  const activeCount = procs.filter(p => p.cpu_pct > 1).length
+
+  // hover 状态
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+
+  // 节点位置
+  const positions = useMemo(() => {
+    if (procs.length === 1) return [{ x: cx, y: cy }]
+    return procs.map((_, i) => {
+      const angle = (i / procs.length) * Math.PI * 2 - Math.PI / 2
+      return { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius }
+    })
+  }, [procs.length, radius])
+
+  // 缩放
+  const [vb, setVb] = useState({ x: -20, y: -20, w: viewW + 40, h: viewH + 40 })
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const scale = e.deltaY > 0 ? 1.1 : 0.9
+      setVb(prev => {
+        const nw = prev.w * scale, nh = prev.h * scale
+        if (nw < 150 || nw > 2000) return prev
+        const svg = svgRef.current
+        if (!svg) return prev
+        const rect = svg.getBoundingClientRect()
+        const mx = (e.clientX - rect.left) / rect.width
+        const my = (e.clientY - rect.top) / rect.height
+        return { x: prev.x + (prev.w - nw) * mx, y: prev.y + (prev.h - nh) * my, w: nw, h: nh }
+      })
+    }
+    wrap.addEventListener('wheel', onWheel, { passive: false })
+    return () => wrap.removeEventListener('wheel', onWheel)
+  }, [])
 
   return (
-    <div className={s.clCard}>
-      <div className={s.clCardBar} style={{ background: color }} />
-      <div className={s.clCardHead}>
-        <div className={s.clCardIcon} style={{ background: color + '18', color }}>{roleIcon}</div>
-        <div>
-          <div className={s.clCardName}>{proc.name} ({proc.pid})</div>
-          <div className={s.clCardPid}>PID {proc.pid}</div>
+    <div className={s.claudeClusterWrap}>
+      {/* 顶部汇总条 */}
+      <div className={s.claudeSummaryBar}>
+        <div className={s.claudeSumItem}>
+          <span className={s.claudeSumLabel}>实例</span>
+          <span className={s.claudeSumVal}>{procs.length}</span>
         </div>
-        <span className={s.clCardBadge} style={{ background: statusColor + '18', color: statusColor }}>{statusLabel}</span>
-      </div>
-      <div className={s.clCardGauges}>
-        <div className={s.miniGauge}>
-          <svg viewBox={`0 0 ${gaugeSize} ${gaugeSize}`} width={gaugeSize} height={gaugeSize}>
-            <circle cx={cx} cy={cy} r={gR} fill="none" stroke="var(--tc-border)" strokeWidth={gSW} />
-            <circle cx={cx} cy={cy} r={gR} fill="none" stroke={cpuC} strokeWidth={gSW}
-              strokeDasharray={cpuCirc} strokeDashoffset={cpuOff} strokeLinecap="round"
-              style={{ transform: 'rotate(-90deg)', transformOrigin: `${cx}px ${cy}px` }} />
-            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
-              fill={cpuC} fontSize="10" fontWeight="600" fontFamily="'Geist Mono', monospace">
-              {proc.cpu_pct.toFixed(1)}
-            </text>
-          </svg>
-          <div className={s.miniGaugeLabel}>CPU %</div>
+        <div className={s.claudeSumItem}>
+          <span className={s.claudeSumLabel}>活跃</span>
+          <span className={s.claudeSumVal} style={{ color: '#34d399' }}>{activeCount}</span>
         </div>
-        <div className={s.miniGauge}>
-          <svg viewBox={`0 0 ${gaugeSize} ${gaugeSize}`} width={gaugeSize} height={gaugeSize}>
-            <circle cx={cx} cy={cy} r={gR} fill="none" stroke="var(--tc-border)" strokeWidth={gSW} />
-            <circle cx={cx} cy={cy} r={gR} fill="none" stroke={mC} strokeWidth={gSW}
-              strokeDasharray={memCirc} strokeDashoffset={memOff} strokeLinecap="round"
-              style={{ transform: 'rotate(-90deg)', transformOrigin: `${cx}px ${cy}px` }} />
-            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
-              fill={mC} fontSize="10" fontWeight="600" fontFamily="'Geist Mono', monospace">
-              {Math.round(proc.mem_mb)}
-            </text>
-          </svg>
-          <div className={s.miniGaugeLabel}>MEM MB</div>
+        <div className={s.claudeSumItem}>
+          <span className={s.claudeSumLabel}>总 CPU</span>
+          <span className={s.claudeSumVal} style={{ color: totalCpu > 50 ? '#f97316' : '#60a5fa' }}>
+            {totalCpu.toFixed(1)}%
+          </span>
+        </div>
+        <div className={s.claudeSumItem}>
+          <span className={s.claudeSumLabel}>总内存</span>
+          <span className={s.claudeSumVal} style={{ color: totalMem > 2000 ? '#f97316' : '#34d399' }}>
+            {fmtMem(totalMem)}
+          </span>
         </div>
       </div>
-      <dl className={s.clCardMeta}>
-        <dt className={s.clCardMetaDt}>PID</dt><dd className={s.clCardMetaDd}>{proc.pid}</dd>
-        <dt className={s.clCardMetaDt}>CPU</dt><dd className={s.clCardMetaDd}>{proc.cpu_pct}%</dd>
-        <dt className={s.clCardMetaDt}>内存</dt><dd className={s.clCardMetaDd}>{fmtMem(proc.mem_mb)}</dd>
-      </dl>
+
+      {/* SVG 可视化 */}
+      <div className={s.claudeTopoWrap} ref={wrapRef}>
+        <svg
+          ref={svgRef}
+          className={s.claudeTopoSvg}
+          viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
+        >
+          {/* 背景辐射线（hub → 各节点） */}
+          {procs.length > 1 && positions.map((pos, i) => {
+            const dimmed = hoveredIdx !== null && hoveredIdx !== i
+            return (
+              <line key={`line-${i}`}
+                x1={cx} y1={cy} x2={pos.x} y2={pos.y}
+                stroke={dimmed ? '#141820' : colors[i % colors.length] + '40'}
+                strokeWidth="1.5" strokeDasharray="4 3"
+                style={{ transition: 'stroke 0.25s, opacity 0.25s', opacity: dimmed ? 0.15 : 1 }}
+              />
+            )
+          })}
+
+          {/* 流动光点 */}
+          {procs.length > 1 && positions.map((pos, i) => {
+            const p = procs[i]
+            if (p.cpu_pct < 0.5) return null
+            return (
+              <circle key={`dot-${i}`} r="2.5" fill={colors[i % colors.length]} opacity="0.7">
+                <animateMotion
+                  dur={`${1.5 + (i % 3) * 0.4}s`}
+                  repeatCount="indefinite"
+                  path={`M${cx},${cy} L${pos.x},${pos.y}`}
+                />
+              </circle>
+            )
+          })}
+
+          {/* 中心 hub（仅多进程时显示） */}
+          {procs.length > 1 && (
+            <g>
+              <circle cx={cx} cy={cy} r={20} fill="#a78bfa12" stroke="#a78bfa30" strokeWidth="1.5" />
+              <text x={cx} y={cy - 3} textAnchor="middle" dominantBaseline="central"
+                fill="#a78bfa" fontSize="9" fontWeight="700" fontFamily="'Geist Mono', monospace">
+                Claude
+              </text>
+              <text x={cx} y={cy + 9} textAnchor="middle" dominantBaseline="central"
+                fill="var(--tc-foreground-tertiary)" fontSize="7" fontFamily="'Geist Mono', monospace">
+                ×{procs.length}
+              </text>
+            </g>
+          )}
+
+          {/* 各进程节点 */}
+          {procs.map((p, i) => {
+            const pos = positions[i]
+            const color = colors[i % colors.length]
+            const isActive = p.cpu_pct > 1
+            const cpuC = cpuColorRaw(p.cpu_pct)
+            const memC = memColorRaw(p.mem_mb)
+
+            const outerCirc = 2 * Math.PI * nodeR
+            const outerOff = outerCirc - (Math.min(p.cpu_pct, 100) / 100) * outerCirc
+            const innerCirc = 2 * Math.PI * innerNodeR
+            const memPct = Math.min(p.mem_mb / 2600 * 100, 100)
+            const innerOff = innerCirc - (memPct / 100) * innerCirc
+
+            const dimmed = hoveredIdx !== null && hoveredIdx !== i
+
+            return (
+              <g key={`node-${i}`}
+                style={{
+                  opacity: dimmed ? 0.15 : 1,
+                  filter: dimmed ? 'saturate(0)' : 'none',
+                  transition: 'opacity 0.25s, filter 0.25s',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={() => setHoveredIdx(i)}
+                onMouseLeave={() => setHoveredIdx(null)}
+              >
+                {/* 活跃光晕 */}
+                {isActive && !dimmed && (
+                  <circle cx={pos.x} cy={pos.y} r={nodeR + 6} fill="none"
+                    stroke={color} strokeWidth="1" opacity="0.2">
+                    <animate attributeName="r" values={`${nodeR + 3};${nodeR + 8};${nodeR + 3}`}
+                      dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.3;0.08;0.3"
+                      dur="2s" repeatCount="indefinite" />
+                  </circle>
+                )}
+
+                {/* 外环 CPU */}
+                <circle cx={pos.x} cy={pos.y} r={nodeR} fill="none" stroke="var(--tc-border)" strokeWidth={nodeSW} />
+                <circle cx={pos.x} cy={pos.y} r={nodeR} fill="none" stroke={cpuC} strokeWidth={nodeSW}
+                  strokeDasharray={outerCirc} strokeDashoffset={outerOff} strokeLinecap="round"
+                  style={{ transform: `rotate(-90deg)`, transformOrigin: `${pos.x}px ${pos.y}px` }} />
+
+                {/* 内环 MEM */}
+                <circle cx={pos.x} cy={pos.y} r={innerNodeR} fill="none" stroke="var(--tc-border)" strokeWidth={innerSW} />
+                <circle cx={pos.x} cy={pos.y} r={innerNodeR} fill="none" stroke={memC} strokeWidth={innerSW}
+                  strokeDasharray={innerCirc} strokeDashoffset={innerOff} strokeLinecap="round"
+                  style={{ transform: `rotate(-90deg)`, transformOrigin: `${pos.x}px ${pos.y}px` }} />
+
+                {/* 中心填充 */}
+                <circle cx={pos.x} cy={pos.y} r={innerNodeR - innerSW / 2 - 1} fill={color + '12'} />
+
+                {/* 状态点 */}
+                <circle cx={pos.x + nodeR - 4} cy={pos.y - nodeR + 4} r="4"
+                  fill={isActive ? '#34d399' : '#6b7280'} stroke="var(--tc-content-bg)" strokeWidth="1.5" />
+
+                {/* PID */}
+                <text x={pos.x} y={pos.y - 2} textAnchor="middle" dominantBaseline="central"
+                  fill="var(--tc-foreground)" fontSize="9" fontWeight="700"
+                  fontFamily="'Geist Mono', monospace">
+                  {p.pid}
+                </text>
+                <text x={pos.x} y={pos.y + 9} textAnchor="middle" dominantBaseline="central"
+                  fill="var(--tc-foreground-tertiary)" fontSize="6.5"
+                  fontFamily="'Geist Mono', monospace">
+                  {p.cpu_pct.toFixed(1)}%
+                </text>
+
+                {/* hover 详情浮层 */}
+                {hoveredIdx === i && (
+                  <g>
+                    <rect x={pos.x + nodeR + 8} y={pos.y - 28} width="90" height="56" rx="6"
+                      fill="var(--tc-panel-bg)" stroke="var(--tc-border)" strokeWidth="1" />
+                    <text x={pos.x + nodeR + 14} y={pos.y - 14} fill="var(--tc-foreground)"
+                      fontSize="8" fontWeight="600" fontFamily="'Geist Mono', monospace">
+                      PID {p.pid}
+                    </text>
+                    <text x={pos.x + nodeR + 14} y={pos.y - 2} fill={cpuC}
+                      fontSize="7.5" fontFamily="'Geist Mono', monospace">
+                      CPU: {p.cpu_pct.toFixed(1)}%
+                    </text>
+                    <text x={pos.x + nodeR + 14} y={pos.y + 10} fill={memC}
+                      fontSize="7.5" fontFamily="'Geist Mono', monospace">
+                      MEM: {fmtMem(p.mem_mb)}
+                    </text>
+                    <text x={pos.x + nodeR + 14} y={pos.y + 22} fill={isActive ? '#34d399' : '#6b7280'}
+                      fontSize="7.5" fontFamily="'Geist Mono', monospace">
+                      {isActive ? '● 运行中' : '○ 空闲'}
+                    </text>
+                  </g>
+                )}
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+
+      {/* 底部图例 */}
+      <div className={s.claudeClusterLegend}>
+        <span><span className={s.topoLegendDot} style={{ background: '#60a5fa' }} />外环 CPU%</span>
+        <span><span className={s.topoLegendDot} style={{ background: '#34d399' }} />内环 MEM</span>
+        <span><span className={s.topoLegendDot} style={{ background: '#34d399' }} />● 活跃</span>
+        <span><span className={s.topoLegendDot} style={{ background: '#6b7280' }} />● 空闲</span>
+        {procs.map((p, i) => (
+          <span key={p.pid}>
+            <span className={s.topoLegendDot} style={{ background: colors[i % colors.length] }} />
+            PID {p.pid}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
