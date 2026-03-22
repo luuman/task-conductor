@@ -471,7 +471,6 @@ function ChatDemoCanvas() {
       <SvgLines pairs={pairs} />
       <FloatingNav sections={DEMO_SECTIONS} onJump={handleJump} />
     </div>
-    </CardStyleCtx.Provider>
   )
 }
 
