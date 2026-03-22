@@ -515,132 +515,68 @@
   vertical-align: middle;
 }
 
-/* ── Claude 详情卡片 ── */
-.claudeCards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 12px;
+/* ── Claude 独立集群可视化 ── */
+.claudeClusterWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.clCard {
+.claudeSummaryBar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.claudeSumItem {
   background: var(--tc-content-bg);
   border: 1px solid var(--tc-border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.15s;
-}
-
-.clCard:hover {
-  border-color: var(--tc-border-active);
-  transform: translateY(-1px);
-}
-
-.clCardBar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-}
-
-.clCardHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.clCardIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.clCardName {
-  font-weight: 600;
-  font-size: 13px;
-  flex: 1;
-}
-
-.clCardPid {
-  font-size: 9px;
-  color: var(--tc-foreground-tertiary);
-  font-family: 'Geist Mono', monospace;
-}
-
-.clCardBadge {
-  font-size: 9px;
-  padding: 2px 6px;
   border-radius: 8px;
-  font-weight: 500;
-}
-
-.clCardGauges {
+  padding: 8px 14px;
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 10px;
+  align-items: baseline;
+  gap: 8px;
+  flex: 1;
+  min-width: 100px;
 }
 
-.miniGauge { text-align: center; }
-.miniGauge svg { display: block; margin: 0 auto 2px; }
-
-.miniGaugeLabel {
-  font-size: 9px;
+.claudeSumLabel {
+  font-size: 10px;
   color: var(--tc-foreground-tertiary);
   font-family: 'Geist Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.clCardMeta {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 3px 10px;
-  font-size: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--tc-border);
-}
-
-.clCardMetaDt { color: var(--tc-foreground-tertiary); }
-
-.clCardMetaDd {
-  text-align: right;
+.claudeSumVal {
+  font-size: 18px;
+  font-weight: 700;
   font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-}
-
-.clCardActions {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.clBtn {
-  flex: 1;
-  padding: 5px;
-  border-radius: 5px;
-  border: 1px solid var(--tc-border);
-  background: transparent;
-  color: var(--tc-foreground-secondary);
-  font-size: 10px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.clBtn:hover {
-  border-color: var(--tc-border-active);
   color: var(--tc-foreground);
 }
 
-.clBtnDanger:hover {
-  border-color: var(--tc-error);
-  color: var(--tc-error);
+.claudeTopoWrap {
+  position: relative;
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--tc-content-bg);
+}
+
+.claudeTopoSvg {
+  display: block;
+  width: 100%;
+  height: 360px;
+  user-select: none;
+}
+
+.claudeClusterLegend {
+  display: flex;
+  gap: 16px;
+  font-size: 10px;
+  color: var(--tc-foreground-tertiary);
+  font-family: 'Geist Mono', monospace;
+  flex-wrap: wrap;
 }
 
 /* ── Toast ── */
