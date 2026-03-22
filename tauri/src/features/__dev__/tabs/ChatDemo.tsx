@@ -1,6 +1,5 @@
 /**
- * ChatDemo — 画布卡片对比展示
- * Raw 节点 ←连线→ Styled 节点，右侧悬浮导航
+ * ChatDemo — 先用最小用例验证连线，再渲染完整内容
  */
 import { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
@@ -129,11 +128,33 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
 interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
 interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
 
-// ── Raw 节点：div 包裹，Handle 在 div 内 ────────────
+// ── 简单标签节点（用于 source/target，保证连线可见）──
 
-const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
-  <div style={{ width: 340, position: 'relative' }}>
-    <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+interface LabelNodeData { label: string; color: string; icon: string; side: 'raw' | 'styled'; [k: string]: unknown }
+
+const LabelNode = memo(({ data }: NodeProps<Node<LabelNodeData>>) => (
+  <div style={{
+    padding: '6px 12px', borderRadius: 6,
+    background: `${data.color}15`,
+    border: `1.5px solid ${data.color}50`,
+    fontSize: 11, fontWeight: 600,
+    color: data.color,
+    display: 'flex', alignItems: 'center', gap: 6,
+    minWidth: 100,
+  }}>
+    <Handle type="target" position={Position.Left} style={{ background: data.color, width: 6, height: 6 }} />
+    <span>{data.icon}</span>
+    <span>{data.label}</span>
+    <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 4 }}>{data.side === 'raw' ? '原始' : '渲染'}</span>
+    <Handle type="source" position={Position.Right} style={{ background: data.color, width: 6, height: 6 }} />
+  </div>
+))
+LabelNode.displayName = 'LabelNode'
+
+// ── 内容节点（不参与连线，只展示内容）────────────────
+
+const RawContentNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
+  <div style={{ width: 340 }}>
     {data.messages.map((msg, i) => {
       const isUser = msg.role === 'user'
       return (
@@ -148,14 +169,11 @@ const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
         </div>
       )
     })}
-    <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
   </div>
 ))
-RawNode.displayName = 'RawNode'
+RawContentNode.displayName = 'RawContentNode'
 
-// ── Styled 节点内部渲染 ─────────────────────────────
-
-function StyledContent({ turns }: { turns: GroupedTurnItem[] }) {
+function StyledContentInner({ turns }: { turns: GroupedTurnItem[] }) {
   return (
     <ExpandSignalCtx.Provider value={1}>
       <AutoExpandCtx.Provider value={true}>
@@ -193,19 +211,22 @@ function StyledContent({ turns }: { turns: GroupedTurnItem[] }) {
   )
 }
 
-// Styled 节点：div 包裹，Handle 在 div 内（不用 Fragment/Provider 包裹）
-const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
-  <div style={{ width: 480, position: 'relative' }}>
-    <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-    <StyledContent turns={data.turns} />
-    <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+const StyledContentNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
+  <div style={{ width: 480 }}>
+    <StyledContentInner turns={data.turns} />
   </div>
 ))
-StyledNode.displayName = 'StyledNode'
+StyledContentNode.displayName = 'StyledContentNode'
 
-const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
+const nodeTypes = {
+  labelNode: LabelNode,
+  rawContent: RawContentNode,
+  styledContent: StyledContentNode,
+}
 
 // ── 布局 ────────────────────────────────────────────
+// 每组 3 个节点：rawLabel ——连线——> styledLabel
+//                rawContent（下方）  styledContent（下方）
 
 const RAW_W = 340
 const STYLED_W = 480
@@ -214,6 +235,7 @@ const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
 const COL_GAP = 160
 const ROW_PAD = 100
 const COLS = 2
+const LABEL_H = 36
 
 function estimateH(msgCount: number, turnCount: number): number {
   const raw = msgCount * 160 + 60
@@ -265,27 +287,44 @@ function buildGraph(turns: GroupedTurnItem[]) {
     const x = col * (PAIR_TOTAL + COL_GAP)
     const y = colY[col]
 
+    // 标签节点（用于连线）
     nodes.push({
-      id: `raw-${si}`,
-      type: 'rawNode',
-      position: { x, y },
-      data: { label, color, icon, messages: rawMsgs },
+      id: `rawLabel-${si}`,
+      type: 'labelNode',
+      position: { x: x + RAW_W / 2 - 60, y },
+      data: { label, color, icon, side: 'raw' },
     })
     nodes.push({
-      id: `styled-${si}`,
-      type: 'styledNode',
-      position: { x: x + RAW_W + PAIR_GAP, y },
-      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
+      id: `styledLabel-${si}`,
+      type: 'labelNode',
+      position: { x: x + RAW_W + PAIR_GAP + STYLED_W / 2 - 60, y },
+      data: { label, color, icon, side: 'styled' },
     })
+
+    // 连线：rawLabel → styledLabel
     edges.push({
       id: `e-${si}`,
-      source: `raw-${si}`,
-      target: `styled-${si}`,
+      source: `rawLabel-${si}`,
+      target: `styledLabel-${si}`,
       type: 'default',
       style: { stroke: color, strokeWidth: 2 },
     })
 
-    colY[col] += height + ROW_PAD
+    // 内容节点（在标签下方）
+    nodes.push({
+      id: `rawContent-${si}`,
+      type: 'rawContent',
+      position: { x, y: y + LABEL_H + 10 },
+      data: { label, color, icon, messages: rawMsgs },
+    })
+    nodes.push({
+      id: `styledContent-${si}`,
+      type: 'styledContent',
+      position: { x: x + RAW_W + PAIR_GAP, y: y + LABEL_H + 10 },
+      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
+    })
+
+    colY[col] += height + LABEL_H + ROW_PAD
   }
 
   return { nodes, edges }
@@ -352,14 +391,14 @@ function ChatDemoCanvas() {
   }, [fitView])
 
   const handleJump = useCallback((idx: number) => {
-    const r = nodes.find(n => n.id === `raw-${idx}`)
-    const s = nodes.find(n => n.id === `styled-${idx}`)
+    const r = nodes.find(n => n.id === `rawLabel-${idx}`)
+    const s = nodes.find(n => n.id === `styledLabel-${idx}`)
     if (!r || !s) return
-    const x = Math.min(r.position.x, s.position.x)
-    const y = Math.min(r.position.y, s.position.y)
-    const right = Math.max(r.position.x + RAW_W, s.position.x + STYLED_W)
+    const x = Math.min(r.position.x, s.position.x) - 60
+    const y = r.position.y - 20
+    const right = Math.max(r.position.x, s.position.x) + STYLED_W + 60
     fitBounds(
-      { x: x - 30, y: y - 30, width: right - x + 60, height: 660 },
+      { x, y, width: right - x, height: 660 },
       { padding: 0.08, duration: 600 },
     )
   }, [nodes, fitBounds])
@@ -384,7 +423,10 @@ function ChatDemoCanvas() {
         <MiniMap position="bottom-right"
           style={{ background: 'rgba(30,30,30,0.9)', border: '1px solid var(--tc-border)', borderRadius: 8 }}
           maskColor="rgba(0,0,0,0.5)"
-          nodeColor={n => PALETTE[parseInt(n.id.split('-')[1]) % PALETTE.length]}
+          nodeColor={n => {
+            const idx = parseInt(n.id.replace(/\D+/g, '') || '0')
+            return PALETTE[idx % PALETTE.length]
+          }}
         />
       </ReactFlow>
       <FloatingNav sections={DEMO_SECTIONS} onJump={handleJump} />
