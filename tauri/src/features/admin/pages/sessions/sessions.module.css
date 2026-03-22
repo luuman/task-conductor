@@ -811,6 +811,14 @@
   color: #f85149;
 }
 
+.bashCardLines {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
 .bashCardOutput {
   padding: 6px 10px;
   font-size: 10px;
