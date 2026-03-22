@@ -128,76 +128,72 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
 interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; [k: string]: unknown }
 interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; [k: string]: unknown }
 
-// Raw 节点：纯内容，无外壳
+// Raw 节点：Handle 在最外层，与内容平级（和 MindMapNode 一致）
 const RawNode = memo(({ data }: NodeProps<Node<RawNodeData>>) => (
-  <div style={{
-    width: 340, position: 'relative', minHeight: 20,
-    padding: 4, borderRadius: 10,
-    border: '1px solid transparent',
-    background: 'transparent',
-  }}>
+  <>
+    <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+    <div style={{ width: 340 }}>
+      {data.messages.map((msg, i) => {
+        const isUser = msg.role === 'user'
+        return (
+          <div key={i} style={{
+            marginBottom: i < data.messages.length - 1 ? 6 : 0,
+            borderRadius: 8,
+            border: `1px solid ${isUser ? 'var(--tc-border)' : 'rgba(88,166,255,0.15)'}`,
+            background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
+            overflow: 'hidden',
+          }}>
+            {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
+          </div>
+        )
+      })}
+    </div>
     <Handle type="source" position={Position.Right}
       style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-    {data.messages.map((msg, i) => {
-      const isUser = msg.role === 'user'
-      return (
-        <div key={i} style={{
-          marginBottom: i < data.messages.length - 1 ? 6 : 0,
-          borderRadius: 8,
-          border: `1px solid ${isUser ? 'var(--tc-border)' : 'rgba(88,166,255,0.15)'}`,
-          background: isUser ? 'var(--tc-sidebar-item-hover)' : 'var(--tc-content-bg)',
-          overflow: 'hidden',
-        }}>
-          {msg.blocks.map((b, bi) => <RawBlockContent key={bi} block={b} />)}
-        </div>
-      )
-    })}
-  </div>
+  </>
 ))
 RawNode.displayName = 'RawNode'
 
-// Styled 节点：纯内容，无外壳，无头像
+// Styled 节点：Handle 在最外层
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
   <ExpandSignalCtx.Provider value={1}>
     <AutoExpandCtx.Provider value={true}>
-      <div style={{
-        width: 480, position: 'relative', minHeight: 20,
-        padding: 4, borderRadius: 10,
-        border: '1px solid transparent',
-        background: 'transparent',
-      }}>
+      <>
         <Handle type="target" position={Position.Left}
           style={{ background: data.color, width: 8, height: 8, border: `2px solid ${data.color}` }} />
-        {data.turns.map((item, i) => {
-          if (item.kind === 'user') {
-            const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
-            if (!text) return null
+        <div style={{ width: 480 }}>
+          {data.turns.map((item, i) => {
+            if (item.kind === 'user') {
+              const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
+              if (!text) return null
+              return (
+                <div key={i} style={{
+                  padding: '8px 12px', borderRadius: 8, marginBottom: 6,
+                  background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
+                  fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
+                }}>
+                  <RichTextBlock text={text} />
+                </div>
+              )
+            }
+            const { turn } = item
             return (
               <div key={i} style={{
                 padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-                background: 'var(--tc-sidebar-item-hover)', border: '1px solid var(--tc-border)',
+                background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
                 fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
               }}>
-                <RichTextBlock text={text} />
+                {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
+                {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
+                {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
+                {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
+                {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
               </div>
             )
-          }
-          const { turn } = item
-          return (
-            <div key={i} style={{
-              padding: '8px 12px', borderRadius: 8, marginBottom: 6,
-              background: 'rgba(68,119,255,0.04)', border: '1px solid rgba(68,119,255,0.12)',
-              fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
-            }}>
-              {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
-              {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
-              {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
-              {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
-              {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
-            </div>
-          )
-        })}
-      </div>
+          })}
+        </div>
+        <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+      </>
     </AutoExpandCtx.Provider>
   </ExpandSignalCtx.Provider>
 ))
