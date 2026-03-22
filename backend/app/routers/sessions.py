@@ -367,4 +367,16 @@ def get_transcript(
                 block.tool_result = result_text
                 block.tool_error = is_error if is_error else None
 
-    return TranscriptResponse(messages=messages)
+    total = len(messages)
+    if offset is None:
+        start = max(0, total - limit)
+    else:
+        start = max(0, min(offset, total))
+    end = min(start + limit, total)
+
+    return TranscriptResponse(
+        messages=messages[start:end],
+        file_found=True,
+        total=total,
+        has_more=start > 0,
+    )
