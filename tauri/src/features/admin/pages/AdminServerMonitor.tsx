@@ -819,6 +819,9 @@ export default function AdminServerMonitor() {
       .sort((a, b) => b.cpu_pct - a.cpu_pct)
   }, [procs])
 
+  // 拓扑图用的非 claude 进程
+  const nonClaudeProcs = useMemo(() => allProcs.filter(p => p.name !== 'claude'), [allProcs])
+
   const CLAUDE_COLORS = ['#60a5fa', '#a78bfa', '#f472b6', '#34d399', '#f97316']
 
   return (
