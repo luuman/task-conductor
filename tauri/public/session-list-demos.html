@@ -3,69 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Session List — 8 种方案对比</title>
+<title>Demo D 延伸 — 4 种富卡片变体</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg0: #111114;
-    --bg1: #1e1e1e;
-    --bg2: #252526;
-    --bg3: #2a2d2e;
-    --fg1: #cccccc;
-    --fg2: #969696;
-    --fg3: #636363;
-    --accent: #007acc;
-    --accent-bg: #094771;
-    --border: #3c3c3c;
-    --green: #56d364;
-    --yellow: #e3b341;
-    --gray: #8b949e;
-    --red: #f44747;
+    --bg0: #111114; --bg1: #1e1e1e; --bg2: #252526; --bg3: #2a2d2e;
+    --fg1: #cccccc; --fg2: #969696; --fg3: #636363;
+    --accent: #007acc; --accent-bg: #094771; --border: #3c3c3c;
+    --green: #56d364; --yellow: #e3b341; --gray: #8b949e; --red: #f44747;
+    --purple: #c678dd; --orange: #d19a66; --cyan: #56b6c2; --pink: #e06c75;
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg0);
-    color: var(--fg1);
-    padding: 20px;
-    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg0); color: var(--fg1); padding: 20px; min-height: 100vh;
   }
 
   h1 { text-align: center; font-size: 18px; color: #fff; margin-bottom: 4px; }
-  .subtitle { text-align: center; font-size: 12px; color: var(--fg2); margin-bottom: 20px; }
-  .loading-msg { text-align: center; padding: 40px; color: var(--fg2); }
+  .subtitle { text-align: center; font-size: 12px; color: var(--fg2); margin-bottom: 16px; }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 280px);
-    gap: 20px;
-    justify-content: center;
+  /* ── 信息元素图例 ── */
+  .legend {
+    max-width: 1200px; margin: 0 auto 20px; padding: 14px 18px;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
   }
+  .legend h3 { font-size: 12px; color: var(--accent); margin-bottom: 8px; }
+  .legend-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--fg2);
+  }
+  .legend-dot {
+    width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+  }
+  .legend-check { color: var(--green); font-size: 12px; flex-shrink: 0; width: 14px; text-align: center; }
+  .legend-cross { color: var(--fg3); font-size: 10px; flex-shrink: 0; width: 14px; text-align: center; }
 
+  /* ── Grid ── */
+  .grid {
+    display: grid; grid-template-columns: repeat(4, 300px);
+    gap: 20px; justify-content: center;
+  }
   .col { display: flex; flex-direction: column; gap: 8px; }
-
   .label {
     text-align: center; font-size: 13px; font-weight: 700; color: #fff;
     padding: 5px 10px; border-radius: 6px; background: var(--accent);
   }
-
   .desc {
     text-align: center; font-size: 10px; color: var(--fg2); line-height: 1.5;
     min-height: 30px;
   }
-
   .panel {
-    width: 280px; height: 580px; background: var(--bg1);
+    width: 300px; height: 640px; background: var(--bg1);
     border: 1px solid var(--border); border-radius: 8px;
     overflow: hidden; display: flex; flex-direction: column;
   }
+  .loading-msg { text-align: center; padding: 40px; color: var(--fg2); }
 
-  /* shared header */
+  /* ── Shared ── */
   .hdr {
     padding: 8px 12px; display: flex; align-items: center;
-    justify-content: space-between; border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   .hdr-title { font-size: 11px; font-weight: 600; }
   .hdr-btn {
@@ -73,8 +73,6 @@
     border: none; background: transparent; color: var(--fg2); cursor: pointer;
   }
   .hdr-btn:hover { background: var(--bg3); color: var(--accent); }
-
-  /* shared search */
   .srch {
     padding: 6px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
@@ -85,216 +83,223 @@
   }
   .srch input:focus { border-color: var(--accent); }
   .srch input::placeholder { color: var(--fg3); }
-
   .body { flex: 1; overflow-y: auto; }
 
-  /* dots */
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
   .dot-active { background: var(--green); }
   .dot-idle { background: var(--yellow); }
   .dot-stopped { background: var(--gray); }
   .dot-pulse { animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-
-  /* tags */
   .tag {
     font-size: 8px; padding: 1px 5px; border-radius: 999px;
     background: rgba(0,122,204,.12); color: var(--accent);
   }
 
-  /* scrollbar */
+  /* section header */
+  .sec-h { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 4px; }
+  .sec-t { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--fg3); }
+  .sec-c { font-size: 9px; color: var(--fg3); }
+
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
 
-  /* ═══════ A: 日期分组 + 头像 ═══════ */
-  .a-sec { font-size: 10px; font-weight: 600; color: var(--fg3); padding: 10px 12px 4px; letter-spacing: .5px; }
-  .a-it {
-    display: flex; gap: 8px; padding: 8px 12px; margin: 1px 6px;
-    border-radius: 8px; cursor: pointer; transition: background .12s;
-  }
-  .a-it:hover { background: var(--bg3); }
-  .a-it.sel { background: var(--accent-bg); }
-  .a-av {
-    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
-    background: rgba(0,122,204,.08); border: 1px solid rgba(0,122,204,.15);
-    display: flex; align-items: center; justify-content: center; font-size: 13px;
-  }
-  .a-c { flex: 1; min-width: 0; }
-  .a-r1 { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-  .a-ti { font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-  .a-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
-  .a-sum { font-size: 10px; color: var(--fg2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .a-meta { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
-  .a-ev { font-size: 9px; color: var(--fg3); }
-
-  /* ═══════ B: ChatGPT 极简 ═══════ */
-  .b-sec { font-size: 10px; font-weight: 600; color: var(--fg3); padding: 12px 12px 4px; }
-  .b-it {
-    display: flex; align-items: center; gap: 8px; padding: 7px 12px;
-    margin: 1px 6px; border-radius: 6px; cursor: pointer; transition: background .12s;
-  }
-  .b-it:hover { background: var(--bg3); }
-  .b-it.sel { background: var(--bg3); }
-  .b-it.sel .b-ti { color: #fff; }
-  .b-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--fg3); }
-  .b-ic svg { width: 16px; height: 16px; }
-  .b-ti { font-size: 12px; color: var(--fg1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-  .b-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
-  .b-acts { display: none; gap: 2px; flex-shrink: 0; }
-  .b-it:hover .b-acts { display: flex; }
-  .b-it:hover .b-tm { display: none; }
-  .b-ab { width: 20px; height: 20px; border-radius: 4px; border: none; background: transparent; color: var(--fg2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-  .b-ab:hover { background: rgba(255,255,255,.1); }
-
-  /* ═══════ C: VS Code 风格 ═══════ */
-  .c-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .c-tab {
-    flex: 1; padding: 7px 0; text-align: center; font-size: 10px; font-weight: 500;
-    color: var(--fg2); border: none; background: transparent; cursor: pointer;
-    border-bottom: 2px solid transparent; transition: all .12s;
-  }
-  .c-tab.act { color: var(--fg1); border-bottom-color: var(--accent); }
-  .c-sec2 { font-size: 10px; font-weight: 500; color: var(--fg2); padding: 8px 10px 4px; background: var(--bg2); display: flex; align-items: center; gap: 6px; }
-  .c-cnt { font-size: 9px; padding: 0 5px; height: 14px; border-radius: 7px; display: flex; align-items: center; background: rgba(255,255,255,.06); color: var(--fg3); }
-  .c-it {
-    display: flex; align-items: center; padding: 4px 10px;
-    cursor: pointer; transition: background .12s; border-left: 2px solid transparent;
-  }
-  .c-it:hover { background: var(--bg3); }
-  .c-it.sel { background: rgba(0,122,204,.08); border-left-color: var(--accent); }
-  .c-bar { width: 3px; align-self: stretch; flex-shrink: 0; border-radius: 0 2px 2px 0; margin-right: 6px; }
-  .c-bar-a { background: var(--green); }
-  .c-bar-i { background: var(--yellow); }
-  .c-bar-s { background: transparent; }
-  .c-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'SF Mono','Consolas',monospace; }
-  .c-badge { font-size: 9px; padding: 0 5px; height: 15px; border-radius: 8px; display: flex; align-items: center; background: rgba(255,255,255,.06); color: var(--fg3); flex-shrink: 0; margin: 0 4px; }
-  .c-badge-live { background: rgba(86,211,100,.15); color: var(--green); }
-  .c-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; font-family: 'SF Mono','Consolas',monospace; }
-
-  /* ═══════ D: 富卡片 ═══════ */
-  .d-sh { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 4px; }
-  .d-st { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--fg3); }
-  .d-sc { font-size: 9px; color: var(--fg3); }
-  .d-cd {
+  /* ═══════ D1: 精简双区 ═══════ */
+  .d1-cd {
     margin: 3px 8px; padding: 8px 10px; border-radius: 8px;
     border: 1px solid var(--border); background: var(--bg2);
     cursor: pointer; transition: all .12s;
+    display: flex; align-items: center; gap: 8px;
   }
-  .d-cd:hover { border-color: rgba(255,255,255,.12); background: var(--bg3); }
-  .d-cd.sel { border-color: var(--accent); background: var(--accent-bg); }
-  .d-r1 { display: flex; align-items: center; gap: 6px; }
-  .d-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .d-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
-  .d-r2 { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
-  .d-mb { font-size: 8px; padding: 1px 5px; border-radius: 4px; background: rgba(0,122,204,.12); color: var(--accent); font-weight: 600; }
-  .d-stat { font-size: 9px; color: var(--fg3); }
-  .d-sum { font-size: 10px; color: var(--fg2); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .d-tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
-  .d-prog { height: 2px; border-radius: 1px; background: var(--border); margin-top: 5px; overflow: hidden; }
-  .d-prog-fill { height: 100%; border-radius: 1px; background: var(--accent); }
+  .d1-cd:hover { border-color: rgba(255,255,255,.1); background: var(--bg3); }
+  .d1-cd.sel { border-color: var(--accent); background: var(--accent-bg); }
+  .d1-mid { flex: 1; min-width: 0; }
+  .d1-ti { font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d1-r2 { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .d1-stat { font-size: 9px; color: var(--fg3); }
+  .d1-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+  .d1-tm { font-size: 9px; color: var(--fg3); }
+  .d1-ev { font-size: 9px; color: var(--fg3); }
 
-  /* ═══════ E: 时间轴 ═══════ */
-  .e-line { position: relative; padding-left: 24px; }
-  .e-line::before {
-    content: ''; position: absolute; left: 14px; top: 0; bottom: 0;
-    width: 1px; background: var(--border);
+  /* ═══════ D2: 摘要 + 工具 ═══════ */
+  .d2-cd {
+    margin: 3px 8px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    cursor: pointer; transition: all .12s;
   }
-  .e-node {
-    position: relative; padding: 6px 10px 6px 0; cursor: pointer;
-    transition: background .12s; border-radius: 0 6px 6px 0; margin-right: 6px;
+  .d2-cd:hover { border-color: rgba(255,255,255,.1); background: var(--bg3); }
+  .d2-cd.sel { border-color: var(--accent); background: var(--accent-bg); }
+  .d2-r1 { display: flex; align-items: center; gap: 6px; }
+  .d2-ti { font-size: 12px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d2-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .d2-alias { font-size: 9px; color: var(--accent); margin-top: 2px; opacity: .8; }
+  .d2-sum {
+    font-size: 10px; color: var(--fg2); margin-top: 5px; line-height: 1.45;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    padding: 5px 7px; border-radius: 5px; background: rgba(255,255,255,.02);
+    border: 1px solid rgba(60,60,60,.3);
   }
-  .e-node:hover { background: var(--bg3); }
-  .e-node.sel { background: var(--accent-bg); }
-  .e-dot-wrap {
-    position: absolute; left: -18px; top: 10px;
-    width: 10px; height: 10px; border-radius: 50%; background: var(--bg1);
-    display: flex; align-items: center; justify-content: center; z-index: 1;
+  .d2-tools {
+    display: flex; gap: 3px; margin-top: 6px; flex-wrap: wrap; align-items: center;
   }
-  .e-dot-inner { width: 6px; height: 6px; border-radius: 50%; }
-  .e-r1 { display: flex; align-items: center; gap: 4px; }
-  .e-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .e-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
-  .e-r2 { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-  .e-ev { font-size: 9px; color: var(--fg3); }
-  .e-date-label {
-    position: relative; font-size: 9px; font-weight: 600; color: var(--fg3);
-    padding: 8px 10px 4px 0; letter-spacing: .3px;
+  .d2-tool {
+    font-size: 8px; padding: 1px 5px; border-radius: 3px;
+    background: rgba(255,255,255,.05); color: var(--fg2); font-weight: 500;
+    display: flex; align-items: center; gap: 2px;
   }
-  .e-date-label::before {
-    content: ''; position: absolute; left: -18px; top: 12px;
-    width: 8px; height: 8px; border-radius: 2px; background: var(--border); z-index: 1;
+  .d2-tool-icon { font-size: 9px; }
+  .d2-foot { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .d2-tags { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
+  .d2-dur { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+
+  /* ═══════ D3: 数据指标 ═══════ */
+  .d3-cd {
+    margin: 3px 8px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    cursor: pointer; transition: all .12s;
+  }
+  .d3-cd:hover { border-color: rgba(255,255,255,.1); background: var(--bg3); }
+  .d3-cd.sel { border-color: var(--accent); background: var(--accent-bg); }
+  .d3-r1 { display: flex; align-items: center; gap: 6px; }
+  .d3-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d3-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .d3-metrics {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px;
+  }
+  .d3-metric {
+    text-align: center; padding: 4px; border-radius: 4px;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(60,60,60,.3);
+  }
+  .d3-metric-val { font-size: 14px; font-weight: 600; color: var(--fg1); line-height: 1; }
+  .d3-metric-label { font-size: 8px; color: var(--fg3); margin-top: 2px; text-transform: uppercase; letter-spacing: .3px; }
+  .d3-bar-wrap { margin-top: 6px; }
+  .d3-bar-label { font-size: 8px; color: var(--fg3); margin-bottom: 2px; display: flex; justify-content: space-between; }
+  .d3-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; }
+  .d3-bar-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+  .d3-status-label {
+    font-size: 9px; padding: 1px 6px; border-radius: 4px; font-weight: 500;
+  }
+  .d3-s-a { background: rgba(86,211,100,.12); color: var(--green); }
+  .d3-s-i { background: rgba(227,179,65,.12); color: var(--yellow); }
+  .d3-s-s { background: rgba(139,148,158,.1); color: var(--gray); }
+
+  /* ═══════ D4: 全要素 ═══════ */
+  .d4-cd {
+    margin: 4px 8px; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg2);
+    cursor: pointer; transition: all .15s;
+  }
+  .d4-cd:hover { border-color: rgba(255,255,255,.1); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+  .d4-cd.sel { border-color: var(--accent); background: var(--accent-bg); }
+
+  .d4-top { display: flex; align-items: flex-start; gap: 8px; }
+  .d4-avatar {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+    position: relative;
+  }
+  .d4-av-active { background: rgba(86,211,100,.1); border: 1px solid rgba(86,211,100,.2); }
+  .d4-av-idle { background: rgba(227,179,65,.1); border: 1px solid rgba(227,179,65,.2); }
+  .d4-av-stopped { background: rgba(139,148,158,.08); border: 1px solid rgba(139,148,158,.15); }
+  .d4-av-dot {
+    position: absolute; bottom: -1px; right: -1px;
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 2px solid var(--bg2);
   }
 
-  /* ═══════ F: 棋盘缩略图 ═══════ */
-  .f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px; }
-  .f-card {
-    padding: 8px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg2); cursor: pointer; transition: all .12s;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .f-card:hover { border-color: rgba(255,255,255,.12); }
-  .f-card.sel { border-color: var(--accent); background: var(--accent-bg); }
-  .f-head { display: flex; align-items: center; gap: 4px; }
-  .f-ti { font-size: 10px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .f-meta { font-size: 8px; color: var(--fg3); display: flex; align-items: center; gap: 4px; }
-  .f-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; margin-top: 2px; }
-  .f-bar-fill { height: 100%; border-radius: 2px; }
+  .d4-main { flex: 1; min-width: 0; }
+  .d4-r1 { display: flex; align-items: center; gap: 4px; }
+  .d4-ti { font-size: 12px; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d4-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
+  .d4-alias { font-size: 9px; color: var(--accent); opacity: .7; margin-top: 1px; display: flex; align-items: center; gap: 3px; }
+  .d4-alias-icon { font-size: 8px; }
 
-  /* ═══════ G: Notion 数据库 ═══════ */
-  .g-cols {
-    display: grid; grid-template-columns: auto 1fr 50px 50px;
-    padding: 6px 10px; font-size: 9px; font-weight: 600; color: var(--fg3);
-    border-bottom: 1px solid var(--border); gap: 6px; align-items: center;
-    flex-shrink: 0;
-  }
-  .g-row {
-    display: grid; grid-template-columns: auto 1fr 50px 50px;
-    padding: 5px 10px; gap: 6px; align-items: center; cursor: pointer;
-    transition: background .12s; border-bottom: 1px solid rgba(60,60,60,.3);
-  }
-  .g-row:hover { background: var(--bg3); }
-  .g-row.sel { background: rgba(0,122,204,.08); }
-  .g-status {
-    font-size: 9px; padding: 1px 6px; border-radius: 4px; text-align: center;
-    font-weight: 500; white-space: nowrap;
-  }
-  .g-s-active { background: rgba(86,211,100,.12); color: var(--green); }
-  .g-s-idle { background: rgba(227,179,65,.12); color: var(--yellow); }
-  .g-s-stopped { background: rgba(139,148,158,.1); color: var(--gray); }
-  .g-ti { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .g-ev { font-size: 10px; color: var(--fg2); text-align: right; }
-  .g-tm { font-size: 10px; color: var(--fg3); text-align: right; }
-
-  /* ═══════ H: 气泡预览 ═══════ */
-  .h-it {
-    padding: 8px 12px; cursor: pointer; transition: background .12s;
-    border-bottom: 1px solid rgba(60,60,60,.2);
-  }
-  .h-it:hover { background: var(--bg3); }
-  .h-it.sel { background: var(--accent-bg); border-left: 2px solid var(--accent); }
-  .h-r1 { display: flex; align-items: center; gap: 6px; }
-  .h-ti { font-size: 11px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .h-tm { font-size: 9px; color: var(--fg3); flex-shrink: 0; }
-  .h-preview {
-    margin-top: 5px; padding: 6px 8px; border-radius: 6px;
-    background: rgba(255,255,255,.03); border: 1px solid rgba(60,60,60,.4);
-    font-size: 10px; color: var(--fg2); line-height: 1.4;
+  .d4-sum {
+    font-size: 10px; color: var(--fg2); margin-top: 6px; line-height: 1.45;
     overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
-  .h-foot { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-  .h-ev { font-size: 9px; color: var(--fg3); }
+
+  .d4-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .d4-chip {
+    font-size: 8px; padding: 2px 6px; border-radius: 4px;
+    display: flex; align-items: center; gap: 3px; font-weight: 500;
+  }
+  .d4-chip-status { }
+  .d4-chip-dur { background: rgba(255,255,255,.05); color: var(--fg2); }
+  .d4-chip-evt { background: rgba(0,122,204,.1); color: var(--accent); }
+  .d4-chip-proj { background: rgba(198,120,221,.1); color: var(--purple); }
+  .d4-chip-task { background: rgba(224,108,117,.1); color: var(--pink); }
+
+  .d4-tools { display: flex; gap: 2px; margin-top: 6px; }
+  .d4-tool-bar {
+    height: 4px; border-radius: 2px; flex: 1; min-width: 4px;
+    transition: flex .2s;
+  }
+
+  .d4-tags { display: flex; gap: 3px; margin-top: 5px; flex-wrap: wrap; }
+
+  .d4-prog { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+  .d4-prog-bar { flex: 1; height: 2px; border-radius: 1px; background: var(--border); overflow: hidden; }
+  .d4-prog-fill { height: 100%; border-radius: 1px; }
+  .d4-prog-label { font-size: 8px; color: var(--fg3); flex-shrink: 0; }
+
+  /* info table */
+  .info-table {
+    max-width: 1200px; margin: 0 auto 16px;
+  }
+  .info-header {
+    display: grid; grid-template-columns: 200px repeat(4, 1fr);
+    font-size: 10px; font-weight: 600; color: var(--fg3); padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-row {
+    display: grid; grid-template-columns: 200px repeat(4, 1fr);
+    font-size: 11px; padding: 3px 0; border-bottom: 1px solid rgba(60,60,60,.2);
+    align-items: center;
+  }
+  .info-row span { display: flex; align-items: center; gap: 4px; }
+  .info-name { color: var(--fg1); font-weight: 500; }
+  .ck { color: var(--green); font-size: 13px; }
+  .no { color: var(--fg3); font-size: 11px; }
+  .info-source { font-size: 9px; color: var(--fg3); font-style: italic; }
 </style>
 </head>
 <body>
 
-<h1>Session List 侧边栏 — 8 种方案</h1>
-<p class="subtitle">数据来自本地 API /api/sessions，点击可模拟选中效果</p>
+<h1>Demo D 延伸 — 4 种富卡片变体</h1>
+<p class="subtitle">基于方案 D 的双区域富卡片设计，展示不同信息密度组合 | 数据来自本地 API</p>
+
+<!-- ── 信息元素对照表 ── -->
+<div class="info-table">
+  <div class="info-header">
+    <span>可用信息元素</span>
+    <span style="text-align:center">D1 精简</span>
+    <span style="text-align:center">D2 摘要+工具</span>
+    <span style="text-align:center">D3 数据指标</span>
+    <span style="text-align:center">D4 全要素</span>
+  </div>
+  <div class="info-row"><span class="info-name">状态指示 <span class="info-source">(status)</span></span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">标题 / 别名 <span class="info-source">(summary / note.alias)</span></span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">时间 <span class="info-source">(last_seen_at)</span></span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">事件数 <span class="info-source">(event_count)</span></span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">别名 (独立行) <span class="info-source">(note.alias)</span></span><span class="no">-</span><span class="ck">&#10003;</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">摘要预览 <span class="info-source">(summary 2行)</span></span><span class="no">-</span><span class="ck">&#10003;</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">标签 <span class="info-source">(note.tags)</span></span><span class="no">-</span><span class="ck">&#10003;</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">持续时长 <span class="info-source">(计算)</span></span><span class="no">-</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">工具使用分布 <span class="info-source">(events 聚合)</span></span><span class="no">-</span><span class="ck">&#10003;</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">三指标面板 <span class="info-source">(events/时长/密度)</span></span><span class="no">-</span><span class="no">-</span><span class="ck">&#10003;</span><span class="no">-</span></div>
+  <div class="info-row"><span class="info-name">活跃度进度条 <span class="info-source">(event_count)</span></span><span class="no">-</span><span class="no">-</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">项目名 <span class="info-source">(cwd 尾段)</span></span><span class="no">-</span><span class="no">-</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">关联任务 <span class="info-source">(note.linked_task_id)</span></span><span class="no">-</span><span class="no">-</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">头像 / 图标 <span class="info-source">(按状态)</span></span><span class="no">-</span><span class="no">-</span><span class="no">-</span><span class="ck">&#10003;</span></div>
+  <div class="info-row"><span class="info-name">状态文字标签 <span class="info-source">(运行中/空闲/已结束)</span></span><span class="ck">&#10003;</span><span class="no">-</span><span class="ck">&#10003;</span><span class="ck">&#10003;</span></div>
+</div>
+
 <p id="status" class="loading-msg">正在加载会话数据...</p>
 <div id="root" class="grid" style="display:none"></div>
 
 <script>
-// ── Fetch real data ──
 const API = location.port === '7071'
   ? `${location.protocol}//${location.hostname}:8765`
   : `${location.protocol}//${location.host}`
@@ -303,272 +308,304 @@ async function loadSessions() {
   try {
     const r = await fetch(`${API}/api/sessions`)
     if (!r.ok) throw new Error(r.status)
-    const data = await r.json()
-    // filter sessions with summary
-    return data.filter(s => s.summary).slice(0, 20)
-  } catch(e) {
-    console.warn('API fetch failed:', e)
-    return null
-  }
+    return (await r.json()).filter(s => s.summary).slice(0, 20)
+  } catch { return null }
 }
 
-// ── Helpers ──
+// 加载工具使用分布（批量取前 8 个会话的事件）
+async function loadToolStats(sessions) {
+  const stats = {}
+  const batch = sessions.slice(0, 8)
+  await Promise.all(batch.map(async s => {
+    try {
+      const r = await fetch(`${API}/api/sessions/${encodeURIComponent(s.session_id)}/events?limit=500`)
+      if (!r.ok) return
+      const events = await r.json()
+      const tools = {}
+      events.forEach(e => {
+        if (e.tool_name && e.event_type === 'PostToolUse') {
+          tools[e.tool_name] = (tools[e.tool_name] || 0) + 1
+        }
+      })
+      stats[s.session_id] = tools
+    } catch {}
+  }))
+  return stats
+}
+
 function relTime(iso) {
   if (!iso) return ''
   const d = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z')
-  const now = new Date()
-  const diff = now - d
-  const mins = Math.floor(diff / 60000)
+  const now = new Date(), diff = now - d, mins = Math.floor(diff / 60000)
   if (mins < 1) return '刚刚'
   if (mins < 60) return `${mins}分钟前`
-  const hrs = Math.floor(mins / 60)
   if (d.toDateString() === now.toDateString())
     return d.toLocaleTimeString('zh', { hour: '2-digit', minute: '2-digit', hour12: false })
   const y = new Date(now); y.setDate(now.getDate() - 1)
-  if (d.toDateString() === y.toDateString()) return '昨天 ' + d.toLocaleTimeString('zh', { hour: '2-digit', minute: '2-digit', hour12: false })
+  if (d.toDateString() === y.toDateString()) return '昨天'
   if (diff < 7 * 86400000) return `${Math.floor(diff / 86400000)}天前`
   return `${d.getMonth()+1}/${d.getDate()}`
 }
 
-function dateGroup(iso) {
-  if (!iso) return '更早'
-  const d = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z')
-  const now = new Date()
-  if (d.toDateString() === now.toDateString()) return '今天'
-  const y = new Date(now); y.setDate(now.getDate() - 1)
-  if (d.toDateString() === y.toDateString()) return '昨天'
-  if (now - d < 7 * 86400000) return '过去 7 天'
-  if (now - d < 30 * 86400000) return '过去 30 天'
-  return '更早'
+function duration(start, end) {
+  if (!start || !end) return ''
+  const a = new Date(start.endsWith('Z') || start.includes('+') ? start : start + 'Z')
+  const b = new Date(end.endsWith('Z') || end.includes('+') ? end : end + 'Z')
+  const mins = Math.round((b - a) / 60000)
+  if (mins < 1) return '<1m'
+  if (mins < 60) return `${mins}m`
+  const h = Math.floor(mins / 60), m = mins % 60
+  return m > 0 ? `${h}h ${m}m` : `${h}h`
 }
 
-function dotCls(s) {
-  return s === 'active' ? 'dot-active' : s === 'idle' ? 'dot-idle' : 'dot-stopped'
+function durationMins(start, end) {
+  if (!start || !end) return 0
+  const a = new Date(start.endsWith('Z') || start.includes('+') ? start : start + 'Z')
+  const b = new Date(end.endsWith('Z') || end.includes('+') ? end : end + 'Z')
+  return Math.max(1, Math.round((b - a) / 60000))
 }
 
-function title(s) {
-  return s.note?.alias || s.summary || s.session_id.slice(0, 8)
-}
+function dotCls(s) { return s === 'active' ? 'dot-active' : s === 'idle' ? 'dot-idle' : 'dot-stopped' }
+function title(s) { return s.note?.alias || s.summary || s.session_id.slice(0, 8) }
+function projName(cwd) { return (cwd || '').split('/').filter(Boolean).pop() || '' }
+function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML }
 
-function esc(str) {
-  const d = document.createElement('div')
-  d.textContent = str || ''
-  return d.innerHTML
-}
-
-function groupByDate(sessions) {
-  const groups = []
-  const map = new Map()
-  for (const s of sessions) {
-    const g = dateGroup(s.last_seen_at || s.started_at)
-    if (!map.has(g)) { map.set(g, []); groups.push(g) }
-    map.get(g).push(s)
-  }
-  return groups.map(g => ({ label: g, items: map.get(g) }))
-}
-
-const chatIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
-
-function setupClick(panel) {
-  panel.addEventListener('click', e => {
+function setupClick(el) {
+  el.addEventListener('click', e => {
     const it = e.target.closest('[data-sid]')
     if (!it) return
-    panel.querySelectorAll('[data-sid]').forEach(el => el.classList.remove('sel'))
+    el.querySelectorAll('[data-sid]').forEach(x => x.classList.remove('sel'))
     it.classList.add('sel')
   })
 }
 
-// ── Renderers ──
-
-function renderA(sessions) {
-  const groups = groupByDate(sessions)
-  let h = ''
-  groups.forEach(g => {
-    h += `<div class="a-sec">${g.label}</div>`
-    g.items.forEach((s, i) => {
-      const tags = (s.note?.tags || []).slice(0, 2)
-      h += `<div class="a-it${i===0 && g.label==='今天' ? ' sel':''}" data-sid="${s.session_id}">
-        <div class="a-av">🤖</div>
-        <div class="a-c">
-          <div class="a-r1"><span class="a-ti">${esc(title(s))}</span><span class="a-tm">${relTime(s.last_seen_at||s.started_at)}</span></div>
-          ${s.summary ? `<div class="a-sum">${esc(s.summary)}</div>` : ''}
-          <div class="a-meta">
-            <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></span>
-            <span class="a-ev">${s.event_count} events</span>
-            ${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}
-          </div>
-        </div>
-      </div>`
-    })
-  })
-  return h
+const toolColors = {
+  Bash: 'var(--green)', Read: 'var(--accent)', Edit: 'var(--yellow)',
+  Write: 'var(--orange)', Grep: 'var(--cyan)', Glob: 'var(--purple)',
+  Agent: 'var(--pink)', WebFetch: '#61afef', WebSearch: '#98c379',
+  Skill: '#d19a66', ToolSearch: '#e5c07b',
+}
+const toolIcons = {
+  Bash: '>', Read: '◎', Edit: '✎', Write: '✦', Grep: '⌕',
+  Glob: '◈', Agent: '◆', WebFetch: '↗', WebSearch: '🔍',
 }
 
-function renderB(sessions) {
-  const groups = groupByDate(sessions)
-  let h = ''
-  groups.forEach(g => {
-    h += `<div class="b-sec">${g.label}</div>`
-    g.items.forEach((s, i) => {
-      const isActive = s.status === 'active'
-      h += `<div class="b-it${i===0 && g.label==='今天' ? ' sel':''}" data-sid="${s.session_id}">
-        ${isActive ? '<span class="dot dot-active dot-pulse" style="margin-top:0"></span>' : `<span class="b-ic">${chatIcon}</span>`}
-        <span class="b-ti">${esc(title(s))}</span>
-        <span class="b-tm">${relTime(s.last_seen_at||s.started_at)}</span>
-        <div class="b-acts"><button class="b-ab">✎</button><button class="b-ab">⋯</button></div>
-      </div>`
-    })
-  })
-  return h
+function splitSections(sessions) {
+  return {
+    active: sessions.filter(s => s.status === 'active' || s.status === 'idle'),
+    history: sessions.filter(s => s.status !== 'active' && s.status !== 'idle'),
+  }
 }
 
-function renderC(sessions) {
-  const active = sessions.filter(s => s.status === 'active' || s.status === 'idle')
-  const history = sessions.filter(s => s.status !== 'active' && s.status !== 'idle')
-  let h = `<div class="c-sec2">活跃会话 <span class="c-cnt">${active.length}</span></div>`
-  active.forEach((s, i) => {
-    const barCls = s.status === 'active' ? 'c-bar-a' : 'c-bar-i'
-    h += `<div class="c-it${i===0?' sel':''}" data-sid="${s.session_id}">
-      <span class="c-bar ${barCls}"></span>
-      <span class="c-ti">${esc(title(s))}</span>
-      ${s.status==='active' ? '<span class="c-badge c-badge-live">LIVE</span>' : `<span class="c-badge">${s.event_count}</span>`}
-      <span class="c-tm">${relTime(s.last_seen_at||s.started_at)}</span>
-    </div>`
-  })
-  h += `<div class="c-sec2" style="margin-top:2px">历史会话 <span class="c-cnt">${history.length}</span></div>`
-  history.forEach(s => {
-    h += `<div class="c-it" data-sid="${s.session_id}">
-      <span class="c-bar c-bar-s"></span>
-      <span class="c-ti">${esc(title(s))}</span>
-      <span class="c-badge">${s.event_count}</span>
-      <span class="c-tm">${relTime(s.last_seen_at||s.started_at)}</span>
-    </div>`
-  })
-  return h
-}
-
-function renderD(sessions) {
-  const active = sessions.filter(s => s.status === 'active' || s.status === 'idle')
-  const history = sessions.filter(s => s.status !== 'active' && s.status !== 'idle')
+// ═══════ D1: 精简双区 ═══════
+function renderD1(sessions) {
+  const { active, history } = splitSections(sessions)
   let h = ''
   if (active.length) {
-    h += `<div class="d-sh"><span class="d-st">● 活跃中</span><span class="d-sc">${active.length} 个会话</span></div>`
+    h += `<div class="sec-h"><span class="sec-t">● 活跃中</span><span class="sec-c">${active.length}</span></div>`
     active.forEach((s, i) => {
-      const tags = (s.note?.tags || []).slice(0, 3)
-      h += `<div class="d-cd${i===0?' sel':''}" data-sid="${s.session_id}">
-        <div class="d-r1">
-          <span class="dot ${dotCls(s.status)} dot-pulse"></span>
-          <span class="d-ti">${esc(title(s))}</span>
-          <span class="d-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+      const stCls = s.status==='active' ? 'd3-s-a' : 'd3-s-i'
+      const stTxt = s.status==='active' ? '运行中' : '空闲'
+      h += `<div class="d1-cd${i===0?' sel':''}" data-sid="${s.session_id}">
+        <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}" style="margin-top:1px"></span>
+        <div class="d1-mid">
+          <div class="d1-ti">${esc(title(s))}</div>
+          <div class="d1-r2">
+            <span class="d3-status-label ${stCls}">${stTxt}</span>
+            <span class="d1-stat">${s.event_count} events</span>
+          </div>
         </div>
-        <div class="d-r2">
-          <span class="d-mb">${s.provider || 'Claude'}</span>
-          <span class="d-stat">⚡ ${s.event_count}</span>
+        <div class="d1-right">
+          <span class="d1-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+          <span class="d1-ev">${duration(s.started_at, s.last_seen_at)}</span>
         </div>
-        ${s.summary ? `<div class="d-sum">${esc(s.summary)}</div>` : ''}
-        ${tags.length ? `<div class="d-tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-        <div class="d-prog"><div class="d-prog-fill" style="width:${Math.min(100, s.event_count)}%"></div></div>
       </div>`
     })
   }
-  h += `<div class="d-sh"><span class="d-st">历史记录</span><span class="d-sc">${history.length} 个会话</span></div>`
+  h += `<div class="sec-h"><span class="sec-t">历史记录</span><span class="sec-c">${history.length}</span></div>`
   history.forEach(s => {
-    h += `<div class="d-cd" data-sid="${s.session_id}">
-      <div class="d-r1">
-        <span class="dot dot-stopped"></span>
-        <span class="d-ti">${esc(title(s))}</span>
-        <span class="d-tm">${relTime(s.last_seen_at||s.started_at)}</span>
-      </div>
-      <div class="d-r2">
-        <span class="d-mb">${s.provider || 'Claude'}</span>
-        <span class="d-stat">⚡ ${s.event_count}</span>
-      </div>
-    </div>`
-  })
-  return h
-}
-
-function renderE(sessions) {
-  const groups = groupByDate(sessions)
-  let h = '<div class="e-line">'
-  groups.forEach(g => {
-    h += `<div class="e-date-label">${g.label}</div>`
-    g.items.forEach((s, i) => {
-      h += `<div class="e-node${i===0 && g.label==='今天' ? ' sel':''}" data-sid="${s.session_id}">
-        <div class="e-dot-wrap"><div class="e-dot-inner ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></div></div>
-        <div class="e-r1"><span class="e-ti">${esc(title(s))}</span><span class="e-tm">${relTime(s.last_seen_at||s.started_at)}</span></div>
-        <div class="e-r2">
-          <span class="e-ev">${s.event_count} events</span>
-          ${(s.note?.tags||[]).slice(0,2).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
+    h += `<div class="d1-cd" data-sid="${s.session_id}">
+      <span class="dot dot-stopped" style="margin-top:1px"></span>
+      <div class="d1-mid">
+        <div class="d1-ti">${esc(title(s))}</div>
+        <div class="d1-r2">
+          <span class="d3-status-label d3-s-s">已结束</span>
+          <span class="d1-stat">${s.event_count} events</span>
         </div>
-      </div>`
-    })
-  })
-  h += '</div>'
-  return h
-}
-
-function renderF(sessions) {
-  let h = '<div class="f-grid">'
-  sessions.forEach((s, i) => {
-    const colors = ['var(--accent)', 'var(--green)', 'var(--yellow)', '#e06c75', '#c678dd', '#56b6c2', '#d19a66']
-    const color = colors[i % colors.length]
-    h += `<div class="f-card${i===0?' sel':''}" data-sid="${s.session_id}">
-      <div class="f-head"><span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></span></div>
-      <div class="f-ti">${esc(title(s))}</div>
-      <div class="f-meta"><span>${s.event_count} ev</span><span>${relTime(s.last_seen_at||s.started_at)}</span></div>
-      <div class="f-bar"><div class="f-bar-fill" style="width:${Math.min(100,s.event_count*1.2)}%;background:${color}"></div></div>
-    </div>`
-  })
-  h += '</div>'
-  return h
-}
-
-function renderG(sessions) {
-  let h = ''
-  sessions.forEach((s, i) => {
-    const stCls = s.status === 'active' ? 'g-s-active' : s.status === 'idle' ? 'g-s-idle' : 'g-s-stopped'
-    const stLabel = s.status === 'active' ? '运行中' : s.status === 'idle' ? '空闲' : '已结束'
-    h += `<div class="g-row${i===0?' sel':''}" data-sid="${s.session_id}">
-      <span class="g-status ${stCls}">${stLabel}</span>
-      <span class="g-ti">${esc(title(s))}</span>
-      <span class="g-ev">${s.event_count}</span>
-      <span class="g-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+      </div>
+      <div class="d1-right">
+        <span class="d1-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+        <span class="d1-ev">${duration(s.started_at, s.last_seen_at)}</span>
+      </div>
     </div>`
   })
   return h
 }
 
-function renderH(sessions) {
+// ═══════ D2: 摘要 + 工具 ═══════
+function renderD2(sessions, toolStats) {
+  const { active, history } = splitSections(sessions)
+  const all = [...active, ...history]
   let h = ''
-  sessions.forEach((s, i) => {
+  if (active.length) {
+    h += `<div class="sec-h"><span class="sec-t">● 活跃中</span><span class="sec-c">${active.length}</span></div>`
+  }
+
+  all.forEach((s, i) => {
+    if (i === active.length && history.length)
+      h += `<div class="sec-h"><span class="sec-t">历史记录</span><span class="sec-c">${history.length}</span></div>`
+
     const tags = (s.note?.tags || []).slice(0, 3)
-    h += `<div class="h-it${i===0?' sel':''}" data-sid="${s.session_id}">
-      <div class="h-r1">
-        <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}" style="margin-top:3px"></span>
-        <span class="h-ti">${esc(title(s))}</span>
-        <span class="h-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+    const alias = s.note?.alias && s.note.alias !== s.summary ? s.note.alias : null
+    const tools = toolStats[s.session_id] || {}
+    const topTools = Object.entries(tools).sort((a,b) => b[1]-a[1]).slice(0, 5)
+    const dur = duration(s.started_at, s.last_seen_at)
+
+    h += `<div class="d2-cd${i===0?' sel':''}" data-sid="${s.session_id}">
+      <div class="d2-r1">
+        <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}" style="margin-top:1px"></span>
+        <span class="d2-ti">${esc(title(s))}</span>
+        <span class="d2-tm">${relTime(s.last_seen_at||s.started_at)}</span>
       </div>
-      ${s.summary ? `<div class="h-preview">${esc(s.summary)}</div>` : ''}
-      <div class="h-foot">
-        <span class="h-ev">${s.event_count} events</span>
-        ${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
+      ${alias ? `<div class="d2-alias">✦ ${esc(alias)}</div>` : ''}
+      ${s.summary ? `<div class="d2-sum">${esc(s.summary)}</div>` : ''}
+      ${topTools.length ? `<div class="d2-tools">${topTools.map(([name, cnt]) =>
+        `<span class="d2-tool"><span class="d2-tool-icon" style="color:${toolColors[name]||'var(--fg3)'}">${toolIcons[name]||'·'}</span>${name} ${cnt}</span>`
+      ).join('')}</div>` : ''}
+      <div class="d2-foot">
+        <div class="d2-tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+        ${dur ? `<span class="d2-dur">⏱ ${dur}</span>` : ''}
       </div>
     </div>`
   })
   return h
 }
 
-// ── Build page ──
+// ═══════ D3: 数据指标面板 ═══════
+function renderD3(sessions) {
+  const { active, history } = splitSections(sessions)
+  const maxEvt = Math.max(...sessions.map(s => s.event_count), 1)
+  let h = ''
+
+  if (active.length) {
+    h += `<div class="sec-h"><span class="sec-t">● 活跃中</span><span class="sec-c">${active.length}</span></div>`
+  }
+
+  const all = [...active, ...history]
+  all.forEach((s, i) => {
+    if (i === active.length && history.length)
+      h += `<div class="sec-h"><span class="sec-t">历史记录</span><span class="sec-c">${history.length}</span></div>`
+
+    const dur = duration(s.started_at, s.last_seen_at)
+    const mins = durationMins(s.started_at, s.last_seen_at)
+    const density = (s.event_count / Math.max(mins, 1)).toFixed(1)
+    const pct = Math.min(100, (s.event_count / maxEvt) * 100)
+    const stCls = s.status==='active' ? 'd3-s-a' : s.status==='idle' ? 'd3-s-i' : 'd3-s-s'
+    const stTxt = s.status==='active' ? '运行中' : s.status==='idle' ? '空闲' : '已结束'
+
+    const barColor = s.status === 'active' ? 'var(--green)' : s.status === 'idle' ? 'var(--yellow)' : 'var(--accent)'
+
+    h += `<div class="d3-cd${i===0?' sel':''}" data-sid="${s.session_id}">
+      <div class="d3-r1">
+        <span class="dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}" style="margin-top:1px"></span>
+        <span class="d3-ti">${esc(title(s))}</span>
+        <span class="d3-status-label ${stCls}">${stTxt}</span>
+        <span class="d3-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+      </div>
+      <div class="d3-metrics">
+        <div class="d3-metric">
+          <div class="d3-metric-val">${s.event_count}</div>
+          <div class="d3-metric-label">Events</div>
+        </div>
+        <div class="d3-metric">
+          <div class="d3-metric-val">${dur || '-'}</div>
+          <div class="d3-metric-label">时长</div>
+        </div>
+        <div class="d3-metric">
+          <div class="d3-metric-val">${density}</div>
+          <div class="d3-metric-label">Events/m</div>
+        </div>
+      </div>
+      <div class="d3-bar-wrap">
+        <div class="d3-bar-label"><span>活跃度</span><span>${Math.round(pct)}%</span></div>
+        <div class="d3-bar"><div class="d3-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div>
+    </div>`
+  })
+  return h
+}
+
+// ═══════ D4: 全要素 ═══════
+function renderD4(sessions, toolStats) {
+  const { active, history } = splitSections(sessions)
+  const maxEvt = Math.max(...sessions.map(s => s.event_count), 1)
+  let h = ''
+
+  if (active.length) {
+    h += `<div class="sec-h"><span class="sec-t">● 活跃中</span><span class="sec-c">${active.length}</span></div>`
+  }
+
+  const all = [...active, ...history]
+  all.forEach((s, i) => {
+    if (i === active.length && history.length)
+      h += `<div class="sec-h"><span class="sec-t">历史记录</span><span class="sec-c">${history.length}</span></div>`
+
+    const tags = (s.note?.tags || []).slice(0, 4)
+    const alias = s.note?.alias && s.note.alias !== s.summary ? s.note.alias : null
+    const dur = duration(s.started_at, s.last_seen_at)
+    const proj = projName(s.cwd)
+    const tools = toolStats[s.session_id] || {}
+    const topTools = Object.entries(tools).sort((a,b) => b[1]-a[1]).slice(0, 6)
+    const totalToolUse = topTools.reduce((sum, [,c]) => sum + c, 0) || 1
+    const pct = Math.min(100, (s.event_count / maxEvt) * 100)
+    const barColor = s.status === 'active' ? 'var(--green)' : s.status === 'idle' ? 'var(--yellow)' : 'var(--accent)'
+
+    const avCls = s.status==='active' ? 'd4-av-active' : s.status==='idle' ? 'd4-av-idle' : 'd4-av-stopped'
+    const emoji = s.status === 'active' ? '⚡' : s.status === 'idle' ? '💤' : '✓'
+    const stCls = s.status==='active' ? 'd3-s-a' : s.status==='idle' ? 'd3-s-i' : 'd3-s-s'
+    const stTxt = s.status==='active' ? '运行中' : s.status==='idle' ? '空闲' : '已结束'
+
+    h += `<div class="d4-cd${i===0?' sel':''}" data-sid="${s.session_id}">
+      <div class="d4-top">
+        <div class="d4-avatar ${avCls}">
+          ${emoji}
+          <span class="d4-av-dot ${dotCls(s.status)}${s.status==='active'?' dot-pulse':''}"></span>
+        </div>
+        <div class="d4-main">
+          <div class="d4-r1">
+            <span class="d4-ti">${esc(title(s))}</span>
+            <span class="d4-tm">${relTime(s.last_seen_at||s.started_at)}</span>
+          </div>
+          ${alias ? `<div class="d4-alias"><span class="d4-alias-icon">✦</span>${esc(alias)}</div>` : ''}
+        </div>
+      </div>
+      ${s.summary ? `<div class="d4-sum">${esc(s.summary)}</div>` : ''}
+      <div class="d4-chips">
+        <span class="d4-chip d4-chip-status d3-status-label ${stCls}">${stTxt}</span>
+        ${dur ? `<span class="d4-chip d4-chip-dur">⏱ ${dur}</span>` : ''}
+        <span class="d4-chip d4-chip-evt">⚡ ${s.event_count}</span>
+        ${proj ? `<span class="d4-chip d4-chip-proj">📁 ${esc(proj)}</span>` : ''}
+        ${s.note?.linked_task_id ? `<span class="d4-chip d4-chip-task">🔗 Task #${s.note.linked_task_id}</span>` : ''}
+      </div>
+      ${topTools.length ? `<div class="d4-tools">${topTools.map(([name, cnt]) =>
+        `<div class="d4-tool-bar" style="flex:${cnt};background:${toolColors[name]||'var(--fg3)'};opacity:.6" title="${name}: ${cnt}"></div>`
+      ).join('')}</div>` : ''}
+      ${tags.length ? `<div class="d4-tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+      <div class="d4-prog">
+        <div class="d4-prog-bar"><div class="d4-prog-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <span class="d4-prog-label">${s.event_count} ev</span>
+      </div>
+    </div>`
+  })
+  return h
+}
+
+// ── Build ──
 const demos = [
-  { id: 'A', label: 'A. 日期分组 + 头像', desc: '按日期分组，头像 + 摘要预览<br>类似 Telegram / iMessage', render: renderA, tabs: false },
-  { id: 'B', label: 'B. ChatGPT 极简', desc: '单行文本，hover 显示操作<br>类似 ChatGPT / Claude.ai', render: renderB, tabs: false },
-  { id: 'C', label: 'C. VS Code 资源管理器', desc: 'Tab 切换 + 左侧状态条<br>高密度等宽字体', render: renderC, tabs: true },
-  { id: 'D', label: 'D. 双区域富卡片', desc: '活跃/历史分区，模型标签 + 进度条<br>信息最丰富', render: renderD, tabs: false },
-  { id: 'E', label: 'E. 时间轴', desc: '垂直时间线 + 节点标记<br>按日期串联的历史视图', render: renderE, tabs: false },
-  { id: 'F', label: 'F. 棋盘缩略图', desc: '双列网格卡片 + 彩色进度条<br>一览无余的缩略图视图', render: renderF, tabs: false },
-  { id: 'G', label: 'G. Notion 表格', desc: '四列表格：状态 / 标题 / 事件 / 时间<br>数据库风格', render: renderG, tabs: false, tableHeader: true },
-  { id: 'H', label: 'H. 气泡预览', desc: '消息预览卡片 + 标签<br>聚焦最后一条对话内容', render: renderH, tabs: false },
+  { id: 'D1', label: 'D1. 精简双区', desc: '横向排列：状态 + 标题 + 时间/时长<br>最紧凑的卡片式布局', render: (s) => renderD1(s) },
+  { id: 'D2', label: 'D2. 摘要 + 工具画像', desc: '展示对话摘要预览 + 工具使用分布<br>快速了解会话做了什么', render: (s, t) => renderD2(s, t) },
+  { id: 'D3', label: 'D3. 数据指标面板', desc: '三格指标：Events / 时长 / 密度<br>用数字说话的监控视图', render: (s) => renderD3(s) },
+  { id: 'D4', label: 'D4. 全要素卡片', desc: '头像 + 摘要 + 标签 + 工具条 + 进度<br>信息最丰富的完整视图', render: (s, t) => renderD4(s, t) },
 ]
 
 async function init() {
@@ -576,10 +613,13 @@ async function init() {
   const statusEl = document.getElementById('status')
   const rootEl = document.getElementById('root')
 
-  if (!sessions || sessions.length === 0) {
+  if (!sessions || !sessions.length) {
     statusEl.textContent = '未能获取会话数据，请确保后端运行在 localhost:8765'
     return
   }
+
+  statusEl.textContent = '正在加载工具统计...'
+  const toolStats = await loadToolStats(sessions)
 
   statusEl.style.display = 'none'
   rootEl.style.display = 'grid'
@@ -595,10 +635,8 @@ async function init() {
           <span class="hdr-title">会话记录</span>
           <button class="hdr-btn">+ 新会话</button>
         </div>
-        ${demo.tabs ? '<div class="c-tabs"><button class="c-tab act">全部</button><button class="c-tab">活跃</button><button class="c-tab">已完成</button></div>' : ''}
-        ${demo.tableHeader ? '' : '<div class="srch"><input placeholder="搜索会话..." /></div>'}
-        ${demo.tableHeader ? '<div class="g-cols"><span>状态</span><span>会话</span><span style="text-align:right">事件</span><span style="text-align:right">时间</span></div>' : ''}
-        <div class="body">${demo.render(sessions)}</div>
+        <div class="srch"><input placeholder="搜索会话..." /></div>
+        <div class="body">${demo.render(sessions, toolStats)}</div>
       </div>
     `
     rootEl.appendChild(col)
