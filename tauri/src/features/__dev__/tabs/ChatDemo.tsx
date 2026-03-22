@@ -229,17 +229,38 @@ function DemoEdge({
 const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 const edgeTypes = { demo: DemoEdge }
 
-// ── 布局 ────────────────────────────────────────────
+// ── 布局（一次性计算，不做二次重排） ─────────────────
 
 const RAW_W = 340
 const STYLED_W = 480
 const PAIR_GAP = 200
+const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
+const COL_GAP = 160
+const ROW_PAD = 100
+const COLS = 2
 
-function buildInitialGraph(turns: GroupedTurnItem[]) {
+// 根据消息数量估算行高（宁多不少）
+function estimateH(msgCount: number, turnCount: number): number {
+  // 每条 raw 消息大约 100~200px，每个 styled turn 约 150~300px
+  const raw = msgCount * 160 + 60
+  const styled = turnCount * 250 + 60
+  return Math.max(raw, styled, 300)
+}
+
+function buildGraph(turns: GroupedTurnItem[]) {
   const nodes: Node[] = []
   const edges: Edge[] = []
 
-  // 初始全部 y=0，等渲染后用实际高度重排
+  // 预计算每个 section 的高度
+  const secs: Array<{
+    rawMsgs: TranscriptMessage[]
+    sectionTurns: GroupedTurnItem[]
+    color: string
+    icon: string
+    label: string
+    height: number
+  }> = []
+
   for (let si = 0; si < DEMO_SECTIONS.length; si++) {
     const sec = DEMO_SECTIONS[si]
     const nextSec = DEMO_SECTIONS[si + 1]
@@ -254,20 +275,35 @@ function buildInitialGraph(turns: GroupedTurnItem[]) {
       turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
     )
 
-    const color = PALETTE[si % PALETTE.length]
-    const icon = getIcon(sec.label)
+    secs.push({
+      rawMsgs, sectionTurns,
+      color: PALETTE[si % PALETTE.length],
+      icon: getIcon(sec.label),
+      label: sec.label,
+      height: estimateH(rawMsgs.length, sectionTurns.length),
+    })
+  }
+
+  // 瀑布流分列
+  const colY = new Array(COLS).fill(0)
+
+  for (let si = 0; si < secs.length; si++) {
+    const col = colY.indexOf(Math.min(...colY))
+    const { rawMsgs, sectionTurns, color, icon, label, height } = secs[si]
+    const x = col * (PAIR_TOTAL + COL_GAP)
+    const y = colY[col]
 
     nodes.push({
-      id: `raw-${si}`, type: 'rawNode',
-      position: { x: 0, y: 0 },
-      data: { label: sec.label, color, icon, messages: rawMsgs },
-      style: { width: RAW_W + 8 },
+      id: `raw-${si}`,
+      type: 'rawNode',
+      position: { x, y },
+      data: { label, color, icon, messages: rawMsgs },
     })
     nodes.push({
-      id: `styled-${si}`, type: 'styledNode',
-      position: { x: RAW_W + PAIR_GAP, y: 0 },
-      data: { label: sec.label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
-      style: { width: STYLED_W + 8 },
+      id: `styled-${si}`,
+      type: 'styledNode',
+      position: { x: x + RAW_W + PAIR_GAP, y },
+      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length },
     })
     edges.push({
       id: `e-${si}`,
@@ -276,6 +312,8 @@ function buildInitialGraph(turns: GroupedTurnItem[]) {
       type: 'demo',
       data: { color },
     })
+
+    colY[col] += height + ROW_PAD
   }
 
   return { nodes, edges }
