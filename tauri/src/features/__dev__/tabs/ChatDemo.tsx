@@ -2,7 +2,7 @@
  * ChatDemo — 散落式画布，每组 = Raw卡片 ←连线→ Styled卡片
  * 无外框、无头像，纯内容展示
  */
-import { useState, useMemo, useCallback, useEffect, memo } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef, memo } from 'react'
 import {
   ReactFlow,
   Background,
