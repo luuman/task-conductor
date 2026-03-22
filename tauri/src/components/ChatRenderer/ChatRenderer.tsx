@@ -1001,6 +1001,7 @@ export function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
               const key = `r:${i}`
               const isActive = expandedIdx === key
               const hasContent = b.tool_result != null && b.tool_result !== ''
+              const lines = hasContent ? b.tool_result!.split('\n').length : 0
               return (
                 <span
                   key={key}
@@ -1008,8 +1009,9 @@ export function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
                   title={fp}
                   onClick={hasContent ? () => toggle(key) : undefined}
                 >
-                  <span className={styles.pillIcon}>{getToolIcon('Read', 10)}</span>
+                  <span className={styles.pillIcon}>{fileExtIcon(fp, 12)}</span>
                   <span className={styles.pillText}>{name}</span>
+                  {lines > 0 && <span className={styles.pillBadge}>{lines}</span>}
                 </span>
               )
             })}
