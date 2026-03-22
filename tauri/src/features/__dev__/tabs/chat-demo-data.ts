@@ -1,8 +1,14 @@
 /**
- * Chat Demo Data — 覆盖全部 13 种消息体类型
- * 用于 DevTools 中预览和调整样式
+ * Chat Demo Data — 覆盖全部消息体类型
+ * 每个类型前用 user 消息隔断，确保 turn 分组后每种类型独立可见
  */
 import type { TranscriptMessage } from '../../../lib/api/types'
+
+// helper: 生成分隔用的 user 消息
+const sep = (label: string, ts: string): TranscriptMessage => ({
+  role: 'user', ts,
+  blocks: [{ type: 'text', text: label }],
+})
 
 export const DEMO_MESSAGES: TranscriptMessage[] = [
 
@@ -20,7 +26,6 @@ export const DEMO_MESSAGES: TranscriptMessage[] = [
 
   // ═══════════════════════════════════════════════
   // 2. 助手纯文本 / Markdown（RichTextBlock）
-  //    涵盖：标题、列表、加粗、斜体、链接、表格、引用、分割线
   // ═══════════════════════════════════════════════
   {
     role: 'assistant',
@@ -67,14 +72,16 @@ export const DEMO_MESSAGES: TranscriptMessage[] = [
   },
 
   // ═══════════════════════════════════════════════
-  // 3 & 4 & 5. 代码块（有语言高亮 / 无语言 / 行内代码）
+  // 3-5. 代码块（TS / Python / 无语言 / 行内）
   // ═══════════════════════════════════════════════
+  sep('展示代码块渲染', '2026-03-22T10:00:07Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:08Z',
     blocks: [{
       type: 'text',
-      text: `代码块展示——\`guessLang()\` 函数：
+      text: `\`guessLang()\` 函数：
 
 \`\`\`typescript
 function guessLang(filePath: string): string {
@@ -95,7 +102,6 @@ def compute_diff(old: str, new: str) -> list[DiffLine]:
     """LCS-based diff algorithm."""
     old_lines = old.splitlines()
     new_lines = new.splitlines()
-    # Dynamic programming table
     dp = [[0] * (len(new_lines) + 1) for _ in range(len(old_lines) + 1)]
     for i in range(1, len(old_lines) + 1):
         for j in range(1, len(new_lines) + 1):
@@ -104,7 +110,7 @@ def compute_diff(old: str, new: str) -> list[DiffLine]:
     return backtrack(dp, old_lines, new_lines)
 \`\`\`
 
-无语言标注的代码块：
+无语言标注：
 
 \`\`\`
 some raw output
@@ -116,16 +122,16 @@ some raw output
   },
 
   // ═══════════════════════════════════════════════
-  // 6. Task Notification（4 种状态色）
+  // 6. Task Notification（4 种状态）
   // ═══════════════════════════════════════════════
+  sep('展示 Task Notification', '2026-03-22T10:00:11Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:12Z',
     blocks: [{
       type: 'text',
-      text: `任务通知卡片（4 种状态）：
-
-<task-notification>
+      text: `<task-notification>
 <task-id>task-001</task-id>
 <tool-use-id>tu-abc123</tool-use-id>
 <output-file>/tmp/output-001.json</output-file>
@@ -162,6 +168,8 @@ some raw output
   // ═══════════════════════════════════════════════
   // 7. System Reminder（可折叠）
   // ═══════════════════════════════════════════════
+  sep('展示 System Reminder', '2026-03-22T10:00:14Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:15Z',
@@ -186,20 +194,11 @@ some raw output
   },
 
   // ═══════════════════════════════════════════════
-  // 用户追问
+  // 8. Read + Grep + Glob（ReadPillRow，多 pill 同行）
   // ═══════════════════════════════════════════════
-  {
-    role: 'user',
-    ts: '2026-03-22T10:00:18Z',
-    blocks: [{
-      type: 'text',
-      text: '好的，请先读取相关文件看看结构。',
-    }],
-  },
+  sep('展示 Read / Grep / Glob pill 行', '2026-03-22T10:00:18Z'),
 
-  // ═══════════════════════════════════════════════
-  // 8a. Read 工具（ReadPillRow → ReadFileView）
-  // ═══════════════════════════════════════════════
+  // 连续多个只读工具 → 同一个 turn → ReadPillRow 聚合
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:20Z',
@@ -224,8 +223,6 @@ some raw output
       tool_error: false,
     }],
   },
-
-  // 8a-2. 第二个 Read（同组，形成 pill row 效果）
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:21Z',
@@ -240,21 +237,10 @@ some raw output
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.2);
-}
-
-.bashCardHeader {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
 }`,
       tool_error: false,
     }],
   },
-
-  // ═══════════════════════════════════════════════
-  // 8b. Grep 工具（搜索结果）
-  // ═══════════════════════════════════════════════
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:22Z',
@@ -269,13 +255,9 @@ src/features/admin/pages/AdminSessions.tsx:23`,
       tool_error: false,
     }],
   },
-
-  // ═══════════════════════════════════════════════
-  // 8c. Glob 工具
-  // ═══════════════════════════════════════════════
   {
     role: 'assistant',
-    ts: '2026-03-22T10:00:24Z',
+    ts: '2026-03-22T10:00:23Z',
     blocks: [{
       type: 'tool_use',
       tool_name: 'Glob',
@@ -291,20 +273,26 @@ src/layouts/Panel/panel.module.css`,
   },
 
   // ═══════════════════════════════════════════════
-  // 助手文本（分段说明）
+  // 8d. Read ERROR 状态（pill 行内）
   // ═══════════════════════════════════════════════
   {
     role: 'assistant',
-    ts: '2026-03-22T10:00:28Z',
+    ts: '2026-03-22T10:00:24Z',
     blocks: [{
-      type: 'text',
-      text: '文件结构已清楚，开始修改。',
+      type: 'tool_use',
+      tool_name: 'Read',
+      tool_use_id: 'read-err-001',
+      tool_input: { file_path: '/nonexistent/path/file.ts' },
+      tool_result: 'Error: ENOENT: no such file or directory, open \'/nonexistent/path/file.ts\'',
+      tool_error: true,
     }],
   },
 
   // ═══════════════════════════════════════════════
-  // 9a. Edit 工具（有 diff 数据）
+  // 9a. Edit（有 diff）
   // ═══════════════════════════════════════════════
+  sep('展示 Edit diff 视图', '2026-03-22T10:00:28Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:30Z',
@@ -347,11 +335,41 @@ src/layouts/Panel/panel.module.css`,
   },
 
   // ═══════════════════════════════════════════════
-  // 9b. Write 工具（无 diff，仅文件名 badge）
+  // 9b. MultiEdit（多处编辑）
   // ═══════════════════════════════════════════════
+  sep('展示 MultiEdit', '2026-03-22T10:00:32Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:33Z',
+    blocks: [{
+      type: 'tool_use',
+      tool_name: 'MultiEdit',
+      tool_use_id: 'multiedit-001',
+      tool_input: {
+        file_path: '/home/user/project/src/utils/helpers.ts',
+        old_string: `export function formatTime(ms: number) {
+  return ms + 'ms'
+}`,
+        new_string: `export function formatTime(ms: number): string {
+  if (ms < 1000) return \`\${ms}ms\`
+  if (ms < 60000) return \`\${(ms / 1000).toFixed(1)}s\`
+  return \`\${Math.floor(ms / 60000)}m \${Math.floor((ms % 60000) / 1000)}s\`
+}`,
+      },
+      tool_result: 'File updated successfully.',
+      tool_error: false,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
+  // 9c. Write（无 diff，仅文件名 badge）
+  // ═══════════════════════════════════════════════
+  sep('展示 Write (仅 badge)', '2026-03-22T10:00:35Z'),
+
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:00:36Z',
     blocks: [{
       type: 'tool_use',
       tool_name: 'Write',
@@ -365,8 +383,10 @@ src/layouts/Panel/panel.module.css`,
   },
 
   // ═══════════════════════════════════════════════
-  // 10a. Bash — TypeScript 错误输出
+  // 10a. Bash — TypeScript 编译错误
   // ═══════════════════════════════════════════════
+  sep('展示 Bash TS 编译错误', '2026-03-22T10:00:38Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:40Z',
@@ -385,8 +405,10 @@ Found 3 errors in 2 files.`,
   },
 
   // ═══════════════════════════════════════════════
-  // 10b. Bash — 无输出（静默成功）
+  // 10b. Bash — 静默成功（无输出）
   // ═══════════════════════════════════════════════
+  sep('展示 Bash 静默成功', '2026-03-22T10:00:42Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:43Z',
@@ -403,6 +425,8 @@ Found 3 errors in 2 files.`,
   // ═══════════════════════════════════════════════
   // 10c. Bash — JSON 输出
   // ═══════════════════════════════════════════════
+  sep('展示 Bash JSON 输出', '2026-03-22T10:00:44Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:45Z',
@@ -428,6 +452,8 @@ Found 3 errors in 2 files.`,
   // ═══════════════════════════════════════════════
   // 10d. Bash — Python traceback
   // ═══════════════════════════════════════════════
+  sep('展示 Bash Python traceback', '2026-03-22T10:00:47Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:48Z',
@@ -446,6 +472,8 @@ ModuleNotFoundError: No module named 'nonexistent'`,
   // ═══════════════════════════════════════════════
   // 10e. Bash — 测试通过
   // ═══════════════════════════════════════════════
+  sep('展示 Bash 测试通过', '2026-03-22T10:00:49Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:50Z',
@@ -476,8 +504,10 @@ tests/test_api.py::test_approve_task PASSED                              [100%]
   },
 
   // ═══════════════════════════════════════════════
-  // 10f. Bash — Git log 输出（终端风格着色）
+  // 10f. Bash — git log（终端风格着色）
   // ═══════════════════════════════════════════════
+  sep('展示 Bash git log', '2026-03-22T10:00:51Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:00:52Z',
@@ -496,8 +526,38 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   },
 
   // ═══════════════════════════════════════════════
+  // 10g. Bash — 长命令 + 混合输出
+  // ═══════════════════════════════════════════════
+  sep('展示 Bash 长命令 + 混合输出', '2026-03-22T10:00:53Z'),
+
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:00:54Z',
+    blocks: [{
+      type: 'tool_use',
+      tool_name: 'Bash',
+      tool_use_id: 'bash-007',
+      tool_input: { command: 'cd /home/user/project && npm run build 2>&1 | tail -20' },
+      tool_result: `vite v7.0.0 building for production...
+transforming (142) src/features/admin/pages/AdminSessions.tsx
+✓ 248 modules transformed.
+dist/index.html                    0.42 kB │ gzip:  0.27 kB
+dist/assets/index-CdFn3.css      18.73 kB │ gzip:  4.21 kB
+dist/assets/vendor-BxQ2k.js     156.82 kB │ gzip: 51.03 kB
+dist/assets/index-D4mKz.js       89.45 kB │ gzip: 28.67 kB
+✓ built in 3.24s
+
+warning: Some chunks are larger than 500 kB after minification.
+Done in 4.12s.`,
+      tool_error: false,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
   // 11. Agent 工具
   // ═══════════════════════════════════════════════
+  sep('展示 Agent 子代理', '2026-03-22T10:00:58Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:01:00Z',
@@ -530,6 +590,8 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   // ═══════════════════════════════════════════════
   // 12a. AskUserQuestion（有回答）
   // ═══════════════════════════════════════════════
+  sep('展示 AskUserQuestion 有回答', '2026-03-22T10:01:03Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:01:05Z',
@@ -547,6 +609,8 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   // ═══════════════════════════════════════════════
   // 12b. AskUserQuestion（等待回答）
   // ═══════════════════════════════════════════════
+  sep('展示 AskUserQuestion 无回答', '2026-03-22T10:01:07Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:01:08Z',
@@ -562,8 +626,10 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   },
 
   // ═══════════════════════════════════════════════
-  // 13a. WebSearch（通用工具 → ToolWidget → OutputBlock）
+  // 13a. WebSearch（通用 ToolWidget）
   // ═══════════════════════════════════════════════
+  sep('展示 WebSearch', '2026-03-22T10:01:09Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:01:10Z',
@@ -587,8 +653,10 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   },
 
   // ═══════════════════════════════════════════════
-  // 13b. WebFetch（通用工具）
+  // 13b. WebFetch（通用 ToolWidget）
   // ═══════════════════════════════════════════════
+  sep('展示 WebFetch', '2026-03-22T10:01:12Z'),
+
   {
     role: 'assistant',
     ts: '2026-03-22T10:01:13Z',
@@ -609,11 +677,49 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   },
 
   // ═══════════════════════════════════════════════
-  // 13c. 未知工具（fallback → OutputBlock）
+  // 13c. Skill 工具
   // ═══════════════════════════════════════════════
+  sep('展示 Skill 工具', '2026-03-22T10:01:14Z'),
+
   {
     role: 'assistant',
-    ts: '2026-03-22T10:01:16Z',
+    ts: '2026-03-22T10:01:15Z',
+    blocks: [{
+      type: 'tool_use',
+      tool_name: 'Skill',
+      tool_use_id: 'skill-001',
+      tool_input: { skill: 'brainstorming' },
+      tool_result: 'Skill brainstorming loaded successfully.',
+      tool_error: false,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
+  // 13d. TaskCreate 工具
+  // ═══════════════════════════════════════════════
+  sep('展示 TaskCreate', '2026-03-22T10:01:16Z'),
+
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:01:17Z',
+    blocks: [{
+      type: 'tool_use',
+      tool_name: 'TaskCreate',
+      tool_use_id: 'tc-001',
+      tool_input: { subject: '修复 Bash 输出高亮', description: '重构 guessOutputLang 逻辑' },
+      tool_result: 'Task #1 created successfully: 修复 Bash 输出高亮',
+      tool_error: false,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
+  // 13e. 未知工具（fallback OutputBlock）
+  // ═══════════════════════════════════════════════
+  sep('展示未知工具 fallback', '2026-03-22T10:01:18Z'),
+
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:01:19Z',
     blocks: [{
       type: 'tool_use',
       tool_name: 'CustomPlugin',
@@ -628,57 +734,83 @@ aa500a1 auto: update tauri/src/components/SessionChat/TranscriptViewer.tsx
   },
 
   // ═══════════════════════════════════════════════
-  // 13d. 工具 ERROR 状态
+  // 13f. 工具 ERROR 状态（独立展示）
   // ═══════════════════════════════════════════════
+  sep('展示工具 ERROR 状态', '2026-03-22T10:01:20Z'),
+
   {
     role: 'assistant',
-    ts: '2026-03-22T10:01:20Z',
+    ts: '2026-03-22T10:01:21Z',
     blocks: [{
       type: 'tool_use',
-      tool_name: 'Read',
-      tool_use_id: 'read-err-001',
-      tool_input: { file_path: '/nonexistent/path/file.ts' },
-      tool_result: 'Error: ENOENT: no such file or directory, open \'/nonexistent/path/file.ts\'',
+      tool_name: 'Bash',
+      tool_use_id: 'bash-err-001',
+      tool_input: { command: 'rm -rf /protected/system/path' },
+      tool_result: 'rm: cannot remove \'/protected/system/path\': Permission denied',
       tool_error: true,
     }],
   },
 
   // ═══════════════════════════════════════════════
-  // 最终用户消息
+  // 13g. Edit ERROR（编辑失败）
+  // ═══════════════════════════════════════════════
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:01:22Z',
+    blocks: [{
+      type: 'tool_use',
+      tool_name: 'Edit',
+      tool_use_id: 'edit-err-001',
+      tool_input: {
+        file_path: '/home/user/project/src/App.tsx',
+        old_string: 'function OldComponent() {}',
+        new_string: 'function NewComponent() {}',
+      },
+      tool_result: 'Error: old_string not found in file. The file may have been modified.',
+      tool_error: true,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
+  // 结束
   // ═══════════════════════════════════════════════
   {
     role: 'user',
     ts: '2026-03-22T10:01:25Z',
     blocks: [{
       type: 'text',
-      text: '非常好，样式都能正确渲染了！接下来逐个优化吧。',
+      text: '全部类型都能正确渲染了！',
     }],
   },
 ]
 
-// 按类型标注，方便跳转
+// 导航索引（按实际消息位置）
 export const DEMO_SECTIONS = [
   { label: '1. 用户文本', index: 0 },
   { label: '2. Markdown 全要素', index: 1 },
-  { label: '3-5. 代码块', index: 2 },
-  { label: '6. Task Notification', index: 3 },
-  { label: '7. System Reminder', index: 4 },
-  { label: '8a. Read', index: 6 },
-  { label: '8b. Grep', index: 8 },
-  { label: '8c. Glob', index: 9 },
-  { label: '9a. Edit (diff)', index: 11 },
-  { label: '9b. Write (badge)', index: 12 },
-  { label: '10a. Bash TS error', index: 13 },
-  { label: '10b. Bash 静默', index: 14 },
-  { label: '10c. Bash JSON', index: 15 },
-  { label: '10d. Bash Python', index: 16 },
-  { label: '10e. Bash 测试通过', index: 17 },
-  { label: '10f. Bash git log', index: 18 },
-  { label: '11. Agent', index: 19 },
-  { label: '12a. AskUser 有答', index: 20 },
-  { label: '12b. AskUser 无答', index: 21 },
-  { label: '13a. WebSearch', index: 22 },
-  { label: '13b. WebFetch', index: 23 },
-  { label: '13c. Unknown tool', index: 24 },
-  { label: '13d. Error 状态', index: 25 },
+  { label: '3-5. 代码块', index: 3 },
+  { label: '6. Task Notification ×4', index: 5 },
+  { label: '7. System Reminder', index: 7 },
+  { label: '8. Read+Grep+Glob pill', index: 9 },
+  { label: '8d. Read ERROR', index: 13 },
+  { label: '9a. Edit (diff)', index: 15 },
+  { label: '9b. MultiEdit', index: 17 },
+  { label: '9c. Write (badge)', index: 19 },
+  { label: '10a. Bash TS error', index: 21 },
+  { label: '10b. Bash 静默', index: 23 },
+  { label: '10c. Bash JSON', index: 25 },
+  { label: '10d. Bash Python', index: 27 },
+  { label: '10e. Bash 测试通过', index: 29 },
+  { label: '10f. Bash git log', index: 31 },
+  { label: '10g. Bash build', index: 33 },
+  { label: '11. Agent', index: 35 },
+  { label: '12a. AskUser 有答', index: 37 },
+  { label: '12b. AskUser 无答', index: 39 },
+  { label: '13a. WebSearch', index: 41 },
+  { label: '13b. WebFetch', index: 43 },
+  { label: '13c. Skill', index: 45 },
+  { label: '13d. TaskCreate', index: 47 },
+  { label: '13e. Unknown tool', index: 49 },
+  { label: '13f. Bash ERROR', index: 51 },
+  { label: '13g. Edit ERROR', index: 52 },
 ]
