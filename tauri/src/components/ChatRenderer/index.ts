@@ -7,6 +7,11 @@ export {
   groupMessagesIntoTurns,
   ExpandSignalCtx,
   AutoExpandCtx,
+  RichTextBlock,
+  ReadPillRow,
+  EditInlineCard,
+  BashStatusLine,
+  ToolWidget,
 } from './ChatRenderer'
 
 export type { ChatMessageListProps, AssistantTurn, GroupedTurnItem } from './ChatRenderer'
