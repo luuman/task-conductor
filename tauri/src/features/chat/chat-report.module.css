@@ -3,7 +3,7 @@
 /* ── Page layout ── */
 .page {
   display: flex;
-  height: 100%;
+  height: 100vh;
   background: var(--tc-bg, #09090b);
   overflow: hidden;
 }
