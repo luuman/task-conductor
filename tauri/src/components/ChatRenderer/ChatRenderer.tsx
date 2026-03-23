@@ -72,6 +72,7 @@ mermaid.initialize({
 })
 
 function MermaidBlock({ code }: { code: string }) {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const idBase = useId().replace(/:/g, '_')
   const [svg, setSvg] = useState<string | null>(null)
@@ -90,7 +91,7 @@ function MermaidBlock({ code }: { code: string }) {
   if (error) {
     return (
       <div className={styles.mermaidError}>
-        <span className={styles.mermaidErrorLabel}>Mermaid Error</span>
+        <span className={styles.mermaidErrorLabel}>{t('admin.sessions.mermaid_error')}</span>
         <pre className={styles.mermaidErrorPre}>{error}</pre>
         <pre className={styles.mermaidErrorSrc}>{code}</pre>
       </div>
@@ -100,7 +101,7 @@ function MermaidBlock({ code }: { code: string }) {
   if (!svg) {
     return (
       <div className={styles.mermaidLoading}>
-        Rendering diagram...
+        {t('admin.sessions.mermaid_loading')}
       </div>
     )
   }
