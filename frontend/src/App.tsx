@@ -17,7 +17,8 @@ import ProjectFiles from "./pages/ProjectFiles";
 import PencilCanvas from "./components/PencilCanvas";
 import KnowledgePage from "./pages/KnowledgePage";
 import { DocsPanel } from "./components/DocsPanel";
-type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files" | "pencil" | "knowledge" | "docs";
+import CharacterStudio from "./pages/CharacterStudio";
+type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files" | "pencil" | "knowledge" | "docs" | "character-studio";
 
 export default function App() {
   const { t } = useTranslation();
