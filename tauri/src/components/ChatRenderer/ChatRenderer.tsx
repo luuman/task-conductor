@@ -719,7 +719,7 @@ function ReadFileView({ filePath, result, hideHeader }: { filePath: string; resu
           {fileExtIcon(filePath, 14)}
           <span className={styles.readFilePath} title={filePath}>{fileName}</span>
           <span style={{ flex: 1 }} />
-          <span className={styles.readLineCount}>{lineCount} lines</span>
+          <span className={styles.readLineCount}>{t('admin.sessions.code_lines', { count: lineCount })}</span>
         </div>
       )}
       {highlighted ? (
