@@ -274,21 +274,6 @@
   line-height: 16px;
 }
 
-/* Project name */
-.ntProjectName {
-  font-size: 10px;
-  color: var(--tc-foreground-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Duration mono */
-.ntMono {
-  font-size: 10px;
-  font-family: 'Geist Mono', monospace;
-  color: var(--tc-foreground-secondary);
-}
 
 /* Event count */
 .ntEventCount {
