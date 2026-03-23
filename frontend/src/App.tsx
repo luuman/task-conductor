@@ -208,6 +208,9 @@ if (page === "tasks") {
     if (page === "character-studio") {
       return <CharacterStudio />;
     }
+    if (page === "hybrid-pipeline") {
+      return <HybridPipeline />;
+    }
     if (page === "canvas") {
       return (
         <ProjectsCanvas
