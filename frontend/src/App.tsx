@@ -18,7 +18,8 @@ import PencilCanvas from "./components/PencilCanvas";
 import KnowledgePage from "./pages/KnowledgePage";
 import { DocsPanel } from "./components/DocsPanel";
 import CharacterStudio from "./pages/CharacterStudio";
-type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files" | "pencil" | "knowledge" | "docs" | "character-studio";
+import HybridPipeline from "./pages/HybridPipeline";
+type Page = "dashboard" | "project" | "task" | "settings" | "tasks" | "conversations" | "canvas" | "claude-config" | "files" | "pencil" | "knowledge" | "docs" | "character-studio" | "hybrid-pipeline";
 
 export default function App() {
   const { t } = useTranslation();
