@@ -71,18 +71,15 @@ function TableHeader() {
 // ── Session Row (Notion table row) ──
 
 function SessionRow({
-  session, isSelected, onSelect, showProjectName,
+  session, isSelected, onSelect,
 }: {
   session: AiSession
   isSelected: boolean
   onSelect: (s: AiSession) => void
-  showProjectName: boolean
 }) {
   const { t } = useTranslation()
   const title = session.note?.alias || session.summary || session.session_id.slice(0, 8)
   const time = relativeTime(session.last_seen_at || session.started_at, t)
-  const dur = duration(session.started_at, session.last_seen_at || session.started_at)
-  const proj = projName(session.cwd)
   const tags = session.note?.tags ?? []
 
   const isActive = session.status === 'active'
@@ -112,18 +109,6 @@ function SessionRow({
             ))}
           </span>
         )}
-      </span>
-
-      {/* Project */}
-      {showProjectName && (
-        <span className={styles.ntColProject}>
-          {proj && <span className={styles.ntProjectName}>{proj}</span>}
-        </span>
-      )}
-
-      {/* Duration */}
-      <span className={styles.ntColDuration}>
-        <span className={styles.ntMono}>{dur}</span>
       </span>
 
       {/* Events */}
