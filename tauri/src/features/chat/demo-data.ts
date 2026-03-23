@@ -263,9 +263,9 @@ export const DEMO_TURNS: ReportTurn[] = [
     cwd: '/home/sichengli/Documents/code2/task-conductor',
     model: 'claude-opus-4-6',
 
-    resultText: `TypeScript type check passed with no errors. All backend tests are green — 12/12 passed in 3.45 seconds.
+    resultText: `TypeScript 类型检查通过，无错误。后端全部测试绿色 — 12/12 通过，耗时 3.45 秒。
 
-Everything looks clean. No regressions from the changes.`,
+一切正常，本次修改无回归问题。`,
 
     codeBlocks: [],
 
