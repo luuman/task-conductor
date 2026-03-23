@@ -179,6 +179,8 @@
       "tool_TaskCreate": "创建任务",
       "tool_TaskUpdate": "更新任务",
       "tool_TaskList": "任务列表",
+      "tool_CustomPlugin": "自定义插件",
+      "tool_NotebookEdit": "笔记本编辑",
       "tool_default": "工具",
       "section_active": "活跃中",
       "section_history": "历史记录",
