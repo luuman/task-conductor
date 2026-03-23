@@ -842,14 +842,35 @@ Done in 4.12s.`,
   },
 
   // ═══════════════════════════════════════════════
-  // 结束
+  // 消息渲染流水线（放在最底部）
   // ═══════════════════════════════════════════════
+  sep('消息渲染流水线', '2026-03-22T10:01:28Z'),
+
   {
-    role: 'user',
-    ts: '2026-03-22T10:01:25Z',
+    role: 'assistant',
+    ts: '2026-03-22T10:01:29Z',
     blocks: [{
       type: 'text',
-      text: '全部类型都能正确渲染了！',
+      text: `\`\`\`mermaid
+flowchart TD
+    A[TranscriptMessage] --> B{role?}
+    B -->|user| C[UserCard]
+    B -->|assistant| D[groupMessagesIntoTurns]
+    D --> E[AssistantTurnCard]
+    E --> F[texts → RichTextBlock]
+    E --> G[reads → ReadPillRow]
+    E --> H[edits → EditInlineCard]
+    E --> I[bashes → BashStatusLine]
+    E --> J[others → ToolWidget]
+    F --> F1[Markdown]
+    F --> F2[TaskNotification]
+    F --> F3[SystemReminder]
+    F --> F4[Mermaid]
+    F --> F5[CollapsibleCode]
+    J --> J1[Agent]
+    J --> J2[AskUser]
+    J --> J3[OutputBlock]
+\`\`\``,
     }],
   },
 ]
