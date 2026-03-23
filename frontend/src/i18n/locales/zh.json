@@ -54,6 +54,7 @@
       "tasks": "任务管理",
       "conversations": "会话记录",
       "files": "文件浏览",
+      "characterStudio": "角色工坊",
       "claudeConfig": "Claude 配置",
       "settings": "设置"
     },
