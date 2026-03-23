@@ -177,27 +177,27 @@ export const DEMO_TURNS: ReportTurn[] = [
     cwd: '/home/sichengli/Documents/code2/task-conductor',
     model: 'claude-opus-4-6',
 
-    resultText: `Here's the complete inventory of all message types in the chat rendering pipeline:
+    resultText: `以下是聊天渲染管线中所有消息体类型的完整清单：
 
-**User Messages:**
-- \`UserCard\` — right-aligned bubble with Markdown support
+**用户消息：**
+- \`UserCard\` — 右对齐气泡，支持 Markdown
 
-**Assistant Text:**
-- \`RichTextBlock\` — full Markdown rendering (headings, lists, tables, links, blockquotes)
-- \`CollapsibleCode\` — syntax-highlighted code blocks, foldable when > 8 lines
-- \`MermaidBlock\` — flowchart / sequence / gantt / state diagrams via mermaid.js
-- \`TaskNotificationCard\` — 4 states: completed / running / failed / killed
-- \`SystemReminderCard\` — collapsible system context
+**助手文本：**
+- \`RichTextBlock\` — 完整 Markdown 渲染（标题、列表、表格、链接、引用）
+- \`CollapsibleCode\` — 语法高亮代码块，超过 8 行可折叠
+- \`MermaidBlock\` — 流程图 / 时序图 / 甘特图 / 状态图（mermaid.js）
+- \`TaskNotificationCard\` — 4 种状态：completed / running / failed / killed
+- \`SystemReminderCard\` — 可折叠系统上下文
 
-**Tool Calls (by category):**
-- Read-only: \`ReadPillRow\` (Read / Grep / Glob pills with expandable content)
-- Write: \`EditInlineCard\` (LCS diff view) / Write badge
-- Bash: \`BashStatusLine\` (command + highlighted output + PASS/FAIL)
-- Agent: \`AgentResultView\` (purple theme + Markdown result)
-- AskUser: \`AskUserQuestionView\` (option buttons + waiting state)
-- Other: \`ToolWidget\` → \`OutputBlock\` (generic fallback)
+**工具调用（按类别）：**
+- 只读工具：\`ReadPillRow\`（Read / Grep / Glob 药丸行，可展开内容）
+- 写入工具：\`EditInlineCard\`（LCS diff 视图）/ Write badge
+- 命令行：\`BashStatusLine\`（命令 + 高亮输出 + PASS/FAIL）
+- 子代理：\`AgentResultView\`（紫色主题 + Markdown 结果）
+- 用户确认：\`AskUserQuestionView\`（选项按钮 + 等待状态）
+- 其他：\`ToolWidget\` → \`OutputBlock\`（通用回退）
 
-Created a comprehensive HTML demo at \`tauri/public/session-message-types-demo.html\` covering all 13+ types with full metadata panels.`,
+已创建完整 HTML demo 在 \`tauri/public/session-message-types-demo.html\`，覆盖全部 13+ 种类型并附带完整元数据面板。`,
 
     codeBlocks: [
       {
