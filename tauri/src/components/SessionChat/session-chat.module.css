@@ -187,19 +187,6 @@
   overflow: hidden;
 }
 
-.ntColProject {
-  width: 56px;
-  flex-shrink: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ntColDuration {
-  width: 38px;
-  flex-shrink: 0;
-  text-align: right;
-}
 
 .ntColEvents {
   width: 30px;
