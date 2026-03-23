@@ -1264,7 +1264,7 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
           <code className={styles.bashCardCmd}>{shortCmd}</code>
         )}
         {!noOutput && lineCount > 0 && (
-          <span className={styles.bashCardLines}>{lineCount} lines</span>
+          <span className={styles.bashCardLines}>{t('admin.sessions.bash_lines', { count: lineCount })}</span>
         )}
         <span className={`${styles.bashCardBadge} ${hasError ? styles.bashCardFail : styles.bashCardPass}`}>
           {hasError ? t('admin.sessions.bash_fail') : t('admin.sessions.bash_pass')}
