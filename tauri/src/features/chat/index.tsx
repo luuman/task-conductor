@@ -266,7 +266,7 @@ export default function ChatReportPage() {
           {/* Commands */}
           {turn.commands.length > 0 && (
             <div className={styles.section}>
-              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> Commands</div>
+              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> 命令执行</div>
               <CommandList commands={turn.commands} />
             </div>
           )}
