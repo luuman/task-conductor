@@ -864,7 +864,7 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
 
   const preview = hasResult
     ? block.tool_name === 'Read'
-      ? `${block.tool_result!.split('\n').length} lines`
+      ? t('admin.sessions.code_lines', { count: block.tool_result!.split('\n').length })
       : isError
         ? 'error'
         : ''
