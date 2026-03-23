@@ -362,12 +362,13 @@ function StatusCircle({ color }: { color: string }) {
 }
 
 function TaskNotificationCard({ data }: { data: TaskNotification }) {
+  const { t } = useTranslation()
   const st = STATUS_STYLE[data.status] || STATUS_STYLE.completed
   return (
     <div className={styles.taskNotification} style={{ borderColor: st.color, background: st.bg }}>
       <div className={styles.taskNotifHeader}>
         <StatusCircle color={st.color} />
-        <span className={styles.taskNotifTitle}>Background Task</span>
+        <span className={styles.taskNotifTitle}>{t('admin.sessions.background_task')}</span>
         <span className={styles.taskNotifStatus} style={{ color: st.color }}>{data.status}</span>
       </div>
       <div className={styles.taskNotifSummary}>{data.summary}</div>
