@@ -908,9 +908,16 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
       </button>
       {mounted && (
         <div className={styles.toolBody} style={{ display: open ? 'block' : 'none' }}>
-          {!!hasEditData && <EditDiffView input={block.tool_input!} />}
-          {isBash && hasResult && <BashOutput command={bashCmd} result={block.tool_result!} isError={isError} />}
-          {isRead && hasResult && <ReadFileView filePath={String(block.tool_input?.file_path ?? '')} result={block.tool_result!} />}
+          {/* Edit: 直接渲染 diff 体，跳过 EditDiffView 的 header（ToolWidget header 已显示文件名） */}
+          {!!hasEditData && <EditDiffView input={block.tool_input!} hideHeader />}
+          {/* Bash: 直接输出内容，不再显示 $ command header */}
+          {isBash && hasResult && (
+            <pre className={`hljs ${styles.bashCardOutput} ${isError ? styles.bashCardOutputErr : ''}`}>
+              {block.tool_result}
+            </pre>
+          )}
+          {/* Read: 直接内容体，跳过 ReadFileView header */}
+          {isRead && hasResult && <ReadFileView filePath={String(block.tool_input?.file_path ?? '')} result={block.tool_result!} hideHeader />}
           {isAgent && hasResult && <AgentResultView result={block.tool_result!} description={String(block.tool_input?.description ?? '')} />}
           {isAskUser && <AskUserQuestionView input={block.tool_input || {}} result={block.tool_result} />}
           {!isEdit && !isBash && !isRead && !isAgent && !isAskUser && hasResult && <OutputBlock result={block.tool_result!} isError={isError} />}
