@@ -55,6 +55,7 @@
       "conversations": "Conversations",
       "files": "Files",
       "characterStudio": "Character Studio",
+      "hybridPipeline": "Hybrid Pipeline",
       "claudeConfig": "Claude Config",
       "settings": "Settings"
     },
