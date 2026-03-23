@@ -30,18 +30,6 @@ function relativeTime(iso: string, t: (key: string, opts?: Record<string, unknow
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-function duration(startIso: string, endIso: string): string {
-  const s = safeDate(startIso), e = safeDate(endIso)
-  const mins = Math.round((e.getTime() - s.getTime()) / 60000)
-  if (mins < 1) return '<1m'
-  if (mins < 60) return `${mins}m`
-  const h = Math.floor(mins / 60), m = mins % 60
-  return m > 0 ? `${h}h${m}m` : `${h}h`
-}
-
-function projName(cwd?: string): string {
-  return (cwd || '').split('/').filter(Boolean).pop() || ''
-}
 
 // ── Section header ──
 
