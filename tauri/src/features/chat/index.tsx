@@ -47,7 +47,7 @@ function CodeBlock({ lang, filename, code }: { lang: string; filename?: string; 
         <span className={styles.codeLang}>{lang}</span>
         {filename && <span className={styles.codeFilename}>{filename}</span>}
         <button className={styles.codeCopy} onClick={handleCopy}>
-          {copied ? '✓ Copied' : '📋 Copy Code'}
+          {copied ? '✓ 已复制' : '📋 复制代码'}
         </button>
       </div>
       <div className={styles.codeBody}>{code}</div>
