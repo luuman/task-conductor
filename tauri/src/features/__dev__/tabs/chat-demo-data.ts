@@ -905,4 +905,5 @@ export const DEMO_SECTIONS = [
   { label: '未知工具', index: 51 },
   { label: 'Bash 权限错误', index: 53 },
   { label: 'Edit 编辑失败', index: 54 },
+  { label: '渲染流水线', index: 55 },
 ]
