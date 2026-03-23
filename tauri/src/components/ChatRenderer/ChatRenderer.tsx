@@ -843,7 +843,6 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
   const isAgent = toolName === 'Agent'
   const isAskUser = toolName === 'AskUserQuestion'
   const hasEditData = isEdit && block.tool_input && (block.tool_input.old_string || block.tool_input.new_string)
-  const bashCmd = isBash ? String(block.tool_input?.command ?? '') : ''
   const canExpand = hasResult || hasEditData || isAskUser
 
   const editInfo = useMemo(() => {
