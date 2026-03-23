@@ -258,7 +258,7 @@ export default function ChatReportPage() {
           {/* Changes */}
           {turn.changes.length > 0 && (
             <div className={styles.section}>
-              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> Changes</div>
+              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> 文件变更</div>
               <FileChanges changes={turn.changes} />
             </div>
           )}
