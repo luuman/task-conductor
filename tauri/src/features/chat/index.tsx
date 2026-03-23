@@ -274,7 +274,7 @@ export default function ChatReportPage() {
           {/* Agents */}
           {turn.agents.length > 0 && (
             <div className={styles.section}>
-              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> Agents</div>
+              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> 子代理</div>
               <AgentCards agents={turn.agents} />
             </div>
           )}
