@@ -818,6 +818,7 @@ function OutputBlock({ result, isError }: { result: string; isError: boolean }) 
 // ── ToolWidget ──────────────────────────────────────────────
 
 export function ToolWidget({ block }: { block: TranscriptBlock }) {
+  const { t } = useTranslation()
   const signal = useContext(ExpandSignalCtx)
   const autoExpand = useContext(AutoExpandCtx)
   const toolName = block.tool_name || 'Tool'
