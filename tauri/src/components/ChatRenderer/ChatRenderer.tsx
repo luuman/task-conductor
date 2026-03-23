@@ -704,6 +704,7 @@ function EditDiffView({ input, hideHeader }: { input: Record<string, unknown>; h
 // ── ReadFileView ────────────────────────────────────────────
 
 function ReadFileView({ filePath, result, hideHeader }: { filePath: string; result: string; hideHeader?: boolean }) {
+  const { t } = useTranslation()
   const stripped = stripLineNumbers(result)
   const lineCount = stripped.split('\n').length
   const lang = guessLang(filePath) || undefined
