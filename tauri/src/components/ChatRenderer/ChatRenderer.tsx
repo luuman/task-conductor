@@ -1109,6 +1109,7 @@ export function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
 function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolType: string }) {
   const { t } = useTranslation()
   const result = block.tool_result || ''
+  const files = useMemo(() => parseSearchResultFiles(result), [result])
 
   if (toolType === 'r') {
     const filePath = String(block.tool_input?.file_path ?? '')
@@ -1119,7 +1120,6 @@ function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolTy
     )
   }
 
-  const files = useMemo(() => parseSearchResultFiles(result), [result])
   const pattern = toolType === 'g'
     ? String(block.tool_input?.pattern ?? '')
     : String(block.tool_input?.pattern ?? '')
