@@ -131,29 +131,7 @@ some raw output
     ts: '2026-03-22T10:00:10Z',
     blocks: [{
       type: 'text',
-      text: `消息渲染流水线：
-
-\`\`\`mermaid
-flowchart TD
-    A[TranscriptMessage] --> B{role?}
-    B -->|user| C[UserCard]
-    B -->|assistant| D[groupMessagesIntoTurns]
-    D --> E[AssistantTurnCard]
-    E --> F[texts → RichTextBlock]
-    E --> G[reads → ReadPillRow]
-    E --> H[edits → EditInlineCard]
-    E --> I[bashes → BashStatusLine]
-    E --> J[others → ToolWidget]
-    F --> F1[Markdown]
-    F --> F2[TaskNotification]
-    F --> F3[SystemReminder]
-    F --> F4[Mermaid]
-    J --> J1[Agent]
-    J --> J2[AskUser]
-    J --> J3[OutputBlock]
-\`\`\`
-
-时序图：
+      text: `时序图：
 
 \`\`\`mermaid
 sequenceDiagram
