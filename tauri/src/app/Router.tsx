@@ -46,9 +46,6 @@ export function AppRouter() {
         <Routes>
           <Route path="/login" element={<AuthPage />} />
 
-          {/* 会话报告（独立全屏布局） */}
-          <Route path="/chat" element={<ProtectedRoute><ChatReportPage /></ProtectedRoute>} />
-
           {/* 管理后台（独立布局，不需要选中项目） */}
           <Route
             element={
