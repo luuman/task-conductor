@@ -283,10 +283,10 @@ export default function ChatReportPage() {
         {/* Bottom bar */}
         <div className={styles.bottomBar}>
           <div className={styles.bottomActions}>
-            <button className={styles.actionBtn}>♡ Share</button>
-            <button className={styles.actionBtn}>↗ Share</button>
-            <button className={styles.actionBtn}>↻ Rewrite</button>
-            <button className={styles.actionBtn}>📋 Copy</button>
+            <button className={styles.actionBtn}>♡ 收藏</button>
+            <button className={styles.actionBtn}>↗ 分享</button>
+            <button className={styles.actionBtn}>↻ 重写</button>
+            <button className={styles.actionBtn}>📋 复制</button>
             {/* Turn switcher */}
             {DEMO_TURNS.map(t => (
               <button
