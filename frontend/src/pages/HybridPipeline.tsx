@@ -682,7 +682,7 @@ export default function HybridPipeline() {
                     Waiting for stage to start...
                   </div>
                 ) : (
-                  currentState.logs.map((log, i) => (
+                  currentState.logs.filter(Boolean).map((log, i) => (
                     <div key={i} className="flex gap-2">
                       <span style={{ color: "rgba(255,255,255,0.12)" }}>{String(i + 1).padStart(2, "0")}</span>
                       <span style={{
