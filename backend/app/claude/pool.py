@@ -1,7 +1,7 @@
 """
-ClaudePool — 基于 claude_code_sdk ClaudeSDKClient 的单例 Claude 调用池。
+ClaudePool — 基于 claude_agent_sdk ClaudeSDKClient 的单例 Claude 调用池。
 
-使用 claude_code_sdk 的持久连接模式。
+使用 claude_agent_sdk 的持久连接模式。
 对外接口保持不变：run() 返回 AsyncIterator[dict]，kill() 中断执行。
 """
 
@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import time
+from datetime import datetime
 from typing import Optional, AsyncIterator
 
 from .metrics_store import metrics_store
@@ -39,24 +40,22 @@ class ClaudePool:
         - {"type": "result", "result": "...", ...}
         - 原始 Anthropic API 流式事件 (content_block_delta 等)
         """
-        from claude_code_sdk import (
-            ClaudeSDKClient,
-            ClaudeCodeOptions,
-            AssistantMessage,
-            ResultMessage,
+        from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
+        from claude_agent_sdk.types import (
+            AssistantMessage, ResultMessage, StreamEvent,
         )
-        from claude_code_sdk.types import StreamEvent
 
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         metric = metrics_store.start_call(task_id)
 
-        opts = ClaudeCodeOptions(
+        opts = ClaudeAgentOptions(
             permission_mode="bypassPermissions",
             include_partial_messages=True,
             cwd=worktree_path,
+            cli_path="claude",
         )
 
-        client = ClaudeSDKClient(opts)
+        client = ClaudeSDKClient(options=opts)
         self._clients[task_id] = client
 
         try:
@@ -64,7 +63,7 @@ class ClaudePool:
             await client.query(prompt)
 
             with open(log_file, "w") as f:
-                async for msg in client.receive_response():
+                async for msg in client.receive_messages():
 
                     # ── StreamEvent: 原始 Anthropic API 流式事件 ──
                     if isinstance(msg, StreamEvent):
