@@ -169,42 +169,202 @@ export function getFileIcon(filePath: string): string {
   return `/file-icons/${map[ext] || 'file_type_default.svg'}`
 }
 
-// ── 卡片风格定义（5 种方案）────────────────────────
+// ── Read/Search 变体组件 ────────────────────────────
 
-type CardStyle = 'A' | 'B' | 'C' | 'D' | 'E'
+import type { TranscriptBlock as TB } from '../../../lib/api/types'
 
-const CARD_STYLES: { key: CardStyle; label: string; desc: string }[] = [
-  { key: 'A', label: '默认', desc: '深色圆角卡片' },
-  { key: 'B', label: '毛玻璃', desc: '半透明模糊背景' },
-  { key: 'C', label: '线框', desc: '无背景 + 左色条' },
-  { key: 'D', label: '浮起', desc: '大圆角 + 深阴影' },
-  { key: 'E', label: '紧凑', desc: '零圆角 + 小间距' },
+// A: 当前 Pill 行（默认）
+function ReadVariantPill({ blocks }: { blocks: TB[] }) {
+  return <ReadPillRow blocks={blocks} />
+}
+
+// B: 文件卡片（大图标 + 文件名 + 行数）
+function ReadVariantCards({ blocks }: { blocks: TB[] }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: '6px 0' }}>
+      {blocks.map((b, i) => {
+        const name = b.tool_name || ''
+        const fp = String(b.tool_input?.file_path || b.tool_input?.pattern || b.tool_input?.query || '')
+        const fileName = fp.split('/').pop() || fp
+        const lines = b.tool_result ? b.tool_result.split('\n').length : 0
+        return (
+          <div key={i} style={{
+            width: 140, padding: '10px 12px', borderRadius: 12,
+            background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+          }}>
+            <img src={getFileIcon(fp)} alt="" style={{ width: 28, height: 28 }} />
+            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tc-foreground)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>
+              {fileName}
+            </span>
+            <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
+              {name === 'Read' ? `${lines} lines` : name === 'Grep' ? `${lines} matches` : `${lines} files`}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// C: 文件列表（紧凑行列表）
+function ReadVariantList({ blocks }: { blocks: TB[] }) {
+  return (
+    <div style={{ margin: '6px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', background: 'rgba(0,0,0,0.15)' }}>
+      {blocks.map((b, i) => {
+        const name = b.tool_name || ''
+        const fp = String(b.tool_input?.file_path || b.tool_input?.pattern || '')
+        const fileName = fp.split('/').pop() || fp
+        const dir = fp.includes('/') ? fp.split('/').slice(0, -1).join('/') : ''
+        const lines = b.tool_result ? b.tool_result.split('\n').length : 0
+        return (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '5px 10px',
+            borderBottom: i < blocks.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined,
+          }}>
+            <img src={getFileIcon(fp)} alt="" style={{ width: 16, height: 16, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--tc-foreground)', flexShrink: 0 }}>{fileName}</span>
+            <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', opacity: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontFamily: "'Geist Mono', monospace" }}>{dir}</span>
+            <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace", flexShrink: 0 }}>
+              {name === 'Grep' ? `${lines} hits` : `${lines} ln`}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// D: 内联标签（最紧凑）
+function ReadVariantInline({ blocks }: { blocks: TB[] }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4, margin: '4px 0', fontSize: 10, color: 'var(--tc-foreground-secondary)' }}>
+      <span style={{ fontWeight: 600, opacity: 0.6 }}>Read</span>
+      {blocks.map((b, i) => {
+        const fp = String(b.tool_input?.file_path || b.tool_input?.pattern || '')
+        const fileName = fp.split('/').pop() || fp
+        return (
+          <span key={i} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 3,
+            padding: '1px 6px', borderRadius: 4,
+            background: 'rgba(255,255,255,0.05)',
+            fontFamily: "'Geist Mono', monospace",
+          }}>
+            <img src={getFileIcon(fp)} alt="" style={{ width: 10, height: 10 }} />
+            {fileName}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Edit/Write 变体组件 ─────────────────────────────
+
+// A: 当前 EditInlineCard（默认）
+// B: 紧凑行（图标+文件名+diff stats 一行）
+function EditVariantCompact({ block }: { block: TB }) {
+  const fp = String(block.tool_input?.file_path || '')
+  const fileName = fp.split('/').pop() || fp
+  const hasOld = block.tool_input?.old_string
+  const hasNew = block.tool_input?.new_string
+  const addN = hasNew ? String(block.tool_input!.new_string).split('\n').length : 0
+  const delN = hasOld ? String(block.tool_input!.old_string).split('\n').length : 0
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0',
+      fontSize: 11, color: 'var(--tc-foreground-secondary)',
+    }}>
+      <img src={getFileIcon(fp)} alt="" style={{ width: 14, height: 14 }} />
+      <span style={{ fontWeight: 500, color: 'var(--tc-foreground)' }}>{fileName}</span>
+      {(addN > 0 || delN > 0) && (
+        <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 10 }}>
+          {addN > 0 && <span style={{ color: '#56d364' }}>+{addN}</span>}
+          {addN > 0 && delN > 0 && ' '}
+          {delN > 0 && <span style={{ color: '#f85149' }}>-{delN}</span>}
+        </span>
+      )}
+      <span style={{ color: '#56d364', fontSize: 12 }}>✓</span>
+    </div>
+  )
+}
+
+// C: 文件卡片风格
+function EditVariantCard({ block }: { block: TB }) {
+  const fp = String(block.tool_input?.file_path || '')
+  const fileName = fp.split('/').pop() || fp
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+      borderRadius: 10, background: 'rgba(86,211,100,0.06)', border: '1px solid rgba(86,211,100,0.15)',
+      margin: '4px 0',
+    }}>
+      <img src={getFileIcon(fp)} alt="" style={{ width: 20, height: 20 }} />
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground)' }}>{fileName}</div>
+        <div style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
+          {block.tool_result || 'Updated'}
+        </div>
+      </div>
+      <span style={{ color: '#56d364', fontSize: 14 }}>✓</span>
+    </div>
+  )
+}
+
+// ── Bash 变体组件 ───────────────────────────────────
+
+// A: 当前 BashStatusLine（默认）
+// B: 极简一行
+function BashVariantOneliner({ block }: { block: TB }) {
+  const cmd = String(block.tool_input?.command ?? '').replace(/^cd [^ ]+ && /, '').slice(0, 80)
+  const isError = block.tool_error === true
+  const result = (block.tool_result || '').trim()
+  const noOutput = !result || result === '(Bash completed with no output)'
+  const lines = result ? result.split('\n').length : 0
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0',
+      fontSize: 10.5, fontFamily: "'Geist Mono', monospace",
+    }}>
+      <span style={{ color: '#56d364', fontWeight: 700 }}>$</span>
+      <span style={{ color: 'var(--tc-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{cmd}</span>
+      {!noOutput && <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', opacity: 0.5 }}>{lines}ln</span>}
+      <span style={{
+        fontSize: 8, padding: '1px 6px', borderRadius: 8,
+        background: isError ? 'rgba(248,81,73,0.12)' : 'rgba(86,211,100,0.12)',
+        color: isError ? '#f85149' : '#56d364', fontWeight: 600,
+      }}>
+        {isError ? '✗' : '✓'}
+      </span>
+    </div>
+  )
+}
+
+// ── 变体方案定义 ────────────────────────────────────
+
+const VARIANT_STYLES = [
+  { key: 'A', label: '当前默认' },
+  { key: 'B', label: '文件卡片 / 紧凑行 / 极简' },
+  { key: 'C', label: '文件列表 / 卡片风格' },
+  { key: 'D', label: '内联标签' },
 ]
 
-function getUserCardStyle(style: CardStyle): React.CSSProperties {
-  const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
-  switch (style) {
-    case 'A': return { ...base, padding: '10px 16px', borderRadius: 16, marginBottom: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }
-    case 'B': return { ...base, padding: '10px 14px', borderRadius: 16, marginBottom: 8, background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }
-    case 'C': return { ...base, padding: '8px 12px', borderRadius: 0, marginBottom: 4, borderLeft: '3px solid #eab308', background: 'transparent' }
-    case 'D': return { ...base, padding: '12px 16px', borderRadius: 18, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }
-    case 'E': return { ...base, padding: '4px 8px', borderRadius: 0, marginBottom: 2, background: 'var(--tc-sidebar-item-hover)', borderBottom: '1px solid var(--tc-border)', fontSize: 11.5 }
-  }
+function VariantLabel({ label, idx }: { label: string; idx: string }) {
+  return (
+    <div style={{
+      marginBottom: 6, padding: '3px 10px',
+      borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6,
+      background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.15)',
+    }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: '#58a6ff' }}>{idx}</span>
+      <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)' }}>{label}</span>
+    </div>
+  )
 }
 
-function getAssistantCardStyle(style: CardStyle): React.CSSProperties {
-  const base = { fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)' } as React.CSSProperties
-  switch (style) {
-    case 'A': return { ...base, padding: '12px 16px', borderRadius: 16, marginBottom: 8, background: 'rgba(30,30,40,0.6)', border: '1px solid rgba(255,255,255,0.06)' }
-    case 'B': return { ...base, padding: '10px 14px', borderRadius: 16, marginBottom: 8, background: 'rgba(88,166,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(88,166,255,0.1)', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }
-    case 'C': return { ...base, padding: '8px 12px', borderRadius: 0, marginBottom: 4, borderLeft: '3px solid #58a6ff', background: 'transparent' }
-    case 'D': return { ...base, padding: '12px 16px', borderRadius: 18, marginBottom: 10, background: 'var(--tc-panel-bg)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }
-    case 'E': return { ...base, padding: '4px 8px', borderRadius: 0, marginBottom: 2, background: 'rgba(68,119,255,0.03)', borderBottom: '1px solid var(--tc-border)', fontSize: 11.5 }
-  }
-}
-
-// 单个风格的渲染
-function StyledContentWithStyle({ turns, style }: { turns: GroupedTurnItem[]; style: CardStyle }) {
+// 渲染单个变体
+function StyledContentVariant({ turns, variant }: { turns: GroupedTurnItem[]; variant: string }) {
   return (
     <ExpandSignalCtx.Provider value={1}>
       <AutoExpandCtx.Provider value={true}>
@@ -213,18 +373,45 @@ function StyledContentWithStyle({ turns, style }: { turns: GroupedTurnItem[]; st
             const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
             if (!text) return null
             return (
-              <div key={i} style={getUserCardStyle(style)}>
+              <div key={i} style={{
+                padding: '10px 16px', borderRadius: 16, marginBottom: 8,
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
+              }}>
                 <RichTextBlock text={text} />
               </div>
             )
           }
           const { turn } = item
           return (
-            <div key={i} style={getAssistantCardStyle(style)}>
+            <div key={i} style={{
+              padding: '12px 16px', borderRadius: 16, marginBottom: 8,
+              background: 'rgba(30,30,40,0.6)', border: '1px solid rgba(255,255,255,0.06)',
+              fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
+            }}>
               {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
-              {turn.reads.length > 0 && <ReadPillRow blocks={turn.reads} />}
-              {turn.edits.map((block, ei) => <EditInlineCard key={`e${ei}`} block={block} />)}
-              {turn.bashes.map((block, bi) => <BashStatusLine key={`b${bi}`} block={block} />)}
+
+              {/* Read/Search 变体 */}
+              {turn.reads.length > 0 && (
+                variant === 'A' ? <ReadVariantPill blocks={turn.reads} />
+                : variant === 'B' ? <ReadVariantCards blocks={turn.reads} />
+                : variant === 'C' ? <ReadVariantList blocks={turn.reads} />
+                : <ReadVariantInline blocks={turn.reads} />
+              )}
+
+              {/* Edit 变体 */}
+              {turn.edits.map((block, ei) => (
+                variant === 'A' ? <EditInlineCard key={`e${ei}`} block={block} />
+                : variant === 'B' ? <EditVariantCompact key={`e${ei}`} block={block} />
+                : <EditVariantCard key={`e${ei}`} block={block} />
+              ))}
+
+              {/* Bash 变体 */}
+              {turn.bashes.map((block, bi) => (
+                variant === 'A' ? <BashStatusLine key={`b${bi}`} block={block} />
+                : <BashVariantOneliner key={`b${bi}`} block={block} />
+              ))}
+
               {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
             </div>
           )
@@ -234,23 +421,14 @@ function StyledContentWithStyle({ turns, style }: { turns: GroupedTurnItem[]; st
   )
 }
 
-// ── Styled 节点：5 种方案横向排列 ───────────────────
+// ── Styled 节点：4 种变体横向排列 ───────────────────
 
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
   <div style={{ display: 'flex', gap: 16 }}>
-    {CARD_STYLES.map(s => (
+    {VARIANT_STYLES.map(s => (
       <div key={s.key} style={{ width: 420, flexShrink: 0 }}>
-        {/* 方案标签 */}
-        <div style={{
-          marginBottom: 6, padding: '4px 10px',
-          borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'rgba(88,166,255,0.1)', border: '1px solid rgba(88,166,255,0.2)',
-        }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#58a6ff' }}>{s.key}</span>
-          <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)' }}>{s.label}</span>
-          <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', opacity: 0.6 }}>{s.desc}</span>
-        </div>
-        <StyledContentWithStyle turns={data.turns} style={s.key} />
+        <VariantLabel label={s.label} idx={s.key} />
+        <StyledContentVariant turns={data.turns} variant={s.key} />
       </div>
     ))}
   </div>
