@@ -295,10 +295,10 @@ export const DEMO_TURNS: ReportTurn[] = [
 
 /** 左侧会话列表 demo 数据 */
 export const DEMO_SESSIONS = [
-  { id: 'c72aae2c', label: '修复 Bash 输出高亮问题', project: 'task-conductor', date: '今天', tools: '✏️ 3 · ⌨ 2', status: '✓' as const },
-  { id: 'turn-002', label: '整理会话消息类型样式', project: 'task-conductor', date: '今天', tools: '✏️ 3 · 📖 6', status: '✓' as const },
-  { id: 'turn-003', label: '跑类型检查和测试', project: 'task-conductor', date: '今天', tools: '⌨ 3', status: '✓' as const },
-  { id: '5232f0b2', label: '添加 Mermaid 图表支持', project: 'task-conductor', date: '昨天', tools: '✏️ 2 · ⌨ 1', status: '✓' as const },
-  { id: '0ac4c3b9', label: '重构 ThemeProvider', project: 'task-conductor', date: '昨天', tools: '✏️ 4', status: '✓' as const },
-  { id: 'd1759d02', label: 'Session 双栏布局实现', project: 'task-conductor', date: '3月20日', tools: '✏️ 8 · ⌨ 5', status: '✓' as const },
+  { id: 'c72aae2c', label: '修复 Bash 输出高亮问题', project: 'task-conductor', date: '今天', tools: '✏️3 · ⌨2', status: '✓' as const },
+  { id: 'turn-002', label: '整理会话消息类型样式', project: 'task-conductor', date: '今天', tools: '✏️3 · 📖6', status: '✓' as const },
+  { id: 'turn-003', label: '跑类型检查和测试', project: 'task-conductor', date: '今天', tools: '⌨3', status: '✓' as const },
+  { id: '5232f0b2', label: '添加 Mermaid 图表支持', project: 'task-conductor', date: '昨天', tools: '✏️2 · ⌨1', status: '✓' as const },
+  { id: '0ac4c3b9', label: '重构 ThemeProvider', project: 'task-conductor', date: '昨天', tools: '✏️4', status: '✓' as const },
+  { id: 'd1759d02', label: 'Session 双栏布局实现', project: 'task-conductor', date: '3月20日', tools: '✏️8 · ⌨5', status: '✓' as const },
 ]
