@@ -132,6 +132,23 @@ class ClaudePool:
             if sdk_session_id:
                 self._mark_session_stopped(sdk_session_id)
 
+    @staticmethod
+    def _mark_session_stopped(session_id: str):
+        """主动将 ClaudeSession 标记为 stopped，防止 disconnect 后 hook 来不及触发"""
+        try:
+            from sqlalchemy.orm import Session as DBSession
+            from ..database import engine
+            from ..models import ClaudeSession
+            with DBSession(engine) as db:
+                sess = db.query(ClaudeSession).filter_by(session_id=session_id).first()
+                if sess and sess.status != "stopped":
+                    sess.status = "stopped"
+                    sess.last_seen_at = datetime.utcnow()
+                    db.commit()
+                    logger.debug(f"Marked session {session_id} as stopped")
+        except Exception:
+            logger.debug(f"Failed to mark session {session_id} as stopped", exc_info=True)
+
     async def kill(self, task_id: int):
         """中断指定任务的 Claude 执行"""
         client = self._clients.get(task_id)
