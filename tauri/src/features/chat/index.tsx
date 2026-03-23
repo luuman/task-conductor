@@ -239,7 +239,7 @@ export default function ChatReportPage() {
 
           {/* Results */}
           <div className={styles.section}>
-            <div className={styles.sectionTitle}><span className={styles.sectionDot} /> Results</div>
+            <div className={styles.sectionTitle}><span className={styles.sectionDot} /> 执行结果</div>
             <ResultsText text={turn.resultText} />
           </div>
 
