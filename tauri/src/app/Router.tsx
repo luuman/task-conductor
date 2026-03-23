@@ -83,7 +83,7 @@ export function AppRouter() {
             <Route path="/task/:id"       element={<TaskDetailPage />} />
             <Route path="/task-manager"   element={<TaskManagerPage />} />
             <Route path="/sessions"       element={<SessionsPage />} />
-            <Route path="/chat"           element={<ChatReportPage />} />
+            <Route path="/chat"           element={<PlaceholderPage />} />{/* 保留占位，实际用独立路由 */}
             <Route path="/config"         element={<PlaceholderPage />} />
             <Route path="/knowledge"      element={<PlaceholderPage />} />
             <Route path="/mcp"            element={<PlaceholderPage />} />
