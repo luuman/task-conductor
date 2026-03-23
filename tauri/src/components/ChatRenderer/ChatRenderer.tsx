@@ -697,25 +697,9 @@ function EditDiffView({ input, hideHeader }: { input: Record<string, unknown>; h
   )
 }
 
-// ── BashOutput ──────────────────────────────────────────────
-
-function BashOutput({ command, result, isError }: { command: string; result: string; isError: boolean }) {
-  return (
-    <div className={styles.bashWrap} style={isError ? { borderColor: 'rgba(244,63,94,0.3)' } : undefined}>
-      <div className={styles.bashHeader}>
-        <span className={styles.bashPrompt}>$</span>
-        <span className={styles.bashCmd}>{command}</span>
-      </div>
-      <pre className={`${styles.bashOutput} ${isError ? styles.bashOutputError : ''}`}>
-        {result}
-      </pre>
-    </div>
-  )
-}
-
 // ── ReadFileView ────────────────────────────────────────────
 
-function ReadFileView({ filePath, result }: { filePath: string; result: string }) {
+function ReadFileView({ filePath, result, hideHeader }: { filePath: string; result: string; hideHeader?: boolean }) {
   const stripped = stripLineNumbers(result)
   const lineCount = stripped.split('\n').length
   const lang = guessLang(filePath) || undefined
