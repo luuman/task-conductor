@@ -54,6 +54,7 @@
       "tasks": "Task Manager",
       "conversations": "Conversations",
       "files": "Files",
+      "characterStudio": "Character Studio",
       "claudeConfig": "Claude Config",
       "settings": "Settings"
     },
