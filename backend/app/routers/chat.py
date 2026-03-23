@@ -186,6 +186,10 @@ async def handle_chat_ws(ws: WebSocket):
                     cost = getattr(msg, "total_cost_usd", 0) or 0
                     duration = getattr(msg, "duration_ms", 0) or 0
 
+                    # 回合结束，标记为 idle（持久连接仍在，等待下一条消息）
+                    if result_session_id:
+                        _update_session_status(result_session_id, "idle")
+
                     await _send({
                         "type": "chat_done",
                         "data": {
