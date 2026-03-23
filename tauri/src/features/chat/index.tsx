@@ -2,7 +2,7 @@
 // 对齐 Dribbble 参考图：icon bar + main report + right sidebar
 
 import { useCallback, useState } from 'react'
-import { DEMO_TURNS, DEMO_SESSIONS, type ReportTurn } from './demo-data'
+import { DEMO_TURNS, type ReportTurn } from './demo-data'
 import styles from './chat-report.module.css'
 
 // ── Source Cards ──
