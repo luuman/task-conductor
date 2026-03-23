@@ -224,7 +224,6 @@ export function SessionList({
                     session={s}
                     isSelected={s.session_id === selectedId}
                     onSelect={onSelect}
-                    showProjectName={showProjectName}
                   />
                 ))}
               </>
@@ -241,7 +240,6 @@ export function SessionList({
                     session={s}
                     isSelected={s.session_id === selectedId}
                     onSelect={onSelect}
-                    showProjectName={showProjectName}
                   />
                 ))}
               </>
