@@ -772,6 +772,76 @@ Done in 4.12s.`,
   },
 
   // ═══════════════════════════════════════════════
+  // Mermaid 图表
+  // ═══════════════════════════════════════════════
+  sep('展示 Mermaid 图表', '2026-03-22T10:01:26Z'),
+
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:01:27Z',
+    blocks: [{
+      type: 'text',
+      text: `时序图：
+
+\`\`\`mermaid
+sequenceDiagram
+    participant U as User
+    participant CC as Claude Code
+    participant H as tc-hook.sh
+    participant API as Backend API
+    participant WS as WebSocket
+
+    U->>CC: 发送指令
+    CC->>CC: 调用工具
+    CC->>H: Hook 事件 (stdin JSON)
+    H->>API: POST /hooks/claude
+    API->>API: upsert Session + insert Event
+    API->>WS: broadcast session:xxx
+    WS->>U: 实时推送到前端
+\`\`\`
+
+甘特图：
+
+\`\`\`mermaid
+gantt
+    title Pipeline 阶段执行
+    dateFormat X
+    axisFormat %s
+
+    section 分析
+    analysis     :done, a1, 0, 3
+    section PRD
+    prd          :done, a2, 3, 5
+    section 审核
+    approval     :crit, a3, 5, 6
+    section 计划
+    plan         :active, a4, 6, 9
+    section 开发
+    dev          :a5, 9, 15
+    section 测试
+    test         :a6, 15, 18
+\`\`\`
+
+状态图：
+
+\`\`\`mermaid
+stateDiagram-v2
+    [*] --> input
+    input --> analysis
+    analysis --> prd : auto
+    prd --> approval : needs review
+    approval --> plan : approved
+    approval --> prd : rejected
+    plan --> dev
+    dev --> test
+    test --> deploy
+    deploy --> done
+    done --> [*]
+\`\`\``,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
   // 消息渲染流水线（放在最底部）
   // ═══════════════════════════════════════════════
   sep('消息渲染流水线', '2026-03-22T10:01:28Z'),
