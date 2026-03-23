@@ -1,5 +1,5 @@
-// SessionList.tsx — D4 全要素卡片布局
-// 活跃/历史双区域，头像+摘要+标签+Chips+进度条
+// SessionList.tsx — G. Notion 表格布局
+// 扁平表格行，列头+紧凑行，Notion 风格
 
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,7 +36,7 @@ function duration(startIso: string, endIso: string): string {
   if (mins < 1) return '<1m'
   if (mins < 60) return `${mins}m`
   const h = Math.floor(mins / 60), m = mins % 60
-  return m > 0 ? `${h}h ${m}m` : `${h}h`
+  return m > 0 ? `${h}h${m}m` : `${h}h`
 }
 
 function projName(cwd?: string): string {
@@ -47,115 +47,107 @@ function projName(cwd?: string): string {
 
 function SectionHeader({ label, count }: { label: string; count: number }) {
   return (
-    <div className={styles.cardSectionHeader}>
-      <span className={styles.cardSectionLabel}>{label}</span>
-      <span className={styles.cardSectionCount}>{count}</span>
+    <div className={styles.ntSectionHeader}>
+      <span className={styles.ntSectionLabel}>{label}</span>
+      <span className={styles.ntSectionCount}>{count}</span>
     </div>
   )
 }
 
-// ── Session Card (D4) ──
+// ── Table header ──
 
-function SessionCard({
-  session, isSelected, onSelect, maxEventCount, showProjectName,
+function TableHeader({ showProjectName }: { showProjectName: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <div className={styles.ntHeaderRow}>
+      <span className={styles.ntColStatus}>{t('admin.sessions.col_status', '状态')}</span>
+      <span className={styles.ntColTitle}>{t('admin.sessions.col_title', '标题')}</span>
+      {showProjectName && (
+        <span className={styles.ntColProject}>{t('admin.sessions.col_project', '项目')}</span>
+      )}
+      <span className={styles.ntColDuration}>{t('admin.sessions.col_duration', '时长')}</span>
+      <span className={styles.ntColEvents}>{t('admin.sessions.col_events', '事件')}</span>
+      <span className={styles.ntColTime}>{t('admin.sessions.col_time', '时间')}</span>
+    </div>
+  )
+}
+
+// ── Session Row (Notion table row) ──
+
+function SessionRow({
+  session, isSelected, onSelect, showProjectName,
 }: {
   session: AiSession
   isSelected: boolean
   onSelect: (s: AiSession) => void
-  maxEventCount: number
   showProjectName: boolean
 }) {
   const { t } = useTranslation()
   const title = session.note?.alias || session.summary || session.session_id.slice(0, 8)
-  const alias = session.note?.alias && session.note.alias !== session.summary ? session.summary : null
-  const tags = session.note?.tags ?? []
   const time = relativeTime(session.last_seen_at || session.started_at, t)
   const dur = duration(session.started_at, session.last_seen_at || session.started_at)
   const proj = projName(session.cwd)
-  const pct = Math.min(100, (session.event_count / Math.max(maxEventCount, 1)) * 100)
+  const tags = session.note?.tags ?? []
 
   const isActive = session.status === 'active'
   const isIdle = session.status === 'idle'
-
-  const avatarCls = isActive ? styles.cardAvatarActive
-    : isIdle ? styles.cardAvatarIdle
-    : styles.cardAvatarStopped
-
-  const statusCls = isActive ? styles.chipStatusActive
-    : isIdle ? styles.chipStatusIdle
-    : styles.chipStatusStopped
 
   const statusText = isActive ? t('admin.sessions.status_active', '运行中')
     : isIdle ? t('admin.sessions.status_idle', '空闲')
     : t('admin.sessions.status_stopped', '已结束')
 
-  const emoji = isActive ? '\u26A1' : isIdle ? '\uD83D\uDCA4' : '\u2713'
+  const statusCls = isActive ? styles.ntStatusActive
+    : isIdle ? styles.ntStatusIdle
+    : styles.ntStatusStopped
 
-  const dotCls = isActive ? styles.statusDotActive
-    : isIdle ? styles.statusDotIdle
-    : styles.statusDotStopped
-
-  const barColor = isActive ? '#56d364' : isIdle ? '#e3b341' : 'var(--tc-border-active)'
+  const dotCls = isActive ? styles.ntDotActive
+    : isIdle ? styles.ntDotIdle
+    : styles.ntDotStopped
 
   return (
     <button
-      className={isSelected ? styles.cardActive : styles.card}
+      className={isSelected ? styles.ntRowSelected : styles.ntRow}
       onClick={() => onSelect(session)}
     >
-      {/* Top: avatar + title */}
-      <div className={styles.cardTop}>
-        <div className={`${styles.cardAvatar} ${avatarCls}`}>
-          {emoji}
-          <span className={`${styles.cardAvatarDot} ${dotCls} ${isActive ? styles.cardAvatarDotPulse : ''}`} />
-        </div>
-        <div className={styles.cardMain}>
-          <div className={styles.cardRow1}>
-            <span className={styles.cardTitle}>{title}</span>
-            <span className={styles.cardTime}>{time}</span>
-          </div>
-          {alias && (
-            <div className={styles.cardAlias}>
-              <span className={styles.cardAliasIcon}>{'\u2726'}</span>
-              {alias}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Status */}
+      <span className={styles.ntColStatus}>
+        <span className={`${styles.ntDot} ${dotCls} ${isActive ? styles.ntDotPulse : ''}`} />
+        <span className={`${styles.ntStatusTag} ${statusCls}`}>{statusText}</span>
+      </span>
 
-      {/* Summary */}
-      {session.summary && (
-        <div className={styles.cardSummary}>{session.summary}</div>
+      {/* Title + tags */}
+      <span className={styles.ntColTitle}>
+        <span className={styles.ntTitle}>{title}</span>
+        {tags.length > 0 && (
+          <span className={styles.ntInlineTags}>
+            {tags.slice(0, 2).map(tag => (
+              <span key={tag} className={styles.ntTag}>{tag}</span>
+            ))}
+          </span>
+        )}
+      </span>
+
+      {/* Project */}
+      {showProjectName && (
+        <span className={styles.ntColProject}>
+          {proj && <span className={styles.ntProjectName}>{proj}</span>}
+        </span>
       )}
 
-      {/* Chips */}
-      <div className={styles.cardChips}>
-        <span className={`${styles.chip} ${statusCls}`}>{statusText}</span>
-        {dur && <span className={`${styles.chip} ${styles.chipDur}`}>{'\u23F1'} {dur}</span>}
-        <span className={`${styles.chip} ${styles.chipEvt}`}>{'\u26A1'} {session.event_count}</span>
-        {showProjectName && proj && (
-          <span className={`${styles.chip} ${styles.chipProj}`}>{'\uD83D\uDCC1'} {proj}</span>
-        )}
-        {session.note?.linked_task_id && (
-          <span className={`${styles.chip} ${styles.chipTask}`}>{'\uD83D\uDD17'} Task #{session.note.linked_task_id}</span>
-        )}
-      </div>
+      {/* Duration */}
+      <span className={styles.ntColDuration}>
+        <span className={styles.ntMono}>{dur}</span>
+      </span>
 
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className={styles.cardTags}>
-          {tags.slice(0, 4).map(tag => (
-            <span key={tag} className={styles.cardTag}>{tag}</span>
-          ))}
-        </div>
-      )}
+      {/* Events */}
+      <span className={styles.ntColEvents}>
+        <span className={styles.ntEventCount}>{session.event_count}</span>
+      </span>
 
-      {/* Progress bar */}
-      <div className={styles.cardProgress}>
-        <div className={styles.cardProgressBar}>
-          <div className={styles.cardProgressFill} style={{ width: `${pct}%`, background: barColor }} />
-        </div>
-        <span className={styles.cardProgressLabel}>{session.event_count} ev</span>
-      </div>
+      {/* Time */}
+      <span className={styles.ntColTime}>
+        <span className={styles.ntTimeText}>{time}</span>
+      </span>
     </button>
   )
 }
@@ -195,7 +187,7 @@ export function SessionList({
   }, [sessions, search])
 
   // Split into active/history + sort
-  const { activeSessions, historySessions, maxEventCount } = useMemo(() => {
+  const { activeSessions, historySessions } = useMemo(() => {
     const sorted = [...filtered].sort((a, b) => {
       const aActive = a.status === 'active' ? 2 : a.status === 'idle' ? 1 : 0
       const bActive = b.status === 'active' ? 2 : b.status === 'idle' ? 1 : 0
@@ -205,8 +197,7 @@ export function SessionList({
     })
     const active = sorted.filter(s => s.status === 'active' || s.status === 'idle')
     const history = sorted.filter(s => s.status !== 'active' && s.status !== 'idle')
-    const max = Math.max(...sorted.map(s => s.event_count), 1)
-    return { activeSessions: active, historySessions: history, maxEventCount: max }
+    return { activeSessions: active, historySessions: history }
   }, [filtered])
 
   return (
@@ -245,7 +236,10 @@ export function SessionList({
             </p>
           </div>
         ) : (
-          <>
+          <div className={styles.ntTable}>
+            {/* Column headers */}
+            <TableHeader showProjectName={showProjectName} />
+
             {activeSessions.length > 0 && (
               <>
                 <SectionHeader
@@ -253,12 +247,11 @@ export function SessionList({
                   count={activeSessions.length}
                 />
                 {activeSessions.map(s => (
-                  <SessionCard
+                  <SessionRow
                     key={s.session_id}
                     session={s}
                     isSelected={s.session_id === selectedId}
                     onSelect={onSelect}
-                    maxEventCount={maxEventCount}
                     showProjectName={showProjectName}
                   />
                 ))}
@@ -271,18 +264,17 @@ export function SessionList({
                   count={historySessions.length}
                 />
                 {historySessions.map(s => (
-                  <SessionCard
+                  <SessionRow
                     key={s.session_id}
                     session={s}
                     isSelected={s.session_id === selectedId}
                     onSelect={onSelect}
-                    maxEventCount={maxEventCount}
                     showProjectName={showProjectName}
                   />
                 ))}
               </>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
