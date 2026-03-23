@@ -375,7 +375,11 @@
 
 /* ── Tool widget ── */
 .toolWidget {
-  margin: 4px 0;
+  margin: 5px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .toolHeader {
@@ -383,13 +387,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  padding: 5px 10px;
   text-align: left;
-  background: none;
+  background: rgba(255, 255, 255, 0.03);
   border: none;
   cursor: default;
   transition: background 0.15s;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .toolHeaderClickable {
@@ -397,7 +401,7 @@
 }
 
 .toolHeaderClickable:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .toolIcon {
@@ -408,7 +412,7 @@
 }
 
 .toolName {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--tc-foreground);
   flex-shrink: 0;
@@ -418,13 +422,12 @@
   font-size: 10.5px;
   font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground-secondary);
-  background: var(--tc-content-bg);
-  padding: 2px 6px;
-  border-radius: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 300px;
+  background: none;
+  padding: 0;
 }
 
 .toolEditInfo {
@@ -452,6 +455,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 180px;
+  opacity: 0.5;
 }
 
 .toolChevron {
@@ -459,10 +463,12 @@
   display: flex;
   align-items: center;
   color: var(--tc-foreground-secondary);
+  opacity: 0.5;
 }
 
 .toolBody {
-  padding: 4px 0;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* ── Read group strip (collapsed read-only tools) ── */
