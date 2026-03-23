@@ -1105,6 +1105,7 @@ export function ReadPillRow({ blocks }: { blocks: TranscriptBlock[] }) {
 // ── Expanded panel for pill content ─────────────────────────
 
 function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolType: string }) {
+  const { t } = useTranslation()
   const result = block.tool_result || ''
 
   if (toolType === 'r') {
