@@ -167,7 +167,7 @@ function Sidebar({ turn }: { turn: ReportTurn }) {
   return (
     <div className={styles.sidebar}>
       <div className={styles.sbSection}>
-        <div className={styles.sbTitle}>Data Sources</div>
+        <div className={styles.sbTitle}>数据来源</div>
         <div className={styles.sbSourceGrid}>
           {turn.sources.slice(0, 2).map((s, i) => (
             <div key={i} className={styles.sbThumb}>
@@ -176,16 +176,16 @@ function Sidebar({ turn }: { turn: ReportTurn }) {
             </div>
           ))}
         </div>
-        <div className={styles.sbHint}>Add from connected databases or upload to the system.</div>
+        <div className={styles.sbHint}>从已连接的知识库添加或上传到系统。</div>
         <div className={styles.sbUploadRow}>
-          <button className={styles.sbUploadBtn}>📎 Upload file</button>
-          <button className={styles.sbUploadBtn}>🖼 Upload media</button>
+          <button className={styles.sbUploadBtn}>📎 上传文件</button>
+          <button className={styles.sbUploadBtn}>🖼 上传媒体</button>
         </div>
-        <span className={styles.sbBrowse}>📂 Browse existing records</span>
+        <span className={styles.sbBrowse}>📂 浏览已有记录</span>
       </div>
 
       <div className={styles.sbSection}>
-        <div className={styles.sbTitle}>Recommended tasks</div>
+        <div className={styles.sbTitle}>推荐任务</div>
         <div className={styles.sbTasks}>
           {turn.suggestedTasks.map((t, i) => (
             <div key={i} className={styles.sbTask}>{t}</div>
@@ -194,7 +194,7 @@ function Sidebar({ turn }: { turn: ReportTurn }) {
       </div>
 
       <div className={styles.sbSection}>
-        <div className={styles.sbTitle}>Recommended questions</div>
+        <div className={styles.sbTitle}>推荐问题</div>
         <ul className={styles.sbQuestions}>
           {turn.suggestedQuestions.map((q, i) => (
             <li key={i} className={styles.sbQuestion}>{q}</li>
