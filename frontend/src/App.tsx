@@ -204,6 +204,9 @@ if (page === "tasks") {
         />
       );
     }
+    if (page === "character-studio") {
+      return <CharacterStudio />;
+    }
     if (page === "canvas") {
       return (
         <ProjectsCanvas
