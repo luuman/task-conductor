@@ -315,3 +315,5 @@ async def handle_chat_ws(ws: WebSocket):
                 await client.disconnect()
             except Exception:
                 pass
+        if current_session_id:
+            _update_session_status(current_session_id, "stopped")
