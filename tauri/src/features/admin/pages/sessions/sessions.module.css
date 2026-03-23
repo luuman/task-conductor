@@ -1714,6 +1714,75 @@
   border-bottom: 1px solid var(--tc-border);
 }
 
+/* ── Collapsible code block ── */
+.codeWrap {
+  margin: 6px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.codeLang {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+  color: var(--tc-border-active);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.codeLines {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.5;
+}
+
+.codeToggle {
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  padding: 1px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-panel-bg);
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.codeToggle:hover {
+  background: var(--tc-sidebar-item-hover);
+  color: var(--tc-foreground);
+}
+
+.codeWrap .mdCodeBlock,
+.codeWrap .mdCodeBlockPlain {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.codeFade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  cursor: pointer;
+}
+
 .mermaidErrorSrc {
   margin: 0;
   padding: 8px 12px;
