@@ -756,9 +756,46 @@ function AgentResultView({ result, description }: { result: string; description:
 
 // ── AskUserQuestionView ─────────────────────────────────────
 
+// 解析选项：匹配 "- A) ..." / "A) ..." / "A. ..." / "- A: ..."
+interface ParsedOption { key: string; text: string }
+
+function parseOptions(question: string): { intro: string; options: ParsedOption[] } {
+  const lines = question.split('\n')
+  const options: ParsedOption[] = []
+  const introLines: string[] = []
+  let foundOptions = false
+
+  for (const line of lines) {
+    const m = line.match(/^\s*-?\s*([A-Z])\s*[).:]\s*(.+)/)
+    if (m) {
+      foundOptions = true
+      options.push({ key: m[1], text: m[2].trim() })
+    } else if (!foundOptions) {
+      introLines.push(line)
+    }
+  }
+
+  return { intro: introLines.join('\n').trim(), options }
+}
+
 function AskUserQuestionView({ input, result }: { input: Record<string, unknown>; result?: string | null }) {
   const { t } = useTranslation()
   const question = String(input.question || '')
+  const { intro, options } = useMemo(() => parseOptions(question), [question])
+  const hasOptions = options.length > 0
+  const answered = result != null && result !== ''
+
+  // 判断哪个选项被选中
+  const selectedKey = useMemo(() => {
+    if (!answered || !hasOptions) return null
+    const r = result!.trim().toUpperCase()
+    // 直接匹配 "A" / "B" / "C" 或开头包含
+    for (const opt of options) {
+      if (r === opt.key || r.startsWith(opt.key + ')') || r.startsWith(opt.key + '.') || r.startsWith(opt.key + ' ') || r.startsWith(opt.key + ':')) return opt.key
+      if (result!.toLowerCase().includes(opt.text.toLowerCase().slice(0, 20))) return opt.key
+    }
+    return null
+  }, [answered, hasOptions, options, result])
 
   return (
     <div className={styles.askWrap}>
@@ -767,9 +804,30 @@ function AskUserQuestionView({ input, result }: { input: Record<string, unknown>
         <span className={styles.askTitle}>{t('admin.sessions.ask_user_question')}</span>
       </div>
       <div className={styles.askBody}>
-        <p className={styles.askQuestion}>{question}</p>
+        {/* 问题正文 */}
+        {intro && <p className={styles.askQuestion}>{intro}</p>}
+        {!hasOptions && !intro && <p className={styles.askQuestion}>{question}</p>}
+
+        {/* 选项按钮 */}
+        {hasOptions && (
+          <div className={styles.askOptions}>
+            {options.map(opt => {
+              const isSelected = selectedKey === opt.key
+              return (
+                <button
+                  key={opt.key}
+                  className={`${styles.askOptionBtn} ${isSelected ? styles.askOptionSelected : ''} ${answered && !isSelected ? styles.askOptionDimmed : ''}`}
+                >
+                  <span className={styles.askOptionKey}>{opt.key}</span>
+                  <span className={styles.askOptionText}>{opt.text}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
-      {result && (
+      {/* 已回答但不是选项按钮匹配的（自由文本回复） */}
+      {answered && !selectedKey && (
         <div className={styles.askAnswer}>
           <span style={{ flexShrink: 0, marginTop: 1, display: 'flex' }}><IconUser size={12} /></span>
           <p className={styles.askAnswerText}>{result}</p>
