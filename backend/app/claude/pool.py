@@ -57,6 +57,7 @@ class ClaudePool:
 
         client = ClaudeSDKClient(options=opts)
         self._clients[task_id] = client
+        sdk_session_id: Optional[str] = None
 
         try:
             await client.connect()
@@ -100,6 +101,7 @@ class ClaudePool:
 
                     # ── ResultMessage: 最终结果（含 cost / usage）──
                     elif isinstance(msg, ResultMessage):
+                        sdk_session_id = msg.session_id
                         event = {
                             "type": "result",
                             "result": msg.result or "",
@@ -126,6 +128,9 @@ class ClaudePool:
             except Exception:
                 logger.debug("ClaudeSDKClient disconnect error (ignored)")
             self._clients.pop(task_id, None)
+            # SDK disconnect 可能导致 SessionEnd hook 来不及触发，主动更新 DB 状态
+            if sdk_session_id:
+                self._mark_session_stopped(sdk_session_id)
 
     async def kill(self, task_id: int):
         """中断指定任务的 Claude 执行"""
