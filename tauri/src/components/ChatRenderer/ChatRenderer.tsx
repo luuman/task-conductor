@@ -678,7 +678,7 @@ function EditDiffView({ input, hideHeader }: { input: Record<string, unknown>; h
           if ('count' in item) {
             return (
               <div key={idx} className={styles.diffFold}>
-                <span>{'\u22EF'} {item.count} unchanged lines {'\u22EF'}</span>
+                <span>{t('admin.sessions.unchanged_lines', { count: item.count })}</span>
               </div>
             )
           }
