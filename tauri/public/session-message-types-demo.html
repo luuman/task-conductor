@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Session Messages — 消息体类型完整参考</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-hover: #1c2128;
+    --bg-elevated: #21262d;
+    --border: #30363d;
+    --border-accent: #58a6ff;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --orange: #f0883e;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 8px;
+    --radius-sm: 4px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 0;
+  }
+  ::selection { background: rgba(88,166,255,0.3); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Layout ── */
+  .page { display: flex; min-height: 100vh; }
+  .nav {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .nav h2 {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 16px;
+    margin-bottom: 8px;
+  }
+  .nav-group { margin-bottom: 16px; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover {
+    color: var(--text);
+    background: rgba(88,166,255,0.04);
+    border-left-color: var(--border);
+  }
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(88,166,255,0.08);
+    border-left-color: var(--accent);
+  }
+  .nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .content {
+    flex: 1;
+    max-width: 900px;
+    padding: 32px 40px;
+  }
+
+  /* ── Section headers ── */
+  .section {
+    margin-bottom: 48px;
+    scroll-margin-top: 20px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .section-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+  }
+  .section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* ── Card container ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .card-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(88,166,255,0.04);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .card-label .tag {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .tag-user { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .tag-assistant { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .tag-system { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .tag-tool { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag-error { background: rgba(248,81,73,0.15); color: var(--red); }
+  .tag-progress { background: rgba(57,210,192,0.15); color: var(--cyan); }
+
+  .card-body {
+    padding: 12px 16px;
+  }
+
+  /* ── Chat message styles ── */
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+  }
+  .msg-row-right {
+    flex-direction: row-reverse;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .avatar-bot {
+    background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 100%);
+    color: #fff;
+  }
+  .avatar-user {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .bubble {
+    max-width: 85%;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .bubble-user {
+    background: rgba(88,166,255,0.08);
+    border: 1px solid rgba(88,166,255,0.15);
+    color: var(--text);
+  }
+  .bubble-assistant {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* ── Markdown in bubbles ── */
+  .md-content p { margin-bottom: 8px; }
+  .md-content p:last-child { margin-bottom: 0; }
+  .md-content h2 { font-size: 15px; margin: 12px 0 6px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .md-content h3 { font-size: 14px; margin: 10px 0 4px; color: var(--text); }
+  .md-content h4 { font-size: 13px; margin: 8px 0 4px; color: var(--text-muted); }
+  .md-content strong { color: var(--text); font-weight: 600; }
+  .md-content em { color: var(--text-muted); font-style: italic; }
+  .md-content code {
+    background: rgba(110,118,129,0.15);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--orange);
+  }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 12px;
+    margin: 8px 0;
+    color: var(--text-muted);
+    background: rgba(88,166,255,0.04);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .md-content ul, .md-content ol { padding-left: 18px; margin: 4px 0 8px; }
+  .md-content li { margin: 2px 0; }
+  .md-content hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+  .md-content a { color: var(--accent); }
+
+  /* ── Tables ── */
+  .md-table-wrap { overflow-x: auto; margin: 8px 0; }
+  .md-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .md-table th {
+    background: rgba(110,118,129,0.1);
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .md-table td {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    background: rgba(110,118,129,0.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .code-lang {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-lines {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-size: 10px;
+  }
+  .code-body {
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text);
+  }
+
+  /* hljs theme (inline) */
+  .hljs-keyword { color: #ff7b72; }
+  .hljs-string { color: #a5d6ff; }
+  .hljs-number { color: #79c0ff; }
+  .hljs-comment { color: #8b949e; font-style: italic; }
+  .hljs-function { color: #d2a8ff; }
+  .hljs-title { color: #d2a8ff; }
+  .hljs-built_in { color: #ffa657; }
+  .hljs-literal { color: #79c0ff; }
+  .hljs-type { color: #ff7b72; }
+  .hljs-params { color: #e6edf3; }
+  .hljs-attr { color: #79c0ff; }
+  .hljs-addition { color: #3fb950; background: rgba(63,185,80,0.1); }
+  .hljs-deletion { color: #f85149; background: rgba(248,81,73,0.1); }
+
+  /* ── Tool cards ── */
+  .tool-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background 0.1s;
+  }
+  .tool-header:hover { background: rgba(110,118,129,0.06); }
+  .tool-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+  }
+  .tool-name { color: var(--text-muted); font-weight: 500; }
+  .tool-param {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tool-badge-pass {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(63,185,80,0.12);
+    color: var(--green);
+    font-weight: 600;
+  }
+  .tool-badge-fail {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(248,81,73,0.12);
+    color: var(--red);
+    font-weight: 600;
+  }
+  .tool-chevron {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-size: 10px;
+    transition: transform 0.15s;
+  }
+
+  /* ── Bash card ── */
+  .bash-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .bash-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .bash-header-err { border-bottom: 1px solid rgba(248,81,73,0.2); }
+  .bash-prompt { color: var(--green); font-weight: 700; }
+  .bash-cmd { color: var(--text); }
+  .bash-lines { color: var(--text-dim); font-size: 10px; margin-left: auto; }
+  .bash-output {
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.45;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.15);
+  }
+  .bash-output-err {
+    color: var(--red);
+    background: rgba(248,81,73,0.04);
+  }
+
+  /* ── Diff view ── */
+  .diff-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .diff-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .diff-filename {
+    font-family: var(--font-mono);
+    color: var(--text);
+    font-size: 12px;
+  }
+  .diff-stats { margin-left: auto; font-family: var(--font-mono); font-size: 11px; }
+  .diff-add { color: var(--green); }
+  .diff-del { color: var(--red); }
+  .diff-body {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .diff-line {
+    display: flex;
+    padding: 0 10px;
+    min-height: 20px;
+  }
+  .diff-line-add { background: rgba(63,185,80,0.08); }
+  .diff-line-del { background: rgba(248,81,73,0.08); }
+  .diff-sign {
+    width: 16px;
+    flex-shrink: 0;
+    text-align: center;
+    user-select: none;
+  }
+  .diff-sign-add { color: var(--green); }
+  .diff-sign-del { color: var(--red); }
+  .diff-text { white-space: pre; }
+  .diff-fold {
+    padding: 2px 10px;
+    color: var(--text-dim);
+    font-size: 10px;
+    background: rgba(110,118,129,0.04);
+    text-align: center;
+  }
+
+  /* ── Pill row (Read/Grep/Glob) ── */
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 0;
+  }
+  .pill-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-right: 2px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(110,118,129,0.08);
+    border: 1px solid rgba(110,118,129,0.15);
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .pill:hover { background: rgba(110,118,129,0.15); border-color: rgba(110,118,129,0.25); }
+  .pill-active { background: rgba(88,166,255,0.1); border-color: rgba(88,166,255,0.3); color: var(--accent); }
+  .pill-icon { display: flex; font-size: 10px; }
+  .pill-badge {
+    font-size: 9px;
+    background: rgba(110,118,129,0.15);
+    padding: 0 4px;
+    border-radius: 6px;
+    color: var(--text-dim);
+  }
+  .pill-grep { border-color: rgba(255,123,114,0.2); }
+  .pill-error { border-color: rgba(248,81,73,0.3); color: var(--red); }
+
+  /* ── Task Notification ── */
+  .task-notif {
+    border-radius: var(--radius-sm);
+    border: 1px solid;
+    padding: 10px 12px;
+    margin: 6px 0;
+  }
+  .task-notif-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+  .task-notif-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .task-notif-title { font-weight: 600; color: var(--text); }
+  .task-notif-status { margin-left: auto; font-weight: 600; font-size: 11px; }
+  .task-notif-summary { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .task-notif-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .task-notif-meta code {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    font-size: 10px;
+  }
+
+  /* ── System Reminder ── */
+  .sys-reminder {
+    border: 1px solid rgba(210,153,34,0.2);
+    background: rgba(210,153,34,0.04);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+  }
+  .sys-reminder-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--yellow);
+    cursor: pointer;
+    list-style: none;
+  }
+  .sys-reminder-summary::before { content: '▸'; font-size: 10px; }
+  details[open] .sys-reminder-summary::before { content: '▾'; }
+  .sys-reminder-body {
+    padding: 8px 12px;
+    border-top: 1px solid rgba(210,153,34,0.1);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Agent result ── */
+  .agent-wrap {
+    border: 1px solid rgba(188,140,255,0.2);
+    background: rgba(188,140,255,0.04);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .agent-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(188,140,255,0.1);
+    font-size: 11px;
+    color: var(--purple);
+  }
+  .agent-body { padding: 10px 12px; font-size: 12px; }
+
+  /* ── AskUserQuestion ── */
+  .ask-wrap {
+    border: 1px solid rgba(88,166,255,0.2);
+    background: rgba(88,166,255,0.03);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .ask-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(88,166,255,0.1);
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .ask-body { padding: 10px 12px; }
+  .ask-question { font-size: 12px; color: var(--text); margin-bottom: 8px; }
+  .ask-options { display: flex; flex-direction: column; gap: 4px; }
+  .ask-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .ask-option:hover { border-color: var(--accent); }
+  .ask-option-selected {
+    border-color: var(--accent);
+    background: rgba(88,166,255,0.08);
+  }
+  .ask-option-dimmed { opacity: 0.4; }
+  .ask-option-key {
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    width: 16px;
+  }
+  .ask-answer {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 10px;
+    border-top: 1px solid rgba(88,166,255,0.1);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .ask-waiting {
+    padding: 6px 10px;
+    border-top: 1px solid rgba(88,166,255,0.1);
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ask-waiting-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--yellow);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ── Metadata panel ── */
+  .meta-panel {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .meta-header {
+    padding: 6px 10px;
+    font-size: 10px;
+    color: var(--text-dim);
+    background: rgba(110,118,129,0.06);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .meta-body {
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .meta-key { color: #79c0ff; }
+  .meta-str { color: #a5d6ff; }
+  .meta-num { color: #79c0ff; }
+  .meta-bool { color: #ff7b72; }
+  .meta-null { color: #8b949e; }
+
+  /* ── Progress indicator ── */
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .progress-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── File write badge ── */
+  .write-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    background: rgba(63,185,80,0.08);
+    border: 1px solid rgba(63,185,80,0.15);
+    font-size: 11px;
+    color: var(--green);
+    font-family: var(--font-mono);
+  }
+
+  /* ── Mermaid placeholder ── */
+  .mermaid-placeholder {
+    background: rgba(110,118,129,0.06);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    margin: 8px 0;
+  }
+
+  /* ── Search result panel ── */
+  .search-result {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .search-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .search-count { margin-left: auto; color: var(--text-dim); font-size: 10px; }
+  .search-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .search-item:hover { background: rgba(110,118,129,0.04); }
+  .search-item-path { color: var(--text-dim); font-size: 10px; margin-left: auto; }
+
+  /* ── Page title ── */
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  /* ── Separator ── */
+  .section-sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Output block (generic tool result) ── */
+  .output-block {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 6px 0;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.1);
+  }
+  .output-block-err {
+    border-color: rgba(248,81,73,0.3);
+    color: var(--red);
+    background: rgba(248,81,73,0.04);
+  }
+
+  /* ── JSONL field table ── */
+  .field-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 8px 0;
+  }
+  .field-table th {
+    text-align: left;
+    padding: 5px 8px;
+    background: rgba(110,118,129,0.08);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .field-table td {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .field-table td:first-child {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .field-table td:nth-child(2) {
+    font-family: var(--font-mono);
+    color: var(--orange);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* ── Title bar ── */
+  .title-bar {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .title-bar h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .title-bar p {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ── 导航面板 ── -->
+<nav class="nav">
+  <div class="title-bar">
+    <h1>Session Messages</h1>
+    <p>消息体类型完整参考</p>
+  </div>
+
+  <div class="nav-group">
+    <h2>JSONL 结构</h2>
+    <a class="nav-item" href="#jsonl-structure"><span class="nav-dot" style="background:var(--cyan)"></span>JSONL 条目类型</a>
+    <a class="nav-item" href="#transcript-api"><span class="nav-dot" style="background:var(--cyan)"></span>Transcript API 数据</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>用户消息</h2>
+    <a class="nav-item" href="#user-text"><span class="nav-dot" style="background:var(--accent)"></span>UserCard 文本</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>助手文本</h2>
+    <a class="nav-item" href="#md-full"><span class="nav-dot" style="background:var(--purple)"></span>Markdown 全要素</a>
+    <a class="nav-item" href="#code-blocks"><span class="nav-dot" style="background:var(--purple)"></span>代码块 + 高亮</a>
+    <a class="nav-item" href="#mermaid"><span class="nav-dot" style="background:var(--purple)"></span>Mermaid 图表</a>
+    <a class="nav-item" href="#task-notification"><span class="nav-dot" style="background:var(--purple)"></span>Task Notification</a>
+    <a class="nav-item" href="#system-reminder"><span class="nav-dot" style="background:var(--purple)"></span>System Reminder</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>只读工具</h2>
+    <a class="nav-item" href="#read-pill"><span class="nav-dot" style="background:var(--green)"></span>Read Pill</a>
+    <a class="nav-item" href="#grep-pill"><span class="nav-dot" style="background:var(--green)"></span>Grep Pill</a>
+    <a class="nav-item" href="#glob-pill"><span class="nav-dot" style="background:var(--green)"></span>Glob Pill</a>
+    <a class="nav-item" href="#read-error"><span class="nav-dot" style="background:var(--red)"></span>Read ERROR</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>写入工具</h2>
+    <a class="nav-item" href="#edit-diff"><span class="nav-dot" style="background:var(--orange)"></span>Edit Diff</a>
+    <a class="nav-item" href="#multi-edit"><span class="nav-dot" style="background:var(--orange)"></span>MultiEdit</a>
+    <a class="nav-item" href="#write-badge"><span class="nav-dot" style="background:var(--orange)"></span>Write Badge</a>
+    <a class="nav-item" href="#edit-error"><span class="nav-dot" style="background:var(--red)"></span>Edit ERROR</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>Bash</h2>
+    <a class="nav-item" href="#bash-success"><span class="nav-dot" style="background:var(--green)"></span>成功输出</a>
+    <a class="nav-item" href="#bash-error"><span class="nav-dot" style="background:var(--red)"></span>错误输出</a>
+    <a class="nav-item" href="#bash-silent"><span class="nav-dot" style="background:var(--text-dim)"></span>静默成功</a>
+    <a class="nav-item" href="#bash-json"><span class="nav-dot" style="background:var(--yellow)"></span>JSON 输出</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>特殊工具</h2>
+    <a class="nav-item" href="#agent"><span class="nav-dot" style="background:var(--purple)"></span>Agent 子代理</a>
+    <a class="nav-item" href="#ask-user"><span class="nav-dot" style="background:var(--accent)"></span>AskUserQuestion</a>
+    <a class="nav-item" href="#web-search"><span class="nav-dot" style="background:var(--cyan)"></span>WebSearch</a>
+    <a class="nav-item" href="#skill"><span class="nav-dot" style="background:var(--pink)"></span>Skill / TaskCreate</a>
+    <a class="nav-item" href="#unknown-tool"><span class="nav-dot" style="background:var(--text-dim)"></span>未知工具 Fallback</a>
+  </div>
+
+  <div class="nav-group">
+    <h2>系统条目</h2>
+    <a class="nav-item" href="#progress"><span class="nav-dot" style="background:var(--cyan)"></span>Progress (Hook)</a>
+    <a class="nav-item" href="#system-entry"><span class="nav-dot" style="background:var(--yellow)"></span>System Entry</a>
+  </div>
+</nav>
+
+<!-- ── 内容区 ── -->
+<main class="content">
+
+<h1 class="page-title">Claude Session Messages — 消息体类型完整参考</h1>
+<p class="page-subtitle">
+  覆盖 Claude Code 会话 JSONL 中的所有条目类型和 Transcript API 返回的全部 <code>TranscriptBlock</code> 变体。<br>
+  每个卡片展示渲染效果 + 原始元数据结构，作为逐个优化改进的参考基线。
+</p>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- JSONL 结构 -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="jsonl-structure">
+  <div class="section-header">
+    <span class="section-num">0a</span>
+    <h3>JSONL 条目类型（原始存储格式）</h3>
+  </div>
+  <p class="section-desc">
+    每个 Claude Code 会话保存为 <code>~/.claude/projects/{project-path}/{session-id}.jsonl</code>，每行一个 JSON 对象。
+    共有 7 种 <code>type</code>：
+  </p>
+
+  <table class="field-table">
+    <tr><th>type</th><th>频率</th><th>说明</th></tr>
+    <tr><td>user</td><td>高</td><td>用户消息（含文本 + tool_result）</td></tr>
+    <tr><td>assistant</td><td>高</td><td>助手消息（含文本 + tool_use + thinking）</td></tr>
+    <tr><td>progress</td><td>极高</td><td>Hook 执行进度、工具执行进度</td></tr>
+    <tr><td>system</td><td>中</td><td>系统事件（stop_hook_summary、context_pruned 等）</td></tr>
+    <tr><td>file-history-snapshot</td><td>中</td><td>文件变更快照（用于撤销）</td></tr>
+    <tr><td>queue-operation</td><td>低</td><td>消息队列操作</td></tr>
+    <tr><td>last-prompt</td><td>极低</td><td>会话最终 prompt 快照</td></tr>
+  </table>
+
+  <div class="meta-panel">
+    <div class="meta-header">JSONL 通用字段（每条都有）</div>
+    <div class="meta-body">{
+  <span class="meta-key">"type"</span>:        <span class="meta-str">"user"</span> | <span class="meta-str">"assistant"</span> | <span class="meta-str">"progress"</span> | ...,
+  <span class="meta-key">"uuid"</span>:        <span class="meta-str">"d094fef5-ed40-44dc-b02b-..."</span>,
+  <span class="meta-key">"parentUuid"</span>:   <span class="meta-str">"d361a269-..."</span> | <span class="meta-null">null</span>,
+  <span class="meta-key">"timestamp"</span>:    <span class="meta-str">"2026-03-22T14:19:07.685Z"</span>,
+  <span class="meta-key">"sessionId"</span>:    <span class="meta-str">"c72aae2c-e37b-43ca-..."</span>,
+  <span class="meta-key">"cwd"</span>:          <span class="meta-str">"/home/user/project"</span>,
+  <span class="meta-key">"version"</span>:      <span class="meta-str">"2.1.81"</span>,
+  <span class="meta-key">"gitBranch"</span>:    <span class="meta-str">"master"</span>,
+  <span class="meta-key">"userType"</span>:     <span class="meta-str">"external"</span>,
+  <span class="meta-key">"entrypoint"</span>:   <span class="meta-str">"cli"</span>,
+  <span class="meta-key">"isSidechain"</span>:  <span class="meta-bool">false</span>,
+  <span class="meta-key">"message"</span>:      { ... }  <span class="meta-null">// user/assistant 类型独有</span>
+}</div>
+  </div>
+</div>
+
+<div class="section" id="transcript-api">
+  <div class="section-header">
+    <span class="section-num">0b</span>
+    <h3>Transcript API 数据结构</h3>
+  </div>
+  <p class="section-desc">
+    后端 <code>GET /api/sessions/{id}/transcript</code> 将 JSONL 解析为 <code>TranscriptMessage[]</code>，
+    每条消息包含 <code>TranscriptBlock[]</code>。这是前端消费的最终格式。
+  </p>
+
+  <table class="field-table">
+    <tr><th>TranscriptMessage 字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td>role</td><td>string</td><td><code>"user"</code> | <code>"assistant"</code></td></tr>
+    <tr><td>ts</td><td>string | null</td><td>ISO 8601 时间戳</td></tr>
+    <tr><td>blocks</td><td>TranscriptBlock[]</td><td>内容块数组</td></tr>
+    <tr><td>model</td><td>string | null</td><td>仅 assistant，如 <code>"claude-opus-4-6"</code></td></tr>
+  </table>
+
+  <table class="field-table" style="margin-top: 12px;">
+    <tr><th>TranscriptBlock 字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td>type</td><td>string</td><td><code>"text"</code> | <code>"tool_use"</code></td></tr>
+    <tr><td>text</td><td>string | null</td><td>文本内容（type=text 时）</td></tr>
+    <tr><td>tool_name</td><td>string | null</td><td>工具名（type=tool_use 时）</td></tr>
+    <tr><td>tool_input</td><td>object | null</td><td>工具输入参数</td></tr>
+    <tr><td>tool_use_id</td><td>string | null</td><td>工具调用唯一 ID</td></tr>
+    <tr><td>tool_result</td><td>string | null</td><td>工具返回结果（最多 5000 字符）</td></tr>
+    <tr><td>tool_error</td><td>boolean | null</td><td>是否错误</td></tr>
+  </table>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 1. 用户文本消息 -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="user-text">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h3>UserCard — 用户文本消息</h3>
+  </div>
+  <p class="section-desc">
+    用户输入的文本消息，渲染为右对齐气泡。支持 Markdown（含 <code>inline code</code>）。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-user">USER</span> role: "user", block.type: "text"</div>
+    <div class="card-body">
+      <div class="msg-row msg-row-right">
+        <div class="avatar avatar-user">U</div>
+        <div class="bubble bubble-user">
+          <div class="md-content">
+            <p>帮我分析 <code>ChatRenderer.tsx</code> 的消息渲染逻辑，修复 Bash 输出高亮问题。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">TranscriptMessage 元数据</div>
+      <div class="meta-body">{
+  <span class="meta-key">"role"</span>: <span class="meta-str">"user"</span>,
+  <span class="meta-key">"ts"</span>: <span class="meta-str">"2026-03-22T10:00:00Z"</span>,
+  <span class="meta-key">"blocks"</span>: [{
+    <span class="meta-key">"type"</span>: <span class="meta-str">"text"</span>,
+    <span class="meta-key">"text"</span>: <span class="meta-str">"帮我分析 `ChatRenderer.tsx` 的消息渲染逻辑..."</span>
+  }]
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 2. Markdown 全要素 -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="md-full">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h3>RichTextBlock — Markdown 全要素</h3>
+  </div>
+  <p class="section-desc">
+    助手文本消息经 <code>ReactMarkdown + remarkGfm</code> 渲染。支持标题、加粗、斜体、引用、列表、表格、链接、分割线。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-assistant">ASSISTANT</span> block.type: "text"</div>
+    <div class="card-body">
+      <div class="msg-row">
+        <div class="avatar avatar-bot">C</div>
+        <div class="bubble bubble-assistant">
+          <div class="md-content">
+            <h2>Markdown 全要素展示</h2>
+            <h3>标题层级</h3>
+            <p>正文段落，包含<strong>加粗</strong>、<em>斜体</em>和 <code>inline code</code> 行内代码。</p>
+            <blockquote><p>引用块：这是一段重要的设计说明，可以跨多行。</p></blockquote>
+            <h4>列表</h4>
+            <p><strong>有序列表：</strong></p>
+            <ol>
+              <li>第一步：读取文件</li>
+              <li>第二步：解析内容</li>
+              <li>第三步：渲染输出</li>
+            </ol>
+            <p><strong>无序列表：</strong></p>
+            <ul>
+              <li>用户消息 → <code>UserCard</code></li>
+              <li>助手文本 → <code>RichTextBlock</code></li>
+              <li>工具调用 → 按类型分发</li>
+            </ul>
+            <h4>表格</h4>
+            <div class="md-table-wrap">
+              <table class="md-table">
+                <tr><th>组件</th><th>行数</th><th>复杂度</th><th>状态</th></tr>
+                <tr><td>ChatRenderer</td><td>1233</td><td>高</td><td>✅</td></tr>
+                <tr><td>TranscriptViewer</td><td>450</td><td>中</td><td>✅</td></tr>
+                <tr><td>SessionList</td><td>380</td><td>中</td><td>⚠️</td></tr>
+              </table>
+            </div>
+            <h4>链接</h4>
+            <p>参考 <a href="#">React Markdown 文档</a> 和 <a href="#">highlight.js</a>。</p>
+            <hr>
+            <p>以上为 Markdown 全要素展示。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 3. 代码块 -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="code-blocks">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h3>CollapsibleCode — 代码块 + 语法高亮</h3>
+  </div>
+  <p class="section-desc">
+    Markdown 代码块经 <code>highlight.js</code> 高亮。超过 8 行可折叠。支持 14 种语言。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-assistant">ASSISTANT</span> block.type: "text" → ```typescript```</div>
+    <div class="card-body">
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">typescript</span>
+          <span class="code-lines">6 lines</span>
+        </div>
+        <div class="code-body"><span class="hljs-keyword">function</span> <span class="hljs-title">guessLang</span>(<span class="hljs-params">filePath: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">const</span> ext = filePath.<span class="hljs-title">split</span>(<span class="hljs-string">'.'</span>).<span class="hljs-title">pop</span>()?.<span class="hljs-title">toLowerCase</span>() || <span class="hljs-string">''</span>
+  <span class="hljs-keyword">const</span> map: <span class="hljs-title">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt; = {
+    <span class="hljs-attr">ts</span>: <span class="hljs-string">'typescript'</span>, <span class="hljs-attr">tsx</span>: <span class="hljs-string">'typescript'</span>,
+    <span class="hljs-attr">py</span>: <span class="hljs-string">'python'</span>, <span class="hljs-attr">rs</span>: <span class="hljs-string">'rust'</span>,
+  }
+  <span class="hljs-keyword">return</span> map[ext] || <span class="hljs-string">''</span>
+}</div>
+      </div>
+
+      <div class="code-block" style="margin-top: 10px;">
+        <div class="code-header">
+          <span class="code-lang">python</span>
+          <span class="code-lines">8 lines</span>
+        </div>
+        <div class="code-body"><span class="hljs-keyword">def</span> <span class="hljs-title">compute_diff</span>(<span class="hljs-params">old: str, new: str</span>) -&gt; list[DiffLine]:
+    <span class="hljs-string">"""LCS-based diff algorithm."""</span>
+    old_lines = old.splitlines()
+    new_lines = new.splitlines()
+    dp = [[<span class="hljs-number">0</span>] * (<span class="hljs-built_in">len</span>(new_lines) + <span class="hljs-number">1</span>) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(old_lines) + <span class="hljs-number">1</span>)]
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">len</span>(old_lines) + <span class="hljs-number">1</span>):
+        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">len</span>(new_lines) + <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> old_lines[i-<span class="hljs-number">1</span>] == new_lines[j-<span class="hljs-number">1</span>]:
+                dp[i][j] = dp[i-<span class="hljs-number">1</span>][j-<span class="hljs-number">1</span>] + <span class="hljs-number">1</span></div>
+      </div>
+
+      <div class="code-block" style="margin-top: 10px;">
+        <div class="code-header">
+          <span class="code-lang" style="color:var(--text-dim)">plain</span>
+        </div>
+        <div class="code-body" style="color:var(--text-muted)">some raw output
+  with indentation
+    and nested content</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 4. Mermaid -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="mermaid">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h3>MermaidBlock — 图表渲染</h3>
+  </div>
+  <p class="section-desc">
+    Markdown 代码块标注 <code>```mermaid```</code> 时，由 <code>mermaid.js</code> 渲染为 SVG 图表。
+    支持 flowchart、sequenceDiagram、gantt、stateDiagram-v2 等。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-assistant">ASSISTANT</span> block.type: "text" → ```mermaid```</div>
+    <div class="card-body">
+      <div class="mermaid-placeholder">
+        <div style="font-size:20px; margin-bottom: 8px">📊</div>
+        <div>Mermaid 图表在此处渲染为交互式 SVG</div>
+        <div style="margin-top: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim)">
+          支持: flowchart / sequenceDiagram / gantt / stateDiagram-v2 / classDiagram
+        </div>
+        <div class="code-block" style="margin-top: 12px; text-align: left;">
+          <div class="code-header"><span class="code-lang">mermaid (source)</span></div>
+          <div class="code-body" style="font-size:11px; color: var(--text-muted)">flowchart TD
+    A[TranscriptMessage] --> B{role?}
+    B -->|user| C[UserCard]
+    B -->|assistant| D[groupMessagesIntoTurns]
+    D --> E[AssistantTurnCard]
+    E --> F[texts → RichTextBlock]
+    E --> G[reads → ReadPillRow]
+    E --> H[edits → EditInlineCard]
+    E --> I[bashes → BashStatusLine]
+    E --> J[others → ToolWidget]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 5. Task Notification -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="task-notification">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h3>TaskNotificationCard — 后台任务通知</h3>
+  </div>
+  <p class="section-desc">
+    从助手文本中解析 <code>&lt;task-notification&gt;</code> XML 标签。4 种状态：completed / running / failed / killed。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-assistant">ASSISTANT</span> text 内嵌 &lt;task-notification&gt;</div>
+    <div class="card-body">
+
+      <div class="task-notif" style="border-color: #3fb950; background: rgba(63,185,80,0.08);">
+        <div class="task-notif-header">
+          <span class="task-notif-dot" style="background:#3fb950"></span>
+          <span class="task-notif-title">Background Task</span>
+          <span class="task-notif-status" style="color:#3fb950">completed</span>
+        </div>
+        <div class="task-notif-summary">代码审查完成，3 个问题已自动修复</div>
+        <div class="task-notif-meta"><span>ID</span> <code>task-001</code></div>
+        <div class="task-notif-meta"><span>Output</span> <code>output-001.json</code></div>
+      </div>
+
+      <div class="task-notif" style="border-color: #58a6ff; background: rgba(88,166,255,0.08);">
+        <div class="task-notif-header">
+          <span class="task-notif-dot" style="background:#58a6ff"></span>
+          <span class="task-notif-title">Background Task</span>
+          <span class="task-notif-status" style="color:#58a6ff">running</span>
+        </div>
+        <div class="task-notif-summary">正在执行单元测试 (47/120)</div>
+        <div class="task-notif-meta"><span>ID</span> <code>task-002</code></div>
+      </div>
+
+      <div class="task-notif" style="border-color: #f85149; background: rgba(248,81,73,0.08);">
+        <div class="task-notif-header">
+          <span class="task-notif-dot" style="background:#f85149"></span>
+          <span class="task-notif-title">Background Task</span>
+          <span class="task-notif-status" style="color:#f85149">failed</span>
+        </div>
+        <div class="task-notif-summary">部署脚本失败：SSH 连接超时</div>
+        <div class="task-notif-meta"><span>ID</span> <code>task-003</code></div>
+        <div class="task-notif-meta"><span>Output</span> <code>output-003.log</code></div>
+      </div>
+
+      <div class="task-notif" style="border-color: #d29922; background: rgba(210,153,34,0.08);">
+        <div class="task-notif-header">
+          <span class="task-notif-dot" style="background:#d29922"></span>
+          <span class="task-notif-title">Background Task</span>
+          <span class="task-notif-status" style="color:#d29922">killed</span>
+        </div>
+        <div class="task-notif-summary">用户手动终止数据迁移任务</div>
+        <div class="task-notif-meta"><span>ID</span> <code>task-004</code></div>
+      </div>
+
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">解析后的 TaskNotification 字段</div>
+      <div class="meta-body">{
+  <span class="meta-key">"taskId"</span>:     <span class="meta-str">"task-001"</span>,
+  <span class="meta-key">"toolUseId"</span>:  <span class="meta-str">"tu-abc123"</span>,
+  <span class="meta-key">"outputFile"</span>: <span class="meta-str">"/tmp/output-001.json"</span>,
+  <span class="meta-key">"status"</span>:     <span class="meta-str">"completed"</span> | <span class="meta-str">"running"</span> | <span class="meta-str">"failed"</span> | <span class="meta-str">"killed"</span>,
+  <span class="meta-key">"summary"</span>:    <span class="meta-str">"代码审查完成，3 个问题已自动修复"</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 6. System Reminder -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="system-reminder">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h3>SystemReminderCard — 系统提醒（可折叠）</h3>
+  </div>
+  <p class="section-desc">
+    从助手文本中解析 <code>&lt;system-reminder&gt;</code> 标签，折叠显示。内容支持 Markdown。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-assistant">ASSISTANT</span> text 内嵌 &lt;system-reminder&gt;</div>
+    <div class="card-body">
+      <details class="sys-reminder">
+        <summary class="sys-reminder-summary">System Reminder</summary>
+        <div class="sys-reminder-body md-content">
+          <h3>可用工具</h3>
+          <ul>
+            <li><strong>Read</strong>: 读取文件</li>
+            <li><strong>Edit</strong>: 精确替换编辑</li>
+            <li><strong>Bash</strong>: 执行 shell 命令</li>
+            <li><strong>Grep</strong>: 搜索文件内容</li>
+          </ul>
+          <p>注意：修改 <code>node_modules</code> 不会生效。</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 7. Read Pill -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="read-pill">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h3>ReadPillRow — Read 文件药丸</h3>
+  </div>
+  <p class="section-desc">
+    连续多个 Read 调用聚合为药丸行，点击展开查看文件内容。显示文件类型图标 + 行数 badge。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Read" × N → ReadPillRow</div>
+    <div class="card-body">
+      <div class="pill-row">
+        <span class="pill-label">READ</span>
+        <span class="pill pill-active">
+          <span class="pill-icon">📄</span>
+          <span>ChatRenderer.tsx</span>
+          <span class="pill-badge">13</span>
+        </span>
+        <span class="pill">
+          <span class="pill-icon">🎨</span>
+          <span>sessions.module.css</span>
+          <span class="pill-badge">7</span>
+        </span>
+      </div>
+      <!-- 展开后内容 -->
+      <div class="search-result">
+        <div class="search-header">
+          <span>📄</span>
+          <span class="diff-filename">ChatRenderer.tsx</span>
+          <span class="search-count">13 lines</span>
+        </div>
+        <div class="code-body" style="font-size:11px; padding: 8px 10px;">     1→<span class="hljs-keyword">import</span> { memo, useCallback } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+     2→<span class="hljs-keyword">import</span> ReactMarkdown <span class="hljs-keyword">from</span> <span class="hljs-string">'react-markdown'</span>
+     3→<span class="hljs-keyword">import</span> remarkGfm <span class="hljs-keyword">from</span> <span class="hljs-string">'remark-gfm'</span>
+     4→
+     5→<span class="hljs-keyword">export function</span> <span class="hljs-title">ChatRenderer</span>({ messages }) {
+     6→  <span class="hljs-keyword">return</span> (
+     7→    &lt;div className=<span class="hljs-string">"chat"</span>&gt;
+     8→      {messages.map((msg, i) =&gt; (
+     9→        &lt;MessageCard key={i} msg={msg} /&gt;
+    10→      ))}
+    11→    &lt;/div&gt;
+    12→  )
+    13→}</div>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">TranscriptBlock 元数据</div>
+      <div class="meta-body">{
+  <span class="meta-key">"type"</span>:       <span class="meta-str">"tool_use"</span>,
+  <span class="meta-key">"tool_name"</span>:  <span class="meta-str">"Read"</span>,
+  <span class="meta-key">"tool_use_id"</span>: <span class="meta-str">"read-001"</span>,
+  <span class="meta-key">"tool_input"</span>:  { <span class="meta-key">"file_path"</span>: <span class="meta-str">"/home/user/project/src/components/ChatRenderer.tsx"</span> },
+  <span class="meta-key">"tool_result"</span>: <span class="meta-str">"     1→import { memo, useCallback }..."</span>,   <span class="meta-null">// max 5000 chars</span>
+  <span class="meta-key">"tool_error"</span>:  <span class="meta-bool">false</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- 7b. Grep Pill -->
+<div class="section" id="grep-pill">
+  <div class="section-header">
+    <span class="section-num">07b</span>
+    <h3>Grep Pill — 搜索结果药丸</h3>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Grep"</div>
+    <div class="card-body">
+      <div class="pill-row">
+        <span class="pill-label">SEARCH</span>
+        <span class="pill pill-grep pill-active">
+          <span class="pill-icon">🔍</span>
+          <span>"BashStatusLine"</span>
+        </span>
+      </div>
+      <div class="search-result">
+        <div class="search-header">
+          <span>🔍</span>
+          <span>BashStatusLine</span>
+          <span class="search-count">3 files</span>
+        </div>
+        <div class="search-item"><span>📄</span> ChatRenderer.tsx <span class="search-item-path">src/components/ChatRenderer/ChatRenderer.tsx:1099</span></div>
+        <div class="search-item"><span>📄</span> index.ts <span class="search-item-path">src/components/ChatRenderer/index.ts:5</span></div>
+        <div class="search-item"><span>📄</span> AdminSessions.tsx <span class="search-item-path">src/features/admin/pages/AdminSessions.tsx:23</span></div>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">TranscriptBlock 元数据</div>
+      <div class="meta-body">{
+  <span class="meta-key">"tool_name"</span>:  <span class="meta-str">"Grep"</span>,
+  <span class="meta-key">"tool_input"</span>:  { <span class="meta-key">"pattern"</span>: <span class="meta-str">"BashStatusLine"</span>, <span class="meta-key">"path"</span>: <span class="meta-str">"src/components"</span> },
+  <span class="meta-key">"tool_result"</span>: <span class="meta-str">"src/components/ChatRenderer/ChatRenderer.tsx:1099\n..."</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- 7c. Glob Pill -->
+<div class="section" id="glob-pill">
+  <div class="section-header">
+    <span class="section-num">07c</span>
+    <h3>Glob Pill — 文件匹配</h3>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Glob"</div>
+    <div class="card-body">
+      <div class="pill-row">
+        <span class="pill pill-active">
+          <span class="pill-icon">📁</span>
+          <span>src/**/*.module.css</span>
+        </span>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">TranscriptBlock 元数据</div>
+      <div class="meta-body">{
+  <span class="meta-key">"tool_name"</span>:  <span class="meta-str">"Glob"</span>,
+  <span class="meta-key">"tool_input"</span>:  { <span class="meta-key">"pattern"</span>: <span class="meta-str">"src/**/*.module.css"</span> },
+  <span class="meta-key">"tool_result"</span>: <span class="meta-str">"src/features/admin/pages/sessions/sessions.module.css\n..."</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- 7d. Read ERROR -->
+<div class="section" id="read-error">
+  <div class="section-header">
+    <span class="section-num">07d</span>
+    <h3>Read ERROR — 文件不存在</h3>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-error">ERROR</span> tool_name: "Read", tool_error: true</div>
+    <div class="card-body">
+      <div class="pill-row">
+        <span class="pill-label">READ</span>
+        <span class="pill pill-error">
+          <span class="pill-icon">📄</span>
+          <span>file.ts</span>
+          <span style="color: var(--red); font-size: 10px; font-weight: 600;">ERROR</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 8. Edit Diff -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="edit-diff">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h3>EditDiffView — 代码编辑 Diff</h3>
+  </div>
+  <p class="section-desc">
+    Edit/MultiEdit 工具调用显示 LCS diff 视图。文件头显示文件类型图标 + 增删行数统计。中间折叠未变更行。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Edit"</div>
+    <div class="card-body">
+      <div class="diff-wrap">
+        <div class="diff-header">
+          <span>📄</span>
+          <span class="diff-filename">BashOutput.tsx</span>
+          <span class="diff-stats">
+            <span class="diff-add">+12</span>
+            <span class="diff-del" style="margin-left:6px">−5</span>
+          </span>
+        </div>
+        <div class="diff-body">
+          <div class="diff-line diff-line-del"><span class="diff-sign diff-sign-del">−</span><span class="diff-text">function BashOutput({ command, result }) {</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">function BashOutput({ command, result, isError }: BashOutputProps) {</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">  const highlighted = useMemo(() => {</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">    const lang = guessOutputLang(result, command)</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">    if (lang) return hljs.highlight(result, { language: lang }).value</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">    return highlightLog(result)</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">  }, [result, command])</span></div>
+          <div class="diff-line"><span class="diff-sign"> </span><span class="diff-text">  return (</span></div>
+          <div class="diff-line diff-line-del"><span class="diff-sign diff-sign-del">−</span><span class="diff-text">    &lt;div className={styles.bashWrap}&gt;</span></div>
+          <div class="diff-line diff-line-del"><span class="diff-sign diff-sign-del">−</span><span class="diff-text">      &lt;pre&gt;{result}&lt;/pre&gt;</span></div>
+          <div class="diff-line diff-line-del"><span class="diff-sign diff-sign-del">−</span><span class="diff-text">    &lt;/div&gt;</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">    &lt;div className={styles.bashWrap}</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">         style={isError ? { borderColor: 'rgba(244,63,94,0.3)' } : undefined}&gt;</span></div>
+          <div class="diff-line diff-line-add"><span class="diff-sign diff-sign-add">+</span><span class="diff-text">      &lt;div className={styles.bashHeader}&gt;</span></div>
+          <div class="diff-fold">⋯ 3 unchanged lines ⋯</div>
+          <div class="diff-line"><span class="diff-sign"> </span><span class="diff-text">  )</span></div>
+          <div class="diff-line"><span class="diff-sign"> </span><span class="diff-text">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">TranscriptBlock 元数据</div>
+      <div class="meta-body">{
+  <span class="meta-key">"tool_name"</span>:  <span class="meta-str">"Edit"</span>,
+  <span class="meta-key">"tool_input"</span>: {
+    <span class="meta-key">"file_path"</span>:   <span class="meta-str">"/home/user/project/src/components/BashOutput.tsx"</span>,
+    <span class="meta-key">"old_string"</span>:  <span class="meta-str">"function BashOutput({ command, result }) {..."</span>,
+    <span class="meta-key">"new_string"</span>:  <span class="meta-str">"function BashOutput({ command, result, isError }..."</span>
+  },
+  <span class="meta-key">"tool_result"</span>: <span class="meta-str">"File updated successfully."</span>,
+  <span class="meta-key">"tool_error"</span>:  <span class="meta-bool">false</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- 8b. MultiEdit -->
+<div class="section" id="multi-edit">
+  <div class="section-header"><span class="section-num">08b</span><h3>MultiEdit — 多处编辑</h3></div>
+  <p class="section-desc">与 Edit 相同渲染，仅 tool_name 不同。</p>
+</div>
+
+<!-- 8c. Write Badge -->
+<div class="section" id="write-badge">
+  <div class="section-header"><span class="section-num">08c</span><h3>Write — 文件写入 Badge</h3></div>
+  <p class="section-desc">Write 工具只显示文件名 badge + ✓，无 diff（因为是全文写入）。</p>
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Write"</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">📄</span>
+        <span class="tool-param">highlight.ts</span>
+        <span style="flex:1"></span>
+        <span class="tool-badge-pass">✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8d. Edit ERROR -->
+<div class="section" id="edit-error">
+  <div class="section-header"><span class="section-num">08d</span><h3>Edit ERROR — 编辑失败</h3></div>
+  <div class="card">
+    <div class="card-label"><span class="tag tag-error">ERROR</span> tool_name: "Edit", tool_error: true</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">📄</span>
+        <span class="tool-param">App.tsx</span>
+        <span class="tool-badge-fail">ERROR</span>
+        <span style="flex:1"></span>
+        <span class="tool-chevron">▶</span>
+      </div>
+      <div class="output-block output-block-err" style="margin: 0 10px 8px;">
+        Error: old_string not found in file. The file may have been modified.
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 9. Bash -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="bash-success">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h3>BashStatusLine — 命令成功执行</h3>
+  </div>
+  <p class="section-desc">
+    Bash 卡片显示 <code>$ command</code> 头 + 输出体。自动检测输出语言（JSON/Python/TS/Bash），
+    回退到 <code>highlightLog()</code> 终端风格着色。错误/警告/成功关键词自动高亮。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Bash" — 测试通过</div>
+    <div class="card-body">
+      <div class="bash-card">
+        <div class="bash-header">
+          <span style="color:var(--text-muted)">⌨</span>
+          <span class="bash-prompt">$</span>
+          <span class="bash-cmd">pytest tests/ -v</span>
+          <span class="bash-lines">13 lines</span>
+          <span class="tool-badge-pass" style="margin-left:8px">PASS</span>
+        </div>
+        <div class="bash-output">============================= test session starts ==============================
+collected 12 items
+
+tests/test_pool.py::test_run_success <span class="hljs-addition">PASSED</span>                              [  8%]
+tests/test_pool.py::test_run_timeout <span class="hljs-addition">PASSED</span>                              [ 16%]
+tests/test_pool.py::test_kill_process <span class="hljs-addition">PASSED</span>                             [ 25%]
+tests/test_hooks.py::test_parse_event <span class="hljs-addition">PASSED</span>                             [ 33%]
+tests/test_hooks.py::test_serialize <span class="hljs-addition">PASSED</span>                               [ 41%]
+tests/test_pipeline.py::test_analysis_stage <span class="hljs-addition">PASSED</span>                       [ 50%]
+tests/test_pipeline.py::test_prd_stage <span class="hljs-addition">PASSED</span>                            [ 58%]
+tests/test_pipeline.py::test_plan_stage <span class="hljs-addition">PASSED</span>                           [ 66%]
+
+============================== <span class="hljs-number">12</span> <span class="hljs-addition">passed</span> in <span class="hljs-number">3.45s</span> ==============================</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="bash-error">
+  <div class="section-header">
+    <span class="section-num">09b</span>
+    <h3>Bash ERROR — 编译/运行错误</h3>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-error">ERROR</span> tool_name: "Bash", tool_error: true — TS 编译错误</div>
+    <div class="card-body">
+      <div class="bash-card">
+        <div class="bash-header bash-header-err">
+          <span style="color:var(--text-muted)">⌨</span>
+          <span class="bash-prompt">$</span>
+          <span class="bash-cmd">npx tsc --noEmit</span>
+          <span class="bash-lines">4 lines</span>
+          <span class="tool-badge-fail" style="margin-left:8px">FAIL</span>
+        </div>
+        <div class="bash-output bash-output-err"><span class="hljs-string">src/components/ChatRenderer.tsx</span>(<span class="hljs-number">45</span>,<span class="hljs-number">7</span>): <span class="hljs-deletion">error</span> <span style="color:#ff7b72">TS2322</span>: Type 'string' is not assignable to type 'number'.
+<span class="hljs-string">src/components/ChatRenderer.tsx</span>(<span class="hljs-number">89</span>,<span class="hljs-number">3</span>): <span class="hljs-deletion">error</span> <span style="color:#ff7b72">TS2345</span>: Argument of type 'null' is not assignable.
+<span class="hljs-string">src/utils/highlight.ts</span>(<span class="hljs-number">12</span>,<span class="hljs-number">5</span>): <span class="hljs-deletion">error</span> <span style="color:#ff7b72">TS7006</span>: Parameter 'text' implicitly has an 'any' type.
+
+Found <span class="hljs-number">3</span> <span class="hljs-deletion">errors</span> in <span class="hljs-number">2</span> files.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 8px;">
+    <div class="card-label"><span class="tag tag-error">ERROR</span> Python traceback</div>
+    <div class="card-body">
+      <div class="bash-card">
+        <div class="bash-header bash-header-err">
+          <span style="color:var(--text-muted)">⌨</span>
+          <span class="bash-prompt">$</span>
+          <span class="bash-cmd">python -c "import nonexistent"</span>
+          <span class="tool-badge-fail" style="margin-left:auto">FAIL</span>
+        </div>
+        <div class="bash-output bash-output-err">Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+<span class="hljs-deletion">ModuleNotFoundError</span>: No module named 'nonexistent'</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="bash-silent">
+  <div class="section-header"><span class="section-num">09c</span><h3>Bash — 静默成功（无输出）</h3></div>
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Bash" — 无输出</div>
+    <div class="card-body">
+      <div class="bash-card">
+        <div class="bash-header">
+          <span style="color:var(--text-muted)">⌨</span>
+          <span class="bash-prompt">$</span>
+          <span class="bash-cmd">mkdir -p src/utils && touch src/utils/index.ts</span>
+          <span style="flex:1"></span>
+          <span class="tool-badge-pass">PASS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="bash-json">
+  <div class="section-header"><span class="section-num">09d</span><h3>Bash — JSON 输出</h3></div>
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> 自动检测 JSON 语法高亮</div>
+    <div class="card-body">
+      <div class="bash-card">
+        <div class="bash-header">
+          <span style="color:var(--text-muted)">⌨</span>
+          <span class="bash-prompt">$</span>
+          <span class="bash-cmd">cat package.json | head -10</span>
+          <span class="bash-lines">10 lines</span>
+          <span class="tool-badge-pass" style="margin-left:8px">PASS</span>
+        </div>
+        <div class="bash-output">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"task-conductor"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+  <span class="hljs-attr">"private"</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"vite"</span>,
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"tsc && vite build"</span>,
+    <span class="hljs-attr">"preview"</span>: <span class="hljs-string">"vite preview"</span>
+  }
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 10. Agent -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="agent">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h3>AgentResultView — 子代理结果</h3>
+  </div>
+  <p class="section-desc">
+    Agent 工具调用显示紫色主题卡片，头部显示子代理描述，内容体渲染 Markdown 结果。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Agent"</div>
+    <div class="card-body">
+      <div class="agent-wrap">
+        <div class="agent-header">
+          <span>🤖</span>
+          <span>探索前端组件结构</span>
+        </div>
+        <div class="agent-body md-content">
+          <h3>探索结果</h3>
+          <p>找到 <strong>8 个 CSS Module 文件</strong>：</p>
+          <ol>
+            <li><code>sessions.module.css</code> — 会话页主样式（1630 行）</li>
+            <li><code>session-chat.module.css</code> — 聊天布局</li>
+            <li><code>sidebar.module.css</code> — 侧边栏</li>
+            <li><code>top-bar.module.css</code> — 顶栏</li>
+          </ol>
+          <h4>样式架构</h4>
+          <ul>
+            <li>CSS Variables（<code>--tc-</code> 前缀）</li>
+            <li>字体：Geist Mono + 系统字体</li>
+            <li>深色主题为主（VS Code Dark+）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">TranscriptBlock 元数据</div>
+      <div class="meta-body">{
+  <span class="meta-key">"tool_name"</span>:  <span class="meta-str">"Agent"</span>,
+  <span class="meta-key">"tool_input"</span>:  {
+    <span class="meta-key">"description"</span>: <span class="meta-str">"探索前端组件结构"</span>,
+    <span class="meta-key">"prompt"</span>: <span class="meta-str">"搜索所有 CSS Module 文件并分析样式架构"</span>
+  },
+  <span class="meta-key">"tool_result"</span>: <span class="meta-str">"## 探索结果\n\n找到 **8 个 CSS Module 文件**..."</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 11. AskUserQuestion -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="ask-user">
+  <div class="section-header">
+    <span class="section-num">11</span>
+    <h3>AskUserQuestionView — 用户确认</h3>
+  </div>
+  <p class="section-desc">
+    带选项按钮的用户确认卡片。支持：选项选中高亮、自由文本回复、等待回答状态。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "AskUserQuestion" — 有选项 + 已回答</div>
+    <div class="card-body">
+      <div class="ask-wrap">
+        <div class="ask-header">
+          <span>❓</span>
+          <span>Ask User Question</span>
+        </div>
+        <div class="ask-body">
+          <p class="ask-question">你说的"顶栏融合为一栏"具体是指什么？</p>
+          <div class="ask-options">
+            <div class="ask-option ask-option-dimmed">
+              <span class="ask-option-key">A</span>
+              <span>AI 弹窗内部的 header + tab 栏合并成一行</span>
+            </div>
+            <div class="ask-option ask-option-selected">
+              <span class="ask-option-key">B</span>
+              <span>AI 助手直接嵌入到应用 TopBar 中（类似 Spotlight / ⌘K 搜索栏）</span>
+            </div>
+            <div class="ask-option ask-option-dimmed">
+              <span class="ask-option-key">C</span>
+              <span>AI 弹窗打开后替换/接管 TopBar 区域</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "AskUserQuestion" — 等待回答</div>
+    <div class="card-body">
+      <div class="ask-wrap">
+        <div class="ask-header">
+          <span>❓</span>
+          <span>Ask User Question</span>
+        </div>
+        <div class="ask-body">
+          <p class="ask-question">需要为暗色/亮色主题分别定制配色吗？还是只专注暗色？</p>
+        </div>
+        <div class="ask-waiting">
+          <span class="ask-waiting-dot"></span>
+          <span>等待用户回答…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 12. WebSearch / WebFetch -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="web-search">
+  <div class="section-header">
+    <span class="section-num">12</span>
+    <h3>WebSearch / WebFetch — 网络搜索</h3>
+  </div>
+  <p class="section-desc">
+    通用 ToolWidget 渲染，可折叠。点击展开查看搜索结果或网页内容。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "WebSearch"</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">🌐</span>
+        <code class="tool-param">react-virtuoso custom renderer performance</code>
+        <span style="flex:1"></span>
+        <span class="tool-chevron">▶</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "WebFetch"</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">🌐</span>
+        <code class="tool-param">https://api.example.com/docs</code>
+        <span style="flex:1"></span>
+        <span class="tool-chevron">▶</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 13. Skill / TaskCreate / Unknown -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="skill">
+  <div class="section-header">
+    <span class="section-num">13</span>
+    <h3>Skill / TaskCreate — 系统工具</h3>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "Skill"</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">⌨</span>
+        <span class="tool-name">Skill</span>
+        <code class="tool-param" style="margin-left: 4px;">brainstorming</code>
+        <span style="flex:1"></span>
+        <span class="tool-chevron">▶</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "TaskCreate"</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">⌨</span>
+        <span class="tool-name">TaskCreate</span>
+        <code class="tool-param" style="margin-left: 4px;">修复 Bash 输出高亮</code>
+        <span style="flex:1"></span>
+        <span class="tool-chevron">▶</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="unknown-tool">
+  <div class="section-header">
+    <span class="section-num">13b</span>
+    <h3>OutputBlock — 未知工具 Fallback</h3>
+  </div>
+  <p class="section-desc">
+    不属于已知工具的 tool_use 使用通用 <code>OutputBlock</code> 渲染结果。支持代码自动检测高亮和 Markdown。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-tool">TOOL_USE</span> tool_name: "CustomPlugin" (unknown)</div>
+    <div class="card-body">
+      <div class="tool-header">
+        <span class="tool-icon">⌨</span>
+        <span class="tool-name">CustomPlugin</span>
+        <span style="flex:1"></span>
+        <span class="tool-chevron" style="transform:rotate(90deg)">▶</span>
+      </div>
+      <div class="output-block" style="margin: 0 10px 8px;">
+        <div class="md-content">
+          <p>Analysis complete:</p>
+          <ul>
+            <li>Render time: 12.3ms average</li>
+            <li>Re-renders: 3 unnecessary (memoize recommended)</li>
+            <li>Bundle impact: +2.1KB gzipped</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 14. Progress / System -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section" id="progress">
+  <div class="section-header">
+    <span class="section-num">14</span>
+    <h3>Progress — Hook 执行进度</h3>
+  </div>
+  <p class="section-desc">
+    JSONL 中频率最高的条目类型。前端不直接渲染，但记录在 Hook 观测层（<code>/hooks/claude</code>）。
+    包含 hook 名称、命令、耗时等信息。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-progress">PROGRESS</span> type: "progress" — Hook 执行进度</div>
+    <div class="card-body">
+      <div class="progress-bar">
+        <div class="progress-spinner"></div>
+        <span>Hook: <code>SessionStart:startup</code></span>
+        <span style="margin-left: auto; color: var(--text-dim)">tc-hook.sh</span>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">JSONL 原始结构</div>
+      <div class="meta-body">{
+  <span class="meta-key">"type"</span>: <span class="meta-str">"progress"</span>,
+  <span class="meta-key">"data"</span>: {
+    <span class="meta-key">"type"</span>: <span class="meta-str">"hook_progress"</span>,
+    <span class="meta-key">"hookEvent"</span>: <span class="meta-str">"SessionStart"</span>,
+    <span class="meta-key">"hookName"</span>: <span class="meta-str">"SessionStart:startup"</span>,
+    <span class="meta-key">"command"</span>: <span class="meta-str">"/home/user/.claude/hooks/tc-hook.sh"</span>
+  },
+  <span class="meta-key">"parentToolUseID"</span>: <span class="meta-str">"878f3828-..."</span>,
+  <span class="meta-key">"toolUseID"</span>: <span class="meta-str">"878f3828-..."</span>,
+  <span class="meta-key">"timestamp"</span>: <span class="meta-str">"2026-03-22T14:18:08.951Z"</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="system-entry">
+  <div class="section-header">
+    <span class="section-num">15</span>
+    <h3>System Entry — 系统事件</h3>
+  </div>
+  <p class="section-desc">
+    包括 <code>stop_hook_summary</code>（stop hook 执行摘要）、<code>context_pruned</code>（上下文压缩）等。
+    前端不渲染，但在 Hook 观测层有记录。
+  </p>
+
+  <div class="card">
+    <div class="card-label"><span class="tag tag-system">SYSTEM</span> type: "system", subtype: "stop_hook_summary"</div>
+    <div class="card-body" style="padding: 8px 12px;">
+      <div style="display:flex; align-items:center; gap: 8px; font-size: 12px; color: var(--text-muted);">
+        <span style="color:var(--yellow)">⚡</span>
+        <span>Stop hook summary — 2 hooks executed</span>
+      </div>
+    </div>
+    <div class="meta-panel">
+      <div class="meta-header">JSONL 原始结构</div>
+      <div class="meta-body">{
+  <span class="meta-key">"type"</span>: <span class="meta-str">"system"</span>,
+  <span class="meta-key">"subtype"</span>: <span class="meta-str">"stop_hook_summary"</span>,
+  <span class="meta-key">"hookCount"</span>: <span class="meta-num">2</span>,
+  <span class="meta-key">"hookInfos"</span>: [
+    { <span class="meta-key">"command"</span>: <span class="meta-str">"vibecraft-hook.sh"</span>, <span class="meta-key">"durationMs"</span>: <span class="meta-num">84</span> },
+    { <span class="meta-key">"command"</span>: <span class="meta-str">"tc-hook.sh"</span>, <span class="meta-key">"durationMs"</span>: <span class="meta-num">21</span> }
+  ],
+  <span class="meta-key">"hookErrors"</span>: [],
+  <span class="meta-key">"preventedContinuation"</span>: <span class="meta-bool">false</span>,
+  <span class="meta-key">"hasOutput"</span>: <span class="meta-bool">true</span>,
+  <span class="meta-key">"level"</span>: <span class="meta-str">"suggestion"</span>
+}</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 完整渲染流水线 -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">REF</span>
+    <h3>完整渲染流水线</h3>
+  </div>
+  <p class="section-desc">从 TranscriptMessage 到最终 React 组件的完整路径。</p>
+
+  <div class="card">
+    <div class="card-body" style="font-family: var(--font-mono); font-size: 12px; line-height: 2; color: var(--text-muted);">
+<pre style="color: var(--text-muted); font-size: 11px;">
+TranscriptMessage[]
+  │
+  ├── groupMessagesIntoTurns()
+  │     ├── { kind: 'user' }     →  <span style="color:var(--accent)">UserCard</span>
+  │     └── { kind: 'turn' }     →  <span style="color:var(--purple)">AssistantTurnCard</span>
+  │           │
+  │           ├── turn.texts[]    →  <span style="color:var(--purple)">RichTextBlock</span>
+  │           │     ├── plain text        → ReactMarkdown + remarkGfm
+  │           │     ├── ```code```        → <span style="color:var(--orange)">CollapsibleCode</span> + hljs
+  │           │     ├── ```mermaid```     → <span style="color:var(--orange)">MermaidBlock</span>
+  │           │     ├── &lt;task-notification&gt; → <span style="color:var(--green)">TaskNotificationCard</span>
+  │           │     └── &lt;system-reminder&gt;  → <span style="color:var(--yellow)">SystemReminderCard</span>
+  │           │
+  │           ├── turn.reads[]    →  <span style="color:var(--green)">ReadPillRow</span>
+  │           │     ├── Read      → pill + ReadFileView (展开)
+  │           │     ├── Grep      → pill + SearchResultPanel (展开)
+  │           │     └── Glob      → pill
+  │           │
+  │           ├── turn.edits[]    →  <span style="color:var(--orange)">EditInlineCard</span>
+  │           │     ├── Edit      → EditDiffView (LCS diff)
+  │           │     ├── MultiEdit → EditDiffView
+  │           │     └── Write     → file badge + ✓
+  │           │
+  │           ├── turn.bashes[]   →  <span style="color:var(--green)">BashStatusLine</span>
+  │           │     ├── success   → $ cmd + highlighted output
+  │           │     ├── error     → red border + error output
+  │           │     └── silent    → $ cmd + PASS badge only
+  │           │
+  │           └── turn.others[]   →  <span style="color:var(--cyan)">ToolWidget</span> (通用)
+  │                 ├── Agent           → <span style="color:var(--purple)">AgentResultView</span>
+  │                 ├── AskUserQuestion → <span style="color:var(--accent)">AskUserQuestionView</span>
+  │                 ├── WebSearch       → collapsible output
+  │                 ├── WebFetch        → collapsible output
+  │                 ├── Skill           → collapsible output
+  │                 ├── TaskCreate      → collapsible output
+  │                 └── *unknown*       → <span style="color:var(--text-dim)">OutputBlock</span> (fallback)
+</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════ -->
+<!-- 工具分类速查表 -->
+<!-- ═════════════════════════════════════════════════════════════ -->
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">REF</span>
+    <h3>工具分类速查</h3>
+  </div>
+
+  <table class="field-table">
+    <tr><th>分类</th><th>工具名</th><th>渲染组件</th><th>特殊处理</th></tr>
+    <tr><td>READONLY_TOOLS</td><td>Read, Grep, Glob, WebSearch, WebFetch</td><td>ReadPillRow</td><td>聚合为药丸行，点击展开</td></tr>
+    <tr><td>WRITE_TOOLS</td><td>Edit, MultiEdit, Write</td><td>EditInlineCard</td><td>LCS diff / file badge</td></tr>
+    <tr><td>Bash</td><td>Bash</td><td>BashStatusLine</td><td>命令高亮 + 输出语言检测</td></tr>
+    <tr><td>Agent</td><td>Agent</td><td>AgentResultView</td><td>紫色主题 + Markdown</td></tr>
+    <tr><td>AskUser</td><td>AskUserQuestion</td><td>AskUserQuestionView</td><td>选项按钮 + 等待状态</td></tr>
+    <tr><td>Other</td><td>Skill, TaskCreate, *</td><td>ToolWidget → OutputBlock</td><td>通用折叠 + Markdown/Code</td></tr>
+  </table>
+</div>
+
+<div style="height: 80px"></div>
+
+</main>
+</div>
+
+<script>
+// 简单导航高亮
+const items = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      items.forEach(i => i.classList.remove('active'));
+      const href = '#' + e.target.id;
+      const item = document.querySelector(`.nav-item[href="${href}"]`);
+      if (item) item.classList.add('active');
+    }
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+document.querySelectorAll('.section[id]').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
