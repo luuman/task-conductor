@@ -179,6 +179,8 @@
       "tool_TaskCreate": "Create Task",
       "tool_TaskUpdate": "Update Task",
       "tool_TaskList": "Task List",
+      "tool_CustomPlugin": "Custom Plugin",
+      "tool_NotebookEdit": "Notebook Edit",
       "tool_default": "Tool",
       "section_active": "Active",
       "section_history": "History",
