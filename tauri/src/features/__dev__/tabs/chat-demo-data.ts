@@ -772,13 +772,46 @@ Done in 4.12s.`,
   },
 
   // ═══════════════════════════════════════════════
-  // Mermaid 图表
+  // 消息渲染流水线
   // ═══════════════════════════════════════════════
-  sep('展示 Mermaid 图表', '2026-03-22T10:01:26Z'),
+  sep('消息渲染流水线', '2026-03-22T10:01:26Z'),
 
   {
     role: 'assistant',
     ts: '2026-03-22T10:01:27Z',
+    blocks: [{
+      type: 'text',
+      text: `\`\`\`mermaid
+flowchart TD
+    A[TranscriptMessage] --> B{role?}
+    B -->|user| C[UserCard]
+    B -->|assistant| D[groupMessagesIntoTurns]
+    D --> E[AssistantTurnCard]
+    E --> F[texts → RichTextBlock]
+    E --> G[reads → ReadPillRow]
+    E --> H[edits → EditInlineCard]
+    E --> I[bashes → BashStatusLine]
+    E --> J[others → ToolWidget]
+    F --> F1[Markdown]
+    F --> F2[TaskNotification]
+    F --> F3[SystemReminder]
+    F --> F4[Mermaid]
+    F --> F5[CollapsibleCode]
+    J --> J1[Agent]
+    J --> J2[AskUser]
+    J --> J3[OutputBlock]
+\`\`\``,
+    }],
+  },
+
+  // ═══════════════════════════════════════════════
+  // Mermaid 图表（最后展示）
+  // ═══════════════════════════════════════════════
+  sep('展示 Mermaid 图表', '2026-03-22T10:01:28Z'),
+
+  {
+    role: 'assistant',
+    ts: '2026-03-22T10:01:29Z',
     blocks: [{
       type: 'text',
       text: `时序图：
@@ -840,39 +873,6 @@ stateDiagram-v2
 \`\`\``,
     }],
   },
-
-  // ═══════════════════════════════════════════════
-  // 消息渲染流水线（放在最底部）
-  // ═══════════════════════════════════════════════
-  sep('消息渲染流水线', '2026-03-22T10:01:28Z'),
-
-  {
-    role: 'assistant',
-    ts: '2026-03-22T10:01:29Z',
-    blocks: [{
-      type: 'text',
-      text: `\`\`\`mermaid
-flowchart TD
-    A[TranscriptMessage] --> B{role?}
-    B -->|user| C[UserCard]
-    B -->|assistant| D[groupMessagesIntoTurns]
-    D --> E[AssistantTurnCard]
-    E --> F[texts → RichTextBlock]
-    E --> G[reads → ReadPillRow]
-    E --> H[edits → EditInlineCard]
-    E --> I[bashes → BashStatusLine]
-    E --> J[others → ToolWidget]
-    F --> F1[Markdown]
-    F --> F2[TaskNotification]
-    F --> F3[SystemReminder]
-    F --> F4[Mermaid]
-    F --> F5[CollapsibleCode]
-    J --> J1[Agent]
-    J --> J2[AskUser]
-    J --> J3[OutputBlock]
-\`\`\``,
-    }],
-  },
 ]
 
 // 导航索引（按实际消息位置）
@@ -904,6 +904,6 @@ export const DEMO_SECTIONS = [
   { label: '未知工具', index: 49 },
   { label: 'Bash 权限错误', index: 51 },
   { label: 'Edit 编辑失败', index: 52 },
-  { label: 'Mermaid 图表', index: 53 },
-  { label: '渲染流水线', index: 55 },
+  { label: '渲染流水线', index: 53 },
+  { label: 'Mermaid 图表', index: 55 },
 ]
