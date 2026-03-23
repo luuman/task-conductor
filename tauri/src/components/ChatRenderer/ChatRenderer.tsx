@@ -658,15 +658,17 @@ function EditDiffView({ input, hideHeader }: { input: Record<string, unknown>; h
 
   return (
     <div className={styles.diffWrap}>
-      <div className={styles.diffHeader}>
-        {fileExtIcon(filePath, 14)}
-        <span className={styles.diffFilePath} title={filePath}>{fileName}</span>
-        <span style={{ flex: 1 }} />
-        <span className={styles.diffStats}>
-          {added > 0 && <span className={styles.diffStatsAdd}>+{added}</span>}
-          {removed > 0 && <span className={styles.diffStatsDel}>{'\u2212'}{removed}</span>}
-        </span>
-      </div>
+      {!hideHeader && (
+        <div className={styles.diffHeader}>
+          {fileExtIcon(filePath, 14)}
+          <span className={styles.diffFilePath} title={filePath}>{fileName}</span>
+          <span style={{ flex: 1 }} />
+          <span className={styles.diffStats}>
+            {added > 0 && <span className={styles.diffStatsAdd}>+{added}</span>}
+            {removed > 0 && <span className={styles.diffStatsDel}>{'\u2212'}{removed}</span>}
+          </span>
+        </div>
+      )}
       <div className={styles.diffBody}>
         {lines.map((item, idx) => {
           if ('count' in item) {
