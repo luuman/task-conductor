@@ -82,19 +82,19 @@ export const DEMO_TURNS: ReportTurn[] = [
     cwd: '/home/sichengli/Documents/code2/task-conductor',
     model: 'claude-opus-4-6',
 
-    resultText: `Alright, here's the analysis and fix for the Bash output highlighting:
+    resultText: `好的，以下是 Bash 输出高亮问题的分析和修复：
 
-**Root Cause:**
-- \`guessOutputLang()\` only detected TypeScript compiler errors
-- No detection for JSON output, Python tracebacks, or test results
-- Fallback was plain text with no coloring at all
+**根因分析：**
+- \`guessOutputLang()\` 仅检测了 TypeScript 编译错误格式
+- 缺少对 JSON 输出、Python traceback、测试结果格式的检测
+- 回退方案是纯文本，没有任何着色
 
-**Fix Applied:**
-1. Extended \`guessOutputLang()\` to cover JSON, Python, Rust, Go output formats
-2. Added \`highlightLog()\` terminal-style coloring as fallback — highlights errors (red), warnings (yellow), success (green), file paths, and numbers
-3. Bash command header now gets syntax highlighting via \`useHighlight('bash')\`
+**修复内容：**
+1. 扩展 \`guessOutputLang()\` 覆盖 JSON、Python、Rust、Go 输出格式
+2. 新增 \`highlightLog()\` 终端风格着色作为回退 — 错误（红色）、警告（黄色）、成功（绿色）、文件路径和数字自动上色
+3. Bash 命令头部现在通过 \`useHighlight('bash')\` 获得语法高亮
 
-All 12 tests pass. The fix covers the most common output formats while the terminal-style fallback ensures nothing is displayed as raw unstyled text.`,
+全部 12 个测试通过。修复覆盖了最常见的输出格式，终端风格着色回退确保不会有纯白文本输出。`,
 
     codeBlocks: [
       {
