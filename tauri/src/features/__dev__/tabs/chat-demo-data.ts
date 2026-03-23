@@ -600,9 +600,9 @@ Done in 4.12s.`,
       tool_name: 'AskUserQuestion',
       tool_use_id: 'ask-001',
       tool_input: {
-        question: 'Diff 视图使用 side-by-side（左右对比）还是 unified（上下合并）布局？\n当前使用 unified 样式。',
+        question: '你说的"顶栏融合为一栏"具体是指什么？\n\n  - A) AI 弹窗内部的 header + tab 栏合并成一行（减少弹窗内部的垂直占用）\n  - B) AI 助手直接嵌入到应用 TopBar 中（类似 Spotlight / ⌘K 搜索栏），不再是独立浮窗\n  - C) AI 弹窗打开后替换/接管 TopBar 区域，形成沉浸式体验\n\n哪个更接近你的想法？',
       },
-      tool_result: '用 side-by-side 吧，看起来更清晰',
+      tool_result: 'B',
     }],
   },
 
