@@ -387,9 +387,10 @@ function TaskNotificationCard({ data }: { data: TaskNotification }) {
 }
 
 function SystemReminderCard({ data }: { data: SystemReminder }) {
+  const { t } = useTranslation()
   return (
     <details className={styles.systemReminder}>
-      <summary className={styles.systemReminderSummary}>System Reminder</summary>
+      <summary className={styles.systemReminderSummary}>{t('admin.sessions.system_reminder')}</summary>
       <div className={styles.systemReminderBody}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{data.content}</ReactMarkdown>
       </div>
