@@ -92,14 +92,6 @@ function SessionRow({
   const isActive = session.status === 'active'
   const isIdle = session.status === 'idle'
 
-  const statusText = isActive ? t('admin.sessions.status_active', '运行中')
-    : isIdle ? t('admin.sessions.status_idle', '空闲')
-    : t('admin.sessions.status_stopped', '已结束')
-
-  const statusCls = isActive ? styles.ntStatusActive
-    : isIdle ? styles.ntStatusIdle
-    : styles.ntStatusStopped
-
   const dotCls = isActive ? styles.ntDotActive
     : isIdle ? styles.ntDotIdle
     : styles.ntDotStopped
@@ -109,10 +101,9 @@ function SessionRow({
       className={isSelected ? styles.ntRowSelected : styles.ntRow}
       onClick={() => onSelect(session)}
     >
-      {/* Status */}
+      {/* Status dot */}
       <span className={styles.ntColStatus}>
         <span className={`${styles.ntDot} ${dotCls} ${isActive ? styles.ntDotPulse : ''}`} />
-        <span className={`${styles.ntStatusTag} ${statusCls}`}>{statusText}</span>
       </span>
 
       {/* Title + tags */}
