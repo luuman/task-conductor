@@ -301,7 +301,7 @@ export default function ChatReportPage() {
           </div>
           <div className={styles.followUpWrap}>
             <span className={styles.followUpIcon}>@</span>
-            <input className={styles.followUpInput} placeholder="Ask follow up question..." />
+            <input className={styles.followUpInput} placeholder="输入追问..." />
             <div className={styles.citationToggle}>
               <span>Citation</span>
               <div className={styles.toggleTrack}><div className={styles.toggleThumb} /></div>
