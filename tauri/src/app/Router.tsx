@@ -23,6 +23,7 @@ const TaskManagerPage   = lazy(() => import('../features/task-manager'))
 const TaskDetailPage    = lazy(() => import('../features/task-detail'))
 const CanvasPage        = lazy(() => import('../features/canvas'))
 const SessionsPage      = lazy(() => import('../features/sessions'))
+const ChatReportPage    = lazy(() => import('../features/chat'))
 
 function PlaceholderPageComponent() {
   const { t } = useTranslation()
