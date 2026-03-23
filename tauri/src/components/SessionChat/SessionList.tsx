@@ -56,16 +56,12 @@ function SectionHeader({ label, count }: { label: string; count: number }) {
 
 // ── Table header ──
 
-function TableHeader({ showProjectName }: { showProjectName: boolean }) {
+function TableHeader() {
   const { t } = useTranslation()
   return (
     <div className={styles.ntHeaderRow}>
       <span className={styles.ntColStatus} />
       <span className={styles.ntColTitle}>{t('admin.sessions.col_title', '标题')}</span>
-      {showProjectName && (
-        <span className={styles.ntColProject}>{t('admin.sessions.col_project', '项目')}</span>
-      )}
-      <span className={styles.ntColDuration}>{t('admin.sessions.col_duration', '时长')}</span>
       <span className={styles.ntColEvents}>{t('admin.sessions.col_events', '事件')}</span>
       <span className={styles.ntColTime}>{t('admin.sessions.col_time', '时间')}</span>
     </div>
