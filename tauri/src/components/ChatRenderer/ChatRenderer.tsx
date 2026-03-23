@@ -633,6 +633,7 @@ function stripLineNumbers(text: string): string {
 // ── EditDiffView ────────────────────────────────────────────
 
 function EditDiffView({ input, hideHeader }: { input: Record<string, unknown>; hideHeader?: boolean }) {
+  const { t } = useTranslation()
   const oldStr = String(input.old_string ?? '')
   const newStr = String(input.new_string ?? '')
   const filePath = String(input.file_path ?? '')
