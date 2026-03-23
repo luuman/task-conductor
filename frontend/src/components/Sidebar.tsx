@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { id: "tasks",         labelKey: "sidebar.nav.tasks",          Icon: CheckSquare     },
   { id: "files",         labelKey: "sidebar.nav.files",          Icon: FolderSearch    },
   { id: "conversations", labelKey: "sidebar.nav.conversations",  Icon: MessageSquare   },
+  { id: "character-studio", labelKey: "sidebar.nav.characterStudio", Icon: Sparkles     },
   { id: "claude-config", labelKey: "sidebar.nav.claudeConfig",   Icon: Cpu             },
   { id: "settings",      labelKey: "sidebar.nav.settings",       Icon: Settings        },
 ];
