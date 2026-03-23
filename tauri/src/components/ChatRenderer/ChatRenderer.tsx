@@ -440,6 +440,56 @@ export function CopyButton({ text, className }: { text: string; className?: stri
   )
 }
 
+// ── CollapsibleCode（代码块折叠） ────────────────────────────
+
+const CODE_COLLAPSE_THRESHOLD = 8 // 超过 8 行可折叠
+
+function CollapsibleCode({ html, raw, lang, lineCount }: {
+  html?: string | null
+  raw: string
+  lang?: string
+  lineCount: number
+}) {
+  const [collapsed, setCollapsed] = useState(lineCount > CODE_COLLAPSE_THRESHOLD)
+  const canCollapse = lineCount > CODE_COLLAPSE_THRESHOLD
+
+  return (
+    <div className={styles.codeWrap}>
+      {/* 代码块头 */}
+      {canCollapse && (
+        <div className={styles.codeHeader}>
+          {lang && <span className={styles.codeLang}>{lang}</span>}
+          <span className={styles.codeLines}>{lineCount} lines</span>
+          <span style={{ flex: 1 }} />
+          <CopyButton text={raw} />
+          <button className={styles.codeToggle} onClick={() => setCollapsed(v => !v)}>
+            {collapsed ? 'Expand' : 'Collapse'}
+          </button>
+        </div>
+      )}
+      {!canCollapse && (
+        <div className={styles.codeHeader}>
+          {lang && <span className={styles.codeLang}>{lang}</span>}
+          <span style={{ flex: 1 }} />
+          <CopyButton text={raw} />
+        </div>
+      )}
+      {/* 代码内容 */}
+      <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
+        {html ? (
+          <code className={`hljs ${styles.mdCodeBlock}`}
+                dangerouslySetInnerHTML={{ __html: html }} />
+        ) : (
+          <code className={styles.mdCodeBlockPlain}>{raw}</code>
+        )}
+        {collapsed && (
+          <div className={styles.codeFade} onClick={() => setCollapsed(false)} />
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Markdown components ─────────────────────────────────────
 
 export const mdComponents: Components = {
