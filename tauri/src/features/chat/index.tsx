@@ -24,7 +24,7 @@ function SourceCards({ sources }: { sources: ReportTurn['sources'] }) {
       ))}
       {!showAll && remaining > 0 && (
         <button className={styles.sourceMore} onClick={() => setShowAll(true)}>
-          +{remaining} More
+          +{remaining} 更多
         </button>
       )}
     </div>
