@@ -885,7 +885,7 @@ export function ToolWidget({ block }: { block: TranscriptBlock }) {
         ) : detail ? (
           <code className={styles.toolParam}>{detail}</code>
         ) : (
-          <span className={styles.toolName}>{isEdit ? 'Edit' : toolName}</span>
+          <span className={styles.toolName}>{t(`admin.sessions.tool_${toolName}`, { defaultValue: toolName })}</span>
         )}
         {isError && (
           <span className={styles.toolError}>ERROR</span>
