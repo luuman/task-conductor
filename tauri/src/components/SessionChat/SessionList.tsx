@@ -210,7 +210,7 @@ export function SessionList({
         ) : (
           <div className={styles.ntTable}>
             {/* Column headers */}
-            <TableHeader showProjectName={showProjectName} />
+            <TableHeader />
 
             {activeSessions.length > 0 && (
               <>
