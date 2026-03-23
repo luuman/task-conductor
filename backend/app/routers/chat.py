@@ -17,6 +17,22 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
+
+def _update_session_status(session_id: str, status: str):
+    """更新 ClaudeSession 状态，防止 SDK disconnect 后 hook 来不及触发"""
+    try:
+        from sqlalchemy.orm import Session as DBSession
+        from ..database import engine
+        from ..models import ClaudeSession
+        with DBSession(engine) as db:
+            sess = db.query(ClaudeSession).filter_by(session_id=session_id).first()
+            if sess and sess.status != status:
+                sess.status = status
+                sess.last_seen_at = datetime.utcnow()
+                db.commit()
+    except Exception:
+        logger.debug(f"Failed to update session {session_id} status", exc_info=True)
+
 router = APIRouter(prefix="/api/chat", tags=["聊天"])
 
 # 可用模型列表
