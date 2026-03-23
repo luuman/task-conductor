@@ -453,20 +453,20 @@ function CollapsibleCode({ html, raw, lang, lineCount }: {
   lang?: string
   lineCount: number
 }) {
+  const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(lineCount > CODE_COLLAPSE_THRESHOLD)
   const canCollapse = lineCount > CODE_COLLAPSE_THRESHOLD
 
   return (
     <div className={styles.codeWrap}>
-      {/* 代码块头 */}
       {canCollapse && (
         <div className={styles.codeHeader}>
           {lang && <span className={styles.codeLang}>{lang}</span>}
-          <span className={styles.codeLines}>{lineCount} lines</span>
+          <span className={styles.codeLines}>{t('admin.sessions.code_lines', { count: lineCount })}</span>
           <span style={{ flex: 1 }} />
           <CopyButton text={raw} />
           <button className={styles.codeToggle} onClick={() => setCollapsed(v => !v)}>
-            {collapsed ? 'Expand' : 'Collapse'}
+            {collapsed ? t('admin.sessions.code_expand') : t('admin.sessions.code_collapse')}
           </button>
         </div>
       )}
