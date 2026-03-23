@@ -169,13 +169,13 @@
   background: rgba(0, 122, 204, 0.12);
 }
 
-/* Column widths — shared between header and rows */
+/* Column widths — optimized for 300px panel */
 .ntColStatus {
-  width: 72px;
+  width: 14px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
 }
 
 .ntColTitle {
@@ -183,12 +183,12 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   overflow: hidden;
 }
 
 .ntColProject {
-  width: 70px;
+  width: 56px;
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -196,19 +196,19 @@
 }
 
 .ntColDuration {
-  width: 48px;
+  width: 38px;
   flex-shrink: 0;
   text-align: right;
 }
 
 .ntColEvents {
-  width: 40px;
+  width: 30px;
   flex-shrink: 0;
   text-align: right;
 }
 
 .ntColTime {
-  width: 52px;
+  width: 44px;
   flex-shrink: 0;
   text-align: right;
 }
