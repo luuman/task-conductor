@@ -756,13 +756,14 @@ function AgentResultView({ result, description }: { result: string; description:
 // ── AskUserQuestionView ─────────────────────────────────────
 
 function AskUserQuestionView({ input, result }: { input: Record<string, unknown>; result?: string | null }) {
+  const { t } = useTranslation()
   const question = String(input.question || '')
 
   return (
     <div className={styles.askWrap}>
       <div className={styles.askHeader}>
         <IconCircleHelp size={13} />
-        <span className={styles.askTitle}>AskUserQuestion</span>
+        <span className={styles.askTitle}>{t('admin.sessions.ask_user_question')}</span>
       </div>
       <div className={styles.askBody}>
         <p className={styles.askQuestion}>{question}</p>
