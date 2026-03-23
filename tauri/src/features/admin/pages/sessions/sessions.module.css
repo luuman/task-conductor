@@ -1130,6 +1130,81 @@
   margin: 0;
 }
 
+/* ── Ask options (button group) ── */
+.askOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.askOptionBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.askOptionBtn:hover {
+  border-color: rgba(234, 179, 8, 0.3);
+  background: rgba(234, 179, 8, 0.06);
+  transform: translateX(4px);
+}
+
+.askOptionKey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  flex-shrink: 0;
+}
+
+.askOptionText {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tc-foreground);
+}
+
+.askOptionSelected {
+  border-color: rgba(86, 211, 100, 0.4);
+  background: rgba(86, 211, 100, 0.08);
+}
+
+.askOptionSelected .askOptionKey {
+  color: #56d364;
+  background: rgba(86, 211, 100, 0.15);
+  border-color: rgba(86, 211, 100, 0.3);
+}
+
+.askOptionSelected .askOptionText {
+  color: #56d364;
+  font-weight: 500;
+}
+
+.askOptionDimmed {
+  opacity: 0.35;
+}
+
+.askOptionDimmed:hover {
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .askAnswer {
   display: flex;
   align-items: flex-start;
