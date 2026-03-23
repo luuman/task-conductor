@@ -285,6 +285,8 @@ async def handle_chat_ws(ws: WebSocket):
                     except Exception:
                         pass
                     client = None
+                if current_session_id:
+                    _update_session_status(current_session_id, "stopped")
                 current_session_id = None
                 await _send({
                     "type": "session_reset",
