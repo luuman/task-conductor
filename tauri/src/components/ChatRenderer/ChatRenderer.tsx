@@ -1130,7 +1130,7 @@ function PillExpandedPanel({ block, toolType }: { block: TranscriptBlock; toolTy
         <span className={styles.searchResultPattern}>{pattern}</span>
         <span style={{ flex: 1 }} />
         <span className={styles.searchResultCount}>
-          {files.length > 0 ? `${files.length} files` : `${resultLines.length} lines`}
+          {files.length > 0 ? t('admin.sessions.files_count', { count: files.length }) : t('admin.sessions.lines_count', { count: resultLines.length })}
         </span>
       </div>
       {files.length > 0 ? (
