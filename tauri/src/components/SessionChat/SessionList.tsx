@@ -60,7 +60,7 @@ function TableHeader({ showProjectName }: { showProjectName: boolean }) {
   const { t } = useTranslation()
   return (
     <div className={styles.ntHeaderRow}>
-      <span className={styles.ntColStatus}>{t('admin.sessions.col_status', '状态')}</span>
+      <span className={styles.ntColStatus} />
       <span className={styles.ntColTitle}>{t('admin.sessions.col_title', '标题')}</span>
       {showProjectName && (
         <span className={styles.ntColProject}>{t('admin.sessions.col_project', '项目')}</span>
