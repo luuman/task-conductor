@@ -402,12 +402,13 @@ export default function HybridPipeline() {
     // 日志
     const lInterval = setInterval(() => {
       if (logIndex < logs.length) {
+        const line = logs[logIndex];
+        logIndex++;
         setStages((prev) => {
           const next = [...prev];
-          next[index] = { ...next[index], logs: [...next[index].logs, logs[logIndex]] };
+          next[index] = { ...next[index], logs: [...next[index].logs, line] };
           return next;
         });
-        logIndex++;
       } else {
         clearInterval(lInterval);
       }
