@@ -232,7 +232,7 @@ export default function ChatReportPage() {
           {/* Sources */}
           {turn.sources.length > 0 && (
             <div className={styles.section}>
-              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> Sources</div>
+              <div className={styles.sectionTitle}><span className={styles.sectionDot} /> 数据来源</div>
               <SourceCards sources={turn.sources} />
             </div>
           )}
