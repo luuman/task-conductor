@@ -470,35 +470,17 @@ export const mdComponents: Components = {
           highlighted = hljs.highlightAuto(raw).value
         }
       } catch { /* fallback */ }
+      const lineCount = raw.split('\n').length
       if (highlighted) {
-        return (
-          <>
-            <CopyButton text={raw} className={styles.codeCopyBtn} />
-            <code className={`hljs ${styles.mdCodeBlock}`}
-                  dangerouslySetInnerHTML={{ __html: highlighted }} />
-          </>
-        )
+        return <CollapsibleCode html={highlighted} raw={raw} lang={lang} lineCount={lineCount} />
       }
-      return (
-        <>
-          <CopyButton text={raw} className={styles.codeCopyBtn} />
-          <code className={styles.mdCodeBlockPlain}>
-            {children}
-          </code>
-        </>
-      )
+      return <CollapsibleCode raw={raw} lang={lang} lineCount={lineCount} />
     }
     // Multi-line without language → plain code block
     const raw = String(children).replace(/\n$/, '')
     if (raw.includes('\n')) {
-      return (
-        <>
-          <CopyButton text={raw} className={styles.codeCopyBtn} />
-          <code className={styles.mdCodeBlockPlain}>
-            {children}
-          </code>
-        </>
-      )
+      const lineCount = raw.split('\n').length
+      return <CollapsibleCode raw={raw} lineCount={lineCount} />
     }
     return (
       <code className={styles.mdInlineCode}>
