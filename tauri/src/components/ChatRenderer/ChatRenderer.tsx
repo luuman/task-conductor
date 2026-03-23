@@ -709,12 +709,14 @@ function ReadFileView({ filePath, result, hideHeader }: { filePath: string; resu
 
   return (
     <div className={styles.readWrap}>
-      <div className={styles.readHeader}>
-        {fileExtIcon(filePath, 14)}
-        <span className={styles.readFilePath} title={filePath}>{fileName}</span>
-        <span style={{ flex: 1 }} />
-        <span className={styles.readLineCount}>{lineCount} lines</span>
-      </div>
+      {!hideHeader && (
+        <div className={styles.readHeader}>
+          {fileExtIcon(filePath, 14)}
+          <span className={styles.readFilePath} title={filePath}>{fileName}</span>
+          <span style={{ flex: 1 }} />
+          <span className={styles.readLineCount}>{lineCount} lines</span>
+        </div>
+      )}
       {highlighted ? (
         <pre className={`hljs ${styles.readBody}`}
              dangerouslySetInnerHTML={{ __html: highlighted }} />
