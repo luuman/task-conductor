@@ -303,7 +303,7 @@ export default function ChatReportPage() {
             <span className={styles.followUpIcon}>@</span>
             <input className={styles.followUpInput} placeholder="输入追问..." />
             <div className={styles.citationToggle}>
-              <span>Citation</span>
+              <span>引用</span>
               <div className={styles.toggleTrack}><div className={styles.toggleThumb} /></div>
             </div>
             <button className={styles.sendBtn}>↑</button>
