@@ -1192,7 +1192,7 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
         </span>
       </button>
       {mounted && (
-        <div style={{ display: expanded ? 'block' : 'none' }}>
+        <div className={styles.toolBody} style={{ display: expanded ? 'block' : 'none' }}>
           <EditDiffView input={input} />
         </div>
       )}
