@@ -440,7 +440,7 @@ const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 // ── 布局 ────────────────────────────────────────────
 
 const RAW_W = 340
-const STYLED_W = 5 * 420 + 4 * 16  // 5 方案 × 420px + 4 间距
+const STYLED_W = 4 * 420 + 3 * 16  // 4 变体 × 420px + 3 间距
 const PAIR_GAP = 200
 const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
 const COL_GAP = 200
