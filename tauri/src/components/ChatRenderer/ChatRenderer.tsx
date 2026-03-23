@@ -1162,13 +1162,16 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
   const [expanded, setExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // No diff data — just show file name badge
+  // No diff data — just show file name + ✓
   if (!hasEditData) {
     return (
-      <div className={styles.bashCardHeader}>
-        <span className={styles.bashCardIcon}>{fileExtIcon(filePath, 14)}</span>
-        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
-        <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
+      <div className={styles.toolWidget}>
+        <div className={styles.toolHeader}>
+          <span className={styles.toolIcon}>{fileExtIcon(filePath, 14)}</span>
+          <span className={styles.toolParam} title={filePath}>{fileName}</span>
+          <span style={{ flex: 1 }} />
+          <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
+        </div>
       </div>
     )
   }
@@ -1179,10 +1182,10 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
   }
 
   return (
-    <div>
-      <button className={`${styles.toolHeader} ${styles.toolHeaderClickable}`} onClick={handleToggle} style={{ width: '100%' }}>
-        <span className={styles.bashCardIcon}>{fileExtIcon(filePath, 14)}</span>
-        <span className={styles.editCardFile} title={filePath}>{fileName}</span>
+    <div className={styles.toolWidget}>
+      <button className={`${styles.toolHeader} ${styles.toolHeaderClickable}`} onClick={handleToggle}>
+        <span className={styles.toolIcon}>{fileExtIcon(filePath, 14)}</span>
+        <span className={styles.toolParam} title={filePath}>{fileName}</span>
         <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
         <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', marginLeft: 'auto' }}>
           ▶
