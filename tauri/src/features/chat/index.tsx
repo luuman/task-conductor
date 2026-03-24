@@ -57,21 +57,34 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
-// ── Code/Result block（直接使用 ChatRenderer.CodeBlock，标题栏复用 CollapsibleCode） ──
+// ── 标题栏 label：SVG 图标 + 文件名 ──
+const ICON_SIZE = 12
+function toolLabel(category: string, fileName: string, extra?: string) {
+  const icon = category === 'read' ? <IconFileText size={ICON_SIZE} />
+    : category === 'edit' ? <IconPencil size={ICON_SIZE} />
+    : category === 'write' ? <IconFileText size={ICON_SIZE} />
+    : category === 'bash' ? <IconTerminal size={ICON_SIZE} />
+    : category === 'agent' ? <IconBot size={ICON_SIZE} />
+    : <IconWrench size={ICON_SIZE} />
+  const text = fileName || extra || ''
+  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>{icon}{text}</span>
+}
+
+// ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
 
-  // Edit — diff 高亮
+  // Edit — diff
   if (step.category === 'edit') {
     const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
     const newStr = String(step.toolInput?.new_string ?? '')
     if (!oldStr && !newStr) return null
     const oldLines = oldStr.split('\n').map(l => `- ${l}`)
     const newLines = newStr.split('\n').map(l => `+ ${l}`)
-    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" label={`Edit · ${fileName}`} />
+    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" label={toolLabel('edit', fileName)} />
   }
 
   // Write
@@ -79,17 +92,17 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return <CodeBlock code={preview} lang={lang} label={`Write · ${fileName}`} />
+    return <CodeBlock code={preview} lang={lang} label={toolLabel('write', fileName)} />
   }
 
-  // Read — 去行号
+  // Read
   if (step.category === 'read' && step.toolResult) {
     const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return <CodeBlock code={stripped} lang={lang} label={`Read · ${fileName}`} />
+    return <CodeBlock code={stripped} lang={lang} label={toolLabel('read', fileName)} />
   }
 
-  // Agent — Markdown 渲染
+  // Agent
   if (step.category === 'agent' && step.toolResult) {
     return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
@@ -97,12 +110,12 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   // Bash
   if (step.category === 'bash' && step.toolResult) {
     const cmd = String(step.toolInput?.command || '').slice(0, 80)
-    return <CodeBlock code={step.toolResult} lang="bash" label={`Bash · ${cmd}`} />
+    return <CodeBlock code={step.toolResult} lang="bash" label={toolLabel('bash', '', cmd)} />
   }
 
   // Generic
   if (step.toolResult) {
-    return <CodeBlock code={step.toolResult} label={step.toolName || 'Result'} />
+    return <CodeBlock code={step.toolResult} label={toolLabel('other', '', step.toolName || 'Result')} />
   }
 
   return null
