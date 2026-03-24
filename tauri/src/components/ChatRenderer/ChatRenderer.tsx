@@ -1342,7 +1342,14 @@ export function DiffBlock({ oldStr, newStr, filePath = '', icon, action, pillCol
     return result
   }, [raw])
 
+  const globalExpanded = useContext(CodeExpandCtx)
   const [collapsed, setCollapsed] = useState(lines.length > 12)
+  const canCollapseDiff = lines.length > 12
+
+  useEffect(() => {
+    if (!canCollapseDiff) return
+    setCollapsed(!globalExpanded)
+  }, [globalExpanded, canCollapseDiff])
 
   // 统计 pills
   const statsPills = (
