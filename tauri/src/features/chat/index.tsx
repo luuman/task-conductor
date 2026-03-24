@@ -79,68 +79,49 @@ function stepToBlock(step: TimelineStep): TranscriptBlock {
   }
 }
 
-// ── Code/Result block ──
+// ── Code/Result block（统一使用 RichTextBlock markdown 代码块样式） ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
-  // Edit — 复用 sessions 页的 EditInlineCard（LCS diff）
+  // Edit — 复用 ChatRenderer 的 EditInlineCard（LCS diff）
   if (step.category === 'edit') {
     return <EditInlineCard block={stepToBlock(step)} />
   }
 
-  // Write — 按文件类型高亮
+  // Write — markdown 代码块（按文件类型语法高亮）
   if (step.category === 'write' && step.toolInput?.content) {
-    const fp = String(step.toolInput.file_path || '')
-    const displayLang = guessLang(fp)
-    const hljsLang = guessHljsLang(fp)
+    const lang = guessHljsLang(String(step.toolInput.file_path || '')) || ''
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return (
-      <div className={s.codeBlock}>
-        {displayLang && <div className={s.codeHeader}><span className={s.codeLang}>{displayLang}</span></div>}
-        <HlPre code={preview} lang={hljsLang} />
-      </div>
-    )
+    return <div className={s.richText}><RichTextBlock text={toCodeBlock(preview, lang)} /></div>
   }
 
-  // Read — 去行号 + 按文件类型高亮
+  // Read — 去行号 + markdown 代码块
   if (step.category === 'read' && step.toolResult) {
-    const fp = String(step.toolInput?.file_path || '')
-    const displayLang = guessLang(fp)
-    const hljsLang = guessHljsLang(fp)
+    const lang = guessHljsLang(String(step.toolInput?.file_path || '')) || ''
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return (
-      <div className={s.codeBlock}>
-        <div className={s.codeHeader}>
-          {displayLang && <span className={s.codeLang}>{displayLang}</span>}
-          <span>{step.toolResult.split('\n').length} lines</span>
-        </div>
-        <HlPre code={stripped} lang={hljsLang} />
-      </div>
-    )
+    return <div className={s.richText}><RichTextBlock text={toCodeBlock(stripped, lang)} /></div>
   }
 
-  // Agent — Markdown 渲染
+  // Agent — 直接 Markdown 渲染
   if (step.category === 'agent' && step.toolResult) {
     return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
 
-  // Bash — 高亮输出
+  // Bash — markdown 代码块
   if (step.category === 'bash' && step.toolResult) {
-    const isErr = step.toolError
     return (
-      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <HlPre code={step.toolResult} className={isErr ? s.errText : ''} />
+      <div className={s.richText} style={step.toolError ? { borderLeft: '2px solid rgba(248,113,113,0.5)', paddingLeft: 8 } : undefined}>
+        <RichTextBlock text={toCodeBlock(step.toolResult, 'bash')} />
       </div>
     )
   }
 
-  // Generic
+  // Generic — markdown 代码块
   if (step.toolResult) {
-    const isErr = step.toolError
     return (
-      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <pre className={`${s.codeBody} ${isErr ? s.errText : ''}`}>{step.toolResult}</pre>
+      <div className={s.richText} style={step.toolError ? { borderLeft: '2px solid rgba(248,113,113,0.5)', paddingLeft: 8 } : undefined}>
+        <RichTextBlock text={toCodeBlock(step.toolResult)} />
       </div>
     )
   }
