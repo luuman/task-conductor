@@ -509,15 +509,8 @@ export default function ChatReportPage() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [selectedId])
 
-  const steps = useMemo(() => parseTimeline(transcript), [transcript])
+  const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
-
-  const userQuestion = useMemo(() => {
-    const userMsg = transcript.find(m => m.role === 'user')
-    if (!userMsg) return ''
-    const textBlock = userMsg.blocks.find(b => b.type === 'text')
-    return textBlock?.text?.slice(0, 150) || ''
-  }, [transcript])
 
   const handleInspect = useCallback((step: TimelineStep, index: number) => {
     setInspected(prev => prev?.step.id === step.id ? null : { step, index })
