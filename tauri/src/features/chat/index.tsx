@@ -555,6 +555,8 @@ export default function ChatReportPage() {
   const [loading, setLoading] = useState(false)
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
   const [inspected, setInspected] = useState<{ step: TimelineStep; index: number } | null>(null)
+  const [activeQ, setActiveQ] = useState(0)
+  const mainAreaRef = useRef<HTMLDivElement>(null)
 
   // 获取当前项目 cwd
   const [projectCwd, setProjectCwd] = useState<string | undefined>()
