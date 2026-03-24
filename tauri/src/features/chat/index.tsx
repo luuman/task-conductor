@@ -535,6 +535,15 @@ export default function ChatReportPage() {
 
   const Renderer = RENDERERS[style]
 
+  const handleInspect = useCallback((step: TimelineStep, index: number) => {
+    setInspected(prev => prev?.step.id === step.id ? null : { step, index })
+  }, [])
+
+  const inspectCtx = useMemo(() => ({
+    selected: inspected?.step.id ?? null,
+    onSelect: handleInspect,
+  }), [inspected, handleInspect])
+
   return (
     <div className={s.page}>
       {/* 顶栏 */}
@@ -563,15 +572,45 @@ export default function ChatReportPage() {
       {/* 主体 */}
       <div className={s.body}>
         <div className={s.mainArea}>
-          {loading ? (
-            <div className={s.empty}><span>加载中...</span></div>
-          ) : steps.length === 0 ? (
-            <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
-          ) : (
-            <>
-              {userQuestion && <div className={s.queryPill}>{userQuestion}</div>}
-              <Renderer steps={steps} />
-            </>
+          <InspectCtx.Provider value={inspectCtx}>
+            {loading ? (
+              <div className={s.empty}><span>加载中...</span></div>
+            ) : steps.length === 0 ? (
+              <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
+            ) : (
+              <>
+                {userQuestion && <div className={s.queryPill}>{userQuestion}</div>}
+                <Renderer steps={steps} />
+              </>
+            )}
+          </InspectCtx.Provider>
+
+          {/* 检查面板 */}
+          {inspected && (
+            <div className={s.inspectPanel}>
+              <div className={s.inspectHeader}>
+                <span className={s.inspectNum}>#{inspected.index + 1}</span>
+                <span className={badgeCls(inspected.step.category)}>{badgeLabel(inspected.step)}</span>
+                <span className={s.inspectTitle}>
+                  {inspected.step.kind === 'text'
+                    ? inspected.step.text?.slice(0, 50) + '...'
+                    : inspected.step.toolDetail}
+                </span>
+                <button className={s.inspectCopy} onClick={() => {
+                  const info = `步骤 #${inspected.index + 1} [${inspected.step.category}] ${inspected.step.kind === 'text' ? '文本' : inspected.step.toolName}: ${inspected.step.kind === 'text' ? inspected.step.text?.slice(0, 80) : inspected.step.toolDetail}`
+                  navigator.clipboard.writeText(info)
+                }}>📋 复制信息</button>
+                <button className={s.inspectClose} onClick={() => setInspected(null)}>✕</button>
+              </div>
+              <div className={s.inspectBody}>
+                <span>类型: <b>{inspected.step.category}</b></span>
+                {inspected.step.toolName && <span> · 工具: <b>{inspected.step.toolName}</b></span>}
+                {inspected.step.ts && <span> · 时间: <b>{formatTs(inspected.step.ts)}</b></span>}
+                {inspected.step.toolError && <span style={{ color: '#f87171' }}> · ERROR</span>}
+                {inspected.step.toolInput?.file_path && <span> · 文件: <b>{String(inspected.step.toolInput.file_path).split('/').pop()}</b></span>}
+                <span style={{ marginLeft: 8, color: 'var(--tc-foreground-secondary)', fontSize: 10 }}>点击复制后告诉 Claude: "步骤 #{inspected.index + 1} 有问题"</span>
+              </div>
+            </div>
           )}
         </div>
 
