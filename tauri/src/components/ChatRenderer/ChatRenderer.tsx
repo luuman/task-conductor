@@ -1290,9 +1290,26 @@ function highlightLog(text: string): string {
     .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
 }
 
-// ── CodeBlock（供外部直接使用，带自定义 label） ──────────────
+// ── CodeBlock（供外部直接使用） ──────────────────────────────
+// label 模式：传 label ReactNode，直接显示（向后兼容）
+// 结构化模式：传 icon/action/fileName + variant，渲染 8 种 header 布局
 
-export function CodeBlock({ code, lang, label }: { code: string; lang?: string; label?: ReactNode }) {
+export type CodeBlockVariant = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+
+export interface CodeBlockProps {
+  code: string
+  lang?: string
+  /** 向后兼容：直接传 ReactNode 作为标签 */
+  label?: ReactNode
+  /** 结构化 props — 与 variant 配合 */
+  icon?: ReactNode
+  action?: string
+  fileName?: string
+  variant?: CodeBlockVariant
+}
+
+export function CodeBlock({ code, lang, label, icon, action, fileName, variant }: CodeBlockProps) {
+  const { t } = useTranslation()
   let highlighted: string | null = null
   try {
     if (lang && hljs.getLanguage(lang)) {
@@ -1302,7 +1319,123 @@ export function CodeBlock({ code, lang, label }: { code: string; lang?: string; 
     }
   } catch { /* fallback */ }
   const lineCount = code.split('\n').length
-  return <CollapsibleCode html={highlighted} raw={code} lang={lang} label={label} lineCount={lineCount} />
+  const [collapsed, setCollapsed] = useState(lineCount > CODE_COLLAPSE_THRESHOLD)
+  const canCollapse = lineCount > CODE_COLLAPSE_THRESHOLD
+
+  // 无 variant → 使用 CollapsibleCode 原有 header
+  if (!variant) {
+    return <CollapsibleCode html={highlighted} raw={code} lang={lang} label={label} lineCount={lineCount} />
+  }
+
+  // ── 8 种 header 布局 ──
+  const linesText = t('admin.sessions.code_lines', { count: lineCount })
+  const toggleBtn = canCollapse && (
+    <button className={styles.codeToggle} onClick={() => setCollapsed(v => !v)}>
+      {collapsed ? t('admin.sessions.code_expand') : t('admin.sessions.code_collapse')}
+    </button>
+  )
+  const copyBtn = <CopyButton text={code} />
+
+  const variantCls = styles[`cbV${variant}` as keyof typeof styles] || ''
+
+  const header = (() => {
+    switch (variant) {
+      // V1 — 内联清爽：[icon] action · filename         lines [copy] [expand]
+      case 1: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          {icon}<span className={styles.cbAction}>{action}</span>
+          {fileName && <><span className={styles.cbDot}>·</span><span className={styles.cbFile}>{fileName}</span></>}
+          <span style={{ flex: 1 }} />
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V2 — 彩色胶囊：[action-pill] [icon] filename    [copy] [expand]
+      case 2: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          <span className={styles.cbPill}>{action}</span>
+          {icon}<span className={styles.cbFile}>{fileName}</span>
+          <span style={{ flex: 1 }} />
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V3 — 分隔面板：[icon action | filename · lines]  [copy] [expand]
+      case 3: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          <span className={styles.cbLeft}>{icon}<span className={styles.cbAction}>{action}</span></span>
+          <span className={styles.cbDivider} />
+          <span className={styles.cbFile}>{fileName}</span>
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          <span style={{ flex: 1 }} />
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V4 — Tab 标签页：╭[icon filename]╮              [copy] [expand]
+      case 4: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          <span className={styles.cbTab}>{icon}<span className={styles.cbFile}>{fileName}</span></span>
+          {action && <span className={styles.cbActionGhost}>{action}</span>}
+          <span style={{ flex: 1 }} />
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V5 — 极简圆点：● filename                       [copy]
+      case 5: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          <span className={styles.cbDotIndicator} />
+          <span className={styles.cbFile}>{fileName || action}</span>
+          <span style={{ flex: 1 }} />
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V6 — 面包屑：action › filename                  lines [copy] [expand]
+      case 6: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          {icon}<span className={styles.cbAction}>{action}</span>
+          {fileName && <><span className={styles.cbChevron}>›</span><span className={styles.cbFile}>{fileName}</span></>}
+          <span style={{ flex: 1 }} />
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V7 — 双色栏：[暗底 icon action] [亮底 filename · lines  copy  expand]
+      case 7: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          <span className={styles.cbDarkZone}>{icon}<span className={styles.cbAction}>{action}</span></span>
+          <span className={styles.cbFile}>{fileName}</span>
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          <span style={{ flex: 1 }} />
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+      // V8 — 边框标签：[action tag] [icon] filename      lines [copy] [expand]
+      case 8: return (
+        <div className={`${styles.codeHeader} ${variantCls}`}>
+          <span className={styles.cbTag}>{action}</span>
+          {icon}<span className={styles.cbFile}>{fileName}</span>
+          <span style={{ flex: 1 }} />
+          {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
+          {copyBtn}{toggleBtn}
+        </div>
+      )
+    }
+  })()
+
+  return (
+    <div className={`${styles.codeWrap} ${variantCls ? styles.codeWrapVariant : ''}`}>
+      {header}
+      <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
+        {highlighted ? (
+          <code className={`hljs ${styles.mdCodeBlock}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
+        ) : (
+          <code className={styles.mdCodeBlockPlain}>{code}</code>
+        )}
+        {collapsed && <div className={styles.codeFade} onClick={() => setCollapsed(false)} />}
+      </div>
+    </div>
+  )
 }
 
 // ── BashStatusLine ──────────────────────────────────────────
