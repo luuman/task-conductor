@@ -62,20 +62,7 @@ const ACTION_MAP: Record<string, string> = {
   read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
 }
 
-// 将代码包为 markdown 代码栅栏（处理内容含 ``` 的情况）
-function toFence(code: string, lang = ''): string {
-  let max = 0, run = 0
-  for (const ch of code) { if (ch === '`') { run++; if (run > max) max = run } else run = 0 }
-  const fence = '`'.repeat(Math.max(3, max + 1))
-  return `${fence}${lang}\n${code}\n${fence}`
-}
-
-function isMdFile(path: string): boolean {
-  const ext = path.split('.').pop()?.toLowerCase()
-  return ext === 'md' || ext === 'markdown' || ext === 'mdx'
-}
-
-// ── Code/Result block（CodeBlock 外框 + RichTextBlock 内容） ──
+// ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   const variant = 2 as const
   if (!step.toolResult && !step.oldString) return null
@@ -96,56 +83,35 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     return <DiffBlock oldStr={oldStr} newStr={newStr} filePath={filePath} icon={icon} action={action} pillColor={color} variant={variant} />
   }
 
-  // Write — 外框 + md 渲染
+  // Write
   if (step.category === 'write' && step.toolInput?.content) {
+    const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    const md = isMdFile(filePath) ? preview : toFence(preview, guessHljsLang(filePath) || '')
-    return (
-      <CodeBlock code="" icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color}>
-        <RichTextBlock text={md} />
-      </CodeBlock>
-    )
+    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
-  // Read — 外框 + md 渲染
+  // Read
   if (step.category === 'read' && step.toolResult) {
+    const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    const md = isMdFile(filePath) ? stripped : toFence(stripped, guessHljsLang(filePath) || '')
-    return (
-      <CodeBlock code="" icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color}>
-        <RichTextBlock text={md} />
-      </CodeBlock>
-    )
+    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
-  // Agent — 外框 + md 渲染
+  // Agent
   if (step.category === 'agent' && step.toolResult) {
-    const desc = String(step.toolInput?.description || '').slice(0, 60)
-    return (
-      <CodeBlock code="" icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
-        <RichTextBlock text={step.toolResult} />
-      </CodeBlock>
-    )
+    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
 
-  // Bash — 外框 + md 渲染
+  // Bash
   if (step.category === 'bash' && step.toolResult) {
     const cmd = String(step.toolInput?.command || '').slice(0, 80)
-    return (
-      <CodeBlock code="" icon={icon} action={action} fileName={cmd} variant={variant} pillColor={color}>
-        <RichTextBlock text={toFence(step.toolResult, 'bash')} />
-      </CodeBlock>
-    )
+    return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} pillColor={color} />
   }
 
-  // Generic — 外框 + md 渲染
+  // Generic
   if (step.toolResult) {
-    return (
-      <CodeBlock code="" icon={icon} action={action} fileName={step.toolName || ''} variant={variant} pillColor={color}>
-        <RichTextBlock text={step.toolResult} />
-      </CodeBlock>
-    )
+    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={step.toolName || ''} variant={variant} pillColor={color} />
   }
 
   return null
