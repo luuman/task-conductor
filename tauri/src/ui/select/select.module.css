@@ -51,9 +51,8 @@
   top: calc(100% + 4px);
   left: 0;
   z-index: 1000;
-  min-width: 200px;
-  max-width: 360px;
-  width: max-content;
+  width: 100%;
+  min-width: 160px;
   max-height: 320px;
   display: flex;
   flex-direction: column;
@@ -64,7 +63,7 @@
   overflow: hidden;
   animation: selectSlideDown 0.12s ease;
 }
-.dropdownWide { min-width: 280px; max-width: 420px; }
+.dropdownWide { /* 无额外限制，跟随触发器宽度 */ }
 
 @keyframes selectSlideDown {
   from { opacity: 0; transform: translateY(-4px); }
