@@ -571,7 +571,6 @@ export default function ChatReportPage() {
               </>
             )}
           </InspectCtx.Provider>
-          </CbVariantCtx.Provider>
 
           {/* 底部操作栏 */}
           {steps.length > 0 && (
