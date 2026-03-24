@@ -32,6 +32,7 @@ export function Select({
   searchable = false,
   searchPlaceholder = '搜索...',
   wide = false,
+  renderItem,
   className,
   style,
 }: SelectProps) {
