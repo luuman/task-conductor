@@ -451,7 +451,7 @@ function CollapsibleCode({ html, raw, lang, label, lineCount }: {
   html?: string | null
   raw: string
   lang?: string
-  label?: string
+  label?: ReactNode
   lineCount: number
 }) {
   const { t } = useTranslation()
