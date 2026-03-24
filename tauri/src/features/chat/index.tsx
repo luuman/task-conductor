@@ -167,25 +167,27 @@ function RichText({ text }: { text: string }) {
 function StyleA({ steps }: { steps: TimelineStep[] }) {
   return (
     <div className={s.aTl}>
-      {steps.map(step => (
-        <div key={step.id} className={s.aStep}>
-          <span className={s.aDot} style={{ background: dotColor(step.category) }} />
-          {step.kind === 'text' ? (
-            <div className={`${s.aText} ${s.richText}`}><RichText text={step.text!} /></div>
-          ) : (
-            <>
-              <div className={s.aToolRow}>
-                <span className={badgeCls(step.category)}>{step.toolName}</span>
-                <span style={{ fontFamily: 'var(--tc-font-mono)', fontSize: 11 }}>
-                  {step.toolDetail && <><span className={s.fileName}>{step.toolDetail.split(' ')[0]}</span> {step.toolDetail.includes(' ') ? step.toolDetail.slice(step.toolDetail.indexOf(' ')) : ''}</>}
-                </span>
-                {step.toolError && <span className={s.errTag}>ERROR</span>}
-                <span style={{ marginLeft: 'auto' }} className={s.ts}>{formatTs(step.ts)}</span>
-              </div>
-              <div style={{ marginLeft: 4 }}><ResultBlock step={step} /></div>
-            </>
-          )}
-        </div>
+      {steps.map((step, i) => (
+        <StepWrap key={step.id} step={step} index={i}>
+          <div className={s.aStep}>
+            <span className={s.aDot} style={{ background: dotColor(step.category) }} />
+            {step.kind === 'text' ? (
+              <div className={`${s.aText} ${s.richText}`}><RichText text={step.text!} /></div>
+            ) : (
+              <>
+                <div className={s.aToolRow}>
+                  <span className={badgeCls(step.category)}>{step.toolName}</span>
+                  <span style={{ fontFamily: 'var(--tc-font-mono)', fontSize: 11 }}>
+                    {step.toolDetail && <><span className={s.fileName}>{step.toolDetail.split(' ')[0]}</span> {step.toolDetail.includes(' ') ? step.toolDetail.slice(step.toolDetail.indexOf(' ')) : ''}</>}
+                  </span>
+                  {step.toolError && <span className={s.errTag}>ERROR</span>}
+                  <span style={{ marginLeft: 'auto' }} className={s.ts}>{formatTs(step.ts)}</span>
+                </div>
+                <div style={{ marginLeft: 4 }}><ResultBlock step={step} /></div>
+              </>
+            )}
+          </div>
+        </StepWrap>
       ))}
     </div>
   )
