@@ -60,15 +60,6 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
-// ── Highlighted code pre ──
-function HlPre({ code, lang, className }: { code: string; lang?: string; className?: string }) {
-  const { html } = useHighlight(code, lang)
-  if (html) {
-    return <pre className={`hljs ${s.codeBody} ${className || ''}`} dangerouslySetInnerHTML={{ __html: html }} />
-  }
-  return <pre className={`${s.codeBody} ${className || ''}`}>{code}</pre>
-}
-
 // ── 将 TimelineStep 转为 TranscriptBlock（复用 ChatRenderer 组件） ──
 function stepToBlock(step: TimelineStep): TranscriptBlock {
   return {
