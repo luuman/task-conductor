@@ -10,10 +10,18 @@ body {
   user-select: none;
 }
 
-/* Scrollbar styling (VS Code style) */
+/* ── 全局滚动条样式 ── */
+
+/* Firefox 标准属性 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tc-scrollbar-thumb, rgba(255, 255, 255, 0.15)) transparent;
+}
+
+/* Webkit (Chrome/Safari/Tauri) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -21,12 +29,20 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--tc-scrollbar-thumb, rgba(255, 255, 255, 0.2));
-  border-radius: 4px;
+  background: var(--tc-scrollbar-thumb, rgba(255, 255, 255, 0.15));
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--tc-scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+}
+
+/* 工具类：隐藏滚动条（仍可滚动） */
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 
 /* Focus visible for accessibility */
