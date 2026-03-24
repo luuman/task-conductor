@@ -222,12 +222,13 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
 
 // C: 紧凑表格
 function StyleC({ steps }: { steps: TimelineStep[] }) {
+  const { onSelect } = useContext(InspectCtx)
   return (
     <table className={s.cTable}>
       <thead><tr><th>#</th><th>类型</th><th>操作详情</th><th>时间</th></tr></thead>
       <tbody>
         {steps.map((step, i) => (
-          <tr key={step.id} className={step.kind === 'text' ? s.cTextRow : undefined}>
+          <tr key={step.id} className={step.kind === 'text' ? s.cTextRow : undefined} onClick={() => onSelect(step, i)} style={{ cursor: 'pointer' }}>
             <td className={s.cNum}>{i + 1}</td>
             <td className={s.cType}><span className={badgeCls(step.category)}>{badgeLabel(step)}</span></td>
             <td className={s.cDetail}>
