@@ -450,9 +450,6 @@ function StepWrap({ step, index, children }: { step: TimelineStep; index: number
 }
 
 // ── 样式渲染分发（包裹 StepWrap） ──
-function WrappedRenderer({ steps, StyleComp }: { steps: TimelineStep[]; StyleComp: React.FC<{ steps: TimelineStep[] }> }) {
-  return <StyleComp steps={steps} />
-}
 const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
   a: StyleA, b: StyleB, c: StyleC, d: StyleD,
   e: StyleE, f: StyleF, g: StyleG, h: StyleH,
