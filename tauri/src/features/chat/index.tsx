@@ -538,24 +538,22 @@ function relativeTime(iso: string): string {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-// ── 会话行渲染（参考 sessions 页面 Notion 表格风格） ──
-function SessionItem(option: { value: string; label: string; desc?: string }, _isActive: boolean) {
-  // desc 格式: "status|events|time|cwd"
+// ── 会话行渲染（Notion 表格风格：圆点 | 标题 | 事件数 | 时间） ──
+function SessionItem(option: { value: string; label: string; desc?: string }) {
   const parts = (option.desc || '').split('|')
   const status = parts[0] || ''
   const events = parts[1] || ''
   const time = parts[2] || ''
-
-  const dotStyle = status === 'active' ? { background: '#4ade80' }
-    : status === 'idle' ? { background: '#fbbf24' }
-    : { background: '#52525b' }
+  const dotBg = status === 'active' ? '#56d364' : status === 'idle' ? '#e3b341' : '#8b949e'
 
   return (
     <>
-      <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, ...dotStyle }} />
-      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12 }}>{option.label}</span>
-      {events && <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', flexShrink: 0 }}>{events}</span>}
-      {time && <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', flexShrink: 0, fontFamily: 'var(--tc-font-mono, monospace)' }}>{time}</span>}
+      <span style={{ width: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotBg }} />
+      </span>
+      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11, fontWeight: 500 }}>{option.label}</span>
+      <span style={{ width: 30, flexShrink: 0, textAlign: 'right', fontSize: 10, fontFamily: "'Geist Mono', monospace", color: 'var(--tc-foreground-secondary)' }}>{events}</span>
+      <span style={{ width: 50, flexShrink: 0, textAlign: 'right', fontSize: 9, color: 'var(--tc-foreground-secondary)' }}>{time}</span>
     </>
   )
 }
