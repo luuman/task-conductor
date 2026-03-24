@@ -356,7 +356,6 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
             <span className={s.hChevron} style={{ transform: openIds.has(step.id) ? 'rotate(90deg)' : undefined }}>▶</span>
             <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
             {step.kind === 'text' && <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>}
-            <span className={s.ts}>{formatTs(step.ts)}</span>
           </div>
           {openIds.has(step.id) && (
             <div className={s.hBody}>
