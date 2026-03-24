@@ -62,26 +62,32 @@ const ACTION_MAP: Record<string, string> = {
   read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
 }
 
+// 将代码包为 markdown 代码栅栏（处理内容含 ``` 的情况）
+function toFence(code: string, lang = ''): string {
+  let max = 0, run = 0
+  for (const ch of code) { if (ch === '`') { run++; if (run > max) max = run } else run = 0 }
+  const fence = '`'.repeat(Math.max(3, max + 1))
+  return `${fence}${lang}\n${code}\n${fence}`
+}
+
 function isMdFile(path: string): boolean {
   const ext = path.split('.').pop()?.toLowerCase()
   return ext === 'md' || ext === 'markdown' || ext === 'mdx'
 }
 
-// ── Code/Result block ──
+// ── Code/Result block（统一 RichTextBlock 渲染） ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   const variant = 2 as const
   if (!step.toolResult && !step.oldString) return null
 
   const filePath = String(step.toolInput?.file_path || '')
-  const fileName = filePath.split('/').pop() || ''
-  // 文件类型 SVG（按扩展名），无文件时用 Terminal/Wrench
   const icon = filePath ? fileExtIcon(filePath, 13)
     : step.category === 'bash' ? <IconTerminal size={13} />
     : <IconWrench size={13} />
   const action = ACTION_MAP[step.category] || step.toolName || 'Tool'
   const color = dotColor(step.category)
 
-  // Edit — LCS diff（带背景色 + 增删行数统计）
+  // Edit — LCS diff（保持 DiffBlock 专用渲染）
   if (step.category === 'edit') {
     const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
     const newStr = String(step.toolInput?.new_string ?? '')
@@ -93,21 +99,15 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   if (step.category === 'write' && step.toolInput?.content) {
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    if (isMdFile(filePath)) {
-      return <div className={s.richText}><RichTextBlock text={preview} /></div>
-    }
-    const lang = guessHljsLang(filePath) || undefined
-    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+    const md = isMdFile(filePath) ? preview : toFence(preview, guessHljsLang(filePath) || '')
+    return <div className={s.richText}><RichTextBlock text={md} /></div>
   }
 
   // Read
   if (step.category === 'read' && step.toolResult) {
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    if (isMdFile(filePath)) {
-      return <div className={s.richText}><RichTextBlock text={stripped} /></div>
-    }
-    const lang = guessHljsLang(filePath) || undefined
-    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+    const md = isMdFile(filePath) ? stripped : toFence(stripped, guessHljsLang(filePath) || '')
+    return <div className={s.richText}><RichTextBlock text={md} /></div>
   }
 
   // Agent
@@ -117,13 +117,12 @@ function ResultBlock({ step }: { step: TimelineStep }) {
 
   // Bash
   if (step.category === 'bash' && step.toolResult) {
-    const cmd = String(step.toolInput?.command || '').slice(0, 80)
-    return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} pillColor={color} />
+    return <div className={s.richText}><RichTextBlock text={toFence(step.toolResult, 'bash')} /></div>
   }
 
-  // Generic
+  // Generic — 直接用 RichTextBlock（自动处理 markdown / 纯文本）
   if (step.toolResult) {
-    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={step.toolName || ''} variant={variant} pillColor={color} />
+    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
 
   return null
