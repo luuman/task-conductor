@@ -242,7 +242,6 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
                   <>{step.category === 'read' ? '读取了文件' : step.category === 'edit' ? '编辑了文件' : step.category === 'write' ? '新建了文件' : step.category === 'bash' ? '执行了命令' : step.category === 'agent' ? '启动了子代理' : '调用了工具'}</>
                 )}
               </div>
-              <span className={s.ts}>{formatTs(step.ts)}</span>
             </div>
             {step.kind === 'text' ? (
               <div className={s.dBody}><RichText text={step.text!} /></div>
