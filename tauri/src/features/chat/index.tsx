@@ -537,6 +537,12 @@ export default function ChatReportPage() {
     localStorage.setItem(LS_KEY, v)
   }, [])
 
+  const handleCbVariantChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const v = Number(e.target.value) as CodeBlockVariant
+    setCbVariant(v)
+    localStorage.setItem(CB_VARIANT_KEY, String(v))
+  }, [])
+
   const handleInspect = useCallback((step: TimelineStep, index: number) => {
     setInspected(prev => prev?.step.id === step.id ? null : { step, index })
   }, [])
