@@ -371,7 +371,8 @@ const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
 }
 
 // ── Right sidebar ──
-function MetaSidebar({ session, steps, questions }: { session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[] }) {
+function MetaSidebar({ session, steps, questions, activeQ }: { session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number }) {
+  const qNavRef = useRef<HTMLDivElement>(null)
   if (!session) return null
   const toolSteps = steps.filter(st => st.kind === 'tool')
   const cats = useMemo(() => {
