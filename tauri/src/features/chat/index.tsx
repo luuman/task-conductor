@@ -63,17 +63,8 @@ const CB_VARIANT_KEY = 'tc_cb_variant'
 const getDefaultCbVariant = (): CodeBlockVariant => (Number(localStorage.getItem(CB_VARIANT_KEY)) || 1) as CodeBlockVariant
 const CbVariantCtx = createContext<CodeBlockVariant>(1)
 
-const ICON_SIZE = 12
 const ACTION_MAP: Record<string, string> = {
   read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
-}
-function toolIcon(category: string) {
-  if (category === 'read') return <IconFileText size={ICON_SIZE} />
-  if (category === 'edit') return <IconPencil size={ICON_SIZE} />
-  if (category === 'write') return <IconFileText size={ICON_SIZE} />
-  if (category === 'bash') return <IconTerminal size={ICON_SIZE} />
-  if (category === 'agent') return <IconBot size={ICON_SIZE} />
-  return <IconWrench size={ICON_SIZE} />
 }
 
 // ── Code/Result block ──
@@ -83,8 +74,12 @@ function ResultBlock({ step }: { step: TimelineStep }) {
 
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
-  const icon = toolIcon(step.category)
+  // 文件类型 SVG（按扩展名），无文件时用 Terminal/Wrench
+  const icon = filePath ? fileExtIcon(filePath, 13)
+    : step.category === 'bash' ? <IconTerminal size={13} />
+    : <IconWrench size={13} />
   const action = ACTION_MAP[step.category] || step.toolName || 'Tool'
+  const color = dotColor(step.category)
 
   // Edit — diff
   if (step.category === 'edit') {
@@ -93,7 +88,7 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     if (!oldStr && !newStr) return null
     const oldLines = oldStr.split('\n').map(l => `- ${l}`)
     const newLines = newStr.split('\n').map(l => `+ ${l}`)
-    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" icon={icon} action={action} fileName={fileName} variant={variant} />
+    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
   // Write
@@ -101,14 +96,14 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} />
+    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
   // Read
   if (step.category === 'read' && step.toolResult) {
     const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} />
+    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
   // Agent
@@ -119,12 +114,12 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   // Bash
   if (step.category === 'bash' && step.toolResult) {
     const cmd = String(step.toolInput?.command || '').slice(0, 80)
-    return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} />
+    return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} pillColor={color} />
   }
 
   // Generic
   if (step.toolResult) {
-    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={step.toolName || ''} variant={variant} />
+    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={step.toolName || ''} variant={variant} pillColor={color} />
   }
 
   return null
