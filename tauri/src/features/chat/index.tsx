@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState, createContext, useContext } 
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { parseTimeline, formatTs, guessHljsLang, type TimelineStep } from './timeline-parser'
+import { Select } from '../../ui/select'
 import { RichTextBlock, CodeBlock, type CodeBlockVariant } from '../../components/ChatRenderer'
 import { IconFileText, IconPencil, IconTerminal, IconBot, IconWrench } from '../../ui/icon'
 import '../../styles/hljs-ayu-dark.css'
