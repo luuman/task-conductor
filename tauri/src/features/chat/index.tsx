@@ -648,7 +648,7 @@ export default function ChatReportPage() {
       </div>
 
       <div className={s.body}>
-        <div className={s.mainArea}>
+        <div className={s.mainArea} ref={mainAreaRef}>
           <InspectCtx.Provider value={inspectCtx}>
             {loading ? (
               <div className={s.empty}><span>加载中...</span></div>
