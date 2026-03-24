@@ -1503,11 +1503,9 @@ export interface CodeBlockProps {
   variant?: CodeBlockVariant
   /** 胶囊/标签颜色（与操作类型颜色一致） */
   pillColor?: string
-  /** 自定义内容体（传入时忽略 code 的高亮渲染） */
-  children?: ReactNode
 }
 
-export function CodeBlock({ code, lang, label, icon, action, fileName, variant, pillColor, children }: CodeBlockProps) {
+export function CodeBlock({ code, lang, label, icon, action, fileName, variant, pillColor }: CodeBlockProps) {
   const { t } = useTranslation()
   let highlighted: string | null = null
   try {
