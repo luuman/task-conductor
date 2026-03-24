@@ -58,11 +58,6 @@ function getToolDetail(name: string, input: Record<string, unknown> | null | und
   }
 }
 
-function getFileName(input: Record<string, unknown> | null | undefined): string {
-  if (!input?.file_path) return ''
-  return String(input.file_path).split('/').pop() || ''
-}
-
 export function parseTimeline(messages: TranscriptMessage[]): TimelineStep[] {
   const steps: TimelineStep[] = []
   let stepId = 0
