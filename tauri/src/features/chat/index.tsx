@@ -491,7 +491,6 @@ export default function ChatReportPage() {
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([])
   const [loading, setLoading] = useState(false)
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
-  const [cbVariant, setCbVariant] = useState<CodeBlockVariant>(getDefaultCbVariant)
   const [inspected, setInspected] = useState<{ step: TimelineStep; index: number } | null>(null)
 
   useEffect(() => {
