@@ -1,10 +1,10 @@
 // ChatReportPage — 会话操作时间线，8 种可切换样式
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, createContext, useContext } from 'react'
 import { api } from '../../lib/api'
-import type { AiSession, TranscriptMessage } from '../../lib/api/types'
-import { parseTimeline, formatTs, type TimelineStep } from './timeline-parser'
-import { RichTextBlock, ToolWidget, EditInlineCard, BashStatusLine } from '../../components/ChatRenderer'
-import type { TranscriptBlock } from '../../lib/api/types'
+import type { AiSession, TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
+import { parseTimeline, formatTs, guessLang, guessHljsLang, type TimelineStep } from './timeline-parser'
+import { useHighlight } from '../../lib/useHighlight'
+import { RichTextBlock, EditInlineCard } from '../../components/ChatRenderer'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
@@ -34,13 +34,11 @@ function badgeCls(cat: TimelineStep['category']): string {
   return `${s.badge} ${map[cat] || s.bOther}`
 }
 
-// ── badge label ──
 function badgeLabel(step: TimelineStep): string {
   if (step.kind === 'text') return '💬'
   return step.toolName || 'Tool'
 }
 
-// ── dot color (for timeline) ──
 function dotColor(cat: TimelineStep['category']): string {
   const map: Record<string, string> = {
     text: '#a78bfa', read: '#60a5fa', edit: '#fbbf24', write: '#4ade80',
@@ -50,7 +48,6 @@ function dotColor(cat: TimelineStep['category']): string {
   return map[cat] || '#52525b'
 }
 
-// ── icon for card style ──
 function catIcon(cat: TimelineStep['category']): string {
   const map: Record<string, string> = {
     text: '💬', read: '📖', edit: '✏️', write: '📝',
@@ -60,7 +57,14 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
-// ── 将 TimelineStep 转为 TranscriptBlock（复用 ChatRenderer 组件） ──
+// ── 高亮代码 ──
+function HlPre({ code, lang, className }: { code: string; lang?: string; className?: string }) {
+  const { html } = useHighlight(code, lang)
+  if (html) return <pre className={`hljs ${s.codeBody} ${className || ''}`} dangerouslySetInnerHTML={{ __html: html }} />
+  return <pre className={`${s.codeBody} ${className || ''}`}>{code}</pre>
+}
+
+// ── step → TranscriptBlock（给 EditInlineCard 用） ──
 function stepToBlock(step: TimelineStep): TranscriptBlock {
   return {
     type: 'tool_use',
@@ -72,28 +76,73 @@ function stepToBlock(step: TimelineStep): TranscriptBlock {
   }
 }
 
-// ── Code/Result block component ──
-// 复用 ChatRenderer 的 ToolWidget / EditInlineCard / BashStatusLine
+// ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
-  // Edit/MultiEdit — 复用 EditInlineCard（含 LCS diff 视图）
+  // Edit — 复用 sessions 页的 EditInlineCard（LCS diff）
   if (step.category === 'edit') {
     return <EditInlineCard block={stepToBlock(step)} />
   }
 
-  // Bash — 复用 BashStatusLine（含命令高亮 + 输出着色 + PASS/FAIL）
-  if (step.category === 'bash') {
-    return <BashStatusLine block={stepToBlock(step)} />
+  // Write — 按文件类型高亮
+  if (step.category === 'write' && step.toolInput?.content) {
+    const fp = String(step.toolInput.file_path || '')
+    const displayLang = guessLang(fp)
+    const hljsLang = guessHljsLang(fp)
+    const raw = String(step.toolInput.content)
+    const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
+    return (
+      <div className={s.codeBlock}>
+        {displayLang && <div className={s.codeHeader}><span className={s.codeLang}>{displayLang}</span></div>}
+        <HlPre code={preview} lang={hljsLang} />
+      </div>
+    )
   }
 
-  // Agent result — Markdown 渲染
+  // Read — 去行号 + 按文件类型高亮
+  if (step.category === 'read' && step.toolResult) {
+    const fp = String(step.toolInput?.file_path || '')
+    const displayLang = guessLang(fp)
+    const hljsLang = guessHljsLang(fp)
+    const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
+    return (
+      <div className={s.codeBlock}>
+        <div className={s.codeHeader}>
+          {displayLang && <span className={s.codeLang}>{displayLang}</span>}
+          <span>{step.toolResult.split('\n').length} lines</span>
+        </div>
+        <HlPre code={stripped} lang={hljsLang} />
+      </div>
+    )
+  }
+
+  // Agent — Markdown 渲染
   if (step.category === 'agent' && step.toolResult) {
     return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
 
-  // 其余工具 — 通用 ToolWidget（已处理 Read/Grep/WebSearch/AskUser 等 + JSON 折叠）
-  return <ToolWidget block={stepToBlock(step)} />
+  // Bash — 高亮输出
+  if (step.category === 'bash' && step.toolResult) {
+    const isErr = step.toolError
+    return (
+      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
+        <HlPre code={step.toolResult} className={isErr ? s.errText : ''} />
+      </div>
+    )
+  }
+
+  // Generic
+  if (step.toolResult) {
+    const isErr = step.toolError
+    return (
+      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
+        <pre className={`${s.codeBody} ${isErr ? s.errText : ''}`}>{step.toolResult}</pre>
+      </div>
+    )
+  }
+
+  return null
 }
 
 // ── Rich text — 复用 ChatRenderer 的 Markdown 渲染 ──
@@ -101,11 +150,39 @@ function RichText({ text }: { text: string }) {
   return <div className={s.richText}><RichTextBlock text={text} /></div>
 }
 
+// ── 检查上下文 ──
+const InspectCtx = createContext<{ selected: string | null; onSelect: (step: TimelineStep, index: number) => void }>({ selected: null, onSelect: () => {} })
+
+function StepWrap({ step, index, children }: { step: TimelineStep; index: number; children: React.ReactNode }) {
+  const { selected, onSelect } = useContext(InspectCtx)
+  const isActive = selected === step.id
+  return (
+    <div
+      data-step={index + 1}
+      onClick={(e) => { e.stopPropagation(); onSelect(step, index) }}
+      style={{
+        position: 'relative', cursor: 'pointer',
+        outline: isActive ? '1px solid #7c5cfc' : undefined,
+        outlineOffset: 2, borderRadius: 6,
+      }}
+    >
+      <span style={{
+        position: 'absolute', left: -4, top: -4, fontSize: 9, fontWeight: 700,
+        background: isActive ? '#7c5cfc' : 'var(--tc-sidebar-bg, #131316)',
+        color: isActive ? '#fff' : 'var(--tc-foreground-secondary, #a1a1aa)',
+        border: '1px solid var(--tc-border, #27272a)',
+        borderRadius: 8, padding: '0 4px', zIndex: 2,
+        fontFamily: 'var(--tc-font-mono, monospace)',
+      }}>{index + 1}</span>
+      {children}
+    </div>
+  )
+}
+
 // ════════════════════════════════════════════════
 // 8 种样式渲染器
 // ════════════════════════════════════════════════
 
-// A: 竖线时间线
 function StyleA({ steps }: { steps: TimelineStep[] }) {
   return (
     <div className={s.aTl}>
@@ -114,7 +191,7 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
           <div className={s.aStep}>
             <span className={s.aDot} style={{ background: dotColor(step.category) }} />
             {step.kind === 'text' ? (
-              <div className={`${s.aText} ${s.richText}`}><RichText text={step.text!} /></div>
+              <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
               <>
                 <div className={s.aToolRow}>
@@ -135,16 +212,13 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// B: 卡片瀑布
 function StyleB({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step, i) => (
         <StepWrap key={step.id} step={step} index={i}>
           {step.kind === 'text' ? (
-            <div className={`${s.bCard} ${s.bTextCard}`}>
-              <div className={s.bBody}><RichText text={step.text!} /></div>
-            </div>
+            <div className={`${s.bCard} ${s.bTextCard}`}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (
             <div className={s.bCard}>
               <div className={s.bHead}>
@@ -162,7 +236,6 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// C: 紧凑表格
 function StyleC({ steps }: { steps: TimelineStep[] }) {
   const { onSelect } = useContext(InspectCtx)
   return (
@@ -192,7 +265,6 @@ function StyleC({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// D: GitHub PR
 function StyleD({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
@@ -225,7 +297,6 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// E: 终端日志
 function StyleE({ steps }: { steps: TimelineStep[] }) {
   const { onSelect } = useContext(InspectCtx)
   return (
@@ -250,7 +321,6 @@ function StyleE({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// F: 看板泳道
 function StyleF({ steps }: { steps: TimelineStep[] }) {
   const lanes = useMemo(() => {
     const groups: Record<string, { label: string; color: string; items: TimelineStep[] }> = {
@@ -264,21 +334,16 @@ function StyleF({ steps }: { steps: TimelineStep[] }) {
       const key = step.category === 'edit' || step.category === 'write' ? 'write'
         : step.category === 'text' ? 'text'
         : step.category === 'read' || step.category === 'grep' || step.category === 'glob' ? 'read'
-        : step.category === 'bash' ? 'bash'
-        : 'other'
+        : step.category === 'bash' ? 'bash' : 'other'
       groups[key].items.push(step)
     }
     return Object.values(groups).filter(g => g.items.length > 0)
   }, [steps])
-
   return (
     <div className={s.fBoard}>
       {lanes.map(lane => (
         <div key={lane.label} className={s.fLane}>
-          <div className={s.fLaneHead} style={{ color: lane.color }}>
-            {lane.label}
-            <span className={s.fLaneCount}>{lane.items.length}</span>
-          </div>
+          <div className={s.fLaneHead} style={{ color: lane.color }}>{lane.label}<span className={s.fLaneCount}>{lane.items.length}</span></div>
           <div className={s.fLaneBody}>
             {lane.items.map(step => (
               <div key={step.id} className={s.fItem}>
@@ -293,37 +358,36 @@ function StyleF({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// G: 气泡聊天
 function StyleG({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step, i) => (
-        <StepWrap key={step.id} step={step} index={i}><div className={s.gMsg}>
-          <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`}>
-            {step.kind === 'text' ? 'C' : catIcon(step.category)}
-          </div>
-          {step.kind === 'text' ? (
-            <div className={s.gBubbleText}><RichText text={step.text!} /></div>
-          ) : (
-            <div className={s.gBubbleTool}>
-              <div className={s.gToolHead}>
-                <span className={badgeCls(step.category)}>{step.toolName}</span>
-                <span style={{ fontSize: 11 }}>{step.toolDetail?.split(' ')[0]}</span>
-                {step.toolError && <span className={s.errTag}>ERROR</span>}
-                <span className={s.ts} style={{ marginLeft: 'auto' }}>{formatTs(step.ts)}</span>
-              </div>
-              <ResultBlock step={step} />
+        <StepWrap key={step.id} step={step} index={i}>
+          <div className={s.gMsg}>
+            <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`}>
+              {step.kind === 'text' ? 'C' : catIcon(step.category)}
             </div>
-          )}
-        </div></StepWrap>
+            {step.kind === 'text' ? (
+              <div className={s.gBubbleText}><RichText text={step.text!} /></div>
+            ) : (
+              <div className={s.gBubbleTool}>
+                <div className={s.gToolHead}>
+                  <span className={badgeCls(step.category)}>{step.toolName}</span>
+                  <span style={{ fontSize: 11 }}>{step.toolDetail?.split(' ')[0]}</span>
+                  {step.toolError && <span className={s.errTag}>ERROR</span>}
+                  <span className={s.ts} style={{ marginLeft: 'auto' }}>{formatTs(step.ts)}</span>
+                </div>
+                <ResultBlock step={step} />
+              </div>
+            )}
+          </div>
+        </StepWrap>
       ))}
     </>
   )
 }
 
-// H: 折叠手风琴
 function StyleH({ steps }: { steps: TimelineStep[] }) {
-  const { onSelect } = useContext(InspectCtx)
   const [openIds, setOpenIds] = useState<Set<string>>(() => {
     const set = new Set<string>()
     steps.forEach(st => { if (st.kind === 'text') set.add(st.id) })
@@ -332,12 +396,11 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
   const toggle = useCallback((id: string) => {
     setOpenIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }, [])
-
   return (
     <>
-      {steps.map((step, i) => (
+      {steps.map(step => (
         <div key={step.id} className={s.hAcc}>
-          <div className={s.hHead} onClick={(e) => { if (e.shiftKey) { onSelect(step, i) } else { toggle(step.id) } }}>
+          <div className={s.hHead} onClick={() => toggle(step.id)}>
             <span className={s.hChevron} style={{ transform: openIds.has(step.id) ? 'rotate(90deg)' : undefined }}>▶</span>
             <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
             <span className={s.hTitle}>{step.kind === 'text' ? step.text?.slice(0, 60) : step.toolDetail}</span>
@@ -358,46 +421,12 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// ── 步骤检查上下文 ──
-import { createContext, useContext } from 'react'
-const InspectCtx = createContext<{ selected: string | null; onSelect: (step: TimelineStep, index: number) => void }>({ selected: null, onSelect: () => {} })
-
-/** 可点击步骤包装器 — 给每步加序号 + 点击高亮 */
-function StepWrap({ step, index, children }: { step: TimelineStep; index: number; children: React.ReactNode }) {
-  const { selected, onSelect } = useContext(InspectCtx)
-  const isActive = selected === step.id
-  return (
-    <div
-      data-step={index + 1}
-      onClick={(e) => { e.stopPropagation(); onSelect(step, index) }}
-      style={{
-        position: 'relative',
-        cursor: 'pointer',
-        outline: isActive ? '1px solid #7c5cfc' : undefined,
-        outlineOffset: 2,
-        borderRadius: 6,
-      }}
-    >
-      <span style={{
-        position: 'absolute', left: -4, top: -4, fontSize: 9, fontWeight: 700,
-        background: isActive ? '#7c5cfc' : 'var(--tc-sidebar-bg, #131316)',
-        color: isActive ? '#fff' : 'var(--tc-foreground-secondary, #a1a1aa)',
-        border: '1px solid var(--tc-border, #27272a)',
-        borderRadius: 8, padding: '0 4px', zIndex: 2,
-        fontFamily: 'var(--tc-font-mono, monospace)',
-      }}>{index + 1}</span>
-      {children}
-    </div>
-  )
-}
-
-// ── 样式渲染分发（包裹 StepWrap） ──
 const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
   a: StyleA, b: StyleB, c: StyleC, d: StyleD,
   e: StyleE, f: StyleF, g: StyleG, h: StyleH,
 }
 
-// ── Right sidebar: metadata ──
+// ── Right sidebar ──
 function MetaSidebar({ session, steps }: { session: AiSession | null; steps: TimelineStep[] }) {
   if (!session) return null
   const toolSteps = steps.filter(st => st.kind === 'tool')
@@ -406,7 +435,6 @@ function MetaSidebar({ session, steps }: { session: AiSession | null; steps: Tim
     toolSteps.forEach(st => { m[st.category] = (m[st.category] || 0) + 1 })
     return Object.entries(m).sort((a, b) => b[1] - a[1])
   }, [toolSteps])
-
   return (
     <div className={s.sidebar}>
       <div className={s.sbSection}>
@@ -445,7 +473,6 @@ export default function ChatReportPage() {
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
   const [inspected, setInspected] = useState<{ step: TimelineStep; index: number } | null>(null)
 
-  // 获取会话列表
   useEffect(() => {
     api.getSessions().then(list => {
       setSessions(list)
@@ -453,20 +480,18 @@ export default function ChatReportPage() {
     }).catch(() => {})
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 获取选中会话的 transcript
   useEffect(() => {
     if (!selectedId) return
     setLoading(true)
+    setInspected(null)
     api.getTranscript(selectedId, { limit: 200, offset: 0 }).then(res => {
       setTranscript(res.messages)
     }).catch(() => {}).finally(() => setLoading(false))
   }, [selectedId])
 
-  // 解析时间线
   const steps = useMemo(() => parseTimeline(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
 
-  // 用户提问文本（第一条 user message）
   const userQuestion = useMemo(() => {
     const userMsg = transcript.find(m => m.role === 'user')
     if (!userMsg) return ''
@@ -474,14 +499,11 @@ export default function ChatReportPage() {
     return textBlock?.text?.slice(0, 150) || ''
   }, [transcript])
 
-  // 切换样式
   const handleStyleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const v = e.target.value as StyleKey
     setStyle(v)
     localStorage.setItem(LS_KEY, v)
   }, [])
-
-  const Renderer = RENDERERS[style]
 
   const handleInspect = useCallback((step: TimelineStep, index: number) => {
     setInspected(prev => prev?.step.id === step.id ? null : { step, index })
@@ -492,32 +514,25 @@ export default function ChatReportPage() {
     onSelect: handleInspect,
   }), [inspected, handleInspect])
 
+  const Renderer = RENDERERS[style]
+
   return (
     <div className={s.page}>
-      {/* 顶栏 */}
       <div className={s.topBar}>
         <span className={s.topLabel}>会话</span>
-        <select
-          className={s.sessionSelect}
-          value={selectedId || ''}
-          onChange={e => setSelectedId(e.target.value)}
-        >
+        <select className={s.sessionSelect} value={selectedId || ''} onChange={e => setSelectedId(e.target.value)}>
           {sessions.map(ss => (
             <option key={ss.session_id} value={ss.session_id}>
               {ss.summary || ss.session_id.slice(0, 8)} — {ss.cwd?.split('/').pop() || ''} ({ss.event_count})
             </option>
           ))}
         </select>
-
         <span className={s.topLabel} style={{ marginLeft: 'auto' }}>样式</span>
         <select className={s.styleSelect} value={style} onChange={handleStyleChange}>
-          {STYLES.map(st => (
-            <option key={st.key} value={st.key}>{st.label}</option>
-          ))}
+          {STYLES.map(st => (<option key={st.key} value={st.key}>{st.label}</option>))}
         </select>
       </div>
 
-      {/* 主体 */}
       <div className={s.body}>
         <div className={s.mainArea}>
           <InspectCtx.Provider value={inspectCtx}>
@@ -533,16 +548,13 @@ export default function ChatReportPage() {
             )}
           </InspectCtx.Provider>
 
-          {/* 检查面板 */}
           {inspected && (
             <div className={s.inspectPanel}>
               <div className={s.inspectHeader}>
                 <span className={s.inspectNum}>#{inspected.index + 1}</span>
                 <span className={badgeCls(inspected.step.category)}>{badgeLabel(inspected.step)}</span>
                 <span className={s.inspectTitle}>
-                  {inspected.step.kind === 'text'
-                    ? inspected.step.text?.slice(0, 50) + '...'
-                    : inspected.step.toolDetail}
+                  {inspected.step.kind === 'text' ? inspected.step.text?.slice(0, 50) + '...' : inspected.step.toolDetail}
                 </span>
                 <button className={s.inspectCopy} onClick={() => {
                   const info = `步骤 #${inspected.index + 1} [${inspected.step.category}] ${inspected.step.kind === 'text' ? '文本' : inspected.step.toolName}: ${inspected.step.kind === 'text' ? inspected.step.text?.slice(0, 80) : inspected.step.toolDetail}`
@@ -561,8 +573,6 @@ export default function ChatReportPage() {
             </div>
           )}
         </div>
-
-        {/* 右侧元数据 */}
         <MetaSidebar session={selectedSession} steps={steps} />
       </div>
     </div>
