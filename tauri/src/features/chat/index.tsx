@@ -277,7 +277,7 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
               <div className={s.dBody}><ResultBlock step={step} /></div>
             ) : null}
           </div>
-        </div>
+        </StepWrap>
       ))}
     </>
   )
