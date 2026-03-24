@@ -123,6 +123,29 @@ export function langColor(filePath: string): string {
   return map[ext] || '#8b949e'
 }
 
+/** 从文件路径获取 hljs 语言标识（小写） */
+export function guessHljsLang(filePath: string): string | undefined {
+  const ext = filePath.split('.').pop()?.toLowerCase() || ''
+  const map: Record<string, string> = {
+    ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript',
+    py: 'python', rs: 'rust', go: 'go', css: 'css', scss: 'scss',
+    html: 'xml', json: 'json', yaml: 'yaml', yml: 'yaml',
+    sh: 'bash', bash: 'bash', sql: 'sql', md: 'markdown',
+    c: 'c', cpp: 'cpp', java: 'java', kt: 'kotlin',
+  }
+  return map[ext] || undefined
+}
+
+/** 从 Bash 命令/输出猜测输出语言 */
+export function guessBashOutputLang(cmd: string, output: string): string | undefined {
+  if (/^\s*[\[{]/.test(output) && /[\]}]\s*$/.test(output)) return 'json'
+  if (/\.(ts|tsx)\(\d+,\d+\):\s*error/.test(output)) return 'typescript'
+  if (/Traceback \(most recent call last\)/.test(output)) return 'python'
+  if (/\bpython|pip|pytest\b/.test(cmd)) return 'python'
+  if (/\bcargo|rustc\b/.test(cmd)) return 'rust'
+  return undefined
+}
+
 /** 格式化时间戳为 HH:MM:SS */
 export function formatTs(ts: string | null): string {
   if (!ts) return ''
