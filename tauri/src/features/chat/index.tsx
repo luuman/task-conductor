@@ -56,114 +56,52 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
-// ── 将代码包装为 markdown fenced code block ──
-function toCodeBlock(code: string, lang = ''): string {
-  // 如果内容含 ``` 则用更多反引号包裹
-  let maxRun = 0, run = 0
-  for (const ch of code) {
-    if (ch === '`') { run++; if (run > maxRun) maxRun = run } else run = 0
-  }
-  const fence = '`'.repeat(Math.max(3, maxRun + 1))
-  return `${fence}${lang}\n${code}\n${fence}`
-}
-
-// ── 将 Edit 的 old/new string 转为 diff 格式 ──
-function toDiffBlock(oldStr: string, newStr: string): string {
-  const oldLines = oldStr.split('\n').map(l => `- ${l}`)
-  const newLines = newStr.split('\n').map(l => `+ ${l}`)
-  const diffText = [...oldLines, ...newLines].join('\n')
-  return toCodeBlock(diffText, 'diff')
-}
-
-// ── 带信息栏头部的代码块 ──
-function CodeWithHeader({ icon, label, detail, error, children }: {
-  icon: string; label: string; detail?: string; error?: boolean; children: React.ReactNode
-}) {
-  return (
-    <div className={s.codeBlock} style={error ? { borderColor: 'rgba(248,113,113,0.35)' } : undefined}>
-      <div className={s.codeHeader}>
-        <span className={s.codeIcon}>{icon}</span>
-        <span className={s.codeLang}>{label}</span>
-        {detail && <span className={s.codeDetail} title={detail}>{detail}</span>}
-        {error && <span className={s.codeErr}>ERROR</span>}
-      </div>
-      <div className={s.richText}>{children}</div>
-    </div>
-  )
-}
-
-// ── Code/Result block（统一使用 RichTextBlock markdown 代码块样式） ──
+// ── Code/Result block（直接使用 ChatRenderer.CodeBlock，标题栏复用 CollapsibleCode） ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
 
-  // Edit — markdown diff 代码块
+  // Edit — diff 高亮
   if (step.category === 'edit') {
     const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
     const newStr = String(step.toolInput?.new_string ?? '')
-    if (oldStr || newStr) {
-      return (
-        <CodeWithHeader icon="✏️" label="Edit" detail={fileName}>
-          <RichTextBlock text={toDiffBlock(oldStr, newStr)} />
-        </CodeWithHeader>
-      )
-    }
-    return null
+    if (!oldStr && !newStr) return null
+    const oldLines = oldStr.split('\n').map(l => `- ${l}`)
+    const newLines = newStr.split('\n').map(l => `+ ${l}`)
+    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" label={`Edit · ${fileName}`} />
   }
 
-  // Write — markdown 代码块（按文件类型语法高亮）
+  // Write
   if (step.category === 'write' && step.toolInput?.content) {
-    const lang = guessHljsLang(filePath) || ''
+    const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return (
-      <CodeWithHeader icon="📝" label="Write" detail={fileName}>
-        <RichTextBlock text={toCodeBlock(preview, lang)} />
-      </CodeWithHeader>
-    )
+    return <CodeBlock code={preview} lang={lang} label={`Write · ${fileName}`} />
   }
 
-  // Read — 去行号 + markdown 代码块
+  // Read — 去行号
   if (step.category === 'read' && step.toolResult) {
-    const lang = guessHljsLang(filePath) || ''
+    const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    const lineCount = step.toolResult.split('\n').length
-    return (
-      <CodeWithHeader icon="📖" label="Read" detail={`${fileName} · ${lineCount} lines`}>
-        <RichTextBlock text={toCodeBlock(stripped, lang)} />
-      </CodeWithHeader>
-    )
+    return <CodeBlock code={stripped} lang={lang} label={`Read · ${fileName}`} />
   }
 
-  // Agent — 直接 Markdown 渲染
+  // Agent — Markdown 渲染
   if (step.category === 'agent' && step.toolResult) {
-    const desc = String(step.toolInput?.description || 'Agent')
-    return (
-      <CodeWithHeader icon="🤖" label="Agent" detail={desc}>
-        <RichTextBlock text={step.toolResult} />
-      </CodeWithHeader>
-    )
+    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
 
-  // Bash — markdown 代码块
+  // Bash
   if (step.category === 'bash' && step.toolResult) {
-    const cmd = String(step.toolInput?.command || '').slice(0, 100)
-    return (
-      <CodeWithHeader icon="⌨" label="Bash" detail={cmd} error={!!step.toolError}>
-        <RichTextBlock text={toCodeBlock(step.toolResult, 'bash')} />
-      </CodeWithHeader>
-    )
+    const cmd = String(step.toolInput?.command || '').slice(0, 80)
+    return <CodeBlock code={step.toolResult} lang="bash" label={`Bash · ${cmd}`} />
   }
 
-  // Generic — markdown 代码块
+  // Generic
   if (step.toolResult) {
-    return (
-      <CodeWithHeader icon="⚙" label={step.toolName || 'Result'} error={!!step.toolError}>
-        <RichTextBlock text={toCodeBlock(step.toolResult)} />
-      </CodeWithHeader>
-    )
+    return <CodeBlock code={step.toolResult} label={step.toolName || 'Result'} />
   }
 
   return null
