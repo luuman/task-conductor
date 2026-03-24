@@ -446,11 +446,11 @@ function MetaSidebar({ session, steps, questions, activeQ }: { session: AiSessio
           <hr className={s.sbDivider} />
           <div className={s.sbSection}>
             <div className={s.sbTitle}>问题导航 ({questions.length})</div>
-            <div className={s.qNav}>
+            <div className={s.qNav} ref={qNavRef}>
               {questions.map((q, i) => (
                 <a
                   key={q.id}
-                  className={s.qNavItem}
+                  className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}
                   href={`#question-${i}`}
                   onClick={e => {
                     e.preventDefault()
@@ -458,7 +458,7 @@ function MetaSidebar({ session, steps, questions, activeQ }: { session: AiSessio
                   }}
                 >
                   <span className={s.qNavNum}>Q{i + 1}</span>
-                  <span className={s.qNavText}>{q.text.slice(0, 60)}{q.text.length > 60 ? '...' : ''}</span>
+                  <span className={s.qNavText}>{q.text}</span>
                 </a>
               ))}
             </div>
