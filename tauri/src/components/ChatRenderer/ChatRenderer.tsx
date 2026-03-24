@@ -462,7 +462,7 @@ function CollapsibleCode({ html, raw, lang, label, lineCount }: {
     <div className={styles.codeWrap}>
       {canCollapse && (
         <div className={styles.codeHeader}>
-          {lang && <span className={styles.codeLang}>{lang}</span>}
+          {(label || lang) && <span className={styles.codeLang}>{label || lang}</span>}
           <span className={styles.codeLines}>{t('admin.sessions.code_lines', { count: lineCount })}</span>
           <span style={{ flex: 1 }} />
           <CopyButton text={raw} />
@@ -473,7 +473,7 @@ function CollapsibleCode({ html, raw, lang, label, lineCount }: {
       )}
       {!canCollapse && (
         <div className={styles.codeHeader}>
-          {lang && <span className={styles.codeLang}>{lang}</span>}
+          {(label || lang) && <span className={styles.codeLang}>{label || lang}</span>}
           <span style={{ flex: 1 }} />
           <CopyButton text={raw} />
         </div>
