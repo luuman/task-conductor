@@ -70,67 +70,31 @@ function HlPre({ code, lang, className }: { code: string; lang?: string; classNa
   return <pre className={`${s.codeBody} ${className || ''}`}>{code}</pre>
 }
 
+// ── 将 TimelineStep 转为 TranscriptBlock（复用 ChatRenderer 组件） ──
+function stepToBlock(step: TimelineStep): TranscriptBlock {
+  return {
+    type: 'tool_use',
+    tool_name: step.toolName || null,
+    tool_input: step.toolInput || null,
+    tool_use_id: step.id,
+    tool_result: step.toolResult || null,
+    tool_error: step.toolError || null,
+  }
+}
+
 // ── Code/Result block component ──
+// 复用 ChatRenderer 的 ToolWidget / EditInlineCard / BashStatusLine
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
-  // Edit diff — 不做语法高亮，保持 diff 颜色
-  if (step.category === 'edit' && (step.oldString || step.newString)) {
-    return (
-      <div className={s.codeBlock}>
-        <div className={s.codeHeader}><span className={s.codeLang}>Diff</span></div>
-        <pre className={s.codeBody}>
-          {step.oldString && <span className={s.diffDel}>{step.oldString.split('\n').map(l => `−${l}`).join('\n')}</span>}
-          {step.oldString && step.newString && '\n'}
-          {step.newString && <span className={s.diffAdd}>{step.newString.split('\n').map(l => `+${l}`).join('\n')}</span>}
-        </pre>
-      </div>
-    )
+  // Edit/MultiEdit — 复用 EditInlineCard（含 LCS diff 视图）
+  if (step.category === 'edit') {
+    return <EditInlineCard block={stepToBlock(step)} />
   }
 
-  // Write content preview — 按文件类型高亮
-  if (step.category === 'write' && step.toolInput?.content) {
-    const fp = String(step.toolInput.file_path || '')
-    const displayLang = guessLang(fp)
-    const hljsLang = guessHljsLang(fp)
-    const raw = String(step.toolInput.content)
-    const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return (
-      <div className={s.codeBlock}>
-        {displayLang && <div className={s.codeHeader}><span className={s.codeLang}>{displayLang}</span></div>}
-        <HlPre code={preview} lang={hljsLang} />
-      </div>
-    )
-  }
-
-  // Read file content — 去行号后按文件类型高亮
-  if (step.category === 'read' && step.toolResult) {
-    const fp = String(step.toolInput?.file_path || '')
-    const displayLang = guessLang(fp)
-    const hljsLang = guessHljsLang(fp)
-    // 去掉 Read 工具输出的行号前缀 "   123→"
-    const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return (
-      <div className={s.codeBlock}>
-        <div className={s.codeHeader}>
-          {displayLang && <span className={s.codeLang}>{displayLang}</span>}
-          <span>{step.toolResult.split('\n').length} lines</span>
-        </div>
-        <HlPre code={stripped} lang={hljsLang} />
-      </div>
-    )
-  }
-
-  // Bash output — 尝试猜测输出语言
-  if (step.category === 'bash' && step.toolResult) {
-    const cmd = String(step.toolInput?.command || '')
-    const bashLang = guessBashOutputLang(cmd, step.toolResult)
-    const isErr = step.toolError
-    return (
-      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <HlPre code={step.toolResult} lang={bashLang} className={isErr ? s.errText : ''} />
-      </div>
-    )
+  // Bash — 复用 BashStatusLine（含命令高亮 + 输出着色 + PASS/FAIL）
+  if (step.category === 'bash') {
+    return <BashStatusLine block={stepToBlock(step)} />
   }
 
   // Agent result — Markdown 渲染
@@ -138,35 +102,8 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
   }
 
-  // AskUserQuestion — 显示问题文本
-  if (step.category === 'ask' && step.toolResult) {
-    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
-  }
-
-  // Grep/Glob result — 纯文本路径
-  if ((step.category === 'grep' || step.category === 'glob') && step.toolResult) {
-    return (
-      <div className={s.codeBlock}>
-        <pre className={s.codeBody}>{step.toolResult}</pre>
-      </div>
-    )
-  }
-
-  // Generic result — 尝试判断是否是 Markdown（含 **、#、- 等标记）
-  if (step.toolResult) {
-    const isErr = step.toolError
-    const looksLikeMd = /^[#*\-]|\*\*|```/.test(step.toolResult.trim())
-    if (looksLikeMd && !isErr) {
-      return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
-    }
-    return (
-      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <pre className={`${s.codeBody} ${isErr ? s.errText : ''}`}>{step.toolResult}</pre>
-      </div>
-    )
-  }
-
-  return null
+  // 其余工具 — 通用 ToolWidget（已处理 Read/Grep/WebSearch/AskUser 等 + JSON 折叠）
+  return <ToolWidget block={stepToBlock(step)} />
 }
 
 // ── Rich text — 复用 ChatRenderer 的 Markdown 渲染 ──
