@@ -6,11 +6,6 @@
   border-bottom: 1px solid var(--tc-border);
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none;
-}
-
-.tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .tab {
