@@ -1290,6 +1290,183 @@ function highlightLog(text: string): string {
     .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
 }
 
+// ── DiffBlock（8 种 diff 渲染变体） ─────────────────────────
+
+export interface DiffBlockProps {
+  oldStr: string
+  newStr: string
+  filePath?: string
+  icon?: ReactNode
+  action?: string
+  pillColor?: string
+  variant?: CodeBlockVariant
+}
+
+export function DiffBlock({ oldStr, newStr, filePath = '', icon, action, pillColor, variant = 1 }: DiffBlockProps) {
+  const { t } = useTranslation()
+  const fileName = filePath.split('/').pop() || filePath
+
+  const raw = useMemo(() => computeDiff(oldStr, newStr), [oldStr, newStr])
+  const added = raw.filter(d => d.type === 'add').length
+  const removed = raw.filter(d => d.type === 'del').length
+
+  // 上下文折叠
+  const lines: (DiffLine | { type: 'fold'; count: number })[] = useMemo(() => {
+    const result: (DiffLine | { type: 'fold'; count: number })[] = []
+    let ctxRun: DiffLine[] = []
+    const flushCtx = () => {
+      if (ctxRun.length <= 4) { result.push(...ctxRun) }
+      else {
+        result.push(ctxRun[0])
+        result.push({ type: 'fold', count: ctxRun.length - 2 })
+        result.push(ctxRun[ctxRun.length - 1])
+      }
+      ctxRun = []
+    }
+    for (const d of raw) {
+      if (d.type === 'ctx') ctxRun.push(d)
+      else { if (ctxRun.length) flushCtx(); result.push(d) }
+    }
+    if (ctxRun.length) flushCtx()
+    return result
+  }, [raw])
+
+  const [collapsed, setCollapsed] = useState(lines.length > 12)
+
+  // 统计 pills
+  const statsPills = (
+    <span className={styles.diffStats}>
+      {added > 0 && <span className={styles.diffStatsAdd}>+{added}</span>}
+      {removed > 0 && <span className={styles.diffStatsDel}>{'\u2212'}{removed}</span>}
+    </span>
+  )
+
+  // diff 行渲染（共用）
+  const diffBody = (
+    <div className={styles.diffBody} style={collapsed ? { maxHeight: 160, overflow: 'hidden', position: 'relative' } : undefined}>
+      {lines.map((item, idx) => {
+        if ('count' in item) {
+          return <div key={idx} className={styles.diffFold}><span>{t('admin.sessions.unchanged_lines', { count: item.count })}</span></div>
+        }
+        const isAdd = item.type === 'add'
+        const isDel = item.type === 'del'
+        return (
+          <div key={idx} className={isAdd ? styles.diffLineAdd : isDel ? styles.diffLineDel : styles.diffLineCtx}>
+            <span className={`${styles.diffSign} ${isAdd ? styles.diffSignAdd : isDel ? styles.diffSignDel : ''}`}>
+              {isAdd ? '+' : isDel ? '\u2212' : ' '}
+            </span>
+            <span className={`${styles.diffText} ${isAdd ? styles.diffTextAdd : isDel ? styles.diffTextDel : styles.diffTextCtx}`}>
+              {item.text || ' '}
+            </span>
+          </div>
+        )
+      })}
+      {collapsed && <div className={styles.codeFade} onClick={() => setCollapsed(false)} />}
+    </div>
+  )
+
+  const toggleBtn = lines.length > 12 && (
+    <button className={styles.codeToggle} onClick={() => setCollapsed(v => !v)}>
+      {collapsed ? t('admin.sessions.code_expand') : t('admin.sessions.code_collapse')}
+    </button>
+  )
+
+  const headerVariants: Record<number, ReactNode> = {
+    // V1 — Sessions 经典：文件图标 + 文件名 + stats
+    1: (
+      <div className={styles.diffHeader}>
+        {icon || fileExtIcon(filePath, 14)}
+        <span className={styles.diffFilePath} title={filePath}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V2 — 彩色胶囊：[Edit pill] + 文件图标 + 文件名 + stats
+    2: (
+      <div className={`${styles.codeHeader} ${styles.cbV2 || ''}`}>
+        <span className={styles.cbPill} style={pillColor ? { background: pillColor, color: '#000' } : undefined}>{action || 'Edit'}</span>
+        {icon || fileExtIcon(filePath, 13)}
+        <span className={styles.cbFile}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V3 — 分隔面板：[icon Edit | filename +N -M]
+    3: (
+      <div className={`${styles.codeHeader} ${styles.cbV3 || ''}`}>
+        <span className={styles.cbLeft}>{icon || fileExtIcon(filePath, 13)}<span className={styles.cbAction}>{action || 'Edit'}</span></span>
+        <span className={styles.cbDivider} />
+        <span className={styles.cbFile}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V4 — Tab 标签：╭[icon filename]╮ + stats
+    4: (
+      <div className={`${styles.codeHeader} ${styles.cbV4 || ''}`}>
+        <span className={styles.cbTab}>{icon || fileExtIcon(filePath, 13)}<span className={styles.cbFile}>{fileName}</span></span>
+        {action && <span className={styles.cbActionGhost}>{action}</span>}
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V5 — 极简圆点：● filename +N -M
+    5: (
+      <div className={`${styles.codeHeader} ${styles.cbV5 || ''}`}>
+        <span className={styles.cbDotIndicator} style={pillColor ? { background: pillColor } : undefined} />
+        {icon || fileExtIcon(filePath, 13)}
+        <span className={styles.cbFile}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V6 — 面包屑：Edit › filename  +N -M
+    6: (
+      <div className={`${styles.codeHeader} ${styles.cbV6 || ''}`}>
+        {icon || fileExtIcon(filePath, 13)}
+        <span className={styles.cbAction}>{action || 'Edit'}</span>
+        {fileName && <><span className={styles.cbChevron}>›</span><span className={styles.cbFile}>{fileName}</span></>}
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V7 — 双色栏：[暗底 icon Edit] filename +N -M
+    7: (
+      <div className={`${styles.codeHeader} ${styles.cbV7 || ''}`}>
+        <span className={styles.cbDarkZone}>{icon || fileExtIcon(filePath, 13)}<span className={styles.cbAction}>{action || 'Edit'}</span></span>
+        <span className={styles.cbFile}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+    // V8 — 边框标签：[Edit tag] icon filename +N -M
+    8: (
+      <div className={`${styles.codeHeader} ${styles.cbV8 || ''}`}>
+        <span className={styles.cbTag} style={pillColor ? { borderColor: pillColor, color: pillColor } : undefined}>{action || 'Edit'}</span>
+        {icon || fileExtIcon(filePath, 13)}
+        <span className={styles.cbFile}>{fileName}</span>
+        <span style={{ flex: 1 }} />
+        {statsPills}
+        {toggleBtn}
+      </div>
+    ),
+  }
+
+  return (
+    <div className={styles.diffWrap}>
+      {headerVariants[variant] || headerVariants[1]}
+      {diffBody}
+    </div>
+  )
+}
+
 // ── CodeBlock（供外部直接使用） ──────────────────────────────
 // label 模式：传 label ReactNode，直接显示（向后兼容）
 // 结构化模式：传 icon/action/fileName + variant，渲染 8 种 header 布局
