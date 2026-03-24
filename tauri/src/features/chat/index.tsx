@@ -197,20 +197,24 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
 function StyleB({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
-      {steps.map(step => step.kind === 'text' ? (
-        <div key={step.id} className={`${s.bCard} ${s.bTextCard}`}>
-          <div className={s.bBody}><RichText text={step.text!} /></div>
-        </div>
-      ) : (
-        <div key={step.id} className={s.bCard}>
-          <div className={s.bHead}>
-            <div className={s.bIcon} style={{ background: `${dotColor(step.category)}15`, color: dotColor(step.category) }}>{catIcon(step.category)}</div>
-            <div className={s.bTitle}>{step.toolName} · {step.toolDetail?.split(' ')[0]}</div>
-            {step.toolError && <span className={s.errTag}>ERROR</span>}
-            <div className={s.bMeta}>{formatTs(step.ts)}</div>
-          </div>
-          {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
-        </div>
+      {steps.map((step, i) => (
+        <StepWrap key={step.id} step={step} index={i}>
+          {step.kind === 'text' ? (
+            <div className={`${s.bCard} ${s.bTextCard}`}>
+              <div className={s.bBody}><RichText text={step.text!} /></div>
+            </div>
+          ) : (
+            <div className={s.bCard}>
+              <div className={s.bHead}>
+                <div className={s.bIcon} style={{ background: `${dotColor(step.category)}15`, color: dotColor(step.category) }}>{catIcon(step.category)}</div>
+                <div className={s.bTitle}>{step.toolName} · {step.toolDetail?.split(' ')[0]}</div>
+                {step.toolError && <span className={s.errTag}>ERROR</span>}
+                <div className={s.bMeta}>{formatTs(step.ts)}</div>
+              </div>
+              {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
+            </div>
+          )}
+        </StepWrap>
       ))}
     </>
   )
