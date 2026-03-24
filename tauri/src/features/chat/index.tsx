@@ -57,6 +57,13 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
+// ── 高亮代码 ──
+function HlPre({ code, lang, className }: { code: string; lang?: string; className?: string }) {
+  const { html } = useHighlight(code, lang)
+  if (html) return <pre className={`hljs ${s.codeBody} ${className || ''}`} dangerouslySetInnerHTML={{ __html: html }} />
+  return <pre className={`${s.codeBody} ${className || ''}`}>{code}</pre>
+}
+
 // ── step → TranscriptBlock（给 EditInlineCard 用） ──
 function stepToBlock(step: TimelineStep): TranscriptBlock {
   return {
