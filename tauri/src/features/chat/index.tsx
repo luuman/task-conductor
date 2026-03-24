@@ -539,7 +539,7 @@ function relativeTime(iso: string): string {
 }
 
 // ── 会话行渲染（参考 sessions 页面 Notion 表格风格） ──
-function SessionItem(option: { value: string; label: string; desc?: string }, isActive: boolean) {
+function SessionItem(option: { value: string; label: string; desc?: string }, _isActive: boolean) {
   // desc 格式: "status|events|time|cwd"
   const parts = (option.desc || '').split('|')
   const status = parts[0] || ''
