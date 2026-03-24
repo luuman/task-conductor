@@ -169,10 +169,7 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
             {step.kind === 'text' ? (
               <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
-              <>
-                <span className={s.ts}>{formatTs(step.ts)}</span>
-                <ResultBlock step={step} />
-              </>
+              <ResultBlock step={step} />
             )}
           </div>
         </StepWrap>
