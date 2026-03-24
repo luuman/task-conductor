@@ -232,21 +232,6 @@
 .termContainer :global(.xterm) {
   height: 100%;
 }
-.termContainer :global(.xterm-viewport) {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(16, 185, 129, 0.15) transparent;
-}
-.termContainer :global(.xterm-viewport::-webkit-scrollbar) {
-  width: 4px;
-}
-.termContainer :global(.xterm-viewport::-webkit-scrollbar-track) {
-  background: transparent;
-}
-.termContainer :global(.xterm-viewport::-webkit-scrollbar-thumb) {
-  background: rgba(16, 185, 129, 0.15);
-  border-radius: 2px;
-}
-
 /* ── Resize 手柄（8方向） ── */
 .resizeN, .resizeS { position: absolute; left: 6px; right: 6px; height: 5px; z-index: 5; }
 .resizeE, .resizeW { position: absolute; top: 6px; bottom: 6px; width: 5px; z-index: 5; }
