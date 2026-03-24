@@ -418,7 +418,8 @@ function MetaSidebar({ session, steps, questions, activeQ, expandedQs, onToggleQ
     return { read: readFiles.size, edit: editFiles.size, write: newFiles.size }
   }, [toolSteps])
 
-  // 操作类型中文标签
+  if (!session) return null
+
   const catLabel: Record<string, string> = {
     read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash',
     grep: 'Grep', glob: 'Glob', agent: 'Agent', ask: 'Ask',
