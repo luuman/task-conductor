@@ -285,10 +285,11 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
 
 // E: 终端日志
 function StyleE({ steps }: { steps: TimelineStep[] }) {
+  const { onSelect } = useContext(InspectCtx)
   return (
     <div className={s.eLog}>
-      {steps.map(step => (
-        <div key={step.id} className={s.eLine}>
+      {steps.map((step, i) => (
+        <div key={step.id} className={s.eLine} onClick={() => onSelect(step, i)} style={{ cursor: 'pointer' }}>
           <span className={s.eTs}>{formatTs(step.ts)}</span>
           <span className={s.eType}><span className={badgeCls(step.category)}>{badgeLabel(step)}</span></span>
           <span className={s.eCt}>
