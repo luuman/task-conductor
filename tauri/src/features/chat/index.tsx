@@ -569,6 +569,17 @@ export default function ChatReportPage() {
         <select className={s.styleSelect} value={style} onChange={handleStyleChange}>
           {STYLES.map(st => (<option key={st.key} value={st.key}>{st.label}</option>))}
         </select>
+        <span className={s.topLabel}>代码栏</span>
+        <select className={s.styleSelect} value={cbVariant} onChange={handleCbVariantChange}>
+          <option value={1}>1 内联清爽</option>
+          <option value={2}>2 彩色胶囊</option>
+          <option value={3}>3 分隔面板</option>
+          <option value={4}>4 Tab标签</option>
+          <option value={5}>5 极简圆点</option>
+          <option value={6}>6 面包屑</option>
+          <option value={7}>7 双色栏</option>
+          <option value={8}>8 边框标签</option>
+        </select>
       </div>
 
       <div className={s.body}>
