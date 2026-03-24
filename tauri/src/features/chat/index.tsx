@@ -557,11 +557,24 @@ export default function ChatReportPage() {
               <div className={s.empty}><span>加载中...</span></div>
             ) : steps.length === 0 ? (
               <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
+            ) : questions.length === 0 ? (
+              <Renderer steps={steps} />
             ) : (
-              <>
-                {userQuestion && <div className={s.queryPill}>{userQuestion}</div>}
-                <Renderer steps={steps} />
-              </>
+              questions.map((q, qi) => {
+                const nextQ = questions[qi + 1]
+                const startIdx = q.stepIndex
+                const endIdx = nextQ ? nextQ.stepIndex : steps.length
+                const sectionSteps = steps.slice(startIdx, endIdx)
+                return (
+                  <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
+                    <div className={s.queryPill}>
+                      <span className={s.qNum}>Q{qi + 1}</span>
+                      {q.text.slice(0, 200)}
+                    </div>
+                    {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
+                  </div>
+                )
+              })
             )}
           </InspectCtx.Provider>
 
