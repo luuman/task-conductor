@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
-import { parseTimeline, formatTs, langColor, guessLang, type TimelineStep } from './timeline-parser'
+import { parseTimeline, formatTs, guessLang, type TimelineStep } from './timeline-parser'
 import s from './chat-report.module.css'
 
 // ── 样式常量 ──
