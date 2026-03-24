@@ -58,11 +58,6 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
-// ── 代码块顶栏样式 Context ──
-const CB_VARIANT_KEY = 'tc_cb_variant'
-const getDefaultCbVariant = (): CodeBlockVariant => (Number(localStorage.getItem(CB_VARIANT_KEY)) || 1) as CodeBlockVariant
-const CbVariantCtx = createContext<CodeBlockVariant>(1)
-
 const ACTION_MAP: Record<string, string> = {
   read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
 }
