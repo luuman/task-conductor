@@ -1386,7 +1386,7 @@ export function CodeBlock({ code, lang, label, icon, action, fileName, variant, 
       // V5 — 极简圆点：● filename                       [copy]
       case 5: return (
         <div className={`${styles.codeHeader} ${variantCls}`}>
-          <span className={styles.cbDotIndicator} />
+          <span className={styles.cbDotIndicator} style={pillColor ? { background: pillColor } : undefined} />
           <span className={styles.cbFile}>{fileName || action}</span>
           <span style={{ flex: 1 }} />
           {copyBtn}{toggleBtn}
