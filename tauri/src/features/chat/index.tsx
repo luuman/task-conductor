@@ -349,16 +349,12 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
           <div className={s.hHead} onClick={() => toggle(step.id)}>
             <span className={s.hChevron} style={{ transform: openIds.has(step.id) ? 'rotate(90deg)' : undefined }}>▶</span>
             <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-            <span className={s.hTitle}>{step.kind === 'text' ? step.text?.slice(0, 60) : step.toolDetail}</span>
-            {step.toolError && <span className={s.errTag}>ERROR</span>}
+            {step.kind === 'text' && <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>}
             <span className={s.ts}>{formatTs(step.ts)}</span>
           </div>
           {openIds.has(step.id) && (
             <div className={s.hBody}>
               {step.kind === 'text' ? <RichText text={step.text!} /> : <ResultBlock step={step} />}
-              {step.kind === 'tool' && !step.toolResult && !step.oldString && (
-                <span style={{ color: 'var(--tc-foreground-secondary)', fontSize: 11 }}>{step.toolDetail}</span>
-              )}
             </div>
           )}
         </div>
