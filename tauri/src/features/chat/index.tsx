@@ -387,26 +387,23 @@ function MetaSidebar({ session, steps, questions, activeQ, expandedQs, onToggleQ
     }
   }, [activeQ])
 
-  if (!session) return null
-  const toolSteps = steps.filter(st => st.kind === 'tool')
+  const toolSteps = useMemo(() => steps.filter(st => st.kind === 'tool'), [steps])
   const cats = useMemo(() => {
     const m: Record<string, number> = {}
     toolSteps.forEach(st => { m[st.category] = (m[st.category] || 0) + 1 })
     return Object.entries(m).sort((a, b) => b[1] - a[1])
   }, [toolSteps])
 
-  // 计算耗时
   const duration = useMemo(() => {
-    if (!session.started_at || !session.last_seen_at) return ''
+    if (!session?.started_at || !session?.last_seen_at) return ''
     const start = new Date(session.started_at).getTime()
     const end = new Date(session.last_seen_at).getTime()
     const diff = Math.round((end - start) / 1000)
     if (diff < 60) return `${diff}s`
     if (diff < 3600) return `${Math.floor(diff / 60)}m ${diff % 60}s`
     return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}m`
-  }, [session.started_at, session.last_seen_at])
+  }, [session?.started_at, session?.last_seen_at])
 
-  // 涉及文件统计
   const fileStats = useMemo(() => {
     const readFiles = new Set<string>()
     const editFiles = new Set<string>()
