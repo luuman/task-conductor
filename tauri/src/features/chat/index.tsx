@@ -62,6 +62,11 @@ const ACTION_MAP: Record<string, string> = {
   read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
 }
 
+function isMdFile(path: string): boolean {
+  const ext = path.split('.').pop()?.toLowerCase()
+  return ext === 'md' || ext === 'markdown' || ext === 'mdx'
+}
+
 // ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   const variant = 2 as const
