@@ -63,6 +63,21 @@
 .sbKey { color: var(--tc-foreground-secondary); }
 .sbVal { color: var(--tc-foreground); font-family: var(--tc-font-mono, monospace); font-size: 10px; }
 .sbDivider { border: none; border-top: 1px solid var(--tc-border); margin: 10px 0; }
+.sbTasks { display: flex; flex-wrap: wrap; gap: 5px; }
+.sbTask {
+  background: var(--tc-content-bg); border: 1px solid var(--tc-border);
+  border-radius: 6px; padding: 4px 8px; font-size: 10px;
+  color: var(--tc-foreground-secondary); cursor: pointer; line-height: 1.3;
+}
+.sbTask:hover { border-color: var(--tc-foreground-secondary); }
+.sbQuestions { list-style: none; }
+.sbQuestion {
+  padding: 5px 0; border-bottom: 1px solid var(--tc-border);
+  font-size: 10px; color: var(--tc-foreground-secondary);
+  cursor: pointer; line-height: 1.3;
+}
+.sbQuestion:hover { color: var(--tc-foreground); }
+.sbQuestion:last-child { border-bottom: none; }
 
 /* ── Main layout ── */
 .body { display: flex; flex: 1; overflow: hidden; }
