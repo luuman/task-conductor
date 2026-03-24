@@ -584,16 +584,6 @@ export default function ChatReportPage() {
   const [expandedQs, setExpandedQs] = useState<Set<number>>(new Set())
   const mainAreaRef = useRef<HTMLDivElement>(null)
 
-  const toggleQ = useCallback((idx: number) => {
-    setExpandedQs(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n })
-  }, [])
-  const expandAll = useCallback(() => {
-    setExpandedQs(new Set(questions.map((_, i) => i)))
-  }, [questions])
-  const collapseAll = useCallback(() => {
-    setExpandedQs(new Set())
-  }, [])
-
   // 获取当前项目 cwd
   const [projectCwd, setProjectCwd] = useState<string | undefined>()
   useEffect(() => {
