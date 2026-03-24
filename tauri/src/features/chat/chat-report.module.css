@@ -57,7 +57,6 @@
 .qNav {
   display: flex; flex-direction: column; gap: 1px;
   max-height: 240px; overflow-y: auto;
-  scrollbar-width: thin;
 }
 .qNavItem {
   display: flex; align-items: center; gap: 6px;
