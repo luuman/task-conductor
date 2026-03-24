@@ -4,6 +4,7 @@ import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { parseTimeline, formatTs, guessHljsLang, type TimelineStep } from './timeline-parser'
 import { RichTextBlock, CodeBlock } from '../../components/ChatRenderer'
+import { IconFileText, IconPencil, IconTerminal, IconBot, IconWrench } from '../../ui/icon'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
