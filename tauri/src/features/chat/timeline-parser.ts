@@ -1,7 +1,7 @@
 /**
  * timeline-parser.ts — 将 TranscriptMessage[] 解析为操作时间线步骤
  */
-import type { TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
+import type { TranscriptMessage } from '../../lib/api/types'
 
 export interface TimelineStep {
   id: string
