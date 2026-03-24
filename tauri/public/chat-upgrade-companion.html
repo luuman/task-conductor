@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat 升级视觉伴侣 — ResultBlock 改造参考</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-elevated: #21262d;
+    --border: #30363d;
+    --border-accent: #58a6ff;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --orange: #f0883e;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 8px;
+    --radius-sm: 4px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 13px; line-height: 1.6; }
+  ::selection { background: rgba(88,166,255,0.3); }
+  a { color: var(--accent); text-decoration: none; }
+
+  .page { display: flex; min-height: 100vh; }
+
+  /* ── Nav ── */
+  .nav {
+    width: 280px; flex-shrink: 0; background: var(--bg-card);
+    border-right: 1px solid var(--border); position: sticky; top: 0;
+    height: 100vh; overflow-y: auto; padding: 20px 0;
+  }
+  .nav h2 { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 16px; margin-bottom: 8px; }
+  .nav-group { margin-bottom: 16px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 16px;
+    color: var(--text-muted); font-size: 12px; cursor: pointer;
+    border-left: 2px solid transparent; transition: all 0.15s; text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(88,166,255,0.04); border-left-color: var(--border); }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .nav-status { margin-left: auto; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; }
+  .nav-status-miss { background: rgba(248,81,73,0.12); color: var(--red); }
+  .nav-status-weak { background: rgba(210,153,34,0.12); color: var(--yellow); }
+
+  .title-bar { padding: 20px 16px 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .title-bar h1 { font-size: 15px; font-weight: 700; }
+  .title-bar p { font-size: 11px; color: var(--text-dim); }
+
+  /* ── Content ── */
+  .content { flex: 1; max-width: 920px; padding: 32px 40px; }
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.5; }
+
+  .section { margin-bottom: 48px; scroll-margin-top: 20px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .section-num { font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); padding: 2px 8px; border-radius: 10px; font-family: var(--font-mono); }
+  .section h3 { font-size: 16px; font-weight: 600; }
+  .section-desc { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; line-height: 1.5; }
+  .section-sep { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── Before / After ── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .compare-single { margin-bottom: 12px; }
+  .compare-box { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .compare-label {
+    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-label-before { background: rgba(248,81,73,0.06); color: var(--red); }
+  .compare-label-after { background: rgba(63,185,80,0.06); color: var(--green); }
+  .compare-body { padding: 12px; }
+
+  /* ── Code hint ── */
+  .code-hint {
+    background: rgba(110,118,129,0.06); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 8px;
+    font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--text-muted);
+  }
+  .code-hint strong { color: var(--text); font-weight: 600; }
+  .code-hint code { color: var(--orange); background: rgba(110,118,129,0.15); padding: 1px 4px; border-radius: 3px; }
+
+  /* ══════════════════════════════════════ */
+  /* 1. BashStatusLine                      */
+  /* ══════════════════════════════════════ */
+  .bash-card { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .bash-header {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: rgba(0,0,0,0.3); font-family: var(--font-mono); font-size: 12px;
+  }
+  .bash-header-err { border-bottom: 1px solid rgba(248,81,73,0.2); }
+  .bash-prompt { color: var(--green); font-weight: 700; }
+  .bash-cmd { color: var(--text); }
+  .bash-lines { color: var(--text-dim); font-size: 10px; margin-left: auto; }
+  .bash-output {
+    padding: 8px 10px; font-family: var(--font-mono); font-size: 11px;
+    line-height: 1.45; overflow-x: auto; white-space: pre;
+    color: var(--text-muted); background: rgba(0,0,0,0.15);
+  }
+  .bash-output-err { color: var(--red); background: rgba(248,81,73,0.04); }
+
+  .tool-badge-pass { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(63,185,80,0.12); color: var(--green); font-weight: 600; }
+  .tool-badge-fail { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(248,81,73,0.12); color: var(--red); font-weight: 600; }
+
+  /* highlight keywords in bash output */
+  .hl-pass { color: var(--green); }
+  .hl-fail { color: var(--red); }
+  .hl-warn { color: var(--yellow); }
+  .hl-file { color: var(--cyan); }
+  .hl-num { color: #79c0ff; }
+  .hl-key { color: #79c0ff; }
+  .hl-str { color: #a5d6ff; }
+  .hl-attr { color: #ffa657; }
+
+  /* "before" generic codeblock mock */
+  .before-generic {
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-family: var(--font-mono); font-size: 11px; padding: 8px 10px;
+    color: var(--text-muted); background: rgba(0,0,0,0.1); white-space: pre; overflow-x: auto;
+  }
+
+  /* ══════════════════════════════════════ */
+  /* 2. ReadPillRow                         */
+  /* ══════════════════════════════════════ */
+  .pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 0; }
+  .pill-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; margin-right: 2px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; background: rgba(110,118,129,0.08);
+    border: 1px solid rgba(110,118,129,0.15); border-radius: 12px;
+    font-size: 11px; color: var(--text-muted); cursor: pointer; transition: all 0.1s;
+  }
+  .pill:hover { background: rgba(110,118,129,0.15); border-color: rgba(110,118,129,0.25); }
+  .pill-active { background: rgba(88,166,255,0.1); border-color: rgba(88,166,255,0.3); color: var(--accent); }
+  .pill-icon { display: flex; font-size: 10px; }
+  .pill-badge { font-size: 9px; background: rgba(110,118,129,0.15); padding: 0 4px; border-radius: 6px; color: var(--text-dim); }
+  .pill-grep { border-color: rgba(255,123,114,0.2); }
+  .pill-error { border-color: rgba(248,81,73,0.3); color: var(--red); }
+
+  .search-result { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 4px; }
+  .search-header {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted);
+  }
+  .search-count { margin-left: auto; color: var(--text-dim); font-size: 10px; }
+  .search-item {
+    display: flex; align-items: center; gap: 6px; padding: 3px 10px;
+    font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);
+  }
+  .search-item:hover { background: rgba(110,118,129,0.04); }
+  .search-item-path { color: var(--text-dim); font-size: 10px; margin-left: auto; }
+
+  .file-content-preview {
+    padding: 8px 10px; font-family: var(--font-mono); font-size: 11px;
+    line-height: 1.5; overflow-x: auto; white-space: pre; color: var(--text-muted);
+  }
+
+  /* ══════════════════════════════════════ */
+  /* 3. AskUserQuestion                     */
+  /* ══════════════════════════════════════ */
+  .ask-wrap { border: 1px solid rgba(88,166,255,0.2); background: rgba(88,166,255,0.03); border-radius: var(--radius-sm); overflow: hidden; }
+  .ask-header { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(88,166,255,0.1); font-size: 11px; color: var(--accent); font-weight: 600; }
+  .ask-body { padding: 10px 12px; }
+  .ask-question { font-size: 12px; color: var(--text); margin-bottom: 8px; }
+  .ask-options { display: flex; flex-direction: column; gap: 4px; }
+  .ask-option {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--bg); font-size: 12px; cursor: pointer; transition: all 0.1s;
+  }
+  .ask-option:hover { border-color: var(--accent); }
+  .ask-option-selected { border-color: var(--accent); background: rgba(88,166,255,0.08); }
+  .ask-option-dimmed { opacity: 0.4; }
+  .ask-option-key { font-weight: 700; color: var(--accent); font-family: var(--font-mono); width: 16px; }
+  .ask-answer { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border-top: 1px solid rgba(88,166,255,0.1); font-size: 12px; color: var(--text-muted); }
+  .ask-waiting { padding: 6px 10px; border-top: 1px solid rgba(88,166,255,0.1); font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+  .ask-waiting-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ══════════════════════════════════════ */
+  /* 4. Error States                        */
+  /* ══════════════════════════════════════ */
+  .err-block {
+    border: 1px solid rgba(248,81,73,0.3); border-radius: var(--radius-sm);
+    background: rgba(248,81,73,0.04); padding: 8px 10px;
+    font-size: 12px; color: var(--red); font-family: var(--font-mono);
+  }
+  .err-header {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    font-size: 12px; border-radius: var(--radius-sm); color: var(--text-muted);
+  }
+  .err-icon { color: var(--red); }
+
+  /* ══════════════════════════════════════ */
+  /* 5. Agent Card                          */
+  /* ══════════════════════════════════════ */
+  .agent-wrap { border: 1px solid rgba(188,140,255,0.2); background: rgba(188,140,255,0.04); border-radius: var(--radius-sm); overflow: hidden; }
+  .agent-header { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(188,140,255,0.1); font-size: 11px; color: var(--purple); }
+  .agent-body { padding: 10px 12px; font-size: 12px; }
+  .agent-body p { margin-bottom: 6px; }
+  .agent-body strong { color: var(--text); }
+  .agent-body code { color: var(--orange); background: rgba(110,118,129,0.15); padding: 1px 4px; border-radius: 3px; font-family: var(--font-mono); font-size: 11px; }
+  .agent-body ul { padding-left: 16px; margin: 4px 0; }
+  .agent-body li { margin: 2px 0; color: var(--text-muted); }
+
+  /* ══════════════════════════════════════ */
+  /* 6. UserCard                            */
+  /* ══════════════════════════════════════ */
+  .msg-row { display: flex; gap: 10px; padding: 8px 0; }
+  .msg-row-right { flex-direction: row-reverse; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+  .avatar-user { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); }
+  .avatar-bot { background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 100%); color: #fff; }
+  .bubble { max-width: 85%; border-radius: var(--radius); padding: 10px 14px; font-size: 13px; line-height: 1.6; }
+  .bubble-user { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); }
+  .bubble-assistant { background: var(--bg-elevated); border: 1px solid var(--border); }
+
+  /* ══════════════════════════════════════ */
+  /* 7. WebSearch / Skill                   */
+  /* ══════════════════════════════════════ */
+  .tool-header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; border-radius: var(--radius-sm); transition: background 0.1s; }
+  .tool-header:hover { background: rgba(110,118,129,0.06); }
+  .tool-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+  .tool-name { color: var(--text-muted); font-weight: 500; }
+  .tool-param { font-family: var(--font-mono); font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tool-chevron { margin-left: auto; color: var(--text-dim); font-size: 10px; transition: transform 0.15s; }
+
+  /* ══════════════════════════════════════ */
+  /* 8. Write Badge                         */
+  /* ══════════════════════════════════════ */
+  .write-badge-row {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    border: 1px solid rgba(63,185,80,0.15); border-radius: var(--radius-sm);
+    background: rgba(63,185,80,0.04);
+  }
+  .write-badge-icon { font-size: 12px; }
+  .write-badge-file { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+  .write-badge-check { margin-left: auto; color: var(--green); font-weight: 700; font-size: 12px; }
+  .write-badge-size { font-size: 10px; color: var(--text-dim); margin-left: 8px; }
+
+  /* ── Markdown in content ── */
+  .md p { margin-bottom: 6px; }
+  .md strong { color: var(--text); }
+  .md code { color: var(--orange); background: rgba(110,118,129,0.15); padding: 1px 4px; border-radius: 3px; font-family: var(--font-mono); font-size: 11px; }
+  .md ul { padding-left: 16px; }
+  .md li { margin: 2px 0; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ── Nav ── -->
+<nav class="nav">
+  <div class="title-bar">
+    <h1>Chat 升级伴侣</h1>
+    <p>ResultBlock 改造视觉参考</p>
+  </div>
+
+  <div class="nav-group">
+    <h2>高优先级</h2>
+    <a class="nav-item" href="#bash"><span class="nav-dot" style="background:var(--cyan)"></span>BashStatusLine<span class="nav-status nav-status-miss">缺失</span></a>
+    <a class="nav-item" href="#read-pill"><span class="nav-dot" style="background:#60a5fa"></span>ReadPillRow 药丸聚合<span class="nav-status nav-status-miss">缺失</span></a>
+    <a class="nav-item" href="#grep-pill"><span class="nav-dot" style="background:#f87171"></span>GrepPill 搜索结果<span class="nav-status nav-status-miss">缺失</span></a>
+    <a class="nav-item" href="#glob-pill"><span class="nav-dot" style="background:#fb923c"></span>GlobPill 文件匹配<span class="nav-status nav-status-miss">缺失</span></a>
+    <a class="nav-item" href="#ask-user"><span class="nav-dot" style="background:var(--accent)"></span>AskUserQuestion<span class="nav-status nav-status-miss">缺失</span></a>
+    <a class="nav-item" href="#errors"><span class="nav-dot" style="background:var(--red)"></span>Error 状态渲染<span class="nav-status nav-status-miss">缺失</span></a>
+  </div>
+
+  <div class="nav-group">
+    <h2>中优先级</h2>
+    <a class="nav-item" href="#agent"><span class="nav-dot" style="background:var(--purple)"></span>Agent 紫色卡片<span class="nav-status nav-status-weak">弱</span></a>
+    <a class="nav-item" href="#user-card"><span class="nav-dot" style="background:var(--accent)"></span>UserCard 用户消息<span class="nav-status nav-status-miss">缺失</span></a>
+    <a class="nav-item" href="#write-badge"><span class="nav-dot" style="background:var(--green)"></span>Write Badge<span class="nav-status nav-status-weak">弱</span></a>
+  </div>
+
+  <div class="nav-group">
+    <h2>低优先级</h2>
+    <a class="nav-item" href="#web-search"><span class="nav-dot" style="background:var(--cyan)"></span>WebSearch / WebFetch<span class="nav-status nav-status-weak">弱</span></a>
+    <a class="nav-item" href="#skill"><span class="nav-dot" style="background:var(--pink)"></span>Skill / TaskCreate<span class="nav-status nav-status-weak">弱</span></a>
+  </div>
+</nav>
+
+<!-- ── Content ── -->
+<main class="content">
+
+<h1 class="page-title">Chat 升级视觉伴侣</h1>
+<p class="page-subtitle">
+  对照 <code>session-message-types-demo.html</code> 参考基线，展示 <code>/chat</code> 页面 <code>ResultBlock</code> 中每个缺失/弱化组件的<strong>当前状态</strong>和<strong>目标效果</strong>。<br>
+  每个 section 包含：Before（当前） → After（目标） → 代码提示。
+</p>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 1. BashStatusLine                                   -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="bash">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h3>BashStatusLine — Bash 专用卡片</h3>
+  </div>
+  <p class="section-desc">
+    当前：Bash 统一包为 <code>```bash</code> 代码栅栏，丢失命令头部和状态指示。<br>
+    目标：<code>$ command</code> 提示符 + PASS/FAIL badge + 智能输出高亮 + 静默成功 + JSON 自动检测。
+  </p>
+
+  <!-- 1a. 成功 -->
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 通用代码块</div>
+      <div class="compare-body">
+        <div class="before-generic">$ pytest tests/ -v
+============================= test session starts ==============================
+collected 12 items
+
+tests/test_pool.py::test_run_success PASSED                              [  8%]
+tests/test_pool.py::test_run_timeout PASSED                              [ 16%]
+
+============================== 12 passed in 3.45s ==============================</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — BashStatusLine</div>
+      <div class="compare-body">
+        <div class="bash-card">
+          <div class="bash-header">
+            <span style="color:var(--text-muted)">⌨</span>
+            <span class="bash-prompt">$</span>
+            <span class="bash-cmd">pytest tests/ -v</span>
+            <span class="bash-lines">8 lines</span>
+            <span class="tool-badge-pass" style="margin-left:8px">PASS</span>
+          </div>
+          <div class="bash-output">============================= test session starts ==============================
+collected 12 items
+
+tests/test_pool.py::test_run_success <span class="hl-pass">PASSED</span>                              [  8%]
+tests/test_pool.py::test_run_timeout <span class="hl-pass">PASSED</span>                              [ 16%]
+
+============================== <span class="hl-num">12</span> <span class="hl-pass">passed</span> in <span class="hl-num">3.45s</span> ==============================</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b. 错误 -->
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 错误也是通用代码块</div>
+      <div class="compare-body">
+        <div class="before-generic" style="color: var(--text-muted)">$ npx tsc --noEmit
+src/App.tsx(45,7): error TS2322: Type 'string' is not assignable to type 'number'.
+Found 1 error in 1 file.</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 错误有红色边框和 FAIL badge</div>
+      <div class="compare-body">
+        <div class="bash-card">
+          <div class="bash-header bash-header-err">
+            <span style="color:var(--text-muted)">⌨</span>
+            <span class="bash-prompt">$</span>
+            <span class="bash-cmd">npx tsc --noEmit</span>
+            <span class="bash-lines">3 lines</span>
+            <span class="tool-badge-fail" style="margin-left:8px">FAIL</span>
+          </div>
+          <div class="bash-output bash-output-err"><span class="hl-file">src/App.tsx</span>(<span class="hl-num">45</span>,<span class="hl-num">7</span>): <span class="hl-fail">error</span> <span style="color:#ff7b72">TS2322</span>: Type 'string' is not assignable to type 'number'.
+Found <span class="hl-num">1</span> <span class="hl-fail">error</span> in <span class="hl-num">1</span> file.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1c. 静默成功 -->
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 静默成功（无输出时只显示头部）</div>
+      <div class="compare-body">
+        <div class="bash-card">
+          <div class="bash-header">
+            <span style="color:var(--text-muted)">⌨</span>
+            <span class="bash-prompt">$</span>
+            <span class="bash-cmd">mkdir -p src/utils && touch src/utils/index.ts</span>
+            <span style="flex:1"></span>
+            <span class="tool-badge-pass">PASS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1d. JSON 输出 -->
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — JSON 输出自动检测高亮</div>
+      <div class="compare-body">
+        <div class="bash-card">
+          <div class="bash-header">
+            <span style="color:var(--text-muted)">⌨</span>
+            <span class="bash-prompt">$</span>
+            <span class="bash-cmd">cat package.json | head -6</span>
+            <span class="bash-lines">6 lines</span>
+            <span class="tool-badge-pass" style="margin-left:8px">PASS</span>
+          </div>
+          <div class="bash-output">{
+  <span class="hl-key">"name"</span>: <span class="hl-str">"task-conductor"</span>,
+  <span class="hl-key">"version"</span>: <span class="hl-str">"1.0.0"</span>,
+  <span class="hl-key">"scripts"</span>: {
+    <span class="hl-key">"dev"</span>: <span class="hl-str">"vite"</span>
+  }
+}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    在 <code>ResultBlock</code> 的 <code>step.category === 'bash'</code> 分支中：<br>
+    • 从 <code>step.toolInput.command</code> 提取命令<br>
+    • <code>step.toolError</code> 决定 PASS/FAIL<br>
+    • <code>step.toolResult</code> 为空时只渲染头部（静默成功）<br>
+    • 用 <code>guessBashOutputLang()</code> 检测 JSON/Python/etc，回退到 <code>highlightLog()</code> 终端着色<br>
+    • 新组件：<code>BashCard</code>，替换当前的 <code>CodeBlock + toFence()</code>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 2. ReadPillRow                                      -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="read-pill">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h3>ReadPillRow — Read 文件药丸聚合</h3>
+  </div>
+  <p class="section-desc">
+    当前：每个 Read 调用独立渲染为完整代码块，信息密度低。<br>
+    目标：连续 Read 聚合为紧凑药丸行，点击展开查看文件内容。文件类型图标 + 行数 badge。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 每个 Read 独立展开</div>
+      <div class="compare-body">
+        <div class="before-generic" style="margin-bottom:6px">Read — ChatRenderer.tsx
+     1→import { memo } from 'react'
+     2→import ReactMarkdown from 'react-markdown'
+     ...</div>
+        <div class="before-generic">Read — sessions.module.css
+     1→.sessionList { display: flex; }
+     2→.sessionItem { padding: 8px; }
+     ...</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 药丸行（默认折叠）</div>
+      <div class="compare-body">
+        <div class="pill-row">
+          <span class="pill-label">READ</span>
+          <span class="pill pill-active">
+            <span class="pill-icon">📄</span>
+            <span>ChatRenderer.tsx</span>
+            <span class="pill-badge">13</span>
+          </span>
+          <span class="pill">
+            <span class="pill-icon">🎨</span>
+            <span>sessions.module.css</span>
+            <span class="pill-badge">7</span>
+          </span>
+          <span class="pill">
+            <span class="pill-icon">⚙</span>
+            <span>vite.config.ts</span>
+            <span class="pill-badge">5</span>
+          </span>
+        </div>
+        <!-- 展开态 -->
+        <div class="search-result">
+          <div class="search-header">
+            <span>📄</span>
+            <span style="font-family:var(--font-mono); font-size:12px; color:var(--text)">ChatRenderer.tsx</span>
+            <span class="search-count">13 lines</span>
+          </div>
+          <div class="file-content-preview"><span style="color:var(--text-dim)">  1→</span><span style="color:#ff7b72">import</span> { memo, useCallback } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">'react'</span>
+<span style="color:var(--text-dim)">  2→</span><span style="color:#ff7b72">import</span> ReactMarkdown <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">'react-markdown'</span>
+<span style="color:var(--text-dim)">  3→</span><span style="color:#ff7b72">import</span> remarkGfm <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">'remark-gfm'</span>
+<span style="color:var(--text-dim)">  ...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • 需要在 8 种 Style 中识别连续 Read steps，合并为一组<br>
+    • 或在 <code>timeline-parser.ts</code> 中新增聚合逻辑：连续 category=read 的 step 合并为 <code>ReadGroup</code><br>
+    • 药丸行内部状态：<code>expandedFile: string | null</code>，点击药丸切换展开<br>
+    • 行数从 <code>toolResult</code> 计算：<code>result.split('\n').length</code><br>
+    • 图标用已有的 <code>fileExtIcon(filePath)</code>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 3. GrepPill                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="grep-pill">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h3>GrepPill — 搜索结果药丸</h3>
+  </div>
+  <p class="section-desc">
+    当前：Grep 结果作为纯文本代码块渲染。<br>
+    目标：搜索模式药丸 + 展开后结构化文件匹配列表（文件名 + 行号）。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 纯文本</div>
+      <div class="compare-body">
+        <div class="before-generic">src/components/ChatRenderer.tsx:1099
+src/components/ChatRenderer/index.ts:5
+src/features/admin/AdminSessions.tsx:23</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 结构化搜索结果</div>
+      <div class="compare-body">
+        <div class="pill-row">
+          <span class="pill-label">SEARCH</span>
+          <span class="pill pill-grep pill-active">
+            <span class="pill-icon">🔍</span>
+            <span>"BashStatusLine"</span>
+          </span>
+        </div>
+        <div class="search-result">
+          <div class="search-header">
+            <span>🔍</span>
+            <span>BashStatusLine</span>
+            <span class="search-count">3 files</span>
+          </div>
+          <div class="search-item"><span>📄</span> ChatRenderer.tsx <span class="search-item-path">src/components/ChatRenderer.tsx:1099</span></div>
+          <div class="search-item"><span>📄</span> index.ts <span class="search-item-path">src/components/ChatRenderer/index.ts:5</span></div>
+          <div class="search-item"><span>📄</span> AdminSessions.tsx <span class="search-item-path">src/features/admin/AdminSessions.tsx:23</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • 搜索模式从 <code>step.toolInput.pattern</code> 获取<br>
+    • 解析 <code>toolResult</code>：每行格式 <code>filepath:line</code>，提取文件名和行号<br>
+    • 文件数统计：<code>new Set(lines.map(l => l.split(':')[0])).size</code>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 3b. GlobPill                                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="glob-pill">
+  <div class="section-header">
+    <span class="section-num">03b</span>
+    <h3>GlobPill — 文件匹配药丸</h3>
+  </div>
+
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — Glob 药丸 + 文件列表</div>
+      <div class="compare-body">
+        <div class="pill-row">
+          <span class="pill-label">GLOB</span>
+          <span class="pill pill-active">
+            <span class="pill-icon">📁</span>
+            <span>src/**/*.module.css</span>
+            <span class="pill-badge">4</span>
+          </span>
+        </div>
+        <div class="search-result">
+          <div class="search-header">
+            <span>📁</span>
+            <span style="font-family:var(--font-mono); color:var(--text); font-size:12px">src/**/*.module.css</span>
+            <span class="search-count">4 files</span>
+          </div>
+          <div class="search-item"><span>🎨</span> sessions.module.css <span class="search-item-path">src/features/sessions/</span></div>
+          <div class="search-item"><span>🎨</span> sidebar.module.css <span class="search-item-path">src/layouts/Sidebar/</span></div>
+          <div class="search-item"><span>🎨</span> top-bar.module.css <span class="search-item-path">src/layouts/TopBar/</span></div>
+          <div class="search-item"><span>🎨</span> chat-report.module.css <span class="search-item-path">src/features/chat/</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • 模式从 <code>step.toolInput.pattern</code> 获取<br>
+    • <code>toolResult</code> 每行一个文件路径，解析为文件名 + 目录
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 4. AskUserQuestion                                  -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="ask-user">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h3>AskUserQuestion — 用户确认交互卡片</h3>
+  </div>
+  <p class="section-desc">
+    当前：<code>ask</code> 类别已定义但渲染为通用 ResultBlock。<br>
+    目标：问题 + 选项按钮 + 选中/暗淡状态 + 等待动画。3 种状态：有选项已回答、等待回答、自由文本回答。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 通用文本输出</div>
+      <div class="compare-body">
+        <div class="before-generic">你说的"顶栏融合为一栏"具体是指什么？
+
+Options:
+A. AI 弹窗内部的 header + tab 栏合并成一行
+B. AI 助手直接嵌入到应用 TopBar 中
+C. AI 弹窗打开后替换/接管 TopBar 区域</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 交互卡片（已选 B）</div>
+      <div class="compare-body">
+        <div class="ask-wrap">
+          <div class="ask-header">
+            <span>❓</span>
+            <span>Ask User Question</span>
+          </div>
+          <div class="ask-body">
+            <p class="ask-question">你说的"顶栏融合为一栏"具体是指什么？</p>
+            <div class="ask-options">
+              <div class="ask-option ask-option-dimmed">
+                <span class="ask-option-key">A</span>
+                <span>AI 弹窗内部的 header + tab 栏合并成一行</span>
+              </div>
+              <div class="ask-option ask-option-selected">
+                <span class="ask-option-key">B</span>
+                <span>AI 助手直接嵌入到应用 TopBar 中（类似 Spotlight / ⌘K 搜索栏）</span>
+              </div>
+              <div class="ask-option ask-option-dimmed">
+                <span class="ask-option-key">C</span>
+                <span>AI 弹窗打开后替换/接管 TopBar 区域</span>
+              </div>
+            </div>
+          </div>
+          <div class="ask-answer">
+            <span style="color:var(--accent)">↩</span>
+            <span>用户选择了 <strong style="color:var(--text)">B</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 等待状态 -->
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 等待用户回答</div>
+      <div class="compare-body">
+        <div class="ask-wrap">
+          <div class="ask-header">
+            <span>❓</span>
+            <span>Ask User Question</span>
+          </div>
+          <div class="ask-body">
+            <p class="ask-question">需要为暗色/亮色主题分别定制配色吗？还是只专注暗色？</p>
+          </div>
+          <div class="ask-waiting">
+            <span class="ask-waiting-dot"></span>
+            <span>等待用户回答…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • <code>step.toolInput.question</code> → 问题文本<br>
+    • <code>step.toolInput.options</code> → 选项数组（可能没有）<br>
+    • <code>step.toolResult</code> → 用户回答（null = 等待中）<br>
+    • 解析回答匹配选项 key（A/B/C），高亮选中项，暗淡其他
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 5. Error States                                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="errors">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h3>Error 状态渲染 — 所有工具</h3>
+  </div>
+  <p class="section-desc">
+    当前：<code>step.toolError = true</code> 时 <code>ResultBlock</code> 经常返回 <code>null</code>（因为 toolResult 可能为空）。<br>
+    目标：错误时显示红色错误卡片，包含工具名 + 错误消息。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 错误消失（返回 null）</div>
+      <div class="compare-body">
+        <div style="padding: 20px; text-align: center; color: var(--text-dim); font-size: 12px;">
+          （步骤存在但无渲染输出）
+        </div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — Read 错误</div>
+      <div class="compare-body">
+        <div class="pill-row">
+          <span class="pill-label">READ</span>
+          <span class="pill pill-error">
+            <span class="pill-icon">📄</span>
+            <span>nonexistent.ts</span>
+            <span style="color: var(--red); font-size: 10px; font-weight: 600;">ERROR</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — Edit 错误</div>
+      <div class="compare-body">
+        <div class="err-header">
+          <span class="err-icon">📄</span>
+          <span style="font-family:var(--font-mono); color:var(--text); font-size:12px">App.tsx</span>
+          <span class="tool-badge-fail" style="margin-left:8px">ERROR</span>
+        </div>
+        <div class="err-block" style="margin: 4px 10px 8px;">
+          Error: old_string not found in file. The file may have been modified.
+        </div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — Bash 错误</div>
+      <div class="compare-body">
+        <div class="bash-card">
+          <div class="bash-header bash-header-err">
+            <span style="color:var(--text-muted)">⌨</span>
+            <span class="bash-prompt">$</span>
+            <span class="bash-cmd">python -c "import nope"</span>
+            <span class="tool-badge-fail" style="margin-left:auto">FAIL</span>
+          </div>
+          <div class="bash-output bash-output-err">Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+<span class="hl-fail">ModuleNotFoundError</span>: No module named 'nope'</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • 在 <code>ResultBlock</code> 顶部增加 error 分支：<code>if (step.toolError)</code> 先于正常渲染<br>
+    • Read/Grep/Glob error → 红色药丸<br>
+    • Edit error → 文件名 + ERROR badge + 错误消息块<br>
+    • Bash error → BashCard 的错误变体<br>
+    • <code>step.toolResult</code> 存在时显示错误内容，不存在时显示通用 "Tool execution failed"
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 6. Agent Card                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="agent">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h3>AgentResultView — 子代理紫色卡片</h3>
+  </div>
+  <p class="section-desc">
+    当前：Agent 用通用 <code>CodeBlock</code> 包裹，无视觉区分。<br>
+    目标：紫色边框主题卡片 + 🤖 头部 + 描述 + Markdown body。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 通用 CodeBlock</div>
+      <div class="compare-body">
+        <div class="before-generic">Agent — 探索前端组件结构
+
+## 探索结果
+找到 8 个 CSS Module 文件：
+1. sessions.module.css
+2. session-chat.module.css
+...</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 紫色主题卡片</div>
+      <div class="compare-body">
+        <div class="agent-wrap">
+          <div class="agent-header">
+            <span>🤖</span>
+            <span>探索前端组件结构</span>
+          </div>
+          <div class="agent-body md">
+            <p><strong>探索结果</strong></p>
+            <p>找到 <strong>8 个 CSS Module 文件</strong>：</p>
+            <ul>
+              <li><code>sessions.module.css</code> — 会话页主样式（1630 行）</li>
+              <li><code>session-chat.module.css</code> — 聊天布局</li>
+              <li><code>sidebar.module.css</code> — 侧边栏</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • 描述从 <code>step.toolInput.description</code> 获取<br>
+    • 新组件：<code>AgentCard</code>，紫色 border + header + <code>RichTextBlock</code> body<br>
+    • CSS: <code>border: 1px solid rgba(188,140,255,0.2); background: rgba(188,140,255,0.04)</code>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 7. UserCard                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="user-card">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h3>UserCard — 用户消息气泡</h3>
+  </div>
+  <p class="section-desc">
+    当前：用户消息只作为问题分组标题（灰色文字），不渲染为聊天气泡。<br>
+    目标：每个 Turn 开头渲染用户消息为右对齐气泡（仅在 Style G 气泡模式），其他样式作为带引号的区块。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 仅分组标题</div>
+      <div class="compare-body">
+        <div style="padding: 12px 0; border-bottom: 1px solid var(--border); color: var(--text-dim); font-size: 13px;">
+          <span style="color:var(--accent); font-weight:600; margin-right:6px;">Q1</span>
+          帮我分析 ChatRenderer.tsx 的消息渲染逻辑
+        </div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 用户消息气泡（Style G）</div>
+      <div class="compare-body">
+        <div class="msg-row msg-row-right">
+          <div class="avatar avatar-user">U</div>
+          <div class="bubble bubble-user">
+            帮我分析 <code style="color:var(--orange); background:rgba(110,118,129,0.15); padding:1px 4px; border-radius:3px; font-family:var(--font-mono); font-size:12px">ChatRenderer.tsx</code> 的消息渲染逻辑，修复 Bash 输出高亮问题。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 其他样式 -->
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 用户消息区块（Style A/B/D 等）</div>
+      <div class="compare-body">
+        <div style="
+          border-left: 3px solid var(--accent);
+          padding: 8px 12px;
+          margin: 8px 0;
+          background: rgba(88,166,255,0.04);
+          border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+          font-size: 13px;
+        ">
+          <span style="font-size:10px; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:0.5px">用户</span>
+          <p style="margin-top:4px">帮我分析 <code style="color:var(--orange); background:rgba(110,118,129,0.15); padding:1px 4px; border-radius:3px; font-family:var(--font-mono); font-size:12px">ChatRenderer.tsx</code> 的消息渲染逻辑，修复 Bash 输出高亮问题。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • <code>UserQuestion</code> 已由 <code>parseTimelineWithQuestions()</code> 提取<br>
+    • 在 Turn 渲染逻辑中，steps 列表前插入 UserCard 渲染<br>
+    • <code>question.text</code> 支持 Markdown（用 <code>RichTextBlock</code> 渲染）
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 8. Write Badge                                      -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="write-badge">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h3>Write Badge — 简洁文件写入指示</h3>
+  </div>
+  <p class="section-desc">
+    当前：Write 显示前 800 字符内容预览，信息过多。<br>
+    目标：简洁模式——文件名 + ✓ + 大小，可选展开查看内容。
+  </p>
+
+  <div class="compare">
+    <div class="compare-box">
+      <div class="compare-label compare-label-before">● BEFORE — 800字符内容预览</div>
+      <div class="compare-body">
+        <div class="before-generic" style="max-height: 80px; overflow: hidden;">Write — highlight.ts
+export function guessLang(file: string): string {
+  const ext = file.split('.').pop()?.toLowerCase() || ''
+  const map: Record&lt;string, string&gt; = {
+    ts: 'typescript', tsx: 'typescript',
+    py: 'python', rs: 'rust',
+  }
+  return map[ext] || ''
+}
+...</div>
+      </div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 简洁 badge（默认折叠）</div>
+      <div class="compare-body">
+        <div class="write-badge-row">
+          <span class="write-badge-icon">📄</span>
+          <span class="write-badge-file">highlight.ts</span>
+          <span class="write-badge-size">320B</span>
+          <span class="write-badge-check">✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-hint">
+    <strong>实现提示：</strong><br>
+    • 文件大小从 <code>step.toolInput.content.length</code> 估算<br>
+    • 默认只显示 badge，点击可展开内容（复用现有 <code>CodeBlock</code>）<br>
+    • 成功/错误状态：<code>step.toolError ? '✗' : '✓'</code>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 9. WebSearch / WebFetch                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="web-search">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h3>WebSearch / WebFetch — 网络搜索卡片</h3>
+  </div>
+  <p class="section-desc">
+    当前：通用 ResultBlock。<br>
+    目标：🌐 图标 + 搜索查询/URL 的可折叠卡片。
+  </p>
+
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — WebSearch 折叠卡片</div>
+      <div class="compare-body">
+        <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;">
+          <div class="tool-header">
+            <span class="tool-icon">🌐</span>
+            <span class="tool-name">WebSearch</span>
+            <code class="tool-param" style="margin-left:4px">react-virtuoso custom renderer performance</code>
+            <span style="flex:1"></span>
+            <span class="tool-badge-pass">OK</span>
+            <span class="tool-chevron">▶</span>
+          </div>
+        </div>
+        <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 8px;">
+          <div class="tool-header">
+            <span class="tool-icon">🌐</span>
+            <span class="tool-name">WebFetch</span>
+            <code class="tool-param" style="margin-left:4px; color:var(--cyan)">https://api.example.com/docs</code>
+            <span style="flex:1"></span>
+            <span class="tool-badge-pass">OK</span>
+            <span class="tool-chevron">▶</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 10. Skill / TaskCreate                              -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="skill">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h3>Skill / TaskCreate — 系统工具卡片</h3>
+  </div>
+
+  <div class="compare-single">
+    <div class="compare-box">
+      <div class="compare-label compare-label-after">● AFTER — 紧凑工具指示</div>
+      <div class="compare-body">
+        <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 8px;">
+          <div class="tool-header">
+            <span class="tool-icon" style="color:var(--pink)">⚡</span>
+            <span class="tool-name">Skill</span>
+            <code class="tool-param" style="margin-left:4px">brainstorming</code>
+            <span style="flex:1"></span>
+            <span class="tool-chevron">▶</span>
+          </div>
+        </div>
+        <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;">
+          <div class="tool-header">
+            <span class="tool-icon" style="color:var(--cyan)">📋</span>
+            <span class="tool-name">TaskCreate</span>
+            <code class="tool-param" style="margin-left:4px">修复 Bash 输出高亮</code>
+            <span style="flex:1"></span>
+            <span class="tool-badge-pass">OK</span>
+            <span class="tool-chevron">▶</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- 改造总结                                            -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section" id="summary">
+  <div class="section-header">
+    <span class="section-num">★</span>
+    <h3>改造路径总结</h3>
+  </div>
+  <p class="section-desc">
+    所有改造集中在两个文件 + 一个新组件文件：
+  </p>
+
+  <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:16px;">
+    <tr style="background:rgba(110,118,129,0.08)">
+      <th style="text-align:left; padding:6px 10px; border:1px solid var(--border); color:var(--text-muted)">优先级</th>
+      <th style="text-align:left; padding:6px 10px; border:1px solid var(--border); color:var(--text-muted)">组件</th>
+      <th style="text-align:left; padding:6px 10px; border:1px solid var(--border); color:var(--text-muted)">改动范围</th>
+      <th style="text-align:left; padding:6px 10px; border:1px solid var(--border); color:var(--text-muted)">难度</th>
+    </tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--red)">P0</span></td><td style="padding:5px 10px; border:1px solid var(--border)">BashCard</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock bash 分支重写</td><td style="padding:5px 10px; border:1px solid var(--border)">中</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--red)">P0</span></td><td style="padding:5px 10px; border:1px solid var(--border)">ReadPillRow</td><td style="padding:5px 10px; border:1px solid var(--border)">timeline-parser 聚合 + 新组件</td><td style="padding:5px 10px; border:1px solid var(--border)">高</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--red)">P0</span></td><td style="padding:5px 10px; border:1px solid var(--border)">GrepPill / GlobPill</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock grep/glob 分支新增</td><td style="padding:5px 10px; border:1px solid var(--border)">低</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--red)">P0</span></td><td style="padding:5px 10px; border:1px solid var(--border)">Error 渲染</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock 顶部增加 error 分支</td><td style="padding:5px 10px; border:1px solid var(--border)">低</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--yellow)">P1</span></td><td style="padding:5px 10px; border:1px solid var(--border)">AskUserCard</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock ask 分支新增</td><td style="padding:5px 10px; border:1px solid var(--border)">中</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--yellow)">P1</span></td><td style="padding:5px 10px; border:1px solid var(--border)">AgentCard</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock agent 分支改造</td><td style="padding:5px 10px; border:1px solid var(--border)">低</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--yellow)">P1</span></td><td style="padding:5px 10px; border:1px solid var(--border)">UserCard</td><td style="padding:5px 10px; border:1px solid var(--border)">Turn 渲染逻辑 + 新组件</td><td style="padding:5px 10px; border:1px solid var(--border)">中</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--text-dim)">P2</span></td><td style="padding:5px 10px; border:1px solid var(--border)">WriteBadge</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock write 分支改造</td><td style="padding:5px 10px; border:1px solid var(--border)">低</td></tr>
+    <tr><td style="padding:5px 10px; border:1px solid var(--border)"><span style="color:var(--text-dim)">P2</span></td><td style="padding:5px 10px; border:1px solid var(--border)">WebSearch/Skill</td><td style="padding:5px 10px; border:1px solid var(--border)">ResultBlock search/other 分支</td><td style="padding:5px 10px; border:1px solid var(--border)">低</td></tr>
+  </table>
+
+  <div class="code-hint">
+    <strong>核心修改文件：</strong><br>
+    <code>features/chat/index.tsx</code> → ResultBlock 重写（所有分支）<br>
+    <code>features/chat/chat-report.module.css</code> → 新增 bash-card / pill / ask / agent / error 样式<br>
+    <code>features/chat/timeline-parser.ts</code> → Read 聚合逻辑（可选）<br>
+    <code>components/ChatRenderer/ChatRenderer.tsx</code> → 可能需要导出新子组件
+  </div>
+</div>
+
+</main>
+</div>
+</body>
+</html>
