@@ -1289,6 +1289,21 @@ function highlightLog(text: string): string {
     .replace(/\b(TS\d{4,5})\b/g, '<span class="hljs-keyword">$1</span>')
 }
 
+// ── CodeBlock（供外部直接使用，带自定义 label） ──────────────
+
+export function CodeBlock({ code, lang, label }: { code: string; lang?: string; label?: string }) {
+  let highlighted: string | null = null
+  try {
+    if (lang && hljs.getLanguage(lang)) {
+      highlighted = hljs.highlight(code, { language: lang }).value
+    } else {
+      highlighted = hljs.highlightAuto(code).value
+    }
+  } catch { /* fallback */ }
+  const lineCount = code.split('\n').length
+  return <CollapsibleCode html={highlighted} raw={code} lang={lang} label={label} lineCount={lineCount} />
+}
+
 // ── BashStatusLine ──────────────────────────────────────────
 
 export function BashStatusLine({ block }: { block: TranscriptBlock }) {
