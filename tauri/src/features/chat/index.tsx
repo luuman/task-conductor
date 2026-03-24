@@ -156,15 +156,8 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
               <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
               <>
-                <div className={s.aToolRow}>
-                  <span className={badgeCls(step.category)}>{step.toolName}</span>
-                  <span style={{ fontFamily: 'var(--tc-font-mono)', fontSize: 11 }}>
-                    {step.toolDetail && <><span className={s.fileName}>{step.toolDetail.split(' ')[0]}</span> {step.toolDetail.includes(' ') ? step.toolDetail.slice(step.toolDetail.indexOf(' ')) : ''}</>}
-                  </span>
-                  {step.toolError && <span className={s.errTag}>ERROR</span>}
-                  <span style={{ marginLeft: 'auto' }} className={s.ts}>{formatTs(step.ts)}</span>
-                </div>
-                <div style={{ marginLeft: 4 }}><ResultBlock step={step} /></div>
+                <span className={s.ts}>{formatTs(step.ts)}</span>
+                <ResultBlock step={step} />
               </>
             )}
           </div>
