@@ -125,6 +125,7 @@ export function Layout() {
     <FloatingAssistant />
     <PtyAssistant />
     <PrdSidebar />
+    <ChatCompanion open={companionOpen} onClose={() => setCompanionOpen(false)} />
   </>
   )
 }
