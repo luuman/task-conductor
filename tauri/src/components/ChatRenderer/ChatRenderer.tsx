@@ -460,8 +460,15 @@ function CollapsibleCode({ html, raw, lang, label, lineCount, hideHeader }: {
   hideHeader?: boolean
 }) {
   const { t } = useTranslation()
+  const globalExpanded = useContext(CodeExpandCtx)
   const [collapsed, setCollapsed] = useState(lineCount > CODE_COLLAPSE_THRESHOLD)
   const canCollapse = lineCount > CODE_COLLAPSE_THRESHOLD
+
+  // 响应全局展开/折叠信号
+  useEffect(() => {
+    if (!canCollapse) return
+    setCollapsed(!globalExpanded)
+  }, [globalExpanded, canCollapse])
 
   return (
     <div className={styles.codeWrap}>
