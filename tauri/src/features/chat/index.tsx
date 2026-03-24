@@ -66,7 +66,7 @@ function toolLabel(category: string, fileName: string, extra?: string) {
     : category === 'bash' ? <IconTerminal size={ICON_SIZE} />
     : category === 'agent' ? <IconBot size={ICON_SIZE} />
     : <IconWrench size={ICON_SIZE} />
-  const text = fileName || extra || ''
+  const text = fileName || (extra ? extra.toLowerCase() : '')
   return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>{icon}{text}</span>
 }
 
