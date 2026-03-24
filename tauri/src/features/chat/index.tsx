@@ -64,7 +64,7 @@ const ACTION_MAP: Record<string, string> = {
 
 // ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
-  const variant = useContext(CbVariantCtx)
+  const variant = 2 as const
   if (!step.toolResult && !step.oldString) return null
 
   const filePath = String(step.toolInput?.file_path || '')
