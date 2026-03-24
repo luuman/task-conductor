@@ -435,28 +435,104 @@ function MetaSidebar({ session, steps }: { session: AiSession | null; steps: Tim
     toolSteps.forEach(st => { m[st.category] = (m[st.category] || 0) + 1 })
     return Object.entries(m).sort((a, b) => b[1] - a[1])
   }, [toolSteps])
+
+  // 计算耗时
+  const duration = useMemo(() => {
+    if (!session.started_at || !session.last_seen_at) return ''
+    const start = new Date(session.started_at).getTime()
+    const end = new Date(session.last_seen_at).getTime()
+    const diff = Math.round((end - start) / 1000)
+    if (diff < 60) return `${diff}s`
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ${diff % 60}s`
+    return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}m`
+  }, [session.started_at, session.last_seen_at])
+
+  // 涉及文件统计
+  const fileStats = useMemo(() => {
+    const readFiles = new Set<string>()
+    const editFiles = new Set<string>()
+    const newFiles = new Set<string>()
+    for (const st of toolSteps) {
+      const fp = String(st.toolInput?.file_path || '')
+      if (!fp) continue
+      if (st.category === 'read') readFiles.add(fp)
+      else if (st.category === 'edit') editFiles.add(fp)
+      else if (st.category === 'write') newFiles.add(fp)
+    }
+    return { read: readFiles.size, edit: editFiles.size, write: newFiles.size }
+  }, [toolSteps])
+
+  // 操作类型中文标签
+  const catLabel: Record<string, string> = {
+    read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash',
+    grep: 'Grep', glob: 'Glob', agent: 'Agent', ask: 'Ask',
+    search: 'Search', other: '其他',
+  }
+
   return (
     <div className={s.sidebar}>
+      {/* 会话元数据 */}
       <div className={s.sbSection}>
         <div className={s.sbTitle}>会话元数据</div>
         <div className={s.sbRow}><span className={s.sbKey}>会话 ID</span><span className={s.sbVal}>{session.session_id.slice(0, 8)}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>状态</span><span className={s.sbVal} style={{ color: session.status === 'active' ? '#4ade80' : undefined }}>● {session.status || 'unknown'}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>状态</span><span className={s.sbVal} style={{ color: session.status === 'active' ? '#4ade80' : session.status === 'stopped' ? '#f87171' : undefined }}>● {session.status || 'unknown'}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>模型</span><span className={s.sbVal}>claude-opus-4-6</span></div>
         <div className={s.sbRow}><span className={s.sbKey}>开始</span><span className={s.sbVal}>{formatTs(session.started_at)}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>最后活跃</span><span className={s.sbVal}>{formatTs(session.last_seen_at || '')}</span></div>
-        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>目录</span><span className={s.sbVal} style={{ fontSize: 9 }}>{session.cwd.split('/').pop()}</span></div>}
+        <div className={s.sbRow}><span className={s.sbKey}>结束</span><span className={s.sbVal}>{formatTs(session.last_seen_at || '')}</span></div>
+        {duration && <div className={s.sbRow}><span className={s.sbKey}>耗时</span><span className={s.sbVal}>{duration}</span></div>}
+        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>工作目录</span><span className={s.sbVal} style={{ fontSize: 9 }}>{session.cwd.split('/').pop()}</span></div>}
+        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>Git 分支</span><span className={s.sbVal}>master</span></div>}
       </div>
+
       <hr className={s.sbDivider} />
+
+      {/* 操作统计 */}
       <div className={s.sbSection}>
         <div className={s.sbTitle}>操作统计</div>
-        <div className={s.sbRow}><span className={s.sbKey}>总步骤</span><span className={s.sbVal}>{steps.length}</span></div>
         <div className={s.sbRow}><span className={s.sbKey}>工具调用</span><span className={s.sbVal}>{toolSteps.length}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>文本输出</span><span className={s.sbVal}>{steps.length - toolSteps.length}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>文本输出</span><span className={s.sbVal}>{steps.length - toolSteps.length} 段</span></div>
         {cats.map(([cat, count]) => (
           <div key={cat} className={s.sbRow}>
-            <span className={s.sbKey}>{cat}</span>
+            <span className={s.sbKey}>{catLabel[cat] || cat}</span>
             <span className={s.sbVal} style={{ color: dotColor(cat as TimelineStep['category']) }}>{count}</span>
           </div>
         ))}
+      </div>
+
+      <hr className={s.sbDivider} />
+
+      {/* 涉及文件 */}
+      <div className={s.sbSection}>
+        <div className={s.sbTitle}>涉及文件</div>
+        <div className={s.sbRow}><span className={s.sbKey}>📄 读取</span><span className={s.sbVal}>{fileStats.read} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>✏️ 修改</span><span className={s.sbVal}>{fileStats.edit} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>📝 新建</span><span className={s.sbVal}>{fileStats.write} 文件</span></div>
+      </div>
+
+      <hr className={s.sbDivider} />
+
+      {/* 推荐任务 */}
+      <div className={s.sbSection}>
+        <div className={s.sbTitle}>推荐任务</div>
+        <div className={s.sbTasks}>
+          <div className={s.sbTask}>优化 UserCard 气泡样式</div>
+          <div className={s.sbTask}>改进 BashStatusLine 高亮</div>
+          <div className={s.sbTask}>添加 Read pill 动画</div>
+          <div className={s.sbTask}>实现 Mermaid 缩放</div>
+        </div>
+      </div>
+
+      <hr className={s.sbDivider} />
+
+      {/* 推荐问题 */}
+      <div className={s.sbSection}>
+        <div className={s.sbTitle}>推荐问题</div>
+        <ul className={s.sbQuestions}>
+          <li className={s.sbQuestion}>哪种类型最需要优先改进？</li>
+          <li className={s.sbQuestion}>Edit diff 需要 side-by-side？</li>
+          <li className={s.sbQuestion}>Bash 支持 ANSI 颜色码？</li>
+          <li className={s.sbQuestion}>AskUser 选项需要键盘导航？</li>
+        </ul>
       </div>
     </div>
   )
