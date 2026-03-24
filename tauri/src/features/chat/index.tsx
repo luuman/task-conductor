@@ -693,6 +693,7 @@ export default function ChatReportPage() {
               })
             )}
           </InspectCtx.Provider>
+          </CodeExpandCtx.Provider>
 
           {/* 底部操作栏 */}
           {steps.length > 0 && (
