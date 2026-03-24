@@ -329,7 +329,6 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
               <div className={s.gBubbleText}><RichText text={step.text!} /></div>
             ) : (
               <div className={s.gBubbleTool}>
-                <span className={s.ts}>{formatTs(step.ts)}</span>
                 <ResultBlock step={step} />
               </div>
             )}
