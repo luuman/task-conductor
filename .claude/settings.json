@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/sichengli/Documents/code2/task-conductor/.claude/hooks/screenshot-feishu.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
