@@ -559,28 +559,43 @@ export default function ChatReportPage() {
     <div className={s.page}>
       <div className={s.topBar}>
         <span className={s.topLabel}>会话</span>
-        <select className={s.sessionSelect} value={selectedId || ''} onChange={e => setSelectedId(e.target.value)}>
-          {sessions.map(ss => (
-            <option key={ss.session_id} value={ss.session_id}>
-              {ss.summary || ss.session_id.slice(0, 8)} — {ss.cwd?.split('/').pop() || ''} ({ss.event_count})
-            </option>
-          ))}
-        </select>
+        <Select
+          options={sessions.map(ss => ({
+            value: ss.session_id,
+            label: ss.summary || ss.session_id.slice(0, 8),
+            desc: `${ss.cwd?.split('/').pop() || ''} (${ss.event_count})`,
+          }))}
+          value={selectedId || ''}
+          onChange={setSelectedId}
+          placeholder="选择会话"
+          searchable
+          searchPlaceholder="搜索会话..."
+          wide
+          style={{ minWidth: 240, maxWidth: 400 }}
+        />
         <span className={s.topLabel} style={{ marginLeft: 'auto' }}>样式</span>
-        <select className={s.styleSelect} value={style} onChange={handleStyleChange}>
-          {STYLES.map(st => (<option key={st.key} value={st.key}>{st.label}</option>))}
-        </select>
+        <Select
+          options={STYLES.map(st => ({ value: st.key, label: st.label }))}
+          value={style}
+          onChange={v => { setStyle(v as StyleKey); localStorage.setItem(LS_KEY, v) }}
+          style={{ minWidth: 140 }}
+        />
         <span className={s.topLabel}>代码栏</span>
-        <select className={s.styleSelect} value={cbVariant} onChange={handleCbVariantChange}>
-          <option value={1}>1 内联清爽</option>
-          <option value={2}>2 彩色胶囊</option>
-          <option value={3}>3 分隔面板</option>
-          <option value={4}>4 Tab标签</option>
-          <option value={5}>5 极简圆点</option>
-          <option value={6}>6 面包屑</option>
-          <option value={7}>7 双色栏</option>
-          <option value={8}>8 边框标签</option>
-        </select>
+        <Select
+          options={[
+            { value: '1', label: '1 内联清爽' },
+            { value: '2', label: '2 彩色胶囊' },
+            { value: '3', label: '3 分隔面板' },
+            { value: '4', label: '4 Tab标签' },
+            { value: '5', label: '5 极简圆点' },
+            { value: '6', label: '6 面包屑' },
+            { value: '7', label: '7 双色栏' },
+            { value: '8', label: '8 边框标签' },
+          ]}
+          value={String(cbVariant)}
+          onChange={v => { setCbVariant(Number(v) as CodeBlockVariant); localStorage.setItem(LS_CB_KEY, v) }}
+          style={{ minWidth: 130 }}
+        />
       </div>
 
       <div className={s.body}>
