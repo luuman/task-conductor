@@ -81,14 +81,12 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   const action = ACTION_MAP[step.category] || step.toolName || 'Tool'
   const color = dotColor(step.category)
 
-  // Edit — diff
+  // Edit — LCS diff（带背景色 + 增删行数统计）
   if (step.category === 'edit') {
     const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
     const newStr = String(step.toolInput?.new_string ?? '')
     if (!oldStr && !newStr) return null
-    const oldLines = oldStr.split('\n').map(l => `- ${l}`)
-    const newLines = newStr.split('\n').map(l => `+ ${l}`)
-    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+    return <DiffBlock oldStr={oldStr} newStr={newStr} filePath={filePath} icon={icon} action={action} pillColor={color} variant={variant} />
   }
 
   // Write
