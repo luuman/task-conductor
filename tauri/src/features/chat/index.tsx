@@ -355,8 +355,8 @@ function StyleF({ steps }: { steps: TimelineStep[] }) {
 function StyleG({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
-      {steps.map(step => (
-        <div key={step.id} className={s.gMsg}>
+      {steps.map((step, i) => (
+        <StepWrap key={step.id} step={step} index={i}><div className={s.gMsg}>
           <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`}>
             {step.kind === 'text' ? 'C' : catIcon(step.category)}
           </div>
