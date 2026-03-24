@@ -608,6 +608,27 @@ export default function ChatReportPage() {
             )}
           </InspectCtx.Provider>
 
+          {/* 底部操作栏 */}
+          {steps.length > 0 && (
+            <div className={s.bottomBar}>
+              <div className={s.bottomActions}>
+                <button className={s.actionBtn}>♡ 收藏</button>
+                <button className={s.actionBtn}>↗ 分享</button>
+                <button className={s.actionBtn}>↻ 重写</button>
+                <button className={s.actionBtn} onClick={() => {
+                  const allText = steps.filter(st => st.kind === 'text').map(st => st.text).join('\n\n')
+                  navigator.clipboard.writeText(allText)
+                }}>📋 复制</button>
+                <span className={s.actionDots}>⋯</span>
+              </div>
+              <div className={s.followUpWrap}>
+                <span className={s.followUpIcon}>@</span>
+                <input className={s.followUpInput} placeholder="输入追问..." />
+                <button className={s.sendBtn}>↑</button>
+              </div>
+            </div>
+          )}
+
           {inspected && (
             <div className={s.inspectPanel}>
               <div className={s.inspectHeader}>
