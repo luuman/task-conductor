@@ -12,6 +12,7 @@ export {
   EditInlineCard,
   BashStatusLine,
   ToolWidget,
+  CodeBlock,
 } from './ChatRenderer'
 
 export type { ChatMessageListProps, AssistantTurn, GroupedTurnItem } from './ChatRenderer'
