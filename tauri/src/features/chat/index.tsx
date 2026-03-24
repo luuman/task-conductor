@@ -613,7 +613,7 @@ export default function ChatReportPage() {
                 {inspected.step.toolName && <span> · 工具: <b>{inspected.step.toolName}</b></span>}
                 {inspected.step.ts && <span> · 时间: <b>{formatTs(inspected.step.ts)}</b></span>}
                 {inspected.step.toolError && <span style={{ color: '#f87171' }}> · ERROR</span>}
-                {inspected.step.toolInput?.file_path && <span> · 文件: <b>{String(inspected.step.toolInput.file_path as string).split('/').pop()}</b></span>}
+                {inspected.step.toolInput?.file_path != null && <span> · 文件: <b>{String(inspected.step.toolInput.file_path).split('/').pop()}</b></span>}
                 <span style={{ marginLeft: 8, color: 'var(--tc-foreground-secondary)', fontSize: 10 }}>点击复制后告诉 Claude: "步骤 #{inspected.index + 1} 有问题"</span>
               </div>
             </div>
