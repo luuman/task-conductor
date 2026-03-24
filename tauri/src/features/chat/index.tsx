@@ -1,7 +1,7 @@
 // ChatReportPage — 会话操作时间线，8 种可切换样式
 import { useCallback, useEffect, useMemo, useState, createContext, useContext } from 'react'
 import { api } from '../../lib/api'
-import type { AiSession, TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
+import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { parseTimeline, formatTs, guessHljsLang, type TimelineStep } from './timeline-parser'
 import { RichTextBlock } from '../../components/ChatRenderer'
 import '../../styles/hljs-ayu-dark.css'
