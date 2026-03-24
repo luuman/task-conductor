@@ -373,6 +373,17 @@ const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
 // ── Right sidebar ──
 function MetaSidebar({ session, steps, questions, activeQ }: { session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number }) {
   const qNavRef = useRef<HTMLDivElement>(null)
+
+  // 联动：activeQ 变化时自动滚动导航列表
+  useEffect(() => {
+    const container = qNavRef.current
+    if (!container) return
+    const activeEl = container.children[activeQ] as HTMLElement | undefined
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [activeQ])
+
   if (!session) return null
   const toolSteps = steps.filter(st => st.kind === 'tool')
   const cats = useMemo(() => {
