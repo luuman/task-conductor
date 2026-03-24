@@ -373,7 +373,7 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
               <ResultBlock step={step} />
             </div>
           )}
-        </div>
+        </div></StepWrap>
       ))}
     </>
   )
@@ -381,6 +381,7 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
 
 // H: 折叠手风琴
 function StyleH({ steps }: { steps: TimelineStep[] }) {
+  const { onSelect } = useContext(InspectCtx)
   const [openIds, setOpenIds] = useState<Set<string>>(() => {
     const set = new Set<string>()
     steps.forEach(st => { if (st.kind === 'text') set.add(st.id) })
@@ -392,9 +393,9 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
 
   return (
     <>
-      {steps.map(step => (
+      {steps.map((step, i) => (
         <div key={step.id} className={s.hAcc}>
-          <div className={s.hHead} onClick={() => toggle(step.id)}>
+          <div className={s.hHead} onClick={(e) => { if (e.shiftKey) { onSelect(step, i) } else { toggle(step.id) } }}>
             <span className={s.hChevron} style={{ transform: openIds.has(step.id) ? 'rotate(90deg)' : undefined }}>▶</span>
             <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
             <span className={s.hTitle}>{step.kind === 'text' ? step.text?.slice(0, 60) : step.toolDetail}</span>
