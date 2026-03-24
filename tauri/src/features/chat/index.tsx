@@ -532,18 +532,6 @@ export default function ChatReportPage() {
     return textBlock?.text?.slice(0, 150) || ''
   }, [transcript])
 
-  const handleStyleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const v = e.target.value as StyleKey
-    setStyle(v)
-    localStorage.setItem(LS_KEY, v)
-  }, [])
-
-  const handleCbVariantChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const v = Number(e.target.value) as CodeBlockVariant
-    setCbVariant(v)
-    localStorage.setItem(CB_VARIANT_KEY, String(v))
-  }, [])
-
   const handleInspect = useCallback((step: TimelineStep, index: number) => {
     setInspected(prev => prev?.step.id === step.id ? null : { step, index })
   }, [])
