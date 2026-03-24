@@ -1415,7 +1415,7 @@ export function CodeBlock({ code, lang, label, icon, action, fileName, variant, 
       // V8 — 边框标签：[action tag] [icon] filename      lines [copy] [expand]
       case 8: return (
         <div className={`${styles.codeHeader} ${variantCls}`}>
-          <span className={styles.cbTag}>{action}</span>
+          <span className={styles.cbTag} style={pillColor ? { borderColor: pillColor, color: pillColor } : undefined}>{action}</span>
           {icon}<span className={styles.cbFile}>{fileName}</span>
           <span style={{ flex: 1 }} />
           {canCollapse && <span className={styles.codeLines}>{linesText}</span>}
