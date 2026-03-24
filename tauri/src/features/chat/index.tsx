@@ -449,30 +449,24 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
             <div className={s.sbTitle} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span>问题导航 ({questions.length})</span>
               <span style={{ flex: 1 }} />
-              <button className={s.qExpandBtn} onClick={expandedQs.size === questions.length ? onCollapseAll : onExpandAll}>
-                {expandedQs.size === questions.length ? '全部折叠' : '全部展开'}
+              <button className={s.qExpandBtn} onClick={onToggleCode} title={codeExpanded ? '折叠代码' : '展开代码'}>
+                {codeExpanded ? '⊟' : '⊞'}
               </button>
             </div>
             <div className={s.qNav} ref={qNavRef}>
               {questions.map((q, i) => (
-                <div key={q.id} className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}>
-                  <button
-                    className={s.qNavChevron}
-                    style={{ transform: expandedQs.has(i) ? 'rotate(90deg)' : undefined }}
-                    onClick={() => onToggleQ(i)}
-                  >▶</button>
-                  <a
-                    className={s.qNavLink}
-                    href={`#question-${i}`}
-                    onClick={e => {
-                      e.preventDefault()
-                      document.getElementById(`question-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                    }}
-                  >
-                    <span className={s.qNavNum}>Q{i + 1}</span>
-                    <span className={s.qNavText}>{q.text}</span>
-                  </a>
-                </div>
+                <a
+                  key={q.id}
+                  className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}
+                  href={`#question-${i}`}
+                  onClick={e => {
+                    e.preventDefault()
+                    document.getElementById(`question-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                >
+                  <span className={s.qNavNum}>Q{i + 1}</span>
+                  <span className={s.qNavText}>{q.text}</span>
+                </a>
               ))}
             </div>
           </div>
