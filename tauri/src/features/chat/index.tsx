@@ -554,7 +554,7 @@ export default function ChatReportPage() {
           searchable
           searchPlaceholder="搜索会话..."
           wide
-          style={{ minWidth: 240, maxWidth: 400 }}
+          style={{ flex: 1, minWidth: 0 }}
         />
         <span className={s.topLabel} style={{ marginLeft: 'auto' }}>样式</span>
         <Select
