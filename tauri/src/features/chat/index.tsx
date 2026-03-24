@@ -154,16 +154,9 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   return null
 }
 
-// ── Rich text (simple markdown) ──
+// ── Rich text — 复用 ChatRenderer 的 Markdown 渲染 ──
 function RichText({ text }: { text: string }) {
-  const html = useMemo(() => {
-    return text
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br>')
-  }, [text])
-  return <div className={s.richText} dangerouslySetInnerHTML={{ __html: html }} />
+  return <div className={s.richText}><RichTextBlock text={text} /></div>
 }
 
 // ════════════════════════════════════════════════
