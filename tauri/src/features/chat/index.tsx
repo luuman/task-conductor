@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState, createContext, useContext } 
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { parseTimeline, formatTs, guessHljsLang, type TimelineStep } from './timeline-parser'
-import { RichTextBlock } from '../../components/ChatRenderer'
+import { RichTextBlock, CodeBlock } from '../../components/ChatRenderer'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
