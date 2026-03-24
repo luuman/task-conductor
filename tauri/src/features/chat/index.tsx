@@ -407,7 +407,43 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-// ── 样式渲染分发 ──
+// ── 步骤检查上下文 ──
+import { createContext, useContext } from 'react'
+const InspectCtx = createContext<{ selected: string | null; onSelect: (step: TimelineStep, index: number) => void }>({ selected: null, onSelect: () => {} })
+
+/** 可点击步骤包装器 — 给每步加序号 + 点击高亮 */
+function StepWrap({ step, index, children }: { step: TimelineStep; index: number; children: React.ReactNode }) {
+  const { selected, onSelect } = useContext(InspectCtx)
+  const isActive = selected === step.id
+  return (
+    <div
+      data-step={index + 1}
+      onClick={(e) => { e.stopPropagation(); onSelect(step, index) }}
+      style={{
+        position: 'relative',
+        cursor: 'pointer',
+        outline: isActive ? '1px solid #7c5cfc' : undefined,
+        outlineOffset: 2,
+        borderRadius: 6,
+      }}
+    >
+      <span style={{
+        position: 'absolute', left: -4, top: -4, fontSize: 9, fontWeight: 700,
+        background: isActive ? '#7c5cfc' : 'var(--tc-sidebar-bg, #131316)',
+        color: isActive ? '#fff' : 'var(--tc-foreground-secondary, #a1a1aa)',
+        border: '1px solid var(--tc-border, #27272a)',
+        borderRadius: 8, padding: '0 4px', zIndex: 2,
+        fontFamily: 'var(--tc-font-mono, monospace)',
+      }}>{index + 1}</span>
+      {children}
+    </div>
+  )
+}
+
+// ── 样式渲染分发（包裹 StepWrap） ──
+function WrappedRenderer({ steps, StyleComp }: { steps: TimelineStep[]; StyleComp: React.FC<{ steps: TimelineStep[] }> }) {
+  return <StyleComp steps={steps} />
+}
 const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
   a: StyleA, b: StyleB, c: StyleC, d: StyleD,
   e: StyleE, f: StyleF, g: StyleG, h: StyleH,
