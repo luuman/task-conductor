@@ -683,13 +683,16 @@ export default function ChatReportPage() {
                 const startIdx = q.stepIndex
                 const endIdx = nextQ ? nextQ.stepIndex : steps.length
                 const sectionSteps = steps.slice(startIdx, endIdx)
+                const isExpanded = expandedQs.has(qi)
                 return (
                   <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
-                    <div className={s.queryPill}>
+                    <div className={s.queryPill} onClick={() => toggleQ(qi)} style={{ cursor: 'pointer' }}>
+                      <span className={s.qChevron} style={{ transform: isExpanded ? 'rotate(90deg)' : undefined }}>▶</span>
                       <span className={s.qNum}>Q{qi + 1}</span>
                       {q.text.slice(0, 200)}
+                      {sectionSteps.length > 0 && <span className={s.qStepCount}>{sectionSteps.length} steps</span>}
                     </div>
-                    {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
+                    {isExpanded && sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
                   </div>
                 )
               })
