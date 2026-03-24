@@ -322,12 +322,7 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
               <div className={s.gBubbleText}><RichText text={step.text!} /></div>
             ) : (
               <div className={s.gBubbleTool}>
-                <div className={s.gToolHead}>
-                  <span className={badgeCls(step.category)}>{step.toolName}</span>
-                  <span style={{ fontSize: 11 }}>{step.toolDetail?.split(' ')[0]}</span>
-                  {step.toolError && <span className={s.errTag}>ERROR</span>}
-                  <span className={s.ts} style={{ marginLeft: 'auto' }}>{formatTs(step.ts)}</span>
-                </div>
+                <span className={s.ts}>{formatTs(step.ts)}</span>
                 <ResultBlock step={step} />
               </div>
             )}
