@@ -1,0 +1,134 @@
+/* Select — 通用下拉选择组件 */
+
+.root { position: relative; display: inline-flex; }
+
+/* 触发按钮 */
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--tc-foreground);
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  white-space: nowrap;
+  min-width: 0;
+}
+.trigger:hover { border-color: var(--tc-foreground-secondary); }
+.trigger:focus { border-color: var(--tc-focus-ring); outline: none; }
+.triggerOpen { border-color: var(--tc-focus-ring); }
+
+.triggerText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerIcon {
+  color: var(--tc-foreground-secondary);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.triggerOpen .triggerIcon { transform: rotate(180deg); }
+
+/* 遮罩 */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+/* 下拉面板 */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  min-width: 100%;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: selectSlideDown 0.12s ease;
+}
+.dropdownWide { min-width: 280px; }
+
+@keyframes selectSlideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 搜索 */
+.search {
+  padding: 6px;
+  border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
+}
+.searchInput {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  font-size: 12px;
+  color: var(--tc-foreground);
+  outline: none;
+}
+.searchInput::placeholder { color: var(--tc-foreground-secondary); }
+.searchInput:focus { border-color: var(--tc-focus-ring); }
+
+/* 列表 */
+.list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+/* 选项 */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 12px;
+  color: var(--tc-foreground);
+}
+.item:hover { background: var(--tc-sidebar-item-hover); }
+.itemActive { background: var(--tc-sidebar-item-active-bg); }
+.itemActive:hover { background: var(--tc-sidebar-item-active-bg); }
+
+.itemText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemDesc {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+}
+
+/* 空状态 */
+.emptyMsg {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+}
