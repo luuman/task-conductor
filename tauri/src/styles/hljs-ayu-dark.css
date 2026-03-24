@@ -126,9 +126,15 @@
   color: #aad94c;
 }
 
-/* ── deletion ────────────────────── */
+/* ── diff deletion ──────────────── */
 .hljs-deletion {
   color: #d95757;
+  background: rgba(248, 81, 73, 0.12);
+  display: inline-block;
+  width: 100%;
+  margin: 0 -12px;
+  padding: 0 12px;
+  border-left: 3px solid rgba(248, 81, 73, 0.4);
 }
 
 /* ── selector (CSS) ──────────────── */
