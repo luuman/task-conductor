@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
-import { parseTimeline, formatTs, guessLang, guessHljsLang, type TimelineStep } from './timeline-parser'
+import { parseTimeline, formatTs, guessLang, guessHljsLang, guessBashOutputLang, type TimelineStep } from './timeline-parser'
 import { useHighlight } from '../../lib/useHighlight'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
