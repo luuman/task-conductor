@@ -132,7 +132,17 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     )
   }
 
-  // Grep/Glob result
+  // Agent result — Markdown 渲染
+  if (step.category === 'agent' && step.toolResult) {
+    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
+  }
+
+  // AskUserQuestion — 显示问题文本
+  if (step.category === 'ask' && step.toolResult) {
+    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
+  }
+
+  // Grep/Glob result — 纯文本路径
   if ((step.category === 'grep' || step.category === 'glob') && step.toolResult) {
     return (
       <div className={s.codeBlock}>
@@ -141,9 +151,13 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     )
   }
 
-  // Generic result
+  // Generic result — 尝试判断是否是 Markdown（含 **、#、- 等标记）
   if (step.toolResult) {
     const isErr = step.toolError
+    const looksLikeMd = /^[#*\-]|\*\*|```/.test(step.toolResult.trim())
+    if (looksLikeMd && !isErr) {
+      return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
+    }
     return (
       <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
         <pre className={`${s.codeBody} ${isErr ? s.errText : ''}`}>{step.toolResult}</pre>
