@@ -125,7 +125,12 @@ export function parseTimelineWithQuestions(messages: TranscriptMessage[]): Parse
     }
   }
 
-  return steps
+  return { steps, questions }
+}
+
+/** 向后兼容：只返回 steps */
+export function parseTimeline(messages: TranscriptMessage[]): TimelineStep[] {
+  return parseTimelineWithQuestions(messages).steps
 }
 
 /** 从文件路径猜语言 */
