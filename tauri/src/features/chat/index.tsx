@@ -2,11 +2,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { parseTimeline, formatTs, guessLang, guessHljsLang, guessBashOutputLang, type TimelineStep } from './timeline-parser'
 import { useHighlight } from '../../lib/useHighlight'
-import { mdComponents } from '../../components/ChatRenderer'
+import { RichTextBlock } from '../../components/ChatRenderer'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
