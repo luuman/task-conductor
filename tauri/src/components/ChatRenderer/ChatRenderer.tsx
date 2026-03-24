@@ -461,7 +461,7 @@ function CollapsibleCode({ html, raw, lang, label, lineCount, hideHeader }: {
 
   return (
     <div className={styles.codeWrap}>
-      {canCollapse && (
+      {!hideHeader && canCollapse && (
         <div className={styles.codeHeader}>
           {(label || lang) && <span className={styles.codeLang}>{label || lang}</span>}
           <span className={styles.codeLines}>{t('admin.sessions.code_lines', { count: lineCount })}</span>
@@ -472,7 +472,7 @@ function CollapsibleCode({ html, raw, lang, label, lineCount, hideHeader }: {
           </button>
         </div>
       )}
-      {!canCollapse && (
+      {!hideHeader && !canCollapse && (
         <div className={styles.codeHeader}>
           {(label || lang) && <span className={styles.codeLang}>{label || lang}</span>}
           <span style={{ flex: 1 }} />
