@@ -187,9 +187,6 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
             <div className={`${s.bCard} ${s.bTextCard}`}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (
             <div className={s.bCard}>
-              <div className={s.bHead}>
-                <div className={s.bMeta}>{formatTs(step.ts)}</div>
-              </div>
               {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
             </div>
           )}
