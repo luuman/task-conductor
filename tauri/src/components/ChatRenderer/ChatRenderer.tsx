@@ -443,6 +443,10 @@ export function CopyButton({ text, className }: { text: string; className?: stri
   )
 }
 
+// ── 代码块全局展开/折叠信号 ────────────────────────────────
+// codeExpanded: true=全部展开, false=默认折叠
+export const CodeExpandCtx = createContext(false)
+
 // ── CollapsibleCode（代码块折叠） ────────────────────────────
 
 const CODE_COLLAPSE_THRESHOLD = 8 // 超过 8 行可折叠
