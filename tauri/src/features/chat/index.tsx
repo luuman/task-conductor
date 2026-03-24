@@ -371,7 +371,10 @@ const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
 }
 
 // ── Right sidebar ──
-function MetaSidebar({ session, steps, questions, activeQ }: { session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number }) {
+function MetaSidebar({ session, steps, questions, activeQ, expandedQs, onToggleQ, onExpandAll, onCollapseAll }: {
+  session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number
+  expandedQs: Set<number>; onToggleQ: (i: number) => void; onExpandAll: () => void; onCollapseAll: () => void
+}) {
   const qNavRef = useRef<HTMLDivElement>(null)
 
   // 联动：activeQ 变化时自动滚动导航列表
