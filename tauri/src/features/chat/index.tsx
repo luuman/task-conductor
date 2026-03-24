@@ -86,16 +86,22 @@ function ResultBlock({ step }: { step: TimelineStep }) {
 
   // Write
   if (step.category === 'write' && step.toolInput?.content) {
-    const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
+    if (isMdFile(filePath)) {
+      return <div className={s.richText}><RichTextBlock text={preview} /></div>
+    }
+    const lang = guessHljsLang(filePath) || undefined
     return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
   // Read
   if (step.category === 'read' && step.toolResult) {
-    const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
+    if (isMdFile(filePath)) {
+      return <div className={s.richText}><RichTextBlock text={stripped} /></div>
+    }
+    const lang = guessHljsLang(filePath) || undefined
     return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
