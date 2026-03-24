@@ -1516,8 +1516,14 @@ export function CodeBlock({ code, lang, label, icon, action, fileName, variant, 
     }
   } catch { /* fallback */ }
   const lineCount = code.split('\n').length
+  const globalExp = useContext(CodeExpandCtx)
   const [collapsed, setCollapsed] = useState(lineCount > CODE_COLLAPSE_THRESHOLD)
   const canCollapse = lineCount > CODE_COLLAPSE_THRESHOLD
+
+  useEffect(() => {
+    if (!canCollapse) return
+    setCollapsed(!globalExp)
+  }, [globalExp, canCollapse])
 
   // 无 variant → 使用 CollapsibleCode 原有 header
   if (!variant) {
