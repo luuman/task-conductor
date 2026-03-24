@@ -447,10 +447,11 @@ export function CopyButton({ text, className }: { text: string; className?: stri
 
 const CODE_COLLAPSE_THRESHOLD = 8 // 超过 8 行可折叠
 
-function CollapsibleCode({ html, raw, lang, lineCount }: {
+function CollapsibleCode({ html, raw, lang, label, lineCount }: {
   html?: string | null
   raw: string
   lang?: string
+  label?: string
   lineCount: number
 }) {
   const { t } = useTranslation()
