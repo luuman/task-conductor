@@ -77,72 +77,11 @@ function stepToBlock(step: TimelineStep): TranscriptBlock {
 }
 
 // ── Code/Result block ──
+// Edit → EditInlineCard（LCS diff），其余 → ToolWidget（统一 code 样式）
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
-
-  // Edit — 复用 sessions 页的 EditInlineCard（LCS diff）
-  if (step.category === 'edit') {
-    return <EditInlineCard block={stepToBlock(step)} />
-  }
-
-  // Write — 按文件类型高亮
-  if (step.category === 'write' && step.toolInput?.content) {
-    const fp = String(step.toolInput.file_path || '')
-    const displayLang = guessLang(fp)
-    const hljsLang = guessHljsLang(fp)
-    const raw = String(step.toolInput.content)
-    const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return (
-      <div className={s.codeBlock}>
-        {displayLang && <div className={s.codeHeader}><span className={s.codeLang}>{displayLang}</span></div>}
-        <HlPre code={preview} lang={hljsLang} />
-      </div>
-    )
-  }
-
-  // Read — 去行号 + 按文件类型高亮
-  if (step.category === 'read' && step.toolResult) {
-    const fp = String(step.toolInput?.file_path || '')
-    const displayLang = guessLang(fp)
-    const hljsLang = guessHljsLang(fp)
-    const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return (
-      <div className={s.codeBlock}>
-        <div className={s.codeHeader}>
-          {displayLang && <span className={s.codeLang}>{displayLang}</span>}
-          <span>{step.toolResult.split('\n').length} lines</span>
-        </div>
-        <HlPre code={stripped} lang={hljsLang} />
-      </div>
-    )
-  }
-
-  // Agent — Markdown 渲染
-  if (step.category === 'agent' && step.toolResult) {
-    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
-  }
-
-  // Bash — 高亮输出
-  if (step.category === 'bash' && step.toolResult) {
-    const isErr = step.toolError
-    return (
-      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <HlPre code={step.toolResult} className={isErr ? s.errText : ''} />
-      </div>
-    )
-  }
-
-  // Generic
-  if (step.toolResult) {
-    const isErr = step.toolError
-    return (
-      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <pre className={`${s.codeBody} ${isErr ? s.errText : ''}`}>{step.toolResult}</pre>
-      </div>
-    )
-  }
-
-  return null
+  if (step.category === 'edit') return <EditInlineCard block={stepToBlock(step)} />
+  return <ToolWidget block={stepToBlock(step)} />
 }
 
 // ── Rich text — 复用 ChatRenderer 的 Markdown 渲染 ──
