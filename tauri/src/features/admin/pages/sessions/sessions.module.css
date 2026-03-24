@@ -1863,6 +1863,90 @@
   cursor: pointer;
 }
 
+/* ═══ CodeBlock 8 种 header variant ═══ */
+
+/* 共享子元素 */
+.cbAction {
+  font-size: 9px; font-weight: 600; color: var(--tc-border-active);
+  font-family: 'Geist Mono', monospace;
+}
+.cbFile {
+  font-size: 9px; font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary); opacity: 0.8;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;
+}
+.cbDot { color: var(--tc-foreground-secondary); opacity: 0.3; font-size: 9px; }
+
+.codeWrapVariant { /* 可供 variant wrapper 覆写 */ }
+
+/* V1 — 内联清爽 */
+.cbV1 { gap: 5px; }
+.cbV1 .cbAction { letter-spacing: 0.3px; }
+
+/* V2 — 彩色胶囊 */
+.cbV2 { gap: 6px; }
+.cbPill {
+  font-size: 8px; font-weight: 700; font-family: 'Geist Mono', monospace;
+  padding: 1px 7px; border-radius: 9px;
+  background: var(--tc-border-active); color: #000;
+  letter-spacing: 0.4px;
+}
+
+/* V3 — 分隔面板 */
+.cbV3 { gap: 6px; }
+.cbLeft {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.cbDivider {
+  width: 1px; height: 12px; background: rgba(255,255,255,0.1); flex-shrink: 0;
+}
+
+/* V4 — Tab 标签页 */
+.cbV4 { gap: 6px; padding-left: 0 !important; }
+.cbTab {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; font-size: 9px; font-family: 'Geist Mono', monospace;
+  background: rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  border-top-left-radius: 10px;
+  color: var(--tc-foreground);
+}
+.cbActionGhost {
+  font-size: 8px; font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary); opacity: 0.4;
+}
+
+/* V5 — 极简圆点 */
+.cbV5 { gap: 6px; }
+.cbDotIndicator {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  background: var(--tc-border-active);
+}
+
+/* V6 — 面包屑 */
+.cbV6 { gap: 4px; }
+.cbChevron {
+  font-size: 10px; color: var(--tc-foreground-secondary); opacity: 0.35;
+}
+
+/* V7 — 双色栏 */
+.cbV7 { gap: 8px; padding-left: 0 !important; }
+.cbDarkZone {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.3);
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* V8 — 边框标签 */
+.cbV8 { gap: 6px; }
+.cbTag {
+  font-size: 8px; font-weight: 600; font-family: 'Geist Mono', monospace;
+  padding: 0 6px; border-radius: 3px;
+  border: 1px solid var(--tc-border-active); color: var(--tc-border-active);
+  letter-spacing: 0.3px;
+}
+
 .mermaidErrorSrc {
   margin: 0;
   padding: 8px 12px;
