@@ -89,7 +89,7 @@ export function Layout() {
         userName="User"
         onSearchClick={() => navigate('/sessions')}
         onSettingsClick={() => navigate('/settings')}
-        onMessageClick={() => navigate('/chat')}
+        onMessageClick={() => setCompanionOpen(v => !v)}
         unreadCount={unreadCount}
         onNotificationClick={togglePanel}
       />
