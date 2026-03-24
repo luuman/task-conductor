@@ -511,6 +511,43 @@ function MetaSidebar({ session, steps, questions }: { session: AiSession | null;
 // ════════════════════════════════════════════════
 // Main page
 // ════════════════════════════════════════════════
+// ── 时间格式化（相对时间） ──
+function relativeTime(iso: string): string {
+  if (!iso) return ''
+  const d = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z')
+  const now = new Date()
+  const diff = now.getTime() - d.getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return '刚刚'
+  if (mins < 60) return `${mins}分钟前`
+  if (d.toDateString() === now.toDateString())
+    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
+  if (diff < 7 * 86400000) return `${Math.floor(diff / 86400000)}天前`
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
+// ── 会话行渲染（参考 sessions 页面 Notion 表格风格） ──
+function SessionItem(option: { value: string; label: string; desc?: string }, isActive: boolean) {
+  // desc 格式: "status|events|time|cwd"
+  const parts = (option.desc || '').split('|')
+  const status = parts[0] || ''
+  const events = parts[1] || ''
+  const time = parts[2] || ''
+
+  const dotStyle = status === 'active' ? { background: '#4ade80' }
+    : status === 'idle' ? { background: '#fbbf24' }
+    : { background: '#52525b' }
+
+  return (
+    <>
+      <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, ...dotStyle }} />
+      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12 }}>{option.label}</span>
+      {events && <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', flexShrink: 0 }}>{events}</span>}
+      {time && <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', flexShrink: 0, fontFamily: 'var(--tc-font-mono, monospace)' }}>{time}</span>}
+    </>
+  )
+}
+
 export default function ChatReportPage() {
   const [sessions, setSessions] = useState<AiSession[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -519,12 +556,25 @@ export default function ChatReportPage() {
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
   const [inspected, setInspected] = useState<{ step: TimelineStep; index: number } | null>(null)
 
+  // 获取当前项目 cwd
+  const [projectCwd, setProjectCwd] = useState<string | undefined>()
+  useEffect(() => {
+    const pid = localStorage.getItem('tc_active_project')
+    if (!pid) return
+    api.getProjects().then(list => {
+      const proj = list.find(p => String(p.id) === pid)
+      if (proj?.repo_url) setProjectCwd(proj.repo_url)
+    }).catch(() => {})
+  }, [])
+
+  // 获取会话列表并按项目过滤
   useEffect(() => {
     api.getSessions().then(list => {
-      setSessions(list)
-      if (list.length > 0 && !selectedId) setSelectedId(list[0].session_id)
+      const filtered = projectCwd ? list.filter(ss => ss.cwd === projectCwd) : list
+      setSessions(filtered)
+      if (filtered.length > 0 && !selectedId) setSelectedId(filtered[0].session_id)
     }).catch(() => {})
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projectCwd]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selectedId) return
