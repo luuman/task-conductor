@@ -428,6 +428,32 @@ function MetaSidebar({ session, steps, questions }: { session: AiSession | null;
         {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>Git 分支</span><span className={s.sbVal}>master</span></div>}
       </div>
 
+      {/* 问题导航 */}
+      {questions.length > 0 && (
+        <>
+          <hr className={s.sbDivider} />
+          <div className={s.sbSection}>
+            <div className={s.sbTitle}>问题导航 ({questions.length})</div>
+            <div className={s.qNav}>
+              {questions.map((q, i) => (
+                <a
+                  key={q.id}
+                  className={s.qNavItem}
+                  href={`#question-${i}`}
+                  onClick={e => {
+                    e.preventDefault()
+                    document.getElementById(`question-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                >
+                  <span className={s.qNavNum}>Q{i + 1}</span>
+                  <span className={s.qNavText}>{q.text.slice(0, 60)}{q.text.length > 60 ? '...' : ''}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       <hr className={s.sbDivider} />
 
       {/* 操作统计 */}
