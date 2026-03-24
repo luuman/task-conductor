@@ -57,25 +57,33 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
-// ── 标题栏 label：SVG 图标 + 文件名 ──
+// ── 代码块顶栏样式 Context ──
+const CB_VARIANT_KEY = 'tc_cb_variant'
+const getDefaultCbVariant = (): CodeBlockVariant => (Number(localStorage.getItem(CB_VARIANT_KEY)) || 1) as CodeBlockVariant
+const CbVariantCtx = createContext<CodeBlockVariant>(1)
+
 const ICON_SIZE = 12
-function toolLabel(category: string, fileName: string, extra?: string) {
-  const icon = category === 'read' ? <IconFileText size={ICON_SIZE} />
-    : category === 'edit' ? <IconPencil size={ICON_SIZE} />
-    : category === 'write' ? <IconFileText size={ICON_SIZE} />
-    : category === 'bash' ? <IconTerminal size={ICON_SIZE} />
-    : category === 'agent' ? <IconBot size={ICON_SIZE} />
-    : <IconWrench size={ICON_SIZE} />
-  const text = fileName || extra || ''
-  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>{icon}{text}</span>
+const ACTION_MAP: Record<string, string> = {
+  read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
+}
+function toolIcon(category: string) {
+  if (category === 'read') return <IconFileText size={ICON_SIZE} />
+  if (category === 'edit') return <IconPencil size={ICON_SIZE} />
+  if (category === 'write') return <IconFileText size={ICON_SIZE} />
+  if (category === 'bash') return <IconTerminal size={ICON_SIZE} />
+  if (category === 'agent') return <IconBot size={ICON_SIZE} />
+  return <IconWrench size={ICON_SIZE} />
 }
 
 // ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
+  const variant = useContext(CbVariantCtx)
   if (!step.toolResult && !step.oldString) return null
 
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
+  const icon = toolIcon(step.category)
+  const action = ACTION_MAP[step.category] || step.toolName || 'Tool'
 
   // Edit — diff
   if (step.category === 'edit') {
@@ -84,7 +92,7 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     if (!oldStr && !newStr) return null
     const oldLines = oldStr.split('\n').map(l => `- ${l}`)
     const newLines = newStr.split('\n').map(l => `+ ${l}`)
-    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" label={toolLabel('edit', fileName)} />
+    return <CodeBlock code={[...oldLines, ...newLines].join('\n')} lang="diff" icon={icon} action={action} fileName={fileName} variant={variant} />
   }
 
   // Write
@@ -92,14 +100,14 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return <CodeBlock code={preview} lang={lang} label={toolLabel('write', fileName)} />
+    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} />
   }
 
   // Read
   if (step.category === 'read' && step.toolResult) {
     const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return <CodeBlock code={stripped} lang={lang} label={toolLabel('read', fileName)} />
+    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} />
   }
 
   // Agent
@@ -110,12 +118,12 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   // Bash
   if (step.category === 'bash' && step.toolResult) {
     const cmd = String(step.toolInput?.command || '').slice(0, 80)
-    return <CodeBlock code={step.toolResult} lang="bash" label={toolLabel('bash', '', cmd)} />
+    return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} />
   }
 
   // Generic
   if (step.toolResult) {
-    return <CodeBlock code={step.toolResult} label={toolLabel('other', '', step.toolName || 'Result')} />
+    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={step.toolName || ''} variant={variant} />
   }
 
   return null
