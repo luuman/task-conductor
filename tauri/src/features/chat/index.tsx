@@ -739,7 +739,7 @@ export default function ChatReportPage() {
             </div>
           )}
         </div>
-        <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} expandedQs={expandedQs} onToggleQ={toggleQ} onExpandAll={expandAll} onCollapseAll={collapseAll} />
+        <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} />
       </div>
     </div>
   )
