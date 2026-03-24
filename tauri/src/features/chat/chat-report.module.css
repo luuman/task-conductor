@@ -234,3 +234,65 @@
 .hChevron { color: var(--tc-foreground-secondary); font-size: 10px; transition: transform 0.15s; flex-shrink: 0; }
 .hTitle { flex: 1; font-weight: 500; }
 .hBody { padding: 10px 12px; border-top: 1px solid var(--tc-border); background: var(--tc-content-bg); }
+
+/* ═══════════════════════════════════════════════ */
+/* 检查面板 */
+/* ═══════════════════════════════════════════════ */
+.inspectPanel {
+  position: sticky;
+  bottom: 0;
+  background: var(--tc-sidebar-bg, #131316);
+  border-top: 2px solid #7c5cfc;
+  padding: 0;
+  z-index: 20;
+  font-size: 12px;
+}
+.inspectHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--tc-border);
+}
+.inspectNum {
+  font-family: var(--tc-font-mono, monospace);
+  font-size: 14px;
+  font-weight: 700;
+  color: #7c5cfc;
+}
+.inspectTitle {
+  flex: 1;
+  font-family: var(--tc-font-mono, monospace);
+  font-size: 11px;
+  color: var(--tc-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inspectCopy {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--tc-border);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.inspectCopy:hover { border-color: #7c5cfc; color: #a78bfa; }
+.inspectClose {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.inspectClose:hover { color: var(--tc-foreground); }
+.inspectBody {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.6;
+}
+.inspectBody b { color: var(--tc-foreground); font-weight: 500; }
