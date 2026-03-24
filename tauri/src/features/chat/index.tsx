@@ -59,17 +59,26 @@ function catIcon(cat: TimelineStep['category']): string {
   return map[cat] || '⚙'
 }
 
+// ── Highlighted code pre ──
+function HlPre({ code, lang, className }: { code: string; lang?: string; className?: string }) {
+  const { html } = useHighlight(code, lang)
+  if (html) {
+    return <pre className={`hljs ${s.codeBody} ${className || ''}`} dangerouslySetInnerHTML={{ __html: html }} />
+  }
+  return <pre className={`${s.codeBody} ${className || ''}`}>{code}</pre>
+}
+
 // ── Code/Result block component ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
-  // Edit diff
+  // Edit diff — 不做语法高亮，保持 diff 颜色
   if (step.category === 'edit' && (step.oldString || step.newString)) {
     return (
       <div className={s.codeBlock}>
         <div className={s.codeHeader}><span className={s.codeLang}>Diff</span></div>
         <pre className={s.codeBody}>
-          {step.oldString && <span className={s.diffDel}>{step.oldString.split('\n').map(l => `-${l}`).join('\n')}</span>}
+          {step.oldString && <span className={s.diffDel}>{step.oldString.split('\n').map(l => `−${l}`).join('\n')}</span>}
           {step.oldString && step.newString && '\n'}
           {step.newString && <span className={s.diffAdd}>{step.newString.split('\n').map(l => `+${l}`).join('\n')}</span>}
         </pre>
@@ -77,28 +86,55 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     )
   }
 
-  // Write content preview
+  // Write content preview — 按文件类型高亮
   if (step.category === 'write' && step.toolInput?.content) {
     const fp = String(step.toolInput.file_path || '')
-    const lang = guessLang(fp)
+    const displayLang = guessLang(fp)
+    const hljsLang = guessHljsLang(fp)
+    const raw = String(step.toolInput.content)
+    const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
     return (
       <div className={s.codeBlock}>
-        {lang && <div className={s.codeHeader}><span className={s.codeLang}>{lang}</span></div>}
-        <pre className={s.codeBody}>{String(step.toolInput.content).slice(0, 500)}{String(step.toolInput.content).length > 500 ? '\n...' : ''}</pre>
+        {displayLang && <div className={s.codeHeader}><span className={s.codeLang}>{displayLang}</span></div>}
+        <HlPre code={preview} lang={hljsLang} />
       </div>
     )
   }
 
-  // Read file content
+  // Read file content — 去行号后按文件类型高亮
   if (step.category === 'read' && step.toolResult) {
     const fp = String(step.toolInput?.file_path || '')
-    const lang = guessLang(fp)
+    const displayLang = guessLang(fp)
+    const hljsLang = guessHljsLang(fp)
+    // 去掉 Read 工具输出的行号前缀 "   123→"
+    const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
     return (
       <div className={s.codeBlock}>
         <div className={s.codeHeader}>
-          {lang && <span className={s.codeLang}>{lang}</span>}
+          {displayLang && <span className={s.codeLang}>{displayLang}</span>}
           <span>{step.toolResult.split('\n').length} lines</span>
         </div>
+        <HlPre code={stripped} lang={hljsLang} />
+      </div>
+    )
+  }
+
+  // Bash output — 尝试猜测输出语言
+  if (step.category === 'bash' && step.toolResult) {
+    const cmd = String(step.toolInput?.command || '')
+    const bashLang = guessBashOutputLang(cmd, step.toolResult)
+    const isErr = step.toolError
+    return (
+      <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
+        <HlPre code={step.toolResult} lang={bashLang} className={isErr ? s.errText : ''} />
+      </div>
+    )
+  }
+
+  // Grep/Glob result
+  if ((step.category === 'grep' || step.category === 'glob') && step.toolResult) {
+    return (
+      <div className={s.codeBlock}>
         <pre className={s.codeBody}>{step.toolResult}</pre>
       </div>
     )
@@ -109,7 +145,7 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     const isErr = step.toolError
     return (
       <div className={s.codeBlock} style={isErr ? { borderColor: 'rgba(248,113,113,0.3)' } : undefined}>
-        <pre className={s.codeBody} style={isErr ? { color: '#f87171' } : undefined}>{step.toolResult}</pre>
+        <pre className={`${s.codeBody} ${isErr ? s.errText : ''}`}>{step.toolResult}</pre>
       </div>
     )
   }
