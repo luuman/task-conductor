@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState, createContext, useContext } from 'react'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
-import { parseTimeline, formatTs, guessHljsLang, type TimelineStep } from './timeline-parser'
+import { parseTimelineWithQuestions, formatTs, guessHljsLang, type TimelineStep, type UserQuestion } from './timeline-parser'
 import { Select } from '../../ui/select'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon } from '../../components/ChatRenderer'
 import { IconTerminal, IconWrench } from '../../ui/icon'
