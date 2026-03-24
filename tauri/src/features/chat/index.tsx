@@ -555,27 +555,10 @@ export default function ChatReportPage() {
           onChange={v => { setStyle(v as StyleKey); localStorage.setItem(LS_KEY, v) }}
           style={{ minWidth: 140 }}
         />
-        <span className={s.topLabel}>代码栏</span>
-        <Select
-          options={[
-            { value: '1', label: '1 内联清爽' },
-            { value: '2', label: '2 彩色胶囊' },
-            { value: '3', label: '3 分隔面板' },
-            { value: '4', label: '4 Tab标签' },
-            { value: '5', label: '5 极简圆点' },
-            { value: '6', label: '6 面包屑' },
-            { value: '7', label: '7 双色栏' },
-            { value: '8', label: '8 边框标签' },
-          ]}
-          value={String(cbVariant)}
-          onChange={v => { setCbVariant(Number(v) as CodeBlockVariant); localStorage.setItem(CB_VARIANT_KEY, v) }}
-          style={{ minWidth: 130 }}
-        />
       </div>
 
       <div className={s.body}>
         <div className={s.mainArea}>
-          <CbVariantCtx.Provider value={cbVariant}>
           <InspectCtx.Provider value={inspectCtx}>
             {loading ? (
               <div className={s.empty}><span>加载中...</span></div>
