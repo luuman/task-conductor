@@ -449,9 +449,15 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
             <div className={s.sbTitle} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span>问题导航 ({questions.length})</span>
               <span style={{ flex: 1 }} />
-              <button className={s.qExpandBtn} onClick={onToggleCode} title={codeExpanded ? '折叠代码' : '展开代码'}>
-                {codeExpanded ? '⊟' : '⊞'}
-              </button>
+              <span className={s.expandToggleWrap}>
+                <button
+                  className={s.expandToggle}
+                  style={{ background: codeExpanded ? 'var(--tc-border-active)' : 'var(--tc-panel-bg)' }}
+                  onClick={onToggleCode}
+                >
+                  <span className={s.expandDot} style={{ left: codeExpanded ? 'calc(100% - 12px)' : '2px' }} />
+                </button>
+              </span>
             </div>
             <div className={s.qNav} ref={qNavRef}>
               {questions.map((q, i) => (
