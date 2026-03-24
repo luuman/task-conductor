@@ -13,6 +13,7 @@ export {
   BashStatusLine,
   ToolWidget,
   CodeBlock,
+  DiffBlock,
   fileExtIcon,
 } from './ChatRenderer'
 
