@@ -58,12 +58,41 @@ function getToolDetail(name: string, input: Record<string, unknown> | null | und
   }
 }
 
-export function parseTimeline(messages: TranscriptMessage[]): TimelineStep[] {
+/** 用户问题（用于分段 + 导航） */
+export interface UserQuestion {
+  id: string
+  text: string
+  ts: string | null
+  /** 该问题对应的第一个 step 的索引 */
+  stepIndex: number
+}
+
+/** 解析结果：steps + 用户问题列表 */
+export interface ParsedTimeline {
+  steps: TimelineStep[]
+  questions: UserQuestion[]
+}
+
+export function parseTimelineWithQuestions(messages: TranscriptMessage[]): ParsedTimeline {
   const steps: TimelineStep[] = []
+  const questions: UserQuestion[] = []
   let stepId = 0
+  let qId = 0
 
   for (const msg of messages) {
-    if (msg.role === 'user') continue // 跳过用户消息（tool_result 已关联到 block）
+    // 提取用户问题
+    if (msg.role === 'user') {
+      const textBlock = msg.blocks.find(b => b.type === 'text' && b.text?.trim())
+      if (textBlock?.text) {
+        questions.push({
+          id: `q${qId++}`,
+          text: textBlock.text.trim(),
+          ts: msg.ts,
+          stepIndex: steps.length, // 指向下一个 step 的索引
+        })
+      }
+      continue
+    }
 
     for (const block of msg.blocks) {
       if (block.type === 'text' && block.text?.trim()) {
