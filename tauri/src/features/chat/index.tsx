@@ -255,7 +255,7 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step, i) => (
-        <div key={step.id}>
+        <StepWrap key={step.id} step={step} index={i}>
           {i > 0 && <div className={s.dConnector} />}
           <div className={`${s.dEvent} ${step.kind === 'text' ? s.dTextEvent : ''}`}>
             <div className={s.dHead}>
