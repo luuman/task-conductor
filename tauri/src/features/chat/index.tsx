@@ -607,7 +607,7 @@ export default function ChatReportPage() {
           options={sessions.map(ss => ({
             value: ss.session_id,
             label: ss.summary || ss.session_id.slice(0, 8),
-            desc: `${ss.cwd?.split('/').pop() || ''} (${ss.event_count})`,
+            desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${ss.cwd?.split('/').pop() || ''}`,
           }))}
           value={selectedId || ''}
           onChange={setSelectedId}
@@ -615,6 +615,7 @@ export default function ChatReportPage() {
           searchable
           searchPlaceholder="搜索会话..."
           wide
+          renderItem={SessionItem}
           style={{ flex: 1, minWidth: 0 }}
         />
         <span className={s.topLabel} style={{ marginLeft: 'auto' }}>样式</span>
