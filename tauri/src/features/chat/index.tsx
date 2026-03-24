@@ -599,6 +599,24 @@ export default function ChatReportPage() {
     onSelect: handleInspect,
   }), [inspected, handleInspect])
 
+  // IntersectionObserver：滚动时自动高亮当前可见的问题
+  useEffect(() => {
+    if (questions.length === 0 || !mainAreaRef.current) return
+    const root = mainAreaRef.current
+    const els = questions.map((_, i) => document.getElementById(`question-${i}`)).filter(Boolean) as HTMLElement[]
+    if (els.length === 0) return
+    const ob = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          const idx = els.indexOf(e.target as HTMLElement)
+          if (idx >= 0) setActiveQ(idx)
+        }
+      }
+    }, { root, rootMargin: '-10% 0px -70% 0px', threshold: 0 })
+    els.forEach(el => ob.observe(el))
+    return () => ob.disconnect()
+  }, [questions])
+
   const Renderer = RENDERERS[style]
 
   return (
