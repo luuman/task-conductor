@@ -116,8 +116,12 @@ export function Select({
                     className={`${styles.item} ${o.value === value ? styles.itemActive : ''}`}
                     onClick={() => handleSelect(o.value)}
                   >
-                    <span className={styles.itemText}>{o.label}</span>
-                    {o.desc && <span className={styles.itemDesc}>{o.desc}</span>}
+                    {renderItem ? renderItem(o, o.value === value) : (
+                      <>
+                        <span className={styles.itemText}>{o.label}</span>
+                        {o.desc && <span className={styles.itemDesc}>{o.desc}</span>}
+                      </>
+                    )}
                   </div>
                 ))
               )}
