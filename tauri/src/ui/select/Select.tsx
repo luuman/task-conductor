@@ -20,6 +20,8 @@ export interface SelectProps {
   searchable?: boolean
   searchPlaceholder?: string
   wide?: boolean
+  /** 自定义列表项渲染 */
+  renderItem?: (option: SelectOption, isActive: boolean) => React.ReactNode
   className?: string
   style?: React.CSSProperties
 }
