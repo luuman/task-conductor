@@ -650,7 +650,7 @@ export default function ChatReportPage() {
             </div>
           )}
         </div>
-        <MetaSidebar session={selectedSession} steps={steps} />
+        <MetaSidebar session={selectedSession} steps={steps} questions={questions} />
       </div>
     </div>
   )
