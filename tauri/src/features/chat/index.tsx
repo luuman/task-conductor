@@ -67,25 +67,26 @@ function toCodeBlock(code: string, lang = ''): string {
   return `${fence}${lang}\n${code}\n${fence}`
 }
 
-// ── step → TranscriptBlock（给 EditInlineCard 用） ──
-function stepToBlock(step: TimelineStep): TranscriptBlock {
-  return {
-    type: 'tool_use',
-    tool_name: step.toolName || null,
-    tool_input: step.toolInput || null,
-    tool_use_id: step.id,
-    tool_result: step.toolResult || null,
-    tool_error: step.toolError || null,
-  }
+// ── 将 Edit 的 old/new string 转为 diff 格式 ──
+function toDiffBlock(oldStr: string, newStr: string): string {
+  const oldLines = oldStr.split('\n').map(l => `- ${l}`)
+  const newLines = newStr.split('\n').map(l => `+ ${l}`)
+  const diffText = [...oldLines, ...newLines].join('\n')
+  return toCodeBlock(diffText, 'diff')
 }
 
 // ── Code/Result block（统一使用 RichTextBlock markdown 代码块样式） ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
 
-  // Edit — 复用 ChatRenderer 的 EditInlineCard（LCS diff）
+  // Edit — markdown diff 代码块
   if (step.category === 'edit') {
-    return <EditInlineCard block={stepToBlock(step)} />
+    const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
+    const newStr = String(step.toolInput?.new_string ?? '')
+    if (oldStr || newStr) {
+      return <div className={s.richText}><RichTextBlock text={toDiffBlock(oldStr, newStr)} /></div>
+    }
+    return null
   }
 
   // Write — markdown 代码块（按文件类型语法高亮）
