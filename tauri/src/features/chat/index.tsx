@@ -581,7 +581,7 @@ export default function ChatReportPage() {
             { value: '8', label: '8 边框标签' },
           ]}
           value={String(cbVariant)}
-          onChange={v => { setCbVariant(Number(v) as CodeBlockVariant); localStorage.setItem(LS_CB_KEY, v) }}
+          onChange={v => { setCbVariant(Number(v) as CodeBlockVariant); localStorage.setItem(CB_VARIANT_KEY, v) }}
           style={{ minWidth: 130 }}
         />
       </div>
