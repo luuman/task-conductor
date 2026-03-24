@@ -616,6 +616,16 @@ export default function ChatReportPage() {
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
 
+  const toggleQ = useCallback((idx: number) => {
+    setExpandedQs(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n })
+  }, [])
+  const expandAll = useCallback(() => {
+    setExpandedQs(new Set(questions.map((_, i) => i)))
+  }, [questions])
+  const collapseAll = useCallback(() => {
+    setExpandedQs(new Set())
+  }, [])
+
   const handleInspect = useCallback((step: TimelineStep, index: number) => {
     setInspected(prev => prev?.step.id === step.id ? null : { step, index })
   }, [])
