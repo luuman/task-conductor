@@ -1306,9 +1306,11 @@ export interface CodeBlockProps {
   action?: string
   fileName?: string
   variant?: CodeBlockVariant
+  /** 胶囊/标签颜色（与操作类型颜色一致） */
+  pillColor?: string
 }
 
-export function CodeBlock({ code, lang, label, icon, action, fileName, variant }: CodeBlockProps) {
+export function CodeBlock({ code, lang, label, icon, action, fileName, variant, pillColor }: CodeBlockProps) {
   const { t } = useTranslation()
   let highlighted: string | null = null
   try {
