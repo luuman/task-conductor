@@ -1,5 +1,5 @@
 // ChatReportPage — 会话操作时间线，8 种可切换样式
-import { useCallback, useEffect, useMemo, useState, createContext, useContext } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext } from 'react'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { parseTimelineWithQuestions, formatTs, guessHljsLang, type TimelineStep, type UserQuestion } from './timeline-parser'
