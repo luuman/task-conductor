@@ -1291,7 +1291,7 @@ function highlightLog(text: string): string {
 
 // ── CodeBlock（供外部直接使用，带自定义 label） ──────────────
 
-export function CodeBlock({ code, lang, label }: { code: string; lang?: string; label?: string }) {
+export function CodeBlock({ code, lang, label }: { code: string; lang?: string; label?: ReactNode }) {
   let highlighted: string | null = null
   try {
     if (lang && hljs.getLanguage(lang)) {
