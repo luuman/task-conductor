@@ -4,7 +4,7 @@ import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
 import { parseTimeline, formatTs, guessLang, guessHljsLang, type TimelineStep } from './timeline-parser'
 import { useHighlight } from '../../lib/useHighlight'
-import { RichTextBlock, EditInlineCard } from '../../components/ChatRenderer'
+import { RichTextBlock, EditInlineCard, ToolWidget } from '../../components/ChatRenderer'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
