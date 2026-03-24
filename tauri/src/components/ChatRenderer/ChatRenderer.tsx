@@ -1631,14 +1631,18 @@ export function CodeBlock({ code, lang, label, icon, action, fileName, variant, 
   return (
     <div className={`${styles.codeWrap} ${variantCls ? styles.codeWrapVariant : ''}`}>
       {header}
-      <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
-        {highlighted ? (
-          <code className={`hljs ${styles.mdCodeBlock}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
-        ) : (
-          <code className={styles.mdCodeBlockPlain}>{code}</code>
-        )}
-        {collapsed && <div className={styles.codeFade} onClick={() => setCollapsed(false)} />}
-      </div>
+      {children ? (
+        <div style={{ padding: '8px 12px' }}>{children}</div>
+      ) : (
+        <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
+          {highlighted ? (
+            <code className={`hljs ${styles.mdCodeBlock}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
+          ) : (
+            <code className={styles.mdCodeBlockPlain}>{code}</code>
+          )}
+          {collapsed && <div className={styles.codeFade} onClick={() => setCollapsed(false)} />}
+        </div>
+      )}
     </div>
   )
 }
