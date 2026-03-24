@@ -75,55 +75,94 @@ function toDiffBlock(oldStr: string, newStr: string): string {
   return toCodeBlock(diffText, 'diff')
 }
 
+// ── 带信息栏头部的代码块 ──
+function CodeWithHeader({ icon, label, detail, error, children }: {
+  icon: string; label: string; detail?: string; error?: boolean; children: React.ReactNode
+}) {
+  return (
+    <div className={s.codeBlock} style={error ? { borderColor: 'rgba(248,113,113,0.35)' } : undefined}>
+      <div className={s.codeHeader}>
+        <span className={s.codeIcon}>{icon}</span>
+        <span className={s.codeLang}>{label}</span>
+        {detail && <span className={s.codeDetail} title={detail}>{detail}</span>}
+        {error && <span className={s.codeErr}>ERROR</span>}
+      </div>
+      <div className={s.richText}>{children}</div>
+    </div>
+  )
+}
+
 // ── Code/Result block（统一使用 RichTextBlock markdown 代码块样式） ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   if (!step.toolResult && !step.oldString) return null
+
+  const filePath = String(step.toolInput?.file_path || '')
+  const fileName = filePath.split('/').pop() || ''
 
   // Edit — markdown diff 代码块
   if (step.category === 'edit') {
     const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
     const newStr = String(step.toolInput?.new_string ?? '')
     if (oldStr || newStr) {
-      return <div className={s.richText}><RichTextBlock text={toDiffBlock(oldStr, newStr)} /></div>
+      return (
+        <CodeWithHeader icon="✏️" label="Edit" detail={fileName}>
+          <RichTextBlock text={toDiffBlock(oldStr, newStr)} />
+        </CodeWithHeader>
+      )
     }
     return null
   }
 
   // Write — markdown 代码块（按文件类型语法高亮）
   if (step.category === 'write' && step.toolInput?.content) {
-    const lang = guessHljsLang(String(step.toolInput.file_path || '')) || ''
+    const lang = guessHljsLang(filePath) || ''
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return <div className={s.richText}><RichTextBlock text={toCodeBlock(preview, lang)} /></div>
+    return (
+      <CodeWithHeader icon="📝" label="Write" detail={fileName}>
+        <RichTextBlock text={toCodeBlock(preview, lang)} />
+      </CodeWithHeader>
+    )
   }
 
   // Read — 去行号 + markdown 代码块
   if (step.category === 'read' && step.toolResult) {
-    const lang = guessHljsLang(String(step.toolInput?.file_path || '')) || ''
+    const lang = guessHljsLang(filePath) || ''
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return <div className={s.richText}><RichTextBlock text={toCodeBlock(stripped, lang)} /></div>
+    const lineCount = step.toolResult.split('\n').length
+    return (
+      <CodeWithHeader icon="📖" label="Read" detail={`${fileName} · ${lineCount} lines`}>
+        <RichTextBlock text={toCodeBlock(stripped, lang)} />
+      </CodeWithHeader>
+    )
   }
 
   // Agent — 直接 Markdown 渲染
   if (step.category === 'agent' && step.toolResult) {
-    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
+    const desc = String(step.toolInput?.description || 'Agent')
+    return (
+      <CodeWithHeader icon="🤖" label="Agent" detail={desc}>
+        <RichTextBlock text={step.toolResult} />
+      </CodeWithHeader>
+    )
   }
 
   // Bash — markdown 代码块
   if (step.category === 'bash' && step.toolResult) {
+    const cmd = String(step.toolInput?.command || '').slice(0, 100)
     return (
-      <div className={s.richText} style={step.toolError ? { borderLeft: '2px solid rgba(248,113,113,0.5)', paddingLeft: 8 } : undefined}>
+      <CodeWithHeader icon="⌨" label="Bash" detail={cmd} error={!!step.toolError}>
         <RichTextBlock text={toCodeBlock(step.toolResult, 'bash')} />
-      </div>
+      </CodeWithHeader>
     )
   }
 
   // Generic — markdown 代码块
   if (step.toolResult) {
     return (
-      <div className={s.richText} style={step.toolError ? { borderLeft: '2px solid rgba(248,113,113,0.5)', paddingLeft: 8 } : undefined}>
+      <CodeWithHeader icon="⚙" label={step.toolName || 'Result'} error={!!step.toolError}>
         <RichTextBlock text={toCodeBlock(step.toolResult)} />
-      </div>
+      </CodeWithHeader>
     )
   }
 
