@@ -15,4 +15,4 @@ export {
   CodeBlock,
 } from './ChatRenderer'
 
-export type { ChatMessageListProps, AssistantTurn, GroupedTurnItem } from './ChatRenderer'
+export type { ChatMessageListProps, AssistantTurn, GroupedTurnItem, CodeBlockVariant } from './ChatRenderer'
