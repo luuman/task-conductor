@@ -177,9 +177,6 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
           ) : (
             <div className={s.bCard}>
               <div className={s.bHead}>
-                <div className={s.bIcon} style={{ background: `${dotColor(step.category)}15`, color: dotColor(step.category) }}>{catIcon(step.category)}</div>
-                <div className={s.bTitle}>{step.toolName} · {step.toolDetail?.split(' ')[0]}</div>
-                {step.toolError && <span className={s.errTag}>ERROR</span>}
                 <div className={s.bMeta}>{formatTs(step.ts)}</div>
               </div>
               {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
