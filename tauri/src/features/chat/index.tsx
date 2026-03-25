@@ -661,6 +661,7 @@ function PromptInput() {
         <textarea
           ref={textareaRef}
           className={s.pTextarea}
+          style={{ maxHeight: expanded ? 400 : 160 }}
           placeholder={isGenerating ? '正在处理...' : 'Ask anything, @models, /prompts...'}
           value={value}
           onChange={e => { setValue(e.target.value); autoResize() }}
@@ -668,7 +669,11 @@ function PromptInput() {
           disabled={isGenerating}
           rows={1}
         />
-        <button className={s.pExpandBtn} title="展开">
+        <button
+          className={s.pExpandBtn}
+          title={expanded ? '收起' : '展开输入框'}
+          onClick={() => { setExpanded(v => !v); setTimeout(() => autoResize(), 0) }}
+        >
           <IconMaximize size={13} />
         </button>
       </div>
