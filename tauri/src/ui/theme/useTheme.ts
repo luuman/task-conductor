@@ -3,8 +3,9 @@ import type { ThemeJSON } from './tokens'
 
 export interface ThemeContextValue {
   theme: string
-  themeType: 'dark' | 'light'
+  mode: 'dark' | 'light'
   setTheme: (name: string) => void
+  setMode: (mode: 'dark' | 'light') => void
   themes: string[]
   themeList: ThemeJSON[]
   registerTheme: (json: ThemeJSON) => void
