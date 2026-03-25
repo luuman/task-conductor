@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { IconZap } from '../../ui/icon'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
