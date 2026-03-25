@@ -384,14 +384,20 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
     <CodeExpandCtx.Provider value={false}>
       {segments.map((seg, i) =>
         seg.type === 'user' ? (
-          <div key={i} className={s.userMsg}>
-            <p className={s.userMsgText}>{seg.text}</p>
+          <div key={i} className={s.turnSection}>
+            <div className={s.queryPill}>
+              <div className={s.richText}>{seg.text}</div>
+            </div>
           </div>
         ) : (
           <Renderer key={i} steps={seg.steps} />
         )
       )}
-      {streamingStep && <Renderer steps={[streamingStep]} />}
+      {streamingStep && (
+        <div className={s.chatAiBlock}>
+          <div className={s.richText}>{streamingStep.text}</div>
+        </div>
+      )}
     </CodeExpandCtx.Provider>
   )
 }
