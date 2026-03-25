@@ -560,12 +560,25 @@ function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage 
 function PromptInput() {
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
-  const { isGenerating, addMessage } = useChatStore()
+  const [expanded, setExpanded] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const { isGenerating, addMessage, setMessages, setCurrentReply } = useChatStore()
   const { send, stop } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const settingsRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0
+
+  // 点击外部关闭设置面板
+  useEffect(() => {
+    if (!showSettings) return
+    const handler = (e: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) setShowSettings(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showSettings])
 
   const autoResize = useCallback(() => {
     const el = textareaRef.current
