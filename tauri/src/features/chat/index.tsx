@@ -259,31 +259,92 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
 
 
 function StyleD({ steps }: { steps: TimelineStep[] }) {
+  const groups = useMemo(() => groupSteps(steps), [steps])
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set())
+  const toggle = useCallback((id: string) => {
+    setOpenIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }, [])
+
   return (
     <>
-      {steps.map((step, i) => (
-        <StepWrap key={step.id} step={step} index={i}>
-          {i > 0 && <div className={s.dConnector} />}
-          <div className={`${s.dEvent} ${step.kind === 'text' ? s.dTextEvent : ''}`}>
-            <div className={s.dHead}>
-              <div className={`${s.dAvatar} ${step.kind === 'text' ? s.dAvatarClaude : s.dAvatarTool}`}>
-                {step.kind === 'text' ? 'C' : catIcon(step.category)}
+      {groups.map((grp, gi) => {
+        if (grp.kind === 'text') {
+          const step = grp.step
+          return (
+            <StepWrap key={step.id} step={step} index={grp.idx}>
+              {gi > 0 && <div className={s.dConnector} />}
+              <div className={`${s.dEvent} ${s.dTextEvent}`}>
+                <div className={s.dHead}>
+                  <div className={`${s.dAvatar} ${s.dAvatarClaude}`}>C</div>
+                  <div className={s.dDesc}><strong>Claude</strong> 说：</div>
+                </div>
+                <div className={s.dBody}><RichText text={step.text!} /></div>
               </div>
-              <div className={s.dDesc}>
-                <strong>Claude</strong>{' '}
-                {step.kind === 'text' ? '说：' : (
-                  <>{step.category === 'read' ? '读取了文件' : step.category === 'edit' ? '编辑了文件' : step.category === 'write' ? '新建了文件' : step.category === 'bash' ? '执行了命令' : step.category === 'agent' ? '启动了子代理' : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}` : '调用了工具'}</>
-                )}
+            </StepWrap>
+          )
+        }
+        // tool group
+        const grpId = `dg-${gi}`
+        const isOpen = openIds.has(grpId)
+        const { steps: toolSteps, startIdx } = grp
+        if (toolSteps.length === 1) {
+          const step = toolSteps[0]
+          const catDesc = step.category === 'read' ? '读取了文件' : step.category === 'edit' ? '编辑了文件' : step.category === 'write' ? '新建了文件' : step.category === 'bash' ? '执行了命令' : step.category === 'agent' ? '启动了子代理' : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}` : '调用了工具'
+          return (
+            <StepWrap key={step.id} step={step} index={startIdx}>
+              {gi > 0 && <div className={s.dConnector} />}
+              <div className={s.dEvent}>
+                <div className={s.dHead}>
+                  <div className={`${s.dAvatar} ${s.dAvatarTool}`}>{catIcon(step.category)}</div>
+                  <div className={s.dDesc}><strong>Claude</strong> {catDesc}</div>
+                </div>
+                {(step.toolResult || step.oldString) && <div className={s.dBody}><ResultBlock step={step} /></div>}
               </div>
+            </StepWrap>
+          )
+        }
+        // grouped tools
+        return (
+          <div key={grpId}>
+            {gi > 0 && <div className={s.dConnector} />}
+            <div className={s.dEvent}>
+              <div className={s.dHead} style={{ cursor: 'pointer' }} onClick={() => toggle(grpId)}>
+                <div className={`${s.dAvatar} ${s.dAvatarTool}`}>
+                  <span style={{ fontSize: 9, fontWeight: 700 }}>{toolSteps.length}</span>
+                </div>
+                <div className={s.dDesc}><strong>Claude</strong> 执行了 {toolSteps.length} 个操作</div>
+                <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 'auto' }}>
+                  {isOpen ? '▲' : '▼'}
+                </span>
+              </div>
+              {isOpen && (
+                <div style={{ borderTop: '1px solid var(--tc-border)' }}>
+                  {toolSteps.map((step, si) => {
+                    const catDesc = step.category === 'read' ? '读取了文件' : step.category === 'edit' ? '编辑了文件' : step.category === 'write' ? '新建了文件' : step.category === 'bash' ? '执行了命令' : step.category === 'agent' ? '启动了子代理' : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}` : '调用了工具'
+                    return (
+                      <StepWrap key={step.id} step={step} index={startIdx + si}>
+                        <div className={s.dSubRow}>
+                          <span className={s.dSubIcon}>{catIcon(step.category)}</span>
+                          <span className={s.dSubDesc}>{catDesc}</span>
+                          {step.toolInput?.file_path && (
+                            <span className={s.dSubFile}>{String(step.toolInput.file_path).split('/').pop()}</span>
+                          )}
+                          {step.toolInput?.command && (
+                            <span className={s.dSubFile}>{String(step.toolInput.command).slice(0, 40)}</span>
+                          )}
+                        </div>
+                        {(step.toolResult || step.oldString) && (
+                          <div className={s.dBody}><ResultBlock step={step} /></div>
+                        )}
+                      </StepWrap>
+                    )
+                  })}
+                </div>
+              )}
             </div>
-            {step.kind === 'text' ? (
-              <div className={s.dBody}><RichText text={step.text!} /></div>
-            ) : (step.toolResult || step.oldString) ? (
-              <div className={s.dBody}><ResultBlock step={step} /></div>
-            ) : null}
           </div>
-        </StepWrap>
-      ))}
+        )
+      })}
     </>
   )
 }
