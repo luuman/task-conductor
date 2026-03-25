@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useChatStore } from '../../lib/store/chat'
+import { IconX } from '../../ui/icon'
 import styles from './PrdSidebar.module.css'
 
 interface PrdData {
