@@ -553,14 +553,25 @@ const QUICK_CHIPS = [
 
 type Attachment = { id: string; name: string; kind: 'image' | 'file'; dataUrl?: string }
 
+function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
+  return { role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }] }
+}
+
 function PromptInput() {
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
-  const [working, setWorking] = useState(false)
+  const { isGenerating, messages, currentReply, addMessage } = useChatStore()
+  const { send, stop } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const msgEndRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0
+
+  // 新消息到达时自动滚动
+  useEffect(() => {
+    msgEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, currentReply])
 
   const autoResize = useCallback(() => {
     const el = textareaRef.current
@@ -570,16 +581,16 @@ function PromptInput() {
   }, [])
 
   const handleSend = useCallback(() => {
-    if (isEmpty || working) return
-    setWorking(true)
+    const text = value.trim()
+    if (!text || isGenerating) return
+    addMessage(makeAiMsg('user', text))
+    send(text)
     setValue('')
     setAttachments([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-    // TODO: 接入后端 API 发送 prompt
-    setTimeout(() => setWorking(false), 1500)
-  }, [isEmpty, working])
+  }, [value, isGenerating, addMessage, send])
 
-  const handleStop = useCallback(() => setWorking(false), [])
+  const handleStop = useCallback(() => stop(), [stop])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -610,6 +621,11 @@ function PromptInput() {
   const removeAttachment = useCallback((id: string) => {
     setAttachments(v => v.filter(a => a.id !== id))
   }, [])
+
+  // 展示消息：历史 + 当前流式回复
+  const displayMessages = currentReply
+    ? [...messages, makeAiMsg('assistant', currentReply)]
+    : messages
 
   return (
     <>
