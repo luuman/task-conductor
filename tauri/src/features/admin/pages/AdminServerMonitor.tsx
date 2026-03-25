@@ -192,7 +192,7 @@ function buildTopology(procs: ProcessInfo[]): { nodes: TopoNode[]; edges: TopoEd
   const outerR = 480
 
   // 统计外环子节点总数
-  const _totalChildren = groupNames.reduce((s, name) => s + Math.max(groups.get(name)!.length - 1, 0), 0) // reserved
+  // reserved: const _totalChildren = groupNames.reduce((s, name) => s + Math.max(groups.get(name)!.length - 1, 0), 0)
   const viewW = (cx + outerR + 100) * 2
 
   // 中心 host 节点
@@ -1178,7 +1178,7 @@ export default function AdminServerMonitor() {
         <div className={s.card} style={{ marginBottom: 14 }}>
           <div className={s.cardHead}>
             <div className={s.cardTitle}>
-              <div className={s.cardTitleIcon} style={{ background: '#a78bfa22', color: '#a78bfa' }}>⬡</div>
+              <div className={s.cardTitleIcon} style={{ background: 'var(--tc-accent-a8)', color: 'var(--tc-accent)' }}>⬡</div>
               进程关系图
             </div>
             <div className={s.cardHint}>双环：外环 = CPU% · 内环 = MEM · 拖拽/缩放（不含 Claude）</div>
@@ -1206,7 +1206,7 @@ export default function AdminServerMonitor() {
             <div className={s.card} style={{ marginBottom: 14 }}>
               <div className={s.cardHead}>
                 <div className={s.cardTitle}>
-                  <div className={s.cardTitleIcon} style={{ background: '#a78bfa22', color: '#a78bfa' }}>◉</div>
+                  <div className={s.cardTitleIcon} style={{ background: 'var(--tc-accent-a8)', color: 'var(--tc-accent)' }}>◉</div>
                   Claude 实例集群
                 </div>
                 <div className={s.cardHint}>
