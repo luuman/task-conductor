@@ -795,6 +795,15 @@ export default function ChatReportPage() {
     return () => ob.disconnect()
   }, [questions])
 
+  // 新对话消息到达时滚动到底部
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMessages, currentReply])
+
+  const chatDisplayMessages = currentReply
+    ? [...chatMessages, makeAiMsg('assistant', currentReply)]
+    : chatMessages
+
   const Renderer = RENDERERS[style]
 
   return (
