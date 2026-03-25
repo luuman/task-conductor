@@ -5,6 +5,7 @@ import { AppShell, Sidebar, Panel } from '../layouts'
 import {
   IconLayoutGrid, IconLogo, IconFileText, IconMonitor,
   IconMessage, IconSettings, IconFolder, IconGitBranch,
+  IconBot, IconTerminal,
 } from '../ui/icon'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
@@ -13,6 +14,7 @@ import { FloatingAssistant } from '../components/FloatingAssistant'
 import { PtyAssistant } from '../components/PtyAssistant/PtyAssistant'
 import { PrdSidebar } from '../components/PrdSidebar'
 import { useChatStore } from '../lib/store/chat'
+import { usePtyChatStore } from '../lib/store/pty-chat'
 import { useAppStore } from '../lib/store/app'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
 import shellStyles from '../layouts/AppShell/app-shell.module.css'
