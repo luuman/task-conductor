@@ -191,6 +191,11 @@ WebSocket
   WS /ws/session/{session_id}           → 单会话工具调用流
 ```
 
+## 修改范围约定
+
+> **重要**：默认只修改 `tauri/` 目录下的 Tauri 桌面端项目页面，**不修改** `frontend/` 目录下的 Web 前端页面。
+> 除非用户明确要求修改 Web 前端，否则所有 UI 改动均针对 Tauri 桌面端。
+
 ## 关键约定
 
 - **DB**：SQLite `backend/task_conductor.db`，SQLAlchemy 2.0 Mapped style，不直接拼 SQL
