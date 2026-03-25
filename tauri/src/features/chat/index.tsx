@@ -676,7 +676,7 @@ export default function ChatReportPage() {
                   return (
                     <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
                       <div className={s.queryPill}>
-  <div className={s.richText}><RichTextBlock text={stripDomContext(q.text)} /></div>
+  <div className={s.richText}>{stripDomContext(q.text)}</div>
                       </div>
                       {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
                     </div>
