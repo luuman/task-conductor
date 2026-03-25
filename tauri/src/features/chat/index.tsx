@@ -861,6 +861,39 @@ export default function ChatReportPage() {
                 })
               )}
             </CodeExpandCtx.Provider>
+
+            {/* AI 对话区 — 跟随会话时间线显示，在 mainArea 滚动区域内 */}
+            {chatDisplayMessages.length > 0 && (
+              <div className={s.chatSection}>
+                <div className={s.chatSectionDivider}>
+                  <span>以下为 AI 对话</span>
+                </div>
+                {chatDisplayMessages.map((msg, i) => {
+                  const text = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
+                  if (!text) return null
+                  return (
+                    <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
+                      {msg.role === 'user' ? (
+                        <div className={s.queryPill}>
+                          <div className={s.richText}><RichTextBlock text={text} /></div>
+                        </div>
+                      ) : (
+                        <div className={s.chatAiBlock}>
+                          <div className={s.richText}><RichTextBlock text={text} /></div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                {isGenerating && !currentReply && (
+                  <div className={s.pThinking}>
+                    <span className={s.pThinkingDot} />
+                    <span>思考中...</span>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+            )}
           </div>
 
           {/* 底部操作栏 — 在可滚动区域之外，不遮盖内容 */}
