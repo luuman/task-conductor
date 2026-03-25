@@ -121,6 +121,17 @@ function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
 
 // ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
+  if (step.mergedSteps && step.mergedSteps.length > 1) {
+    return (
+      <>
+        {step.mergedSteps.map(s => <SingleResultBlock key={s.id} step={s} />)}
+      </>
+    )
+  }
+  return <SingleResultBlock step={step} />
+}
+
+function SingleResultBlock({ step }: { step: TimelineStep }) {
   const variant = 2 as const
   if (!step.toolResult && !step.oldString) return null
 
