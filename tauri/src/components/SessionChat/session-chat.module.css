@@ -382,8 +382,8 @@
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  background: rgba(0, 122, 204, 0.08);
-  border: 1px solid rgba(0, 122, 204, 0.15);
+  background: var(--tc-accent-a8);
+  border: 1px solid var(--tc-accent-a15);
   margin-top: 2px;
 }
 
