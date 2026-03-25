@@ -141,7 +141,8 @@ export function PromptInput() {
           selectedModel, setSelectedModel, lastStats } = useChatStore()
   const { send, stop } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const modelMenuRef = useRef<HTMLDivElement>(null)
+  const modelBtnRef = useRef<HTMLButtonElement>(null)
+  const [modelMenuPos, setModelMenuPos] = useState<{ left: number; bottom: number } | null>(null)
 
   // 监听外部 inputDraft（来自 empty state 建议卡片点击），应用后立即清空
   useEffect(() => {
