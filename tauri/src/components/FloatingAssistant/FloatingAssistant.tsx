@@ -425,7 +425,7 @@ export function FloatingAssistant() {
               <div className={styles.chatMain}>
                 {/* 消息列表 */}
                 <div className={styles.messages}>
-                  {displayMessages.length === 0 && (
+                  {messages.length === 0 && !currentReply && (
                     <div className={styles.empty}>
                       {projectInfo ? (
                         <>项目 <strong>{projectInfo.name}</strong><br/>向我描述你的需求<br/>我会帮你分析、创建任务、生成 PRD</>
@@ -443,21 +443,6 @@ export function FloatingAssistant() {
                   <div className={styles.actionRow}>
                     <button className={styles.actionBtn} onClick={handleCopy}>复制</button>
                     <button className={styles.actionBtn} onClick={handleRetry}>重试</button>
-                  </div>
-                )}
-
-                {/* Sources 区域 */}
-                {sourceFiles.length > 0 && (
-                  <div className={styles.sourcesSection}>
-                    <div className={styles.sourcesLabel}>{sourceFiles.length} 个引用文件</div>
-                    <div className={styles.sourcePills}>
-                      {sourceFiles.map(f => (
-                        <span key={f} className={styles.sourcePill}>
-                          <IconFileText size={10} />
-                          {f}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 )}
 
