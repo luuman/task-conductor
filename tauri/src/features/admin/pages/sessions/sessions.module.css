@@ -468,7 +468,7 @@
 
 .toolBody {
   padding: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid var(--tc-border);
 }
 
 /* ── Read group strip (collapsed read-only tools) ── */
