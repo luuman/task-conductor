@@ -741,6 +741,10 @@ export default function ChatReportPage() {
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  // AI 对话状态（与 FloatingAssistant 共享同一 store）
+  const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
 
   // 获取当前项目 cwd
   const [projectCwd, setProjectCwd] = useState<string | undefined>()
