@@ -788,7 +788,6 @@ export default function ChatReportPage() {
                 )
               })
             )}
-          </InspectCtx.Provider>
           </CodeExpandCtx.Provider>
 
           {/* 底部操作栏 */}
