@@ -33,31 +33,6 @@ export default function AdminLayout() {
 
   const [cmdOpen, setCmdOpen] = useState(false)
   const handleCmdClose = useCallback(() => setCmdOpen(false), [])
-  const [sessionCount, setSessionCount] = useState<number | null>(null)
-
-  // Fetch session count for badge
-  useEffect(() => {
-    let cancelled = false
-    const fetchCount = async () => {
-      try {
-        const token = localStorage.getItem('tc_token')
-        const res = await fetch('/api/sessions', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        })
-        if (res.ok && !cancelled) {
-          const data = await res.json()
-          if (Array.isArray(data)) {
-            setSessionCount(data.length)
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-    fetchCount()
-    return () => { cancelled = true }
-  }, [])
-
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
