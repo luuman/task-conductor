@@ -48,12 +48,6 @@
 .queryPill .richText {
   flex: 1; min-width: 0;
 }
-.qNum {
-  flex-shrink: 0; font-size: 9px; font-weight: 700;
-  background: var(--tc-border-active); color: #000;
-  padding: 1px 6px; border-radius: 8px;
-  font-family: 'Geist Mono', monospace;
-}
 .turnSection { margin-bottom: 24px; }
 
 /* 侧边栏问题导航 */
