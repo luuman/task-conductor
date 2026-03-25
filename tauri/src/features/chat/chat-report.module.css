@@ -329,8 +329,8 @@
 .inspectPanel {
   position: sticky;
   bottom: 0;
-  background: var(--tc-sidebar-bg, #131316);
-  border-top: 2px solid #7c5cfc;
+  background: var(--tc-sidebar-bg);
+  border-top: 2px solid var(--tc-accent);
   padding: 0;
   z-index: 20;
   font-size: 12px;
