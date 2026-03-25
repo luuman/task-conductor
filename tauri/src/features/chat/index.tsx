@@ -33,7 +33,7 @@ function badgeCls(cat: TimelineStep['category']): string {
     bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
     ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
   }
-  return `${s.badge} ${map[cat] || s.bOther}`
+  return map[cat] || s.bOther
 }
 
 const TOOL_LABEL_MAP: Record<string, string> = {
