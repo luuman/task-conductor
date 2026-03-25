@@ -131,6 +131,12 @@ export function useChatStream() {
           console.log(`[ChatStream] 回答完成, 总耗时: ${(performance.now() - sendTsRef.current).toFixed(0)}ms, 文本长度: ${(msg.data?.full_text || ft).length}`)
           const sessionId = msg.data?.session_id
           if (sessionId) s.setClaudeSessionId(sessionId)
+          s.setLastStats({
+            cost_usd: msg.data?.cost_usd,
+            duration_ms: msg.data?.duration_ms,
+            input_tokens: msg.data?.input_tokens,
+            output_tokens: msg.data?.output_tokens,
+          })
           s.setIsGenerating(false)
           // flush 最后的文字
           const remaining = s.currentReply.trim()
