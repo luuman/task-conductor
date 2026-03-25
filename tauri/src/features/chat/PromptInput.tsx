@@ -132,14 +132,12 @@ function formatOneDomContext(ctx: DomContext, index: number): string {
     + (ctx.classes.length ? `.${ctx.classes[0]}` : '')
 
   const lines = [
-    `--- 问题元素 #${index + 1} ---`,
-    `元素: ${selector}`,
+    `【元素 #${index + 1}】${selector}`,
     ctx.path ? `路径: ${ctx.path} > ${selector}` : '',
-    ctx.text ? `文本内容: "${ctx.text}"` : '',
-    `位置与尺寸: x=${ctx.rect.x} y=${ctx.rect.y} ${ctx.rect.width}×${ctx.rect.height}px`,
-    `样式: color=${ctx.styles.color} background=${ctx.styles.background} font-size=${ctx.styles.fontSize}`,
+    ctx.text ? `文本: "${ctx.text}"` : '',
+    `尺寸: ${ctx.rect.width}×${ctx.rect.height}px @ (${ctx.rect.x}, ${ctx.rect.y})`,
+    `样式: color=${ctx.styles.color} bg=${ctx.styles.background} font=${ctx.styles.fontSize}`,
     `HTML: ${ctx.outerHTML}`,
-    '---',
   ].filter(Boolean)
 
   return lines.join('\n')
