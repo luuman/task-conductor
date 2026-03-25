@@ -1,9 +1,11 @@
 import asyncio
+import mimetypes
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path as FilePath
-from fastapi import FastAPI, Header, Query, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session as DBSession
 from .database import engine
