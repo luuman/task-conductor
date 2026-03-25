@@ -317,6 +317,11 @@
 .gBubbleText { max-width: 90%; border-radius: 10px; padding: 8px 12px; font-size: 12px; background: var(--tc-accent-a6); border: 1px solid var(--tc-accent-a15); color: var(--tc-foreground-secondary); }
 .gBubbleTool { max-width: 90%; border-radius: 10px; padding: 6px 10px; background: var(--tc-sidebar-bg); border: 1px solid var(--tc-border); color: var(--tc-foreground-secondary); }
 .gToolHead { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 11px; }
+.gGroupHead { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--tc-foreground); margin-bottom: 4px; }
+.gGroupSummary { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.gGroupChip { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); color: var(--tc-foreground-secondary); }
+.gGroupBody { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; border-top: 1px solid var(--tc-border); padding-top: 6px; }
+.gGroupItem { display: flex; gap: 6px; align-items: flex-start; }
 
 /* ═══════════════════════════════════════════════ */
 /* H: 折叠手风琴 */
