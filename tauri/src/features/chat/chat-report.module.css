@@ -483,14 +483,24 @@
 .pDomChip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background: rgba(96, 165, 250, 0.08);
   border: 1px solid rgba(96, 165, 250, 0.35);
   border-radius: 6px;
   padding: 3px 8px;
   font-size: 11px;
   color: #60a5fa;
-  max-width: 320px;
+  max-width: 300px;
+  flex-shrink: 0;
+}
+
+.pDomChipIndex {
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(96, 165, 250, 0.25);
+  border-radius: 3px;
+  padding: 0 4px;
+  line-height: 16px;
   flex-shrink: 0;
 }
 
@@ -499,6 +509,10 @@
   font-size: 10px;
   font-weight: 600;
   flex-shrink: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pDomChipText {
@@ -508,7 +522,25 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
-  flex: 1;
+  max-width: 100px;
+}
+
+.pDomClearAll {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: 1px dashed rgba(96, 165, 250, 0.35);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.1s, border-color 0.1s;
+}
+.pDomClearAll:hover {
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.6);
 }
 
 .pPickingHint {
