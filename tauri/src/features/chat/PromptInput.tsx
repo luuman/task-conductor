@@ -282,6 +282,12 @@ export function PromptInput() {
                 <img src={a.dataUrl} alt={a.name} title={a.name} />
                 <button onClick={() => removeAttachment(a.id)}><IconX size={8} /></button>
               </span>
+            ) : a.kind === 'folder' ? (
+              <span key={a.id} className={s.pFolderChip}>
+                <IconFolder size={12} />
+                <span>{a.name}</span>
+                <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}><IconX size={10} /></button>
+              </span>
             ) : (
               <span key={a.id} className={s.pAttachChip}>
                 <IconFileText size={11} />
