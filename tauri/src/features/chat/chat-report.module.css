@@ -233,9 +233,9 @@
 .bOther  { background: color-mix(in srgb, var(--tc-tool-other)  20%, transparent); color: var(--tc-tool-other); }
 
 /* 代码/结果块（样式由 ChatRenderer.CollapsibleCode 统一提供） */
-.diffAdd { color: #4ade80; }
-.diffDel { color: #f87171; }
-.errText { color: #f87171 !important; }
+.diffAdd { color: var(--tc-success); }
+.diffDel { color: var(--tc-error); }
+.errText { color: var(--tc-error) !important; }
 
 /* 文本内容 */
 .richText {
