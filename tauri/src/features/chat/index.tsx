@@ -327,7 +327,6 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
 }
 
 function StyleH({ steps }: { steps: TimelineStep[] }) {
-  const groups = useMemo(() => groupSteps(steps), [steps])
   const [openIds, setOpenIds] = useState<Set<string>>(() => {
     const set = new Set<string>()
     steps.forEach(st => { if (st.kind === 'text') set.add(st.id) })
@@ -339,89 +338,24 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
 
   return (
     <>
-      {groups.map((grp, gi) => {
-        if (grp.kind === 'text') {
-          const step = grp.step
-          const isOpen = openIds.has(step.id)
-          return (
-            <StepWrap key={step.id} step={step} index={grp.idx}>
-              <div className={s.hAcc}>
-                <div className={s.hHead} onClick={() => toggle(step.id)}>
-                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-                  <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>
-                </div>
-                {isOpen && <div className={s.hBody}><RichText text={step.text!} /></div>}
-              </div>
-            </StepWrap>
-          )
-        }
-        // tool group
-        const { steps: toolSteps, startIdx } = grp
-        if (toolSteps.length === 1) {
-          const step = toolSteps[0]
-          const isOpen = openIds.has(step.id)
-          return (
-            <StepWrap key={step.id} step={step} index={startIdx}>
-              <div className={s.hAcc}>
-                <div className={s.hHead} onClick={() => toggle(step.id)}>
-                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-                </div>
-                {isOpen && (step.toolResult || step.oldString) && (
-                  <div className={s.hBody}><ResultBlock step={step} /></div>
-                )}
-              </div>
-            </StepWrap>
-          )
-        }
-        // multiple consecutive tool steps → grouped accordion
-        const grpId = `hg-${gi}`
-        const isGrpOpen = openIds.has(grpId)
+      {steps.map((step, i) => {
+        const isOpen = openIds.has(step.id)
         return (
-          <div key={grpId} className={s.hAcc}>
-            <div className={s.hHead} onClick={() => toggle(grpId)}>
-              <span className={s.hChevron} style={{ transform: isGrpOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-              <span className={s.hTitle} style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                {toolSteps.slice(0, 4).map(st => (
-                  <span key={st.id} className={badgeCls(st.category)}>{badgeLabel(st)}</span>
-                ))}
-                {toolSteps.length > 4 && <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)' }}>+{toolSteps.length - 4}</span>}
-              </span>
-              <span className={s.hGroupCount}>{toolSteps.length} 步</span>
-            </div>
-            {isGrpOpen && (
-              <div style={{ borderTop: '1px solid var(--tc-border)' }}>
-                {toolSteps.map((step, si) => {
-                  const subId = `${grpId}-${si}`
-                  const isSubOpen = openIds.has(subId)
-                  return (
-                    <StepWrap key={step.id} step={step} index={startIdx + si}>
-                      <div className={s.hSubItem}>
-                        <div className={s.hSubHead} onClick={(e) => { e.stopPropagation(); toggle(subId) }}>
-                          <span className={s.hChevron} style={{ transform: isSubOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                          <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-                          {!!step.toolInput?.file_path && (
-                            <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 4 }}>
-                              {String(step.toolInput.file_path).split('/').pop() || ''}
-                            </span>
-                          )}
-                          {!!step.toolInput?.command && (
-                            <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 4 }}>
-                              {String(step.toolInput.command).slice(0, 40)}
-                            </span>
-                          )}
-                        </div>
-                        {isSubOpen && (step.toolResult || step.oldString) && (
-                          <div className={s.hSubBody}><ResultBlock step={step} /></div>
-                        )}
-                      </div>
-                    </StepWrap>
-                  )
-                })}
+          <StepWrap key={step.id} step={step} index={i}>
+            <div className={s.hAcc}>
+              <div className={s.hHead} onClick={() => toggle(step.id)}>
+                <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
+                <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                {step.kind === 'text' && <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>}
               </div>
-            )}
-          </div>
+              {isOpen && step.kind === 'text' && (
+                <div className={s.hBody}><RichText text={step.text!} /></div>
+              )}
+              {isOpen && step.kind === 'tool' && (step.toolResult || step.oldString) && (
+                <div className={s.hBody}><ResultBlock step={step} /></div>
+              )}
+            </div>
+          </StepWrap>
         )
       })}
     </>
