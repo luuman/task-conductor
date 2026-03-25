@@ -193,7 +193,7 @@ export function useChatStream() {
     sendTsRef.current = performance.now()
     console.log(`[ChatStream] 发送消息: "${message.slice(0, 50)}..." @ ${new Date().toISOString()}`)
 
-    const { systemPrompt, pageContext, claudeSessionId, projectCwd, selectedModel } = store
+    const { systemPrompt, pageContext, claudeSessionId, projectCwd, selectedModel, bypassPermissions } = store
     const payload = JSON.stringify({
       type: 'chat',
       message,
@@ -202,6 +202,7 @@ export function useChatStream() {
       session_id: claudeSessionId || undefined,
       cwd: projectCwd || undefined,
       context: pageContext,
+      bypass_permissions: bypassPermissions,
     })
 
     const ws = _ensureWs()
