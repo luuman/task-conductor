@@ -222,9 +222,9 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
             <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (
             <div>
-              <div style={{ marginBottom: step.toolResult || step.oldString ? 4 : 0 }}>
+              {!step.toolResult && !step.oldString && (
                 <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-              </div>
+              )}
               {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
             </div>
           )}
