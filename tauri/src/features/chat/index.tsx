@@ -4,19 +4,27 @@ import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
-import { parseTimelineWithQuestions, formatTs, guessHljsLang, type TimelineStep, type UserQuestion } from './timeline-parser'
+import { formatTs, type UserQuestion } from './timeline-parser'
 import { Select } from '../../ui/select'
-import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
+import { CodeExpandCtx } from '../../components/ChatRenderer'
 import {
-  IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
-  IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
-  IconChevronRight, IconX, IconPlus, IconLink, IconSettings, IconMaximize,
+  IconX, IconPlus, IconLink, IconSettings, IconMaximize,
 } from '../../ui/icon'
-import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
+import {
+  STYLES, type StyleKey, RENDERERS, ChatTimeline,
+  parseTimelineWithQuestions, groupConsecutiveSameType,
+  badgeCls, badgeLabel, dotColor, catIcon,
+  RichText, ResultBlock,
+  StyleA, StyleB, StyleD, StyleG, StyleH,
+} from './ChatTimeline'
+
+// ── 样式常量（re-export from ChatTimeline）──
+const _STYLES = STYLES
+void _STYLES
 
 // ── 样式常量 ──
-const STYLES = [
+const STYLE_LIST = [
   { key: 'a', label: 'A 竖线时间线' },
   { key: 'b', label: 'B 卡片瀑布' },
   { key: 'd', label: 'D GitHub PR' },
