@@ -981,7 +981,7 @@ export default function AdminServerMonitor() {
           <div className={s.card}>
             <div className={s.cardHead}>
               <div className={s.cardTitle}>
-                <div className={s.cardTitleIcon} style={{ background: '#60a5fa22', color: 'var(--tc-border-active)' }}>⚡</div>
+                <div className={s.cardTitleIcon} style={{ background: '#60a5fa22', color: 'var(--tc-border-active)' }}><IconZap size={14} /></div>
                 CPU
               </div>
               <div className={s.cardHint}>
