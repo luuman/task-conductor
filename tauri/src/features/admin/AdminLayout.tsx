@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Suspense, useCallback, useEffect, useState } from 'react'
-import { AppShell, TopBar, Sidebar } from '../../layouts'
+import { AppShell, Sidebar } from '../../layouts'
 import { IconLogo, IconLayoutGrid, IconSettings, IconSearch, IconMonitor, IconArrowLeft, IconGitBranch, IconActivity } from '../../ui/icon'
 import { useNotificationStore } from '../../lib/store/notifications'
 import { NotificationPanel } from '../../components/NotificationPanel'
