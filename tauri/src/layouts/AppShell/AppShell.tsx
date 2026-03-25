@@ -9,17 +9,15 @@ export interface AppShellProps {
 const DEFAULT_PANEL_HEIGHT = 200
 
 export function AppShell({ children }: AppShellProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelHeight, setPanelHeight] = useState(DEFAULT_PANEL_HEIGHT)
 
-  const toggleSidebar = useCallback(() => setSidebarCollapsed((v) => !v), [])
   const togglePanel = useCallback(() => setPanelOpen((v) => !v), [])
 
   const value: ShellContextValue = {
-    sidebarCollapsed,
-    setSidebarCollapsed,
-    toggleSidebar,
+    sidebarCollapsed: false,
+    setSidebarCollapsed: () => {},
+    toggleSidebar: () => {},
     panelOpen,
     setPanelOpen,
     togglePanel,
@@ -29,10 +27,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <ShellContext.Provider value={value}>
-      <div
-        className={styles.shell}
-        data-sidebar-collapsed={sidebarCollapsed}
-      >
+      <div className={styles.shell}>
         {children}
       </div>
     </ShellContext.Provider>
