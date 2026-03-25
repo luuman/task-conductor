@@ -2,7 +2,7 @@
  * ChatTimeline — 共享会话消息渲染组件
  * 同时用于 /chat 页面和 FloatingAssistant
  */
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { TranscriptMessage } from '../../lib/api/types'
 import { parseTimelineWithQuestions, guessHljsLang } from './timeline-parser'
 import type { TimelineStep } from './timeline-parser'
