@@ -217,19 +217,20 @@
 /* ── Common ── */
 .badge {
   font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px;
-  font-family: var(--tc-font-mono, monospace); white-space: nowrap; display: inline-block;
+  font-family: var(--tc-font-mono); white-space: nowrap; display: inline-block;
 }
-.bRead { background: rgba(96,165,250,0.1); color: #60a5fa; }
-.bEdit { background: rgba(251,191,36,0.1); color: #fbbf24; }
-.bWrite { background: rgba(74,222,128,0.1); color: #4ade80; }
-.bBash { background: rgba(34,211,238,0.1); color: #22d3ee; }
-.bGrep { background: rgba(248,113,113,0.1); color: #f87171; }
-.bGlob { background: rgba(251,146,60,0.08); color: #fb923c; }
-.bAgent { background: var(--tc-accent-a10); color: var(--tc-tool-agent); }
-.bAsk { background: rgba(96,165,250,0.1); color: #60a5fa; }
-.bSearch { background: rgba(34,211,238,0.08); color: #22d3ee; }
-.bText { background: var(--tc-accent-a10); color: var(--tc-tool-text); }
-.bOther { background: rgba(82,82,91,0.2); color: #52525b; }
+.bRead   { background: color-mix(in srgb, var(--tc-tool-read)   10%, transparent); color: var(--tc-tool-read); }
+.bEdit   { background: color-mix(in srgb, var(--tc-tool-edit)   10%, transparent); color: var(--tc-tool-edit); }
+.bWrite  { background: color-mix(in srgb, var(--tc-tool-write)  10%, transparent); color: var(--tc-tool-write); }
+.bBash   { background: color-mix(in srgb, var(--tc-tool-bash)   10%, transparent); color: var(--tc-tool-bash); }
+.bGrep   { background: color-mix(in srgb, var(--tc-tool-grep)   10%, transparent); color: var(--tc-tool-grep); }
+.bGlob   { background: color-mix(in srgb, var(--tc-tool-glob)    8%, transparent); color: var(--tc-tool-glob); }
+.bAgent  { background: var(--tc-accent-a10);                                        color: var(--tc-tool-agent); }
+.bAsk    { background: color-mix(in srgb, var(--tc-tool-read)   10%, transparent); color: var(--tc-tool-read); }
+.bSearch { background: color-mix(in srgb, var(--tc-tool-bash)    8%, transparent); color: var(--tc-tool-bash); }
+.bText   { background: var(--tc-accent-a10);                                        color: var(--tc-tool-text); }
+.bTask   { background: color-mix(in srgb, var(--tc-tool-task)   10%, transparent); color: var(--tc-tool-task); }
+.bOther  { background: color-mix(in srgb, var(--tc-tool-other)  20%, transparent); color: var(--tc-tool-other); }
 
 /* 代码/结果块（样式由 ChatRenderer.CollapsibleCode 统一提供） */
 .diffAdd { color: #4ade80; }
@@ -248,7 +249,7 @@
 .richText ul, .richText ol { padding-left: 18px; margin: 4px 0; }
 .richText li { margin: 2px 0; }
 
-.ts { font-size: 10px; color: var(--tc-foreground-secondary); font-family: var(--tc-font-mono, monospace); flex-shrink: 0; }
+.ts { font-size: 10px; color: var(--tc-foreground-secondary); font-family: var(--tc-font-mono); flex-shrink: 0; }
 .fileName { color: var(--tc-foreground); }
 .newTag { color: #4ade80; font-size: 10px; }
 .errTag { color: #f87171; font-size: 10px; font-weight: 600; }
@@ -280,7 +281,7 @@
 .bHead { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
 .bIcon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
 .bTitle { font-size: 12px; font-weight: 500; }
-.bMeta { font-size: 10px; color: var(--tc-foreground-secondary); margin-left: auto; font-family: var(--tc-font-mono, monospace); }
+.bMeta { font-size: 10px; color: var(--tc-foreground-secondary); margin-left: auto; font-family: var(--tc-font-mono); }
 .bBody { padding: 0 12px 10px; }
 .bTextCard { background: transparent; border: none; border-left: 2px solid var(--tc-border-active); border-radius: 0; margin-left: 10px; }
 .bTextCard .bBody { padding: 8px 12px; }
@@ -398,20 +399,20 @@
 
 /* Bash 卡片 */
 .iBashCard { border: 1px solid var(--tc-border); border-radius: 6px; overflow: hidden; margin: 2px 0; }
-.iBashHead { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(0,0,0,0.3); font-family: var(--tc-font-mono, monospace); font-size: 12px; }
+.iBashHead { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(0,0,0,0.3); font-family: var(--tc-font-mono); font-size: 12px; }
 .iBashHeadErr { border-bottom: 1px solid rgba(248,81,73,0.2); }
 .iBashPrompt { color: #3fb950; font-weight: 700; }
 .iBashCmd { color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 420px; }
 .iBashLines { color: var(--tc-foreground-secondary); font-size: 10px; margin-left: auto; flex-shrink: 0; }
 .iBashPass { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(63,185,80,0.12); color: #3fb950; font-weight: 600; flex-shrink: 0; }
 .iBashFail { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(248,81,73,0.12); color: #f85149; font-weight: 600; flex-shrink: 0; }
-.iBashOut { padding: 8px 10px; font-family: var(--tc-font-mono, monospace); font-size: 11px; line-height: 1.45; overflow-x: auto; white-space: pre; color: var(--tc-foreground-secondary); background: rgba(0,0,0,0.15); margin: 0; }
+.iBashOut { padding: 8px 10px; font-family: var(--tc-font-mono); font-size: 11px; line-height: 1.45; overflow-x: auto; white-space: pre; color: var(--tc-foreground-secondary); background: rgba(0,0,0,0.15); margin: 0; }
 .iBashOutErr { color: #f85149; background: rgba(248,81,73,0.04); }
 
 /* 药丸行（Read / Grep / Glob） */
 .iPillRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 0; }
-.iPillLabel { font-size: 9px; color: var(--tc-foreground-secondary); text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; opacity: 0.6; font-family: var(--tc-font-mono, monospace); }
-.iPill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(110,118,129,0.08); border: 1px solid rgba(110,118,129,0.15); border-radius: 12px; font-size: 11px; color: var(--tc-foreground-secondary); font-family: var(--tc-font-mono, monospace); }
+.iPillLabel { font-size: 9px; color: var(--tc-foreground-secondary); text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; opacity: 0.6; font-family: var(--tc-font-mono); }
+.iPill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(110,118,129,0.08); border: 1px solid rgba(110,118,129,0.15); border-radius: 12px; font-size: 11px; color: var(--tc-foreground-secondary); font-family: var(--tc-font-mono); }
 .iPillBadge { font-size: 9px; background: rgba(110,118,129,0.15); padding: 0 4px; border-radius: 6px; color: var(--tc-foreground-secondary); }
 
 /* Agent 卡片 */
@@ -424,5 +425,5 @@
 .iToolRow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 5px; font-size: 12px; cursor: default; }
 .iToolRow:hover { background: rgba(110,118,129,0.06); }
 .iToolName { color: var(--tc-foreground-secondary); font-weight: 500; flex-shrink: 0; }
-.iToolParam { font-family: var(--tc-font-mono, monospace); font-size: 11px; color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.iToolParam { font-family: var(--tc-font-mono); font-size: 11px; color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .iToolErr { color: #f85149; font-size: 10px; flex-shrink: 0; }
