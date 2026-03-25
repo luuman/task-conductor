@@ -1,0 +1,20 @@
+{
+  "name": "Crimson",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#0d0a0a",
+    "base.bg-secondary":  "#150c0c",
+    "base.bg-hover":      "#1e1414",
+    "base.fg-primary":    "#f0e8e8",
+    "base.fg-secondary":  "#705858",
+    "base.accent":        "#f43f5e",
+    "base.accent-bg":     "#2a0a12",
+    "base.accent-fg":     "#ffffff",
+    "base.border":        "#1e1818",
+    "base.border-active": "#f43f5e",
+    "base.error":         "#fb7185",
+    "base.warning":       "#fbbf24",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
