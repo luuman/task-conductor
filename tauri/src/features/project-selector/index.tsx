@@ -14,8 +14,8 @@ interface ProjectMeta extends Project {
 }
 
 const AVATAR_COLORS = [
-  '#007acc', '#16825d', '#bf8803', '#e51400',
-  '#68217a', '#005fb8', '#388e3c', '#f57c00',
+  '#7c6af5', '#16825d', '#f59e0b', '#ef4444',
+  '#a855f7', '#3b82f6', '#10b981', '#f97316',
 ]
 
 function getAvatarColor(id: number) {
