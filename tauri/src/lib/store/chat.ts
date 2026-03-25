@@ -79,6 +79,8 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   isGenerating: false,
   systemPrompt: '',
   claudeSessionId: null,
+  selectedModel: 'claude-sonnet-4-20250514',
+  lastStats: null,
 
   prdContent: null,
   prdSidebarOpen: false,
