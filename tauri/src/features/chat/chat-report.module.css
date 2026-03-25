@@ -307,33 +307,6 @@
 .dTextEvent { border-color: rgba(124,92,252,0.2); }
 .dTextEvent .dHead { background: rgba(124,92,252,0.04); }
 
-/* ═══════════════════════════════════════════════ */
-/* E: 终端日志 */
-/* ═══════════════════════════════════════════════ */
-.eLog { background: #000; border: 1px solid #333; border-radius: 8px; padding: 10px; font-family: var(--tc-font-mono, monospace); font-size: 11px; }
-.eLine { display: flex; gap: 8px; padding: 1px 0; line-height: 1.6; }
-.eTs { color: #555; flex-shrink: 0; width: 55px; }
-.eType { flex-shrink: 0; width: 50px; }
-.eCt { color: #aaa; word-break: break-word; flex: 1; }
-.eCt b { color: #fff; font-weight: 500; }
-.hlFile { color: #60a5fa; }
-.hlCmd { color: #22d3ee; }
-.hlOk { color: #4ade80; }
-.hlErr { color: #f87171; }
-.hlNew { color: #4ade80; }
-
-/* ═══════════════════════════════════════════════ */
-/* F: 看板泳道 */
-/* ═══════════════════════════════════════════════ */
-.fBoard { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
-.fLane { background: var(--tc-sidebar-bg); border: 1px solid var(--tc-border); border-radius: 8px; overflow: hidden; }
-.fLaneHead { padding: 6px 10px; border-bottom: 1px solid var(--tc-border); font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-.fLaneCount { margin-left: auto; font-size: 10px; color: var(--tc-foreground-secondary); font-weight: 400; }
-.fLaneBody { padding: 6px; max-height: 400px; overflow-y: auto; }
-.fItem { padding: 5px 8px; border-radius: 5px; margin-bottom: 4px; font-size: 11px; background: var(--tc-content-bg); border: 1px solid transparent; }
-.fItem:hover { border-color: var(--tc-border); }
-.fItemTitle { font-weight: 500; color: var(--tc-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fItemDesc { font-size: 10px; color: var(--tc-foreground-secondary); margin-top: 1px; }
 
 /* ═══════════════════════════════════════════════ */
 /* G: 气泡聊天 */
