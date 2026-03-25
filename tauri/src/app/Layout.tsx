@@ -7,6 +7,7 @@ import {
   IconMessage, IconSettings, IconFolder, IconGitBranch,
   IconBot, IconTerminal,
 } from '../ui/icon'
+import { useTheme } from '../ui/theme/useTheme'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
 import { CommandMenu } from '../components/CommandMenu'
