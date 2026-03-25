@@ -381,37 +381,22 @@ export function PromptInput() {
             </button>
             <div className={s.pToolSep} />
             {/* 模型选择器 */}
-            <div ref={modelMenuRef} style={{ position: 'relative' }}>
-              <button
-                className={s.pModelBtn}
-                title="选择模型"
-                onClick={() => setShowModelMenu(v => !v)}
-              >
-                {(models.find(m => m.id === selectedModel) || models[0])?.name ?? 'Sonnet 4'}
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 3 }}>
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-              {showModelMenu && models.length > 0 && (
-                <div className={s.settingsDropdown} style={{ minWidth: 160, zIndex: 200 }}>
-                  {models.map(m => (
-                    <button
-                      key={m.id}
-                      className={s.settingsItem}
-                      style={m.id === selectedModel ? { color: 'var(--tc-accent)' } : undefined}
-                      onClick={() => { setSelectedModel(m.id); setShowModelMenu(false) }}
-                    >
-                      {m.id === selectedModel && (
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 6 }}>
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      )}
-                      {m.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <button
+              ref={modelBtnRef}
+              className={s.pModelBtn}
+              title="选择模型"
+              onClick={() => {
+                if (showModelMenu) { setShowModelMenu(false); return }
+                const r = modelBtnRef.current?.getBoundingClientRect()
+                if (r) setModelMenuPos({ left: r.left, bottom: window.innerHeight - r.top + 4 })
+                setShowModelMenu(true)
+              }}
+            >
+              {(models.find(m => m.id === selectedModel) || models[0])?.name ?? 'Sonnet 4'}
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 3 }}>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
           </div>
           <div className={s.pToolRight}>
             <div ref={settingsRef} style={{ position: 'relative' }}>
