@@ -471,6 +471,9 @@
     "appearance": {
       "title": "外观",
       "hint": "主题和语言偏好",
+      "mode": "明暗模式",
+      "modeDark": "暗色",
+      "modeLight": "亮色",
       "theme": "主题",
       "language": "语言",
       "lang_zh": "中文",
