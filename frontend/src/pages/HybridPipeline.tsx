@@ -388,7 +388,7 @@ export default function HybridPipeline() {
     // 进度条
     const pInterval = setInterval(() => {
       progress += (100 / (stage.duration * 1000)) * progressTick;
-      const elapsed = (progress / 100) * stage.duration;
+      void ((progress / 100) * stage.duration);
       setStages((prev) => {
         const next = [...prev];
         next[index] = { ...next[index], progress: Math.min(progress, 100) };
