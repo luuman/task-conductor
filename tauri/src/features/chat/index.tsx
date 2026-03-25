@@ -193,7 +193,7 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
   return (
     <div className={s.aTl}>
       {steps.map((step, i) => (
-        <StepWrap key={step.id} step={step} index={i}>
+        <React.Fragment key={step.id}>
           <div className={s.aStep}>
             <span className={s.aDot} style={{ background: dotColor(step.category) }} />
             {step.kind === 'text' ? (
@@ -205,7 +205,7 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
               </>
             )}
           </div>
-        </StepWrap>
+        </React.Fragment>
       ))}
     </div>
   )
