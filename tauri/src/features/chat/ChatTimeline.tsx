@@ -339,7 +339,7 @@ type Segment =
 
 /** 移除用户消息中附加的 DOM 上下文文本块（格式：\n\n--- 问题元素 ... ---） */
 function stripDomContext(text: string): string {
-  const idx = text.indexOf('\n\n--- 问题元素')
+  const idx = text.search(/\n+--- 问题元素/)
   return idx !== -1 ? text.slice(0, idx).trim() : text
 }
 
