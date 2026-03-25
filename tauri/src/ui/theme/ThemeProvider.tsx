@@ -5,6 +5,7 @@ import darkPlus from './themes/dark-plus.json'
 import { ALL_THEMES } from './themes/index'
 
 const STORAGE_KEY = 'tc-theme'
+const MODE_KEY = 'tc-mode'
 const DEFAULT_THEME = 'Dark+'
 const FALLBACK: ThemeJSON = darkPlus as ThemeJSON
 
@@ -16,12 +17,20 @@ function getInitialThemeName(): string {
   }
 }
 
-function applyThemeToDOM(vars: Record<string, string>, type: 'dark' | 'light') {
+function getInitialMode(): 'dark' | 'light' {
+  try {
+    const stored = localStorage.getItem(MODE_KEY)
+    if (stored === 'dark' || stored === 'light') return stored
+  } catch { /* ignore */ }
+  return 'dark'
+}
+
+function applyThemeToDOM(vars: Record<string, string>, mode: 'dark' | 'light') {
   const root = document.documentElement
   for (const [prop, value] of Object.entries(vars)) {
     root.style.setProperty(prop, value)
   }
-  root.setAttribute('data-theme', type)
+  root.setAttribute('data-theme', mode)
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -30,22 +39,29 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   )
 
   const [themeName, setThemeName] = useState(getInitialThemeName)
+  const [mode, setModeState] = useState<'dark' | 'light'>(getInitialMode)
 
   const currentTheme = registry.current.get(themeName) ?? FALLBACK
 
   useEffect(() => {
-    const vars = resolveTheme(currentTheme, FALLBACK)
-    applyThemeToDOM(vars, currentTheme.type)
+    const colors = currentTheme[mode] ?? currentTheme.dark
+    const fallbackColors = FALLBACK[mode] ?? FALLBACK.dark
+    const vars = resolveTheme(colors, fallbackColors)
+    applyThemeToDOM(vars, mode)
     try {
       localStorage.setItem(STORAGE_KEY, themeName)
+      localStorage.setItem(MODE_KEY, mode)
     } catch { /* ignore */ }
-  }, [themeName, currentTheme])
+  }, [themeName, currentTheme, mode])
 
-  // 跨窗口/标签页同步：监听其他窗口写入 localStorage 触发的 storage 事件
+  // 跨窗口/标签页同步
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY && e.newValue && registry.current.has(e.newValue)) {
         setThemeName(e.newValue)
+      }
+      if (e.key === MODE_KEY && (e.newValue === 'dark' || e.newValue === 'light')) {
+        setModeState(e.newValue)
       }
     }
     window.addEventListener('storage', onStorage)
@@ -60,14 +76,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemeName(name)
   }, [])
 
+  const setMode = useCallback((m: 'dark' | 'light') => {
+    setModeState(m)
+  }, [])
+
   const registerTheme = useCallback((json: ThemeJSON) => {
     registry.current.set(json.name, json)
   }, [])
 
   const value: ThemeContextValue = {
     theme: themeName,
-    themeType: currentTheme.type,
+    mode,
     setTheme,
+    setMode,
     themes: Array.from(registry.current.keys()),
     themeList: Array.from(registry.current.values()),
     registerTheme,
