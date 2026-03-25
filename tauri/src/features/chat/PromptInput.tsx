@@ -147,8 +147,17 @@ export function PromptInput() {
   }, [inputDraft, setInputDraft])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const folderInputRef = useRef<HTMLInputElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0 && domCtxList.length === 0
+
+  // 加载模型列表
+  useEffect(() => {
+    fetch('/api/chat/models')
+      .then(r => r.ok ? r.json() : [])
+      .then((list: ModelInfo[]) => { if (list.length) setModels(list) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!showSettings) return
@@ -158,6 +167,15 @@ export function PromptInput() {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [showSettings])
+
+  useEffect(() => {
+    if (!showModelMenu) return
+    const handler = (e: MouseEvent) => {
+      if (modelMenuRef.current && !modelMenuRef.current.contains(e.target as Node)) setShowModelMenu(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showModelMenu])
 
   // DOM 拾取模式
   useEffect(() => {
