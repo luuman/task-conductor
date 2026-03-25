@@ -266,7 +266,7 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step, i) => (
-        <StepWrap key={step.id} step={step} index={i}>
+        <React.Fragment key={step.id}>
           <div className={s.gMsg}>
             <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`} style={{ position: 'relative' }}>
               {step.kind === 'text' ? 'C' : catIcon(step.category)}
@@ -287,7 +287,7 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
               </div>
             )}
           </div>
-        </StepWrap>
+        </React.Fragment>
       ))}
     </>
   )
