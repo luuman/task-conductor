@@ -385,9 +385,28 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
       {segments.map((seg, i) =>
         seg.type === 'user' ? (
           <div key={i} className={s.turnSection}>
-            <div className={s.queryPill}>
-              <div className={s.richText}>{seg.text}</div>
-            </div>
+            {seg.attachments && seg.attachments.length > 0 && (
+              <div className={s.queryAttachments}>
+                {seg.attachments.map(a => a.kind === 'image' && a.dataUrl ? (
+                  <img key={a.id} src={a.dataUrl} className={s.queryImgThumb} alt={a.name} title={a.name} />
+                ) : a.kind === 'folder' ? (
+                  <div key={a.id} className={s.queryFolderChip}>
+                    <IconFolder size={12} />
+                    <span>{a.name}</span>
+                  </div>
+                ) : (
+                  <div key={a.id} className={s.queryFileChip}>
+                    <IconFileText size={12} />
+                    <span>{a.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {seg.text && (
+              <div className={s.queryPill}>
+                <div className={s.richText}>{seg.text}</div>
+              </div>
+            )}
           </div>
         ) : (
           <Renderer key={i} steps={seg.steps} />
