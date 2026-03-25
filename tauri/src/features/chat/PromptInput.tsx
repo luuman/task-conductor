@@ -355,8 +355,11 @@ export function PromptInput() {
 
         <div className={s.pToolbar}>
           <div className={s.pToolLeft}>
-            <button className={s.pToolBtn} title="添加附件" onClick={() => fileInputRef.current?.click()}>
+            <button className={s.pToolBtn} title="添加文件" onClick={() => fileInputRef.current?.click()}>
               <IconPlus size={14} />
+            </button>
+            <button className={s.pToolBtn} title="添加文件夹" onClick={() => folderInputRef.current?.click()}>
+              <IconFolder size={14} />
             </button>
             <button className={s.pToolBtn} title="插入链接">
               <IconLink size={14} />
