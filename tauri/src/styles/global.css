@@ -34,6 +34,10 @@
   --tc-tool-task:   #818cf8;
   --tc-tool-other:  #71717a;
 
+  /* ── 终端/代码输出语义颜色 ── */
+  --tc-terminal-green: #3fb950;
+  --tc-terminal-red:   #f85149;
+
   /* ── 圆角比例（保持跨组件一致） ── */
   --tc-radius-xs:   4px;
   --tc-radius-sm:   6px;
