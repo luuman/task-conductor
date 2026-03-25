@@ -4,27 +4,32 @@ import type { Task } from '../../../lib/api/types'
 import { Button } from '../../../ui/button'
 import styles from './TaskRow.module.css'
 
+// 阶段颜色 — 从 CSS 变量读取（定义在 global.css --tc-stage-* 中）
+function getCssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#71717a'
+}
+
 const STAGE_COLORS: Record<string, string> = {
-  input: '#6b7280',
-  analysis: '#8b5cf6',
-  prd: '#3b82f6',
-  ui: '#ec4899',
-  plan: '#f59e0b',
-  dev: '#10b981',
-  test: '#06b6d4',
-  deploy: '#f97316',
-  monitor: '#6366f1',
-  done: '#22c55e',
+  input:    '#71717a',
+  analysis: 'var(--tc-stage-analysis)',
+  prd:      'var(--tc-stage-prd)',
+  ui:       'var(--tc-stage-ui)',
+  plan:     'var(--tc-stage-plan)',
+  dev:      'var(--tc-stage-dev)',
+  test:     'var(--tc-stage-test)',
+  deploy:   'var(--tc-stage-deploy)',
+  monitor:  'var(--tc-stage-monitor)',
+  done:     'var(--tc-success)',
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: '#6b7280',
-  running: '#3b82f6',
-  waiting_review: '#f59e0b',
-  approved: '#10b981',
-  done: '#22c55e',
-  failed: '#ef4444',
-  rejected: '#ef4444',
+  pending:        '#71717a',
+  running:        'var(--tc-info)',
+  waiting_review: 'var(--tc-warning)',
+  approved:       'var(--tc-success)',
+  done:           'var(--tc-success)',
+  failed:         'var(--tc-error)',
+  rejected:       'var(--tc-error)',
 }
 
 function timeAgo(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
