@@ -62,7 +62,7 @@ export function CommandMenu({ open, onClose }: CommandMenuProps) {
       {
         id: 'action-lang',
         label: t('commandMenu.toggleLanguage'),
-        icon: '🌐',
+        icon: <IconGlobe size={14} />,
         shortcut: undefined,
         group: t('commandMenu.group.actions'),
         action: () => {
