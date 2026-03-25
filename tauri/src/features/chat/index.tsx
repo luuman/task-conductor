@@ -241,7 +241,7 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
         const catDesc = step.kind === 'text' ? '说：'
           : step.category === 'read' ? `读取了文件${n}` : step.category === 'edit' ? `编辑了文件${n}` : step.category === 'write' ? `新建了文件${n}` : step.category === 'bash' ? `执行了命令${n}` : step.category === 'agent' ? `启动了子代理${n}` : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}${n}` : `调用了工具${n}`
         return (
-          <StepWrap key={step.id} step={step} index={i}>
+          <React.Fragment key={step.id}>
             {i > 0 && <div className={s.dConnector} />}
             <div className={`${s.dEvent} ${step.kind === 'text' ? s.dTextEvent : ''}`}>
               <div className={s.dHead}>
@@ -254,7 +254,7 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
                 ? <div className={s.dBody}><RichText text={step.text!} /></div>
                 : (step.toolResult || step.oldString) ? <div className={s.dBody}><ResultBlock step={step} /></div> : null}
             </div>
-          </StepWrap>
+          </React.Fragment>
         )
       })}
     </>
