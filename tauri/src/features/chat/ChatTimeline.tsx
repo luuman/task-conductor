@@ -318,7 +318,20 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
 
 // ── Rich text ──
 export function RichText({ text }: { text: string }) {
-  return <div className={s.richText}><RichTextBlock text={text} /></div>
+  const parts = useMemo(() => parseFilePaths(text), [text])
+  const hasFileParts = parts.some(p => p.kind !== 'text')
+  if (!hasFileParts) {
+    return <div className={s.richText}><RichTextBlock text={text} /></div>
+  }
+  return (
+    <div className={s.richText}>
+      {parts.map((p, i) => {
+        if (p.kind === 'text') return p.content ? <RichTextBlock key={i} text={p.content} /> : null
+        if (p.kind === 'image') return <MsgImgCard key={i} path={p.path} />
+        return <MsgFileCard key={i} path={p.path} ext={p.ext} />
+      })}
+    </div>
+  )
 }
 
 // ════════════════════════════════════
