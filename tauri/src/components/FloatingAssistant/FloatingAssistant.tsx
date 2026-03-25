@@ -144,6 +144,7 @@ export function FloatingAssistant() {
   // ── 历史会话下拉 ──
   const [showHistory, setShowHistory] = useState(false)
   const historyRef = useRef<HTMLDivElement>(null)
+  const [historyPos, setHistoryPos] = useState<{ top: number; right: number } | null>(null)
 
   // Use shared session data hook
   const {
