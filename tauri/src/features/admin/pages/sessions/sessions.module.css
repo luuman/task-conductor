@@ -583,8 +583,8 @@
   font-size: 10.5px;
   font-family: 'Geist Mono', monospace;
   color: var(--tc-foreground-secondary);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
