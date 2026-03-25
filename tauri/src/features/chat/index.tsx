@@ -127,7 +127,7 @@ function ResultBlock({ step }: { step: TimelineStep }) {
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
   const icon = filePath ? fileExtIcon(filePath, 13) : catIcon(step.category, 13)
-  const action = ACTION_MAP[step.category] || step.toolName || 'Tool'
+  const action = TOOL_LABEL_MAP[step.toolName || ''] || CAT_LABEL_MAP[step.category] || step.toolName || '工具'
   const color = dotColor(step.category)
 
   // Edit — LCS diff
