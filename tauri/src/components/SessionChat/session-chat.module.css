@@ -268,7 +268,7 @@
   font-size: 8px;
   padding: 0 4px;
   border-radius: 3px;
-  background: rgba(0, 122, 204, 0.1);
+  background: var(--tc-accent-a10);
   color: var(--tc-border-active);
   white-space: nowrap;
   line-height: 16px;
