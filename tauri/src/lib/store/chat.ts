@@ -95,6 +95,7 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   togglePrdSidebar: () => set((s) => ({ prdSidebarOpen: !s.prdSidebarOpen })),
   openPrdSidebar: () => set({ prdSidebarOpen: true }),
   closePrdSidebar: () => set({ prdSidebarOpen: false }),
+  setInputDraft: (text) => set({ inputDraft: text }),
 }), {
   name: 'tc-chat',
   partialize: (state) => ({
