@@ -345,15 +345,15 @@
 /* 引用标签 */
 .bubbleAi .ref {
   display: inline-block;
-  background: #007acc22;
-  color: #60a5fa;
+  background: var(--tc-accent-a8);
+  color: var(--tc-info);
   padding: 1px 6px;
   border-radius: 4px;
   font-size: 11px;
   cursor: pointer;
 }
 .bubbleAi .ref:hover {
-  background: #007acc33;
+  background: var(--tc-accent-a12);
 }
 
 /* ── 输入区 ── */
