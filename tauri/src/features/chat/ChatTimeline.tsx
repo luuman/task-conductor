@@ -144,8 +144,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
     return <DiffBlock oldStr={oldStr} newStr={newStr} filePath={filePath} icon={icon} action={action} pillColor={color} variant={variant} />
   }
   if (step.category === 'write' && step.toolInput?.content) {
-    const { guessHljsLang } = await import('./timeline-parser').catch(() => ({ guessHljsLang: () => null })) as never
-    void guessHljsLang
+    const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
     return <CodeBlock code={preview} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
