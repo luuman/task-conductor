@@ -500,7 +500,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
                     <StepWrap key={step.id} step={step} index={startIdx + si}>
                       <div className={s.hSubItem}>
                         <div className={s.hSubHead} onClick={(e) => { e.stopPropagation(); toggle(subId) }}>
-                          <span className={s.hChevron} style={{ transform: isSubOpen ? 'rotate(90deg)' : undefined }}>▶</span>
+                          <span className={s.hChevron} style={{ transform: isSubOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
                           <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
                           {!!step.toolInput?.file_path && (
                             <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 4 }}>
