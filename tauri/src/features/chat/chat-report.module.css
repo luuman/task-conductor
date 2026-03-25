@@ -291,19 +291,6 @@
 .bTextCard { background: transparent; border: none; border-left: 2px solid var(--tc-border-active); border-radius: 0; margin-left: 10px; }
 .bTextCard .bBody { padding: 8px 12px; }
 
-/* ═══════════════════════════════════════════════ */
-/* C: 紧凑表格 */
-/* ═══════════════════════════════════════════════ */
-.cTable { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; }
-.cTable th { text-align: left; padding: 5px 8px; background: var(--tc-sidebar-bg); color: var(--tc-foreground-secondary); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid var(--tc-border); }
-.cTable td { padding: 5px 8px; border-bottom: 1px solid var(--tc-border); vertical-align: top; }
-.cTable tr:hover td { background: rgba(255,255,255,0.02); }
-.cNum { font-family: var(--tc-font-mono, monospace); font-size: 10px; color: var(--tc-foreground-secondary); width: 28px; text-align: right; }
-.cType { width: 55px; }
-.cDetail { color: var(--tc-foreground-secondary); max-width: 420px; }
-.cTime { font-family: var(--tc-font-mono, monospace); font-size: 10px; color: var(--tc-foreground-secondary); width: 60px; text-align: right; }
-.cTextRow td { background: rgba(124,92,252,0.02); }
-.cExpanded { background: var(--tc-sidebar-bg); border-radius: 4px; padding: 5px 8px; margin: 3px 0; font-family: var(--tc-font-mono, monospace); font-size: 10px; color: var(--tc-foreground-secondary); white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
 
 /* ═══════════════════════════════════════════════ */
 /* D: GitHub PR */
