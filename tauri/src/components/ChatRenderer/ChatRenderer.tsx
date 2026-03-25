@@ -1705,7 +1705,7 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
 // ── UserCard ────────────────────────────────────────────────
 
 function stripDomContext(text: string): string {
-  const idx = text.search(/\n+--- 问题元素/)
+  const idx = text.indexOf('--- 问题元素')
   return idx !== -1 ? text.slice(0, idx).trim() : text
 }
 
