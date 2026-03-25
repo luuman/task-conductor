@@ -74,15 +74,14 @@ function captureDomContext(el: Element): DomContext {
   }
 }
 
-/** 把 DomContext 转成可读的上下文文本，附加到发送消息末尾 */
-function formatDomContext(ctx: DomContext): string {
+/** 把单个 DomContext 格式化为文本块 */
+function formatOneDomContext(ctx: DomContext, index: number): string {
   const selector = ctx.tag
     + (ctx.id ? `#${ctx.id}` : '')
     + (ctx.classes.length ? `.${ctx.classes[0]}` : '')
 
   const lines = [
-    '',
-    '--- DOM 元素上下文 ---',
+    `--- 问题元素 #${index + 1} ---`,
     `元素: ${selector}`,
     ctx.path ? `路径: ${ctx.path} > ${selector}` : '',
     ctx.text ? `文本内容: "${ctx.text}"` : '',
@@ -93,6 +92,12 @@ function formatDomContext(ctx: DomContext): string {
   ].filter(Boolean)
 
   return lines.join('\n')
+}
+
+/** 把多个 DomContext 拼接成完整上下文文本 */
+function formatDomContextList(list: DomContext[]): string {
+  if (list.length === 0) return ''
+  return '\n\n' + list.map((ctx, i) => formatOneDomContext(ctx, i)).join('\n')
 }
 
 /** DOM 高亮覆盖层（portal 渲染到 body，pointer-events:none） */
