@@ -64,8 +64,8 @@
 }
 .qNavItem:hover { background: var(--tc-sidebar-item-hover); }
 .qNavActive {
-  background: rgba(124,92,252,0.1);
-  border-left-color: var(--tc-border-active);
+  background: var(--tc-accent-a10);
+  border-left-color: var(--tc-accent);
 }
 .qNavActive .qNavText { color: var(--tc-foreground); }
 .qNavNum {
