@@ -273,6 +273,8 @@ async def handle_chat_ws(ws: WebSocket):
                     })
                     continue
 
+                _bypass_permissions = msg.get("bypass_permissions", True)
+
                 # 取消进行中的流
                 if stream_task and not stream_task.done():
                     stream_task.cancel()
