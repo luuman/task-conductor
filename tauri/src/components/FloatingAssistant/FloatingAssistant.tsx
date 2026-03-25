@@ -231,7 +231,7 @@ export function FloatingAssistant() {
     }
   }, [messages])
 
-  // 拖拽移动
+  // 拖拽移动（直接操作 DOM，避免每帧 React 重渲染）
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
     e.preventDefault()
@@ -240,15 +240,24 @@ export function FloatingAssistant() {
     const rect = panel.getBoundingClientRect()
     dragRef.current = { startX: e.clientX, startY: e.clientY, startPosX: rect.left, startPosY: rect.top }
     const handleMove = (ev: MouseEvent) => {
-      if (!dragRef.current) return
-      const newX = dragRef.current.startPosX + ev.clientX - dragRef.current.startX
-      const newY = dragRef.current.startPosY + ev.clientY - dragRef.current.startY
-      setPosition({
-        x: Math.max(0, Math.min(window.innerWidth - 200, newX)),
-        y: Math.max(0, Math.min(window.innerHeight - 60, newY)),
-      })
+      if (!dragRef.current || !panel) return
+      const newX = Math.max(0, Math.min(window.innerWidth - 200, dragRef.current.startPosX + ev.clientX - dragRef.current.startX))
+      const newY = Math.max(0, Math.min(window.innerHeight - 60, dragRef.current.startPosY + ev.clientY - dragRef.current.startY))
+      panel.style.left = newX + 'px'
+      panel.style.top = newY + 'px'
+      panel.style.right = 'auto'
+      panel.style.bottom = 'auto'
     }
-    const handleUp = () => { dragRef.current = null; document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp) }
+    const handleUp = (ev: MouseEvent) => {
+      if (dragRef.current) {
+        const newX = Math.max(0, Math.min(window.innerWidth - 200, dragRef.current.startPosX + ev.clientX - dragRef.current.startX))
+        const newY = Math.max(0, Math.min(window.innerHeight - 60, dragRef.current.startPosY + ev.clientY - dragRef.current.startY))
+        setPosition({ x: newX, y: newY })
+      }
+      dragRef.current = null
+      document.removeEventListener('mousemove', handleMove)
+      document.removeEventListener('mouseup', handleUp)
+    }
     document.addEventListener('mousemove', handleMove)
     document.addEventListener('mouseup', handleUp)
   }, [setPosition])
