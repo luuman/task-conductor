@@ -449,7 +449,7 @@ export function FloatingAssistant() {
                       <button
                         className={styles.tabClose}
                         onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id) }}
-                      >×</button>
+                      ><IconX size={10} /></button>
                     )}
                   </div>
                 ))}
