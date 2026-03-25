@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from 'react' // eslint-disable-line @typescript-eslint/no-unused-vars
+import { useState, useCallback, type ReactNode } from 'react'
 import { ShellContext, type ShellContextValue } from './ShellContext'
 import styles from './app-shell.module.css'
 
