@@ -715,15 +715,6 @@ export default function ChatReportPage() {
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
 
-  const handleInspect = useCallback((step: TimelineStep, index: number) => {
-    setInspected(prev => prev?.step.id === step.id ? null : { step, index })
-  }, [])
-
-  const inspectCtx = useMemo(() => ({
-    selected: inspected?.step.id ?? null,
-    onSelect: handleInspect,
-  }), [inspected, handleInspect])
-
   // IntersectionObserver：滚动时自动高亮当前可见的问题
   useEffect(() => {
     if (questions.length === 0 || !mainAreaRef.current) return
