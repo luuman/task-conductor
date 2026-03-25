@@ -351,24 +351,77 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
 
 
 function StyleG({ steps }: { steps: TimelineStep[] }) {
+  const groups = useMemo(() => groupSteps(steps), [steps])
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set())
+  const toggle = useCallback((id: string) => {
+    setOpenIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }, [])
+
   return (
     <>
-      {steps.map((step, i) => (
-        <StepWrap key={step.id} step={step} index={i}>
-          <div className={s.gMsg}>
-            <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`}>
-              {step.kind === 'text' ? 'C' : catIcon(step.category)}
-            </div>
-            {step.kind === 'text' ? (
-              <div className={s.gBubbleText}><RichText text={step.text!} /></div>
-            ) : (
-              <div className={s.gBubbleTool}>
-                <ResultBlock step={step} />
+      {groups.map((grp, gi) => {
+        if (grp.kind === 'text') {
+          return (
+            <StepWrap key={grp.step.id} step={grp.step} index={grp.idx}>
+              <div className={s.gMsg}>
+                <div className={`${s.gAvatar} ${s.gAvatarClaude}`}>C</div>
+                <div className={s.gBubbleText}><RichText text={grp.step.text!} /></div>
               </div>
-            )}
+            </StepWrap>
+          )
+        }
+        const { steps: toolSteps, startIdx } = grp
+        if (toolSteps.length === 1) {
+          const step = toolSteps[0]
+          return (
+            <StepWrap key={step.id} step={step} index={startIdx}>
+              <div className={s.gMsg}>
+                <div className={`${s.gAvatar} ${s.gAvatarTool}`}>{catIcon(step.category)}</div>
+                <div className={s.gBubbleTool}><ResultBlock step={step} /></div>
+              </div>
+            </StepWrap>
+          )
+        }
+        // grouped tools
+        const grpId = `gg-${gi}`
+        const isOpen = openIds.has(grpId)
+        return (
+          <div key={grpId} className={s.gMsg}>
+            <div className={`${s.gAvatar} ${s.gAvatarTool}`}>
+              <span style={{ fontSize: 9, fontWeight: 700 }}>{toolSteps.length}</span>
+            </div>
+            <div className={s.gBubbleTool} style={{ flex: 1, maxWidth: '90%' }}>
+              <div className={s.gGroupHead} onClick={() => toggle(grpId)} style={{ cursor: 'pointer' }}>
+                <span>{toolSteps.length} 个工具操作</span>
+                <span style={{ marginLeft: 'auto', fontSize: 10 }}>{isOpen ? '▲' : '▼'}</span>
+              </div>
+              {!isOpen && (
+                <div className={s.gGroupSummary}>
+                  {toolSteps.map(st => (
+                    <span key={st.id} className={s.gGroupChip}>
+                      {catIcon(st.category)}&nbsp;{CAT_LABEL_MAP[st.category] || st.toolName}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {isOpen && (
+                <div className={s.gGroupBody}>
+                  {toolSteps.map((step, si) => (
+                    <StepWrap key={step.id} step={step} index={startIdx + si}>
+                      <div className={s.gGroupItem}>
+                        <span className={`${s.gAvatar} ${s.gAvatarTool}`} style={{ width: 18, height: 18, fontSize: 10 }}>{catIcon(step.category)}</span>
+                        <div className={s.gBubbleTool} style={{ flex: 1 }}>
+                          <ResultBlock step={step} />
+                        </div>
+                      </div>
+                    </StepWrap>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </StepWrap>
-      ))}
+        )
+      })}
     </>
   )
 }
