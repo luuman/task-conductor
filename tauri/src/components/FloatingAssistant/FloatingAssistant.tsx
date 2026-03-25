@@ -553,28 +553,7 @@ export function FloatingAssistant() {
                     )}
                   </div>
                 ))}
-                {/* 右侧按钮 */}
-                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-                  <button
-                    className={styles.tab}
-                    onClick={handleNewTab}
-                    title="新建会话"
-                    style={{ color: 'var(--tc-accent)' }}
-                  >+</button>
-                  <div ref={historyRef} style={{ position: 'relative' }}>
-                    <button
-                      className={styles.tab}
-                      onClick={() => {
-                        if (!showHistory && historyRef.current) {
-                          const rect = historyRef.current.getBoundingClientRect()
-                          setHistoryPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
-                        }
-                        setShowHistory(v => !v)
-                      }}
-                      title="历史会话"
-                      style={{ color: showHistory ? 'var(--tc-foreground)' : undefined }}
-                    ><IconClock size={13} /></button>
-                    {showHistory && historyPos && (
+                {showHistory && historyPos && (
                       <div
                         className={styles.historyDropdown}
                         style={{ position: 'fixed', top: historyPos.top, right: historyPos.right, width: 300, maxHeight: 400, zIndex: 99999 }}
