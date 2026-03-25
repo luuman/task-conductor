@@ -242,8 +242,8 @@
 }
 .richText strong { color: var(--tc-foreground); font-weight: 600; }
 .richText code {
-  background: rgba(124,92,252,0.1); padding: 1px 4px; border-radius: 3px;
-  font-family: var(--tc-font-mono, monospace); font-size: 11px; color: #a78bfa;
+  background: var(--tc-accent-a10); padding: 1px 4px; border-radius: 3px;
+  font-family: var(--tc-font-mono); font-size: 11px; color: var(--tc-accent-subtle);
 }
 .richText ul, .richText ol { padding-left: 18px; margin: 4px 0; }
 .richText li { margin: 2px 0; }
