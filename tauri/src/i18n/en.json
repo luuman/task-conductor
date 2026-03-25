@@ -471,6 +471,9 @@
     "appearance": {
       "title": "Appearance",
       "hint": "Theme and language preferences",
+      "mode": "Color Mode",
+      "modeDark": "Dark",
+      "modeLight": "Light",
       "theme": "Theme",
       "language": "Language",
       "lang_zh": "中文",
