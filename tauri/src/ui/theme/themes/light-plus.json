@@ -2,19 +2,19 @@
   "name": "Light+",
   "type": "light",
   "colors": {
-    "base.bg-primary": "#ffffff",
-    "base.bg-secondary": "#f3f3f3",
-    "base.bg-hover": "#e8e8e8",
-    "base.fg-primary": "#333333",
-    "base.fg-secondary": "#717171",
-    "base.accent": "#005fb8",
-    "base.accent-bg": "#cce5ff",
-    "base.accent-fg": "#001a33",
-    "base.border": "#e0e0e0",
-    "base.border-active": "#005fb8",
-    "base.error": "#e51400",
-    "base.warning": "#bf8803",
-    "base.success": "#16825d",
-    "base.info": "#005fb8"
+    "base.bg-primary":   "#fafafa",
+    "base.bg-secondary": "#f4f4f7",
+    "base.bg-hover":     "#ebebef",
+    "base.fg-primary":   "#1a1a2e",
+    "base.fg-secondary": "#6b6b80",
+    "base.accent":       "#6c5ce7",
+    "base.accent-bg":    "#ede9fd",
+    "base.accent-fg":    "#ffffff",
+    "base.border":       "#e2e2ea",
+    "base.border-active":"#6c5ce7",
+    "base.error":        "#ef4444",
+    "base.warning":      "#f59e0b",
+    "base.success":      "#10b981",
+    "base.info":         "#3b82f6"
   }
 }
