@@ -438,34 +438,9 @@ export function FloatingAssistant() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* 操作按钮 */}
-                {messages.length > 0 && !isGenerating && (
-                  <div className={styles.actionRow}>
-                    <button className={styles.actionBtn} onClick={handleCopy}>复制</button>
-                    <button className={styles.actionBtn} onClick={handleRetry}>重试</button>
-                  </div>
-                )}
-
-                {/* 输入区 */}
+                {/* 输入区（与 /chat 共用 PromptInput） */}
                 <div className={styles.inputArea}>
-                  <div className={styles.inputToolbar}>
-                    <button className={styles.contextBtn}>+ 上下文</button>
-                  </div>
-                  <div className={styles.inputRow}>
-                    <textarea
-                      className={styles.input}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="向 AI 提问..."
-                      rows={1}
-                    />
-                    {isGenerating ? (
-                      <button className={styles.sendCircle} onClick={stop}>■</button>
-                    ) : (
-                      <button className={styles.sendCircle} onClick={handleSend} disabled={!input.trim()}>↑</button>
-                    )}
-                  </div>
+                  <PromptInput />
                 </div>
               </div>
             </div>
