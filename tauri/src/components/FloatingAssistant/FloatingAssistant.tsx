@@ -318,25 +318,6 @@ export function FloatingAssistant() {
     })
   }, [activeTabId])
 
-  const switchTab = useCallback((newTabId: string) => {
-    if (newTabId === activeTabId) return
-    // 保存当前 tab
-    saveCurrentTab()
-    // 加载新 tab
-    const cached = tabCacheRef.current.get(newTabId)
-    const store = useChatStore.getState()
-    if (cached) {
-      store.setMessages(cached.messages)
-      store.setClaudeSessionId(cached.sessionId)
-    } else {
-      store.setMessages([])
-      store.setClaudeSessionId(null)
-    }
-    store.setCurrentReply('')
-    isFirstLoadRef.current = true
-    setActiveTabId(newTabId)
-  }, [activeTabId, saveCurrentTab])
-
   const handleNewTab = useCallback(() => {
     saveCurrentTab()
     const tab: ChatTab = { id: uid(), type: 'new', title: '新对话' }
