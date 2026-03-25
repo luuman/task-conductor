@@ -507,6 +507,12 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 // ════════════════════════════════════════════════
 // Main page
 // ════════════════════════════════════════════════
+// ── 移除用户消息中的 DOM 上下文附件文本 ──
+function stripDomContext(text: string): string {
+  const idx = text.indexOf('\n\n--- 问题元素')
+  return idx !== -1 ? text.slice(0, idx).trim() : text
+}
+
 // ── 时间格式化（相对时间） ──
 function relativeTime(iso: string): string {
   if (!iso) return ''
