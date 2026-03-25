@@ -29,6 +29,7 @@ export default function AdminLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const { mode, setMode } = useTheme()
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
 
