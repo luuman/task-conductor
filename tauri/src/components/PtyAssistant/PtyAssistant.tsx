@@ -313,12 +313,12 @@ export function PtyAssistant() {
             )}
             <div className={styles.headerSpacer} />
             <div className={styles.headerActions}>
-              <button className={styles.headerBtn} onClick={() => setSidebarOpen(!sidebarOpen)} title="会话列表">☰</button>
+              <button className={styles.headerBtn} onClick={() => setSidebarOpen(!sidebarOpen)} title="会话列表"><IconMenu size={13} /></button>
               <button className={styles.headerBtn} onClick={handleNewSession} title="新终端">+</button>
               <button className={styles.headerBtn} onClick={isMinimized ? restore : minimize} title={isMinimized ? '展开' : '最小化'}>
-                {isMinimized ? '□' : '—'}
+                {isMinimized ? <IconMaximize size={12} /> : <IconMinus size={12} />}
               </button>
-              <button className={styles.headerBtn} onClick={close} title="隐藏">×</button>
+              <button className={styles.headerBtn} onClick={close} title="隐藏"><IconX size={12} /></button>
             </div>
           </div>
 
