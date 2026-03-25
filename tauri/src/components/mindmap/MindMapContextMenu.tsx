@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useMindMapStore } from './use-mindmap-store'
+import { IconX } from '../../ui/icon'
 import styles from './mindmap.module.css'
 
 interface Props {
