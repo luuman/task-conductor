@@ -45,13 +45,29 @@ function badgeLabel(step: TimelineStep): string {
   return TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || 'Tool'
 }
 
+// 工具类型圆点颜色——通过读取 CSS 变量获取，与 global.css 中 --tc-tool-* 保持一致
 function dotColor(cat: TimelineStep['category']): string {
-  const map: Record<string, string> = {
-    text: '#a78bfa', read: '#60a5fa', edit: '#fbbf24', write: '#4ade80',
-    bash: '#22d3ee', grep: '#f87171', glob: '#fb923c', agent: '#c084fc',
-    ask: '#60a5fa', search: '#22d3ee', task: '#818cf8', other: '#52525b',
+  const style = getComputedStyle(document.documentElement)
+  const varMap: Record<string, string> = {
+    text:   '--tc-tool-text',
+    read:   '--tc-tool-read',
+    edit:   '--tc-tool-edit',
+    write:  '--tc-tool-write',
+    bash:   '--tc-tool-bash',
+    grep:   '--tc-tool-grep',
+    glob:   '--tc-tool-glob',
+    agent:  '--tc-tool-agent',
+    ask:    '--tc-tool-read',
+    search: '--tc-tool-bash',
+    task:   '--tc-tool-task',
+    other:  '--tc-tool-other',
   }
-  return map[cat] || '#52525b'
+  const varName = varMap[cat]
+  if (varName) {
+    const value = style.getPropertyValue(varName).trim()
+    if (value) return value
+  }
+  return style.getPropertyValue('--tc-tool-other').trim() || '#71717a'
 }
 
 function catIcon(cat: TimelineStep['category']): React.ReactNode {
