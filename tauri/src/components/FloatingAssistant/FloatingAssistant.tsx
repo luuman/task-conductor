@@ -516,67 +516,6 @@ export function FloatingAssistant() {
           {!isMinimized && (
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
-              {/* ── Tab 栏 ── */}
-              <div className={styles.tabBar}>
-                {tabs.map(tab => (
-                  <div
-                    key={tab.id}
-                    className={`${styles.tab} ${tab.id === activeTabId ? styles.tabActive : ''}`}
-                    onClick={() => switchTab(tab.id)}
-                    title={tab.title}
-                  >
-                    {isGenerating && tab.id === activeTabId && (
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--tc-accent)', animation: 'pulse 2s infinite', flexShrink: 0 }} />
-                    )}
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{tab.title}</span>
-                    {tabs.length > 1 && (
-                      <button
-                        className={styles.tabClose}
-                        onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id) }}
-                      ><IconX size={10} /></button>
-                    )}
-                  </div>
-                ))}
-                {showHistory && historyPos && (
-                      <div
-                        className={styles.historyDropdown}
-                        style={{ position: 'fixed', top: historyPos.top, right: historyPos.right, width: 300, maxHeight: 400, zIndex: 99999 }}
-                      >
-                        <div className={styles.historyHeader}>
-                          <span className={styles.historyHeaderLabel}>历史会话</span>
-                        </div>
-                        <div className={styles.historyList}>
-                          {sessions.length === 0 && (
-                            <div className={styles.historyEmpty}>暂无历史会话</div>
-                          )}
-                          {sessions.map(s => {
-                            const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
-                            const alreadyOpen = tabs.some(t => t.sessionId === s.session_id)
-                            const dotCls = s.status === 'active'
-                              ? `${styles.historyDot} ${styles.historyDotActive}`
-                              : s.status === 'idle'
-                              ? `${styles.historyDot} ${styles.historyDotIdle}`
-                              : `${styles.historyDot} ${styles.historyDotStopped}`
-                            return (
-                              <button
-                                key={s.session_id}
-                                className={`${styles.historyRow} ${alreadyOpen ? styles.historyRowActive : ''}`}
-                                onClick={() => handleOpenHistory(s)}
-                              >
-                                <span className={dotCls} />
-                                <div className={styles.historyRowBody}>
-                                  <div className={`${styles.historyTitle} ${alreadyOpen ? styles.historyTitleOpen : ''}`}>{title}</div>
-                                  <div className={styles.historyMeta}>
-                                    {s.event_count} 事件 · {formatTime(s.last_seen_at || s.started_at)}
-                                  </div>
-                                </div>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
-              </div>
 
               {/* ── 聊天主体 ── */}
               <div className={styles.chatMain}>
