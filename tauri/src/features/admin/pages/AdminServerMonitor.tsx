@@ -8,10 +8,16 @@ import styles from '../admin.module.css'
 import s from './server-monitor.module.css'
 
 /* ── 颜色工具 ── */
+// 进程类型颜色 — Claude 使用主题 accent，其余为数据可视化语义色
 const PROC_PALETTE: Record<string, string> = {
-  chrome: '#60a5fa', claude: '#a78bfa', node: '#34d399',
-  'rust-analyzer': '#f97316', python: '#fbbf24', vite: '#22d3ee',
-  code: '#f472b6', bash: '#8891a5',
+  chrome:          '#60a5fa',
+  claude:          'var(--tc-accent)',
+  node:            '#34d399',
+  'rust-analyzer': '#f97316',
+  python:          '#fbbf24',
+  vite:            '#22d3ee',
+  code:            '#f472b6',
+  bash:            '#8891a5',
 }
 
 function procColor(name: string): string {
