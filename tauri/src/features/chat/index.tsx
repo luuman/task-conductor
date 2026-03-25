@@ -560,18 +560,12 @@ function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage 
 function PromptInput() {
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
-  const { isGenerating, messages, currentReply, addMessage } = useChatStore()
+  const { isGenerating, addMessage } = useChatStore()
   const { send, stop } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const msgEndRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0
-
-  // 新消息到达时自动滚动
-  useEffect(() => {
-    msgEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, currentReply])
 
   const autoResize = useCallback(() => {
     const el = textareaRef.current
