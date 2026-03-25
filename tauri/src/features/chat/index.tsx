@@ -431,7 +431,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
         <div className={s.sbRow}><span className={s.sbKey}>文本输出</span><span className={s.sbVal}>{steps.length - toolSteps.length} 段</span></div>
         {cats.map(([cat, count]) => (
           <div key={cat} className={s.sbRow}>
-            <span className={s.sbKey}>{catLabel[cat] || cat}</span>
+            <span className={s.sbKey}>{CAT_LABEL_MAP[cat] || cat}</span>
             <span className={s.sbVal} style={{ color: dotColor(cat as TimelineStep['category']) }}>{count}</span>
           </div>
         ))}
