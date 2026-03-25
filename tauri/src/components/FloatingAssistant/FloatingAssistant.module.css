@@ -43,14 +43,15 @@
 }
 
 .panelMinimized {
-  height: 44px;
+  height: 40px;
   width: 280px;
 }
 .panelMinimized .chatMain { display: none; }
 
 /* ── 头部 ── */
 .header {
-  padding: 11px 14px 10px;
+  height: 40px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   gap: 8px;
