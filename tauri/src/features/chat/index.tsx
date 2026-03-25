@@ -170,17 +170,17 @@ function StepWrap({ step, index, children }: { step: TimelineStep; index: number
       onClick={(e) => { e.stopPropagation(); onSelect(step, index) }}
       style={{
         position: 'relative', cursor: 'pointer',
-        outline: isActive ? '1px solid #7c5cfc' : undefined,
+        outline: isActive ? '1px solid var(--tc-accent)' : undefined,
         outlineOffset: 2, borderRadius: 6,
       }}
     >
       <span style={{
         position: 'absolute', left: -4, top: -4, fontSize: 9, fontWeight: 700,
-        background: isActive ? '#7c5cfc' : 'var(--tc-sidebar-bg, #131316)',
-        color: isActive ? '#fff' : 'var(--tc-foreground-secondary, #a1a1aa)',
-        border: '1px solid var(--tc-border, #27272a)',
+        background: isActive ? 'var(--tc-accent)' : 'var(--tc-sidebar-bg)',
+        color: isActive ? 'var(--tc-accent-fg)' : 'var(--tc-foreground-secondary)',
+        border: '1px solid var(--tc-border)',
         borderRadius: 8, padding: '0 4px', zIndex: 2,
-        fontFamily: 'var(--tc-font-mono, monospace)',
+        fontFamily: 'var(--tc-font-mono)',
       }}>{index + 1}</span>
       {children}
     </div>
