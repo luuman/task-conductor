@@ -549,9 +549,11 @@ const QUICK_CHIPS = [
   { label: '精化需求', color: '#fb923c' },
 ]
 
+type Attachment = { id: string; name: string; kind: 'image' | 'file'; dataUrl?: string }
+
 function PromptInput() {
   const [value, setValue] = useState('')
-  const [attachments, setAttachments] = useState<string[]>([])
+  const [attachments, setAttachments] = useState<Attachment[]>([])
   const [working, setWorking] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -570,17 +572,12 @@ function PromptInput() {
     setWorking(true)
     setValue('')
     setAttachments([])
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'
     // TODO: 接入后端 API 发送 prompt
-    // 暂时模拟发送完成，重置状态
     setTimeout(() => setWorking(false), 1500)
   }, [isEmpty, working])
 
-  const handleStop = useCallback(() => {
-    setWorking(false)
-  }, [])
+  const handleStop = useCallback(() => setWorking(false), [])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -591,9 +588,25 @@ function PromptInput() {
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    setAttachments(v => [...v, ...files.map(f => f.name)])
+    files.forEach(file => {
+      const id = `${Date.now()}-${Math.random()}`
+      const isImage = file.type.startsWith('image/')
+      if (isImage) {
+        const reader = new FileReader()
+        reader.onload = ev => {
+          setAttachments(v => [...v, { id, name: file.name, kind: 'image', dataUrl: ev.target?.result as string }])
+        }
+        reader.readAsDataURL(file)
+      } else {
+        setAttachments(v => [...v, { id, name: file.name, kind: 'file' }])
+      }
+    })
     e.target.value = ''
     textareaRef.current?.focus()
+  }, [])
+
+  const removeAttachment = useCallback((id: string) => {
+    setAttachments(v => v.filter(a => a.id !== id))
   }, [])
 
   return (
@@ -605,14 +618,18 @@ function PromptInput() {
     <div className={s.promptCard}>
       {attachments.length > 0 && (
         <div className={s.pAttachRow}>
-          {attachments.map((name, i) => (
-            <span key={i} className={s.pAttachChip}>
+          {attachments.map(a => a.kind === 'image' && a.dataUrl ? (
+            <span key={a.id} className={s.pImgThumb}>
+              <img src={a.dataUrl} alt={a.name} title={a.name} />
+              <button onClick={() => removeAttachment(a.id)}>
+                <IconX size={8} />
+              </button>
+            </span>
+          ) : (
+            <span key={a.id} className={s.pAttachChip}>
               <IconFileText size={11} />
-              <span>{name}</span>
-              <button
-                className={s.pAttachClose}
-                onClick={() => setAttachments(v => v.filter((_, j) => j !== i))}
-              >
+              <span>{a.name}</span>
+              <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}>
                 <IconX size={10} />
               </button>
             </span>
