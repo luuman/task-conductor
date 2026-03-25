@@ -70,9 +70,9 @@
 .qNavActive .qNavText { color: var(--tc-foreground); }
 .qNavNum {
   flex-shrink: 0; font-size: 8px; font-weight: 700;
-  background: var(--tc-border-active); color: #000;
+  background: var(--tc-accent); color: var(--tc-accent-fg);
   padding: 1px 5px; border-radius: 6px;
-  font-family: 'Geist Mono', monospace;
+  font-family: var(--tc-font-mono);
 }
 .qNavText {
   font-size: 10px; line-height: 28px;
