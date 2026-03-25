@@ -45,7 +45,8 @@ html, body {
 .pill { padding:3px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:4px; }
 .pill.on { background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.16);color:var(--text); }
 /* STAGE */
-.stage { position:relative;flex:1;overflow:hidden;min-height:0; }
+.stage { position:relative;flex:1;overflow:hidden;min-height:0;cursor:grab; }
+.stage.dragging { cursor:grabbing; }
 .stage canvas { position:absolute;inset:0; }
 .hint { position:absolute;bottom:10px;right:16px;font-size:9px;color:rgba(255,255,255,0.13);display:flex;gap:5px;align-items:center;pointer-events:none;z-index:5; }
 .key { padding:1px 5px;border:1px solid rgba(255,255,255,0.1);border-radius:3px; }
@@ -97,7 +98,7 @@ html, body {
   <div class="pill">□ Small ▾</div>
 </div>
 <div class="stage" id="stage">
-  <div class="hint"><span class="key">←</span><span class="key">→</span></div>
+  <div class="hint"><span class="key">←</span><span class="key">→</span> 拖拽滑动轴切换</div>
 </div>
 <div class="dw"><div class="dp" id="dpanel"></div></div>
 
@@ -107,7 +108,6 @@ import { EffectComposer }  from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass }      from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass }      from 'three/addons/postprocessing/OutputPass.js';
-/* eslint-disable */
 
 /* ─── Data ─────────────────────────────────────────── */
 const DATA = [
@@ -127,24 +127,27 @@ const DATA = [
   { short:'M&A',   name:'M&A',         date:'Mar 01 – Jun 30', p:17, doc:'MA_Term_Sheet.pdf',       email:'ma@finance.io',       ev:'Due Diligence',     due:'3 Months' },
 ];
 
-/* ─── Card geometry constants ───────────────────────── */
-const CW           = 220;   // card width
-const CH           = 175;   // card height
-const DEPTH        = 16;    // physical card thickness
-const ANGLE        = 10;    // degrees between adjacent cards
-const POP_Z        = 160;   // active card pops forward
-const EXTRA_OFFSET = 380;   // 轴心到卡片左边缘的额外距离 → 扇形半径 = EXTRA_OFFSET + CW/2 = 490
+/* ─── Card geometry constants ─── */
+const CW    = 160;  // card width  (竖向 portrait)
+const CH    = 220;  // card height
+const DEPTH = 14;   // physical thickness
+const ANGLE = 9;    // degrees between adjacent cards
+const POP_Z = 85;   // active card pops forward
 
-let activeIdx = 3;   // "Corporate" — 3 on left, 10 on right
+/* ─── Stage & dynamic radius ─── */
+const stage = document.getElementById('stage');
 
-/* ─── Shared spine-pivot geometry ───────────────────── */
-// Translate so the LEFT EDGE of the card is at local origin.
-// All cards share this geometry and rotate around the spine (x=0).
+// 扇形半径 ≈ 屏幕宽度（让弧线直径 ≈ viewport 宽）
+function getRFan() {
+  return Math.max(380, stage.clientWidth * 0.54);
+}
+
+/* ─── Shared card geometry ─── */
+// 左边缘 → 局部原点；cardGroup 的 x 偏移就是扇形半径
 const cardGeo = new THREE.BoxGeometry(CW, CH, DEPTH);
-// 卡片左边缘距轴心 EXTRA_OFFSET，让扇形半径 = EXTRA_OFFSET + CW/2
-cardGeo.translate(EXTRA_OFFSET + CW / 2, 0, 0);
+cardGeo.translate(CW / 2, 0, 0);
 
-/* ─── Canvas helpers ─────────────────────────────────── */
+/* ─── Canvas helpers ─── */
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
@@ -161,8 +164,8 @@ function makeInactiveTex(data, blurPx) {
   src.width=cw*S; src.height=ch*S;
   const c = src.getContext('2d'); c.scale(S,S);
 
-  // 纯白/米白文件夹背景
-  rrect(c, 0, 0, cw, ch, 9);
+  // 纯白文件夹背景
+  rrect(c, 0, 0, cw, ch, 8);
   const bg = c.createLinearGradient(0, 0, cw*0.4, ch);
   bg.addColorStop(0, 'rgba(255,255,255,0.98)');
   bg.addColorStop(0.5, 'rgba(249,250,252,0.97)');
@@ -171,109 +174,101 @@ function makeInactiveTex(data, blurPx) {
   c.strokeStyle = 'rgba(200,210,225,0.75)'; c.lineWidth = 1; c.stroke();
 
   // 顶部 sheen
-  rrect(c, 0, 0, cw, ch*0.4, 9);
+  rrect(c, 0, 0, cw, ch*0.4, 8);
   const sh = c.createLinearGradient(0, 0, 0, ch*0.4);
   sh.addColorStop(0, 'rgba(255,255,255,0.60)');
   sh.addColorStop(1, 'rgba(255,255,255,0)');
   c.fillStyle = sh; c.fill();
 
-  // 文件夹标签页（顶部左侧小突出）
+  // 文件夹标签页
   const TAB_W = Math.round(cw * 0.38);
-  c.fillStyle = 'rgba(230,237,246,0.98)';
-  c.strokeStyle = 'rgba(190,205,225,0.7)';
+  c.fillStyle = 'rgba(225,233,244,0.98)';
+  c.strokeStyle = 'rgba(185,200,222,0.7)';
   c.lineWidth = 0.8;
   c.beginPath();
   c.roundRect(10, -10, TAB_W, 16, [4,4,0,0]);
   c.fill(); c.stroke();
-  // 标签文字
-  c.fillStyle = 'rgba(50,70,120,0.58)';
+  c.fillStyle = 'rgba(50,70,120,0.55)';
   c.font = '600 7px -apple-system,sans-serif';
   c.textAlign = 'left';
   c.fillText(data.short, 16, -1);
 
-  // 文档内容线条
-  [{y:22,w:.82},{y:32,w:.55},{y:47,w:.90},{y:57,w:.65},
-   {y:67,w:.40},{y:80,w:.76},{y:90,w:.48},{y:100,w:.60}]
+  // 文档线条
+  [{y:22,w:.80},{y:31,w:.55},{y:44,w:.88},{y:53,w:.62},
+   {y:63,w:.40},{y:76,w:.73},{y:85,w:.47},{y:95,w:.58}]
   .forEach(({y,w},i)=>{
-    c.fillStyle = i<2 ? 'rgba(10,20,60,0.18)' : 'rgba(10,20,60,0.10)';
+    c.fillStyle = i<2 ? 'rgba(10,20,60,0.17)' : 'rgba(10,20,60,0.10)';
     c.beginPath(); c.roundRect(14, y, (cw-28)*w, 2, 1); c.fill();
   });
 
-  // 底部小装饰点
   c.fillStyle = 'rgba(10,20,60,0.14)';
   c.beginPath(); c.arc(16, ch-12, 5, 0, Math.PI*2); c.fill();
   c.fillStyle = 'rgba(10,20,60,0.09)';
   c.beginPath(); c.arc(30, ch-12, 5, 0, Math.PI*2); c.fill();
 
-  if (blurPx<=0) {
-    const t=new THREE.CanvasTexture(src); t.colorSpace=THREE.SRGBColorSpace; return t;
+  if (blurPx <= 0) {
+    const t = new THREE.CanvasTexture(src); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
-  // DOF blur
-  const dst=document.createElement('canvas'); dst.width=cw*S; dst.height=ch*S;
-  const dc=dst.getContext('2d');
-  dc.filter=`blur(${(blurPx*S).toFixed(1)}px)`;
-  dc.drawImage(src,0,0);
-  const t=new THREE.CanvasTexture(dst); t.colorSpace=THREE.SRGBColorSpace; return t;
+  const dst = document.createElement('canvas'); dst.width=cw*S; dst.height=ch*S;
+  const dc = dst.getContext('2d');
+  dc.filter = `blur(${(blurPx*S).toFixed(1)}px)`;
+  dc.drawImage(src, 0, 0);
+  const t = new THREE.CanvasTexture(dst); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 
 function makeActiveTex(data) {
   const S=2, cw=CW, ch=CH;
-  const cv=document.createElement('canvas'); cv.width=cw*S; cv.height=ch*S;
-  const c=cv.getContext('2d'); c.scale(S,S);
+  const cv = document.createElement('canvas'); cv.width=cw*S; cv.height=ch*S;
+  const c = cv.getContext('2d'); c.scale(S,S);
 
-  rrect(c,0,0,cw,ch,10);
-  const bg=c.createLinearGradient(0,0,cw,ch);
+  rrect(c, 0, 0, cw, ch, 8);
+  const bg = c.createLinearGradient(0, 0, cw, ch);
   bg.addColorStop(0,'#1d5f3a'); bg.addColorStop(0.4,'#207944'); bg.addColorStop(1,'#17823f');
-  c.fillStyle=bg; c.fill();
-  c.strokeStyle='rgba(134,239,172,0.52)'; c.lineWidth=1.5; c.stroke();
+  c.fillStyle = bg; c.fill();
+  c.strokeStyle = 'rgba(134,239,172,0.52)'; c.lineWidth = 1.5; c.stroke();
 
-  rrect(c,0,0,cw,ch,10);
-  const sh=c.createLinearGradient(0,0,cw*0.65,ch*0.44);
+  rrect(c, 0, 0, cw, ch, 8);
+  const sh = c.createLinearGradient(0, 0, cw*0.65, ch*0.44);
   sh.addColorStop(0,'rgba(255,255,255,0.24)'); sh.addColorStop(1,'rgba(255,255,255,0)');
-  c.fillStyle=sh; c.fill();
+  c.fillStyle = sh; c.fill();
 
-  c.fillStyle='rgba(255,255,255,0.45)'; c.font='600 9px -apple-system,sans-serif';
-  c.textAlign='left'; c.fillText('FOLDER',14,25);
-  c.fillStyle='#fff'; c.font='600 14px -apple-system,sans-serif'; c.fillText(data.name,14,46);
-  c.fillStyle='rgba(255,255,255,0.43)'; c.font='10px -apple-system,sans-serif'; c.fillText(data.date,14,63);
+  c.fillStyle = 'rgba(255,255,255,0.45)'; c.font = '600 9px -apple-system,sans-serif';
+  c.textAlign = 'left'; c.fillText('FOLDER', 14, 26);
+  c.fillStyle = '#fff'; c.font = '600 14px -apple-system,sans-serif'; c.fillText(data.name, 14, 48);
+  c.fillStyle = 'rgba(255,255,255,0.43)'; c.font = '10px -apple-system,sans-serif'; c.fillText(data.date, 14, 65);
 
-  c.fillStyle='#fff'; c.font='800 40px -apple-system,sans-serif';
-  const nw=c.measureText(String(data.p)).width;
-  c.fillText(String(data.p),14,138);
-  c.font='700 17px -apple-system,sans-serif'; c.fillText('%',16+nw,131);
-  c.fillStyle='rgba(255,255,255,0.38)'; c.font='9.5px -apple-system,sans-serif';
-  c.fillText('completion',14,151);
+  c.fillStyle = '#fff'; c.font = '800 44px -apple-system,sans-serif';
+  const nw = c.measureText(String(data.p)).width;
+  c.fillText(String(data.p), 14, 168);
+  c.font = '700 18px -apple-system,sans-serif'; c.fillText('%', 16+nw, 161);
+  c.fillStyle = 'rgba(255,255,255,0.38)'; c.font = '9.5px -apple-system,sans-serif';
+  c.fillText('completion', 14, 183);
 
-  c.fillStyle='rgba(255,255,255,0.14)';
-  c.beginPath(); c.arc(cw-19,18,11,0,Math.PI*2); c.fill();
-  c.fillStyle='rgba(255,255,255,0.72)'; c.font='13px -apple-system,sans-serif';
-  c.textAlign='center'; c.fillText('→',cw-19,23);
+  c.fillStyle = 'rgba(255,255,255,0.14)';
+  c.beginPath(); c.arc(cw-19, 18, 11, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'rgba(255,255,255,0.72)'; c.font = '13px -apple-system,sans-serif';
+  c.textAlign = 'center'; c.fillText('→', cw-19, 23);
 
-  const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; return t;
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 
-/* ─── Material factory ───────────────────────────────── */
-// BoxGeometry face order: +X(right), -X(left/spine), +Y(top), -Y(bot), +Z(front), -Z(back)
+/* ─── Material factory ─── */
 function makeMats(tex, isActive) {
-  // 非激活卡片：浅灰白色边缘（像真实纸质文件夹）；激活卡片：深绿色边缘
   const edgeC = isActive ? new THREE.Color(0x1a5c34) : new THREE.Color(0xbfcdd9);
   const edge = new THREE.MeshStandardMaterial({ color:edgeC, roughness:0.30, metalness:0.04 });
   const front = new THREE.MeshStandardMaterial({
     map:tex, transparent:true, alphaTest:0.01, roughness:0.10, metalness:0.04,
     ...(isActive ? { emissiveMap:tex, emissive:new THREE.Color(0x1a5c38), emissiveIntensity:0.30 } : {})
   });
-  // 背面：非激活改为浅色（白色文件夹背面）
   const back = new THREE.MeshStandardMaterial({
     color: new THREE.Color(isActive ? 0x0e2416 : 0xd0dbe8), roughness:0.8,
     transparent:true, opacity:isActive ? 0.85 : 0.92,
   });
-  // +X, -X, +Y, -Y, +Z(FRONT/tex), -Z(back)
   return [edge, edge, edge, edge, front, back];
 }
 
-/* ─── Three.js scene setup ───────────────────────────── */
-const stage = document.getElementById('stage');
-const getSize = () => ({ w:stage.clientWidth, h:stage.clientHeight });
+/* ─── Three.js scene setup ─── */
+const getSize = () => ({ w: stage.clientWidth, h: stage.clientHeight });
 
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -286,160 +281,141 @@ const scene = new THREE.Scene();
 let { w, h } = getSize();
 renderer.setSize(w, h);
 
-/* Camera — 以扇形视觉中心为目标，FOV 加宽以显示完整扇形 */
-const camera = new THREE.PerspectiveCamera(58, w/h, 1, 6000);
-// 活跃卡片在 x=490，扇形向右展开（卡片到 x≈-100）
-// 视觉中心约 x=200；相机稍偏左上方
-camera.position.set(200, 420, 820);
-camera.lookAt(200, -40, -80);
+const camera = new THREE.PerspectiveCamera(65, w/h, 1, 8000);
 
-/* Fan group — slight backward tilt for the overhead/dramatic look */
 const fanGroup = new THREE.Group();
-fanGroup.rotation.x = -0.30;   // ≈ -17° tilt: 大俯视角展示扇形深度
+fanGroup.rotation.x = -0.18;  // ~10° 轻度俯视
 scene.add(fanGroup);
 
-/* Lights */
-scene.add(new THREE.AmbientLight(0x5a78a0, 2.0));
+/* ─── Lights ─── */
+scene.add(new THREE.AmbientLight(0x5a78a0, 2.2));
 const key = new THREE.DirectionalLight(0xffffff, 1.8);
 key.position.set(300, 400, 400); scene.add(key);
 const fill = new THREE.DirectionalLight(0x8899cc, 0.6);
 fill.position.set(-250, 120, 200); scene.add(fill);
-const gLight = new THREE.PointLight(0x22c55e, 7, 800);
-scene.add(gLight);   // follows active card each frame
+const gLight = new THREE.PointLight(0x22c55e, 8, 1400);
+scene.add(gLight);
 
-/* Post-processing */
+/* ─── Post-processing ─── */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.70, 0.50, 0.58);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-/* ─── Card meshes ────────────────────────────────────── */
+/* ─── Card meshes with pivot groups ─── */
+// 结构：fanGroup → spinePivot(旋转) → cardGroup(x偏移=扇形半径) → mesh
+let activeIdx = 3;
+
 const cards = DATA.map((d, i) => {
+  const spinePivot = new THREE.Group();  // 绕 Y 轴旋转 → 扇形展开
+  const cardGroup  = new THREE.Group();  // x 偏移 → 扇形半径
   const mesh = new THREE.Mesh(cardGeo, []);
-  fanGroup.add(mesh);
-  return { mesh, data:d, tRY:0, tZ:0 };
+  cardGroup.add(mesh);
+  spinePivot.add(cardGroup);
+  fanGroup.add(spinePivot);
+  return { mesh, spinePivot, cardGroup, data: d, tRY: 0, tZ: 0 };
 });
 
-/* ─── Arc slider (above cards) ───────────────────────── */
-// The slider sits above the card tops, following the arc of card-spine tops.
-// Each card's top-spine is at local (0, CH/2, 0) before rotation.
-// After rotateY=theta: top = (0, CH/2, 0) → same point (spine doesn't move by rotateY).
-// So ALL card spines share the same top point (0, CH/2, 0)!
-// The actual card TOP EDGE center sweeps an arc:
-//   cardTopCenter = (CW/2 * cos(theta), CH/2, -CW/2 * sin(theta))  [Three.js rotateY sign]
-
+/* ─── Arc slider (above cards) ─── */
 let arcLine = null;
-let arcDot  = null;   // glowing indicator sphere
-
-const dotGeo = new THREE.SphereGeometry(5, 16, 16);
+const dotGeo = new THREE.SphereGeometry(5.5, 16, 16);
 const dotMat = new THREE.MeshStandardMaterial({
-  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:2.5,
+  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:2.8,
   roughness:0, metalness:0,
 });
-arcDot = new THREE.Mesh(dotGeo, dotMat);
+const arcDot = new THREE.Mesh(dotGeo, dotMat);
 fanGroup.add(arcDot);
 
-// Outer halo ring around dot
-const haloGeo = new THREE.TorusGeometry(10, 1.2, 8, 32);
+const haloGeo = new THREE.TorusGeometry(11, 1.3, 8, 32);
 const haloMat = new THREE.MeshStandardMaterial({
-  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:1.2,
+  color:0x22c55e, emissive:new THREE.Color(0x22c55e), emissiveIntensity:1.4,
   transparent:true, opacity:0.55, roughness:0, metalness:0,
 });
 const haloDot = new THREE.Mesh(haloGeo, haloMat);
 fanGroup.add(haloDot);
 
 function buildArcSlider() {
-  // Remove old arc line
   if (arcLine) { fanGroup.remove(arcLine); arcLine.geometry.dispose(); arcLine = null; }
-
-  // Compute top-center of each card's visible face in local fanGroup space
-  // Card i: rotateY = tRY[i], card center is at (CW/2 after geo.translate)
-  // Top-center of card i = rotate (CW/2, CH/2, 0) by tRY around Y axis at origin
-  // Three.js rotateY(theta): x' = x*cos(theta) + z*sin(theta), z' = -x*sin(theta) + z*cos(theta)
-
-  const YARC = CH / 2 + 30;  // above card tops
-  const R = EXTRA_OFFSET + CW / 2;  // 扇形半径
-  const pts = cards.map((_, i) => {
+  const R    = getRFan();
+  const YARC = CH / 2 + 32;
+  const pts  = cards.map((_, i) => {
     const theta = cards[i].tRY;
-    const x = R * Math.cos(theta);
-    const z = -R * Math.sin(theta);
-    return new THREE.Vector3(x, YARC, z);
+    return new THREE.Vector3(R * Math.cos(theta), YARC, -R * Math.sin(theta));
   });
-
-  // Smooth the arc with CatmullRomCurve3
-  const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
-  const smoothPts = curve.getPoints(120);
-  const geo = new THREE.BufferGeometry().setFromPoints(smoothPts);
-
-  const mat = new THREE.LineDashedMaterial({
-    color: 0x22c55e,
-    linewidth: 1,
-    dashSize: 5,
-    gapSize: 7,
-    transparent: true,
-    opacity: 0.55,
+  const curve     = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
+  const smoothPts = curve.getPoints(160);
+  const geo       = new THREE.BufferGeometry().setFromPoints(smoothPts);
+  const mat       = new THREE.LineDashedMaterial({
+    color:0x22c55e, linewidth:1, dashSize:5, gapSize:7, transparent:true, opacity:0.55,
   });
   arcLine = new THREE.Line(geo, mat);
   arcLine.computeLineDistances();
   fanGroup.add(arcLine);
-
-  // Position the indicator dot at the active card's top center
-  const atRY = cards[activeIdx].tRY;
-  const R2 = EXTRA_OFFSET + CW / 2;
-  const dotX = R2 * Math.cos(atRY);
-  const dotZ = -R2 * Math.sin(atRY);
-  arcDot.position.set(dotX, YARC, dotZ);
-  haloDot.position.set(dotX, YARC, dotZ);
-  haloDot.rotation.x = Math.PI / 2;  // lay flat in XZ plane
 }
 
-/* ─── Compute target angles and positions ────────────── */
+/* ─── Set fan radius ─── */
+function setFanRadius() {
+  const R = getRFan();
+  cards.forEach(c => c.cardGroup.position.x = R - CW / 2);
+}
+
+/* ─── Camera: 自动居中扇形 ─── */
+// 设计图分析：活跃卡片在屏幕左侧，扇形向右展开
+// → 相机需在活跃卡片右侧偏上方，朝左下方看
+// 活跃卡片(θ=0)在 x=R → 相机在 x=R*2 右侧 → 活跃卡片出现在画面左侧 ✓
+// 最右卡片(θ=90°)在 x=0,z=-R → 出现在画面右侧 ✓
+function updateCamera() {
+  const R  = getRFan();
+  // 相机在活跃卡片右侧约 1倍R 处，偏高，稍微前置
+  camera.position.set(R * 1.9, R * 0.38, R * 0.60);
+  // lookAt 对准扇形整体中心（x ≈ R*0.4，中间偏左）
+  camera.lookAt(R * 0.40, 0, -R * 0.20);
+  camera.fov    = 62;
+  camera.aspect = stage.clientWidth / stage.clientHeight;
+  camera.updateProjectionMatrix();
+}
+
+/* ─── Compute targets ─── */
 function computeTargets(ai) {
   cards.forEach((c, i) => {
-    const off = i - ai;
-    c.tRY = off * ANGLE * (Math.PI / 180);
-    c.tZ  = (i === ai) ? POP_Z : 0;   // active card pops forward (spine moves too — like pulling a book out)
+    c.tRY = (i - ai) * ANGLE * (Math.PI / 180);
+    c.tZ  = (i === ai) ? POP_Z : 0;
   });
 }
 
-/* ─── Rebuild all card textures ──────────────────────── */
+/* ─── Rebuild card textures ─── */
 function rebuildTextures(ai) {
   cards.forEach((c, i) => {
-    // Dispose previous materials
     if (Array.isArray(c.mesh.material)) {
       c.mesh.material.forEach(m => { if (m.map) m.map.dispose(); if (m.emissiveMap) m.emissiveMap.dispose(); m.dispose(); });
     }
-    const off = Math.abs(i - ai);
-    const blurPx = Math.max(0, off * 1.3 - 0.7);
+    const off    = Math.abs(i - ai);
+    const blurPx = Math.max(0, off * 1.2 - 0.5);
     const isAct  = (i === ai);
-
-    const tex  = isAct ? makeActiveTex(c.data) : makeInactiveTex(c.data, blurPx);
-    const mats = makeMats(tex, isAct);
-
-    // Apply distance-based opacity to front + back faces
-    const opacity = isAct ? 1.0 : Math.max(0.08, 1 - off * 0.092);
+    const tex    = isAct ? makeActiveTex(c.data) : makeInactiveTex(c.data, blurPx);
+    const mats   = makeMats(tex, isAct);
+    const opacity = isAct ? 1.0 : Math.max(0.08, 1 - off * 0.088);
     mats[4].opacity = opacity;
     mats[5].opacity = Math.min(opacity, 0.75);
     mats.forEach(m => m.needsUpdate = true);
-
     c.mesh.material  = mats;
-    c.mesh.renderOrder = 100 - off;  // closer cards on top
+    c.mesh.renderOrder = 100 - off;
   });
 }
 
-/* ─── Initial setup ──────────────────────────────────── */
+/* ─── Initial setup ─── */
 computeTargets(activeIdx);
 rebuildTextures(activeIdx);
-
-// Snap immediately (no animation on first frame)
+setFanRadius();
 cards.forEach(c => {
-  c.mesh.rotation.y = c.tRY;
+  c.spinePivot.rotation.y = c.tRY;
   c.mesh.position.set(0, 0, c.tZ);
 });
 buildArcSlider();
+updateCamera();
 
-/* ─── Change active ──────────────────────────────────── */
+/* ─── Change active card ─── */
 function changeActive(idx) {
   activeIdx = idx;
   computeTargets(activeIdx);
@@ -448,43 +424,80 @@ function changeActive(idx) {
   renderDetail();
 }
 
-/* ─── Raycasting (click detection) ──────────────────── */
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+/* ─── Pointer → nearest card index ─── */
+// 将每张卡片顶部中心投影到屏幕，找离指针 X 最近的
+function pointerToCardIdx(clientX) {
+  const rect = stage.getBoundingClientRect();
+  const px   = clientX - rect.left;
+  const R    = getRFan();
+  const YARC = CH / 2 + 32;
+  let minDist = Infinity, nearest = activeIdx;
+  cards.forEach((c, i) => {
+    const theta = c.spinePivot.rotation.y;  // 当前插值中的角度
+    const v = new THREE.Vector3(
+      R * Math.cos(theta),
+      YARC,
+      -R * Math.sin(theta) + c.mesh.position.z * 0.3
+    );
+    v.applyMatrix4(fanGroup.matrixWorld);
+    v.project(camera);
+    const sx = (v.x + 1) / 2 * stage.clientWidth;
+    const d  = Math.abs(sx - px);
+    if (d < minDist) { minDist = d; nearest = i; }
+  });
+  return nearest;
+}
 
-stage.addEventListener('click', e => {
-  const r = stage.getBoundingClientRect();
-  mouse.x =  ((e.clientX - r.left) / r.width)  * 2 - 1;
-  mouse.y = -((e.clientY - r.top)  / r.height) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(cards.map(c => c.mesh));
-  if (!hits.length) return;
-  const idx = cards.findIndex(c => c.mesh === hits[0].object);
-  if (idx !== -1 && idx !== activeIdx) changeActive(idx);
+/* ─── Drag interaction (弧形轨道可拖拽) ─── */
+let isDragging  = false;
+let lastDragIdx = -1;
+
+stage.addEventListener('pointerdown', e => {
+  isDragging  = true;
+  lastDragIdx = -1;
+  stage.classList.add('dragging');
+  stage.setPointerCapture(e.pointerId);
+  const idx = pointerToCardIdx(e.clientX);
+  if (idx !== activeIdx) changeActive(idx);
+  lastDragIdx = idx;
+  e.preventDefault();
 });
 
-/* ─── Keyboard ────────────────────────────────────────── */
+stage.addEventListener('pointermove', e => {
+  if (!isDragging) return;
+  const idx = pointerToCardIdx(e.clientX);
+  if (idx !== lastDragIdx) { lastDragIdx = idx; changeActive(idx); }
+});
+
+stage.addEventListener('pointerup',     () => { isDragging = false; stage.classList.remove('dragging'); });
+stage.addEventListener('pointercancel', () => { isDragging = false; stage.classList.remove('dragging'); });
+
+/* ─── Keyboard ─── */
 document.addEventListener('keydown', e => {
-  if (e.key==='ArrowLeft'  && activeIdx>0)              changeActive(activeIdx-1);
-  if (e.key==='ArrowRight' && activeIdx<DATA.length-1)  changeActive(activeIdx+1);
+  if (e.key === 'ArrowLeft'  && activeIdx > 0)             changeActive(activeIdx - 1);
+  if (e.key === 'ArrowRight' && activeIdx < DATA.length-1) changeActive(activeIdx + 1);
 });
 
-/* ─── Animation loop ──────────────────────────────────── */
+/* ─── Animation loop ─── */
 const LERP = 0.10;
 function animate() {
   requestAnimationFrame(animate);
+  const R    = getRFan();
+  const YARC = CH / 2 + 32;
 
   cards.forEach(c => {
-    // Lerp rotation (spine-pivot fan)
-    c.mesh.rotation.y += (c.tRY - c.mesh.rotation.y) * LERP;
-    // Lerp active card pop in Z
-    c.mesh.position.z += (c.tZ - c.mesh.position.z) * LERP;
+    c.spinePivot.rotation.y += (c.tRY - c.spinePivot.rotation.y) * LERP;
+    c.mesh.position.z       += (c.tZ  - c.mesh.position.z)       * LERP;
   });
 
-  // Green point light: follows active card in world space
-  // Active card center in local fanGroup: (CW/2, 0, POP_Z)
-  // After fanGroup.rotation.x tilt, approximate world position:
-  const acPos = new THREE.Vector3(EXTRA_OFFSET + CW/2, 80, cards[activeIdx].mesh.position.z + 200);
+  // 指示点跟随当前活跃卡片（实时插值角度）
+  const activeTheta = cards[activeIdx].spinePivot.rotation.y;
+  arcDot.position.set(R * Math.cos(activeTheta), YARC, -R * Math.sin(activeTheta));
+  haloDot.position.copy(arcDot.position);
+  haloDot.rotation.x = Math.PI / 2;
+
+  // 绿色点光源跟随活跃卡片
+  const acPos = new THREE.Vector3(R, 80, cards[activeIdx].mesh.position.z + 220);
   acPos.applyMatrix4(fanGroup.matrixWorld);
   gLight.position.copy(acPos);
 
@@ -492,7 +505,7 @@ function animate() {
 }
 animate();
 
-/* ─── Detail panel ────────────────────────────────────── */
+/* ─── Detail panel ─── */
 function renderDetail() {
   const d = DATA[activeIdx];
   document.getElementById('dpanel').innerHTML = `
@@ -523,14 +536,15 @@ function renderDetail() {
 }
 renderDetail();
 
-/* ─── Resize ──────────────────────────────────────────── */
+/* ─── Resize ─── */
 function onResize() {
   const { w:nw, h:nh } = getSize();
   renderer.setSize(nw, nh);
   composer.setSize(nw, nh);
   bloom.resolution.set(nw, nh);
-  camera.aspect = nw / nh;
-  camera.updateProjectionMatrix();
+  setFanRadius();
+  buildArcSlider();
+  updateCamera();
 }
 window.addEventListener('resize', onResize);
 new ResizeObserver(onResize).observe(stage);
