@@ -49,13 +49,21 @@ function dotColor(cat: TimelineStep['category']): string {
   return map[cat] || '#52525b'
 }
 
-function catIcon(cat: TimelineStep['category']): string {
-  const map: Record<string, string> = {
-    text: '💬', read: '📖', edit: '✏️', write: '📝',
-    bash: '⌨', grep: '🔍', glob: '📁', agent: '🤖',
-    ask: '❓', search: '🌐', other: '⚙',
+function catIcon(cat: TimelineStep['category']): React.ReactNode {
+  const map: Record<string, React.ReactNode> = {
+    text: <IconMessage size={12} />,
+    read: <IconFileText size={12} />,
+    edit: <IconPencil size={12} />,
+    write: <IconFilePlus size={12} />,
+    bash: <IconTerminal size={12} />,
+    grep: <IconSearch size={12} />,
+    glob: <IconFolder size={12} />,
+    agent: <IconBot size={12} />,
+    ask: <IconCircleHelp size={12} />,
+    search: <IconGlobe size={12} />,
+    other: <IconWrench size={12} />,
   }
-  return map[cat] || '⚙'
+  return map[cat] ?? <IconWrench size={12} />
 }
 
 const ACTION_MAP: Record<string, string> = {
