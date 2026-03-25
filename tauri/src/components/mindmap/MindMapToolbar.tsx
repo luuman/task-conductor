@@ -23,7 +23,7 @@ export function MindMapToolbar({ nodeId, x, y }: Props) {
         onClick={() => addNode(nodeId)} title="添加子节点">＋</button>
       {node.parentId && (
         <button className={styles.toolbarBtn}
-          onClick={() => removeNode(nodeId)} title="删除">✕</button>
+          onClick={() => removeNode(nodeId)} title="删除"><IconX size={12} /></button>
       )}
     </div>
   )
