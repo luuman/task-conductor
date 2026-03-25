@@ -367,7 +367,7 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.inspectCopy:hover { border-color: #7c5cfc; color: #a78bfa; }
+.inspectCopy:hover { border-color: var(--tc-accent); color: var(--tc-accent-subtle); }
 .inspectClose {
   font-size: 12px;
   color: var(--tc-foreground-secondary);
