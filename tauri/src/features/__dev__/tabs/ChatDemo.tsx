@@ -477,7 +477,7 @@ function buildGraph(turns: GroupedTurnItem[]): { nodes: Node[]; pairs: PairPosit
   const secs: Array<{
     rawMsgs: TranscriptMessage[]
     sectionTurns: GroupedTurnItem[]
-    color: string; icon: string; label: string; height: number
+    color: string; icon: React.ReactNode; label: string; height: number
   }> = []
 
   for (let si = 0; si < DEMO_SECTIONS.length; si++) {
