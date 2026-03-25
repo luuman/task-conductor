@@ -1,11 +1,13 @@
 import { createContext, useContext } from 'react'
+import type { ThemeJSON } from './tokens'
 
 export interface ThemeContextValue {
   theme: string
   themeType: 'dark' | 'light'
   setTheme: (name: string) => void
   themes: string[]
-  registerTheme: (json: import('./tokens').ThemeJSON) => void
+  themeList: ThemeJSON[]
+  registerTheme: (json: ThemeJSON) => void
 }
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null)
