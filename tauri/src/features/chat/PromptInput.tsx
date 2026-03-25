@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { TranscriptMessage } from '../../lib/api/types'
+import type { TranscriptMessage, MessageAttachment } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
-import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconFileText, IconCrosshair } from '../../ui/icon'
+import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconFileText, IconCrosshair, IconFolder } from '../../ui/icon'
 import s from './chat-report.module.css'
 
 const QUICK_CHIPS = [
