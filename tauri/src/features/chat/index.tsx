@@ -322,7 +322,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
                 <div className={s.hBody}><ResultBlock step={step} /></div>
               )}
             </div>
-          </StepWrap>
+          </React.Fragment>
         )
       })}
     </>
