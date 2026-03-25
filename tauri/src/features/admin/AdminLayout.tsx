@@ -72,6 +72,8 @@ export default function AdminLayout() {
           activeKey={activeKey}
           onSelect={(key) => navigate(key)}
           logoIcon={<IconLogo size={18} />}
+          mode={mode}
+          onModeToggle={() => setMode(mode === 'dark' ? 'light' : 'dark')}
           notificationCount={unreadCount}
           onNotificationClick={togglePanel}
           footer={
