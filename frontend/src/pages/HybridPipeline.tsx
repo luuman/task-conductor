@@ -2,10 +2,9 @@
 // 混合方案 Demo — AI生成 → 拓扑修复 → 骨骼绑定 → 风格化材质
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  Sparkles, Box, Bone, Palette, Play, Pause, RotateCcw,
+  Sparkles, Box, Bone, Palette, Play, RotateCcw,
   ChevronRight, Check, Loader2, AlertCircle, Settings2,
-  Zap, Layers, Eye, Download, ArrowRight, Clock,
-  Triangle, Hexagon, CircleDot, Brush,
+  Zap, Layers, Eye, Download, Clock,
 } from "lucide-react";
 
 /* ═══════════════════════════════════════════════
