@@ -24,7 +24,6 @@ export function Layout() {
   const togglePanel = useNotificationStore(s => s.togglePanel)
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
   const [cmdOpen, setCmdOpen] = useState(false)
-  const [companionOpen, setCompanionOpen] = useState(false)
   const setPageContext = useChatStore((s) => s.setPageContext)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
 
