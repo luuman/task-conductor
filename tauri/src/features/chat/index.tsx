@@ -215,7 +215,7 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step, i) => (
-        <StepWrap key={step.id} step={step} index={i}>
+        <React.Fragment key={step.id}>
           {step.kind === 'text' ? (
             <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (
@@ -226,7 +226,7 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
               {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
             </div>
           )}
-        </StepWrap>
+        </React.Fragment>
       ))}
     </>
   )
