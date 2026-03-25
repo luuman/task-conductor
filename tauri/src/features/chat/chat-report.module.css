@@ -281,7 +281,7 @@
   width: 100%;
   background: transparent;
   border: none;
-  outline: none;
+  outline: none !important;
   color: var(--tc-foreground);
   font-size: 13px;
   line-height: 1.6;
