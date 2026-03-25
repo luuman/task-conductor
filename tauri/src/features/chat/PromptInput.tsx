@@ -310,14 +310,15 @@ export function PromptInput() {
     files.forEach(file => {
       const id = `${Date.now()}-${Math.random()}`
       const isImage = file.type.startsWith('image/')
+      const ext = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() ?? '' : ''
       if (isImage) {
         const reader = new FileReader()
         reader.onload = ev => {
-          setAttachments(v => [...v, { id, name: file.name, kind: 'image', dataUrl: ev.target?.result as string }])
+          setAttachments(v => [...v, { id, name: file.name, kind: 'image', dataUrl: ev.target?.result as string, ext, size: file.size }])
         }
         reader.readAsDataURL(file)
       } else {
-        setAttachments(v => [...v, { id, name: file.name, kind: 'file' }])
+        setAttachments(v => [...v, { id, name: file.name, kind: 'file', ext, size: file.size }])
       }
     })
     e.target.value = ''
