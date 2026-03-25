@@ -187,8 +187,9 @@ export function PromptInput() {
   const [pickRect, setPickRect] = useState<DOMRectReadOnly | null>(null)
   const [domCtxList, setDomCtxList] = useState<DomContext[]>([])
   const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft,
-          selectedModel, setSelectedModel, lastStats } = useChatStore()
-  const { send, stop } = useChatStream()
+          selectedModel, setSelectedModel, lastStats,
+          bypassPermissions, setBypassPermissions } = useChatStore()
+  const { send, stop, sendNewSession } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const modelBtnRef = useRef<HTMLButtonElement>(null)
   const [modelMenuPos, setModelMenuPos] = useState<{ left: number; bottom: number } | null>(null)
