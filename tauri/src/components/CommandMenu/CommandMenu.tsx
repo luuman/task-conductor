@@ -72,10 +72,10 @@ export function CommandMenu({ open, onClose }: CommandMenuProps) {
       },
 
       // Claude Config sections
-      { id: 'config-overview', label: 'Overview', icon: '📋', shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-overview') },
-      { id: 'config-settings', label: 'Settings', icon: '⚙️', shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-settings') },
-      { id: 'config-skills', label: 'Skills', icon: '🧩', shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-skills') },
-      { id: 'config-hooks', label: 'Hooks', icon: '🪝', shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-hooks') },
+      { id: 'config-overview', label: 'Overview', icon: <IconClipboard size={14} />, shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-overview') },
+      { id: 'config-settings', label: 'Settings', icon: <IconSettings size={14} />, shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-settings') },
+      { id: 'config-skills', label: 'Skills', icon: <IconBlocks size={14} />, shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-skills') },
+      { id: 'config-hooks', label: 'Hooks', icon: <IconLink size={14} />, shortcut: undefined, group: t('commandMenu.group.config'), action: scrollTo('section-hooks') },
     ]
   }, [t, navigate, onClose, theme, setTheme, i18n])
 
