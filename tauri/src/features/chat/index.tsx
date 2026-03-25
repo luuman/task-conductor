@@ -36,7 +36,7 @@ function badgeCls(cat: TimelineStep['category']): string {
 }
 
 function badgeLabel(step: TimelineStep): string {
-  if (step.kind === 'text') return '💬'
+  if (step.kind === 'text') return 'text'
   return step.toolName || 'Tool'
 }
 
