@@ -64,7 +64,7 @@ export function PrdSidebar() {
       <div className={`${styles.sidebar} ${prdSidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.header}>
           <span className={styles.title}>PRD 文档</span>
-          <button className={styles.closeBtn} onClick={closePrdSidebar}>×</button>
+          <button className={styles.closeBtn} onClick={closePrdSidebar}><IconX size={14} /></button>
         </div>
 
         <div className={styles.content}>
