@@ -30,21 +30,26 @@ function badgeCls(cat: TimelineStep['category']): string {
   const map: Record<string, string> = {
     text: s.bText, read: s.bRead, edit: s.bEdit, write: s.bWrite,
     bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
-    ask: s.bAsk, search: s.bSearch, other: s.bOther,
+    ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
   }
   return `${s.badge} ${map[cat] || s.bOther}`
 }
 
+const TOOL_LABEL_MAP: Record<string, string> = {
+  TaskCreate: '创建任务', TaskUpdate: '更新任务', TaskList: '任务列表',
+  TaskGet: '获取任务', TaskStop: '停止任务',
+}
+
 function badgeLabel(step: TimelineStep): string {
   if (step.kind === 'text') return 'text'
-  return step.toolName || 'Tool'
+  return TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || 'Tool'
 }
 
 function dotColor(cat: TimelineStep['category']): string {
   const map: Record<string, string> = {
     text: '#a78bfa', read: '#60a5fa', edit: '#fbbf24', write: '#4ade80',
     bash: '#22d3ee', grep: '#f87171', glob: '#fb923c', agent: '#c084fc',
-    ask: '#60a5fa', search: '#22d3ee', other: '#52525b',
+    ask: '#60a5fa', search: '#22d3ee', task: '#818cf8', other: '#52525b',
   }
   return map[cat] || '#52525b'
 }
@@ -61,6 +66,7 @@ function catIcon(cat: TimelineStep['category']): React.ReactNode {
     agent: <IconBot size={12} />,
     ask: <IconCircleHelp size={12} />,
     search: <IconGlobe size={12} />,
+    task: <IconClipboard size={12} />,
     other: <IconWrench size={12} />,
   }
   return map[cat] ?? <IconWrench size={12} />
@@ -68,6 +74,7 @@ function catIcon(cat: TimelineStep['category']): React.ReactNode {
 
 const ACTION_MAP: Record<string, string> = {
   read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
+  task: 'Task',
 }
 
 // ── Code/Result block ──
