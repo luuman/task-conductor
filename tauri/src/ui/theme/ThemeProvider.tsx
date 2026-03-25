@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { ThemeContext, type ThemeContextValue } from './useTheme'
 import { resolveTheme, type ThemeJSON } from './tokens'
 import darkPlus from './themes/dark-plus.json'
-import lightPlus from './themes/light-plus.json'
+import { ALL_THEMES } from './themes/index'
 
 const STORAGE_KEY = 'tc-theme'
 const DEFAULT_THEME = 'Dark+'
