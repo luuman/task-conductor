@@ -560,16 +560,23 @@ function getChildText(children: ReactNode): string {
 function InlineImgCard({ path }: { path: string }) {
   const [src, setSrc] = useState<string | null>(null)
   const name = path.split('/').pop() || path
+
   useEffect(() => {
+    // 优先用 Tauri convertFileSrc（桌面模式），否则走后端 HTTP 接口（Web 模式）
     import('@tauri-apps/api/core')
       .then(({ convertFileSrc }) => setSrc(convertFileSrc(path)))
-      .catch(() => {})
+      .catch(() => {
+        // Web 模式：通过后端接口加载本地图片
+        setSrc(`/api/local-file?path=${encodeURIComponent(path)}`)
+      })
   }, [path])
+
   return (
     <span style={{ display: 'inline-flex', flexDirection: 'column', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--tc-border)', background: 'var(--tc-sidebar-bg)', width: 180, verticalAlign: 'top', marginTop: 4 }}>
       {src
-        ? <img src={src} alt={name} style={{ width: 180, height: 120, objectFit: 'cover', display: 'block' }} />
-        : <span style={{ width: 180, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--tc-content-bg)', color: 'var(--tc-foreground-secondary)', fontSize: 11 }}>{name}</span>
+        ? <img src={src} alt={name} style={{ width: 180, height: 120, objectFit: 'cover', display: 'block' }}
+               onError={() => setSrc(null)} />
+        : <span style={{ width: 180, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--tc-content-bg)', color: 'var(--tc-foreground-secondary)', fontSize: 11 }}>加载中…</span>
       }
       <span style={{ padding: '4px 8px', fontSize: 11, fontWeight: 500, color: 'var(--tc-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{name}</span>
     </span>
