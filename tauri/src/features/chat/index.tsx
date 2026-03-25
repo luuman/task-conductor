@@ -890,7 +890,7 @@ export default function ChatReportPage() {
                   const info = `步骤 #${inspected.index + 1} [${inspected.step.category}] ${inspected.step.kind === 'text' ? '文本' : inspected.step.toolName}: ${inspected.step.kind === 'text' ? inspected.step.text?.slice(0, 80) : inspected.step.toolDetail}`
                   navigator.clipboard.writeText(info)
                 }}><IconClipboard size={12} /> 复制信息</button>
-                <button className={s.inspectClose} onClick={() => setInspected(null)}>✕</button>
+                <button className={s.inspectClose} onClick={() => setInspected(null)}><IconX size={12} /></button>
               </div>
               <div className={s.inspectBody}>
                 <span>类型: <b>{CAT_LABEL_MAP[inspected.step.category] || inspected.step.category}</b></span>
