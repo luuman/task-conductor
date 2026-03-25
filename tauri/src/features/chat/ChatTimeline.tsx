@@ -18,6 +18,142 @@ import '../../styles/hljs-ayu-dark.css'
 export type { TimelineStep }
 export { parseTimelineWithQuestions }
 
+// ════════════════════════════════════
+// 文件路径卡片渲染
+// ════════════════════════════════════
+
+const FILE_COLORS: Record<string, string> = {
+  pdf: '#ef4444', doc: '#2563eb', docx: '#2563eb',
+  xls: '#16a34a', xlsx: '#16a34a', csv: '#16a34a',
+  ppt: '#ea580c', pptx: '#ea580c',
+  txt: '#9ca3af', md: '#8b5cf6', mdx: '#8b5cf6',
+  json: '#f59e0b', yaml: '#f59e0b', yml: '#f59e0b',
+  js: '#f59e0b', jsx: '#60a5fa', ts: '#60a5fa', tsx: '#60a5fa',
+  py: '#3b82f6', rb: '#ef4444', go: '#06b6d4', rs: '#ea580c',
+  css: '#06b6d4', scss: '#ec4899', html: '#ea580c',
+  svg: '#10b981', xml: '#f59e0b',
+  zip: '#8b5cf6', tar: '#8b5cf6', gz: '#8b5cf6',
+  mp4: '#ec4899', mov: '#ec4899', mp3: '#ec4899', wav: '#ec4899',
+  sh: '#9ca3af',
+}
+const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'avif', 'tiff'])
+
+function fileColor(ext: string) { return FILE_COLORS[ext.toLowerCase()] ?? '#71717a' }
+
+type MsgPart =
+  | { kind: 'text'; content: string }
+  | { kind: 'image'; path: string; ext: string }
+  | { kind: 'file'; path: string; ext: string }
+
+/** 从消息文本中提取文件路径，拆分为 text/image/file 片段 */
+function parseFilePaths(text: string): MsgPart[] {
+  const parts: MsgPart[] = []
+  // 匹配绝对路径、~/、./ 开头且含扩展名的文件路径
+  const re = /((?:\/|~\/|\.\/)[^\s\n"'`<>|*?\\]+\.([a-zA-Z0-9]{1,8}))/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      const before = text.slice(lastIndex, match.index)
+      if (before) parts.push({ kind: 'text', content: before })
+    }
+    const path = match[1]
+    const ext = match[2].toLowerCase()
+    parts.push(IMAGE_EXTS.has(ext) ? { kind: 'image', path, ext } : { kind: 'file', path, ext })
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length) {
+    const rest = text.slice(lastIndex)
+    if (rest) parts.push({ kind: 'text', content: rest })
+  }
+  return parts
+}
+
+function FileTypeSvgInline({ ext }: { ext: string }) {
+  const color = fileColor(ext)
+  const label = (ext || 'FILE').toUpperCase().slice(0, 4)
+  return (
+    <svg width="28" height="34" viewBox="0 0 28 34" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M2 0 H17 L26 9 V32 Q26 34 24 34 H4 Q2 34 2 32 Z" fill={color} fillOpacity="0.15" />
+      <path d="M2 0 H17 L26 9 V32 Q26 34 24 34 H4 Q2 34 2 32 Z" stroke={color} strokeWidth="1" strokeOpacity="0.6" />
+      <path d="M17 0 L17 9 L26 9" stroke={color} strokeWidth="1" strokeOpacity="0.6" fill="none" />
+      <text x="14" y="26" textAnchor="middle" fontSize="6.5" fontWeight="800" fill={color} fontFamily="ui-monospace,monospace">{label}</text>
+    </svg>
+  )
+}
+
+function FolderSvgInline() {
+  return (
+    <svg width="38" height="32" viewBox="0 0 38 32" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M2 12 L2 8 Q2 6 4 6 L13 6 Q16 6 17 9 L18 12 Z" fill="#5ba4f5" />
+      <rect x="2" y="11" width="34" height="19" rx="3" fill="#4b96e8" />
+      <rect x="2" y="11" width="34" height="7" fill="#5ba4f5" />
+      <rect x="2" y="16" width="34" height="2" fill="#4b96e8" />
+    </svg>
+  )
+}
+
+/** 消息中内嵌图片卡片 — 尝试用 Tauri convertFileSrc 加载本地文件 */
+function MsgImgCard({ path }: { path: string }) {
+  const [src, setSrc] = useState<string | null>(null)
+  const name = path.split('/').pop() || path
+  useEffect(() => {
+    import('@tauri-apps/api/core').then(({ convertFileSrc }) => setSrc(convertFileSrc(path))).catch(() => {})
+  }, [path])
+  return (
+    <div className={s.msgImgCard}>
+      {src
+        ? <img src={src} alt={name} className={s.msgImgCardImg} />
+        : <div className={s.msgImgCardPlaceholder}><IconFileText size={20} /></div>
+      }
+      <div className={s.msgCardBar}>
+        <span className={s.msgCardName}>{name}</span>
+        <span className={s.msgCardMeta}>图片</span>
+      </div>
+    </div>
+  )
+}
+
+function MsgFileCard({ path, ext }: { path: string; ext: string }) {
+  const name = path.split('/').pop() || path
+  const color = fileColor(ext)
+  return (
+    <div className={s.msgFileCard}>
+      {ext ? <FileTypeSvgInline ext={ext} /> : <FolderSvgInline />}
+      <div className={s.msgCardMeta2}>
+        <span className={s.msgCardName}>{name}</span>
+        <span className={s.msgCardInfo} style={{ color }}>{ext.toUpperCase() || '文件'}</span>
+      </div>
+    </div>
+  )
+}
+
+/** 用户消息正文：文字 + 内嵌文件/图片卡片 */
+function UserMsgBody({ text }: { text: string }) {
+  const parts = useMemo(() => parseFilePaths(text), [text])
+  const hasFileParts = parts.some(p => p.kind !== 'text')
+
+  if (!hasFileParts) {
+    return <div className={s.richText}>{text}</div>
+  }
+
+  const textOnly = parts.filter(p => p.kind === 'text').map(p => p.content).join('')
+  const fileParts = parts.filter((p): p is Exclude<MsgPart, { kind: 'text' }> => p.kind !== 'text')
+
+  return (
+    <>
+      {textOnly.trim() && <div className={s.richText}>{textOnly}</div>}
+      <div className={s.msgFileRow}>
+        {fileParts.map((p, i) =>
+          p.kind === 'image'
+            ? <MsgImgCard key={i} path={p.path} />
+            : <MsgFileCard key={i} path={p.path} ext={p.ext} />
+        )}
+      </div>
+    </>
+  )
+}
+
 // ── 样式常量 ──
 export const STYLES = [
   { key: 'a', label: 'A 竖线时间线' },
