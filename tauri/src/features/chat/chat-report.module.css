@@ -292,7 +292,7 @@
 .dEvent { border: 1px solid var(--tc-border); border-radius: 8px; margin-bottom: 5px; overflow: hidden; }
 .dHead { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--tc-sidebar-bg); border-bottom: 1px solid var(--tc-border); }
 .dAvatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-.dAvatarClaude { background: linear-gradient(135deg, #7c5cfc, #a78bfa); color: #fff; }
+.dAvatarClaude { background: linear-gradient(135deg, var(--tc-accent), var(--tc-accent-subtle)); color: var(--tc-accent-fg); }
 .dAvatarTool { background: var(--tc-sidebar-bg); border: 1px solid var(--tc-border); color: var(--tc-foreground-secondary); }
 .dDesc { font-size: 11px; color: var(--tc-foreground-secondary); flex: 1; }
 .dDesc strong { color: var(--tc-foreground); }
