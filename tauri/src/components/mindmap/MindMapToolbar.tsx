@@ -1,6 +1,7 @@
 // tauri/src/components/mindmap/MindMapToolbar.tsx
 
 import { useMindMapStore } from './use-mindmap-store'
+import { IconX } from '../../ui/icon'
 import styles from './mindmap.module.css'
 
 interface Props {
