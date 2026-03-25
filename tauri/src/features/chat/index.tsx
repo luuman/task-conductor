@@ -509,7 +509,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 // ════════════════════════════════════════════════
 // ── 移除用户消息中的 DOM 上下文附件文本 ──
 function stripDomContext(text: string): string {
-  const idx = text.search(/\n+--- 问题元素/)
+  const idx = text.indexOf('--- 问题元素')
   return idx !== -1 ? text.slice(0, idx).trim() : text
 }
 
