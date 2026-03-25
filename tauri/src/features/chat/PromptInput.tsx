@@ -277,6 +277,8 @@ export function PromptInput() {
     setAttachments(v => v.filter(a => a.id !== id))
   }, [])
 
+  const btnWidth = modelBtnRef.current?.offsetWidth ?? 120
+
   return (
     <>
       {isPicking && <DomPickerOverlay rect={pickRect} />}
@@ -285,6 +287,39 @@ export function PromptInput() {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           zIndex: 99998, cursor: 'crosshair',
         }} />,
+        document.body
+      )}
+      {/* 模型选择下拉（portal，避免被 overflow:hidden 裁剪） */}
+      {showModelMenu && modelMenuPos && models.length > 0 && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            left: modelMenuPos.left,
+            bottom: modelMenuPos.bottom,
+            width: Math.max(btnWidth, 140),
+            background: 'var(--tc-sidebar-bg)',
+            border: '1px solid var(--tc-border)',
+            borderRadius: 8,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            zIndex: 9999,
+            overflow: 'hidden',
+          }}
+        >
+          {models.map(m => (
+            <button
+              key={m.id}
+              className={s.settingsItem}
+              style={m.id === selectedModel ? { color: 'var(--tc-accent)', display: 'flex', alignItems: 'center' } : { display: 'flex', alignItems: 'center' }}
+              onClick={() => { setSelectedModel(m.id); setShowModelMenu(false) }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                style={{ marginRight: 6, opacity: m.id === selectedModel ? 1 : 0, flexShrink: 0 }}>
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {m.name}
+            </button>
+          ))}
+        </div>,
         document.body
       )}
 
