@@ -820,12 +820,10 @@ export default function ChatReportPage() {
             </CodeExpandCtx.Provider>
           </div>
 
-          {/* 底部输入栏 — 在可滚动区域之外，不遮盖内容 */}
-          {steps.length > 0 && (
-            <div className={s.bottomBar}>
-              <PromptInput />
-            </div>
-          )}
+          {/* 底部输入栏 — 始终显示 */}
+          <div className={s.bottomBar}>
+            <PromptInput />
+          </div>
         </div>
         <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} />
       </div>
