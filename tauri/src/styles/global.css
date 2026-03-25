@@ -31,6 +31,7 @@
   --tc-tool-glob:   #fb923c;
   --tc-tool-agent:  var(--tc-accent-subtle);
   --tc-tool-text:   var(--tc-accent-subtle);
+  --tc-tool-task:   #818cf8;
   --tc-tool-other:  #71717a;
 
   /* ── 圆角比例（保持跨组件一致） ── */
