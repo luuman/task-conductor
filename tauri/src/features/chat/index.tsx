@@ -600,8 +600,7 @@ export default function ChatReportPage() {
                 return (
                   <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
                     <div className={s.queryPill}>
-                      <span className={s.qNum}>Q{qi + 1}</span>
-                      <div className={s.richText}><RichTextBlock text={q.text} /></div>
+<div className={s.richText}><RichTextBlock text={q.text} /></div>
                     </div>
                     {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
                   </div>
