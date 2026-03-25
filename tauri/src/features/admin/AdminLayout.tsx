@@ -85,10 +85,6 @@ export default function AdminLayout() {
     key: item.key,
     label: t(item.i18n),
     icon: item.icon,
-    shortcut: item.shortcut,
-    badge: item.key === '/admin/sessions' && sessionCount != null && sessionCount > 0
-      ? String(sessionCount)
-      : undefined,
   }))
 
   return (
