@@ -350,7 +350,7 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
     if (msg.role === 'user') {
       flushBuf()
       const text = msg.blocks.find(b => b.type === 'text')?.text?.trim()
-      if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
+      if (text || msg.attachments?.length) segs.push({ type: 'user', text: text ?? '', ts: msg.ts ?? null, attachments: msg.attachments })
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
       const { steps } = parseTimelineWithQuestions([msg])
