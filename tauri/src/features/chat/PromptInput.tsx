@@ -202,15 +202,18 @@ export function PromptInput() {
 
   const handleSend = useCallback(() => {
     const text = value.trim()
-    if ((!text && !domCtx) || isGenerating) return
-    const fullText = domCtx ? (text || '请帮我分析这个元素') + formatDomContext(domCtx) : text
+    if ((!text && domCtxList.length === 0) || isGenerating) return
+    const ctxText = formatDomContextList(domCtxList)
+    const fullText = ctxText
+      ? (text || `请帮我分析以下 ${domCtxList.length} 个元素`) + ctxText
+      : text
     addMessage(makeAiMsg('user', fullText))
     send(fullText)
     setValue('')
     setAttachments([])
-    setDomCtx(null)
+    setDomCtxList([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-  }, [value, domCtx, isGenerating, addMessage, send])
+  }, [value, domCtxList, isGenerating, addMessage, send])
 
   const handleStop = useCallback(() => stop(), [stop])
 
