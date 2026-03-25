@@ -500,6 +500,28 @@ export function FloatingAssistant() {
               {tabs.find(t => t.id === activeTabId)?.title || 'AI 助手'}
             </span>
             <div className={styles.headerActions}>
+              <button
+                className={styles.headerBtn}
+                onClick={(e) => { e.stopPropagation(); handleNewTab() }}
+                title="新建会话"
+                onMouseDown={e => e.stopPropagation()}
+              >+</button>
+              <div ref={historyRef} style={{ position: 'relative' }}>
+                <button
+                  className={`${styles.headerBtn} ${showHistory ? styles.headerBtnActive : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (!showHistory && historyRef.current) {
+                      const rect = historyRef.current.getBoundingClientRect()
+                      setHistoryPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right })
+                    }
+                    setShowHistory(v => !v)
+                  }}
+                  onMouseDown={e => e.stopPropagation()}
+                  title="历史会话"
+                ><IconClock size={12} /></button>
+              </div>
+              <div className={styles.headerSep} />
               <button className={styles.headerBtn} onClick={isMinimized ? restore : minimize} title={isMinimized ? '展开' : '最小化'}>
                 {isMinimized ? <IconMaximize size={12} /> : <IconMinus size={12} />}
               </button>
