@@ -707,7 +707,6 @@ export default function ChatReportPage() {
   useEffect(() => {
     if (!selectedId) return
     setLoading(true)
-    setInspected(null)
     api.getTranscript(selectedId, { limit: 200, offset: 0 }).then(res => {
       setTranscript(res.messages)
     }).catch(() => {}).finally(() => setLoading(false))
