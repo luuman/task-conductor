@@ -326,10 +326,10 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
                         <div className={s.dSubRow}>
                           <span className={s.dSubIcon}>{catIcon(step.category)}</span>
                           <span className={s.dSubDesc}>{catDesc}</span>
-                          {step.toolInput?.file_path && (
-                            <span className={s.dSubFile}>{String(step.toolInput.file_path).split('/').pop()}</span>
+                          {!!step.toolInput?.file_path && (
+                            <span className={s.dSubFile}>{String(step.toolInput.file_path).split('/').pop() || ''}</span>
                           )}
-                          {step.toolInput?.command && (
+                          {!!step.toolInput?.command && (
                             <span className={s.dSubFile}>{String(step.toolInput.command).slice(0, 40)}</span>
                           )}
                         </div>
@@ -503,7 +503,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
                           <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
                           {step.toolInput?.file_path && (
                             <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 4 }}>
-                              {String(step.toolInput.file_path).split('/').pop()}
+                              {String(step.toolInput.file_path).split('/').pop() || ''}
                             </span>
                           )}
                           {step.toolInput?.command && (
