@@ -1492,7 +1492,7 @@ export function DiffBlock({ oldStr, newStr, filePath = '', icon, action, pillCol
 export type CodeBlockVariant = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 export interface CodeBlockProps {
-  code: string
+  code?: string
   lang?: string
   /** 向后兼容：直接传 ReactNode 作为标签 */
   label?: ReactNode
@@ -1503,6 +1503,8 @@ export interface CodeBlockProps {
   variant?: CodeBlockVariant
   /** 胶囊/标签颜色（与操作类型颜色一致） */
   pillColor?: string
+  /** 自定义内容区（替代 code 语法高亮，用于 markdown 等富文本渲染） */
+  children?: ReactNode
 }
 
 export function CodeBlock({ code, lang, label, icon, action, fileName, variant, pillColor }: CodeBlockProps) {
