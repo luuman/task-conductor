@@ -194,12 +194,11 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
             {step.kind === 'text' ? (
               <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
-              <>
-                {!step.toolResult && !step.oldString && (
-                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step)}</span>
-                )}
+              <div className={s.aToolRow}>
+                {catIcon(step.category, 12)}
+                <span className={s.ts}>{toolLabel(step)}</span>
                 <ResultBlock step={step} />
-              </>
+              </div>
             )}
           </div>
         </React.Fragment>
