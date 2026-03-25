@@ -221,5 +221,15 @@ export function useChatStream() {
     }
   }, [])
 
-  return { send, stop }
+  const sendNewSession = useCallback(() => {
+    const ws = _ensureWs()
+    const payload = JSON.stringify({ type: 'new_session' })
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(payload)
+    } else {
+      pendingRef.current = payload
+    }
+  }, [_ensureWs])
+
+  return { send, stop, sendNewSession }
 }
