@@ -377,27 +377,11 @@ export function FloatingAssistant() {
   }, [activeTabId])
 
   const handleOpenHistory = useCallback((session: AiSession) => {
-    // 已打开则直接切换
-    const existing = tabs.find(t => t.sessionId === session.session_id)
-    if (existing) {
-      switchTab(existing.id)
-      setShowHistory(false)
-      return
-    }
-    // 保存当前 tab
-    saveCurrentTab()
-    // 创建新 tab
-    const tab: ChatTab = {
-      id: uid(),
-      type: 'session',
-      title: session.note?.alias || session.summary || session.session_id.slice(0, 8),
-      sessionId: session.session_id,
-    }
-    setTabs(prev => [...prev, tab])
-    setActiveTabId(tab.id)
+    // 直接在当前 tab 加载该会话（一个弹窗展示一个会话）
     setShowHistory(false)
+    const title = session.note?.alias || session.summary || session.session_id.slice(0, 8)
+    setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
 
-    // 加载历史消息
     isFirstLoadRef.current = true
     sharedSelectSession(session.session_id)
     const store = useChatStore.getState()
@@ -407,10 +391,10 @@ export function FloatingAssistant() {
       if (!msgs?.length) return
       if (useChatStore.getState().claudeSessionId === session.session_id) {
         useChatStore.getState().setMessages(msgs)
-        tabCacheRef.current.set(tab.id, { messages: msgs, sessionId: session.session_id })
+        tabCacheRef.current.set(activeTabId, { messages: msgs, sessionId: session.session_id })
       }
     }).catch(() => {})
-  }, [tabs, saveCurrentTab, switchTab, sharedSelectSession])
+  }, [activeTabId, sharedSelectSession])
 
   // 首条消息时更新 tab 标题
   useEffect(() => {
