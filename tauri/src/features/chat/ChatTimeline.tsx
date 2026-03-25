@@ -147,11 +147,12 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
     const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
     const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return <CodeBlock code={preview} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
   if (step.category === 'read' && step.toolResult) {
+    const lang = guessHljsLang(filePath) || undefined
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
-    return <CodeBlock code={stripped} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
   if (step.category === 'agent' && step.toolResult) {
     const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
