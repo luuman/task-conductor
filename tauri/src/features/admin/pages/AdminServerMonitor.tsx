@@ -717,9 +717,9 @@ function ClaudeCluster({ procs, colors }: { procs: ProcessInfo[]; colors: string
           {/* 中心 hub（仅多进程时显示） */}
           {procs.length > 1 && (
             <g>
-              <circle cx={cx} cy={cy} r={20} fill="#a78bfa12" stroke="#a78bfa30" strokeWidth="1.5" />
+              <circle cx={cx} cy={cy} r={20} fill="var(--tc-accent-a8)" stroke="var(--tc-accent-a20)" strokeWidth="1.5" />
               <text x={cx} y={cy - 3} textAnchor="middle" dominantBaseline="central"
-                fill="#a78bfa" fontSize="9" fontWeight="700" fontFamily="'Geist Mono', monospace">
+                fill="var(--tc-accent)" fontSize="9" fontWeight="700" fontFamily="var(--tc-font-mono)">
                 Claude
               </text>
               <text x={cx} y={cy + 9} textAnchor="middle" dominantBaseline="central"
