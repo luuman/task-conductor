@@ -318,42 +318,6 @@ export function FloatingAssistant() {
     setTabs(prev => prev.map(t => t.id === activeTabId && t.type === 'new' ? { ...t, title } : t))
   }, [messages, activeTabId])
 
-  const handleSend = useCallback(() => {
-    const text = input.trim()
-    if (!text || isGenerating) return
-    setInput('')
-    addMessage(makeTextMsg('user', text))
-    send(text)
-  }, [input, isGenerating, addMessage, send])
-
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-      e.preventDefault()
-      handleSend()
-    }
-  }, [handleSend])
-
-  const handleCopy = useCallback(() => {
-    const lastAi = [...messages].reverse().find(m => m.role === 'assistant')
-    if (!lastAi) return
-    const text = lastAi.blocks
-      .filter(b => b.type === 'text')
-      .map(b => (b as { type: string; text?: string }).text ?? '')
-      .join('\n')
-    navigator.clipboard.writeText(text).catch(() => {})
-  }, [messages])
-
-  const handleRetry = useCallback(() => {
-    const lastUser = [...messages].reverse().find(m => m.role === 'user')
-    if (!lastUser || isGenerating) return
-    const text = lastUser.blocks
-      .filter(b => b.type === 'text')
-      .map(b => (b as { type: string; text?: string }).text ?? '')
-      .join('\n')
-    if (text) send(text)
-  }, [messages, isGenerating, send])
-
-
   const formatTime = (ts: string) => {
     const now = new Date()
     const d = new Date(ts)
