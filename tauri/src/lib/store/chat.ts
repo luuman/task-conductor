@@ -71,6 +71,7 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
 
   prdContent: null,
   prdSidebarOpen: false,
+  inputDraft: '',
 
   pageContext: { page: 'dashboard' },
   projectCwd: null,
