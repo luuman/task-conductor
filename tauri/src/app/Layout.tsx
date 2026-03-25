@@ -54,10 +54,6 @@ export function Layout() {
         e.preventDefault()
         setCmdOpen(prev => !prev)
       }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
-        e.preventDefault()
-        setCompanionOpen(prev => !prev)
-      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
