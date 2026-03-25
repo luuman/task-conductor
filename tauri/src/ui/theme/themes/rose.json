@@ -1,0 +1,20 @@
+{
+  "name": "Rose",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#0d0a0b",
+    "base.bg-secondary":  "#140f10",
+    "base.bg-hover":      "#1e1618",
+    "base.fg-primary":    "#f0e8eb",
+    "base.fg-secondary":  "#706070",
+    "base.accent":        "#fb7185",
+    "base.accent-bg":     "#2d0f15",
+    "base.accent-fg":     "#ffffff",
+    "base.border":        "#1e1a1b",
+    "base.border-active": "#fb7185",
+    "base.error":         "#f87171",
+    "base.warning":       "#fbbf24",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
