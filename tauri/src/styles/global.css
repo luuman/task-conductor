@@ -1,11 +1,54 @@
 @import '@fontsource-variable/geist';
 
+/* ─────────────────────────────────────────────────────────────
+   派生 CSS 变量
+   所有颜色必须通过此处或 ThemeProvider 注入的 token 使用，
+   禁止在组件 CSS 中硬编码色值。
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* 等宽字体（统一引用，不要在各组件中各自写 fallback） */
+  --tc-font-mono: 'Geist Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Accent 透明度变体（基于主题注入的 --tc-accent，通过 color-mix 派生） */
+  --tc-accent-a3:  color-mix(in srgb, var(--tc-accent)  3%, transparent);
+  --tc-accent-a4:  color-mix(in srgb, var(--tc-accent)  4%, transparent);
+  --tc-accent-a6:  color-mix(in srgb, var(--tc-accent)  6%, transparent);
+  --tc-accent-a8:  color-mix(in srgb, var(--tc-accent)  8%, transparent);
+  --tc-accent-a10: color-mix(in srgb, var(--tc-accent) 10%, transparent);
+  --tc-accent-a12: color-mix(in srgb, var(--tc-accent) 12%, transparent);
+  --tc-accent-a15: color-mix(in srgb, var(--tc-accent) 15%, transparent);
+  --tc-accent-a20: color-mix(in srgb, var(--tc-accent) 20%, transparent);
+  --tc-accent-a40: color-mix(in srgb, var(--tc-accent) 40%, transparent);
+  /* Accent 亮色变体 —— 用于次级文字标注、avatar 渐变终点等 */
+  --tc-accent-subtle: color-mix(in srgb, var(--tc-accent) 65%, white);
+
+  /* ── 工具类型 badge 颜色（单一来源，禁止在组件中重复硬编码） ── */
+  --tc-tool-read:   #60a5fa;
+  --tc-tool-edit:   #fbbf24;
+  --tc-tool-write:  #4ade80;
+  --tc-tool-bash:   #22d3ee;
+  --tc-tool-grep:   #f87171;
+  --tc-tool-glob:   #fb923c;
+  --tc-tool-agent:  var(--tc-accent-subtle);
+  --tc-tool-text:   var(--tc-accent-subtle);
+  --tc-tool-other:  #71717a;
+
+  /* ── 圆角比例（保持跨组件一致） ── */
+  --tc-radius-xs:   4px;
+  --tc-radius-sm:   6px;
+  --tc-radius-md:   8px;
+  --tc-radius-lg:   10px;
+  --tc-radius-xl:   12px;
+  --tc-radius-2xl:  16px;
+  --tc-radius-full: 9999px;
+}
+
 body {
   font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 13px;
-  background-color: var(--tc-content-bg, #1e1e1e);
-  color: var(--tc-foreground, #cccccc);
+  background-color: var(--tc-content-bg, #0f0f13);
+  color: var(--tc-foreground, #e2e2ec);
   overflow: hidden;
   user-select: none;
 }
