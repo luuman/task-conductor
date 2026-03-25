@@ -151,7 +151,8 @@ function ResultBlock({ step }: { step: TimelineStep }) {
 
   // Generic
   if (step.toolResult) {
-    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={step.toolName || ''} variant={variant} pillColor={color} />
+    const displayName = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || ''
+    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={displayName} variant={variant} pillColor={color} />
   }
 
   return null
