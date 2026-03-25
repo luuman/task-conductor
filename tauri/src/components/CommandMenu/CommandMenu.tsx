@@ -164,7 +164,7 @@ export function CommandMenu({ open, onClose }: CommandMenuProps) {
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={styles.container} onKeyDown={handleKeyDown}>
         <div className={styles.searchWrapper}>
-          <span className={styles.searchIcon}>🔍</span>
+          <span className={styles.searchIcon}><IconSearch size={14} /></span>
           <input
             ref={inputRef}
             className={styles.searchInput}
