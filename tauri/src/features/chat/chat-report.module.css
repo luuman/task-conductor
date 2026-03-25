@@ -400,14 +400,14 @@
 /* Bash 卡片 */
 .iBashCard { border: 1px solid var(--tc-border); border-radius: 6px; overflow: hidden; margin: 2px 0; }
 .iBashHead { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(0,0,0,0.3); font-family: var(--tc-font-mono); font-size: 12px; }
-.iBashHeadErr { border-bottom: 1px solid rgba(248,81,73,0.2); }
-.iBashPrompt { color: #3fb950; font-weight: 700; }
+.iBashHeadErr { border-bottom: 1px solid color-mix(in srgb, var(--tc-terminal-red) 20%, transparent); }
+.iBashPrompt { color: var(--tc-terminal-green); font-weight: 700; }
 .iBashCmd { color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 420px; }
 .iBashLines { color: var(--tc-foreground-secondary); font-size: 10px; margin-left: auto; flex-shrink: 0; }
-.iBashPass { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(63,185,80,0.12); color: #3fb950; font-weight: 600; flex-shrink: 0; }
-.iBashFail { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(248,81,73,0.12); color: #f85149; font-weight: 600; flex-shrink: 0; }
+.iBashPass { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: color-mix(in srgb, var(--tc-terminal-green) 12%, transparent); color: var(--tc-terminal-green); font-weight: 600; flex-shrink: 0; }
+.iBashFail { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: color-mix(in srgb, var(--tc-terminal-red)   12%, transparent); color: var(--tc-terminal-red);   font-weight: 600; flex-shrink: 0; }
 .iBashOut { padding: 8px 10px; font-family: var(--tc-font-mono); font-size: 11px; line-height: 1.45; overflow-x: auto; white-space: pre; color: var(--tc-foreground-secondary); background: rgba(0,0,0,0.15); margin: 0; }
-.iBashOutErr { color: #f85149; background: rgba(248,81,73,0.04); }
+.iBashOutErr { color: var(--tc-terminal-red); background: color-mix(in srgb, var(--tc-terminal-red) 4%, transparent); }
 
 /* 药丸行（Read / Grep / Glob） */
 .iPillRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 0; }
