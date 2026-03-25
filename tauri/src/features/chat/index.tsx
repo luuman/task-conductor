@@ -636,7 +636,7 @@ export default function ChatReportPage() {
         <Select
           options={sessions.map(ss => ({
             value: ss.session_id,
-            label: ss.summary || ss.session_id.slice(0, 8),
+            label: stripDomContext(ss.summary || ss.session_id.slice(0, 8)),
             desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${ss.cwd?.split('/').pop() || ''}`,
           }))}
           value={selectedId || ''}
