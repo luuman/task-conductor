@@ -13,10 +13,7 @@ import s from './chat-report.module.css'
 const STYLES = [
   { key: 'a', label: 'A 竖线时间线' },
   { key: 'b', label: 'B 卡片瀑布' },
-  { key: 'c', label: 'C 紧凑表格' },
   { key: 'd', label: 'D GitHub PR' },
-  { key: 'e', label: 'E 终端日志' },
-  { key: 'f', label: 'F 看板泳道' },
   { key: 'g', label: 'G 气泡聊天' },
   { key: 'h', label: 'H 折叠手风琴' },
 ] as const
