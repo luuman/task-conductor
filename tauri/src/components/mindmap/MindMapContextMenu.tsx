@@ -42,7 +42,7 @@ export function MindMapContextMenu({ x, y, nodeId, onClose }: Props) {
       {node?.parentId && (
         <button className={styles.contextMenuItemDanger}
           onClick={() => { removeNode(nodeId); onClose() }}>
-          ✕ 删除
+          <IconX size={12} /> 删除
         </button>
       )}
     </div>
