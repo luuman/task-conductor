@@ -308,7 +308,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
       {steps.map((step, i) => {
         const isOpen = openIds.has(step.id)
         return (
-          <StepWrap key={step.id} step={step} index={i}>
+          <React.Fragment key={step.id}>
             <div className={s.hAcc}>
               <div className={s.hHead} onClick={() => toggle(step.id)}>
                 <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
