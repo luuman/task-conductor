@@ -331,7 +331,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
               {isOpen && step.kind === 'text' && (
                 <div className={s.hBody}><RichText text={step.text!} /></div>
               )}
-              {isOpen && step.kind === 'tool' && (step.toolResult || step.oldString) && (
+              {isOpen && step.kind === 'tool' && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
                 <div className={s.hBody}><ResultBlock step={step} /></div>
               )}
             </div>
