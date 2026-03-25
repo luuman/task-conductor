@@ -1,7 +1,7 @@
 export interface ThemeJSON {
   name: string
-  type: 'dark' | 'light'
-  colors: Record<string, string>
+  dark: Record<string, string>
+  light: Record<string, string>
 }
 
 export const BASE_COLOR_KEYS = [
@@ -12,7 +12,8 @@ export const BASE_COLOR_KEYS = [
   'base.fg-secondary',
   'base.accent',
   'base.accent-bg',
-  'base.accent-fg',
+  'base.accent-fg',      // text placed ON accent-colored background
+  'base.accent-on-bg',   // text/icon placed ON accent-bg background
   'base.border',
   'base.border-active',
   'base.error',
@@ -35,7 +36,7 @@ export const SEMANTIC_MAP: Record<string, string> = {
   '--tc-sidebar-fg':              'base.fg-primary',
   '--tc-sidebar-item-hover':      'base.bg-hover',
   '--tc-sidebar-item-active-bg':  'base.accent-bg',
-  '--tc-sidebar-item-active-fg':  'base.accent-fg',
+  '--tc-sidebar-item-active-fg':  'base.accent-on-bg',
   '--tc-sidebar-border':          'base.border',
   '--tc-content-bg':              'base.bg-primary',
   '--tc-panel-bg':                'base.bg-secondary',
@@ -51,12 +52,12 @@ export const SEMANTIC_MAP: Record<string, string> = {
 }
 
 export function resolveTheme(
-  theme: ThemeJSON,
-  fallback: ThemeJSON
+  colors: Record<string, string>,
+  fallbackColors: Record<string, string>
 ): Record<string, string> {
   const vars: Record<string, string> = {}
   for (const [cssVar, baseKey] of Object.entries(SEMANTIC_MAP)) {
-    vars[cssVar] = theme.colors[baseKey] ?? fallback.colors[baseKey] ?? '#ff00ff'
+    vars[cssVar] = colors[baseKey] ?? fallbackColors[baseKey] ?? '#ff00ff'
   }
   return vars
 }
