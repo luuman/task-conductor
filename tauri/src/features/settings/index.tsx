@@ -217,12 +217,13 @@ export default function SettingsPage() {
               <span className={styles.fieldLabel}>{t('settings.appearance.theme')}</span>
               <div className={styles.themeGrid}>
                 {themeList.map(t2 => {
-                  const bg1    = t2.colors['base.bg-primary']
-                  const bg2    = t2.colors['base.bg-secondary']
-                  const accent = t2.colors['base.accent']
-                  const fg1    = t2.colors['base.fg-primary']
-                  const fg2    = t2.colors['base.fg-secondary']
-                  const border = t2.colors['base.border']
+                  const colors = t2[mode] ?? t2.dark
+                  const bg1    = colors['base.bg-primary']
+                  const bg2    = colors['base.bg-secondary']
+                  const accent = colors['base.accent']
+                  const fg1    = colors['base.fg-primary']
+                  const fg2    = colors['base.fg-secondary']
+                  const border = colors['base.border']
                   const active = theme === t2.name
                   return (
                     <button
