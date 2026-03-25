@@ -807,30 +807,6 @@ export default function ChatReportPage() {
             </div>
           )}
 
-          {inspected && (
-            <div className={s.inspectPanel}>
-              <div className={s.inspectHeader}>
-                <span className={s.inspectNum}>#{inspected.index + 1}</span>
-                <span className={badgeCls(inspected.step.category)}>{badgeLabel(inspected.step)}</span>
-                <span className={s.inspectTitle}>
-                  {inspected.step.kind === 'text' ? inspected.step.text?.slice(0, 50) + '...' : inspected.step.toolDetail}
-                </span>
-                <button className={s.inspectCopy} onClick={() => {
-                  const info = `步骤 #${inspected.index + 1} [${inspected.step.category}] ${inspected.step.kind === 'text' ? '文本' : inspected.step.toolName}: ${inspected.step.kind === 'text' ? inspected.step.text?.slice(0, 80) : inspected.step.toolDetail}`
-                  navigator.clipboard.writeText(info)
-                }}><IconClipboard size={12} /> 复制信息</button>
-                <button className={s.inspectClose} onClick={() => setInspected(null)}><IconX size={12} /></button>
-              </div>
-              <div className={s.inspectBody}>
-                <span>类型: <b>{CAT_LABEL_MAP[inspected.step.category] || inspected.step.category}</b></span>
-                {inspected.step.toolName && <span> · 工具: <b>{TOOL_LABEL_MAP[inspected.step.toolName] || inspected.step.toolName}</b></span>}
-                {inspected.step.ts && <span> · 时间: <b>{formatTs(inspected.step.ts)}</b></span>}
-                {inspected.step.toolError && <span style={{ color: '#f87171' }}> · ERROR</span>}
-                {inspected.step.toolInput?.file_path != null && <span> · 文件: <b>{String(inspected.step.toolInput.file_path).split('/').pop()}</b></span>}
-                <span style={{ marginLeft: 8, color: 'var(--tc-foreground-secondary)', fontSize: 10 }}>点击复制后告诉 Claude: "步骤 #{inspected.index + 1} 有问题"</span>
-              </div>
-            </div>
-          )}
         </div>
         <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} />
       </div>
