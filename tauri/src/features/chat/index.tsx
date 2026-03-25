@@ -265,7 +265,7 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
 function StyleG({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
-      {steps.map((step, i) => (
+      {steps.map((step) => (
         <React.Fragment key={step.id}>
           <div className={s.gMsg}>
             <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`} style={{ position: 'relative' }}>
