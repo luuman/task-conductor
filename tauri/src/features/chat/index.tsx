@@ -277,10 +277,11 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
               <div className={s.gBubbleText}><RichText text={step.text!} /></div>
             ) : (
               <div className={s.gBubbleTool}>
-                {!step.toolResult && !step.oldString && (
-                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-                )}
-                <ResultBlock step={step} />
+                <div className={s.gToolHead}>
+                  {catIcon(step.category, 11)}
+                  <span>{toolLabel(step)}</span>
+                </div>
+                {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
               </div>
             )}
           </div>
