@@ -223,66 +223,6 @@ function StyleD({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-function StyleE({ steps }: { steps: TimelineStep[] }) {
-  const { onSelect } = useContext(InspectCtx)
-  return (
-    <div className={s.eLog}>
-      {steps.map((step, i) => (
-        <div key={step.id} className={s.eLine} onClick={() => onSelect(step, i)} style={{ cursor: 'pointer' }}>
-          <span className={s.eTs}>{formatTs(step.ts)}</span>
-          <span className={s.eType}><span className={badgeCls(step.category)}>{badgeLabel(step)}</span></span>
-          <span className={s.eCt}>
-            {step.kind === 'text' ? step.text?.slice(0, 200) : (
-              <>
-                <span className={s.hlFile}>{step.toolDetail?.split(' ')[0]}</span>
-                {step.toolDetail?.includes(' ') && <span> {step.toolDetail.slice(step.toolDetail.indexOf(' '))}</span>}
-                {step.toolError && <span className={s.hlErr}> ERROR</span>}
-                {step.toolResult && !step.toolError && step.toolResult.length < 60 && <span> → <span className={s.hlOk}>{step.toolResult}</span></span>}
-              </>
-            )}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function StyleF({ steps }: { steps: TimelineStep[] }) {
-  const lanes = useMemo(() => {
-    const groups: Record<string, { label: string; color: string; items: TimelineStep[] }> = {
-      text: { label: '💬 思考', color: '#a78bfa', items: [] },
-      read: { label: '📖 读取', color: '#60a5fa', items: [] },
-      write: { label: '✏️ 写入', color: '#4ade80', items: [] },
-      bash: { label: '⌨ 命令', color: '#22d3ee', items: [] },
-      other: { label: '🔧 其他', color: '#52525b', items: [] },
-    }
-    for (const step of steps) {
-      const key = step.category === 'edit' || step.category === 'write' ? 'write'
-        : step.category === 'text' ? 'text'
-        : step.category === 'read' || step.category === 'grep' || step.category === 'glob' ? 'read'
-        : step.category === 'bash' ? 'bash' : 'other'
-      groups[key].items.push(step)
-    }
-    return Object.values(groups).filter(g => g.items.length > 0)
-  }, [steps])
-  return (
-    <div className={s.fBoard}>
-      {lanes.map(lane => (
-        <div key={lane.label} className={s.fLane}>
-          <div className={s.fLaneHead} style={{ color: lane.color }}>{lane.label}<span className={s.fLaneCount}>{lane.items.length}</span></div>
-          <div className={s.fLaneBody}>
-            {lane.items.map(step => (
-              <div key={step.id} className={s.fItem}>
-                <div className={s.fItemTitle}>{step.kind === 'text' ? step.text?.slice(0, 40) : step.toolDetail?.split(' ')[0]}</div>
-                <div className={s.fItemDesc}>{step.kind === 'text' ? '' : step.toolName} {formatTs(step.ts)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
 
 function StyleG({ steps }: { steps: TimelineStep[] }) {
   return (
