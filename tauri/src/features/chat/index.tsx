@@ -369,12 +369,6 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
   if (!session) return null
 
-  const catLabel: Record<string, string> = {
-    read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash',
-    grep: 'Grep', glob: 'Glob', agent: 'Agent', ask: 'Ask',
-    search: 'Search', task: '任务管理', other: '其他',
-  }
-
   return (
     <div className={s.sidebar}>
       {/* 会话元数据 */}
