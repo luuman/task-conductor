@@ -631,7 +631,7 @@ export default function ChatReportPage() {
                 <button className={s.actionBtn} onClick={() => {
                   const allText = steps.filter(st => st.kind === 'text').map(st => st.text).join('\n\n')
                   navigator.clipboard.writeText(allText)
-                }}>📋 复制</button>
+                }}><IconClipboard size={12} /> 复制</button>
                 <span className={s.actionDots}>⋯</span>
               </div>
               <div className={s.followUpWrap}>
