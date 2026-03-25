@@ -380,6 +380,35 @@
   opacity: 1;
 }
 
+.settingsDropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  background: var(--tc-sidebar-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 10;
+  min-width: 140px;
+  overflow: hidden;
+}
+.settingsItem {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+.settingsItem:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--tc-foreground);
+}
+
 .pStopBtn {
   width: 30px;
   height: 30px;
