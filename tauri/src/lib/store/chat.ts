@@ -10,6 +10,13 @@ export interface PageContext {
   taskStage?: string
 }
 
+export interface ChatStats {
+  cost_usd?: number
+  duration_ms?: number
+  input_tokens?: number
+  output_tokens?: number
+}
+
 interface ChatStore {
   // 悬浮面板状态
   isOpen: boolean
@@ -23,6 +30,8 @@ interface ChatStore {
   isGenerating: boolean
   systemPrompt: string
   claudeSessionId: string | null
+  selectedModel: string
+  lastStats: ChatStats | null
 
   // PRD
   prdContent: string | null
