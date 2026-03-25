@@ -1,4 +1,5 @@
 import { useCanvasStore } from '../../../lib/store/canvas'
+import { IconX } from '../../../ui/icon'
 import styles from '../canvas.module.css'
 
 const STATUS_COLORS: Record<string, string> = {
