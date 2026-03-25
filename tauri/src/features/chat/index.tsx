@@ -563,11 +563,24 @@ function PromptInput() {
     el.style.height = Math.min(el.scrollHeight, 160) + 'px'
   }, [])
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     if (isEmpty || working) return
+    const text = value.trim()
     setWorking(true)
-    // TODO: 接入后端 API 发送 prompt
-  }, [isEmpty, working])
+    setValue('')
+    setAttachments([])
+    try {
+      const pid = localStorage.getItem('tc_active_project')
+      if (pid) {
+        await api.createTask(Number(pid), { title: text })
+      }
+    } catch {
+      // ignore
+    } finally {
+      setWorking(false)
+      setTimeout(() => textareaRef.current?.focus(), 0)
+    }
+  }, [isEmpty, working, value])
 
   const handleStop = useCallback(() => {
     setWorking(false)
