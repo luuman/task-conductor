@@ -383,6 +383,7 @@
 
 /* ── Main layout ── */
 .body { display: flex; flex: 1; overflow: hidden; }
+.mainCol { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .mainArea { flex: 1; overflow-y: auto; padding: 16px 20px; }
 
 /* ── Common ── */
