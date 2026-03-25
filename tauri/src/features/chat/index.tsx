@@ -192,7 +192,7 @@ function RichText({ text }: { text: string }) {
 function StyleA({ steps }: { steps: TimelineStep[] }) {
   return (
     <div className={s.aTl}>
-      {steps.map((step, i) => (
+      {steps.map((step) => (
         <React.Fragment key={step.id}>
           <div className={s.aStep}>
             <span className={s.aDot} style={{ background: dotColor(step.category) }} />
