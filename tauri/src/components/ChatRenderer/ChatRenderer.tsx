@@ -1723,7 +1723,7 @@ export function UserCard({ msg }: { msg: TranscriptMessage }) {
       <div className={styles.bubbleWrap}>
         <div className={styles.userBubble}>
           <div className={styles.mdContent}>
-            <RichTextBlock text={text} />
+            {text}
           </div>
         </div>
         <CopyButton text={text} className={styles.msgCopyBtn} />
