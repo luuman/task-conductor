@@ -303,6 +303,8 @@ type ParsedSegment =
   | { kind: 'text'; content: string }
   | { kind: 'task-notification'; data: TaskNotification }
   | { kind: 'system-reminder'; data: SystemReminder }
+  | { kind: 'image-ref'; path: string }
+  | { kind: 'file-ref'; path: string }
 
 function extractTag(xml: string, tag: string): string {
   const re = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`)
