@@ -37,14 +37,19 @@ function badgeCls(cat: TimelineStep['category']): string {
 }
 
 const TOOL_LABEL_MAP: Record<string, string> = {
+  Read: '读取', Write: '写入', Edit: '编辑', MultiEdit: '多处编辑',
+  Bash: '命令', Grep: '内容搜索', Glob: '文件匹配',
+  Agent: '子代理', AskUserQuestion: '提问',
+  WebSearch: '网络搜索', WebFetch: '获取网页',
+  ToolSearch: '工具搜索', Skill: '执行技能',
   TaskCreate: '创建任务', TaskUpdate: '更新任务', TaskList: '任务列表',
   TaskGet: '获取任务', TaskStop: '停止任务',
 }
 
 const CAT_LABEL_MAP: Record<string, string> = {
-  read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash',
-  grep: 'Grep', glob: 'Glob', agent: 'Agent', ask: 'Ask',
-  search: 'Search', task: '任务管理', text: '文本', other: '其他',
+  read: '读取', edit: '编辑', write: '写入', bash: '命令',
+  grep: '内容搜索', glob: '文件匹配', agent: '子代理', ask: '提问',
+  search: '网络搜索', task: '任务管理', text: '文本', other: '其他',
 }
 
 function badgeLabel(step: TimelineStep): string {
