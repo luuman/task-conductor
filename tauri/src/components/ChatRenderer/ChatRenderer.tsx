@@ -444,6 +444,10 @@ export function RichTextBlock({ text }: { text: string }) {
             return <TaskNotificationCard key={i} data={seg.data} />
           case 'system-reminder':
             return <SystemReminderCard key={i} data={seg.data} />
+          case 'image-ref':
+            return <InlineImgCard key={i} path={seg.path} />
+          case 'file-ref':
+            return <InlineFileCard key={i} path={seg.path} />
         }
       })}
     </>
