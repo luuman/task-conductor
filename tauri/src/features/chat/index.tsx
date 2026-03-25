@@ -277,85 +277,27 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
 
 
 function StyleD({ steps }: { steps: TimelineStep[] }) {
-
   return (
     <>
-      {groups.map((grp, gi) => {
-        if (grp.kind === 'text') {
-          const step = grp.step
-          return (
-            <StepWrap key={step.id} step={step} index={grp.idx}>
-              {gi > 0 && <div className={s.dConnector} />}
-              <div className={`${s.dEvent} ${s.dTextEvent}`}>
-                <div className={s.dHead}>
-                  <div className={`${s.dAvatar} ${s.dAvatarClaude}`}>C</div>
-                  <div className={s.dDesc}><strong>Claude</strong> 说：</div>
-                </div>
-                <div className={s.dBody}><RichText text={step.text!} /></div>
-              </div>
-            </StepWrap>
-          )
-        }
-        // tool group
-        const grpId = `dg-${gi}`
-        const isOpen = openIds.has(grpId)
-        const { steps: toolSteps, startIdx } = grp
-        if (toolSteps.length === 1) {
-          const step = toolSteps[0]
-          const catDesc = step.category === 'read' ? '读取了文件' : step.category === 'edit' ? '编辑了文件' : step.category === 'write' ? '新建了文件' : step.category === 'bash' ? '执行了命令' : step.category === 'agent' ? '启动了子代理' : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}` : '调用了工具'
-          return (
-            <StepWrap key={step.id} step={step} index={startIdx}>
-              {gi > 0 && <div className={s.dConnector} />}
-              <div className={s.dEvent}>
-                <div className={s.dHead}>
-                  <div className={`${s.dAvatar} ${s.dAvatarTool}`}>{catIcon(step.category)}</div>
-                  <div className={s.dDesc}><strong>Claude</strong> {catDesc}</div>
-                </div>
-                {(step.toolResult || step.oldString) && <div className={s.dBody}><ResultBlock step={step} /></div>}
-              </div>
-            </StepWrap>
-          )
-        }
-        // grouped tools
+      {steps.map((step, i) => {
+        const n = step.mergedCount && step.mergedCount > 1 ? ` ×${step.mergedCount}` : ''
+        const catDesc = step.kind === 'text' ? '说：'
+          : step.category === 'read' ? `读取了文件${n}` : step.category === 'edit' ? `编辑了文件${n}` : step.category === 'write' ? `新建了文件${n}` : step.category === 'bash' ? `执行了命令${n}` : step.category === 'agent' ? `启动了子代理${n}` : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}${n}` : `调用了工具${n}`
         return (
-          <div key={grpId}>
-            {gi > 0 && <div className={s.dConnector} />}
-            <div className={s.dEvent}>
-              <div className={s.dHead} style={{ cursor: 'pointer' }} onClick={() => toggle(grpId)}>
-                <div className={`${s.dAvatar} ${s.dAvatarTool}`}>
-                  <span style={{ fontSize: 9, fontWeight: 700 }}>{toolSteps.length}</span>
+          <StepWrap key={step.id} step={step} index={i}>
+            {i > 0 && <div className={s.dConnector} />}
+            <div className={`${s.dEvent} ${step.kind === 'text' ? s.dTextEvent : ''}`}>
+              <div className={s.dHead}>
+                <div className={`${s.dAvatar} ${step.kind === 'text' ? s.dAvatarClaude : s.dAvatarTool}`}>
+                  {step.kind === 'text' ? 'C' : catIcon(step.category)}
                 </div>
-                <div className={s.dDesc}><strong>Claude</strong> 执行了 {toolSteps.length} 个操作</div>
-                <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 'auto' }}>
-                  {isOpen ? '▲' : '▼'}
-                </span>
+                <div className={s.dDesc}><strong>Claude</strong> {catDesc}</div>
               </div>
-              {isOpen && (
-                <div style={{ borderTop: '1px solid var(--tc-border)' }}>
-                  {toolSteps.map((step, si) => {
-                    const catDesc = step.category === 'read' ? '读取了文件' : step.category === 'edit' ? '编辑了文件' : step.category === 'write' ? '新建了文件' : step.category === 'bash' ? '执行了命令' : step.category === 'agent' ? '启动了子代理' : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}` : '调用了工具'
-                    return (
-                      <StepWrap key={step.id} step={step} index={startIdx + si}>
-                        <div className={s.dSubRow}>
-                          <span className={s.dSubIcon}>{catIcon(step.category)}</span>
-                          <span className={s.dSubDesc}>{catDesc}</span>
-                          {!!step.toolInput?.file_path && (
-                            <span className={s.dSubFile}>{String(step.toolInput.file_path).split('/').pop() || ''}</span>
-                          )}
-                          {!!step.toolInput?.command && (
-                            <span className={s.dSubFile}>{String(step.toolInput.command).slice(0, 40)}</span>
-                          )}
-                        </div>
-                        {(step.toolResult || step.oldString) && (
-                          <div className={s.dBody}><ResultBlock step={step} /></div>
-                        )}
-                      </StepWrap>
-                    )
-                  })}
-                </div>
-              )}
+              {step.kind === 'text'
+                ? <div className={s.dBody}><RichText text={step.text!} /></div>
+                : (step.toolResult || step.oldString) ? <div className={s.dBody}><ResultBlock step={step} /></div> : null}
             </div>
-          </div>
+          </StepWrap>
         )
       })}
     </>
