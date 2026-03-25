@@ -32,6 +32,7 @@ interface ChatStore {
   claudeSessionId: string | null
   selectedModel: string
   lastStats: ChatStats | null
+  bypassPermissions: boolean
 
   // PRD
   prdContent: string | null
