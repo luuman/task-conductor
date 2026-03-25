@@ -25,7 +25,7 @@ export function TabBar() {
           <button
             className={styles.tabClose}
             onClick={(e) => { e.stopPropagation(); removeTab(tab.taskId) }}
-          >×</button>
+          ><IconX size={12} /></button>
         </div>
       ))}
       <div className={styles.tabBarRight}>
