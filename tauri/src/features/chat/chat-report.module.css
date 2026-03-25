@@ -268,7 +268,7 @@
 .aTl::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 1px; background: var(--tc-border); }
 .aStep { position: relative; margin-bottom: 3px; }
 .aDot { position: absolute; left: -20px; top: 8px; width: 8px; height: 8px; border-radius: 50%; }
-.aText { padding: 8px 12px; border-radius: 5px; border-left: 2px solid var(--tc-border-active); margin-left: 4px; background: rgba(124,92,252,0.03); }
+.aText { padding: 8px 12px; border-radius: 5px; border-left: 2px solid var(--tc-accent); margin-left: 4px; background: var(--tc-accent-a3); }
 .aToolRow { display: flex; align-items: flex-start; gap: 8px; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
 .aToolRow:hover { background: rgba(255,255,255,0.02); }
 
