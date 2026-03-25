@@ -117,5 +117,6 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
     messages: state.messages.slice(-50),  // 只保留最近 50 条
     claudeSessionId: state.claudeSessionId,
     projectCwd: state.projectCwd,
+    selectedModel: state.selectedModel,
   }),
 }))
