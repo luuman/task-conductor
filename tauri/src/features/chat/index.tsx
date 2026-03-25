@@ -277,11 +277,6 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
 
 
 function StyleD({ steps }: { steps: TimelineStep[] }) {
-  const groups = useMemo(() => groupSteps(steps), [steps])
-  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set())
-  const toggle = useCallback((id: string) => {
-    setOpenIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
-  }, [])
 
   return (
     <>
