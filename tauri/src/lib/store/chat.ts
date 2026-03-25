@@ -64,6 +64,7 @@ interface ChatStore {
   closePrdSidebar(): void
   setSelectedModel(model: string): void
   setLastStats(stats: ChatStats | null): void
+  setBypassPermissions(v: boolean): void
   // 临时输入草稿（供 empty state 建议卡片填充输入框）
   inputDraft: string
   setInputDraft(text: string): void
