@@ -2,6 +2,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
+import { useChatStore } from '../../lib/store/chat'
+import { useChatStream } from '../../hooks/useChatStream'
 import { parseTimelineWithQuestions, formatTs, guessHljsLang, type TimelineStep, type UserQuestion } from './timeline-parser'
 import { Select } from '../../ui/select'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
