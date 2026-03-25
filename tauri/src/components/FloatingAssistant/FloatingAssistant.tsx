@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { IconX, IconMinus, IconMaximize, IconClock } from '../../ui/icon'
 import { useChatStore, type PageContext } from '../../lib/store/chat'
-import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
 import type { AiSession, Project, Task, TranscriptMessage } from '../../lib/api/types'
 import { useSessionData } from '../SessionChat/useSessionData'
 import { ChatTimeline } from '../../features/chat/ChatTimeline'
+import { PromptInput } from '../../features/chat/PromptInput'
 import styles from './FloatingAssistant.module.css'
 
 interface ProjectInfo {
