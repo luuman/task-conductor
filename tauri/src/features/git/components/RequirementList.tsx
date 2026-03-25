@@ -58,13 +58,13 @@ export function RequirementList() {
             onClick={() => setSelectedTask(task.id, branchName)}
           >
             <span className={styles.stageIcon}>
-              {STAGE_ICONS[task.current_stage] ?? '\u25CB'}
+              {STAGE_ICONS[task.stage] ?? '\u25CB'}
             </span>
             <span className={styles.reqInfo}>
               <span className={styles.reqName}>{task.title}</span>
               <span className={styles.reqMeta}>
                 <span className={styles.branchTag}>{branchName}</span>
-                <span className={styles.stageLabel}>{task.current_stage}</span>
+                <span className={styles.stageLabel}>{task.stage}</span>
               </span>
             </span>
             {isActive && <span className={styles.virtualBadge} title={t('git.virtualHint')}>&#128065;</span>}

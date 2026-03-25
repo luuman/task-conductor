@@ -174,7 +174,7 @@ async def upload_to_feishu(
     if not app_id or not app_secret:
         return None
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with _client(30) as client:
         # 获取 tenant_token
         resp = await client.post(
             "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
@@ -210,7 +210,7 @@ async def send_feishu_image(
     if not all([app_id, app_secret, chat_id]):
         return False
 
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with _client(15) as client:
         resp = await client.post(
             "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
             json={"app_id": app_id, "app_secret": app_secret},
@@ -246,7 +246,7 @@ async def send_feishu_text(
     if not all([app_id, app_secret, chat_id]):
         return False
 
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with _client(15) as client:
         resp = await client.post(
             "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
             json={"app_id": app_id, "app_secret": app_secret},

@@ -1,1 +1,0 @@
-export { ChatCompanion } from './ChatCompanion'

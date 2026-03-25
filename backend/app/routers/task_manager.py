@@ -139,7 +139,15 @@ async def batch_analyze(body: AnalyzeRequest):
         from ..claude.pool import ClaudePool
         pool = ClaudePool()
         async for event in pool.run(0, prompt, "/tmp", log_path):
-            content = event.get("content") or event.get("result", "")
+            etype = event.get("type", "")
+            content = ""
+            if etype == "result":
+                content = event.get("result", "")
+            elif etype == "assistant":
+                msg = event.get("message", {})
+                for block in msg.get("content", []):
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        content = block.get("text", "")
             if content:
                 raw_output.append(str(content))
     except Exception:

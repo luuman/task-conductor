@@ -13,7 +13,6 @@ import { CommandMenu } from '../components/CommandMenu'
 import { FloatingAssistant } from '../components/FloatingAssistant'
 import { PtyAssistant } from '../components/PtyAssistant/PtyAssistant'
 import { PrdSidebar } from '../components/PrdSidebar'
-import { ChatCompanion } from '../components/ChatCompanion'
 import { useChatStore } from '../lib/store/chat'
 import { useAppStore } from '../lib/store/app'
 import sidebarStyles from '../layouts/Sidebar/sidebar.module.css'
@@ -129,7 +128,6 @@ export function Layout() {
     <FloatingAssistant />
     <PtyAssistant />
     <PrdSidebar />
-    <ChatCompanion open={companionOpen} onClose={() => setCompanionOpen(false)} />
   </>
   )
 }

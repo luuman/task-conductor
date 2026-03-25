@@ -53,7 +53,7 @@ export function fileTreeToNodes(
  */
 export function tasksToNodes(
   projects: Array<{ id: number; name: string }>,
-  tasksByProject: Map<number, Array<{ id: number; title: string; current_stage?: string }>>,
+  tasksByProject: Map<number, Array<{ id: number; title: string; stage?: string }>>,
 ): MindMapNodeData[] {
   const rootId = nextId()
   const result: MindMapNodeData[] = [
@@ -89,7 +89,7 @@ export function tasksToNodes(
         label: task.title,
         icon: '📋',
         color,
-        status: task.current_stage ?? 'pending',
+        status: task.stage ?? 'pending',
         parentId: projId,
         meta: { taskId: task.id },
       })
