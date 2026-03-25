@@ -692,7 +692,8 @@ export default function ChatReportPage() {
                   <span>以下为 AI 对话</span>
                 </div>
                 {chatDisplayMessages.map((msg, i) => {
-                  const text = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
+                  const rawText = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
+                  const text = msg.role === 'user' ? stripDomContext(rawText) : rawText
                   if (!text) return null
                   return (
                     <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
