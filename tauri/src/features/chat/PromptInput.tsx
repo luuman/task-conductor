@@ -57,6 +57,7 @@ function captureDomContext(el: Element): DomContext {
   const html = el.outerHTML.replace(/\s+/g, ' ').slice(0, 200)
 
   return {
+    _id,
     tag: el.tagName.toLowerCase(),
     id: el.id || '',
     classes: cls,
