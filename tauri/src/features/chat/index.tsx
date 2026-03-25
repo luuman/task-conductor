@@ -377,7 +377,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
 }
 
 const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
-  a: StyleA, b: StyleB, d: StyleD, g: StyleG, h: StyleH,
+  a: StyleA, b: StyleB, d: StyleD, g: StyleG, h: StyleH, i: StyleI,
 }
 
 // ── Right sidebar ──
