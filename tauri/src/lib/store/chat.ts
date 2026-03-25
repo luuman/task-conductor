@@ -52,6 +52,9 @@ interface ChatStore {
   togglePrdSidebar(): void
   openPrdSidebar(): void
   closePrdSidebar(): void
+  // 临时输入草稿（供 empty state 建议卡片填充输入框）
+  inputDraft: string
+  setInputDraft(text: string): void
 }
 
 export const useChatStore = create<ChatStore>()(persist((set) => ({
