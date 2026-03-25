@@ -323,6 +323,11 @@
 .hChevron { color: var(--tc-foreground-secondary); font-size: 10px; transition: transform 0.15s; flex-shrink: 0; }
 .hTitle { flex: 1; font-weight: 500; }
 .hBody { padding: 10px 12px; border-top: 1px solid var(--tc-border); background: var(--tc-content-bg); }
+.hGroupCount { font-size: 10px; font-family: var(--tc-font-mono); color: var(--tc-foreground-secondary); flex-shrink: 0; }
+.hSubItem { border-top: 1px solid var(--tc-border); background: var(--tc-content-bg); }
+.hSubHead { display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 28px; cursor: pointer; font-size: 11px; transition: background 0.1s; }
+.hSubHead:hover { background: rgba(255,255,255,0.02); }
+.hSubBody { padding: 8px 12px 8px 28px; border-top: 1px solid rgba(255,255,255,0.05); }
 
 /* ═══════════════════════════════════════════════ */
 /* 检查面板 */
