@@ -166,42 +166,36 @@
 }
 
 /* ═══════════════════════════════════════════════ */
-/* Chat History (AI 对话历史)                      */
+/* AI 对话区（mainArea 内）                        */
 /* ═══════════════════════════════════════════════ */
-.chatHistory {
-  max-height: 220px;
-  overflow-y: auto;
+.chatSection {
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 0 6px;
-  border-bottom: 1px solid var(--tc-border);
-  margin-bottom: 10px;
+  gap: 2px;
 }
-.chatUser {
+.chatSectionDivider {
   display: flex;
-  justify-content: flex-end;
-}
-.chatUserText {
-  background: var(--tc-accent-a15);
-  border: 1px solid var(--tc-accent-a25);
-  border-radius: 12px 12px 2px 12px;
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--tc-foreground);
-  max-width: 80%;
-  line-height: 1.5;
-  word-break: break-word;
-}
-.chatAi {
-  display: flex;
-  justify-content: flex-start;
-  padding-right: 12%;
-}
-.chatAi .richText {
-  font-size: 12px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
   color: var(--tc-foreground-secondary);
-  line-height: 1.7;
+  font-size: 11px;
+}
+.chatSectionDivider::before,
+.chatSectionDivider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--tc-border);
+}
+.chatAiBlock {
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: var(--tc-accent-a3);
+  border-left: 2px solid var(--tc-border-active);
+  margin-left: 4px;
+  margin-bottom: 3px;
 }
 
 /* ═══════════════════════════════════════════════ */
