@@ -120,9 +120,17 @@ export function PromptInput() {
   const [isPicking, setIsPicking] = useState(false)
   const [pickRect, setPickRect] = useState<DOMRectReadOnly | null>(null)
   const [domCtx, setDomCtx] = useState<DomContext | null>(null)
-  const { isGenerating, addMessage, setMessages, setCurrentReply } = useChatStore()
+  const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft } = useChatStore()
   const { send, stop } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // 监听外部 inputDraft（来自 empty state 建议卡片点击），应用后立即清空
+  useEffect(() => {
+    if (!inputDraft) return
+    setValue(inputDraft)
+    setInputDraft('')
+    setTimeout(() => { textareaRef.current?.focus() }, 0)
+  }, [inputDraft, setInputDraft])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
