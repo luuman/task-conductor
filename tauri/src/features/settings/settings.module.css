@@ -396,6 +396,75 @@
   color: var(--tc-border-active);
 }
 
+/* Theme picker grid */
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.themeCard {
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+  padding: 0;
+  text-align: left;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.themeCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.themeCardActive {
+  composes: themeCard;
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.themePreview {
+  height: 52px;
+  display: flex;
+  overflow: hidden;
+}
+
+.themePreviewSidebar {
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.themeCardInfo {
+  padding: 5px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.themeCardName {
+  font-size: 10px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.themeSwatches {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.themeSwatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Toast notification */
 .toast {
   position: fixed;
