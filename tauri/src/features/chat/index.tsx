@@ -49,7 +49,8 @@ const CAT_LABEL_MAP: Record<string, string> = {
 
 function badgeLabel(step: TimelineStep): string {
   if (step.kind === 'text') return 'text'
-  return TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || 'Tool'
+  const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || 'Tool'
+  return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
 }
 
 // 工具类型圆点颜色——通过读取 CSS 变量获取，与 global.css 中 --tc-tool-* 保持一致
