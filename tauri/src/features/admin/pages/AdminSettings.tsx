@@ -208,6 +208,20 @@ export default function AdminSettings() {
           </div>
           <div className={styles.sectionBody}>
             <div className={styles.fieldGroup}>
+              <span className={styles.fieldLabel}>{t('settings.appearance.mode')}</span>
+              <div className={styles.pillGroup}>
+                {(['dark', 'light'] as const).map(m => (
+                  <button
+                    key={m}
+                    className={mode === m ? styles.pillActive : styles.pill}
+                    onClick={() => setMode(m)}
+                  >
+                    {m === 'dark' ? t('settings.appearance.modeDark') : t('settings.appearance.modeLight')}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.fieldGroup}>
               <span className={styles.fieldLabel}>{t('settings.appearance.theme')}</span>
               <div className={styles.pillGroup}>
                 {themes.map(name => (
