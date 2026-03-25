@@ -79,7 +79,7 @@ function makeTextMsg(role: 'user' | 'assistant', text: string): TranscriptMessag
 export function FloatingAssistant() {
   const {
     isOpen, isMinimized, messages, currentReply, isGenerating,
-    pageContext, position, toggle, minimize, restore, close,
+    pageContext, position, minimize, restore, close,
     addMessage, setSystemPrompt, setPosition, setProjectCwd,
   } = useChatStore()
   const { send, stop } = useChatStream()
