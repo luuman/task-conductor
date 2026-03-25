@@ -438,9 +438,9 @@ export function FloatingAssistant() {
         >
           {/* 头部 */}
           <div className={styles.header} onMouseDown={handleDragStart}>
-            <div className={styles.headerAvatar}><IconBot size={16} /></div>
-            <span className={styles.headerTitle}>AI 助手</span>
-            <span className={styles.headerOnline}>在线</span>
+            <span className={styles.headerTitle}>
+              {tabs.find(t => t.id === activeTabId)?.title || 'AI 助手'}
+            </span>
             <div className={styles.headerActions}>
               <button className={styles.headerBtn} onClick={isMinimized ? restore : minimize} title={isMinimized ? '展开' : '最小化'}>
                 {isMinimized ? <IconMaximize size={12} /> : <IconMinus size={12} />}
