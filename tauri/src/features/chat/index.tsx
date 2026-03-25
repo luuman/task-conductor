@@ -113,7 +113,7 @@ function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
     let j = i + 1
     while (j < steps.length && steps[j].kind === 'tool' && steps[j].toolName === step.toolName) j++
     const count = j - i
-    result.push(count > 1 ? { ...steps[j - 1], mergedCount: count } : step)
+    result.push(count > 1 ? { ...steps[i], mergedCount: count, mergedSteps: steps.slice(i, j) } : step)
     i = j
   }
   return result
