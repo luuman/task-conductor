@@ -166,6 +166,45 @@
 }
 
 /* ═══════════════════════════════════════════════ */
+/* Chat History (AI 对话历史)                      */
+/* ═══════════════════════════════════════════════ */
+.chatHistory {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--tc-border);
+  margin-bottom: 10px;
+}
+.chatUser {
+  display: flex;
+  justify-content: flex-end;
+}
+.chatUserText {
+  background: var(--tc-accent-a15);
+  border: 1px solid var(--tc-accent-a25);
+  border-radius: 12px 12px 2px 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--tc-foreground);
+  max-width: 80%;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.chatAi {
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 12%;
+}
+.chatAi .richText {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════════ */
 /* Prompt Input Card                              */
 /* ═══════════════════════════════════════════════ */
 .promptCard {
