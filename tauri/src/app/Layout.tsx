@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { AppShell, TopBar, Sidebar, Panel } from '../layouts'
+import { AppShell, Sidebar, Panel } from '../layouts'
 import {
   IconLayoutGrid, IconLogo, IconFileText, IconMonitor,
   IconMessage, IconSettings, IconFolder, IconGitBranch,
