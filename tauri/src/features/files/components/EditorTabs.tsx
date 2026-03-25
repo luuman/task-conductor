@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useEditorTabs } from '../hooks/useEditorTabs'
+import { IconX } from '../../../ui/icon'
 import styles from './editor-tabs.module.css'
 
 export function EditorTabs() {
