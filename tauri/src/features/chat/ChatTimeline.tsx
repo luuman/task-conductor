@@ -137,7 +137,8 @@ function MsgFileCard({ path, ext }: { path: string; ext: string }) {
 
 /** 用户消息正文：文字 + 内嵌文件/图片卡片 */
 function UserMsgBody({ text }: { text: string }) {
-  const parts = useMemo(() => parseFilePaths(text), [text])
+  const clean = text.indexOf('--- 问题元素') !== -1 ? text.slice(0, text.indexOf('--- 问题元素')).trim() : text
+  const parts = useMemo(() => parseFilePaths(clean), [clean])
   const hasFileParts = parts.some(p => p.kind !== 'text')
 
   if (!hasFileParts) {
