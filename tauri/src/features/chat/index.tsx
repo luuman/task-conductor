@@ -854,13 +854,13 @@ export default function ChatReportPage() {
             ) : steps.length === 0 ? (
               <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
             ) : questions.length === 0 ? (
-              <Renderer steps={steps} />
+              <Renderer steps={groupConsecutiveSameType(steps)} />
             ) : (
               questions.map((q, qi) => {
                 const nextQ = questions[qi + 1]
                 const startIdx = q.stepIndex
                 const endIdx = nextQ ? nextQ.stepIndex : steps.length
-                const sectionSteps = steps.slice(startIdx, endIdx)
+                const sectionSteps = groupConsecutiveSameType(steps.slice(startIdx, endIdx))
                 return (
                   <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
                     <div className={s.queryPill}>
