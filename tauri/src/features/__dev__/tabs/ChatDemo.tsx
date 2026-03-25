@@ -120,8 +120,8 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
 
 // ── 节点数据 ────────────────────────────────────────
 
-interface RawNodeData { label: string; color: string; icon: string; messages: TranscriptMessage[]; pairIndex: number; [k: string]: unknown }
-interface StyledNodeData { label: string; color: string; icon: string; turns: GroupedTurnItem[]; rawCount: number; pairIndex: number; [k: string]: unknown }
+interface RawNodeData { label: string; color: string; icon: React.ReactNode; messages: TranscriptMessage[]; pairIndex: number; [k: string]: unknown }
+interface StyledNodeData { label: string; color: string; icon: React.ReactNode; turns: GroupedTurnItem[]; rawCount: number; pairIndex: number; [k: string]: unknown }
 
 // ── Raw 节点 ────────────────────────────────────────
 
