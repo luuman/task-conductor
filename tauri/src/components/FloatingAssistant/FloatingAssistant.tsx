@@ -331,32 +331,6 @@ export function FloatingAssistant() {
     setActiveTabId(tab.id)
   }, [saveCurrentTab, sharedClearSelection])
 
-  const handleCloseTab = useCallback((tabId: string) => {
-    setTabs(prev => {
-      if (prev.length <= 1) return prev
-      const idx = prev.findIndex(t => t.id === tabId)
-      const filtered = prev.filter(t => t.id !== tabId)
-      tabCacheRef.current.delete(tabId)
-      if (tabId === activeTabId) {
-        const newActive = filtered[Math.min(idx, filtered.length - 1)] || filtered[0]
-        // 加载新激活 tab
-        const cached = tabCacheRef.current.get(newActive.id)
-        const store = useChatStore.getState()
-        if (cached) {
-          store.setMessages(cached.messages)
-          store.setClaudeSessionId(cached.sessionId)
-        } else {
-          store.setMessages([])
-          store.setClaudeSessionId(null)
-        }
-        store.setCurrentReply('')
-        isFirstLoadRef.current = true
-        setActiveTabId(newActive.id)
-      }
-      return filtered
-    })
-  }, [activeTabId])
-
   const handleOpenHistory = useCallback((session: AiSession) => {
     // 直接在当前 tab 加载该会话（一个弹窗展示一个会话）
     setShowHistory(false)
