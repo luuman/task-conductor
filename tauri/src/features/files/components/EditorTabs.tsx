@@ -32,7 +32,7 @@ export function EditorTabs() {
               className={styles.closeBtn}
               onClick={(e) => handleClose(e, tab.path)}
             >
-              ×
+              <IconX size={12} />
             </span>
           </button>
         )
