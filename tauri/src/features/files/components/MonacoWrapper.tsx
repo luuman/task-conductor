@@ -124,7 +124,7 @@ export function MonacoWrapper({
     }
 
     ed.focus()
-  }, [onSave, onInlineAI])
+  }, [onSave, onInlineAI, themeType])
 
   const handleChange = useCallback((value: string | undefined) => {
     if (value !== undefined) {
