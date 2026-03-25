@@ -507,6 +507,11 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 // ════════════════════════════════════════════════
 // Main page
 // ════════════════════════════════════════════════
+function stripDomContext(text: string): string {
+  const idx = text.indexOf('--- 问题元素')
+  return idx !== -1 ? text.slice(0, idx).trim() : text
+}
+
 // ── 时间格式化（相对时间） ──
 function relativeTime(iso: string): string {
   if (!iso) return ''
