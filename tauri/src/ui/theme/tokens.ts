@@ -35,7 +35,7 @@ export const SEMANTIC_MAP: Record<string, string> = {
   '--tc-sidebar-fg':              'base.fg-primary',
   '--tc-sidebar-item-hover':      'base.bg-hover',
   '--tc-sidebar-item-active-bg':  'base.accent-bg',
-  '--tc-sidebar-item-active-fg':  'base.accent',
+  '--tc-sidebar-item-active-fg':  'base.accent-fg',
   '--tc-sidebar-border':          'base.border',
   '--tc-content-bg':              'base.bg-primary',
   '--tc-panel-bg':                'base.bg-secondary',
