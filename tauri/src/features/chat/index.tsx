@@ -482,7 +482,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
         return (
           <div key={grpId} className={s.hAcc}>
             <div className={s.hHead} onClick={() => toggle(grpId)}>
-              <span className={s.hChevron} style={{ transform: isGrpOpen ? 'rotate(90deg)' : undefined }}>▶</span>
+              <span className={s.hChevron} style={{ transform: isGrpOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
               <span className={s.hTitle} style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
                 {toolSteps.slice(0, 4).map(st => (
                   <span key={st.id} className={badgeCls(st.category)}>{badgeLabel(st)}</span>
