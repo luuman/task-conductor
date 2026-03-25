@@ -1,0 +1,20 @@
+{
+  "name": "Teal",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#0a0d0d",
+    "base.bg-secondary":  "#0f1414",
+    "base.bg-hover":      "#161e1e",
+    "base.fg-primary":    "#e8f0f0",
+    "base.fg-secondary":  "#507070",
+    "base.accent":        "#2dd4bf",
+    "base.accent-bg":     "#0a2424",
+    "base.accent-fg":     "#ffffff",
+    "base.border":        "#181e1e",
+    "base.border-active": "#2dd4bf",
+    "base.error":         "#f87171",
+    "base.warning":       "#fbbf24",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
