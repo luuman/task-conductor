@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../ui/theme/useTheme'
+import {
+  IconLayoutGrid, IconBot, IconSettings, IconRadio, IconHome,
+  IconPalette, IconGlobe, IconClipboard, IconBlocks, IconLink, IconSearch,
+} from '../../ui/icon'
 import styles from './command-menu.module.css'
 
 export interface CommandMenuItem {
   id: string
   label: string
-  icon?: string
+  icon?: ReactNode
   shortcut?: string
   group: string
   action: () => void
