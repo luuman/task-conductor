@@ -142,7 +142,7 @@ function UserMsgBody({ text }: { text: string }) {
   const hasFileParts = parts.some(p => p.kind !== 'text')
 
   if (!hasFileParts) {
-    return <div className={s.richText}>{text}</div>
+    return <div className={s.richText}>{clean}</div>
   }
 
   const textOnly = parts.filter(p => p.kind === 'text').map(p => p.content).join('')
