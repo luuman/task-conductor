@@ -92,13 +92,29 @@ export function Layout() {
         notificationCount={unreadCount}
         onNotificationClick={togglePanel}
         footer={
-          <button
-            className={sidebarStyles.iconBtn}
-            onClick={() => window.open('/admin', '_blank', 'width=1200,height=800')}
-            title={t('project.global_manage')}
-          >
-            <IconLayoutGrid size={16} />
-          </button>
+          <>
+            <button
+              className={`${sidebarStyles.iconBtn} ${chatOpen ? sidebarStyles.iconBtnActive : ''}`}
+              onClick={toggleChat}
+              title="AI 助手 (Ctrl+J)"
+            >
+              <IconBot size={16} />
+            </button>
+            <button
+              className={`${sidebarStyles.iconBtn} ${ptyOpen ? sidebarStyles.iconBtnActive : ''}`}
+              onClick={togglePty}
+              title="Claude Terminal (Ctrl+Shift+J)"
+            >
+              <IconTerminal size={16} />
+            </button>
+            <button
+              className={sidebarStyles.iconBtn}
+              onClick={() => window.open('/admin', '_blank', 'width=1200,height=800')}
+              title={t('project.global_manage')}
+            >
+              <IconLayoutGrid size={16} />
+            </button>
+          </>
         }
       />
       <div className={shellStyles.main}>
