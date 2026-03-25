@@ -208,9 +208,6 @@
   overflow: hidden;
   transition: border-color 0.15s;
 }
-.promptCard:focus-within {
-  border-color: var(--tc-border-active);
-}
 
 .pAttachRow {
   display: flex;
@@ -648,3 +645,18 @@
 .iToolName { color: var(--tc-foreground-secondary); font-weight: 500; flex-shrink: 0; }
 .iToolParam { font-family: var(--tc-font-mono); font-size: 11px; color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .iToolErr { color: var(--tc-terminal-red); font-size: 10px; flex-shrink: 0; }
+
+/* ── 用户消息行（ChatTimeline 内嵌用户气泡） ── */
+.userMsg {
+  padding: 6px 0 10px;
+  border-bottom: 1px solid var(--tc-border);
+  margin-bottom: 4px;
+}
+.userMsgText {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
