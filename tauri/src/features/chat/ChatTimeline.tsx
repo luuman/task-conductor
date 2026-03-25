@@ -493,12 +493,6 @@ type Segment =
   | { type: 'user'; text: string; ts: string | null }
   | { type: 'assistant'; steps: TimelineStep[] }
 
-/** 移除用户消息中附加的 DOM 上下文文本块（格式：\n\n--- 问题元素 ... ---） */
-function stripDomContext(text: string): string {
-  const idx = text.indexOf('--- 问题元素')
-  return idx !== -1 ? text.slice(0, idx).trim() : text
-}
-
 function splitSegments(messages: TranscriptMessage[]): Segment[] {
   const segs: Segment[] = []
   let buf: TimelineStep[] = []
@@ -511,8 +505,7 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
   for (const msg of messages) {
     if (msg.role === 'user') {
       flushBuf()
-      const rawText = msg.blocks.find(b => b.type === 'text')?.text?.trim()
-      const text = rawText ? stripDomContext(rawText) : rawText
+      const text = msg.blocks.find(b => b.type === 'text')?.text?.trim()
       if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
