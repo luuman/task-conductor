@@ -316,6 +316,9 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
                 <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
                 <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
                 {step.kind === 'text' && <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>}
+                {step.kind === 'tool' && step.toolDetail && (
+                  <span className={s.hTitle}>{step.toolDetail.split('/').pop() || step.toolDetail}</span>
+                )}
               </div>
               {isOpen && step.kind === 'text' && (
                 <div className={s.hBody}><RichText text={step.text!} /></div>
