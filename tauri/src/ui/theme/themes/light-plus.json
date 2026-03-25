@@ -9,7 +9,7 @@
     "base.fg-secondary":  "#71717a",
     "base.accent":        "#18181b",
     "base.accent-bg":     "#e2e3e6",
-    "base.accent-fg":     "#ffffff",
+    "base.accent-fg":     "#18181b",
     "base.border":        "#e4e4e7",
     "base.border-active": "#18181b",
     "base.error":         "#dc2626",
