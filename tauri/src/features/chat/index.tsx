@@ -543,21 +543,9 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
   )
 }
 
-// ── Prompt Input ──
-const QUICK_CHIPS = [
-  { label: '澄清用户问题', color: '#60a5fa' },
-  { label: '定义用户上下文', color: '#a78bfa' },
-  { label: '选择可交付成果', color: '#34d399' },
-  { label: '精化需求', color: '#fb923c' },
-]
+import { PromptInput } from './PromptInput'
 
-type Attachment = { id: string; name: string; kind: 'image' | 'file'; dataUrl?: string }
-
-function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
-  return { role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }] }
-}
-
-function PromptInput() {
+function _PromptInputUnused() {
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [expanded, setExpanded] = useState(false)
