@@ -351,7 +351,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
   const catLabel: Record<string, string> = {
     read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash',
     grep: 'Grep', glob: 'Glob', agent: 'Agent', ask: 'Ask',
-    search: 'Search', other: '其他',
+    search: 'Search', task: '任务管理', other: '其他',
   }
 
   return (
