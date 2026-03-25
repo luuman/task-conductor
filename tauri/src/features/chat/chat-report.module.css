@@ -209,6 +209,40 @@
 }
 .pAttachClose:hover { color: var(--tc-foreground); }
 
+.pImgThumb {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+}
+.pImgThumb img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+}
+.pImgThumb button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.pImgThumb:hover button { opacity: 1; }
+
 .pInputRow {
   position: relative;
   padding: 12px 40px 6px 14px;
