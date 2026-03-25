@@ -16,7 +16,6 @@ const STYLES = [
   { key: 'd', label: 'D GitHub PR' },
   { key: 'g', label: 'G 气泡聊天' },
   { key: 'h', label: 'H 折叠手风琴' },
-  { key: 'i', label: 'I GitHub 精致' },
 ] as const
 type StyleKey = typeof STYLES[number]['key']
 
