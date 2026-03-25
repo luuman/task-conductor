@@ -114,6 +114,7 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   setSelectedModel: (model) => set({ selectedModel: model }),
   setLastStats: (stats) => set({ lastStats: stats }),
   setInputDraft: (text) => set({ inputDraft: text }),
+  setBypassPermissions: (v) => set({ bypassPermissions: v }),
 }), {
   name: 'tc-chat',
   partialize: (state) => ({
