@@ -37,8 +37,8 @@
 /* ── Query pill ── */
 .queryPill {
   display: flex; align-items: flex-start; gap: 8px;
-  background: rgba(124,92,252,0.08);
-  border: 1px solid rgba(124,92,252,0.2);
+  background: var(--tc-accent-a8);
+  border: 1px solid var(--tc-accent-a20);
   border-radius: 12px;
   padding: 10px 14px;
   font-size: 12px; line-height: 1.5;
