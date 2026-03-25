@@ -50,12 +50,15 @@ type MsgPart =
  * 支持格式：
  *   [Image: source: /path/to/file.png]
  *   [image: /path/to/file.png]
- *   /absolute/path/to/file.ext  ~/path  ./relative/path
+ *   [IMAGE: source: data:image/png;base64,...]
  */
 function parseFilePaths(text: string): MsgPart[] {
+  // 快速检测：没有 [image: 前缀则直接返回
+  if (!text.toLowerCase().includes('[image:')) return [{ kind: 'text', content: text }]
+
   const parts: MsgPart[] = []
-  // 优先匹配 [Image: source: /path] 格式，再匹配裸路径
-  const re = /\[(?:image|Image|IMAGE)\s*:\s*(?:source\s*:\s*)?([^\]]+)\]|((?:\/|~\/|\.\/)[^\s\n"'`<>|*?\\]+\.([a-zA-Z0-9]{1,8}))/g
+  // 使用 /i 标志做大小写不敏感匹配，支持可选的 source: 前缀
+  const re = /\[image\s*:\s*(?:source\s*:\s*)?([^\]]+)\]/gi
   let lastIndex = 0
   let match: RegExpExecArray | null
   while ((match = re.exec(text)) !== null) {
@@ -63,10 +66,13 @@ function parseFilePaths(text: string): MsgPart[] {
       const before = text.slice(lastIndex, match.index)
       if (before) parts.push({ kind: 'text', content: before })
     }
-    // match[1] = [Image: source: ...] 中的路径；match[2]/[3] = 裸路径及扩展名
-    const path = (match[1] ?? match[2]).trim()
+    const path = match[1].trim()
     const ext = (path.split('.').pop() ?? '').toLowerCase()
-    parts.push(IMAGE_EXTS.has(ext) ? { kind: 'image', path, ext } : { kind: 'file', path, ext })
+    if (path.startsWith('data:') || IMAGE_EXTS.has(ext)) {
+      parts.push({ kind: 'image', path, ext: path.startsWith('data:') ? 'png' : ext })
+    } else {
+      parts.push({ kind: 'file', path, ext })
+    }
     lastIndex = match.index + match[0].length
   }
   if (lastIndex < text.length) {
