@@ -1,55 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { IconX, IconMinus, IconMaximize, IconClock, IconFileText } from '../../ui/icon'
 import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
 import { HttpAdapter } from '../../lib/api/http'
-import type { AiSession, Project, Task, TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
+import type { AiSession, Project, Task, TranscriptMessage } from '../../lib/api/types'
 import { useSessionData } from '../SessionChat/useSessionData'
+import { ChatTimeline } from '../../features/chat/ChatTimeline'
 import styles from './FloatingAssistant.module.css'
-
-// ── 简洁消息渲染器（无气泡，文档风格）──
-function SlimMessageList({ messages }: { messages: TranscriptMessage[] }) {
-  return (
-    <>
-      {messages.map((msg, i) => {
-        const textContent = msg.blocks
-          .filter((b: TranscriptBlock) => b.type === 'text')
-          .map((b: TranscriptBlock) => b.text ?? '')
-          .join('\n')
-          .trim()
-        const toolBlocks = msg.blocks.filter((b: TranscriptBlock) => b.type === 'tool_use')
-
-        return (
-          <div key={i} className={msg.role === 'user' ? styles.slimUser : styles.slimAi}>
-            {msg.role === 'user' ? (
-              <p className={styles.slimUserText}>{textContent}</p>
-            ) : (
-              <>
-                {textContent && (
-                  <div className={styles.slimAiContent}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{textContent}</ReactMarkdown>
-                  </div>
-                )}
-                {toolBlocks.length > 0 && (
-                  <div className={styles.slimTools}>
-                    {toolBlocks.map((b: TranscriptBlock, j: number) => (
-                      <span key={j} className={styles.slimToolPill}>
-                        {b.tool_name ?? 'tool'}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )
-      })}
-    </>
-  )
-}
 
 interface ProjectInfo {
   name: string
