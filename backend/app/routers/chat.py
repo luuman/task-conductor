@@ -186,8 +186,16 @@ async def handle_chat_ws(ws: WebSocket):
                     cost = getattr(msg, "total_cost_usd", 0) or 0
                     duration = getattr(msg, "duration_ms", 0) or 0
                     usage = getattr(msg, "usage", None)
-                    input_tokens = getattr(usage, "input_tokens", 0) or 0 if usage else 0
-                    output_tokens = getattr(usage, "output_tokens", 0) or 0 if usage else 0
+                    if usage is not None:
+                        if isinstance(usage, dict):
+                            input_tokens = usage.get("input_tokens", 0) or 0
+                            output_tokens = usage.get("output_tokens", 0) or 0
+                        else:
+                            input_tokens = getattr(usage, "input_tokens", 0) or 0
+                            output_tokens = getattr(usage, "output_tokens", 0) or 0
+                    else:
+                        input_tokens = 0
+                        output_tokens = 0
 
                     # 回合结束，标记为 idle（持久连接仍在，等待下一条消息）
                     if result_session_id:
