@@ -183,34 +183,6 @@ function RichText({ text }: { text: string }) {
   return <div className={s.richText}><RichTextBlock text={text} /></div>
 }
 
-// ── 检查上下文 ──
-const InspectCtx = createContext<{ selected: string | null; onSelect: (step: TimelineStep, index: number) => void }>({ selected: null, onSelect: () => {} })
-
-function StepWrap({ step, index, children }: { step: TimelineStep; index: number; children: React.ReactNode }) {
-  const { selected, onSelect } = useContext(InspectCtx)
-  const isActive = selected === step.id
-  return (
-    <div
-      data-step={index + 1}
-      onClick={(e) => { e.stopPropagation(); onSelect(step, index) }}
-      style={{
-        position: 'relative', cursor: 'pointer',
-        outline: isActive ? '1px solid var(--tc-accent)' : undefined,
-        outlineOffset: 2, borderRadius: 6,
-      }}
-    >
-      <span style={{
-        position: 'absolute', left: -4, top: -4, fontSize: 9, fontWeight: 700,
-        background: isActive ? 'var(--tc-accent)' : 'var(--tc-sidebar-bg)',
-        color: isActive ? 'var(--tc-accent-fg)' : 'var(--tc-foreground-secondary)',
-        border: '1px solid var(--tc-border)',
-        borderRadius: 8, padding: '0 4px', zIndex: 2,
-        fontFamily: 'var(--tc-font-mono)',
-      }}>{index + 1}</span>
-      {children}
-    </div>
-  )
-}
 
 
 // ════════════════════════════════════════════════
