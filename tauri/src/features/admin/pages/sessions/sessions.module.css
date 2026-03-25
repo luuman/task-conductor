@@ -1808,9 +1808,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 10px;
+  height: 34px;
+  padding: 0 10px;
   background: var(--tc-panel-bg);
   border-bottom: 1px solid var(--tc-border);
+  flex-shrink: 0;
 }
 
 .codeLang {
