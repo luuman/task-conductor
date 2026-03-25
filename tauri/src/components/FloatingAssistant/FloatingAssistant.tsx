@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-import { IconX, IconMinus, IconMaximize, IconClock, IconFileText } from '../../ui/icon'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { IconX, IconMinus, IconMaximize, IconClock } from '../../ui/icon'
 import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
