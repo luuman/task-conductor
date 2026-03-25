@@ -36,7 +36,7 @@
 
 /* ── Query pill ── */
 .queryPill {
-  display: flex; align-items: flex-start; gap: 8px;
+  display: flex; flex-direction: column; gap: 8px;
   background: var(--tc-accent-a8);
   border: 1px solid var(--tc-accent-a20);
   border-radius: 12px;
@@ -47,10 +47,89 @@
   align-self: flex-end;
   max-width: 80%;
 }
-.queryPill .richText {
-  flex: 1; min-width: 0;
-}
+.queryPill .richText { min-width: 0; }
 .turnSection { margin-bottom: 24px; display: flex; flex-direction: column; }
+
+/* ── 消息内嵌文件/图片卡片 ── */
+.msgFileRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+/* 图片卡片 */
+.msgImgCard {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-sidebar-bg);
+  flex-shrink: 0;
+  width: 140px;
+}
+.msgImgCardImg {
+  display: block;
+  width: 140px;
+  height: 92px;
+  object-fit: cover;
+}
+.msgImgCardPlaceholder {
+  width: 140px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tc-foreground-secondary);
+  background: var(--tc-content-bg);
+}
+.msgCardBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  gap: 4px;
+}
+.msgCardName {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tc-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.msgCardMeta {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  flex-shrink: 0;
+}
+
+/* 文件卡片 */
+.msgFileCard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--tc-sidebar-bg);
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 140px;
+  max-width: 210px;
+}
+.msgCardMeta2 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.msgCardInfo {
+  font-size: 10px;
+  white-space: nowrap;
+}
 
 /* 侧边栏问题导航 */
 .qNav {
