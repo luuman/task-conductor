@@ -542,16 +542,22 @@ export function FloatingAssistant() {
                   <div ref={historyRef} style={{ position: 'relative' }}>
                     <button
                       className={styles.tab}
-                      onClick={() => setShowHistory(v => !v)}
+                      onClick={() => {
+                        if (!showHistory && historyRef.current) {
+                          const rect = historyRef.current.getBoundingClientRect()
+                          setHistoryPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+                        }
+                        setShowHistory(v => !v)
+                      }}
                       title="历史会话"
                       style={{ color: showHistory ? '#fff' : undefined }}
                     ><IconClock size={13} /></button>
-                    {showHistory && (
+                    {showHistory && historyPos && (
                       <div style={{
-                        position: 'absolute', top: '100%', right: 0, marginTop: 4,
+                        position: 'fixed', top: historyPos.top, right: historyPos.right,
                         width: 300, maxHeight: 400, background: '#111119',
                         border: '1px solid var(--tc-border, #2a2a3a)', borderRadius: 10,
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 20,
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 99999,
                         display: 'flex', flexDirection: 'column', overflow: 'hidden',
                       }}>
                         <div style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: '#888', borderBottom: '1px solid #1e1e2e' }}>
