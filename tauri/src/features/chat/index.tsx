@@ -248,7 +248,14 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
           {step.kind === 'text' ? (
             <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (step.toolResult || step.oldString) ? (
-            <ResultBlock step={step} />
+            <div>
+              {step.mergedCount && step.mergedCount > 1 && (
+                <div style={{ marginBottom: 4 }}><span className={badgeCls(step.category)}>{badgeLabel(step)}</span></div>
+              )}
+              <ResultBlock step={step} />
+            </div>
+          ) : step.mergedCount && step.mergedCount > 1 ? (
+            <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
           ) : null}
         </StepWrap>
       ))}
