@@ -5,7 +5,7 @@ import React, { useState, useMemo, useCallback, useEffect, memo } from 'react'
 import {
   IconUser, IconPencil, IconLayoutGrid, IconClipboard, IconSettings, IconSearch,
   IconFileText, IconTerminal, IconBot, IconCircleHelp, IconGlobe, IconRadio,
-  IconBlocks, IconZap, IconFilePlus, IconLink, IconActivity,
+  IconBlocks, IconFilePlus, IconLink,
 } from '../../../ui/icon'
 import {
   ReactFlow,
