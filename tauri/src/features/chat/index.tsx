@@ -299,8 +299,13 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
       {steps.map((step, i) => (
         <StepWrap key={step.id} step={step} index={i}>
           <div className={s.gMsg}>
-            <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`}>
+            <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`} style={{ position: 'relative' }}>
               {step.kind === 'text' ? 'C' : catIcon(step.category)}
+              {step.kind === 'tool' && step.mergedCount && step.mergedCount > 1 && (
+                <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 8, fontWeight: 700, background: 'var(--tc-accent)', color: 'var(--tc-accent-fg)', borderRadius: 4, padding: '0 3px', lineHeight: '13px', pointerEvents: 'none' }}>
+                  ×{step.mergedCount}
+                </span>
+              )}
             </div>
             {step.kind === 'text' ? (
               <div className={s.gBubbleText}><RichText text={step.text!} /></div>
