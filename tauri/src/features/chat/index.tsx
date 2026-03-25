@@ -193,6 +193,31 @@ function StepWrap({ step, index, children }: { step: TimelineStep; index: number
   )
 }
 
+// ── 分组：把连续的 tool steps 合并为一组 ──
+type StepGroup =
+  | { kind: 'text'; step: TimelineStep; idx: number }
+  | { kind: 'tools'; steps: TimelineStep[]; startIdx: number }
+
+function groupSteps(steps: TimelineStep[]): StepGroup[] {
+  const groups: StepGroup[] = []
+  let i = 0
+  while (i < steps.length) {
+    if (steps[i].kind === 'text') {
+      groups.push({ kind: 'text', step: steps[i], idx: i })
+      i++
+    } else {
+      const start = i
+      const toolSteps: TimelineStep[] = []
+      while (i < steps.length && steps[i].kind === 'tool') {
+        toolSteps.push(steps[i])
+        i++
+      }
+      groups.push({ kind: 'tools', steps: toolSteps, startIdx: start })
+    }
+  }
+  return groups
+}
+
 // ════════════════════════════════════════════════
 // 样式渲染器
 // ════════════════════════════════════════════════
