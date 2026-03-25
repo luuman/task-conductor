@@ -844,11 +844,7 @@ export default function ChatReportPage() {
                 }}><IconClipboard size={12} /> 复制</button>
                 <span className={s.actionDots}>⋯</span>
               </div>
-              <div className={s.followUpWrap}>
-                <span className={s.followUpIcon}>@</span>
-                <input className={s.followUpInput} placeholder="输入追问..." />
-                <button className={s.sendBtn}>↑</button>
-              </div>
+              <PromptInput />
             </div>
           )}
 
