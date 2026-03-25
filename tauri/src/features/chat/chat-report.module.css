@@ -426,4 +426,4 @@
 .iToolRow:hover { background: rgba(110,118,129,0.06); }
 .iToolName { color: var(--tc-foreground-secondary); font-weight: 500; flex-shrink: 0; }
 .iToolParam { font-family: var(--tc-font-mono); font-size: 11px; color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
-.iToolErr { color: #f85149; font-size: 10px; flex-shrink: 0; }
+.iToolErr { color: var(--tc-terminal-red); font-size: 10px; flex-shrink: 0; }
