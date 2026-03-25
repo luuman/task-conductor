@@ -98,9 +98,14 @@ function ResultBlock({ step }: { step: TimelineStep }) {
     return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
-  // Agent
+  // Agent — 统一 CodeBlock 外框 + RichTextBlock 内容
   if (step.category === 'agent' && step.toolResult) {
-    return <div className={s.richText}><RichTextBlock text={step.toolResult} /></div>
+    const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
+    return (
+      <CodeBlock icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+        <RichTextBlock text={step.toolResult} />
+      </CodeBlock>
+    )
   }
 
   // Bash
