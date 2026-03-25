@@ -31,6 +31,8 @@ const CATEGORY_MAP: Record<string, TimelineStep['category']> = {
   Edit: 'edit', MultiEdit: 'edit', Write: 'write',
   Bash: 'bash', Agent: 'agent', AskUserQuestion: 'ask',
   WebSearch: 'search', WebFetch: 'search',
+  TaskCreate: 'task', TaskUpdate: 'task', TaskList: 'task',
+  TaskGet: 'task', TaskStop: 'task',
 }
 
 function getToolDetail(name: string, input: Record<string, unknown> | null | undefined): string {
