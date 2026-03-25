@@ -100,12 +100,13 @@ function FolderSvgInline() {
   )
 }
 
-/** 消息中内嵌图片卡片 — 尝试用 Tauri convertFileSrc 加载本地文件 */
+/** 消息中内嵌图片卡片 — data: URL 直接使用，本地路径通过 Tauri convertFileSrc 加载 */
 function MsgImgCard({ path }: { path: string }) {
   const [src, setSrc] = useState<string | null>(null)
-  const name = path.split('/').pop() || path
+  const name = path.startsWith('data:') ? '图片' : (path.split('/').pop() || path)
   useEffect(() => {
-    import('@tauri-apps/api/core').then(({ convertFileSrc }) => setSrc(convertFileSrc(path))).catch(() => {})
+    if (path.startsWith('data:')) { setSrc(path); return }
+    import('@tauri-apps/api/core').then(({ convertFileSrc }) => setSrc(convertFileSrc(path))).catch(() => setSrc(path))
   }, [path])
   return (
     <div className={s.msgImgCard}>
