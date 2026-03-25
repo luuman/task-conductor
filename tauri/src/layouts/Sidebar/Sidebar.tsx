@@ -54,6 +54,7 @@ export function Sidebar({
         })}
       </nav>
 
+      <div className={styles.divider} />
       <div className={styles.bottom}>
         {onNotificationClick && (
           <button
