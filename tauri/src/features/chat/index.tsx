@@ -680,7 +680,6 @@ export default function ChatReportPage() {
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([])
   const [loading, setLoading] = useState(false)
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
-  const [inspected, setInspected] = useState<{ step: TimelineStep; index: number } | null>(null)
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
