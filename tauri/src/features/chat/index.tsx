@@ -40,6 +40,12 @@ const TOOL_LABEL_MAP: Record<string, string> = {
   TaskGet: '获取任务', TaskStop: '停止任务',
 }
 
+const CAT_LABEL_MAP: Record<string, string> = {
+  read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash',
+  grep: 'Grep', glob: 'Glob', agent: 'Agent', ask: 'Ask',
+  search: 'Search', task: '任务管理', text: '文本', other: '其他',
+}
+
 function badgeLabel(step: TimelineStep): string {
   if (step.kind === 'text') return 'text'
   return TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || 'Tool'
