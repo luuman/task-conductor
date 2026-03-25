@@ -41,11 +41,11 @@ export function CommandMenu({ open, onClose }: CommandMenuProps) {
 
     return [
       // Navigation
-      { id: 'nav-admin', label: t('admin.nav.dashboard'), icon: '📊', shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin') },
-      { id: 'nav-claude-config', label: t('admin.nav.claude_config'), icon: '🤖', shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin/claude-config') },
-      { id: 'nav-settings', label: t('admin.nav.settings'), icon: '⚙️', shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin/settings') },
-      { id: 'nav-sessions', label: t('admin.nav.sessions'), icon: '📡', shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin/sessions') },
-      { id: 'nav-workspace', label: t('commandMenu.backToWorkspace'), icon: '🏠', shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/') },
+      { id: 'nav-admin', label: t('admin.nav.dashboard'), icon: <IconLayoutGrid size={14} />, shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin') },
+      { id: 'nav-claude-config', label: t('admin.nav.claude_config'), icon: <IconBot size={14} />, shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin/claude-config') },
+      { id: 'nav-settings', label: t('admin.nav.settings'), icon: <IconSettings size={14} />, shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin/settings') },
+      { id: 'nav-sessions', label: t('admin.nav.sessions'), icon: <IconRadio size={14} />, shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/admin/sessions') },
+      { id: 'nav-workspace', label: t('commandMenu.backToWorkspace'), icon: <IconHome size={14} />, shortcut: undefined, group: t('commandMenu.group.navigation'), action: nav('/') },
 
       // Actions
       {
