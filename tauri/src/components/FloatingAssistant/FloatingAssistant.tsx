@@ -592,8 +592,6 @@ export function FloatingAssistant() {
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
               </div>
 
               {/* ── 聊天主体 ── */}
