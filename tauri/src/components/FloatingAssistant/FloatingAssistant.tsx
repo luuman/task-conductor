@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { IconBot } from '../../ui/icon'
+import { IconBot, IconX, IconMinus, IconMaximize, IconClock } from '../../ui/icon'
 import { useChatStore, type PageContext } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { useAppStore } from '../../lib/store/app'
@@ -459,7 +459,7 @@ export function FloatingAssistant() {
                     className={styles.tab}
                     onClick={handleNewTab}
                     title="新建会话"
-                    style={{ color: 'var(--tc-accent, #007acc)' }}
+                    style={{ color: 'var(--tc-accent)' }}
                   >+</button>
                   <div ref={historyRef} style={{ position: 'relative' }}>
                     <button
@@ -505,7 +505,7 @@ export function FloatingAssistant() {
                                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{
-                                    fontSize: 13, color: alreadyOpen ? 'var(--tc-accent, #007acc)' : '#ccc',
+                                    fontSize: 13, color: alreadyOpen ? 'var(--tc-accent)' : '#ccc',
                                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                                     lineHeight: '18px',
                                   }}>{title}</div>
