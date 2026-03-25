@@ -90,48 +90,21 @@ export default function AdminLayout() {
   return (
     <>
       <AppShell>
-        <TopBar
-          logoIcon={<IconLogo size={22} />}
-          logo="TaskConductor"
-          breadcrumb={[{ label: t('admin.title') }]}
-          userName={t('admin_extra.user')}
-          onSearchClick={() => navigate('/admin/sessions')}
-          onSettingsClick={() => navigate('/admin/settings')}
-          unreadCount={unreadCount}
-          onNotificationClick={togglePanel}
-        />
         <Sidebar
-          header={
-            <span className={sidebarStyles.headerTitle}>{t('admin.title')}</span>
-          }
           items={sidebarItems}
           activeKey={activeKey}
           onSelect={(key) => navigate(key)}
+          logoIcon={<IconLogo size={18} />}
+          notificationCount={unreadCount}
+          onNotificationClick={togglePanel}
           footer={
-            <>
-              {/* User info */}
-              <div className={sidebarStyles.userInfo}>
-                <div className={sidebarStyles.userAvatar}>{t('admin_extra.user').charAt(0)}</div>
-                <div className={sidebarStyles.userMeta}>
-                  <span className={sidebarStyles.userName}>{t('admin_extra.user')}</span>
-                  <span className={sidebarStyles.userRole}>{t('admin_extra.admin_role')}</span>
-                </div>
-              </div>
-              {/* Back button */}
-              <button
-                className={sidebarStyles.footerBtn}
-                onClick={() => {
-                  if (window.opener) {
-                    window.close()
-                  } else {
-                    navigate('/')
-                  }
-                }}
-              >
-                <IconArrowLeft size={16} />
-                <span className={sidebarStyles.footerBtnLabel}>{t('admin.back_to_workspace')}</span>
-              </button>
-            </>
+            <button
+              className={sidebarStyles.iconBtn}
+              onClick={() => { if (window.opener) { window.close() } else { navigate('/') } }}
+              title={t('admin.back_to_workspace')}
+            >
+              <IconArrowLeft size={16} />
+            </button>
           }
         />
         <div className={shellStyles.main}>
