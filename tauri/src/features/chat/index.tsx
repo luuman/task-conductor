@@ -102,10 +102,6 @@ function catIcon(cat: TimelineStep['category'], size = 12): React.ReactNode {
   return map[cat] ?? <IconWrench {...p} />
 }
 
-const ACTION_MAP: Record<string, string> = {
-  read: 'Read', edit: 'Edit', write: 'Write', bash: 'Bash', agent: 'Agent',
-  task: 'Task',
-}
 
 /** 将相邻同 toolName 的 tool 步骤合并为 1，用 mergedCount 标记数量 */
 function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
