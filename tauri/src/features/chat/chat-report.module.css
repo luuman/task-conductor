@@ -36,14 +36,17 @@
 
 /* ── Query pill ── */
 .queryPill {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: flex-start; gap: 8px;
   background: rgba(124,92,252,0.08);
   border: 1px solid rgba(124,92,252,0.2);
   border-radius: 12px;
-  padding: 8px 14px;
+  padding: 10px 14px;
   font-size: 12px; line-height: 1.5;
   color: var(--tc-foreground);
   margin-bottom: 12px;
+}
+.queryPill .richText {
+  flex: 1; min-width: 0;
 }
 .qNum {
   flex-shrink: 0; font-size: 9px; font-weight: 700;
