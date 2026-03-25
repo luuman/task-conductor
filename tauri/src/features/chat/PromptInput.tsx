@@ -381,18 +381,33 @@ export function PromptInput() {
       <div className={s.promptCard}>
         {(attachments.length > 0 || domCtxList.length > 0) && (
           <div className={s.pAttachRow}>
-            {attachments.map(a => a.kind === 'image' && a.dataUrl ? (
-              <span key={a.id} className={s.pImgThumb}>
-                <img src={a.dataUrl} alt={a.name} title={a.name} />
-                <button onClick={() => removeAttachment(a.id)}><IconX size={8} /></button>
-              </span>
-            ) : (
-              <span key={a.id} className={s.pAttachChip}>
-                <IconFileText size={11} />
-                <span>{a.name}</span>
-                <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}><IconX size={10} /></button>
-              </span>
-            ))}
+            {attachments.map(a => {
+              if (a.kind === 'image' && a.dataUrl) {
+                return (
+                  <div key={a.id} className={s.pImgCard}>
+                    <img src={a.dataUrl} alt={a.name} />
+                    <div className={s.pImgCardBar}>
+                      <span className={s.pImgCardName}>{a.name}</span>
+                      <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}><IconX size={9} /></button>
+                    </div>
+                  </div>
+                )
+              }
+              return (
+                <div key={a.id} className={s.pFileCard}>
+                  {a.kind === 'folder' ? <FolderSvg /> : <FileTypeSvg ext={a.ext || ''} />}
+                  <div className={s.pFileCardMeta}>
+                    <span className={s.pFileCardName}>{a.name}</span>
+                    <span className={s.pFileCardInfo}>
+                      {a.kind === 'folder'
+                        ? (a.itemCount ? `${a.itemCount} 个文件` : '文件夹')
+                        : [(a.ext || 'FILE').toUpperCase(), fmtFileSize(a.size)].filter(Boolean).join(' · ')}
+                    </span>
+                  </div>
+                  <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}><IconX size={9} /></button>
+                </div>
+              )
+            })}
             {domCtxList.map((ctx, i) => {
               // 优先显示有意义的内容：有文本则展示文本，否则展示路径片段
               const selector = ctx.tag + (ctx.id ? `#${ctx.id}` : '') + (ctx.classes[0] ? `.${ctx.classes[0]}` : '')
