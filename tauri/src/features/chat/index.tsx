@@ -322,19 +322,19 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
         const isOpen = openIds.has(step.id)
         return (
           <React.Fragment key={step.id}>
-            <div className={s.hAcc}>
-              <div className={s.hHead} onClick={() => toggle(step.id)}>
-                <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-                {step.kind === 'text' && <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>}
+            {step.kind === 'text' ? (
+              <div className={s.hBody}><RichText text={step.text!} /></div>
+            ) : (
+              <div className={s.hAcc}>
+                <div className={s.hHead} onClick={() => toggle(step.id)}>
+                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
+                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                </div>
+                {isOpen && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
+                  <div className={s.hBody}><ResultBlock step={step} /></div>
+                )}
               </div>
-              {isOpen && step.kind === 'text' && (
-                <div className={s.hBody}><RichText text={step.text!} /></div>
-              )}
-              {isOpen && step.kind === 'tool' && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
-                <div className={s.hBody}><ResultBlock step={step} /></div>
-              )}
-            </div>
+            )}
           </React.Fragment>
         )
       })}
