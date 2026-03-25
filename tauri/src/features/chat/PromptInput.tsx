@@ -487,19 +487,21 @@ export function PromptInput() {
           </div>
         )}
 
-        {!isGenerating && !isPicking && lastStats && (lastStats.cost_usd !== undefined || lastStats.duration_ms) && (
+        {!isGenerating && !isPicking && lastStats && (
           <div className={s.pStatsBar}>
-            {lastStats.duration_ms != null && lastStats.duration_ms > 0 && (
-              <span>⏱ {lastStats.duration_ms >= 60000
+            <span title="耗时">⏱ {lastStats.duration_ms != null && lastStats.duration_ms > 0
+              ? (lastStats.duration_ms >= 60000
                 ? `${Math.floor(lastStats.duration_ms / 60000)}m${Math.floor((lastStats.duration_ms % 60000) / 1000)}s`
-                : `${(lastStats.duration_ms / 1000).toFixed(1)}s`}</span>
-            )}
-            {(lastStats.input_tokens || lastStats.output_tokens) ? (
-              <span>↓{_fmtTokens(lastStats.input_tokens ?? 0)} ↑{_fmtTokens(lastStats.output_tokens ?? 0)}</span>
-            ) : null}
-            {lastStats.cost_usd != null && lastStats.cost_usd > 0 && (
-              <span>${lastStats.cost_usd.toFixed(4)}</span>
-            )}
+                : `${(lastStats.duration_ms / 1000).toFixed(1)}s`)
+              : '—'}</span>
+            <span className={s.pStatsSep} />
+            <span title="输入/输出 token">
+              ↓{_fmtTokens(lastStats.input_tokens ?? 0)} ↑{_fmtTokens(lastStats.output_tokens ?? 0)}
+            </span>
+            <span className={s.pStatsSep} />
+            <span title="费用">${lastStats.cost_usd != null
+              ? lastStats.cost_usd.toFixed(4)
+              : '—'}</span>
           </div>
         )}
       </div>
