@@ -940,7 +940,11 @@ export default function AdminServerMonitor() {
     })
   }, [sessions])
 
-  const CLAUDE_COLORS = ['#60a5fa', '#a78bfa', '#f472b6', '#34d399', '#f97316']
+  // 多 Claude 进程区分色 — 使用图表调色板变量
+  const CLAUDE_COLORS = [
+    'var(--tc-chart-1)', 'var(--tc-chart-2)', 'var(--tc-chart-3)',
+    'var(--tc-chart-4)', 'var(--tc-chart-5)',
+  ]
 
   return (
     <div className={styles.page}>
