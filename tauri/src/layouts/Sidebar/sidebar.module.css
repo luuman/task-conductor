@@ -18,7 +18,7 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--tc-accent, #6366f1), #8b5cf6);
+  background: linear-gradient(135deg, var(--tc-accent), var(--tc-accent-subtle));
   display: flex;
   align-items: center;
   justify-content: center;
