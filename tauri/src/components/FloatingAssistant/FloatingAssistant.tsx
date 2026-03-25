@@ -520,7 +520,7 @@ export function FloatingAssistant() {
                     title={tab.title}
                   >
                     {isGenerating && tab.id === activeTabId && (
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4477ff', animation: 'pulse 2s infinite', flexShrink: 0 }} />
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--tc-accent)', animation: 'pulse 2s infinite', flexShrink: 0 }} />
                     )}
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{tab.title}</span>
                     {tabs.length > 1 && (
