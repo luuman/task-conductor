@@ -1,0 +1,20 @@
+{
+  "name": "Amber",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#0d0c0a",
+    "base.bg-secondary":  "#151209",
+    "base.bg-hover":      "#1e1c16",
+    "base.fg-primary":    "#f0eee8",
+    "base.fg-secondary":  "#706858",
+    "base.accent":        "#fbbf24",
+    "base.accent-bg":     "#2c2008",
+    "base.accent-fg":     "#0d0c0a",
+    "base.border":        "#1e1c18",
+    "base.border-active": "#fbbf24",
+    "base.error":         "#f87171",
+    "base.warning":       "#fb923c",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
