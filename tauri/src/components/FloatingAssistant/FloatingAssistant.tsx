@@ -550,7 +550,7 @@ export function FloatingAssistant() {
                         setShowHistory(v => !v)
                       }}
                       title="历史会话"
-                      style={{ color: showHistory ? '#fff' : undefined }}
+                      style={{ color: showHistory ? 'var(--tc-foreground)' : undefined }}
                     ><IconClock size={13} /></button>
                     {showHistory && historyPos && (
                       <div
