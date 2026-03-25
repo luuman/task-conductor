@@ -1,0 +1,20 @@
+{
+  "name": "Coral",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#0d0b0a",
+    "base.bg-secondary":  "#140f0c",
+    "base.bg-hover":      "#1e1814",
+    "base.fg-primary":    "#f0ebe8",
+    "base.fg-secondary":  "#706058",
+    "base.accent":        "#f97316",
+    "base.accent-bg":     "#2c1508",
+    "base.accent-fg":     "#ffffff",
+    "base.border":        "#1e1a18",
+    "base.border-active": "#f97316",
+    "base.error":         "#f87171",
+    "base.warning":       "#fbbf24",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
