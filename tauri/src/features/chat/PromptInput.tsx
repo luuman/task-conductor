@@ -146,7 +146,7 @@ function formatOneDomContext(ctx: DomContext, index: number): string {
 /** 把多个 DomContext 拼接成完整上下文文本 */
 function formatDomContextList(list: DomContext[]): string {
   if (list.length === 0) return ''
-  return '\n\n' + list.map((ctx, i) => formatOneDomContext(ctx, i)).join('\n')
+  return '\n\n' + list.map((ctx, i) => formatOneDomContext(ctx, i)).join('\n\n')
 }
 
 /** DOM 高亮覆盖层（portal 渲染到 body，pointer-events:none） */
