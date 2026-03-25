@@ -501,12 +501,12 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
                         <div className={s.hSubHead} onClick={(e) => { e.stopPropagation(); toggle(subId) }}>
                           <span className={s.hChevron} style={{ transform: isSubOpen ? 'rotate(90deg)' : undefined }}>▶</span>
                           <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-                          {step.toolInput?.file_path && (
+                          {!!step.toolInput?.file_path && (
                             <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 4 }}>
                               {String(step.toolInput.file_path).split('/').pop() || ''}
                             </span>
                           )}
-                          {step.toolInput?.command && (
+                          {!!step.toolInput?.command && (
                             <span style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginLeft: 4 }}>
                               {String(step.toolInput.command).slice(0, 40)}
                             </span>
