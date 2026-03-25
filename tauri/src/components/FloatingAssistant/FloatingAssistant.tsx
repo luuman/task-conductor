@@ -363,25 +363,6 @@ export function FloatingAssistant() {
     if (text) send(text)
   }, [messages, isGenerating, send])
 
-  // Build streaming message for display
-  const displayMessages = currentReply
-    ? [...messages, makeTextMsg('assistant', currentReply)]
-    : messages
-
-  // 提取消息中引用的源文件（来自 Read tool 调用）
-  const sourceFiles = useMemo(() => {
-    const seen = new Set<string>()
-    const files: string[] = []
-    for (const msg of messages) {
-      for (const b of msg.blocks as TranscriptBlock[]) {
-        if (b.type === 'tool_use' && b.tool_name === 'Read' && b.tool_input?.file_path) {
-          const name = String(b.tool_input.file_path).split('/').pop() ?? ''
-          if (name && !seen.has(name)) { seen.add(name); files.push(name) }
-        }
-      }
-    }
-    return files.slice(0, 6)
-  }, [messages])
 
   const formatTime = (ts: string) => {
     const now = new Date()
