@@ -53,8 +53,8 @@ const CAT_LABEL_MAP: Record<string, string> = {
 }
 
 function badgeLabel(step: TimelineStep): string {
-  if (step.kind === 'text') return 'text'
-  const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || 'Tool'
+  if (step.kind === 'text') return '文本'
+  const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || '工具'
   return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
 }
 
