@@ -700,9 +700,26 @@ function PromptInput() {
           </button>
         </div>
         <div className={s.pToolRight}>
-          <button className={s.pToolBtn} title="参数设置">
-            <IconSettings size={14} />
-          </button>
+          <div ref={settingsRef} style={{ position: 'relative' }}>
+            <button
+              className={s.pToolBtn}
+              title="设置"
+              onClick={() => setShowSettings(v => !v)}
+              style={showSettings ? { color: 'var(--tc-foreground)', background: 'rgba(255,255,255,0.06)' } : undefined}
+            >
+              <IconSettings size={14} />
+            </button>
+            {showSettings && (
+              <div className={s.settingsDropdown}>
+                <button
+                  className={s.settingsItem}
+                  onClick={() => { setMessages([]); setCurrentReply(''); setShowSettings(false) }}
+                >
+                  清除对话记录
+                </button>
+              </div>
+            )}
+          </div>
           <button className={s.pToolBtn} title="更多选项">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
