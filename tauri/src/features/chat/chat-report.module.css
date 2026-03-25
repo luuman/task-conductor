@@ -415,8 +415,8 @@
 .iPillBadge { font-size: 9px; background: rgba(110,118,129,0.15); padding: 0 4px; border-radius: 6px; color: var(--tc-foreground-secondary); }
 
 /* Agent 卡片 */
-.iAgentCard { border: 1px solid rgba(188,140,255,0.2); background: rgba(188,140,255,0.04); border-radius: 6px; overflow: hidden; margin: 2px 0; }
-.iAgentHead { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(188,140,255,0.1); font-size: 11px; color: #bc8cff; }
+.iAgentCard { border: 1px solid var(--tc-accent-a20); background: var(--tc-accent-a4); border-radius: 6px; overflow: hidden; margin: 2px 0; }
+.iAgentHead { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--tc-accent-a10); font-size: 11px; color: var(--tc-accent-subtle); }
 .iAgentDesc { color: var(--tc-foreground-secondary); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .iAgentBody { padding: 10px 12px; font-size: 12px; }
 
