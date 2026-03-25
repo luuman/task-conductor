@@ -122,6 +122,11 @@ function DomPickerOverlay({ rect }: { rect: DOMRectReadOnly | null }) {
 
 type ModelInfo = { id: string; name: string; default?: boolean }
 
+function _fmtTokens(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+  return String(n)
+}
+
 export function PromptInput() {
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
