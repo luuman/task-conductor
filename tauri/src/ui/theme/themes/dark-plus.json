@@ -10,7 +10,7 @@
     "base.accent":        "#7c6af5",
     "base.accent-bg":     "#13103c",
     "base.accent-fg":     "#ffffff",
-    "base.border":        "#1e1e28",
+    "base.border":        "#1e1e1e",
     "base.border-active": "#7c6af5",
     "base.error":         "#f87171",
     "base.warning":       "#fbbf24",
