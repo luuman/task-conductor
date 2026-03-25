@@ -559,6 +559,10 @@ export default function ChatReportPage() {
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
 
+  const makeAiMsg = (role: 'user' | 'assistant', text: string): TranscriptMessage => ({
+    role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }],
+  })
+
   // 获取当前项目 cwd
   const [projectCwd, setProjectCwd] = useState<string | undefined>()
   useEffect(() => {
