@@ -350,7 +350,7 @@
 }
 .inspectTitle {
   flex: 1;
-  font-family: var(--tc-font-mono, monospace);
+  font-family: var(--tc-font-mono);
   font-size: 11px;
   color: var(--tc-foreground);
   white-space: nowrap;
