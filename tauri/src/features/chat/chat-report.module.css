@@ -111,7 +111,7 @@
 .sbTitle { font-size: 11px; font-weight: 600; color: var(--tc-foreground); margin-bottom: 6px; }
 .sbRow { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; }
 .sbKey { color: var(--tc-foreground-secondary); }
-.sbVal { color: var(--tc-foreground); font-family: var(--tc-font-mono, monospace); font-size: 10px; }
+.sbVal { color: var(--tc-foreground); font-family: var(--tc-font-mono); font-size: 10px; }
 .sbDivider { border: none; border-top: 1px solid var(--tc-border); margin: 10px 0; }
 .sbTasks { display: flex; flex-wrap: wrap; gap: 5px; }
 .sbTask {
