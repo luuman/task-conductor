@@ -44,7 +44,7 @@ type ActionStatus = 'idle' | 'loading' | 'ok' | 'error'
 export default function SettingsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { theme, setTheme, themes } = useTheme()
+  const { theme, setTheme, themeList } = useTheme()
   const { logout } = useAuthStore()
 
   const [settings, setSettings] = useState<Settings>(readCache)
