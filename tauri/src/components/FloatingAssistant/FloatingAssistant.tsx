@@ -613,7 +613,7 @@ export function FloatingAssistant() {
                       )}
                     </div>
                   )}
-                  <ChatMessageList messages={displayMessages} />
+                  <SlimMessageList messages={displayMessages} />
                   <div ref={messagesEndRef} />
                 </div>
 
@@ -622,6 +622,21 @@ export function FloatingAssistant() {
                   <div className={styles.actionRow}>
                     <button className={styles.actionBtn} onClick={handleCopy}>复制</button>
                     <button className={styles.actionBtn} onClick={handleRetry}>重试</button>
+                  </div>
+                )}
+
+                {/* Sources 区域 */}
+                {sourceFiles.length > 0 && (
+                  <div className={styles.sourcesSection}>
+                    <div className={styles.sourcesLabel}>{sourceFiles.length} 个引用文件</div>
+                    <div className={styles.sourcePills}>
+                      {sourceFiles.map(f => (
+                        <span key={f} className={styles.sourcePill}>
+                          <IconFileText size={10} />
+                          {f}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
 
