@@ -4,11 +4,7 @@ import type { Task } from '../../../lib/api/types'
 import { Button } from '../../../ui/button'
 import styles from './TaskRow.module.css'
 
-// 阶段颜色 — 从 CSS 变量读取（定义在 global.css --tc-stage-* 中）
-function getCssVar(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#71717a'
-}
-
+// 阶段颜色 — 使用 CSS 变量（定义在 global.css --tc-stage-* 中）
 const STAGE_COLORS: Record<string, string> = {
   input:    '#71717a',
   analysis: 'var(--tc-stage-analysis)',
