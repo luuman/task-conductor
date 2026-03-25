@@ -616,42 +616,11 @@ function PromptInput() {
     setAttachments(v => v.filter(a => a.id !== id))
   }, [])
 
-  // 展示消息：历史 + 当前流式回复
-  const displayMessages = currentReply
-    ? [...messages, makeAiMsg('assistant', currentReply)]
-    : messages
-
   return (
     <>
     {/* 隐藏文件输入 */}
     <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} />
     <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
-
-    {/* 对话历史区域 */}
-    {displayMessages.length > 0 && (
-      <div className={s.chatHistory}>
-        {displayMessages.map((msg, i) => {
-          const text = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
-          if (!text) return null
-          return (
-            <div key={i} className={msg.role === 'user' ? s.chatUser : s.chatAi}>
-              {msg.role === 'user' ? (
-                <span className={s.chatUserText}>{text}</span>
-              ) : (
-                <div className={s.richText}><RichTextBlock text={text} /></div>
-              )}
-            </div>
-          )
-        })}
-        {isGenerating && !currentReply && (
-          <div className={s.pThinking}>
-            <span className={s.pThinkingDot} />
-            <span>思考中...</span>
-          </div>
-        )}
-        <div ref={msgEndRef} />
-      </div>
-    )}
 
     <div className={s.promptCard}>
       {attachments.length > 0 && (
