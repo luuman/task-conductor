@@ -8,7 +8,7 @@ import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from 
 import {
   IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
   IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
-  IconChevronRight, IconX, IconPlus, IconLink, IconMaximize,
+  IconChevronRight, IconX, IconPlus, IconLink, IconSettings, IconMaximize,
 } from '../../ui/icon'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
@@ -27,6 +27,15 @@ const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
 // ── badge class ──
+function badgeCls(cat: TimelineStep['category']): string {
+  const map: Record<string, string> = {
+    text: s.bText, read: s.bRead, edit: s.bEdit, write: s.bWrite,
+    bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
+    ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
+  }
+  return `${s.badge} ${map[cat] || s.bOther}`
+}
+
 const TOOL_LABEL_MAP: Record<string, string> = {
   Read: '读取', Write: '写入', Edit: '编辑', MultiEdit: '多处编辑',
   Bash: '命令', Grep: '内容搜索', Glob: '文件匹配',
@@ -43,7 +52,8 @@ const CAT_LABEL_MAP: Record<string, string> = {
   search: '网络搜索', task: '任务管理', text: '文本', other: '其他',
 }
 
-function toolLabel(step: TimelineStep): string {
+function badgeLabel(step: TimelineStep): string {
+  if (step.kind === 'text') return '文本'
   const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || '工具'
   return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
 }
@@ -200,11 +210,12 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
             {step.kind === 'text' ? (
               <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
-              <div className={s.aToolRow}>
-                {catIcon(step.category, 12)}
-                <span className={s.ts}>{toolLabel(step)}</span>
+              <>
+                {!step.toolResult && !step.oldString && (
+                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step)}</span>
+                )}
                 <ResultBlock step={step} />
-              </div>
+              </>
             )}
           </div>
         </React.Fragment>
@@ -221,12 +232,11 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
           {step.kind === 'text' ? (
             <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (
-            <div className={s.bCard}>
-              <div className={s.bHead}>
-                {catIcon(step.category, 12)}
-                <span className={s.bTitle}>{toolLabel(step)}</span>
-              </div>
-              {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
+            <div>
+              {!step.toolResult && !step.oldString && (
+                <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+              )}
+              {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
             </div>
           )}
         </React.Fragment>
@@ -283,11 +293,10 @@ function StyleG({ steps }: { steps: TimelineStep[] }) {
               <div className={s.gBubbleText}><RichText text={step.text!} /></div>
             ) : (
               <div className={s.gBubbleTool}>
-                <div className={s.gToolHead}>
-                  {catIcon(step.category, 11)}
-                  <span>{toolLabel(step)}</span>
-                </div>
-                {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
+                {!step.toolResult && !step.oldString && (
+                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                )}
+                <ResultBlock step={step} />
               </div>
             )}
           </div>
@@ -319,7 +328,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
                   <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>{catIcon(step.category, 12)}<span className={s.hTitle}>{toolLabel(step)}</span></span>
+                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
                 </div>
                 {isOpen && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
                   <div className={s.hBody}><ResultBlock step={step} /></div>
@@ -542,7 +551,7 @@ const QUICK_CHIPS = [
 
 function PromptInput() {
   const [value, setValue] = useState('')
-  const [attachments, setAttachments] = useState<Array<{ name: string; type: 'file' | 'image' }>>([])
+  const [attachments, setAttachments] = useState<string[]>([])
   const [working, setWorking] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -556,25 +565,18 @@ function PromptInput() {
     el.style.height = Math.min(el.scrollHeight, 160) + 'px'
   }, [])
 
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(() => {
     if (isEmpty || working) return
-    const text = value.trim()
     setWorking(true)
     setValue('')
     setAttachments([])
-    setTimeout(autoResize, 0)
-    try {
-      const pid = localStorage.getItem('tc_active_project')
-      if (pid) {
-        await api.createTask(Number(pid), { title: text || attachments.map(a => a.name).join(', ') })
-      }
-    } catch {
-      // ignore
-    } finally {
-      setWorking(false)
-      setTimeout(() => textareaRef.current?.focus(), 0)
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
     }
-  }, [isEmpty, working, value, attachments, autoResize])
+    // TODO: 接入后端 API 发送 prompt
+    // 暂时模拟发送完成，重置状态
+    setTimeout(() => setWorking(false), 1500)
+  }, [isEmpty, working])
 
   const handleStop = useCallback(() => {
     setWorking(false)
@@ -587,57 +589,26 @@ function PromptInput() {
     }
   }, [handleSend])
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image') => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    setAttachments(prev => [...prev, ...files.map(f => ({ name: f.name, type }))])
+    setAttachments(v => [...v, ...files.map(f => f.name)])
     e.target.value = ''
     textareaRef.current?.focus()
   }, [])
 
-  const insertLink = useCallback(() => {
-    const url = window.prompt('输入链接地址：')
-    if (!url) return
-    const label = window.prompt('链接文字（可选）：') || url
-    const md = `[${label}](${url})`
-    const el = textareaRef.current
-    if (!el) { setValue(v => v + md); return }
-    const start = el.selectionStart ?? value.length
-    const end = el.selectionEnd ?? value.length
-    const next = value.slice(0, start) + md + value.slice(end)
-    setValue(next)
-    setTimeout(() => {
-      el.focus()
-      el.setSelectionRange(start + md.length, start + md.length)
-      autoResize()
-    }, 0)
-  }, [value, autoResize])
-
   return (
     <>
-    {/* 隐藏的文件选择器 */}
-    <input
-      ref={fileInputRef}
-      type="file"
-      multiple
-      style={{ display: 'none' }}
-      onChange={e => handleFileChange(e, 'file')}
-    />
-    <input
-      ref={imageInputRef}
-      type="file"
-      accept="image/*"
-      multiple
-      style={{ display: 'none' }}
-      onChange={e => handleFileChange(e, 'image')}
-    />
+    {/* 隐藏文件输入 */}
+    <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} />
+    <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
 
     <div className={s.promptCard}>
       {attachments.length > 0 && (
         <div className={s.pAttachRow}>
-          {attachments.map((att, i) => (
+          {attachments.map((name, i) => (
             <span key={i} className={s.pAttachChip}>
               <IconFileText size={11} />
-              <span>{att.name}</span>
+              <span>{name}</span>
               <button
                 className={s.pAttachClose}
                 onClick={() => setAttachments(v => v.filter((_, j) => j !== i))}
@@ -653,23 +624,14 @@ function PromptInput() {
         <textarea
           ref={textareaRef}
           className={s.pTextarea}
-          placeholder={working ? '处理中...' : '输入消息，@模型，/提示词...'}
+          placeholder={working ? 'Working on your request...' : 'Ask anything, @models, /prompts...'}
           value={value}
           onChange={e => { setValue(e.target.value); autoResize() }}
           onKeyDown={handleKeyDown}
           disabled={working}
           rows={1}
         />
-        <button
-          className={s.pExpandBtn}
-          title="展开"
-          onClick={() => {
-            const el = textareaRef.current
-            if (!el) return
-            const isExpanded = parseInt(el.style.height || '0') > 80
-            el.style.height = isExpanded ? 'auto' : '160px'
-          }}
-        >
+        <button className={s.pExpandBtn} title="展开">
           <IconMaximize size={13} />
         </button>
       </div>
@@ -679,7 +641,12 @@ function PromptInput() {
           <button className={s.pToolBtn} title="添加附件" onClick={() => fileInputRef.current?.click()}>
             <IconPlus size={14} />
           </button>
-          <button className={s.pToolBtn} title="插入链接" onClick={insertLink}>
+          <button className={s.pToolBtn} title="保存">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <button className={s.pToolBtn} title="插入链接">
             <IconLink size={14} />
           </button>
           <button className={s.pToolBtn} title="上传图片" onClick={() => imageInputRef.current?.click()}>
@@ -691,6 +658,14 @@ function PromptInput() {
           </button>
         </div>
         <div className={s.pToolRight}>
+          <button className={s.pToolBtn} title="参数设置">
+            <IconSettings size={14} />
+          </button>
+          <button className={s.pToolBtn} title="更多选项">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
+            </svg>
+          </button>
           {working ? (
             <button className={s.pStopBtn} onClick={handleStop} title="停止">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
@@ -710,7 +685,7 @@ function PromptInput() {
       {working && (
         <div className={s.pThinking}>
           <span className={s.pThinkingDot} />
-          <span>处理中...</span>
+          <span>Thinking...</span>
         </div>
       )}
 
@@ -851,10 +826,22 @@ export default function ChatReportPage() {
             </CodeExpandCtx.Provider>
           </div>
 
-          {/* 底部输入栏 — 始终显示 */}
-          <div className={s.bottomBar}>
-            <PromptInput />
-          </div>
+          {/* 底部操作栏 — 在可滚动区域之外，不遮盖内容 */}
+          {steps.length > 0 && (
+            <div className={s.bottomBar}>
+              <div className={s.bottomActions}>
+                <button className={s.actionBtn}>♡ 收藏</button>
+                <button className={s.actionBtn}>↗ 分享</button>
+                <button className={s.actionBtn}>↻ 重写</button>
+                <button className={s.actionBtn} onClick={() => {
+                  const allText = steps.filter(st => st.kind === 'text').map(st => st.text).join('\n\n')
+                  navigator.clipboard.writeText(allText)
+                }}><IconClipboard size={12} /> 复制</button>
+                <span className={s.actionDots}>⋯</span>
+              </div>
+              <PromptInput />
+            </div>
+          )}
         </div>
         <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} />
       </div>
