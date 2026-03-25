@@ -3,7 +3,7 @@
  * 同时用于 /chat 页面和 FloatingAssistant
  */
 import React, { useCallback, useState } from 'react'
-import type { TranscriptMessage } from '../../lib/api/types'
+import type { TranscriptMessage, MessageAttachment } from '../../lib/api/types'
 import { parseTimelineWithQuestions, guessHljsLang } from './timeline-parser'
 import type { TimelineStep } from './timeline-parser'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
