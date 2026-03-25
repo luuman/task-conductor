@@ -38,6 +38,23 @@
   --tc-terminal-green: #3fb950;
   --tc-terminal-red:   #f85149;
 
+  /* ── 流水线阶段颜色（pipeline stage badge/dot） ── */
+  --tc-stage-analysis: #7c6af5;
+  --tc-stage-prd:      #a78bfa;
+  --tc-stage-ui:       #f472b6;
+  --tc-stage-plan:     #60a5fa;
+  --tc-stage-dev:      #34d399;
+  --tc-stage-test:     #fbbf24;
+  --tc-stage-deploy:   #fb923c;
+  --tc-stage-monitor:  #818cf8;
+
+  /* ── 图表/数据可视化颜色序列 ── */
+  --tc-chart-1: #7c6af5;
+  --tc-chart-2: #60a5fa;
+  --tc-chart-3: #4ade80;
+  --tc-chart-4: #fbbf24;
+  --tc-chart-5: #f472b6;
+
   /* ── 圆角比例（保持跨组件一致） ── */
   --tc-radius-xs:   4px;
   --tc-radius-sm:   6px;
