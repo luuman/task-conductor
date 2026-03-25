@@ -509,7 +509,9 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 // ════════════════════════════════════════════════
 function stripDomContext(text: string): string {
   const idx = text.indexOf('--- 问题元素')
-  return idx !== -1 ? text.slice(0, idx).trim() : text
+  const cut = idx !== -1 ? text.slice(0, idx).trim() : text
+  // 如果截断后仍含 HTML 标签（捕获元素的 outerHTML 场景），提取纯文本
+  return cut.includes('<') ? cut.replace(/<[^>]+>/g, '').trim() : cut
 }
 
 // ── 时间格式化（相对时间） ──
