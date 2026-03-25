@@ -27,6 +27,9 @@ export interface TimelineStep {
 
   /** 相邻同类型合并数量（>1 表示已合并） */
   mergedCount?: number
+
+  /** 合并时保存的所有原始步骤（含自身），用于展示多个结果 */
+  mergedSteps?: TimelineStep[]
 }
 
 const CATEGORY_MAP: Record<string, TimelineStep['category']> = {
