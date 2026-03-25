@@ -420,9 +420,9 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
       {/* 涉及文件 */}
       <div className={s.sbSection}>
         <div className={s.sbTitle}>涉及文件</div>
-        <div className={s.sbRow}><span className={s.sbKey}>📄 读取</span><span className={s.sbVal}>{fileStats.read} 文件</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>✏️ 修改</span><span className={s.sbVal}>{fileStats.edit} 文件</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>📝 新建</span><span className={s.sbVal}>{fileStats.write} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFileText size={11} /> 读取</span><span className={s.sbVal}>{fileStats.read} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconPencil size={11} /> 修改</span><span className={s.sbVal}>{fileStats.edit} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFilePlus size={11} /> 新建</span><span className={s.sbVal}>{fileStats.write} 文件</span></div>
       </div>
 
       <hr className={s.sbDivider} />
