@@ -551,9 +551,11 @@ const QUICK_CHIPS = [
 
 function PromptInput() {
   const [value, setValue] = useState('')
-  const [attachments, setAttachments] = useState<string[]>([])
+  const [attachments, setAttachments] = useState<Array<{ name: string; type: 'file' | 'image' }>>([])
   const [working, setWorking] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0
 
   const autoResize = useCallback(() => {
@@ -569,10 +571,11 @@ function PromptInput() {
     setWorking(true)
     setValue('')
     setAttachments([])
+    setTimeout(autoResize, 0)
     try {
       const pid = localStorage.getItem('tc_active_project')
       if (pid) {
-        await api.createTask(Number(pid), { title: text })
+        await api.createTask(Number(pid), { title: text || attachments.map(a => a.name).join(', ') })
       }
     } catch {
       // ignore
@@ -580,11 +583,10 @@ function PromptInput() {
       setWorking(false)
       setTimeout(() => textareaRef.current?.focus(), 0)
     }
-  }, [isEmpty, working, value])
+  }, [isEmpty, working, value, attachments, autoResize])
 
   const handleStop = useCallback(() => {
     setWorking(false)
-    // TODO: 取消请求
   }, [])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -594,15 +596,57 @@ function PromptInput() {
     }
   }, [handleSend])
 
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image') => {
+    const files = Array.from(e.target.files || [])
+    setAttachments(prev => [...prev, ...files.map(f => ({ name: f.name, type }))])
+    e.target.value = ''
+    textareaRef.current?.focus()
+  }, [])
+
+  const insertLink = useCallback(() => {
+    const url = window.prompt('输入链接地址：')
+    if (!url) return
+    const label = window.prompt('链接文字（可选）：') || url
+    const md = `[${label}](${url})`
+    const el = textareaRef.current
+    if (!el) { setValue(v => v + md); return }
+    const start = el.selectionStart ?? value.length
+    const end = el.selectionEnd ?? value.length
+    const next = value.slice(0, start) + md + value.slice(end)
+    setValue(next)
+    setTimeout(() => {
+      el.focus()
+      el.setSelectionRange(start + md.length, start + md.length)
+      autoResize()
+    }, 0)
+  }, [value, autoResize])
+
   return (
     <>
+    {/* 隐藏的文件选择器 */}
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      style={{ display: 'none' }}
+      onChange={e => handleFileChange(e, 'file')}
+    />
+    <input
+      ref={imageInputRef}
+      type="file"
+      accept="image/*"
+      multiple
+      style={{ display: 'none' }}
+      onChange={e => handleFileChange(e, 'image')}
+    />
+
     <div className={s.promptCard}>
       {attachments.length > 0 && (
         <div className={s.pAttachRow}>
-          {attachments.map((name, i) => (
+          {attachments.map((att, i) => (
             <span key={i} className={s.pAttachChip}>
               <IconFileText size={11} />
-              <span>{name}</span>
+              <span>{att.name}</span>
               <button
                 className={s.pAttachClose}
                 onClick={() => setAttachments(v => v.filter((_, j) => j !== i))}
@@ -618,32 +662,36 @@ function PromptInput() {
         <textarea
           ref={textareaRef}
           className={s.pTextarea}
-          placeholder={working ? 'Working on your request...' : 'Ask anything, @models, /prompts...'}
+          placeholder={working ? '处理中...' : '输入消息，@模型，/提示词...'}
           value={value}
           onChange={e => { setValue(e.target.value); autoResize() }}
           onKeyDown={handleKeyDown}
           disabled={working}
           rows={1}
         />
-        <button className={s.pExpandBtn} title="展开">
+        <button
+          className={s.pExpandBtn}
+          title="展开"
+          onClick={() => {
+            const el = textareaRef.current
+            if (!el) return
+            const isExpanded = parseInt(el.style.height || '0') > 80
+            el.style.height = isExpanded ? 'auto' : '160px'
+          }}
+        >
           <IconMaximize size={13} />
         </button>
       </div>
 
       <div className={s.pToolbar}>
         <div className={s.pToolLeft}>
-          <button className={s.pToolBtn} title="添加附件">
+          <button className={s.pToolBtn} title="添加附件" onClick={() => fileInputRef.current?.click()}>
             <IconPlus size={14} />
           </button>
-          <button className={s.pToolBtn} title="保存">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
-          </button>
-          <button className={s.pToolBtn} title="插入链接">
+          <button className={s.pToolBtn} title="插入链接" onClick={insertLink}>
             <IconLink size={14} />
           </button>
-          <button className={s.pToolBtn} title="上传图片">
+          <button className={s.pToolBtn} title="上传图片" onClick={() => imageInputRef.current?.click()}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="18" height="18" rx="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
@@ -652,14 +700,6 @@ function PromptInput() {
           </button>
         </div>
         <div className={s.pToolRight}>
-          <button className={s.pToolBtn} title="参数设置">
-            <IconSettings size={14} />
-          </button>
-          <button className={s.pToolBtn} title="更多选项">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
-            </svg>
-          </button>
           {working ? (
             <button className={s.pStopBtn} onClick={handleStop} title="停止">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
@@ -679,7 +719,7 @@ function PromptInput() {
       {working && (
         <div className={s.pThinking}>
           <span className={s.pThinkingDot} />
-          <span>Thinking...</span>
+          <span>处理中...</span>
         </div>
       )}
 
