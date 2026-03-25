@@ -13,7 +13,7 @@ const QUICK_CHIPS = [
   { label: '精化需求', color: '#fb923c' },
 ]
 
-type Attachment = { id: string; name: string; kind: 'image' | 'file'; dataUrl?: string }
+type Attachment = MessageAttachment
 
 type DomContext = {
   _id: string
