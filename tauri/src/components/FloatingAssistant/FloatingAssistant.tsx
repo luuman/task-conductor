@@ -453,7 +453,7 @@ export function FloatingAssistant() {
                       )}
                     </div>
                   )}
-                  <SlimMessageList messages={displayMessages} />
+                  <ChatTimeline messages={messages} currentReply={currentReply || undefined} />
                   <div ref={messagesEndRef} />
                 </div>
 
