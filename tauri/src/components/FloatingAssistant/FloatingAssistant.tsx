@@ -595,6 +595,47 @@ export function FloatingAssistant() {
           </>}
         </div>
       )}
+
+      {/* 历史会话下拉（fixed，脱离 overflow:hidden 的面板） */}
+      {showHistory && historyPos && (
+        <div
+          className={styles.historyDropdown}
+          style={{ position: 'fixed', top: historyPos.top, right: historyPos.right, width: 300, maxHeight: 400, zIndex: 99999 }}
+        >
+          <div className={styles.historyHeader}>
+            <span className={styles.historyHeaderLabel}>历史会话</span>
+          </div>
+          <div className={styles.historyList}>
+            {sessions.length === 0 && (
+              <div className={styles.historyEmpty}>暂无历史会话</div>
+            )}
+            {sessions.map(s => {
+              const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
+              const isCurrent = tabs.find(t => t.id === activeTabId)?.sessionId === s.session_id
+              const dotCls = s.status === 'active'
+                ? `${styles.historyDot} ${styles.historyDotActive}`
+                : s.status === 'idle'
+                ? `${styles.historyDot} ${styles.historyDotIdle}`
+                : `${styles.historyDot} ${styles.historyDotStopped}`
+              return (
+                <button
+                  key={s.session_id}
+                  className={`${styles.historyRow} ${isCurrent ? styles.historyRowActive : ''}`}
+                  onClick={() => handleOpenHistory(s)}
+                >
+                  <span className={dotCls} />
+                  <div className={styles.historyRowBody}>
+                    <div className={`${styles.historyTitle} ${isCurrent ? styles.historyTitleOpen : ''}`}>{title}</div>
+                    <div className={styles.historyMeta}>
+                      {s.event_count} 事件 · {formatTime(s.last_seen_at || s.started_at)}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </>
   )
 }
