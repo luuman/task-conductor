@@ -144,8 +144,6 @@ export function MonacoWrapper({
         fontSize: 13,
         minimap: { enabled: true },
         lineNumbers: 'on',
-        lineNumbersMinChars: 3,
-        glyphMargin: false,
         automaticLayout: true,
         scrollBeyondLastLine: false,
         renderWhitespace: 'selection',
