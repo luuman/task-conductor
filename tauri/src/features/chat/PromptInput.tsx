@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { TranscriptMessage, MessageAttachment } from '../../lib/api/types'
+import type { TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
-import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconFileText, IconCrosshair, IconFolder } from '../../ui/icon'
+import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconFileText, IconCrosshair } from '../../ui/icon'
 import s from './chat-report.module.css'
 
 const QUICK_CHIPS = [
@@ -13,7 +13,7 @@ const QUICK_CHIPS = [
   { label: '精化需求', color: '#fb923c' },
 ]
 
-type Attachment = MessageAttachment
+type Attachment = { id: string; name: string; kind: 'image' | 'file'; dataUrl?: string }
 
 type DomContext = {
   _id: string
@@ -27,8 +27,8 @@ type DomContext = {
   outerHTML: string
 }
 
-function makeAiMsg(role: 'user' | 'assistant', text: string, attachments?: Attachment[]): TranscriptMessage {
-  return { role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }], attachments: attachments?.length ? attachments : undefined }
+function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
+  return { role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }] }
 }
 
 /** 捕获目标元素的关键信息 */
@@ -141,7 +141,6 @@ export function PromptInput() {
   }, [inputDraft, setInputDraft])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const folderInputRef = useRef<HTMLInputElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0 && domCtxList.length === 0
 
@@ -203,18 +202,18 @@ export function PromptInput() {
 
   const handleSend = useCallback(() => {
     const text = value.trim()
-    if ((!text && attachments.length === 0 && domCtxList.length === 0) || isGenerating) return
+    if ((!text && domCtxList.length === 0) || isGenerating) return
     const ctxText = formatDomContextList(domCtxList)
     const fullText = ctxText
       ? (text || `请帮我分析以下 ${domCtxList.length} 个元素`) + ctxText
       : text
-    addMessage(makeAiMsg('user', fullText, attachments))
+    addMessage(makeAiMsg('user', fullText))
     send(fullText)
     setValue('')
     setAttachments([])
     setDomCtxList([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-  }, [value, attachments, domCtxList, isGenerating, addMessage, send])
+  }, [value, domCtxList, isGenerating, addMessage, send])
 
   const handleStop = useCallback(() => stop(), [stop])
 
@@ -244,17 +243,6 @@ export function PromptInput() {
     textareaRef.current?.focus()
   }, [])
 
-  const handleFolderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
-    // 取公共父目录名作为文件夹名
-    const folderName = files[0].webkitRelativePath.split('/')[0] || '文件夹'
-    const id = `${Date.now()}-${Math.random()}`
-    setAttachments(v => [...v, { id, name: folderName, kind: 'folder' }])
-    e.target.value = ''
-    textareaRef.current?.focus()
-  }, [])
-
   const removeAttachment = useCallback((id: string) => {
     setAttachments(v => v.filter(a => a.id !== id))
   }, [])
@@ -265,14 +253,13 @@ export function PromptInput() {
       {isPicking && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          zIndex: 99998, pointerEvents: 'none',
+          zIndex: 99998, cursor: 'crosshair',
         }} />,
         document.body
       )}
 
       <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} />
       <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
-      <input ref={folderInputRef} type="file" style={{ display: 'none' }} onChange={handleFolderChange} {...{ webkitdirectory: '', mozdirectory: '' } as React.InputHTMLAttributes<HTMLInputElement>} />
 
       <div className={s.promptCard}>
         {(attachments.length > 0 || domCtxList.length > 0) && (
@@ -281,12 +268,6 @@ export function PromptInput() {
               <span key={a.id} className={s.pImgThumb}>
                 <img src={a.dataUrl} alt={a.name} title={a.name} />
                 <button onClick={() => removeAttachment(a.id)}><IconX size={8} /></button>
-              </span>
-            ) : a.kind === 'folder' ? (
-              <span key={a.id} className={s.pFolderChip}>
-                <IconFolder size={12} />
-                <span>{a.name}</span>
-                <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}><IconX size={10} /></button>
               </span>
             ) : (
               <span key={a.id} className={s.pAttachChip}>
@@ -355,11 +336,8 @@ export function PromptInput() {
 
         <div className={s.pToolbar}>
           <div className={s.pToolLeft}>
-            <button className={s.pToolBtn} title="添加文件" onClick={() => fileInputRef.current?.click()}>
+            <button className={s.pToolBtn} title="添加附件" onClick={() => fileInputRef.current?.click()}>
               <IconPlus size={14} />
-            </button>
-            <button className={s.pToolBtn} title="添加文件夹" onClick={() => folderInputRef.current?.click()}>
-              <IconFolder size={14} />
             </button>
             <button className={s.pToolBtn} title="插入链接">
               <IconLink size={14} />

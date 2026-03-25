@@ -3,7 +3,7 @@
  * 同时用于 /chat 页面和 FloatingAssistant
  */
 import React, { useCallback, useState } from 'react'
-import type { TranscriptMessage, MessageAttachment } from '../../lib/api/types'
+import type { TranscriptMessage } from '../../lib/api/types'
 import { parseTimelineWithQuestions, guessHljsLang } from './timeline-parser'
 import type { TimelineStep } from './timeline-parser'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
@@ -334,7 +334,7 @@ const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKe
 
 /** 将 messages 分段：user 气泡 / assistant steps 块交替出现 */
 type Segment =
-  | { type: 'user'; text: string; ts: string | null; attachments?: MessageAttachment[] }
+  | { type: 'user'; text: string; ts: string | null }
   | { type: 'assistant'; steps: TimelineStep[] }
 
 function splitSegments(messages: TranscriptMessage[]): Segment[] {
@@ -350,7 +350,7 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
     if (msg.role === 'user') {
       flushBuf()
       const text = msg.blocks.find(b => b.type === 'text')?.text?.trim()
-      if (text || msg.attachments?.length) segs.push({ type: 'user', text: text ?? '', ts: msg.ts ?? null, attachments: msg.attachments })
+      if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
       const { steps } = parseTimelineWithQuestions([msg])
@@ -385,28 +385,9 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
       {segments.map((seg, i) =>
         seg.type === 'user' ? (
           <div key={i} className={s.turnSection}>
-            {seg.attachments && seg.attachments.length > 0 && (
-              <div className={s.queryAttachments}>
-                {seg.attachments.map(a => a.kind === 'image' && a.dataUrl ? (
-                  <img key={a.id} src={a.dataUrl} className={s.queryImgThumb} alt={a.name} title={a.name} />
-                ) : a.kind === 'folder' ? (
-                  <div key={a.id} className={s.queryFolderChip}>
-                    <IconFolder size={12} />
-                    <span>{a.name}</span>
-                  </div>
-                ) : (
-                  <div key={a.id} className={s.queryFileChip}>
-                    <IconFileText size={12} />
-                    <span>{a.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {seg.text && (
-              <div className={s.queryPill}>
-                <div className={s.richText}>{seg.text}</div>
-              </div>
-            )}
+            <div className={s.queryPill}>
+              <div className={s.richText}>{seg.text}</div>
+            </div>
           </div>
         ) : (
           <Renderer key={i} steps={seg.steps} />

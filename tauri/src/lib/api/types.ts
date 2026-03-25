@@ -439,19 +439,11 @@ export interface TranscriptBlock {
   tool_error?: boolean | null
 }
 
-export interface MessageAttachment {
-  id: string
-  name: string
-  kind: 'image' | 'file' | 'folder'
-  dataUrl?: string
-}
-
 export interface TranscriptMessage {
   role: 'user' | 'assistant'
   ts: string | null
   blocks: TranscriptBlock[]
   model?: string | null
-  attachments?: MessageAttachment[]
 }
 
 export interface PaginatedMessages {

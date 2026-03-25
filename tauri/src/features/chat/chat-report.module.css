@@ -50,59 +50,7 @@
 .queryPill .richText {
   flex: 1; min-width: 0;
 }
-.turnSection { margin-bottom: 24px; display: flex; flex-direction: column; align-items: flex-end; }
-
-/* ── 用户消息附件区 ── */
-.queryAttachments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
-  justify-content: flex-end;
-  max-width: 80%;
-}
-.queryImgThumb {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--tc-border);
-  display: block;
-}
-.queryFileChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--tc-content-bg);
-  border: 1px solid var(--tc-border);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 11px;
-  color: var(--tc-foreground);
-  max-width: 180px;
-}
-.queryFileChip span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.queryFolderChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--tc-content-bg);
-  border: 1px solid var(--tc-border);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 11px;
-  color: var(--tc-foreground);
-  max-width: 180px;
-}
-.queryFolderChip span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.turnSection { margin-bottom: 24px; display: flex; flex-direction: column; }
 
 /* 侧边栏问题导航 */
 .qNav {
@@ -273,17 +221,6 @@
   gap: 5px;
   background: var(--tc-accent-a10);
   border: 1px solid var(--tc-accent-a20);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 11px;
-  color: var(--tc-foreground);
-}
-.pFolderChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(251,191,36,0.08);
-  border: 1px solid rgba(251,191,36,0.25);
   border-radius: 6px;
   padding: 3px 8px;
   font-size: 11px;
