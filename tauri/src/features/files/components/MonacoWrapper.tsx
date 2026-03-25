@@ -1,6 +1,7 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 import Editor, { type OnMount, type Monaco } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
+import { useTheme } from '../../../ui/theme/useTheme'
 
 interface MonacoWrapperProps {
   path: string
