@@ -23,7 +23,7 @@ export interface TimelineStep {
   newString?: string
 
   /** 分类标签 */
-  category: 'text' | 'read' | 'edit' | 'write' | 'bash' | 'grep' | 'glob' | 'agent' | 'ask' | 'search' | 'other'
+  category: 'text' | 'read' | 'edit' | 'write' | 'bash' | 'grep' | 'glob' | 'agent' | 'ask' | 'search' | 'task' | 'other'
 }
 
 const CATEGORY_MAP: Record<string, TimelineStep['category']> = {
