@@ -1258,8 +1258,8 @@ export function EditInlineCard({ block }: { block: TranscriptBlock }) {
         <span className={styles.toolIcon}>{fileExtIcon(filePath, 14)}</span>
         <span className={styles.toolParam} title={filePath}>{fileName}</span>
         <span className={`${styles.bashCardBadge} ${styles.bashCardPass}`}>{'\u2713'}</span>
-        <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', marginLeft: 'auto' }}>
-          ▶
+        <span className={styles.toolChevron} style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', marginLeft: 'auto', display: 'flex' }}>
+          <IconChevronRight size={13} />
         </span>
       </button>
       {mounted && (
