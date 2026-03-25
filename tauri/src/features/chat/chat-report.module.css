@@ -195,14 +195,14 @@
 .sendBtn {
   width: 30px;
   height: 30px;
-  background: var(--tc-border-active, #7c5cfc);
+  background: var(--tc-accent);
   border-radius: 50%;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--tc-accent-fg);
   font-size: 14px;
   flex-shrink: 0;
 }
