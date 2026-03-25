@@ -442,7 +442,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
                   }}
                 >
                   <span className={s.qNavNum}>Q{i + 1}</span>
-                  <span className={s.qNavText}>{q.text}</span>
+                  <span className={s.qNavText}>{stripDomContext(q.text)}</span>
                 </a>
               ))}
             </div>
