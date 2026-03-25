@@ -174,11 +174,9 @@ export function PromptInput() {
       e.stopPropagation()
       const el = document.elementFromPoint(e.clientX, e.clientY)
       if (el && el !== document.body && el !== document.documentElement) {
-        setDomCtx(captureDomContext(el))
+        setDomCtxList(v => [...v, captureDomContext(el)])
       }
-      setIsPicking(false)
-      setPickRect(null)
-      document.body.style.cursor = ''
+      // 不退出拾取模式，允许继续选多个
     }
 
     const onKeyDown = (e: KeyboardEvent) => {
