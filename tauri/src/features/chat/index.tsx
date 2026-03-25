@@ -76,22 +76,23 @@ function dotColor(cat: TimelineStep['category']): string {
   return style.getPropertyValue('--tc-tool-other').trim() || '#71717a'
 }
 
-function catIcon(cat: TimelineStep['category']): React.ReactNode {
+function catIcon(cat: TimelineStep['category'], size = 12): React.ReactNode {
+  const p = { size }
   const map: Record<string, React.ReactNode> = {
-    text: <IconMessage size={12} />,
-    read: <IconFileText size={12} />,
-    edit: <IconPencil size={12} />,
-    write: <IconFilePlus size={12} />,
-    bash: <IconTerminal size={12} />,
-    grep: <IconSearch size={12} />,
-    glob: <IconFolder size={12} />,
-    agent: <IconBot size={12} />,
-    ask: <IconCircleHelp size={12} />,
-    search: <IconGlobe size={12} />,
-    task: <IconClipboard size={12} />,
-    other: <IconWrench size={12} />,
+    text: <IconMessage {...p} />,
+    read: <IconFileText {...p} />,
+    edit: <IconPencil {...p} />,
+    write: <IconFilePlus {...p} />,
+    bash: <IconTerminal {...p} />,
+    grep: <IconSearch {...p} />,
+    glob: <IconFolder {...p} />,
+    agent: <IconBot {...p} />,
+    ask: <IconCircleHelp {...p} />,
+    search: <IconGlobe {...p} />,
+    task: <IconClipboard {...p} />,
+    other: <IconWrench {...p} />,
   }
-  return map[cat] ?? <IconWrench size={12} />
+  return map[cat] ?? <IconWrench {...p} />
 }
 
 const ACTION_MAP: Record<string, string> = {
