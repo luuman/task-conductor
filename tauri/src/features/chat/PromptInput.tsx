@@ -244,6 +244,17 @@ export function PromptInput() {
     textareaRef.current?.focus()
   }, [])
 
+  const handleFolderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+    // 取公共父目录名作为文件夹名
+    const folderName = files[0].webkitRelativePath.split('/')[0] || '文件夹'
+    const id = `${Date.now()}-${Math.random()}`
+    setAttachments(v => [...v, { id, name: folderName, kind: 'folder' }])
+    e.target.value = ''
+    textareaRef.current?.focus()
+  }, [])
+
   const removeAttachment = useCallback((id: string) => {
     setAttachments(v => v.filter(a => a.id !== id))
   }, [])
