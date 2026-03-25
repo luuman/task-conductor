@@ -26,10 +26,7 @@ function applyThemeToDOM(vars: Record<string, string>, type: 'dark' | 'light') {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const registry = useRef<Map<string, ThemeJSON>>(
-    new Map([
-      ['Dark+', darkPlus as ThemeJSON],
-      ['Light+', lightPlus as ThemeJSON],
-    ])
+    new Map(ALL_THEMES.map(t => [t.name, t]))
   )
 
   const [themeName, setThemeName] = useState(getInitialThemeName)
