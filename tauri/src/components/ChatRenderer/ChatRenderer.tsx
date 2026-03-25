@@ -1704,12 +1704,18 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
 
 // ── UserCard ────────────────────────────────────────────────
 
+function stripDomContext(text: string): string {
+  const idx = text.search(/\n+--- 问题元素/)
+  return idx !== -1 ? text.slice(0, idx).trim() : text
+}
+
 export function UserCard({ msg }: { msg: TranscriptMessage }) {
-  const text = msg.blocks
+  const raw = msg.blocks
     .filter(b => b.type === 'text')
     .map(b => b.text || '')
     .join('\n')
     .trim()
+  const text = stripDomContext(raw)
   if (!text) return null
 
   return (
