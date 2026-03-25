@@ -78,29 +78,20 @@ export function Layout() {
   return (
   <>
     <AppShell>
-      <TopBar
-        logoIcon={<IconLogo size={22} />}
-        logo="TaskConductor"
-        breadcrumb={[]}
-        breadcrumbPrefix={<ProjectSwitcher />}
-        userName="User"
-        onSearchClick={() => navigate('/sessions')}
-        onSettingsClick={() => navigate('/settings')}
-        onMessageClick={() => setCompanionOpen(v => !v)}
-        unreadCount={unreadCount}
-        onNotificationClick={togglePanel}
-      />
       <Sidebar
         items={sidebarItems}
         activeKey={activeKey}
         onSelect={(key) => navigate(key)}
+        logoIcon={<IconLogo size={18} />}
+        notificationCount={unreadCount}
+        onNotificationClick={togglePanel}
         footer={
           <button
-            className={sidebarStyles.footerBtn}
+            className={sidebarStyles.iconBtn}
             onClick={() => window.open('/admin', '_blank', 'width=1200,height=800')}
+            title={t('project.global_manage')}
           >
             <IconLayoutGrid size={16} />
-            <span className={sidebarStyles.footerBtnLabel}>{t('project.global_manage')}</span>
           </button>
         }
       />
