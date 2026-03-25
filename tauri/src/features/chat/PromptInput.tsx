@@ -120,17 +120,23 @@ function DomPickerOverlay({ rect }: { rect: DOMRectReadOnly | null }) {
   return createPortal(<div style={style} />, document.body)
 }
 
+type ModelInfo = { id: string; name: string; default?: boolean }
+
 export function PromptInput() {
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [expanded, setExpanded] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showModelMenu, setShowModelMenu] = useState(false)
+  const [models, setModels] = useState<ModelInfo[]>([])
   const [isPicking, setIsPicking] = useState(false)
   const [pickRect, setPickRect] = useState<DOMRectReadOnly | null>(null)
   const [domCtxList, setDomCtxList] = useState<DomContext[]>([])
-  const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft } = useChatStore()
+  const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft,
+          selectedModel, setSelectedModel, lastStats } = useChatStore()
   const { send, stop } = useChatStream()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const modelMenuRef = useRef<HTMLDivElement>(null)
 
   // 监听外部 inputDraft（来自 empty state 建议卡片点击），应用后立即清空
   useEffect(() => {
