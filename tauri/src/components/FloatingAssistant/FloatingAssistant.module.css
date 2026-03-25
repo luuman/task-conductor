@@ -105,6 +105,22 @@
   color: var(--tc-foreground);
   opacity: 1;
 }
+.headerBtnActive {
+  background: var(--tc-accent-a10);
+  color: var(--tc-accent);
+  opacity: 1;
+}
+.headerBtnActive:hover {
+  background: var(--tc-accent-a15);
+}
+
+.headerSep {
+  width: 1px;
+  height: 14px;
+  background: var(--tc-border);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
 
 /* ── Tab 栏 ── */
 .tabBar {
