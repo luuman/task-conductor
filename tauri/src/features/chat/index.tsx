@@ -741,7 +741,7 @@ function PromptInput() {
         </div>
       </div>
 
-      {isGenerating && currentReply && (
+      {isGenerating && (
         <div className={s.pThinking}>
           <span className={s.pThinkingDot} />
           <span>正在生成回复...</span>
