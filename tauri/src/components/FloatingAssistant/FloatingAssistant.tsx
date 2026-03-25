@@ -73,7 +73,7 @@ export function FloatingAssistant() {
   const {
     isOpen, isMinimized, messages, currentReply,
     pageContext, position, minimize, restore, close,
-    setSystemPrompt, setPosition, setProjectCwd,
+    setSystemPrompt, setPosition, setProjectCwd, setInputDraft,
   } = useChatStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isFirstLoadRef = useRef(true)
