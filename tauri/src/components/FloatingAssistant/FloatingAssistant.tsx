@@ -423,9 +423,9 @@ export function FloatingAssistant() {
             <span className={styles.headerOnline}>在线</span>
             <div className={styles.headerActions}>
               <button className={styles.headerBtn} onClick={isMinimized ? restore : minimize} title={isMinimized ? '展开' : '最小化'}>
-                {isMinimized ? '□' : '—'}
+                {isMinimized ? <IconMaximize size={12} /> : <IconMinus size={12} />}
               </button>
-              <button className={styles.headerBtn} onClick={close} title="关闭">×</button>
+              <button className={styles.headerBtn} onClick={close} title="关闭"><IconX size={12} /></button>
             </div>
           </div>
 
