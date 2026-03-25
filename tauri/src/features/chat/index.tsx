@@ -685,8 +685,8 @@ export default function ChatReportPage() {
                 <button className={s.inspectClose} onClick={() => setInspected(null)}>✕</button>
               </div>
               <div className={s.inspectBody}>
-                <span>类型: <b>{inspected.step.category}</b></span>
-                {inspected.step.toolName && <span> · 工具: <b>{inspected.step.toolName}</b></span>}
+                <span>类型: <b>{CAT_LABEL_MAP[inspected.step.category] || inspected.step.category}</b></span>
+                {inspected.step.toolName && <span> · 工具: <b>{TOOL_LABEL_MAP[inspected.step.toolName] || inspected.step.toolName}</b></span>}
                 {inspected.step.ts && <span> · 时间: <b>{formatTs(inspected.step.ts)}</b></span>}
                 {inspected.step.toolError && <span style={{ color: '#f87171' }}> · ERROR</span>}
                 {inspected.step.toolInput?.file_path != null && <span> · 文件: <b>{String(inspected.step.toolInput.file_path).split('/').pop()}</b></span>}
