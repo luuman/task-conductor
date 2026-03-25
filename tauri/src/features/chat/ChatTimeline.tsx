@@ -4,7 +4,7 @@
  */
 import React, { useCallback, useState } from 'react'
 import type { TranscriptMessage } from '../../lib/api/types'
-import { parseTimelineWithQuestions } from './timeline-parser'
+import { parseTimelineWithQuestions, guessHljsLang } from './timeline-parser'
 import type { TimelineStep } from './timeline-parser'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
 import {
