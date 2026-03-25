@@ -334,7 +334,7 @@ const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKe
 
 /** 将 messages 分段：user 气泡 / assistant steps 块交替出现 */
 type Segment =
-  | { type: 'user'; text: string; ts: string | null }
+  | { type: 'user'; text: string; ts: string | null; attachments?: MessageAttachment[] }
   | { type: 'assistant'; steps: TimelineStep[] }
 
 function splitSegments(messages: TranscriptMessage[]): Segment[] {
