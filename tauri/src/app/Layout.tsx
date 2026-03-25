@@ -27,6 +27,10 @@ export function Layout() {
   const unreadCount = useNotificationStore(s => s.items.filter(n => !n.read).length)
   const [cmdOpen, setCmdOpen] = useState(false)
   const setPageContext = useChatStore((s) => s.setPageContext)
+  const toggleChat = useChatStore((s) => s.toggle)
+  const chatOpen = useChatStore((s) => s.isOpen)
+  const togglePty = usePtyChatStore((s) => s.toggle)
+  const ptyOpen = usePtyChatStore((s) => s.isOpen)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
 
   // 页面上下文感知
