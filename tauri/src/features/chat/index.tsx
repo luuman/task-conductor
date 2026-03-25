@@ -764,33 +764,35 @@ export default function ChatReportPage() {
       </div>
 
       <div className={s.body}>
-        <div className={s.mainArea} ref={mainAreaRef}>
-          <CodeExpandCtx.Provider value={codeExpanded}>
-            {loading ? (
-              <div className={s.empty}><span>加载中...</span></div>
-            ) : steps.length === 0 ? (
-              <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
-            ) : questions.length === 0 ? (
-              <Renderer steps={groupConsecutiveSameType(steps)} />
-            ) : (
-              questions.map((q, qi) => {
-                const nextQ = questions[qi + 1]
-                const startIdx = q.stepIndex
-                const endIdx = nextQ ? nextQ.stepIndex : steps.length
-                const sectionSteps = groupConsecutiveSameType(steps.slice(startIdx, endIdx))
-                return (
-                  <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
-                    <div className={s.queryPill}>
-<div className={s.richText}><RichTextBlock text={q.text} /></div>
+        <div className={s.mainCol}>
+          <div className={s.mainArea} ref={mainAreaRef}>
+            <CodeExpandCtx.Provider value={codeExpanded}>
+              {loading ? (
+                <div className={s.empty}><span>加载中...</span></div>
+              ) : steps.length === 0 ? (
+                <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
+              ) : questions.length === 0 ? (
+                <Renderer steps={groupConsecutiveSameType(steps)} />
+              ) : (
+                questions.map((q, qi) => {
+                  const nextQ = questions[qi + 1]
+                  const startIdx = q.stepIndex
+                  const endIdx = nextQ ? nextQ.stepIndex : steps.length
+                  const sectionSteps = groupConsecutiveSameType(steps.slice(startIdx, endIdx))
+                  return (
+                    <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
+                      <div className={s.queryPill}>
+  <div className={s.richText}><RichTextBlock text={q.text} /></div>
+                      </div>
+                      {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
                     </div>
-                    {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
-                  </div>
-                )
-              })
-            )}
-          </CodeExpandCtx.Provider>
+                  )
+                })
+              )}
+            </CodeExpandCtx.Provider>
+          </div>
 
-          {/* 底部操作栏 */}
+          {/* 底部操作栏 — 在可滚动区域之外，不遮盖内容 */}
           {steps.length > 0 && (
             <div className={s.bottomBar}>
               <div className={s.bottomActions}>
@@ -806,7 +808,6 @@ export default function ChatReportPage() {
               <PromptInput />
             </div>
           )}
-
         </div>
         <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} />
       </div>
