@@ -313,7 +313,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
                   <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>{catIcon(step.category, 12)}<span className={s.hTitle}>{toolLabel(step)}</span></span>
                 </div>
                 {isOpen && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
                   <div className={s.hBody}><ResultBlock step={step} /></div>
