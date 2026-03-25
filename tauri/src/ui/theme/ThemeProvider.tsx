@@ -41,6 +41,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [themeName, currentTheme])
 
+  // 跨窗口/标签页同步：监听其他窗口写入 localStorage 触发的 storage 事件
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue && registry.current.has(e.newValue)) {
+        setThemeName(e.newValue)
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   const setTheme = useCallback((name: string) => {
     if (!registry.current.has(name)) {
       console.warn(`[ThemeProvider] Theme "${name}" is not registered. Ignoring.`)
