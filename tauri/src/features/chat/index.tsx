@@ -633,6 +633,32 @@ function PromptInput() {
     <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} />
     <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
 
+    {/* 对话历史区域 */}
+    {displayMessages.length > 0 && (
+      <div className={s.chatHistory}>
+        {displayMessages.map((msg, i) => {
+          const text = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
+          if (!text) return null
+          return (
+            <div key={i} className={msg.role === 'user' ? s.chatUser : s.chatAi}>
+              {msg.role === 'user' ? (
+                <span className={s.chatUserText}>{text}</span>
+              ) : (
+                <div className={s.richText}><RichTextBlock text={text} /></div>
+              )}
+            </div>
+          )
+        })}
+        {isGenerating && !currentReply && (
+          <div className={s.pThinking}>
+            <span className={s.pThinkingDot} />
+            <span>思考中...</span>
+          </div>
+        )}
+        <div ref={msgEndRef} />
+      </div>
+    )}
+
     <div className={s.promptCard}>
       {attachments.length > 0 && (
         <div className={s.pAttachRow}>
@@ -659,11 +685,11 @@ function PromptInput() {
         <textarea
           ref={textareaRef}
           className={s.pTextarea}
-          placeholder={working ? 'Working on your request...' : 'Ask anything, @models, /prompts...'}
+          placeholder={isGenerating ? '正在处理...' : 'Ask anything, @models, /prompts...'}
           value={value}
           onChange={e => { setValue(e.target.value); autoResize() }}
           onKeyDown={handleKeyDown}
-          disabled={working}
+          disabled={isGenerating}
           rows={1}
         />
         <button className={s.pExpandBtn} title="展开">
@@ -701,7 +727,7 @@ function PromptInput() {
               <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
             </svg>
           </button>
-          {working ? (
+          {isGenerating ? (
             <button className={s.pStopBtn} onClick={handleStop} title="停止">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                 <rect x="4" y="4" width="16" height="16" rx="2" />
@@ -717,15 +743,15 @@ function PromptInput() {
         </div>
       </div>
 
-      {working && (
+      {isGenerating && currentReply && (
         <div className={s.pThinking}>
           <span className={s.pThinkingDot} />
-          <span>Thinking...</span>
+          <span>正在生成回复...</span>
         </div>
       )}
 
     </div>
-    {isEmpty && !working && (
+    {isEmpty && !isGenerating && (
       <div className={s.pChips}>
         {QUICK_CHIPS.map(chip => (
           <button
