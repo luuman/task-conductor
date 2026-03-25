@@ -24,6 +24,9 @@ export interface TimelineStep {
 
   /** 分类标签 */
   category: 'text' | 'read' | 'edit' | 'write' | 'bash' | 'grep' | 'glob' | 'agent' | 'ask' | 'search' | 'task' | 'other'
+
+  /** 相邻同类型合并数量（>1 表示已合并） */
+  mergedCount?: number
 }
 
 const CATEGORY_MAP: Record<string, TimelineStep['category']> = {
