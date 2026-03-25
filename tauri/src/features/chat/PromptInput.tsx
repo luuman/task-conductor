@@ -16,6 +16,7 @@ const QUICK_CHIPS = [
 type Attachment = { id: string; name: string; kind: 'image' | 'file'; dataUrl?: string }
 
 type DomContext = {
+  _id: string
   tag: string
   id: string
   classes: string[]
