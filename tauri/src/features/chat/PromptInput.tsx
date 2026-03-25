@@ -283,18 +283,25 @@ export function PromptInput() {
 
   const handleSend = useCallback(() => {
     const text = value.trim()
-    if ((!text && domCtxList.length === 0) || isGenerating) return
+    if ((!text && attachments.length === 0 && domCtxList.length === 0) || isGenerating) return
     const ctxText = formatDomContextList(domCtxList)
-    // displayText：只存用户可读文字，不含 DOM 上下文（避免污染聊天气泡展示）
-    const displayText = text || `请帮我分析以下 ${domCtxList.length} 个元素`
-    const fullText = ctxText ? displayText + ctxText : displayText
-    addMessage(makeAiMsg('user', displayText))
+    // 把附件序列化为 [Image: source: ...] 或 [File: name] 格式，追加到消息末
+    const attachText = attachments.map(a => {
+      if (a.kind === 'image') {
+        // dataUrl 附件：直接内嵌；如果有真实文件路径则用路径格式
+        return `\n[Image: source: ${a.dataUrl ?? a.name}]`
+      }
+      return `\n[File: ${a.name}]`
+    }).join('')
+    const displayText = text || (attachments.length > 0 ? '' : `请帮我分析以下 ${domCtxList.length} 个元素`)
+    const fullText = [displayText, attachText, ctxText].filter(Boolean).join('')
+    addMessage(makeAiMsg('user', displayText + attachText))
     send(fullText)
     setValue('')
     setAttachments([])
     setDomCtxList([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-  }, [value, domCtxList, isGenerating, addMessage, send])
+  }, [value, attachments, domCtxList, isGenerating, addMessage, send])
 
   const handleStop = useCallback(() => stop(), [stop])
 
