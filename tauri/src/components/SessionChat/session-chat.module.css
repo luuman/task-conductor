@@ -1438,13 +1438,13 @@
 }
 
 .questionItem:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--tc-sidebar-item-hover);
   color: var(--tc-foreground);
 }
 
 .questionItemActive {
   composes: questionItem;
-  background: rgba(0, 122, 204, 0.08);
+  background: var(--tc-accent-a8);
   color: var(--tc-border-active);
 }
 
