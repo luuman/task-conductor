@@ -1,20 +1,12 @@
 .shell {
   display: grid;
-  grid-template-rows: var(--tc-topbar-height, 46px) 1fr;
-  grid-template-columns: var(--tc-sidebar-width, 240px) 1fr;
-  grid-template-areas:
-    "topbar  topbar"
-    "sidebar main";
+  grid-template-columns: 52px 1fr;
+  grid-template-areas: "sidebar main";
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   background: var(--tc-content-bg);
   color: var(--tc-foreground);
-  transition: grid-template-columns 0.2s ease;
-}
-
-.shell[data-sidebar-collapsed="true"] {
-  grid-template-columns: 48px 1fr;
 }
 
 .main {
