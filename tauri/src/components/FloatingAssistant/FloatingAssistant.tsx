@@ -68,23 +68,13 @@ function buildSystemPrompt(ctx: PageContext, project?: ProjectInfo | null): stri
   return parts.join('\n')
 }
 
-function makeTextMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
-  return {
-    role,
-    ts: new Date().toISOString(),
-    blocks: [{ type: 'text', text }],
-  }
-}
-
 // ── 主组件 ──
 export function FloatingAssistant() {
   const {
-    isOpen, isMinimized, messages, currentReply, isGenerating,
+    isOpen, isMinimized, messages, currentReply,
     pageContext, position, minimize, restore, close,
-    addMessage, setSystemPrompt, setPosition, setProjectCwd,
+    setSystemPrompt, setPosition, setProjectCwd,
   } = useChatStore()
-  const { send, stop } = useChatStream()
-  const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isFirstLoadRef = useRef(true)
   const panelRef = useRef<HTMLDivElement>(null)
