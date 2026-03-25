@@ -699,7 +699,7 @@ export default function ChatReportPage() {
                     <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
                       {msg.role === 'user' ? (
                         <div className={s.queryPill}>
-                          <div className={s.richText}><RichTextBlock text={text} /></div>
+                          <div className={s.richText}>{text}</div>
                         </div>
                       ) : (
                         <div className={s.chatAiBlock}>
