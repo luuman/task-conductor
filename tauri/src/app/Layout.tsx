@@ -6,7 +6,6 @@ import {
   IconLayoutGrid, IconLogo, IconFileText, IconMonitor,
   IconMessage, IconSettings, IconFolder, IconGitBranch,
 } from '../ui/icon'
-import { ProjectSwitcher } from '../components/ProjectSwitcher'
 import { useNotificationStore } from '../lib/store/notifications'
 import { NotificationPanel } from '../components/NotificationPanel'
 import { CommandMenu } from '../components/CommandMenu'
