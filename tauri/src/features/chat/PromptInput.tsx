@@ -285,10 +285,10 @@ export function PromptInput() {
     const text = value.trim()
     if ((!text && domCtxList.length === 0) || isGenerating) return
     const ctxText = formatDomContextList(domCtxList)
-    const fullText = ctxText
-      ? (text || `请帮我分析以下 ${domCtxList.length} 个元素`) + ctxText
-      : text
-    addMessage(makeAiMsg('user', fullText))
+    // displayText：只存用户可读文字，不含 DOM 上下文（避免污染聊天气泡展示）
+    const displayText = text || `请帮我分析以下 ${domCtxList.length} 个元素`
+    const fullText = ctxText ? displayText + ctxText : displayText
+    addMessage(makeAiMsg('user', displayText))
     send(fullText)
     setValue('')
     setAttachments([])
