@@ -141,6 +141,7 @@ export function PromptInput() {
   }, [inputDraft, setInputDraft])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const folderInputRef = useRef<HTMLInputElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0 && domCtxList.length === 0
 
