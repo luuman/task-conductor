@@ -58,6 +58,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     themeType: currentTheme.type,
     setTheme,
     themes: Array.from(registry.current.keys()),
+    themeList: Array.from(registry.current.values()),
     registerTheme,
   }
 
