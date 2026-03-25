@@ -176,7 +176,8 @@ export function PromptInput() {
   useEffect(() => {
     if (!showModelMenu) return
     const handler = (e: MouseEvent) => {
-      if (modelMenuRef.current && !modelMenuRef.current.contains(e.target as Node)) setShowModelMenu(false)
+      const target = e.target as Node
+      if (modelBtnRef.current && !modelBtnRef.current.contains(target)) setShowModelMenu(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
