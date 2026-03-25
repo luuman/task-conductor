@@ -657,21 +657,22 @@ function PromptInput() {
         </div>
       )}
 
-      {isEmpty && !working && (
-        <div className={s.pChips}>
-          {QUICK_CHIPS.map(chip => (
-            <button
-              key={chip.label}
-              className={s.pChip}
-              onClick={() => { setValue(chip.label); setTimeout(() => textareaRef.current?.focus(), 0) }}
-            >
-              <span className={s.pChipDot} style={{ background: chip.color }} />
-              {chip.label}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
+    {isEmpty && !working && (
+      <div className={s.pChips}>
+        {QUICK_CHIPS.map(chip => (
+          <button
+            key={chip.label}
+            className={s.pChip}
+            onClick={() => { setValue(chip.label); setTimeout(() => textareaRef.current?.focus(), 0) }}
+          >
+            <span className={s.pChipDot} style={{ background: chip.color }} />
+            {chip.label}
+          </button>
+        ))}
+      </div>
+    )}
+    </>
   )
 }
 
