@@ -593,7 +593,7 @@
 .pStatsBar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   padding: 0 14px 8px;
   font-size: 10px;
   color: var(--tc-foreground-muted, var(--tc-foreground-secondary));
@@ -604,7 +604,14 @@
 .pStatsBar > span {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
+}
+.pStatsSep {
+  width: 1px;
+  height: 10px;
+  background: currentColor;
+  opacity: 0.3;
+  flex-shrink: 0;
 }
 
 /* ── Main layout ── */
