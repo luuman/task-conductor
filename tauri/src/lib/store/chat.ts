@@ -108,6 +108,8 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   togglePrdSidebar: () => set((s) => ({ prdSidebarOpen: !s.prdSidebarOpen })),
   openPrdSidebar: () => set({ prdSidebarOpen: true }),
   closePrdSidebar: () => set({ prdSidebarOpen: false }),
+  setSelectedModel: (model) => set({ selectedModel: model }),
+  setLastStats: (stats) => set({ lastStats: stats }),
   setInputDraft: (text) => set({ inputDraft: text }),
 }), {
   name: 'tc-chat',
