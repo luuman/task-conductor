@@ -553,51 +553,39 @@ export function FloatingAssistant() {
                       style={{ color: showHistory ? '#fff' : undefined }}
                     ><IconClock size={13} /></button>
                     {showHistory && historyPos && (
-                      <div style={{
-                        position: 'fixed', top: historyPos.top, right: historyPos.right,
-                        width: 300, maxHeight: 400, background: '#111119',
-                        border: '1px solid var(--tc-border, #2a2a3a)', borderRadius: 10,
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 99999,
-                        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                      }}>
-                        <div style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: '#888', borderBottom: '1px solid #1e1e2e' }}>
-                          历史会话
+                      <div
+                        className={styles.historyDropdown}
+                        style={{ position: 'fixed', top: historyPos.top, right: historyPos.right, width: 300, maxHeight: 400, zIndex: 99999 }}
+                      >
+                        <div className={styles.historyHeader}>
+                          <span className={styles.historyHeaderLabel}>历史会话</span>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: 6 }}>
+                        <div className={styles.historyList}>
                           {sessions.length === 0 && (
-                            <div style={{ padding: '20px 12px', fontSize: 12, color: '#444', textAlign: 'center' }}>
-                              暂无历史会话
-                            </div>
+                            <div className={styles.historyEmpty}>暂无历史会话</div>
                           )}
                           {sessions.map(s => {
-                            const statusColor = s.status === 'active' ? '#10b981' : s.status === 'idle' ? '#f59e0b' : '#6b7280'
                             const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
                             const alreadyOpen = tabs.some(t => t.sessionId === s.session_id)
+                            const dotCls = s.status === 'active'
+                              ? `${styles.historyDot} ${styles.historyDotActive}`
+                              : s.status === 'idle'
+                              ? `${styles.historyDot} ${styles.historyDotIdle}`
+                              : `${styles.historyDot} ${styles.historyDotStopped}`
                             return (
-                              <div
+                              <button
                                 key={s.session_id}
+                                className={`${styles.historyRow} ${alreadyOpen ? styles.historyRowActive : ''}`}
                                 onClick={() => handleOpenHistory(s)}
-                                style={{
-                                  padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
-                                  marginBottom: 3, display: 'flex', alignItems: 'center', gap: 10,
-                                  transition: 'background .1s',
-                                  minHeight: 44,
-                                }}
-                                onMouseEnter={e => (e.currentTarget.style.background = '#1a1a28')}
-                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                               >
-                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{
-                                    fontSize: 13, color: alreadyOpen ? 'var(--tc-accent)' : '#ccc',
-                                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                    lineHeight: '18px',
-                                  }}>{title}</div>
-                                  <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>
+                                <span className={dotCls} />
+                                <div className={styles.historyRowBody}>
+                                  <div className={`${styles.historyTitle} ${alreadyOpen ? styles.historyTitleOpen : ''}`}>{title}</div>
+                                  <div className={styles.historyMeta}>
                                     {s.event_count} 事件 · {formatTime(s.last_seen_at || s.started_at)}
                                   </div>
                                 </div>
-                              </div>
+                              </button>
                             )
                           })}
                         </div>
