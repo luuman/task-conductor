@@ -101,6 +101,22 @@ const ACTION_MAP: Record<string, string> = {
   task: 'Task',
 }
 
+/** 将相邻同 toolName 的 tool 步骤合并为 1，用 mergedCount 标记数量 */
+function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
+  const result: TimelineStep[] = []
+  let i = 0
+  while (i < steps.length) {
+    const step = steps[i]
+    if (step.kind !== 'tool') { result.push(step); i++; continue }
+    let j = i + 1
+    while (j < steps.length && steps[j].kind === 'tool' && steps[j].toolName === step.toolName) j++
+    const count = j - i
+    result.push(count > 1 ? { ...steps[j - 1], mergedCount: count } : step)
+    i = j
+  }
+  return result
+}
+
 // ── Code/Result block ──
 function ResultBlock({ step }: { step: TimelineStep }) {
   const variant = 2 as const
