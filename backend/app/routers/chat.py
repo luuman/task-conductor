@@ -67,6 +67,7 @@ async def handle_chat_ws(ws: WebSocket):
     client: Optional[ClaudeSDKClient] = None
     stream_task: Optional[asyncio.Task] = None
     current_session_id: Optional[str] = None
+    _bypass_permissions: bool = True
 
     def _ts() -> str:
         return datetime.utcnow().isoformat()
