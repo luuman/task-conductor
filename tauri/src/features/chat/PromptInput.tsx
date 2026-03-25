@@ -272,6 +272,7 @@ export function PromptInput() {
 
       <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} />
       <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
+      <input ref={folderInputRef} type="file" style={{ display: 'none' }} onChange={handleFolderChange} {...{ webkitdirectory: '', mozdirectory: '' } as React.InputHTMLAttributes<HTMLInputElement>} />
 
       <div className={s.promptCard}>
         {(attachments.length > 0 || domCtxList.length > 0) && (
