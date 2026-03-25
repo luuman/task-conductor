@@ -1863,6 +1863,13 @@
   cursor: pointer;
 }
 
+/* 富文本内容区（Agent/Markdown 渲染，无 code 高亮） */
+.codeBodyRich {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 /* ═══ CodeBlock 8 种 header variant ═══ */
 
 /* 共享子元素 */
