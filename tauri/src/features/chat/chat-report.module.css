@@ -225,7 +225,7 @@
 .bBash { background: rgba(34,211,238,0.1); color: #22d3ee; }
 .bGrep { background: rgba(248,113,113,0.1); color: #f87171; }
 .bGlob { background: rgba(251,146,60,0.08); color: #fb923c; }
-.bAgent { background: rgba(192,132,252,0.1); color: #c084fc; }
+.bAgent { background: var(--tc-accent-a10); color: var(--tc-tool-agent); }
 .bAsk { background: rgba(96,165,250,0.1); color: #60a5fa; }
 .bSearch { background: rgba(34,211,238,0.08); color: #22d3ee; }
 .bText { background: rgba(124,92,252,0.1); color: #a78bfa; }
