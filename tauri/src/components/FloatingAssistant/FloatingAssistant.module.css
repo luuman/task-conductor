@@ -343,17 +343,82 @@
 .resizeSW { bottom: -3px; left: -3px; cursor: sw-resize; }
 
 /* ── 空状态 ── */
-.empty {
+.emptyState {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  gap: 8px;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--tc-accent-a8);
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tc-foreground);
+  letter-spacing: 0.01em;
+}
+
+.emptySub {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  margin-bottom: 8px;
+}
+
+.emptyProjectName {
+  color: var(--tc-accent);
+  font-weight: 500;
+}
+
+.emptySuggestions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emptySuggestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
   color: var(--tc-foreground-secondary);
   font-size: 12px;
-  text-align: center;
-  padding: 20px;
-  line-height: 1.8;
-  opacity: 0.6;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.emptySuggestion:hover {
+  background: var(--tc-sidebar-item-hover);
+  border-color: var(--tc-border-active);
+  color: var(--tc-foreground);
+}
+
+.emptySuggestionIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.emptySuggestionLabel {
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 /* ── 快捷键提示 ── */
