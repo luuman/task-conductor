@@ -89,7 +89,7 @@ async def handle_chat_ws(ws: WebSocket):
             return client
 
         opts = ClaudeAgentOptions(
-            permission_mode="bypassPermissions",
+            permission_mode="bypassPermissions" if _bypass_permissions else "default",
             include_partial_messages=True,
             cwd=cwd or os.path.expanduser("~"),
             cli_path="claude",
