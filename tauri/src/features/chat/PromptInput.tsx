@@ -33,6 +33,7 @@ function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage 
 
 /** 捕获目标元素的关键信息 */
 function captureDomContext(el: Element): DomContext {
+  const _id = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   const rect = el.getBoundingClientRect()
   const computed = window.getComputedStyle(el)
 
