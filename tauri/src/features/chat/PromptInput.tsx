@@ -27,8 +27,8 @@ type DomContext = {
   outerHTML: string
 }
 
-function makeAiMsg(role: 'user' | 'assistant', text: string): TranscriptMessage {
-  return { role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }] }
+function makeAiMsg(role: 'user' | 'assistant', text: string, attachments?: Attachment[]): TranscriptMessage {
+  return { role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }], attachments: attachments?.length ? attachments : undefined }
 }
 
 /** 捕获目标元素的关键信息 */
