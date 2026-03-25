@@ -567,6 +567,46 @@
   50% { opacity: 1; }
 }
 
+/* 模型选择按钮 */
+.pModelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid var(--tc-border);
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  cursor: pointer;
+  height: 22px;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
+}
+.pModelBtn:hover {
+  color: var(--tc-foreground);
+  border-color: var(--tc-border-active);
+  background: rgba(255,255,255,0.04);
+}
+
+/* 最后一轮统计栏 */
+.pStatsBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 8px;
+  font-size: 10px;
+  color: var(--tc-foreground-muted, var(--tc-foreground-secondary));
+  opacity: 0.6;
+  font-family: var(--tc-font-mono);
+  user-select: none;
+}
+.pStatsBar > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 /* ── Main layout ── */
 .body { display: flex; flex: 1; overflow: hidden; }
 .mainCol { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
