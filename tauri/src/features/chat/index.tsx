@@ -807,19 +807,9 @@ export default function ChatReportPage() {
             </CodeExpandCtx.Provider>
           </div>
 
-          {/* 底部操作栏 — 在可滚动区域之外，不遮盖内容 */}
+          {/* 底部输入栏 — 在可滚动区域之外，不遮盖内容 */}
           {steps.length > 0 && (
             <div className={s.bottomBar}>
-              <div className={s.bottomActions}>
-                <button className={s.actionBtn}>♡ 收藏</button>
-                <button className={s.actionBtn}>↗ 分享</button>
-                <button className={s.actionBtn}>↻ 重写</button>
-                <button className={s.actionBtn} onClick={() => {
-                  const allText = steps.filter(st => st.kind === 'text').map(st => st.text).join('\n\n')
-                  navigator.clipboard.writeText(allText)
-                }}><IconClipboard size={12} /> 复制</button>
-                <span className={s.actionDots}>⋯</span>
-              </div>
               <PromptInput />
             </div>
           )}
