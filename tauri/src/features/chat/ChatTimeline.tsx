@@ -491,6 +491,15 @@ export const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
+/** 移除用户消息中附加的 DOM 上下文（兼容新格式【元素 #N】和旧格式 --- 问题元素） */
+function stripDomContext(text: string): string {
+  const i1 = text.indexOf('\n\n【元素 #')
+  const i2 = text.indexOf('--- 问题元素')
+  const candidates = [i1, i2].filter(i => i !== -1)
+  if (candidates.length === 0) return text
+  return text.slice(0, Math.min(...candidates)).trim()
+}
+
 /** 将 messages 分段：user 气泡 / assistant steps 块交替出现 */
 type Segment =
   | { type: 'user'; text: string; ts: string | null }
@@ -508,7 +517,8 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
   for (const msg of messages) {
     if (msg.role === 'user') {
       flushBuf()
-      const text = msg.blocks.find(b => b.type === 'text')?.text?.trim()
+      const rawText = msg.blocks.find(b => b.type === 'text')?.text?.trim()
+      const text = rawText ? stripDomContext(rawText) : rawText
       if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
