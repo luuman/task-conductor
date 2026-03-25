@@ -311,6 +311,33 @@ function extractTag(xml: string, tag: string): string {
   return re.exec(xml)?.[1]?.trim() ?? ''
 }
 
+/** 把纯文本片段进一步按 [Image: source: /path] / [File: /path] 拆分 */
+function splitTextOnFileRefs(text: string): ParsedSegment[] {
+  const parts: ParsedSegment[] = []
+  const re = /\[(?:image|Image|IMAGE)\s*:\s*(?:source\s*:\s*)?([^\]\n]+)\]|\[(?:file|File|FILE)\s*:\s*([^\]\n]+)\]/g
+  let last = 0
+  let m: RegExpExecArray | null
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) {
+      const before = text.slice(last, m.index)
+      if (before.trim()) parts.push({ kind: 'text', content: before })
+    }
+    const path = (m[1] ?? m[2]).trim()
+    const ext = (path.split('.').pop() ?? '').toLowerCase()
+    if (m[1]) {
+      parts.push(IMG_EXTS.has(ext) ? { kind: 'image-ref', path } : { kind: 'file-ref', path })
+    } else {
+      parts.push({ kind: 'file-ref', path })
+    }
+    last = m.index + m[0].length
+  }
+  if (last < text.length) {
+    const rest = text.slice(last)
+    if (rest.trim()) parts.push({ kind: 'text', content: rest })
+  }
+  return parts.length ? parts : [{ kind: 'text', content: text }]
+}
+
 export function parseTextSegments(text: string): ParsedSegment[] {
   const segments: ParsedSegment[] = []
   const re = /<(task-notification|system-reminder)>([\s\S]*?)<\/\1>/g
@@ -319,7 +346,7 @@ export function parseTextSegments(text: string): ParsedSegment[] {
   while ((match = re.exec(text)) !== null) {
     if (match.index > lastIndex) {
       const before = text.slice(lastIndex, match.index).trim()
-      if (before) segments.push({ kind: 'text', content: before })
+      if (before) segments.push(...splitTextOnFileRefs(before))
     }
     if (match[1] === 'task-notification') {
       const xml = match[2]
@@ -341,7 +368,7 @@ export function parseTextSegments(text: string): ParsedSegment[] {
   if (lastIndex < text.length) {
     let rest = text.slice(lastIndex).trim()
     rest = rest.replace(/^Read the output file to retrieve the result:\s*\S+\s*/m, '').trim()
-    if (rest) segments.push({ kind: 'text', content: rest })
+    if (rest) segments.push(...splitTextOnFileRefs(rest))
   }
   return segments
 }
