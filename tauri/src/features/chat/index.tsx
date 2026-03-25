@@ -556,6 +556,152 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
   )
 }
 
+// ── Prompt Input ──
+const QUICK_CHIPS = [
+  { label: '澄清用户问题', color: '#60a5fa' },
+  { label: '定义用户上下文', color: '#a78bfa' },
+  { label: '选择可交付成果', color: '#34d399' },
+  { label: '精化需求', color: '#fb923c' },
+]
+
+function PromptInput() {
+  const [value, setValue] = useState('')
+  const [attachments, setAttachments] = useState<string[]>([])
+  const [working, setWorking] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const isEmpty = value.trim() === '' && attachments.length === 0
+
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px'
+  }, [])
+
+  const handleSend = useCallback(() => {
+    if (isEmpty || working) return
+    setWorking(true)
+    // TODO: 接入后端 API 发送 prompt
+  }, [isEmpty, working])
+
+  const handleStop = useCallback(() => {
+    setWorking(false)
+    // TODO: 取消请求
+  }, [])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      handleSend()
+    }
+  }, [handleSend])
+
+  return (
+    <div className={s.promptCard}>
+      {attachments.length > 0 && (
+        <div className={s.pAttachRow}>
+          {attachments.map((name, i) => (
+            <span key={i} className={s.pAttachChip}>
+              <IconFileText size={11} />
+              <span>{name}</span>
+              <button
+                className={s.pAttachClose}
+                onClick={() => setAttachments(v => v.filter((_, j) => j !== i))}
+              >
+                <IconX size={10} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className={s.pInputRow}>
+        <textarea
+          ref={textareaRef}
+          className={s.pTextarea}
+          placeholder={working ? 'Working on your request...' : 'Ask anything, @models, /prompts...'}
+          value={value}
+          onChange={e => { setValue(e.target.value); autoResize() }}
+          onKeyDown={handleKeyDown}
+          disabled={working}
+          rows={1}
+        />
+        <button className={s.pExpandBtn} title="展开">
+          <IconMaximize size={13} />
+        </button>
+      </div>
+
+      <div className={s.pToolbar}>
+        <div className={s.pToolLeft}>
+          <button className={s.pToolBtn} title="添加附件">
+            <IconPlus size={14} />
+          </button>
+          <button className={s.pToolBtn} title="保存">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <button className={s.pToolBtn} title="插入链接">
+            <IconLink size={14} />
+          </button>
+          <button className={s.pToolBtn} title="上传图片">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </button>
+        </div>
+        <div className={s.pToolRight}>
+          <button className={s.pToolBtn} title="参数设置">
+            <IconSettings size={14} />
+          </button>
+          <button className={s.pToolBtn} title="更多选项">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
+            </svg>
+          </button>
+          {working ? (
+            <button className={s.pStopBtn} onClick={handleStop} title="停止">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+              </svg>
+            </button>
+          ) : (
+            <button className={s.pSendBtn} onClick={handleSend} disabled={isEmpty} title="发送 (⌘↵)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {working && (
+        <div className={s.pThinking}>
+          <span className={s.pThinkingDot} />
+          <span>Thinking...</span>
+        </div>
+      )}
+
+      {isEmpty && !working && (
+        <div className={s.pChips}>
+          {QUICK_CHIPS.map(chip => (
+            <button
+              key={chip.label}
+              className={s.pChip}
+              onClick={() => { setValue(chip.label); setTimeout(() => textareaRef.current?.focus(), 0) }}
+            >
+              <span className={s.pChipDot} style={{ background: chip.color }} />
+              {chip.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ChatReportPage() {
   const [sessions, setSessions] = useState<AiSession[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
