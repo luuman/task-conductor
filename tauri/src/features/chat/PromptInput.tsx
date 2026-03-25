@@ -247,10 +247,6 @@ export function PromptInput() {
     setAttachments(v => v.filter(a => a.id !== id))
   }, [])
 
-  const domChipLabel = domCtx
-    ? `${domCtx.tag}${domCtx.id ? '#' + domCtx.id : ''}${domCtx.classes[0] ? '.' + domCtx.classes[0] : ''}`
-    : ''
-
   return (
     <>
       {isPicking && <DomPickerOverlay rect={pickRect} />}
@@ -266,7 +262,7 @@ export function PromptInput() {
       <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
 
       <div className={s.promptCard}>
-        {(attachments.length > 0 || domCtx) && (
+        {(attachments.length > 0 || domCtxList.length > 0) && (
           <div className={s.pAttachRow}>
             {attachments.map(a => a.kind === 'image' && a.dataUrl ? (
               <span key={a.id} className={s.pImgThumb}>
@@ -280,13 +276,39 @@ export function PromptInput() {
                 <button className={s.pAttachClose} onClick={() => removeAttachment(a.id)}><IconX size={10} /></button>
               </span>
             ))}
-            {domCtx && (
-              <span className={s.pDomChip} title={`路径: ${domCtx.path}\n文本: ${domCtx.text}\n位置: ${domCtx.rect.width}×${domCtx.rect.height}px`}>
-                <IconCrosshair size={10} />
-                <span className={s.pDomChipLabel}>{domChipLabel}</span>
-                {domCtx.text && <span className={s.pDomChipText}>"{domCtx.text.slice(0, 20)}{domCtx.text.length > 20 ? '…' : ''}"</span>}
-                <button className={s.pAttachClose} onClick={() => setDomCtx(null)}><IconX size={10} /></button>
-              </span>
+            {domCtxList.map((ctx, i) => {
+              // 优先显示有意义的内容：有文本则展示文本，否则展示路径片段
+              const selector = ctx.tag + (ctx.id ? `#${ctx.id}` : '') + (ctx.classes[0] ? `.${ctx.classes[0]}` : '')
+              // 取路径最后一段作为位置提示
+              const pathTail = ctx.path ? ctx.path.split(' > ').slice(-1)[0] : ''
+              const location = pathTail ? `${pathTail} › ${ctx.tag}` : selector
+              const preview = ctx.text
+                ? `"${ctx.text.slice(0, 24)}${ctx.text.length > 24 ? '…' : ''}"`
+                : `${ctx.rect.width}×${ctx.rect.height}px`
+              const tooltip = [
+                `#${i + 1} ${selector}`,
+                ctx.path ? `路径: ${ctx.path}` : '',
+                ctx.text ? `文本: ${ctx.text}` : '',
+                `位置: (${ctx.rect.x}, ${ctx.rect.y})  ${ctx.rect.width}×${ctx.rect.height}px`,
+              ].filter(Boolean).join('\n')
+              return (
+                <span key={ctx._id} className={s.pDomChip} title={tooltip}>
+                  <IconCrosshair size={10} />
+                  <span className={s.pDomChipIndex}>{i + 1}</span>
+                  <span className={s.pDomChipLabel}>{location}</span>
+                  <span className={s.pDomChipText}>{preview}</span>
+                  <button className={s.pAttachClose} onClick={() => setDomCtxList(v => v.filter(c => c._id !== ctx._id))}><IconX size={10} /></button>
+                </span>
+              )
+            })}
+            {domCtxList.length > 1 && (
+              <button
+                className={s.pDomClearAll}
+                onClick={() => setDomCtxList([])}
+                title="清除所有标记元素"
+              >
+                全部清除
+              </button>
             )}
           </div>
         )}
