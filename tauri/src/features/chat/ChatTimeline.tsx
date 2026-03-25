@@ -529,7 +529,7 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
         seg.type === 'user' ? (
           <div key={i} className={s.turnSection}>
             <div className={s.queryPill}>
-              <div className={s.richText}>{seg.text}</div>
+              <UserMsgBody text={seg.text} />
             </div>
           </div>
         ) : (
