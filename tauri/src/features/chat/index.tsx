@@ -8,7 +8,7 @@ import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from 
 import {
   IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
   IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
-  IconChevronRight, IconX, IconPlus, IconLink, IconSettings, IconMaximize,
+  IconChevronRight, IconX, IconPlus, IconLink, IconMaximize,
 } from '../../ui/icon'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
