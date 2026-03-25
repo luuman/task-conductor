@@ -200,7 +200,9 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
               <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
               <>
-                <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step)}</span>
+                {!step.toolResult && !step.oldString && (
+                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step)}</span>
+                )}
                 <ResultBlock step={step} />
               </>
             )}
