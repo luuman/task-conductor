@@ -506,10 +506,88 @@ function CollapsibleCode({ html, raw, lang, label, lineCount, hideHeader }: {
   )
 }
 
+// ── Inline image / file card (for [Image: source: /path] references) ───────
+
+const IMG_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'avif', 'tiff', 'svg'])
+const FILE_CLR: Record<string, string> = {
+  pdf: '#ef4444', doc: '#2563eb', docx: '#2563eb', xls: '#16a34a', xlsx: '#16a34a',
+  csv: '#16a34a', ppt: '#ea580c', pptx: '#ea580c', txt: '#9ca3af', md: '#8b5cf6',
+  json: '#f59e0b', yaml: '#f59e0b', yml: '#f59e0b', js: '#f59e0b', jsx: '#60a5fa',
+  ts: '#60a5fa', tsx: '#60a5fa', py: '#3b82f6', go: '#06b6d4', rs: '#ea580c',
+  css: '#06b6d4', scss: '#ec4899', html: '#ea580c', zip: '#8b5cf6', tar: '#8b5cf6',
+  mp4: '#ec4899', mp3: '#ec4899',
+}
+
+function getChildText(children: ReactNode): string {
+  if (typeof children === 'string') return children
+  if (Array.isArray(children)) return children.map(c => (typeof c === 'string' ? c : '')).join('')
+  return ''
+}
+
+function InlineImgCard({ path }: { path: string }) {
+  const [src, setSrc] = useState<string | null>(null)
+  const name = path.split('/').pop() || path
+  useEffect(() => {
+    import('@tauri-apps/api/core')
+      .then(({ convertFileSrc }) => setSrc(convertFileSrc(path)))
+      .catch(() => {})
+  }, [path])
+  return (
+    <span style={{ display: 'inline-flex', flexDirection: 'column', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--tc-border)', background: 'var(--tc-sidebar-bg)', width: 180, verticalAlign: 'top', marginTop: 4 }}>
+      {src
+        ? <img src={src} alt={name} style={{ width: 180, height: 120, objectFit: 'cover', display: 'block' }} />
+        : <span style={{ width: 180, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--tc-content-bg)', color: 'var(--tc-foreground-secondary)', fontSize: 11 }}>{name}</span>
+      }
+      <span style={{ padding: '4px 8px', fontSize: 11, fontWeight: 500, color: 'var(--tc-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{name}</span>
+    </span>
+  )
+}
+
+function InlineFileCard({ path }: { path: string }) {
+  const name = path.split('/').pop() || path
+  const ext = (name.includes('.') ? name.split('.').pop() ?? '' : '').toLowerCase()
+  const color = FILE_CLR[ext] ?? '#71717a'
+  const label = (ext || 'FILE').toUpperCase().slice(0, 4)
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--tc-sidebar-bg)', border: '1px solid var(--tc-border)', borderRadius: 10, padding: '8px 10px', verticalAlign: 'top', marginTop: 4 }}>
+      <svg width="28" height="34" viewBox="0 0 28 34" fill="none" style={{ flexShrink: 0 }}>
+        <path d="M2 0 H17 L26 9 V32 Q26 34 24 34 H4 Q2 34 2 32 Z" fill={color} fillOpacity="0.15" />
+        <path d="M2 0 H17 L26 9 V32 Q26 34 24 34 H4 Q2 34 2 32 Z" stroke={color} strokeWidth="1" strokeOpacity="0.6" />
+        <path d="M17 0 L17 9 L26 9" stroke={color} strokeWidth="1" strokeOpacity="0.6" fill="none" />
+        <text x="14" y="26" textAnchor="middle" fontSize="6.5" fontWeight="800" fill={color} fontFamily="ui-monospace,monospace">{label}</text>
+      </svg>
+      <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--tc-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{name}</span>
+        <span style={{ fontSize: 10, color }}>{(ext || 'FILE').toUpperCase()}</span>
+      </span>
+    </span>
+  )
+}
+
+/** [Image: source: /path] 或 [image: /path] → 渲染为卡片；否则 null */
+function tryRenderFileRef(text: string): React.ReactElement | null {
+  // [Image: source: /path] 或 [image: /path]
+  const imgM = text.match(/^\[(?:image|Image|IMAGE)\s*:\s*(?:source\s*:\s*)?(.+)\]$/)
+  if (imgM) {
+    const p = imgM[1].trim()
+    const ext = (p.split('.').pop() ?? '').toLowerCase()
+    return IMG_EXTS.has(ext) ? <InlineImgCard path={p} /> : <InlineFileCard path={p} />
+  }
+  // [File: /path] 或裸路径（整行）
+  const fileM = text.match(/^\[(?:file|File|FILE)\s*:\s*(.+)\]$/)
+  if (fileM) return <InlineFileCard path={fileM[1].trim()} />
+  return null
+}
+
 // ── Markdown components ─────────────────────────────────────
 
 export const mdComponents: Components = {
-  p: ({ children }) => <p className={styles.mdP}>{children}</p>,
+  p: ({ children }) => {
+    const text = getChildText(children).trim()
+    const card = tryRenderFileRef(text)
+    if (card) return card
+    return <p className={styles.mdP}>{children}</p>
+  },
   h1: ({ children }) => <h1 className={styles.mdH1}>{children}</h1>,
   h2: ({ children }) => <h2 className={styles.mdH2}>{children}</h2>,
   h3: ({ children }) => <h3 className={styles.mdH3}>{children}</h3>,
