@@ -51,7 +51,7 @@ export function CommandMenu({ open, onClose }: CommandMenuProps) {
       {
         id: 'action-theme',
         label: t('commandMenu.toggleTheme'),
-        icon: '🎨',
+        icon: <IconPalette size={14} />,
         shortcut: undefined,
         group: t('commandMenu.group.actions'),
         action: () => {
