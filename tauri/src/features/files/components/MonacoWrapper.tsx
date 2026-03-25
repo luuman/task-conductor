@@ -137,7 +137,7 @@ export function MonacoWrapper({
       key={path}
       defaultValue={content}
       language={language}
-      theme="vs-dark"
+      theme="tc-theme"
       onChange={handleChange}
       onMount={handleMount}
       options={{
