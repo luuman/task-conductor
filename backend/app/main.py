@@ -345,6 +345,19 @@ app.include_router(claude_config_router.router)  # GET/PUT /api/claude-config
 app.include_router(mcp_router.router)            # GET/POST/DELETE /api/mcp/servers
 app.include_router(tc_config_router.router)      # GET/PUT /api/tc-config
 app.include_router(files_router.router)          # GET /api/projects/{id}/files, /file
+
+_IMG_EXTS = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg', '.ico', '.avif', '.tiff'}
+
+@app.get("/api/local-file", summary="读取本地文件（仅限图片，供前端展示用）")
+def local_file(path: str = Query(..., description="绝对文件路径")):
+    """读取本地绝对路径的图片文件并返回，仅允许图片扩展名。"""
+    p = FilePath(path).resolve()
+    if p.suffix.lower() not in _IMG_EXTS:
+        raise HTTPException(400, "只支持图片文件")
+    if not p.is_file():
+        raise HTTPException(404, "文件不存在")
+    media_type = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
+    return FileResponse(str(p), media_type=media_type)
 app.include_router(git_router.router)            # GET /api/projects/{id}/git/status, /git/diff
 app.include_router(chat_router.router)            # GET /api/chat/models
 app.include_router(ai_router.router)              # POST /api/ai/inline-edit
