@@ -332,6 +332,35 @@ export const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
+/** 将 messages 分段：user 气泡 / assistant steps 块交替出现 */
+type Segment =
+  | { type: 'user'; text: string; ts: string | null }
+  | { type: 'assistant'; steps: TimelineStep[] }
+
+function splitSegments(messages: TranscriptMessage[]): Segment[] {
+  const segs: Segment[] = []
+  let buf: TimelineStep[] = []
+  let stepId = 0
+
+  const flushBuf = () => {
+    if (buf.length) { segs.push({ type: 'assistant', steps: groupConsecutiveSameType(buf) }); buf = [] }
+  }
+
+  for (const msg of messages) {
+    if (msg.role === 'user') {
+      flushBuf()
+      const text = msg.blocks.find(b => b.type === 'text')?.text?.trim()
+      if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
+    } else {
+      // 复用 parseTimelineWithQuestions 的 block→step 逻辑
+      const { steps } = parseTimelineWithQuestions([msg])
+      steps.forEach(st => buf.push({ ...st, id: `seg-${stepId++}` }))
+    }
+  }
+  flushBuf()
+  return segs
+}
+
 interface ChatTimelineProps {
   messages: TranscriptMessage[]
   /** 流式输出中的当前回复文本 */
@@ -344,16 +373,25 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
   const activeStyle = style ?? getDefaultStyle()
   const Renderer = RENDERERS[activeStyle] ?? StyleA
 
-  const steps = groupConsecutiveSameType(parseTimelineWithQuestions(messages).steps)
+  const segments = splitSegments(messages)
 
-  // 将正在流式输出的 currentReply 作为末尾临时步骤追加
-  const allSteps: TimelineStep[] = currentReply
-    ? [...steps, { id: '__streaming__', kind: 'text', ts: null, text: currentReply, category: 'text' }]
-    : steps
+  // 流式输出追加为末尾 assistant 块
+  const streamingStep: TimelineStep | null = currentReply
+    ? { id: '__streaming__', kind: 'text', ts: null, text: currentReply, category: 'text' }
+    : null
 
   return (
     <CodeExpandCtx.Provider value={false}>
-      <Renderer steps={allSteps} />
+      {segments.map((seg, i) =>
+        seg.type === 'user' ? (
+          <div key={i} className={s.userMsg}>
+            <p className={s.userMsgText}>{seg.text}</p>
+          </div>
+        ) : (
+          <Renderer key={i} steps={seg.steps} />
+        )
+      )}
+      {streamingStep && <Renderer steps={[streamingStep]} />}
     </CodeExpandCtx.Provider>
   )
 }
