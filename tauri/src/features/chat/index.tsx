@@ -305,7 +305,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
 
   return (
     <>
-      {steps.map((step, i) => {
+      {steps.map((step) => {
         const isOpen = openIds.has(step.id)
         return (
           <React.Fragment key={step.id}>
