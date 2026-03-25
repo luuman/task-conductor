@@ -354,3 +354,178 @@
 
 /* ── 兼容旧类名 ── */
 .sendBtn { display: none; }
+
+/* ── Slim 消息渲染器（无气泡，文档风格）── */
+.slimUser {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 2px;
+}
+
+.slimUserText {
+  margin: 0;
+  font-size: 12.5px;
+  color: #555;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.slimAi {
+  color: #d0d0d8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.slimAiContent {
+  /* Markdown content */
+}
+
+.slimAiContent p {
+  margin: 0 0 9px;
+}
+.slimAiContent p:last-child {
+  margin-bottom: 0;
+}
+.slimAiContent h1,
+.slimAiContent h2,
+.slimAiContent h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8e8f0;
+  margin: 14px 0 6px;
+  letter-spacing: 0.01em;
+}
+.slimAiContent h1:first-child,
+.slimAiContent h2:first-child,
+.slimAiContent h3:first-child {
+  margin-top: 0;
+}
+.slimAiContent ul,
+.slimAiContent ol {
+  margin: 4px 0 10px;
+  padding-left: 18px;
+}
+.slimAiContent li {
+  margin: 5px 0;
+  color: #c8c8d4;
+  line-height: 1.65;
+}
+.slimAiContent strong {
+  color: #eeeef8;
+  font-weight: 600;
+}
+.slimAiContent em {
+  color: #a0a0b8;
+  font-style: italic;
+}
+.slimAiContent code {
+  background: rgba(255,255,255,0.07);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-family: 'Geist Mono', monospace;
+  color: #9fc3ff;
+}
+.slimAiContent pre {
+  background: #0c0c10;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 10px 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.07) transparent;
+}
+.slimAiContent pre code {
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  color: #c8c8d8;
+}
+.slimAiContent blockquote {
+  border-left: 2px solid rgba(68,119,255,0.45);
+  padding-left: 10px;
+  margin: 6px 0;
+  color: #777;
+}
+.slimAiContent a {
+  color: #6699ff;
+  text-decoration: none;
+}
+.slimAiContent a:hover {
+  text-decoration: underline;
+}
+.slimAiContent table {
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 8px 0;
+  width: 100%;
+}
+.slimAiContent th,
+.slimAiContent td {
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 5px 9px;
+  text-align: left;
+}
+.slimAiContent th {
+  background: rgba(255,255,255,0.04);
+  color: #999;
+  font-weight: 500;
+}
+.slimAiContent hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin: 10px 0;
+}
+
+/* ── Tool 调用指示器 ── */
+.slimTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.slimToolPill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 10.5px;
+  color: #444;
+}
+
+/* ── Sources 区域 ── */
+.sourcesSection {
+  padding: 6px 14px 8px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.sourcesLabel {
+  font-size: 10.5px;
+  color: #3a3a4a;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+.sourcePills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.sourcePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(68,119,255,0.07);
+  border: 1px solid rgba(68,119,255,0.18);
+  border-radius: 10px;
+  padding: 3px 9px;
+  font-size: 11px;
+  color: #6688cc;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
