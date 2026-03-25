@@ -298,8 +298,8 @@
 .dDesc strong { color: var(--tc-foreground); }
 .dBody { padding: 8px 10px 8px 40px; }
 .dConnector { width: 1px; height: 5px; background: var(--tc-border); margin-left: 20px; }
-.dTextEvent { border-color: rgba(124,92,252,0.2); }
-.dTextEvent .dHead { background: rgba(124,92,252,0.04); }
+.dTextEvent { border-color: var(--tc-accent-a20); }
+.dTextEvent .dHead { background: var(--tc-accent-a4); }
 
 
 /* ═══════════════════════════════════════════════ */
