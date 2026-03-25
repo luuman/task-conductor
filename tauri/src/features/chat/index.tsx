@@ -226,7 +226,12 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
             {step.kind === 'text' ? (
               <div className={s.aText}><RichText text={step.text!} /></div>
             ) : (
-              <ResultBlock step={step} />
+              <>
+                {step.mergedCount && step.mergedCount > 1 && (
+                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step)}</span>
+                )}
+                <ResultBlock step={step} />
+              </>
             )}
           </div>
         </StepWrap>
