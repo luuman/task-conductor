@@ -766,7 +766,6 @@ export default function ChatReportPage() {
       <div className={s.body}>
         <div className={s.mainArea} ref={mainAreaRef}>
           <CodeExpandCtx.Provider value={codeExpanded}>
-          <InspectCtx.Provider value={inspectCtx}>
             {loading ? (
               <div className={s.empty}><span>加载中...</span></div>
             ) : steps.length === 0 ? (
