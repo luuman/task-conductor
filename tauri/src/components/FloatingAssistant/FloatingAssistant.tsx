@@ -380,13 +380,11 @@ export function FloatingAssistant() {
                 {/* 消息列表 */}
                 <div className={styles.messages}>
                   {messages.length === 0 && !currentReply && (
-                    <div className={styles.empty}>
-                      {projectInfo ? (
-                        <>项目 <strong>{projectInfo.name}</strong><br/>向我描述你的需求<br/>我会帮你分析、创建任务、生成 PRD</>
-                      ) : (
-                        <>请先选择一个项目</>
-                      )}
-                    </div>
+                    <EmptyState
+                      projectInfo={projectInfo}
+                      pageContext={pageContext}
+                      onSuggest={setInputDraft}
+                    />
                   )}
                   <ChatTimeline messages={messages} currentReply={currentReply || undefined} />
                   <div ref={messagesEndRef} />
