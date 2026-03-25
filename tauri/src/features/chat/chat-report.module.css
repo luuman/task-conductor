@@ -384,3 +384,45 @@
   line-height: 1.6;
 }
 .inspectBody b { color: var(--tc-foreground); font-weight: 500; }
+
+/* ═══════════════════════════════════════════════ */
+/* I: GitHub 暗色精致                              */
+/* ═══════════════════════════════════════════════ */
+.iWrap { display: flex; flex-direction: column; gap: 2px; }
+
+/* 文本气泡 */
+.iMsg { display: flex; gap: 10px; padding: 4px 0; align-items: flex-start; }
+.iAvatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 700; }
+.iAvatarBot { background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 100%); color: #fff; }
+.iBubble { background: var(--tc-sidebar-bg); border: 1px solid var(--tc-border); border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.6; flex: 1; min-width: 0; }
+
+/* Bash 卡片 */
+.iBashCard { border: 1px solid var(--tc-border); border-radius: 6px; overflow: hidden; margin: 2px 0; }
+.iBashHead { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(0,0,0,0.3); font-family: var(--tc-font-mono, monospace); font-size: 12px; }
+.iBashHeadErr { border-bottom: 1px solid rgba(248,81,73,0.2); }
+.iBashPrompt { color: #3fb950; font-weight: 700; }
+.iBashCmd { color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 420px; }
+.iBashLines { color: var(--tc-foreground-secondary); font-size: 10px; margin-left: auto; flex-shrink: 0; }
+.iBashPass { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(63,185,80,0.12); color: #3fb950; font-weight: 600; flex-shrink: 0; }
+.iBashFail { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(248,81,73,0.12); color: #f85149; font-weight: 600; flex-shrink: 0; }
+.iBashOut { padding: 8px 10px; font-family: var(--tc-font-mono, monospace); font-size: 11px; line-height: 1.45; overflow-x: auto; white-space: pre; color: var(--tc-foreground-secondary); background: rgba(0,0,0,0.15); margin: 0; }
+.iBashOutErr { color: #f85149; background: rgba(248,81,73,0.04); }
+
+/* 药丸行（Read / Grep / Glob） */
+.iPillRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 0; }
+.iPillLabel { font-size: 9px; color: var(--tc-foreground-secondary); text-transform: uppercase; letter-spacing: 0.4px; margin-right: 2px; opacity: 0.6; font-family: var(--tc-font-mono, monospace); }
+.iPill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(110,118,129,0.08); border: 1px solid rgba(110,118,129,0.15); border-radius: 12px; font-size: 11px; color: var(--tc-foreground-secondary); font-family: var(--tc-font-mono, monospace); }
+.iPillBadge { font-size: 9px; background: rgba(110,118,129,0.15); padding: 0 4px; border-radius: 6px; color: var(--tc-foreground-secondary); }
+
+/* Agent 卡片 */
+.iAgentCard { border: 1px solid rgba(188,140,255,0.2); background: rgba(188,140,255,0.04); border-radius: 6px; overflow: hidden; margin: 2px 0; }
+.iAgentHead { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(188,140,255,0.1); font-size: 11px; color: #bc8cff; }
+.iAgentDesc { color: var(--tc-foreground-secondary); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iAgentBody { padding: 10px 12px; font-size: 12px; }
+
+/* 通用工具行 */
+.iToolRow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 5px; font-size: 12px; cursor: default; }
+.iToolRow:hover { background: rgba(110,118,129,0.06); }
+.iToolName { color: var(--tc-foreground-secondary); font-weight: 500; flex-shrink: 0; }
+.iToolParam { font-family: var(--tc-font-mono, monospace); font-size: 11px; color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.iToolErr { color: #f85149; font-size: 10px; flex-shrink: 0; }
