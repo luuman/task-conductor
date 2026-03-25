@@ -467,7 +467,7 @@ export function FloatingAssistant() {
                       onClick={() => setShowHistory(v => !v)}
                       title="历史会话"
                       style={{ color: showHistory ? '#fff' : undefined }}
-                    >⏱</button>
+                    ><IconClock size={13} /></button>
                     {showHistory && (
                       <div style={{
                         position: 'absolute', top: '100%', right: 0, marginTop: 4,
