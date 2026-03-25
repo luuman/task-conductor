@@ -43,36 +43,29 @@ const PALETTE = [
   '#56d364', '#e3b341', '#ffa657', '#a5d6ff',
 ]
 
-function getIcon(label: string): string {
-  if (label.includes('用户')) return '👤'
-  if (label.includes('Markdown')) return '📝'
-  if (label.includes('代码')) return '💻'
-  if (label.includes('Mermaid')) return '📊'
-  if (label.includes('Task N')) return '📋'
-  if (label.includes('System')) return '⚙️'
-  if (label.includes('Read') && label.includes('Grep')) return '🔍'
-  if (label.includes('Read') && label.includes('ERROR')) return '❌'
-  if (label.includes('Edit') && label.includes('diff')) return '✏️'
-  if (label.includes('MultiEdit')) return '✏️'
-  if (label.includes('Write')) return '📄'
-  if (label.includes('Bash') && label.includes('TS')) return '🔴'
-  if (label.includes('Bash') && label.includes('静默')) return '🔇'
-  if (label.includes('Bash') && label.includes('JSON')) return '📦'
-  if (label.includes('Bash') && label.includes('Python')) return '🐍'
-  if (label.includes('Bash') && label.includes('测试')) return '✅'
-  if (label.includes('Bash') && label.includes('git')) return '📜'
-  if (label.includes('Bash') && label.includes('build')) return '🏗️'
-  if (label.includes('Bash') && label.includes('ERROR')) return '💥'
-  if (label.includes('Agent')) return '🤖'
-  if (label.includes('AskUser') && label.includes('有')) return '❓'
-  if (label.includes('AskUser') && label.includes('无')) return '⏳'
-  if (label.includes('WebSearch')) return '🌐'
-  if (label.includes('WebFetch')) return '📡'
-  if (label.includes('Skill')) return '🎯'
-  if (label.includes('TaskCreate')) return '📌'
-  if (label.includes('Unknown')) return '❔'
-  if (label.includes('Edit') && label.includes('ERROR')) return '🚫'
-  return '📎'
+function getIcon(label: string): React.ReactNode {
+  const s = 11
+  if (label.includes('用户')) return <IconUser size={s} />
+  if (label.includes('Markdown')) return <IconFilePlus size={s} />
+  if (label.includes('代码')) return <IconTerminal size={s} />
+  if (label.includes('Mermaid')) return <IconLayoutGrid size={s} />
+  if (label.includes('Task N')) return <IconClipboard size={s} />
+  if (label.includes('System')) return <IconSettings size={s} />
+  if (label.includes('Read') && label.includes('Grep')) return <IconSearch size={s} />
+  if (label.includes('Read') && label.includes('ERROR')) return <IconFileText size={s} />
+  if (label.includes('Edit') && label.includes('diff')) return <IconPencil size={s} />
+  if (label.includes('MultiEdit')) return <IconPencil size={s} />
+  if (label.includes('Write')) return <IconFileText size={s} />
+  if (label.includes('Bash')) return <IconTerminal size={s} />
+  if (label.includes('Agent')) return <IconBot size={s} />
+  if (label.includes('AskUser')) return <IconCircleHelp size={s} />
+  if (label.includes('WebSearch')) return <IconGlobe size={s} />
+  if (label.includes('WebFetch')) return <IconRadio size={s} />
+  if (label.includes('Skill')) return <IconBlocks size={s} />
+  if (label.includes('TaskCreate')) return <IconClipboard size={s} />
+  if (label.includes('Unknown')) return <IconCircleHelp size={s} />
+  if (label.includes('Edit') && label.includes('ERROR')) return <IconPencil size={s} />
+  return <IconLink size={s} />
 }
 
 // ── Raw 内容 ────────────────────────────────────────
