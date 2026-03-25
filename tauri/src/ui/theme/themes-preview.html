@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>TaskConductor 主题配色预览</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #060606; font-family: 'Segoe UI', system-ui, sans-serif; padding: 32px; }
+  h1 { color: #888; font-size: 13px; font-weight: 500; letter-spacing: 0.1em;
+       text-transform: uppercase; margin-bottom: 28px; }
+
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+
+  /* Mini app mockup */
+  .theme-card {
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 2px solid transparent;
+  }
+  .theme-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.5); }
+  .theme-card.selected { border-color: #fff; }
+
+  .mock {
+    display: flex;
+    height: 180px;
+    overflow: hidden;
+  }
+  /* Sidebar strip */
+  .mock-sidebar {
+    width: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .mock-logo { width: 22px; height: 22px; border-radius: 6px; margin-bottom: 4px; }
+  .mock-nav-dot { width: 22px; height: 22px; border-radius: 6px; }
+  .mock-nav-dot.active { }
+
+  /* Main area */
+  .mock-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* Topbar */
+  .mock-topbar {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .mock-topbar-title { font-size: 10px; font-weight: 600; flex: 1; }
+  .mock-topbar-btn {
+    width: 18px; height: 18px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+  /* Content */
+  .mock-content {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden;
+  }
+  .mock-section {
+    border-radius: 5px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mock-row {
+    height: 7px;
+    border-radius: 3px;
+    opacity: 0.6;
+  }
+  .mock-row.w100 { width: 100%; }
+  .mock-row.w80  { width: 80%; }
+  .mock-row.w60  { width: 60%; }
+  .mock-row.w40  { width: 40%; }
+  .mock-badge {
+    display: inline-block;
+    height: 14px;
+    border-radius: 3px;
+    width: 36px;
+    opacity: 0.9;
+  }
+  .mock-tag {
+    display: inline-flex;
+    align-items: center;
+    height: 16px;
+    border-radius: 4px;
+    width: 50px;
+    font-size: 8px;
+    font-weight: 600;
+    padding: 0 6px;
+    color: #fff;
+  }
+  .mock-btn {
+    display: inline-block;
+    height: 20px;
+    border-radius: 5px;
+    width: 64px;
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 20px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .mock-input {
+    height: 22px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-style: solid;
+    flex: 1;
+  }
+  .mock-row-flex {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Theme info */
+  .theme-info {
+    padding: 10px 12px;
+  }
+  .theme-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+  .theme-desc { font-size: 10px; opacity: 0.6; margin-bottom: 8px; }
+  .swatch-row { display: flex; gap: 4px; align-items: center; }
+  .swatch {
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .swatch-label { font-size: 9px; opacity: 0.5; font-family: monospace; }
+
+  .theme-num {
+    font-size: 9px;
+    font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    float: right;
+    margin-top: -2px;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+<h1>TaskConductor — 10 种暗色主题</h1>
+<div class="grid" id="grid"></div>
+
+<script>
+const themes = [
+  {
+    id: 1, name: 'Onyx', desc: '纯黑 · 白色 accent',
+    bg1: '#0a0a0a', bg2: '#111111', bgHover: '#1a1a1a',
+    fg1: '#f0f0f0', fg2: '#555555',
+    accent: '#e8e8e8', accentBg: '#1c1c1c',
+    border: '#1e1e1e',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 2, name: 'Violet', desc: '纯黑 · 紫罗兰 accent（当前）',
+    bg1: '#0c0c0e', bg2: '#111115', bgHover: '#191920',
+    fg1: '#e8e8f0', fg2: '#606070',
+    accent: '#7c6af5', accentBg: '#13103c',
+    border: '#1e1e1e',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 3, name: 'Jade', desc: '纯黑 · 翡翠绿 accent',
+    bg1: '#0a0d0b', bg2: '#0f1310', bgHover: '#181e19',
+    fg1: '#e8f0eb', fg2: '#587060',
+    accent: '#34d399', accentBg: '#0d2318',
+    border: '#1a1e1b',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 4, name: 'Rose', desc: '纯黑 · 玫瑰粉 accent',
+    bg1: '#0d0a0b', bg2: '#140f10', bgHover: '#1e1618',
+    fg1: '#f0e8eb', fg2: '#706070',
+    accent: '#fb7185', accentBg: '#2d0f15',
+    border: '#1e1a1b',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 5, name: 'Amber', desc: '纯黑 · 琥珀金 accent',
+    bg1: '#0d0c0a', bg2: '#151209', bgHover: '#1e1c16',
+    fg1: '#f0eee8', fg2: '#706858',
+    accent: '#fbbf24', accentBg: '#2c2008',
+    border: '#1e1c18',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 6, name: 'Coral', desc: '纯黑 · 珊瑚橙 accent',
+    bg1: '#0d0b0a', bg2: '#140f0c', bgHover: '#1e1814',
+    fg1: '#f0ebe8', fg2: '#706058',
+    accent: '#f97316', accentBg: '#2c1508',
+    border: '#1e1a18',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 7, name: 'Teal', desc: '纯黑 · 青色 accent',
+    bg1: '#0a0d0d', bg2: '#0f1414', bgHover: '#161e1e',
+    fg1: '#e8f0f0', fg2: '#507070',
+    accent: '#2dd4bf', accentBg: '#0a2424',
+    border: '#181e1e',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 8, name: 'Crimson', desc: '纯黑 · 深红 accent',
+    bg1: '#0d0a0a', bg2: '#150c0c', bgHover: '#1e1414',
+    fg1: '#f0e8e8', fg2: '#705858',
+    accent: '#f43f5e', accentBg: '#2a0a12',
+    border: '#1e1818',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 9, name: 'Lime', desc: '纯黑 · 荧光绿 accent',
+    bg1: '#0b0d09', bg2: '#12150e', bgHover: '#191e16',
+    fg1: '#eaf0e8', fg2: '#607058',
+    accent: '#a3e635', accentBg: '#1a2608',
+    border: '#1c1e18',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+  {
+    id: 10, name: 'Lavender', desc: '纯黑 · 淡薰衣草 accent',
+    bg1: '#0b0a0e', bg2: '#100f14', bgHover: '#18161e',
+    fg1: '#eae8f5', fg2: '#686070',
+    accent: '#a78bfa', accentBg: '#1c1530',
+    border: '#1e1c24',
+    err: '#f87171', warn: '#fbbf24', ok: '#4ade80',
+  },
+]
+
+const grid = document.getElementById('grid')
+
+themes.forEach(t => {
+  const card = document.createElement('div')
+  card.className = 'theme-card'
+  card.style.background = t.bg1
+
+  card.innerHTML = `
+    <div class="mock">
+      <!-- Sidebar -->
+      <div class="mock-sidebar" style="background:${t.bg1}; border-right:1px solid ${t.border}">
+        <div class="mock-logo" style="background:linear-gradient(135deg,${t.accent},${t.accent}88)"></div>
+        <div class="mock-nav-dot active" style="background:${t.accent}22"></div>
+        <div class="mock-nav-dot" style="background:transparent"></div>
+        <div class="mock-nav-dot" style="background:transparent"></div>
+        <div class="mock-nav-dot" style="background:transparent"></div>
+      </div>
+      <!-- Main -->
+      <div class="mock-main">
+        <!-- Topbar -->
+        <div class="mock-topbar" style="background:${t.bg2}; border-bottom:1px solid ${t.border}">
+          <span class="mock-topbar-title" style="color:${t.fg1}">TaskConductor</span>
+          <div class="mock-topbar-btn" style="background:${t.accent}; color:#fff">+</div>
+        </div>
+        <!-- Content -->
+        <div class="mock-content" style="background:${t.bg1}">
+          <!-- Section card 1 -->
+          <div class="mock-section" style="background:${t.bg2}; border:1px solid ${t.border}">
+            <div class="mock-row w80" style="background:${t.fg1}; height:6px; border-radius:3px"></div>
+            <div class="mock-row-flex">
+              <div class="mock-row w60" style="background:${t.fg2}; height:5px; border-radius:3px; flex:1"></div>
+              <div class="mock-badge" style="background:${t.accent}22; border:1px solid ${t.accent}44; width:28px; height:12px; border-radius:3px"></div>
+            </div>
+          </div>
+          <!-- Section card 2 -->
+          <div class="mock-section" style="background:${t.bg2}; border:1px solid ${t.border}">
+            <div class="mock-row w100" style="background:${t.fg1}; height:6px; border-radius:3px"></div>
+            <div class="mock-row w60" style="background:${t.fg2}; height:5px; border-radius:3px"></div>
+            <div class="mock-row-flex" style="gap:4px; margin-top:2px">
+              <div style="height:13px; border-radius:3px; padding:0 6px; background:${t.ok}22; border:1px solid ${t.ok}44; font-size:8px; color:${t.ok}; line-height:13px; font-weight:600">done</div>
+              <div style="height:13px; border-radius:3px; padding:0 6px; background:${t.warn}22; border:1px solid ${t.warn}44; font-size:8px; color:${t.warn}; line-height:13px; font-weight:600">review</div>
+              <div style="height:13px; border-radius:3px; padding:0 6px; background:${t.err}22; border:1px solid ${t.err}44; font-size:8px; color:${t.err}; line-height:13px; font-weight:600">fail</div>
+            </div>
+          </div>
+          <!-- Input row -->
+          <div class="mock-row-flex" style="padding:0 2px">
+            <div class="mock-input" style="background:${t.bg2}; border-color:${t.border}"></div>
+            <div style="width:22px; height:22px; border-radius:50%; background:${t.accent}; flex-shrink:0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Info -->
+    <div class="theme-info" style="background:${t.bg2}; border-top:1px solid ${t.border}">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px">
+        <span class="theme-name" style="color:${t.fg1}">${t.name}</span>
+        <div class="theme-num" style="background:${t.accent}; font-size:9px; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center">${t.id}</div>
+      </div>
+      <div class="theme-desc" style="color:${t.fg2}; font-size:9px; margin-bottom:7px">${t.desc}</div>
+      <div class="swatch-row">
+        <div class="swatch" style="background:${t.bg1}" title="bg-primary"></div>
+        <div class="swatch" style="background:${t.bg2}" title="bg-secondary"></div>
+        <div class="swatch" style="background:${t.accent}" title="accent"></div>
+        <div class="swatch" style="background:${t.fg1}" title="fg-primary"></div>
+        <div class="swatch" style="background:${t.fg2}" title="fg-secondary"></div>
+        <span class="swatch-label" style="color:${t.fg2}; margin-left:2px; font-family:monospace">${t.accent}</span>
+      </div>
+    </div>
+  `
+
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'))
+    card.classList.add('selected')
+    card.style.borderColor = t.accent
+    console.log('Selected:', t.id, t.name)
+  })
+
+  grid.appendChild(card)
+})
+</script>
+</body>
+</html>
