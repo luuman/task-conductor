@@ -323,7 +323,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
         return (
           <React.Fragment key={step.id}>
             {step.kind === 'text' ? (
-              <div className={s.hBody}><RichText text={step.text!} /></div>
+              <RichText text={step.text!} />
             ) : (
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
