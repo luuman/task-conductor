@@ -85,6 +85,15 @@
   flex-shrink: 0;
 }
 
+/* Divider between nav list and bottom tools */
+.divider {
+  width: 28px;
+  height: 1px;
+  background: var(--tc-sidebar-border);
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
 /* Shared icon button (notification, footer) */
 .iconBtn {
   width: 40px;
@@ -104,6 +113,11 @@
 .iconBtn:hover {
   background: var(--tc-sidebar-item-hover);
   color: var(--tc-sidebar-fg);
+}
+
+.iconBtnActive {
+  background: var(--tc-sidebar-item-active-bg);
+  color: var(--tc-sidebar-item-active-fg);
 }
 
 /* Notification badge */
