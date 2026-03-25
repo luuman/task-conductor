@@ -391,7 +391,7 @@ export function PromptInput() {
                 </svg>
               </button>
               {showModelMenu && models.length > 0 && (
-                <div className={s.settingsDropdown} style={{ minWidth: 160 }}>
+                <div className={s.settingsDropdown} style={{ minWidth: 160, zIndex: 200 }}>
                   {models.map(m => (
                     <button
                       key={m.id}
