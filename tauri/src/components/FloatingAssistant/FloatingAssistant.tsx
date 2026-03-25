@@ -186,12 +186,13 @@ export function FloatingAssistant() {
     }).catch(() => {})
   }, [activeProjectId, setProjectCwd])
 
-  // 当 claude 返回 session_id 时，选中该会话
+  // 当 claude 返回 session_id 时，若已在历史列表中则选中（不在列表则跳过，避免 404）
   const claudeSessionId = useChatStore((s) => s.claudeSessionId)
   useEffect(() => {
     if (!claudeSessionId) return
+    if (!sessions.some(s => s.session_id === claudeSessionId)) return
     sharedSelectSession(claudeSessionId)
-  }, [claudeSessionId, sharedSelectSession])
+  }, [claudeSessionId, sessions, sharedSelectSession])
 
   // system prompt
   useEffect(() => {
