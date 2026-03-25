@@ -1,0 +1,20 @@
+{
+  "name": "Lime",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#0b0d09",
+    "base.bg-secondary":  "#12150e",
+    "base.bg-hover":      "#191e16",
+    "base.fg-primary":    "#eaf0e8",
+    "base.fg-secondary":  "#607058",
+    "base.accent":        "#a3e635",
+    "base.accent-bg":     "#1a2608",
+    "base.accent-fg":     "#0b0d09",
+    "base.border":        "#1c1e18",
+    "base.border-active": "#a3e635",
+    "base.error":         "#f87171",
+    "base.warning":       "#fbbf24",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
