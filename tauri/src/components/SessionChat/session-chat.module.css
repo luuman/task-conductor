@@ -634,12 +634,12 @@
 }
 
 .pill:hover {
-  border-color: rgba(0, 122, 204, 0.3);
-  background: rgba(0, 122, 204, 0.06);
+  border-color: var(--tc-accent-a40);
+  background: var(--tc-accent-a8);
 }
 
 .pillGrep {
-  border-left: 2px solid rgba(0, 122, 204, 0.4);
+  border-left: 2px solid var(--tc-accent-a40);
   padding-left: 8px;
 }
 
