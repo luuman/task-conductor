@@ -3,18 +3,18 @@
   "type": "light",
   "colors": {
     "base.bg-primary":    "#ffffff",
-    "base.bg-secondary":  "#f7f7f8",
-    "base.bg-hover":      "#eeeeef",
-    "base.fg-primary":    "#2c3038",
-    "base.fg-secondary":  "#6b7280",
-    "base.accent":        "#7d52f4",
-    "base.accent-bg":     "#f0eeff",
+    "base.bg-secondary":  "#f3f6fb",
+    "base.bg-hover":      "#e8ecf2",
+    "base.fg-primary":    "#18181b",
+    "base.fg-secondary":  "#71717a",
+    "base.accent":        "#18181b",
+    "base.accent-bg":     "#f4f4f5",
     "base.accent-fg":     "#ffffff",
     "base.border":        "#e4e4e7",
-    "base.border-active": "#7d52f4",
-    "base.error":         "#fb3748",
-    "base.warning":       "#f6b51e",
+    "base.border-active": "#18181b",
+    "base.error":         "#dc2626",
+    "base.warning":       "#d97706",
     "base.success":       "#16a34a",
-    "base.info":          "#4285f4"
+    "base.info":          "#2563eb"
   }
 }
