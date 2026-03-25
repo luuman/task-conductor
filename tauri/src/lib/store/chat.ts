@@ -122,5 +122,6 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
     claudeSessionId: state.claudeSessionId,
     projectCwd: state.projectCwd,
     selectedModel: state.selectedModel,
+    bypassPermissions: state.bypassPermissions,
   }),
 }))
