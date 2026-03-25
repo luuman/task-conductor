@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { IconZap } from '../../../ui/icon'
 import { useTranslation } from 'react-i18next'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
 import { api } from '../../../lib/api'
