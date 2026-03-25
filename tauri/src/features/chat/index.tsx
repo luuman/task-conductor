@@ -185,12 +185,10 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
       {steps.map((step, i) => (
         <StepWrap key={step.id} step={step} index={i}>
           {step.kind === 'text' ? (
-            <div className={`${s.bCard} ${s.bTextCard}`}><div className={s.bBody}><RichText text={step.text!} /></div></div>
-          ) : (
-            <div className={s.bCard}>
-              {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
-            </div>
-          )}
+            <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
+          ) : (step.toolResult || step.oldString) ? (
+            <ResultBlock step={step} />
+          ) : null}
         </StepWrap>
       ))}
     </>
