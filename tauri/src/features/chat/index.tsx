@@ -214,7 +214,7 @@ function StyleA({ steps }: { steps: TimelineStep[] }) {
 function StyleB({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
-      {steps.map((step, i) => (
+      {steps.map((step) => (
         <React.Fragment key={step.id}>
           {step.kind === 'text' ? (
             <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
