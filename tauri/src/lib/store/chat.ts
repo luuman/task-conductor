@@ -83,6 +83,7 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   claudeSessionId: null,
   selectedModel: 'claude-sonnet-4-20250514',
   lastStats: null,
+  bypassPermissions: true,
 
   prdContent: null,
   prdSidebarOpen: false,
