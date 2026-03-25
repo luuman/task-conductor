@@ -594,13 +594,13 @@
 }
 
 .pill:hover {
-  border-color: rgba(0, 122, 204, 0.35);
-  background: rgba(0, 122, 204, 0.08);
+  border-color: color-mix(in srgb, var(--tc-border-active) 35%, transparent);
+  background: color-mix(in srgb, var(--tc-border-active) 8%, transparent);
   transform: translateY(-1px);
 }
 
 .pillGrep {
-  border-left: 2px solid rgba(0, 122, 204, 0.4);
+  border-left: 2px solid color-mix(in srgb, var(--tc-border-active) 40%, transparent);
   padding-left: 8px;
 }
 
