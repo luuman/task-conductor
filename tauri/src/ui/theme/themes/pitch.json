@@ -1,0 +1,20 @@
+{
+  "name": "Pitch",
+  "type": "dark",
+  "colors": {
+    "base.bg-primary":    "#080808",
+    "base.bg-secondary":  "#111111",
+    "base.bg-hover":      "#1a1a1a",
+    "base.fg-primary":    "#f0f0f0",
+    "base.fg-secondary":  "#606060",
+    "base.accent":        "#f97316",
+    "base.accent-bg":     "#1c0e00",
+    "base.accent-fg":     "#ffffff",
+    "base.border":        "#1e1e1e",
+    "base.border-active": "#f97316",
+    "base.error":         "#f87171",
+    "base.warning":       "#fbbf24",
+    "base.success":       "#4ade80",
+    "base.info":          "#60a5fa"
+  }
+}
