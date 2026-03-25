@@ -215,11 +215,12 @@ function StyleB({ steps }: { steps: TimelineStep[] }) {
           {step.kind === 'text' ? (
             <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
           ) : (
-            <div>
-              {!step.toolResult && !step.oldString && (
-                <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
-              )}
-              {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
+            <div className={s.bCard}>
+              <div className={s.bHead}>
+                {catIcon(step.category, 12)}
+                <span className={s.bTitle}>{toolLabel(step)}</span>
+              </div>
+              {(step.toolResult || step.oldString) && <div className={s.bBody}><ResultBlock step={step} /></div>}
             </div>
           )}
         </React.Fragment>
