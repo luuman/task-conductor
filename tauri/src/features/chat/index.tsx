@@ -569,6 +569,7 @@ function PromptInput() {
   }, [handleSend])
 
   return (
+    <>
     <div className={s.promptCard}>
       {attachments.length > 0 && (
         <div className={s.pAttachRow}>
