@@ -29,6 +29,82 @@ function uid(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
+// ── Empty State ──
+interface Suggestion { icon: string; label: string; text: string }
+
+function getSuggestions(ctx: PageContext, project?: ProjectInfo | null): Suggestion[] {
+  if (!project) {
+    return [
+      { icon: '📋', label: '创建第一个项目', text: '帮我创建一个新项目，我来描述需求' },
+      { icon: '🤔', label: '了解功能', text: 'TaskConductor 能帮我做什么？' },
+      { icon: '🚀', label: '快速上手', text: '如何快速开始使用 AI 任务流水线？' },
+    ]
+  }
+  switch (ctx.page) {
+    case 'task-detail':
+      return [
+        { icon: '📝', label: '生成 PRD', text: `帮我为任务「${ctx.taskTitle || '当前任务'}」生成详细的 PRD` },
+        { icon: '🔍', label: '分析方案', text: '分析一下各个候选方案的优劣，给出推荐' },
+        { icon: '⚡', label: '推进阶段', text: '当前阶段完成了，帮我规划下一步' },
+      ]
+    case 'canvas':
+      return [
+        { icon: '✨', label: '优化 PRD', text: '帮我优化当前的 PRD 内容，使其更清晰' },
+        { icon: '🧩', label: '拆分功能模块', text: '根据 PRD 帮我拆分出具体的功能模块' },
+        { icon: '⚠️', label: '识别风险', text: '分析当前需求中存在的潜在风险' },
+      ]
+    case 'git':
+      return [
+        { icon: '📄', label: '生成提交信息', text: '根据当前改动帮我生成一个规范的 commit message' },
+        { icon: '🔀', label: '分支策略', text: '建议一个适合当前项目的 Git 分支管理策略' },
+        { icon: '👀', label: '代码审查', text: '帮我检查最近的代码改动，提出改进建议' },
+      ]
+    default:
+      return [
+        { icon: '💡', label: '分析需求', text: `帮我分析一下项目「${project.name}」的需求，拆解成任务` },
+        { icon: '📊', label: '项目状态', text: `${project.name} 现在有 ${project.taskCount} 个任务，帮我梳理一下进度` },
+        { icon: '🛠️', label: '创建任务', text: '我有一个新需求，帮我创建对应的开发任务' },
+      ]
+  }
+}
+
+function EmptyState({ projectInfo, pageContext, onSuggest }: {
+  projectInfo: ProjectInfo | null
+  pageContext: PageContext
+  onSuggest: (text: string) => void
+}) {
+  const suggestions = getSuggestions(pageContext, projectInfo)
+  return (
+    <div className={styles.emptyState}>
+      <div className={styles.emptyIcon}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="var(--tc-accent)" opacity="0.9"/>
+          <path d="M19 15L19.8 17.2L22 18L19.8 18.8L19 21L18.2 18.8L16 18L18.2 17.2L19 15Z" fill="var(--tc-accent)" opacity="0.5"/>
+          <path d="M5 3L5.5 4.5L7 5L5.5 5.5L5 7L4.5 5.5L3 5L4.5 4.5L5 3Z" fill="var(--tc-accent)" opacity="0.4"/>
+        </svg>
+      </div>
+      <div className={styles.emptyTitle}>TaskConductor AI</div>
+      <div className={styles.emptySub}>
+        {projectInfo
+          ? <>正在协助 <span className={styles.emptyProjectName}>{projectInfo.name}</span></>
+          : '请选择一个项目开始协作'}
+      </div>
+      <div className={styles.emptySuggestions}>
+        {suggestions.map(s => (
+          <button
+            key={s.label}
+            className={styles.emptySuggestion}
+            onClick={() => onSuggest(s.text)}
+          >
+            <span className={styles.emptySuggestionIcon}>{s.icon}</span>
+            <span className={styles.emptySuggestionLabel}>{s.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── System Prompt 构建 ──
 function buildSystemPrompt(ctx: PageContext, project?: ProjectInfo | null): string {
   const parts: string[] = []
