@@ -448,7 +448,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
             <StepWrap key={step.id} step={step} index={grp.idx}>
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
-                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined }}>▶</span>
+                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
                   <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
                   <span className={s.hTitle}>{step.text?.slice(0, 60)}</span>
                 </div>
@@ -466,7 +466,7 @@ function StyleH({ steps }: { steps: TimelineStep[] }) {
             <StepWrap key={step.id} step={step} index={startIdx}>
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
-                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined }}>▶</span>
+                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
                   <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
                 </div>
                 {isOpen && (step.toolResult || step.oldString) && (
