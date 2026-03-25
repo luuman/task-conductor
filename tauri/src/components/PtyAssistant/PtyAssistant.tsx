@@ -301,7 +301,7 @@ export function PtyAssistant() {
         >
           {/* 头部 */}
           <div className={styles.header} onMouseDown={handleDragStart}>
-            <div className={styles.headerAvatar}>⚡</div>
+            <div className={styles.headerAvatar}><IconZap size={16} /></div>
             <span className={styles.headerTitle}>Claude Terminal</span>
             <span className={styles.headerBadge}>PTY</span>
             {activeSessionId && (
