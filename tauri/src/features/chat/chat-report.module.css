@@ -133,10 +133,8 @@
 /* 底部操作栏 */
 /* ═══════════════════════════════════════════════ */
 .bottomBar {
-  position: sticky;
-  bottom: 0;
   border-top: 1px solid var(--tc-border);
-  padding: 10px 16px 14px;
+  padding: 10px 16px 12px;
   background: var(--tc-content-bg);
   flex-shrink: 0;
 }
