@@ -27,15 +27,6 @@ const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
 // ── badge class ──
-function badgeCls(cat: TimelineStep['category']): string {
-  const map: Record<string, string> = {
-    text: s.bText, read: s.bRead, edit: s.bEdit, write: s.bWrite,
-    bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
-    ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
-  }
-  return map[cat] || s.bOther
-}
-
 const TOOL_LABEL_MAP: Record<string, string> = {
   Read: '读取', Write: '写入', Edit: '编辑', MultiEdit: '多处编辑',
   Bash: '命令', Grep: '内容搜索', Glob: '文件匹配',
@@ -46,14 +37,7 @@ const TOOL_LABEL_MAP: Record<string, string> = {
   TaskGet: '获取任务', TaskStop: '停止任务',
 }
 
-const CAT_LABEL_MAP: Record<string, string> = {
-  read: '读取', edit: '编辑', write: '写入', bash: '命令',
-  grep: '内容搜索', glob: '文件匹配', agent: '子代理', ask: '提问',
-  search: '网络搜索', task: '任务管理', text: '文本', other: '其他',
-}
-
-function badgeLabel(step: TimelineStep): string {
-  if (step.kind === 'text') return '文本'
+function toolLabel(step: TimelineStep): string {
   const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || '工具'
   return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
 }
