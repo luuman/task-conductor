@@ -155,18 +155,18 @@
 }
 
 .ntRow:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--tc-sidebar-item-hover);
 }
 
 .ntRowSelected {
   composes: ntRow;
-  background: rgba(0, 122, 204, 0.08);
+  background: var(--tc-accent-a8);
   border-left: 2px solid var(--tc-border-active);
   padding-left: 10px;
 }
 
 .ntRowSelected:hover {
-  background: rgba(0, 122, 204, 0.12);
+  background: var(--tc-accent-a12);
 }
 
 /* Column widths — optimized for 300px panel */
