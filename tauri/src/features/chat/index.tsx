@@ -702,8 +702,17 @@ export default function ChatReportPage() {
   useEffect(() => {
     if (!selectedId) return
     setLoading(true)
-    api.getTranscript(selectedId, { limit: 200, offset: 0 }).then(res => {
-      setTranscript(res.messages)
+    // 先获取 total，再全量加载所有消息
+    api.getTranscript(selectedId, { limit: 1, offset: 0 }).then(first => {
+      const total = first.total ?? first.messages.length
+      if (total <= 1) {
+        setTranscript(first.messages)
+        setLoading(false)
+        return
+      }
+      return api.getTranscript(selectedId, { limit: total, offset: 0 }).then(res => {
+        setTranscript(res.messages)
+      })
     }).catch(() => {}).finally(() => setLoading(false))
   }, [selectedId])
 
