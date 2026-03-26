@@ -534,8 +534,8 @@ function UserMsgRow({ rawText, children }: { rawText: string; children: React.Re
         tabIndex={-1}
       >
         {copied
-          ? <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5.5 10L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          : <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4.5" y="1.5" width="7" height="8.5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M1.5 4.5H3v6.5A1.5 1.5 0 004.5 12.5H9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+          ? '\u2713'
+          : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
         }
       </button>
       <div className={s.queryPill}>{children}</div>
