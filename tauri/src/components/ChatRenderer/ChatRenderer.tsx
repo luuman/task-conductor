@@ -325,7 +325,8 @@ function splitTextOnFileRefs(text: string): ParsedSegment[] {
     const path = (m[1] ?? m[2]).trim()
     const ext = (path.split('.').pop() ?? '').toLowerCase()
     if (m[1]) {
-      parts.push(IMG_EXTS.has(ext) ? { kind: 'image-ref', path } : { kind: 'file-ref', path })
+      // data: URL 直接视为图片（base64 无扩展名，IMG_EXTS 检测会失效）
+      parts.push((path.startsWith('data:') || IMG_EXTS.has(ext)) ? { kind: 'image-ref', path } : { kind: 'file-ref', path })
     } else {
       parts.push({ kind: 'file-ref', path })
     }
@@ -678,6 +679,19 @@ export const mdComponents: Components = {
       {children}
     </blockquote>
   ),
+  img: ({ src, alt }) => {
+    if (!src) return null
+    // data: URL 或绝对 URL 直接用；本地路径走 convertFileSrc / 后端接口
+    if (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://') || src.startsWith('blob:')) {
+      return (
+        <span style={{ display: 'block', margin: '8px 0' }}>
+          <img src={src} alt={alt || ''} style={{ maxWidth: '100%', maxHeight: 400, borderRadius: 8, border: '1px solid var(--tc-border)' }} />
+        </span>
+      )
+    }
+    // 本地文件路径 → InlineImgCard
+    return <InlineImgCard path={src} />
+  },
   hr: () => <hr className={styles.mdHr} />,
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noopener noreferrer" className={styles.mdLink}>
