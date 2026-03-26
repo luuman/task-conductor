@@ -1,9 +1,11 @@
 // ChatReportPage — 会话操作时间线，8 种可切换样式
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { parseTimelineWithQuestions, formatTs, guessHljsLang, type TimelineStep, type UserQuestion } from './timeline-parser'
+import { RichText as ImageAwareRichText } from './ChatTimeline'
 import { Select } from '../../ui/select'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
 import {
@@ -696,12 +698,13 @@ export default function ChatReportPage() {
                 {chatDisplayMessages.map((msg, i) => {
                   const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
                   const text = msg.role === 'user' ? stripDomContext(raw) : raw
-                  if (!text) return null
+                  console.log(`[ChatPage] msg#${i} role=${msg.role} blocks=`, msg.blocks, `raw="${raw.slice(0, 120)}" text="${text.slice(0, 120)}"`)
+                  if (!text) { console.log(`[ChatPage] msg#${i} SKIPPED (empty text)`); return null }
                   return (
                     <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
                       {msg.role === 'user' ? (
                         <div className={s.queryPill}>
-                          <div className={s.richText}>{text}</div>
+                          <ImageAwareRichText text={raw} />
                         </div>
                       ) : (
                         <div className={s.chatAiBlock}>
