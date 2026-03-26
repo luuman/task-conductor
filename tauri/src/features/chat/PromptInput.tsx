@@ -171,6 +171,13 @@ function DomPickerOverlay({ rect }: { rect: DOMRectReadOnly | null }) {
 
 type ModelInfo = { id: string; name: string; default?: boolean }
 
+const PERMISSION_MODES = [
+  { id: 'bypassPermissions', label: 'Bypass' },
+  { id: 'acceptEdits',       label: 'Accept Edits' },
+  { id: 'plan',              label: 'Plan' },
+  { id: 'default',           label: 'Default' },
+]
+
 function _fmtTokens(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
   return String(n)
@@ -182,17 +189,25 @@ export function PromptInput() {
   const [expanded, setExpanded] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showModelMenu, setShowModelMenu] = useState(false)
+  const [showPermMenu, setShowPermMenu] = useState(false)
   const [models, setModels] = useState<ModelInfo[]>([])
   const [isPicking, setIsPicking] = useState(false)
   const [pickRect, setPickRect] = useState<DOMRectReadOnly | null>(null)
   const [domCtxList, setDomCtxList] = useState<DomContext[]>([])
   const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft,
           selectedModel, setSelectedModel, lastStats,
-          bypassPermissions, setBypassPermissions } = useChatStore()
+          permissionMode, setPermissionMode } = useChatStore()
   const { send, stop, sendNewSession } = useChatStream()
+  const [modelMenuPos, setModelMenuPos] = useState<{ left: number; bottom: number } | null>(null)
+  const [permMenuPos, setPermMenuPos] = useState<{ left: number; bottom: number } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const modelBtnRef = useRef<HTMLButtonElement>(null)
-  const [modelMenuPos, setModelMenuPos] = useState<{ left: number; bottom: number } | null>(null)
+  const permBtnRef = useRef<HTMLButtonElement>(null)
+  const modelMenuRef = useRef<HTMLDivElement>(null)
+  const permMenuRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const settingsRef = useRef<HTMLDivElement>(null)
 
   // 监听外部 inputDraft（来自 empty state 建议卡片点击），应用后立即清空
   useEffect(() => {
@@ -201,9 +216,6 @@ export function PromptInput() {
     setInputDraft('')
     setTimeout(() => { textareaRef.current?.focus() }, 0)
   }, [inputDraft, setInputDraft])
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const imageInputRef = useRef<HTMLInputElement>(null)
-  const settingsRef = useRef<HTMLDivElement>(null)
   const isEmpty = value.trim() === '' && attachments.length === 0 && domCtxList.length === 0
 
   // 加载模型列表
@@ -227,11 +239,23 @@ export function PromptInput() {
     if (!showModelMenu) return
     const handler = (e: MouseEvent) => {
       const target = e.target as Node
-      if (modelBtnRef.current && !modelBtnRef.current.contains(target)) setShowModelMenu(false)
+      if (modelBtnRef.current?.contains(target) || modelMenuRef.current?.contains(target)) return
+      setShowModelMenu(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [showModelMenu])
+
+  useEffect(() => {
+    if (!showPermMenu) return
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (permBtnRef.current?.contains(target) || permMenuRef.current?.contains(target)) return
+      setShowPermMenu(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showPermMenu])
 
   // DOM 拾取模式
   useEffect(() => {
@@ -294,7 +318,9 @@ export function PromptInput() {
     }).join('')
     const displayText = text || (attachments.length > 0 ? '' : `请帮我分析以下 ${domCtxList.length} 个元素`)
     const fullText = [displayText, attachText, ctxText].filter(Boolean).join('')
-    addMessage(makeAiMsg('user', displayText + attachText))
+    const userMsg = displayText + attachText
+    console.log(`[PromptInput] handleSend: attachments=${attachments.length} attachText="${attachText.slice(0, 120)}" userMsg="${userMsg.slice(0, 120)}"`)
+    addMessage(makeAiMsg('user', fullText))
     send(fullText)
     setValue('')
     setAttachments([])
@@ -350,6 +376,7 @@ export function PromptInput() {
       {/* 模型选择下拉（portal，避免被 overflow:hidden 裁剪） */}
       {showModelMenu && modelMenuPos && models.length > 0 && createPortal(
         <div
+          ref={modelMenuRef}
           style={{
             position: 'fixed',
             left: modelMenuPos.left,
@@ -375,6 +402,44 @@ export function PromptInput() {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               {m.name}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+
+      {showPermMenu && permMenuPos && createPortal(
+        <div
+          ref={permMenuRef}
+          style={{
+            position: 'fixed',
+            left: permMenuPos.left,
+            bottom: permMenuPos.bottom,
+            width: 120,
+            background: 'var(--tc-sidebar-bg)',
+            border: '1px solid var(--tc-border)',
+            borderRadius: 8,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            zIndex: 9999,
+            overflow: 'hidden',
+          }}
+        >
+          {PERMISSION_MODES.map(m => (
+            <button
+              key={m.id}
+              className={s.settingsItem}
+              style={m.id === permissionMode ? { color: 'var(--tc-accent)', display: 'flex', alignItems: 'center' } : { display: 'flex', alignItems: 'center' }}
+              onClick={() => {
+                setPermissionMode(m.id)
+                sendNewSession()
+                setShowPermMenu(false)
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                style={{ marginRight: 6, opacity: m.id === permissionMode ? 1 : 0, flexShrink: 0 }}>
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {m.label}
             </button>
           ))}
         </div>,
@@ -507,18 +572,20 @@ export function PromptInput() {
             </button>
             <div className={s.pToolSep} />
             <button
-              className={`${s.pBypassPill} ${bypassPermissions ? s.pBypassPillOn : s.pBypassPillOff}`}
-              title={bypassPermissions ? '已跳过权限检查，点击关闭' : '权限检查已启用，点击开启 bypass'}
+              ref={permBtnRef}
+              className={s.pModelBtn}
+              title="权限模式"
               onClick={() => {
-                const next = !bypassPermissions
-                setBypassPermissions(next)
-                sendNewSession()
+                if (showPermMenu) { setShowPermMenu(false); return }
+                const r = permBtnRef.current?.getBoundingClientRect()
+                if (r) setPermMenuPos({ left: r.left, bottom: window.innerHeight - r.top + 4 })
+                setShowPermMenu(true)
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              {PERMISSION_MODES.find(m => m.id === permissionMode)?.label ?? 'Bypass'}
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 3 }}>
+                <polyline points="6 9 12 15 18 9" />
               </svg>
-              bypass {bypassPermissions ? 'on' : 'off'}
             </button>
           </div>
           <div className={s.pToolRight}>
