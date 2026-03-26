@@ -439,10 +439,10 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
                 <a
                   key={q.id}
                   className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}
-                  href={`#question-${i}`}
+                  href="#"
                   onClick={e => {
                     e.preventDefault()
-                    document.getElementById(`question-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    onScrollToQuestion?.(i)
                   }}
                 >
                   <span className={s.qNavNum}>Q{i + 1}</span>
