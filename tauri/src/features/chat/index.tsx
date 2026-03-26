@@ -696,8 +696,8 @@ export default function ChatReportPage() {
   // 使用 useSessionData 统一管理分页加载 + WS 实时更新
   const {
     sessions, selectedId, selectSession,
-    transcript, transcriptLoading: loading, fileFound,
-    loadMore, hasMore, total, isFirstLoad,
+    transcript, transcriptLoading: loading,
+    loadMore, hasMore,
   } = useSessionData({ filterByCwd: projectCwd })
 
   // 自动选中第一个会话
