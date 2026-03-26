@@ -13,6 +13,8 @@ import {
   IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
   IconChevronRight,
 } from '../../ui/icon'
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { useSessionData } from '../../components/SessionChat/useSessionData'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
