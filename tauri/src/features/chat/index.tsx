@@ -352,9 +352,9 @@ const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
 }
 
 // ── Right sidebar ──
-function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggleCode }: {
+function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggleCode, onScrollToQuestion }: {
   session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number
-  codeExpanded: boolean; onToggleCode: () => void
+  codeExpanded: boolean; onToggleCode: () => void; onScrollToQuestion?: (qi: number) => void
 }) {
   const qNavRef = useRef<HTMLDivElement>(null)
 
