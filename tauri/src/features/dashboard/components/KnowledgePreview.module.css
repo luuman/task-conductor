@@ -68,7 +68,7 @@
 }
 
 .badge {
-  background: var(--tc-accent, #007acc);
+  background: var(--tc-accent);
   color: #fff;
   padding: 1px 6px;
   border-radius: 4px;

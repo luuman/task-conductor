@@ -72,6 +72,7 @@ events = [
     'Notification',      # Claude 等待用户输入
     'SubagentStart',     # 子 agent 启动
     'SubagentStop',      # 子 agent 结束
+    'UserPromptSubmit',  # 用户提交提示
 ]
 
 tc_hook_entry = {
@@ -115,6 +116,7 @@ echo "  - Stop"
 echo "  - SessionStart / SessionEnd"
 echo "  - Notification"
 echo "  - SubagentStart / SubagentStop"
+echo "  - UserPromptSubmit"
 echo ""
 echo "Claude Code 事件将自动上报到: $AGENT_URL/hooks/claude"
 echo ""

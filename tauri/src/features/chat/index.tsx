@@ -403,23 +403,10 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
   return (
     <div className={s.sidebar}>
-      {/* 会话元数据 */}
-      <div className={s.sbSection}>
-        <div className={s.sbTitle}>会话元数据</div>
-        <div className={s.sbRow}><span className={s.sbKey}>会话 ID</span><span className={s.sbVal}>{session.session_id.slice(0, 8)}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>状态</span><span className={s.sbVal} style={{ color: session.status === 'active' ? '#4ade80' : session.status === 'stopped' ? '#f87171' : undefined }}>● {session.status || '未知'}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>模型</span><span className={s.sbVal}>claude-opus-4-6</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>开始</span><span className={s.sbVal}>{formatTs(session.started_at)}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>结束</span><span className={s.sbVal}>{formatTs(session.last_seen_at || '')}</span></div>
-        {duration && <div className={s.sbRow}><span className={s.sbKey}>耗时</span><span className={s.sbVal}>{duration}</span></div>}
-        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>工作目录</span><span className={s.sbVal} style={{ fontSize: 9 }}>{session.cwd.split('/').pop()}</span></div>}
-        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>Git 分支</span><span className={s.sbVal}>master</span></div>}
-      </div>
-
+      
       {/* 问题导航 */}
       {questions.length > 0 && (
         <>
-          <hr className={s.sbDivider} />
           <div className={s.sbSection}>
             <div className={s.sbTitle} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span>问题导航 ({questions.length})</span>
@@ -454,30 +441,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
         </>
       )}
 
-      <hr className={s.sbDivider} />
-
-      {/* 操作统计 */}
-      <div className={s.sbSection}>
-        <div className={s.sbTitle}>操作统计</div>
-        <div className={s.sbRow}><span className={s.sbKey}>工具调用</span><span className={s.sbVal}>{toolSteps.length}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>文本输出</span><span className={s.sbVal}>{steps.length - toolSteps.length} 段</span></div>
-        {cats.map(([cat, count]) => (
-          <div key={cat} className={s.sbRow}>
-            <span className={s.sbKey}>{CAT_LABEL_MAP[cat] || cat}</span>
-            <span className={s.sbVal} style={{ color: dotColor(cat as TimelineStep['category']) }}>{count}</span>
-          </div>
-        ))}
-      </div>
-
-      <hr className={s.sbDivider} />
-
-      {/* 涉及文件 */}
-      <div className={s.sbSection}>
-        <div className={s.sbTitle}>涉及文件</div>
-        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFileText size={11} /> 读取</span><span className={s.sbVal}>{fileStats.read} 文件</span></div>
-        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconPencil size={11} /> 修改</span><span className={s.sbVal}>{fileStats.edit} 文件</span></div>
-        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFilePlus size={11} /> 新建</span><span className={s.sbVal}>{fileStats.write} 文件</span></div>
-      </div>
+    
 
       <hr className={s.sbDivider} />
 
@@ -503,6 +467,46 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
           <li className={s.sbQuestion}>Bash 支持 ANSI 颜色码？</li>
           <li className={s.sbQuestion}>AskUser 选项需要键盘导航？</li>
         </ul>
+      </div>
+
+        <hr className={s.sbDivider} />
+
+      {/* 会话元数据 */}
+      <div className={s.sbSection}>
+        <div className={s.sbTitle}>会话元数据</div>
+        <div className={s.sbRow}><span className={s.sbKey}>会话 ID</span><span className={s.sbVal}>{session.session_id.slice(0, 8)}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>状态</span><span className={s.sbVal} style={{ color: session.status === 'active' ? '#4ade80' : session.status === 'stopped' ? '#f87171' : undefined }}>● {session.status || '未知'}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>模型</span><span className={s.sbVal}>claude-opus-4-6</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>开始</span><span className={s.sbVal}>{formatTs(session.started_at)}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>结束</span><span className={s.sbVal}>{formatTs(session.last_seen_at || '')}</span></div>
+        {duration && <div className={s.sbRow}><span className={s.sbKey}>耗时</span><span className={s.sbVal}>{duration}</span></div>}
+        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>工作目录</span><span className={s.sbVal} style={{ fontSize: 9 }}>{session.cwd.split('/').pop()}</span></div>}
+        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>Git 分支</span><span className={s.sbVal}>master</span></div>}
+      </div>
+
+      <hr className={s.sbDivider} />
+
+      {/* 操作统计 */}
+      <div className={s.sbSection}>
+        <div className={s.sbTitle}>操作统计</div>
+        <div className={s.sbRow}><span className={s.sbKey}>工具调用</span><span className={s.sbVal}>{toolSteps.length}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>文本输出</span><span className={s.sbVal}>{steps.length - toolSteps.length} 段</span></div>
+        {cats.map(([cat, count]) => (
+          <div key={cat} className={s.sbRow}>
+            <span className={s.sbKey}>{CAT_LABEL_MAP[cat] || cat}</span>
+            <span className={s.sbVal} style={{ color: dotColor(cat as TimelineStep['category']) }}>{count}</span>
+          </div>
+        ))}
+      </div>
+
+      <hr className={s.sbDivider} />
+
+      {/* 涉及文件 */}
+      <div className={s.sbSection}>
+        <div className={s.sbTitle}>涉及文件</div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFileText size={11} /> 读取</span><span className={s.sbVal}>{fileStats.read} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconPencil size={11} /> 修改</span><span className={s.sbVal}>{fileStats.edit} 文件</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFilePlus size={11} /> 新建</span><span className={s.sbVal}>{fileStats.write} 文件</span></div>
       </div>
     </div>
   )

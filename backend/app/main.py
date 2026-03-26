@@ -358,6 +358,30 @@ def local_file(path: str = Query(..., description="绝对文件路径")):
         raise HTTPException(404, "文件不存在")
     media_type = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
     return FileResponse(str(p), media_type=media_type)
+
+@app.get("/api/files", summary="通用文件访问端点（用于聊天页面图片显示）")
+def api_files(path: str = Query(..., description="文件路径")):
+    """
+    通用文件访问端点，用于聊天页面的图片显示。
+    支持绝对路径和相对路径，仅允许图片文件。
+    """
+    p = FilePath(path)
+    # 如果不是绝对路径，尝试解析
+    if not p.is_absolute():
+        p = p.resolve()
+
+    if p.suffix.lower() not in _IMG_EXTS:
+        raise HTTPException(400, "只支持图片文件")
+    if not p.is_file():
+        raise HTTPException(404, "文件不存在")
+
+    # 文件大小限制
+    size = p.stat().st_size
+    if size > 10 * 1024 * 1024:  # 10 MB limit
+        raise HTTPException(400, "文件过大")
+
+    media_type = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
+    return FileResponse(str(p), media_type=media_type)
 app.include_router(git_router.router)            # GET /api/projects/{id}/git/status, /git/diff
 app.include_router(chat_router.router)            # GET /api/chat/models
 app.include_router(ai_router.router)              # POST /api/ai/inline-edit
@@ -608,7 +632,7 @@ async def receive_claude_hook(payload: dict):
                 sess.status = "stopped"
             elif event_type == "Stop":
                 sess.status = "idle"
-            elif event_type in ("PreToolUse", "UserPromptSubmit", "SessionStart"):
+            elif event_type in ("PreToolUse", "UserPromptSubmit", "SessionStart", "ChatStream"):
                 sess.status = "active"
 
             # 插入事件

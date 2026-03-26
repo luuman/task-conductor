@@ -32,7 +32,7 @@ interface ChatStore {
   claudeSessionId: string | null
   selectedModel: string
   lastStats: ChatStats | null
-  bypassPermissions: boolean
+  permissionMode: string
 
   // PRD
   prdContent: string | null
@@ -64,7 +64,7 @@ interface ChatStore {
   closePrdSidebar(): void
   setSelectedModel(model: string): void
   setLastStats(stats: ChatStats | null): void
-  setBypassPermissions(v: boolean): void
+  setPermissionMode(mode: string): void
   // 临时输入草稿（供 empty state 建议卡片填充输入框）
   inputDraft: string
   setInputDraft(text: string): void
@@ -83,7 +83,7 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   claudeSessionId: null,
   selectedModel: 'claude-sonnet-4-20250514',
   lastStats: null,
-  bypassPermissions: true,
+  permissionMode: 'default',
 
   prdContent: null,
   prdSidebarOpen: false,
@@ -114,7 +114,7 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
   setSelectedModel: (model) => set({ selectedModel: model }),
   setLastStats: (stats) => set({ lastStats: stats }),
   setInputDraft: (text) => set({ inputDraft: text }),
-  setBypassPermissions: (v) => set({ bypassPermissions: v }),
+  setPermissionMode: (mode) => set({ permissionMode: mode }),
 }), {
   name: 'tc-chat',
   partialize: (state) => ({
@@ -122,6 +122,6 @@ export const useChatStore = create<ChatStore>()(persist((set) => ({
     claudeSessionId: state.claudeSessionId,
     projectCwd: state.projectCwd,
     selectedModel: state.selectedModel,
-    bypassPermissions: state.bypassPermissions,
+    permissionMode: state.permissionMode,
   }),
 }))

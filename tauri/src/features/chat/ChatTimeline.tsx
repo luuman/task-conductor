@@ -329,6 +329,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
 export function RichText({ text }: { text: string }) {
   const parts = useMemo(() => parseFilePaths(text), [text])
   const hasFileParts = parts.some(p => p.kind !== 'text')
+  console.log(`[RichText] text="${text.slice(0, 80)}" hasFileParts=${hasFileParts} parts=`, parts.map(p => ({ kind: p.kind, ...(p.kind === 'image' ? { path: (p as any).path.slice(0, 60) } : {}) })))
   if (!hasFileParts) {
     return <div className={s.richText}><RichTextBlock text={text} /></div>
   }

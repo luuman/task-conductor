@@ -1,20 +1,37 @@
 {
   "name": "Lime",
-  "type": "dark",
-  "colors": {
-    "base.bg-primary":    "#0b0d09",
-    "base.bg-secondary":  "#12150e",
-    "base.bg-hover":      "#191e16",
-    "base.fg-primary":    "#eaf0e8",
-    "base.fg-secondary":  "#607058",
-    "base.accent":        "#a3e635",
-    "base.accent-bg":     "#1a2608",
-    "base.accent-fg":     "#0b0d09",
-    "base.border":        "#1c1e18",
+  "dark": {
+    "base.bg-primary": "#0b0d09",
+    "base.bg-secondary": "#12150e",
+    "base.bg-hover": "#191e16",
+    "base.fg-primary": "#eaf0e8",
+    "base.fg-secondary": "#607058",
+    "base.accent": "#a3e635",
+    "base.accent-bg": "#1a2608",
+    "base.accent-fg": "#0b0d09",
+    "base.accent-on-bg": "#ffffff",
+    "base.border": "#1c1e18",
     "base.border-active": "#a3e635",
-    "base.error":         "#f87171",
-    "base.warning":       "#fbbf24",
-    "base.success":       "#4ade80",
-    "base.info":          "#60a5fa"
+    "base.error": "#f87171",
+    "base.warning": "#fbbf24",
+    "base.success": "#4ade80",
+    "base.info": "#60a5fa"
+  },
+  "light": {
+    "base.bg-primary": "#ffffff",
+    "base.bg-secondary": "#f7fee7",
+    "base.bg-hover": "#ecfccb",
+    "base.fg-primary": "#18181b",
+    "base.fg-secondary": "#71717a",
+    "base.accent": "#65a30d",
+    "base.accent-bg": "#ecfccb",
+    "base.accent-fg": "#1a2e05",
+    "base.accent-on-bg": "#3f6212",
+    "base.border": "#e4e4e7",
+    "base.border-active": "#65a30d",
+    "base.error": "#dc2626",
+    "base.warning": "#d97706",
+    "base.success": "#16a34a",
+    "base.info": "#2563eb"
   }
 }

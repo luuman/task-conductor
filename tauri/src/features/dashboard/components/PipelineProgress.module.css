@@ -92,7 +92,7 @@
 }
 
 .current {
-  background: var(--tc-accent, #007acc);
+  background: var(--tc-accent);
   animation: pulse 2s ease-in-out infinite;
 }
 

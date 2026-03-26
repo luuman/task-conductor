@@ -67,7 +67,7 @@ async def handle_chat_ws(ws: WebSocket):
     client: Optional[ClaudeSDKClient] = None
     stream_task: Optional[asyncio.Task] = None
     current_session_id: Optional[str] = None
-    _bypass_permissions: bool = True
+    _permission_mode: str = "default"
 
     def _ts() -> str:
         return datetime.utcnow().isoformat()
@@ -89,7 +89,7 @@ async def handle_chat_ws(ws: WebSocket):
             return client
 
         opts = ClaudeAgentOptions(
-            permission_mode="bypassPermissions" if _bypass_permissions else "default",
+            permission_mode=_permission_mode,
             include_partial_messages=True,
             cwd=cwd or os.path.expanduser("~"),
             cli_path="claude",
@@ -273,7 +273,20 @@ async def handle_chat_ws(ws: WebSocket):
                     })
                     continue
 
-                _bypass_permissions = msg.get("bypass_permissions", True)
+                new_perm = msg.get("permission_mode", "default")
+                # 权限模式变更时需要重建 client
+                if new_perm != _permission_mode:
+                    _permission_mode = new_perm
+                    if client is not None:
+                        try:
+                            await client.disconnect()
+                        except Exception:
+                            pass
+                        client = None
+                        current_session_id = None
+                        logger.info("[Chat] permission_mode changed to %s, client reset", _permission_mode)
+                else:
+                    _permission_mode = new_perm
 
                 # 取消进行中的流
                 if stream_task and not stream_task.done():

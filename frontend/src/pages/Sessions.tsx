@@ -49,6 +49,8 @@ function applyEventStyle(eventType: string) {
     case "Stop":          icon = "■"; iconColor = "text-red-400";    break;
     case "SessionStart":  icon = "▶"; iconColor = "text-purple-400"; break;
     case "SessionEnd":    icon = "◀"; iconColor = "text-purple-300"; break;
+    case "ChatStream":    icon = "💬"; iconColor = "text-cyan-400"; break;
+    case "UserPromptSubmit": icon = "📝"; iconColor = "text-indigo-400"; break;
   }
   return { icon, iconColor };
 }
@@ -66,6 +68,14 @@ function dbEventToRow(e: ClaudeEvent): EventRow {
   if (e.event_type === "Stop") displayTool = "Stop";
   if (e.event_type === "SessionStart") displayTool = "SessionStart";
   if (e.event_type === "SessionEnd") displayTool = "SessionEnd";
+  if (e.event_type === "ChatStream") {
+    displayTool = "ChatStream";
+    detail = String((e.extra as Record<string, unknown>)?.message || "").slice(0, 160);
+  }
+  if (e.event_type === "UserPromptSubmit") {
+    displayTool = "UserSubmit";
+    detail = String((e.extra as Record<string, unknown>)?.prompt || (e.extra as Record<string, unknown>)?.message || "").slice(0, 160);
+  }
 
   return {
     id: `db-${e.id}`,
@@ -100,6 +110,14 @@ function wsEventToRow(data: Record<string, unknown>): EventRow {
   if (eventType === "Stop") displayTool = "Stop";
   if (eventType === "SessionStart") displayTool = "SessionStart";
   if (eventType === "SessionEnd") displayTool = "SessionEnd";
+  if (eventType === "ChatStream") {
+    displayTool = "ChatStream";
+    detail = String(extra?.message || "").slice(0, 160);
+  }
+  if (eventType === "UserPromptSubmit") {
+    displayTool = "UserSubmit";
+    detail = String(extra?.prompt || extra?.message || "").slice(0, 160);
+  }
 
   return {
     id: `ws-${wsRowCounter++}`,
@@ -127,7 +145,7 @@ function StatusBadge({ status }: { status: ClaudeSession["status"] }) {
 
 // ── 系统消息类型 ─────────────────────────────────────────────
 
-const SYSTEM_EVENTS = new Set(["SessionStart", "SessionEnd", "Stop", "Notification", "SubagentStart", "SubagentStop"]);
+const SYSTEM_EVENTS = new Set(["SessionStart", "SessionEnd", "Stop", "Notification", "SubagentStart", "SubagentStop", "ChatStream", "UserPromptSubmit"]);
 
 // ── 气泡消息流 ──────────────────────────────────────────────
 
@@ -343,7 +361,7 @@ export default function Sessions() {
       <div className="w-[240px] shrink-0 flex flex-col"
            style={{ borderRight: "1px solid var(--border)" }}>
         {/* 头部 */}
-        <div className="px-3 py-2.5 flex items-center justify-between"
+        <div className="px-3 py-3 flex items-center justify-between"
              style={{ borderBottom: "1px solid var(--border)" }}>
           <span className="text-[11px] font-semibold"
                 style={{ color: "var(--text-primary)" }}>{t('sessions.sessionList.title')}</span>
@@ -397,7 +415,7 @@ export default function Sessions() {
       {/* ── 右侧：会话事件流 ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* 工具栏 */}
-        <div className="flex items-center justify-between px-4 py-2 shrink-0"
+        <div className="flex items-center justify-between px-4 py-3 shrink-0"
              style={{ borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2">
             {selectedId ? (

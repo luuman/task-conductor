@@ -1,20 +1,37 @@
 {
   "name": "Jade",
-  "type": "dark",
-  "colors": {
-    "base.bg-primary":    "#0a0d0b",
-    "base.bg-secondary":  "#0f1310",
-    "base.bg-hover":      "#181e19",
-    "base.fg-primary":    "#e8f0eb",
-    "base.fg-secondary":  "#587060",
-    "base.accent":        "#34d399",
-    "base.accent-bg":     "#0d2318",
-    "base.accent-fg":     "#ffffff",
-    "base.border":        "#1a1e1b",
+  "dark": {
+    "base.bg-primary": "#0a0d0b",
+    "base.bg-secondary": "#0f1310",
+    "base.bg-hover": "#181e19",
+    "base.fg-primary": "#e8f0eb",
+    "base.fg-secondary": "#587060",
+    "base.accent": "#34d399",
+    "base.accent-bg": "#0d2318",
+    "base.accent-fg": "#ffffff",
+    "base.accent-on-bg": "#ffffff",
+    "base.border": "#1a1e1b",
     "base.border-active": "#34d399",
-    "base.error":         "#f87171",
-    "base.warning":       "#fbbf24",
-    "base.success":       "#4ade80",
-    "base.info":          "#60a5fa"
+    "base.error": "#f87171",
+    "base.warning": "#fbbf24",
+    "base.success": "#4ade80",
+    "base.info": "#60a5fa"
+  },
+  "light": {
+    "base.bg-primary": "#ffffff",
+    "base.bg-secondary": "#f0fdf4",
+    "base.bg-hover": "#dcfce7",
+    "base.fg-primary": "#18181b",
+    "base.fg-secondary": "#71717a",
+    "base.accent": "#059669",
+    "base.accent-bg": "#d1fae5",
+    "base.accent-fg": "#ffffff",
+    "base.accent-on-bg": "#065f46",
+    "base.border": "#e4e4e7",
+    "base.border-active": "#059669",
+    "base.error": "#dc2626",
+    "base.warning": "#d97706",
+    "base.success": "#16a34a",
+    "base.info": "#2563eb"
   }
 }

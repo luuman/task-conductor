@@ -1,20 +1,37 @@
 {
   "name": "Pitch",
-  "type": "dark",
-  "colors": {
-    "base.bg-primary":    "#080808",
-    "base.bg-secondary":  "#111111",
-    "base.bg-hover":      "#1a1a1a",
-    "base.fg-primary":    "#f0f0f0",
-    "base.fg-secondary":  "#606060",
-    "base.accent":        "#f97316",
-    "base.accent-bg":     "#1c0e00",
-    "base.accent-fg":     "#ffffff",
-    "base.border":        "#1e1e1e",
+  "dark": {
+    "base.bg-primary": "#080808",
+    "base.bg-secondary": "#111111",
+    "base.bg-hover": "#1a1a1a",
+    "base.fg-primary": "#f0f0f0",
+    "base.fg-secondary": "#606060",
+    "base.accent": "#f97316",
+    "base.accent-bg": "#1c0e00",
+    "base.accent-fg": "#ffffff",
+    "base.accent-on-bg": "#ffffff",
+    "base.border": "#1e1e1e",
     "base.border-active": "#f97316",
-    "base.error":         "#f87171",
-    "base.warning":       "#fbbf24",
-    "base.success":       "#4ade80",
-    "base.info":          "#60a5fa"
+    "base.error": "#f87171",
+    "base.warning": "#fbbf24",
+    "base.success": "#4ade80",
+    "base.info": "#60a5fa"
+  },
+  "light": {
+    "base.bg-primary": "#ffffff",
+    "base.bg-secondary": "#fff7ed",
+    "base.bg-hover": "#ffedd5",
+    "base.fg-primary": "#18181b",
+    "base.fg-secondary": "#71717a",
+    "base.accent": "#ea580c",
+    "base.accent-bg": "#ffedd5",
+    "base.accent-fg": "#ffffff",
+    "base.accent-on-bg": "#9a3412",
+    "base.border": "#e4e4e7",
+    "base.border-active": "#ea580c",
+    "base.error": "#dc2626",
+    "base.warning": "#d97706",
+    "base.success": "#16a34a",
+    "base.info": "#2563eb"
   }
 }

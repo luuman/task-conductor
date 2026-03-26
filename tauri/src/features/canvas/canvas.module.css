@@ -17,12 +17,12 @@
 .splitContainer { flex: 1; display: flex; overflow: hidden; }
 .splitPane { display: flex; flex-direction: column; min-width: 240px; overflow: hidden; }
 .splitDivider { width: 4px; background: var(--tc-border, #1a1a25); cursor: col-resize; flex-shrink: 0; transition: background .15s; }
-.splitDivider:hover { background: var(--tc-accent, #007acc); }
+.splitDivider:hover { background: var(--tc-accent); }
 
 /* Pane header */
 .paneHeader { height: 30px; background: var(--tc-bg-secondary, #111119); border-bottom: 1px solid var(--tc-border); display: flex; align-items: center; padding: 0 12px; gap: 8px; flex-shrink: 0; }
 .paneLabel { font-size: 11px; color: var(--tc-text-secondary, #555); font-weight: 600; }
-.paneBadge { font-size: 9px; padding: 1px 6px; border-radius: 6px; background: var(--tc-accent, #007acc); color: var(--tc-text-primary); opacity: 0.6; }
+.paneBadge { font-size: 9px; padding: 1px 6px; border-radius: 6px; background: var(--tc-accent); color: var(--tc-text-primary); opacity: 0.6; }
 
 /* Canvas container */
 .canvasContainer { flex: 1; position: relative; background: #0b0b12; overflow: hidden; }

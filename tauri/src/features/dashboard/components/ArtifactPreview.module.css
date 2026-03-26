@@ -61,8 +61,8 @@
 
 .stage {
   font-size: 10px;
-  color: var(--tc-accent, #007acc);
-  background: color-mix(in srgb, var(--tc-accent, #007acc) 15%, transparent);
+  color: var(--tc-accent);
+  background: color-mix(in srgb, var(--tc-accent) 15%, transparent);
   padding: 1px 6px;
   border-radius: 4px;
   flex-shrink: 0;

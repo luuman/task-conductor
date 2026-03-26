@@ -1,6 +1,7 @@
 backend/.venv/
 backend/*.egg-info/
 frontend/node_modules/
+frontend/.vite/
 *.pyc
 __pycache__/
 .env
@@ -19,6 +20,8 @@ htmlcov/
 ws-core/pkg/
 ws-core/target/
 tauri/node_modules/
+tauri/.vite/
 tauri/target/
 tauri/dist/
 .superpowers/
+UI/

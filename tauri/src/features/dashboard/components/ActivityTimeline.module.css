@@ -53,7 +53,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--tc-accent, #007acc);
+  background: var(--tc-accent);
   flex-shrink: 0;
   margin-top: 4px;
 }

@@ -106,7 +106,7 @@
 
 .listItem::before {
   content: '•';
-  color: var(--tc-accent, #007acc);
+  color: var(--tc-accent);
   flex-shrink: 0;
 }
 
@@ -131,7 +131,7 @@
 }
 
 .stageCheck {
-  accent-color: var(--tc-accent, #007acc);
+  accent-color: var(--tc-accent);
 }
 
 .footer {
@@ -144,7 +144,7 @@
 
 .confirmBtn {
   flex: 1;
-  background: var(--tc-accent, #007acc);
+  background: var(--tc-accent);
   color: #fff;
   border: none;
   border-radius: 6px;

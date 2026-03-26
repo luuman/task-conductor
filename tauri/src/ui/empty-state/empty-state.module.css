@@ -49,7 +49,7 @@
   padding: 0 14px;
   border-radius: 6px;
   border: none;
-  background: var(--tc-accent, #007acc);
+  background: var(--tc-accent);
   color: #fff;
   font-size: 13px;
   font-weight: 500;
