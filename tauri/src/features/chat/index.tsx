@@ -507,6 +507,43 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 }
 
 // ════════════════════════════════════════════════
+// 用户消息行（含 hover 复制按钮）
+// ════════════════════════════════════════════════
+function UserMsgRow({ rawText, children }: { rawText: string; children: React.ReactNode }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(rawText).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = rawText
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [rawText])
+
+  return (
+    <div className={s.userMsgRow}>
+      <button
+        className={`${s.userCopyBtn} ${copied ? s.userCopyBtnDone : ''}`}
+        onClick={handleCopy}
+        title="复制消息"
+        tabIndex={-1}
+      >
+        {copied
+          ? <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5.5 10L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          : <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4.5" y="1.5" width="7" height="8.5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M1.5 4.5H3v6.5A1.5 1.5 0 004.5 12.5H9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+        }
+      </button>
+      <div className={s.queryPill}>{children}</div>
+    </div>
+  )
+}
+
+// ════════════════════════════════════════════════
 // 选词浮动工具栏
 // ════════════════════════════════════════════════
 function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
@@ -730,6 +767,7 @@ export default function ChatReportPage() {
         />
       </div>
 
+      <SelectionToolbar containerRef={mainAreaRef} />
       <div className={s.body}>
         <div className={s.mainCol}>
           <div className={s.mainArea} ref={mainAreaRef}>
@@ -748,9 +786,9 @@ export default function ChatReportPage() {
                   const sectionSteps = groupConsecutiveSameType(steps.slice(startIdx, endIdx))
                   return (
                     <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
-                      <div className={s.queryPill}>
-  <div className={s.richText}>{stripDomContext(q.text)}</div>
-                      </div>
+                      <UserMsgRow rawText={q.text}>
+                        <div className={s.richText}>{stripDomContext(q.text)}</div>
+                      </UserMsgRow>
                       {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
                     </div>
                   )
@@ -772,9 +810,9 @@ export default function ChatReportPage() {
                   return (
                     <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
                       {msg.role === 'user' ? (
-                        <div className={s.queryPill}>
-                          <ImageAwareRichText text={raw} />
-                        </div>
+                        <UserMsgRow rawText={raw}>
+                          <ImageAwareRichText text={stripDomContext(raw)} />
+                        </UserMsgRow>
                       ) : (
                         <div className={s.chatAiBlock}>
                           <div className={s.richText}><RichTextBlock text={text} /></div>
