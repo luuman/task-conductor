@@ -507,6 +507,75 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 }
 
 // ════════════════════════════════════════════════
+// 选词浮动工具栏
+// ════════════════════════════════════════════════
+function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
+  const [selText, setSelText] = useState('')
+  const [copied, setCopied] = useState(false)
+  const toolbarRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleMouseUp() {
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed) { setPos(null); return }
+      const text = sel.toString().trim()
+      if (!text) { setPos(null); return }
+      const container = containerRef.current
+      if (!container) { setPos(null); return }
+      const range = sel.getRangeAt(0)
+      if (!container.contains(range.commonAncestorContainer)) { setPos(null); return }
+      const rect = range.getBoundingClientRect()
+      setSelText(text)
+      setCopied(false)
+      setPos({ x: rect.left + rect.width / 2, y: rect.top })
+    }
+
+    function handleMouseDown(e: MouseEvent) {
+      if (toolbarRef.current?.contains(e.target as Node)) return
+      setPos(null)
+      setCopied(false)
+    }
+
+    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [containerRef])
+
+  if (!pos) return null
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(selText).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = selText
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopied(true)
+    setTimeout(() => { setPos(null); setCopied(false) }, 1200)
+  }
+
+  return createPortal(
+    <div
+      ref={toolbarRef}
+      className={s.selToolbar}
+      style={{ left: pos.x, top: pos.y, transform: 'translate(-50%, calc(-100% - 10px))' }}
+      onMouseDown={e => e.preventDefault()}
+    >
+      <button className={`${s.selBtn} ${copied ? s.selBtnCopied : ''}`} onClick={handleCopy} tabIndex={-1}>
+        {copied ? '✓ 已复制' : '复制'}
+      </button>
+    </div>,
+    document.body
+  )
+}
+
+// ════════════════════════════════════════════════
 // Main page
 // ════════════════════════════════════════════════
 function stripDomContext(text: string): string {
