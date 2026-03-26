@@ -563,6 +563,7 @@ function InlineImgCard({ path }: { path: string }) {
   const name = path.split('/').pop() || path
 
   useEffect(() => {
+    if (path.startsWith('data:')) { setSrc(path); return }
     // 优先用 Tauri convertFileSrc（桌面模式），否则走后端 HTTP 接口（Web 模式）
     import('@tauri-apps/api/core')
       .then(({ convertFileSrc }) => setSrc(convertFileSrc(path)))
