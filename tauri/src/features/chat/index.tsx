@@ -662,17 +662,18 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
 
 import { PromptInput } from './PromptInput'
 
+// Virtuoso 虚拟列表项类型
+type VItem =
+  | { kind: 'user'; key: string; qi: number; question: UserQuestion }
+  | { kind: 'steps'; key: string; steps: TimelineStep[] }
 
 export default function ChatReportPage() {
-  const [sessions, setSessions] = useState<AiSession[]>([])
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [transcript, setTranscript] = useState<TranscriptMessage[]>([])
-  const [loading, setLoading] = useState(false)
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const virtuosoRef = useRef<VirtuosoHandle>(null)
 
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
@@ -692,52 +693,70 @@ export default function ChatReportPage() {
     }).catch(() => {})
   }, [])
 
-  // 获取会话列表并按项目过滤
-  useEffect(() => {
-    api.getSessions().then(list => {
-      const filtered = projectCwd ? list.filter(ss => ss.cwd === projectCwd) : list
-      setSessions(filtered)
-      if (filtered.length > 0 && !selectedId) setSelectedId(filtered[0].session_id)
-    }).catch(() => {})
-  }, [projectCwd]) // eslint-disable-line react-hooks/exhaustive-deps
+  // 使用 useSessionData 统一管理分页加载 + WS 实时更新
+  const {
+    sessions, selectedId, selectSession,
+    transcript, transcriptLoading: loading, fileFound,
+    loadMore, hasMore, total, isFirstLoad,
+  } = useSessionData({ filterByCwd: projectCwd })
 
+  // 自动选中第一个会话
   useEffect(() => {
-    if (!selectedId) return
-    setLoading(true)
-    // 先获取 total，再全量加载所有消息
-    api.getTranscript(selectedId, { limit: 1, offset: 0 }).then(first => {
-      const total = first.total ?? first.messages.length
-      if (total <= 1) {
-        setTranscript(first.messages)
-        setLoading(false)
-        return
-      }
-      return api.getTranscript(selectedId, { limit: total, offset: 0 }).then(res => {
-        setTranscript(res.messages)
-      })
-    }).catch(() => {}).finally(() => setLoading(false))
-  }, [selectedId])
+    if (sessions.length > 0 && !selectedId) {
+      selectSession(sessions[0].session_id)
+    }
+  }, [sessions, selectedId, selectSession])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
 
-  // IntersectionObserver：滚动时自动高亮当前可见的问题
-  useEffect(() => {
-    if (questions.length === 0 || !mainAreaRef.current) return
-    const root = mainAreaRef.current
-    const els = questions.map((_, i) => document.getElementById(`question-${i}`)).filter(Boolean) as HTMLElement[]
-    if (els.length === 0) return
-    const ob = new IntersectionObserver(entries => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          const idx = els.indexOf(e.target as HTMLElement)
-          if (idx >= 0) setActiveQ(idx)
-        }
+  // 构建虚拟列表项：每个用户问题和每组工具步骤各为一项
+  const vitems = useMemo<VItem[]>(() => {
+    if (steps.length === 0) return []
+    if (questions.length === 0) {
+      return groupConsecutiveSameType(steps).map((step, i) => ({
+        kind: 'steps' as const, key: `s-${i}`, steps: [step],
+      }))
+    }
+    const result: VItem[] = []
+    questions.forEach((q, qi) => {
+      result.push({ kind: 'user', key: `q-${qi}`, qi, question: q })
+      const nextQ = questions[qi + 1]
+      const startIdx = q.stepIndex
+      const endIdx = nextQ ? nextQ.stepIndex : steps.length
+      groupConsecutiveSameType(steps.slice(startIdx, endIdx)).forEach((step, si) => {
+        result.push({ kind: 'steps', key: `q${qi}-s${si}`, steps: [step] })
+      })
+    })
+    return result
+  }, [steps, questions])
+
+  // 问题在虚拟列表中的索引映射
+  const questionVirtuosoIndices = useMemo(() =>
+    vitems.reduce<number[]>((acc, item, i) => {
+      if (item.kind === 'user') acc.push(i)
+      return acc
+    }, []),
+    [vitems],
+  )
+
+  // 滚动时自动高亮当前可见的问题
+  const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
+    for (let i = questionVirtuosoIndices.length - 1; i >= 0; i--) {
+      if (questionVirtuosoIndices[i] <= startIndex) {
+        setActiveQ(i)
+        break
       }
-    }, { root, rootMargin: '-10% 0px -70% 0px', threshold: 0 })
-    els.forEach(el => ob.observe(el))
-    return () => ob.disconnect()
-  }, [questions])
+    }
+  }, [questionVirtuosoIndices])
+
+  // 问题导航跳转
+  const scrollToQuestion = useCallback((qi: number) => {
+    const vIdx = questionVirtuosoIndices[qi]
+    if (vIdx != null) {
+      virtuosoRef.current?.scrollToIndex({ index: vIdx, align: 'start', behavior: 'smooth' })
+    }
+  }, [questionVirtuosoIndices])
 
   // 新对话消息到达时滚动到底部
   useEffect(() => {
@@ -750,6 +769,43 @@ export default function ChatReportPage() {
 
   const Renderer = RENDERERS[style]
 
+  // Virtuoso Footer: AI 对话区
+  const VirtuosoFooter = useCallback(() => {
+    if (chatDisplayMessages.length === 0) return null
+    return (
+      <div className={s.chatSection}>
+        <div className={s.chatSectionDivider}>
+          <span>以下为 AI 对话</span>
+        </div>
+        {chatDisplayMessages.map((msg, i) => {
+          const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
+          const text = msg.role === 'user' ? stripDomContext(raw) : raw
+          if (!text) return null
+          return (
+            <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
+              {msg.role === 'user' ? (
+                <UserMsgRow rawText={raw}>
+                  <ImageAwareRichText text={stripDomContext(raw)} />
+                </UserMsgRow>
+              ) : (
+                <div className={s.chatAiBlock}>
+                  <div className={s.richText}><RichTextBlock text={text} /></div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+        {isGenerating && !currentReply && (
+          <div className={s.pThinking}>
+            <span className={s.pThinkingDot} />
+            <span>思考中...</span>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+    )
+  }, [chatDisplayMessages, isGenerating, currentReply])
+
   return (
     <div className={s.page}>
       <div className={s.topBar}>
@@ -761,7 +817,7 @@ export default function ChatReportPage() {
             desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${ss.cwd?.split('/').pop() || ''}`,
           }))}
           value={selectedId || ''}
-          onChange={setSelectedId}
+          onChange={v => selectSession(v)}
           placeholder="选择会话"
           searchable
           searchPlaceholder="搜索会话..."
@@ -781,76 +837,51 @@ export default function ChatReportPage() {
       <SelectionToolbar containerRef={mainAreaRef} />
       <div className={s.body}>
         <div className={s.mainCol}>
-          <div className={s.mainArea} ref={mainAreaRef}>
+          <div className={s.mainArea} ref={mainAreaRef} style={{ overflow: 'hidden', padding: 0 }}>
             <CodeExpandCtx.Provider value={codeExpanded}>
               {loading ? (
                 <div className={s.empty}><span>加载中...</span></div>
-              ) : steps.length === 0 ? (
+              ) : vitems.length === 0 ? (
                 <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
-              ) : questions.length === 0 ? (
-                <Renderer steps={groupConsecutiveSameType(steps)} />
               ) : (
-                questions.map((q, qi) => {
-                  const nextQ = questions[qi + 1]
-                  const startIdx = q.stepIndex
-                  const endIdx = nextQ ? nextQ.stepIndex : steps.length
-                  const sectionSteps = groupConsecutiveSameType(steps.slice(startIdx, endIdx))
-                  return (
-                    <div key={q.id} id={`question-${qi}`} className={s.turnSection}>
-                      <UserMsgRow rawText={q.text}>
-                        <div className={s.richText}>{stripDomContext(q.text)}</div>
-                      </UserMsgRow>
-                      {sectionSteps.length > 0 && <Renderer steps={sectionSteps} />}
-                    </div>
-                  )
-                })
+                <Virtuoso
+                  ref={virtuosoRef}
+                  data={vitems}
+                  style={{ height: '100%', width: '100%' }}
+                  increaseViewportBy={600}
+                  rangeChanged={handleRangeChanged}
+                  startReached={hasMore ? loadMore : undefined}
+                  computeItemKey={(_, item) => item.key}
+                  components={{ Footer: VirtuosoFooter }}
+                  itemContent={(_, item) => {
+                    if (item.kind === 'user') {
+                      return (
+                        <div className={s.turnSection} style={{ padding: '0 20px' }}>
+                          <UserMsgRow rawText={item.question.text}>
+                            <div className={s.richText}>{stripDomContext(item.question.text)}</div>
+                          </UserMsgRow>
+                        </div>
+                      )
+                    }
+                    return (
+                      <div style={{ padding: '0 20px' }}>
+                        <Renderer steps={item.steps} />
+                      </div>
+                    )
+                  }}
+                />
               )}
             </CodeExpandCtx.Provider>
-
-            {/* AI 对话区 — 跟随会话时间线显示，在 mainArea 滚动区域内 */}
-            {chatDisplayMessages.length > 0 && (
-              <div className={s.chatSection}>
-                <div className={s.chatSectionDivider}>
-                  <span>以下为 AI 对话</span>
-                </div>
-                {chatDisplayMessages.map((msg, i) => {
-                  const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
-                  const text = msg.role === 'user' ? stripDomContext(raw) : raw
-                  console.log(`[ChatPage] msg#${i} role=${msg.role} blocks=`, msg.blocks, `raw="${raw.slice(0, 120)}" text="${text.slice(0, 120)}"`)
-                  if (!text) { console.log(`[ChatPage] msg#${i} SKIPPED (empty text)`); return null }
-                  return (
-                    <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
-                      {msg.role === 'user' ? (
-                        <UserMsgRow rawText={raw}>
-                          <ImageAwareRichText text={stripDomContext(raw)} />
-                        </UserMsgRow>
-                      ) : (
-                        <div className={s.chatAiBlock}>
-                          <div className={s.richText}><RichTextBlock text={text} /></div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-                {isGenerating && !currentReply && (
-                  <div className={s.pThinking}>
-                    <span className={s.pThinkingDot} />
-                    <span>思考中...</span>
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-            )}
           </div>
 
           {/* 底部操作栏 — 在可滚动区域之外，不遮盖内容 */}
-          {steps.length > 0 && (
+          {vitems.length > 0 && (
             <div className={s.bottomBar}>
               <PromptInput />
             </div>
           )}
         </div>
-        <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} />
+        <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} onScrollToQuestion={scrollToQuestion} />
       </div>
     </div>
   )
