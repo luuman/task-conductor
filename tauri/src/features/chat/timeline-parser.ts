@@ -81,37 +81,41 @@ export interface ParsedTimeline {
   questions: UserQuestion[]
 }
 
-/** 清理用户消息中 Claude Code 自动注入的系统 XML 标签，返回纯用户文本 */
+/** 清理用户消息中 Claude Code 自动注入的系统 XML 标签，将 command 标签转换为可读文本 */
 export function cleanSystemXml(text: string): string {
-  // 提取 command 信息，转换为可读文本
+  // 1. 提取 command 信息，转换为可读片段
   const cmdName = text.match(/<command-name>([\s\S]*?)<\/command-name>/)?.[1]?.trim() || ''
   const cmdArgs = text.match(/<command-args>([\s\S]*?)<\/command-args>/)?.[1]?.trim() || ''
-  const cmdStdout = text.match(/<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/)?.[1]?.trim() || ''
+  const cmdStdout = text.match(/<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/)?.[1]
+    ?.replace(/\x1b\[\d+m/g, '')  // 清理 ANSI 转义序列
+    .trim() || ''
 
+  // 组装命令可读文本（如 "/model claude-opus-4-6" 或 "/init"）
+  let cmdReadable = ''
+  if (cmdName) {
+    cmdReadable = cmdArgs ? `${cmdName} ${cmdArgs}` : cmdName
+    if (cmdStdout) cmdReadable += `\n→ ${cmdStdout}`
+  } else if (cmdStdout) {
+    cmdReadable = `→ ${cmdStdout}`
+  }
+
+  // 2. 清除系统注入的不可见标签
   const cleaned = text
-    // 完整 XML 块（含内容）— 系统注入的不可见内容
     .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
     .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
     .replace(/<task-notification>[\s\S]*?<\/task-notification>/g, '')
-    // command 相关标签——提取后删除原始标签
     .replace(/<command-name>[\s\S]*?<\/command-name>/g, '')
     .replace(/<command-message>[\s\S]*?<\/command-message>/g, '')
     .replace(/<command-args>[\s\S]*?<\/command-args>/g, '')
     .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '')
-    // 清理 "Read the output file..." 提示
     .replace(/Read the output file to retrieve the result:\s*\S+/g, '')
-    // 残余未匹配的 XML 标签
+    // 残余未匹配的 XML 标签（保留 HTML 实体如 &lt;）
     .replace(/<[^>]+>/g, '')
     .trim()
 
-  // 如果清理后为空但有命令信息，组装可读文本
-  if (!cleaned && cmdName) {
-    const parts = [cmdName]
-    if (cmdArgs) parts.push(cmdArgs)
-    if (cmdStdout) parts.push(cmdStdout)
-    return parts.join(' ')
-  }
-  return cleaned
+  // 3. 组合：命令可读文本 + 用户原文
+  if (cmdReadable && cleaned) return `${cmdReadable}\n${cleaned}`
+  return cmdReadable || cleaned
 }
 
 export function parseTimelineWithQuestions(messages: TranscriptMessage[]): ParsedTimeline {
