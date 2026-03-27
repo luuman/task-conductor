@@ -837,7 +837,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const {
     sessions, selectedId, selectSession,
     transcript, transcriptLoading: loading,
-    loadMore, hasMore,
+    loadMore, hasMore, total, loadedFrom, loadAll,
   } = useSessionData({ filterByCwd: global ? undefined : projectCwd, autoLoadAll: false, initialLimit: 200 })
 
   // 自动选中第一个会话
