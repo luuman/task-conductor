@@ -621,6 +621,48 @@ function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTML
 // ════════════════════════════════════════════════
 // Main page
 // ════════════════════════════════════════════════
+/** Virtuoso Footer: 直接从 store 读取，避免闭包 + components prop 导致不更新 */
+function ChatFooter({ chatEndRef }: { chatEndRef: React.RefObject<HTMLDivElement | null> }) {
+  const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
+  const chatDisplayMessages = currentReply
+    ? [...chatMessages, { role: 'assistant' as const, ts: new Date().toISOString(), blocks: [{ type: 'text' as const, text: currentReply }] }]
+    : chatMessages
+
+  if (chatDisplayMessages.length === 0) return null
+  return (
+    <div className={s.chatSection}>
+      <div className={s.chatSectionDivider}>
+        <span>以下为 AI 对话</span>
+      </div>
+      {chatDisplayMessages.map((msg, i) => {
+        const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
+        const text = msg.role === 'user' ? stripDomContext(raw) : raw
+        if (!text) return null
+        return (
+          <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
+            {msg.role === 'user' ? (
+              <UserMsgRow rawText={raw}>
+                <ImageAwareRichText text={stripDomContext(raw)} />
+              </UserMsgRow>
+            ) : (
+              <div className={s.chatAiBlock}>
+                <div className={s.richText}><RichTextBlock text={text} /></div>
+              </div>
+            )}
+          </div>
+        )
+      })}
+      {isGenerating && !currentReply && (
+        <div className={s.pThinking}>
+          <span className={s.pThinkingDot} />
+          <span>思考中...</span>
+        </div>
+      )}
+      <div ref={chatEndRef} />
+    </div>
+  )
+}
+
 function stripDomContext(text: string): string {
   const i1 = text.indexOf('\n\n【元素 #')
   const i2 = text.indexOf('--- 问题元素')
