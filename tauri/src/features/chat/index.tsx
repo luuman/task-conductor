@@ -646,39 +646,36 @@ function ChatFooter({ chatEndRef }: { chatEndRef: React.RefObject<HTMLDivElement
 
   if (chatDisplayMessages.length === 0) return null
   return (
-    <div className={s.chatSection}>
-      <div className={s.chatSectionDivider}>
-        <span>以下为 AI 对话</span>
-      </div>
+    <>
       {chatDisplayMessages.map((msg, i) => {
         const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
         const text = msg.role === 'user' ? stripDomContext(raw) : raw
         if (!text && msg.role !== 'user') return null
         // 用户消息：即使纯文本为空，只要有 DOM chips 也展示
         if (msg.role === 'user' && !text && parseDomContextChips(raw).length === 0) return null
-        return (
-          <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
-            {msg.role === 'user' ? (
-              <UserMsgRow rawText={raw}>
-                {text && <ImageAwareRichText text={text} />}
-                <InlineDomChips raw={raw} />
-              </UserMsgRow>
-            ) : (
-              <div className={s.chatAiBlock}>
-                <div className={s.richText}><RichTextBlock text={text} /></div>
-              </div>
-            )}
+        return msg.role === 'user' ? (
+          <div key={i} className={s.turnSection} style={{ padding: '0 20px' }}>
+            <UserMsgRow rawText={raw}>
+              {text && <ImageAwareRichText text={text} />}
+              <InlineDomChips raw={raw} />
+            </UserMsgRow>
+          </div>
+        ) : (
+          <div key={i} style={{ padding: '0 20px' }}>
+            <div className={s.chatAiBlock}>
+              <div className={s.richText}><RichTextBlock text={text} /></div>
+            </div>
           </div>
         )
       })}
       {isGenerating && !currentReply && (
-        <div className={s.pThinking}>
+        <div className={s.pThinking} style={{ padding: '0 20px' }}>
           <span className={s.pThinkingDot} />
           <span>思考中...</span>
         </div>
       )}
       <div ref={chatEndRef} />
-    </div>
+    </>
   )
 }
 
