@@ -77,10 +77,14 @@ body {
 
 /* ── 全局滚动条样式 ── */
 
-/* Firefox 标准属性 */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--tc-scrollbar-thumb, rgba(255, 255, 255, 0.15)) transparent;
+/* Firefox 标准属性
+   Chrome 121+ 已支持标准滚动条属性，并且会覆盖/干扰 WebKit 伪元素样式。
+   这里限制到 Gecko，避免浏览器与 Tauri WebView 呈现不一致。 */
+@supports (-moz-appearance: none) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--tc-scrollbar-thumb, rgba(255, 255, 255, 0.15)) transparent;
+  }
 }
 
 /* Webkit (Chrome/Safari/Tauri) */
