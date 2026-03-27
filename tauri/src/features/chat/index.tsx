@@ -372,6 +372,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
   session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number
   codeExpanded: boolean; onToggleCode: () => void; onScrollToQuestion?: (qi: number) => void
 }) {
+  const { t } = useTranslation()
   const qNavRef = useRef<HTMLDivElement>(null)
 
   // 联动：activeQ 变化时自动滚动导航列表
