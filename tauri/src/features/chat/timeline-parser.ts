@@ -81,6 +81,24 @@ export interface ParsedTimeline {
   questions: UserQuestion[]
 }
 
+/** 清理用户消息中 Claude Code 自动注入的系统 XML 标签，返回纯用户文本 */
+export function cleanSystemXml(text: string): string {
+  return text
+    // 完整 XML 块（含内容）
+    .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
+    .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
+    .replace(/<task-notification>[\s\S]*?<\/task-notification>/g, '')
+    .replace(/<command-name>[\s\S]*?<\/command-name>/g, '')
+    .replace(/<command-message>[\s\S]*?<\/command-message>/g, '')
+    .replace(/<command-args>[\s\S]*?<\/command-args>/g, '')
+    .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '')
+    // 清理 "Read the output file..." 提示
+    .replace(/Read the output file to retrieve the result:\s*\S+/g, '')
+    // 残余未匹配的 XML 标签
+    .replace(/<[^>]+>/g, '')
+    .trim()
+}
+
 export function parseTimelineWithQuestions(messages: TranscriptMessage[]): ParsedTimeline {
   const steps: TimelineStep[] = []
   const questions: UserQuestion[] = []
@@ -92,11 +110,14 @@ export function parseTimelineWithQuestions(messages: TranscriptMessage[]): Parse
     if (msg.role === 'user') {
       const textBlock = msg.blocks.find(b => b.type === 'text' && b.text?.trim())
       if (textBlock?.text) {
+        const cleaned = cleanSystemXml(textBlock.text)
+        // 跳过纯系统消息（清理后无用户文本）
+        if (!cleaned) continue
         questions.push({
           id: `q${qId++}`,
           text: textBlock.text.trim(),
           ts: msg.ts,
-          stepIndex: steps.length, // 指向下一个 step 的索引
+          stepIndex: steps.length,
         })
       }
       continue
