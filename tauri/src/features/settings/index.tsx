@@ -58,6 +58,9 @@ export default function SettingsPage() {
   const { logout } = useAuthStore()
 
   const [settings, setSettings] = useState<Settings>(readCache)
+  const [chatStyle, setChatStyle] = useState<ChatStyleKey>(
+    () => (localStorage.getItem(CHAT_STYLE_LS_KEY) as ChatStyleKey) || 'a'
+  )
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>('checking')
   const [checking, setChecking] = useState(false)
   const [newPin, setNewPin] = useState('')
