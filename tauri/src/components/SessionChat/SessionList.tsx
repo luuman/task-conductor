@@ -66,7 +66,8 @@ function SessionRow({
   onSelect: (s: AiSession) => void
 }) {
   const { t } = useTranslation()
-  const title = session.note?.alias || session.summary || session.session_id.slice(0, 8)
+  const rawTitle = session.note?.alias || session.summary || ''
+  const title = rawTitle.replace(/<[^>]+>/g, '').trim() || `会话 ${session.session_id.slice(0, 8)}`
   const time = relativeTime(session.last_seen_at || session.started_at, t)
   const tags = session.note?.tags ?? []
 
