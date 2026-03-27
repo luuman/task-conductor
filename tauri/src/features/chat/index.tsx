@@ -523,10 +523,10 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
       {/* 涉及文件 */}
       <div className={s.sbSection}>
-        <div className={s.sbTitle}>涉及文件</div>
-        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFileText size={11} /> 读取</span><span className={s.sbVal}>{fileStats.read} 文件</span></div>
-        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconPencil size={11} /> 修改</span><span className={s.sbVal}>{fileStats.edit} 文件</span></div>
-        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFilePlus size={11} /> 新建</span><span className={s.sbVal}>{fileStats.write} 文件</span></div>
+        <div className={s.sbTitle}>{t('chat_sidebar.files_involved')}</div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFileText size={11} /> {t('chat_sidebar.file_read')}</span><span className={s.sbVal}>{fileStats.read} {t('chat_sidebar.file_unit')}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconPencil size={11} /> {t('chat_sidebar.file_edit')}</span><span className={s.sbVal}>{fileStats.edit} {t('chat_sidebar.file_unit')}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFilePlus size={11} /> {t('chat_sidebar.file_write')}</span><span className={s.sbVal}>{fileStats.write} {t('chat_sidebar.file_unit')}</span></div>
       </div>
     </div>
   )
