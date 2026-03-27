@@ -465,6 +465,20 @@ export default function SettingsPage() {
               onSave={v => updateSetting('ui_log_max_lines', v)}
               min={100} max={5000} step={100}
             />
+            <div className={styles.fieldGroup}>
+              <span className={styles.fieldLabel}>会话时间线样式</span>
+              <div className={styles.pillGroup}>
+                {CHAT_STYLES.map(st => (
+                  <button
+                    key={st.key}
+                    className={chatStyle === st.key ? styles.pillActive : styles.pill}
+                    onClick={() => { setChatStyle(st.key); localStorage.setItem(CHAT_STYLE_LS_KEY, st.key) }}
+                  >
+                    {st.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
