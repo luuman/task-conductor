@@ -17,38 +17,57 @@ def get_db():
         yield session
 
 
-def _get_session_summary(session_id: str, cwd: str) -> Optional[str]:
-    """从 JSONL 文件中提取第一条用户消息作为会话摘要（最多 120 字符）。"""
+def _get_session_summary(session_id: str, cwd: str, db=None) -> Optional[str]:
+    """提取会话摘要（第一条用户消息，最多 120 字符）。优先 JSONL，回退 DB。"""
+    # 先尝试从 JSONL 读取
     project_path = (cwd or "").replace("/", "-")
     home = _os.path.expanduser("~")
     path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
-    if not _os.path.exists(path):
-        return None
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    entry = _json_mod.loads(line)
-                except Exception:
-                    continue
-                entry_type = entry.get("type", "")
-                msg = entry.get("message", {})
-                role = msg.get("role", "")
-                content = msg.get("content", [])
-                if entry_type == "user" or role == "user":
-                    if isinstance(content, str) and content.strip():
-                        return content.strip()[:120]
-                    if isinstance(content, list):
-                        for block in content:
-                            if isinstance(block, dict) and block.get("type") == "text":
-                                text = (block.get("text") or "").strip()
-                                if text:
-                                    return text[:120]
-    except Exception:
-        pass
+    if _os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = _json_mod.loads(line)
+                    except Exception:
+                        continue
+                    entry_type = entry.get("type", "")
+                    msg = entry.get("message", {})
+                    role = msg.get("role", "")
+                    content = msg.get("content", [])
+                    if entry_type == "user" or role == "user":
+                        if isinstance(content, str) and content.strip():
+                            return content.strip()[:120]
+                        if isinstance(content, list):
+                            for block in content:
+                                if isinstance(block, dict) and block.get("type") == "text":
+                                    text = (block.get("text") or "").strip()
+                                    if text:
+                                        return text[:120]
+        except Exception:
+            pass
+
+    # JSONL 不存在或无内容，从 DB 读取第一条 user 消息
+    if db is not None:
+        try:
+            from ..models import SessionMessage
+            first_user = (
+                db.query(SessionMessage)
+                .filter_by(session_id=session_id, role="user")
+                .order_by(SessionMessage.created_at)
+                .first()
+            )
+            if first_user:
+                blocks = _json_mod.loads(first_user.blocks_json)
+                for b in blocks:
+                    if b.get("type") == "text" and b.get("text", "").strip():
+                        return b["text"].strip()[:120]
+        except Exception:
+            pass
+
     return None
 
 
