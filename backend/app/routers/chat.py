@@ -33,6 +33,24 @@ def _update_session_status(session_id: str, status: str):
     except Exception:
         logger.debug(f"Failed to update session {session_id} status", exc_info=True)
 
+
+def _save_message(session_id: str, role: str, blocks: list[dict], model: str | None = None):
+    """将对话消息写入 session_messages 表"""
+    try:
+        from sqlalchemy.orm import Session as DBSession
+        from ..database import engine
+        from ..models import SessionMessage
+        with DBSession(engine) as db:
+            db.add(SessionMessage(
+                session_id=session_id,
+                role=role,
+                blocks_json=json.dumps(blocks, ensure_ascii=False),
+                model=model,
+            ))
+            db.commit()
+    except Exception:
+        logger.debug(f"Failed to save message for session {session_id}", exc_info=True)
+
 router = APIRouter(prefix="/api/chat", tags=["聊天"])
 
 # 可用模型列表
