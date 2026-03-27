@@ -555,6 +555,26 @@ function extractTaskNotifications(text: string) {
   return { notifications, remainingText: remaining }
 }
 
+/** 从用户消息中提取本地命令信息，返回 { command, stdout, remainingText } */
+function extractLocalCommand(text: string) {
+  const hasCaveat = /<local-command-caveat>/.test(text)
+  if (!hasCaveat) return null
+  const cmdMatch = /<command-name>([\s\S]*?)<\/command-name>/.exec(text)
+  const stdoutMatch = /<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/.exec(text)
+  const command = cmdMatch?.[1]?.trim() ?? ''
+  const stdout = stdoutMatch?.[1]?.trim() ?? ''
+  // 清除所有系统 XML 块
+  const remaining = text
+    .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
+    .replace(/<command-name>[\s\S]*?<\/command-name>/g, '')
+    .replace(/<command-message>[\s\S]*?<\/command-message>/g, '')
+    .replace(/<command-args>[\s\S]*?<\/command-args>/g, '')
+    .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .trim()
+  return { command, stdout, remainingText: remaining }
+}
+
 function splitSegments(messages: TranscriptMessage[]): Segment[] {
   const segs: Segment[] = []
   let buf: TimelineStep[] = []
