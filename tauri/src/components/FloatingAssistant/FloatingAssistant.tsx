@@ -368,7 +368,7 @@ export function FloatingAssistant() {
   const handleOpenHistory = useCallback((session: AiSession) => {
     // 直接在当前 tab 加载该会话（一个弹窗展示一个会话）
     setShowHistory(false)
-    const title = session.note?.alias || session.summary || session.session_id.slice(0, 8)
+    const title = (session.note?.alias || session.summary || '').replace(/<[^>]+>/g, '').trim() || `会话 ${session.session_id.slice(0, 8)}`
     setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
 
     isFirstLoadRef.current = true
