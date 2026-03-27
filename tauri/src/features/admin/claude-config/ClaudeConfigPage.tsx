@@ -47,7 +47,7 @@ const SECTION_COMPONENTS: Record<string, React.LazyExoticComponent<React.Compone
 
 interface NavItem {
   id: string
-  icon: string
+  icon: React.ReactNode
   label: string
 }
 
