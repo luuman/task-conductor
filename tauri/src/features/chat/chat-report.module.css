@@ -300,6 +300,105 @@
   margin-bottom: 3px;
 }
 
+/* ── DOM 元素预览卡片（用户消息内嵌） ── */
+.domCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.domCard {
+  background: rgba(96, 165, 250, 0.05);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s;
+}
+.domCard:hover {
+  border-color: rgba(96, 165, 250, 0.4);
+}
+.domCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.domCardIndex {
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+  border-radius: 4px;
+  min-width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.domCardTag {
+  font-family: var(--tc-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #c084fc;
+}
+.domCardSize {
+  margin-left: auto;
+  font-family: var(--tc-font-mono);
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.7;
+}
+.domCardContent {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tc-foreground);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  border-left: 2px solid rgba(96, 165, 250, 0.3);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.domCardPath {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--tc-font-mono);
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.6;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.domCardPathSep {
+  color: var(--tc-foreground-secondary);
+  opacity: 0.4;
+  margin: 0 1px;
+}
+.domCardStyles {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.domCardSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+.domCardMeta {
+  font-family: var(--tc-font-mono);
+  font-size: 9px;
+  color: var(--tc-foreground-secondary);
+  opacity: 0.6;
+}
+
 /* ═══════════════════════════════════════════════ */
 /* Prompt Input Card                              */
 /* ═══════════════════════════════════════════════ */
