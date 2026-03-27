@@ -820,26 +820,25 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const { messages: chatMessages, currentReply } = useChatStore()
 
   // 获取当前项目 cwd（global 模式不过滤）
-  const [projectCwd, setProjectCwd] = useState<string | null>(global ? null : '')  // '' = 待加载，null = 不过滤
+  // SENTINEL = 还在加载，不应显示任何会话；undefined = global 模式不过滤
+  const LOADING_SENTINEL = '\x00'
+  const [projectCwd, setProjectCwd] = useState<string | undefined>(global ? undefined : LOADING_SENTINEL)
   useEffect(() => {
     if (global) return
     const pid = localStorage.getItem('tc_active_project')
-    if (!pid) { setProjectCwd(null); return }
+    if (!pid) { setProjectCwd(undefined); return }
     api.getProjects().then(list => {
       const proj = list.find(p => String(p.id) === pid)
-      setProjectCwd(proj?.repo_url || null)
-    }).catch(() => setProjectCwd(null))
+      setProjectCwd(proj?.repo_url || undefined)
+    }).catch(() => setProjectCwd(undefined))
   }, [global])
-
-  // projectCwd === '' 表示还在加载项目信息，暂不拉会话
-  const cwdReady = projectCwd !== ''
 
   // 使用 useSessionData 统一管理分页加载 + WS 实时更新
   const {
     sessions, selectedId, selectSession,
     transcript, transcriptLoading: loading,
     loadMore, hasMore,
-  } = useSessionData({ filterByCwd: projectCwd || undefined, autoRefreshInterval: cwdReady ? 5000 : 999999 })
+  } = useSessionData({ filterByCwd: projectCwd })
 
   // 自动选中第一个会话
   useEffect(() => {
