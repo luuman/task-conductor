@@ -675,7 +675,10 @@ function stripDomContext(text: string): string {
 }
 
 /** 从原始消息文本中解析 DOM context 块 */
-type ParsedDomChip = { index: number; selector: string; path: string; text: string }
+type ParsedDomChip = {
+  index: number; selector: string; path: string; text: string
+  size: string; color: string; bg: string; fontSize: string; html: string
+}
 
 function parseDomContextChips(raw: string): ParsedDomChip[] {
   const results: ParsedDomChip[] = []
@@ -684,39 +687,66 @@ function parseDomContextChips(raw: string): ParsedDomChip[] {
   while ((match = re.exec(raw)) !== null) {
     const idx = parseInt(match[1], 10)
     const selector = match[2]
-    // 从匹配位置向后提取路径和文本
     const blockStart = match.index
     const nextBlock = raw.indexOf('【元素 #', blockStart + 1)
     const block = raw.slice(blockStart, nextBlock === -1 ? undefined : nextBlock)
     const pathMatch = block.match(/路径:\s*(.+)/)
     const textMatch = block.match(/文本:\s*"(.+?)"/)
+    const sizeMatch = block.match(/尺寸:\s*(.+)/)
+    const styleMatch = block.match(/样式:\s*color=(\S+)\s+bg=(\S+)\s+font=(\S+)/)
+    const htmlMatch = block.match(/HTML:\s*(.+)/)
     results.push({
       index: idx,
       selector,
       path: pathMatch?.[1]?.trim() || '',
       text: textMatch?.[1]?.trim() || '',
+      size: sizeMatch?.[1]?.trim() || '',
+      color: styleMatch?.[1] || '',
+      bg: styleMatch?.[2] || '',
+      fontSize: styleMatch?.[3] || '',
+      html: htmlMatch?.[1]?.trim() || '',
     })
   }
   return results
 }
 
-/** 消息中内联展示 DOM context chips */
+/** 消息中渲染 DOM context 元素预览卡片 */
 function InlineDomChips({ raw }: { raw: string }) {
   const chips = parseDomContextChips(raw)
   if (chips.length === 0) return null
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+    <div className={s.domCardList}>
       {chips.map((chip) => {
-        // 从 selector 中提取简短的标签（最后一个 tag.class）
-        const label = chip.path
-          ? chip.path.split(' > ').pop() || chip.selector
-          : chip.selector
+        const tag = chip.selector.split(/[.#]/)[0] || 'div'
+        const pathParts = chip.path ? chip.path.split(' > ') : []
         return (
-          <span key={chip.index} className={s.pDomChip} title={`${chip.selector}\n${chip.path}\n${chip.text}`}>
-            <span className={s.pDomChipIndex}>{chip.index}</span>
-            <span className={s.pDomChipLabel}>{label}</span>
-            {chip.text && <span className={s.pDomChipText}>"{chip.text.slice(0, 30)}{chip.text.length > 30 ? '…' : ''}"</span>}
-          </span>
+          <div key={chip.index} className={s.domCard}>
+            <div className={s.domCardHeader}>
+              <span className={s.domCardIndex}>{chip.index}</span>
+              <span className={s.domCardTag}>&lt;{tag}&gt;</span>
+              {chip.size && <span className={s.domCardSize}>{chip.size.split('@')[0].trim()}</span>}
+            </div>
+            {chip.text && (
+              <div className={s.domCardContent}>{chip.text}</div>
+            )}
+            {pathParts.length > 0 && (
+              <div className={s.domCardPath}>
+                {pathParts.map((p, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && <span className={s.domCardPathSep}>&rsaquo;</span>}
+                    <span>{p}</span>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+            {(chip.color || chip.bg) && chip.bg !== 'rgba(0, 0, 0, 0)' && (
+              <div className={s.domCardStyles}>
+                {chip.color && <span className={s.domCardSwatch} style={{ background: chip.color }} title={`color: ${chip.color}`} />}
+                {chip.bg && chip.bg !== 'rgba(0, 0, 0, 0)' && <span className={s.domCardSwatch} style={{ background: chip.bg }} title={`bg: ${chip.bg}`} />}
+                {chip.fontSize && <span className={s.domCardMeta}>{chip.fontSize}</span>}
+              </div>
+            )}
+          </div>
         )
       })}
     </div>
