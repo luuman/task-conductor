@@ -461,7 +461,7 @@ export function CopyButton({ text, getText, className }: { text?: string; getTex
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
     const content = getText ? getText() : (text ?? '')
-    import('../../lib/clipboard').then(({ writeClipboard }) => writeClipboard(content)).then(() => {
+    navigator.clipboard.writeText(content).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     }).catch(() => {})
