@@ -647,6 +647,8 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
               <UserMsgBody text={seg.text} />
             </div>
           </div>
+        ) : seg.type === 'notification' ? (
+          <TaskNotifBanner key={i} status={seg.status} summary={seg.summary} taskId={seg.taskId} />
         ) : (
           <Renderer key={i} steps={seg.steps} />
         )
