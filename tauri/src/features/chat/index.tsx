@@ -36,18 +36,6 @@ function badgeCls(cat: TimelineStep['category']): string {
   return `${s.badge} ${map[cat] || s.bOther}`
 }
 
-function buildToolLabelMap(t: (key: string) => string): Record<string, string> {
-  return {
-    Read: t('chat_sidebar.tool_read'), Write: t('chat_sidebar.tool_write'), Edit: t('chat_sidebar.tool_edit'), MultiEdit: t('chat_sidebar.tool_multi_edit'),
-    Bash: t('chat_sidebar.tool_bash'), Grep: t('chat_sidebar.tool_grep'), Glob: t('chat_sidebar.tool_glob'),
-    Agent: t('chat_sidebar.tool_agent'), AskUserQuestion: t('chat_sidebar.tool_ask'),
-    WebSearch: t('chat_sidebar.tool_web_search'), WebFetch: t('chat_sidebar.tool_web_fetch'),
-    ToolSearch: t('chat_sidebar.tool_search'), Skill: t('chat_sidebar.tool_skill'),
-    TaskCreate: t('chat_sidebar.tool_task_create'), TaskUpdate: t('chat_sidebar.tool_task_update'), TaskList: t('chat_sidebar.tool_task_list'),
-    TaskGet: t('chat_sidebar.tool_task_get'), TaskStop: t('chat_sidebar.tool_task_stop'),
-  }
-}
-
 function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
   return {
     read: t('chat_sidebar.cat_read'), edit: t('chat_sidebar.cat_edit'), write: t('chat_sidebar.cat_write'), bash: t('chat_sidebar.cat_bash'),
