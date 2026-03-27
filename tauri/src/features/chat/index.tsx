@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { api } from '../../lib/api'
-import type { AiSession, TranscriptMessage } from '../../lib/api/types'
+import type { AiSession } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { parseTimelineWithQuestions, formatTs, guessHljsLang, type TimelineStep, type UserQuestion } from './timeline-parser'
 import { RichText as ImageAwareRichText } from './ChatTimeline'
