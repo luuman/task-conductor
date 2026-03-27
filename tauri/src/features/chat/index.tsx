@@ -985,3 +985,8 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     </div>
   )
 }
+
+// 路由 default export（项目级，带 filterByCwd）
+export default function ProjectChatReportPage() {
+  return <ChatReportPage />
+}
