@@ -1679,7 +1679,7 @@ export function CodeBlock({ code = '', lang, label, icon, action, fileName, vari
   )
   // children 模式下 code 为空，从 DOM 中提取文本用于复制
   const getCopyText = useCallback(() => code || bodyRef.current?.textContent || '', [code])
-  const copyBtn = <CopyButton text={getCopyText()} />
+  const copyBtn = children ? <CopyButton getText={getCopyText} /> : <CopyButton text={code} />
 
   const variantCls = styles[`cbV${variant}` as keyof typeof styles] || ''
 
