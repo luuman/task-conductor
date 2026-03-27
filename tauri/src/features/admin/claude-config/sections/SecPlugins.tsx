@@ -47,7 +47,7 @@ export function SecPlugins({ config, overview, onConfigUpdate, showToast }: Sect
       <SectionHeader icon="&#x1F9E9;" title={t('claudeConfig.plugins.title')} />
 
       {pluginIds.length === 0 ? (
-        <EmptyState icon="\uD83E\uDDE9" title={t('claudeConfig.plugins.empty')} />
+        <EmptyState icon={<IconBlocks size={24} />} title={t('claudeConfig.plugins.empty')} />
       ) : (
         <div className={styles.card}>
           {pluginIds.map((id) => {
