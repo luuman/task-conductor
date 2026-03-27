@@ -66,6 +66,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     autoRefreshInterval = 5000,
     transcriptPollInterval = 10000,
     autoLoadAll = true,
+    initialLimit = 50,
   } = options
 
   // Session list
