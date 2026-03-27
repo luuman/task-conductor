@@ -1,7 +1,7 @@
 import styles from './empty-state.module.css'
 
 export interface EmptyStateProps {
-  icon?: string
+  icon?: React.ReactNode
   title: string
   description?: string
   action?: { label: string; onClick: () => void }
