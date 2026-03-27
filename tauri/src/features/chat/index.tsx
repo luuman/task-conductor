@@ -493,15 +493,15 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
       {/* 会话元数据 */}
       <div className={s.sbSection}>
-        <div className={s.sbTitle}>会话元数据</div>
-        <div className={s.sbRow}><span className={s.sbKey}>会话 ID</span><span className={s.sbVal}>{session.session_id.slice(0, 8)}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>状态</span><span className={s.sbVal} style={{ color: session.status === 'active' ? '#4ade80' : session.status === 'stopped' ? '#f87171' : undefined }}>● {session.status || '未知'}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>模型</span><span className={s.sbVal}>claude-opus-4-6</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>开始</span><span className={s.sbVal}>{formatTs(session.started_at)}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>结束</span><span className={s.sbVal}>{formatTs(session.last_seen_at || '')}</span></div>
-        {duration && <div className={s.sbRow}><span className={s.sbKey}>耗时</span><span className={s.sbVal}>{duration}</span></div>}
-        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>工作目录</span><span className={s.sbVal} style={{ fontSize: 9 }}>{session.cwd.split('/').pop()}</span></div>}
-        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>Git 分支</span><span className={s.sbVal}>master</span></div>}
+        <div className={s.sbTitle}>{t('chat_sidebar.session_metadata')}</div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.session_id')}</span><span className={s.sbVal}>{session.session_id.slice(0, 8)}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.status')}</span><span className={s.sbVal} style={{ color: session.status === 'active' ? '#4ade80' : session.status === 'stopped' ? '#f87171' : undefined }}>● {session.status === 'active' ? t('chat_sidebar.status_active') : session.status === 'stopped' ? t('chat_sidebar.status_stopped') : t('chat_sidebar.status_unknown')}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.model')}</span><span className={s.sbVal}>claude-opus-4-6</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.started')}</span><span className={s.sbVal}>{formatTs(session.started_at)}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.ended')}</span><span className={s.sbVal}>{formatTs(session.last_seen_at || '')}</span></div>
+        {duration && <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.duration')}</span><span className={s.sbVal}>{duration}</span></div>}
+        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.cwd')}</span><span className={s.sbVal} style={{ fontSize: 9 }}>{session.cwd.split('/').pop()}</span></div>}
+        {session.cwd && <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.git_branch')}</span><span className={s.sbVal}>master</span></div>}
       </div>
 
       <hr className={s.sbDivider} />
