@@ -64,6 +64,7 @@
       "settings": "Settings",
       "sessions": "Sessions",
       "mindmap": "Mind Map",
+      "chat": "Chat Timeline",
       "server": "Server Monitor",
       "dev_tools": "Dev Tools"
     },
