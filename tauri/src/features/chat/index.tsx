@@ -19,14 +19,8 @@ import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
 // ── 样式常量 ──
-const STYLES = [
-  { key: 'a', label: 'A 竖线时间线' },
-  { key: 'b', label: 'B 卡片瀑布' },
-  { key: 'd', label: 'D GitHub PR' },
-  { key: 'g', label: 'G 气泡聊天' },
-  { key: 'h', label: 'H 折叠手风琴' },
-] as const
-type StyleKey = typeof STYLES[number]['key']
+const CHAT_STYLE_OPTIONS = ['a', 'b', 'd', 'g', 'h'] as const
+type StyleKey = typeof CHAT_STYLE_OPTIONS[number]
 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
