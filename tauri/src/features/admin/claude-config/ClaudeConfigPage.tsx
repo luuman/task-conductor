@@ -11,6 +11,11 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview } from '../../../lib/api/types'
 import { Skeleton } from '../../../ui/skeleton/Skeleton'
+import {
+  IconLayoutGrid, IconSettings, IconZap, IconBot, IconTerminal,
+  IconLink, IconHook, IconClipboard, IconLock, IconGlobe,
+  IconBlocks, IconActivity, IconTrash, IconCircleHelp,
+} from '../../../ui/icon'
 import styles from './claude-config.module.css'
 
 /* ───────── Lazy section imports ───────── */
