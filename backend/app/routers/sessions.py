@@ -255,33 +255,54 @@ def _extract_tool_result_text(content) -> str:
     return ""
 
 
-@router.get("/{session_id}/transcript", response_model=TranscriptResponse, summary="读取会话对话记录")
-def get_transcript(
-    session_id: str,
-    limit: int = 50,
-    offset: Optional[int] = None,
-    db: Session = Depends(get_db),
-):
-    """
-    从本地 ~/.claude/projects/{project_path}/{session_id}.jsonl 读取完整对话记录。
-    两遍解析：第一遍构建消息 + 收集 tool_result，第二遍将 tool_result 关联到对应 tool_use block。
-    """
-    s = db.query(ClaudeSession).filter_by(session_id=session_id).first()
-    if not s:
-        raise HTTPException(status_code=404, detail="会话不存在")
+def _load_transcript_from_db(session_id: str, db: Session) -> list[TranscriptMessage] | None:
+    """从 session_messages 表读取对话记录，返回 None 表示无数据"""
+    from ..models import SessionMessage
+    rows = (
+        db.query(SessionMessage)
+        .filter_by(session_id=session_id)
+        .order_by(SessionMessage.created_at)
+        .all()
+    )
+    if not rows:
+        return None
+    messages: list[TranscriptMessage] = []
+    for row in rows:
+        try:
+            raw_blocks = _json_mod.loads(row.blocks_json)
+        except Exception:
+            continue
+        blocks = [
+            TranscriptBlock(
+                type=b.get("type", "text"),
+                text=b.get("text"),
+                tool_name=b.get("tool_name"),
+                tool_input=b.get("tool_input"),
+                tool_use_id=b.get("tool_use_id"),
+                tool_result=b.get("tool_result"),
+                tool_error=b.get("tool_error"),
+            )
+            for b in raw_blocks
+        ]
+        messages.append(TranscriptMessage(
+            role=row.role,
+            ts=row.created_at.isoformat() if row.created_at else None,
+            blocks=blocks,
+            model=row.model,
+        ))
+    return messages
 
-    # 构建文件路径
-    cwd = s.cwd or ""
+
+def _load_transcript_from_jsonl(session_id: str, cwd: str) -> list[TranscriptMessage] | None:
+    """从 JSONL 文件读取对话记录，返回 None 表示文件不存在"""
     project_path = cwd.replace("/", "-")
     home = _os.path.expanduser("~")
     transcript_path = _os.path.join(home, ".claude", "projects", project_path, f"{session_id}.jsonl")
 
     if not _os.path.exists(transcript_path):
-        return TranscriptResponse(messages=[], file_found=False, total=0, has_more=False)
+        return None
 
-    # ── 第一遍：解析所有消息，同时收集 tool_result ──
     messages: list[TranscriptMessage] = []
-    # key=tool_use_id, value=(result_text, is_error)
     tool_results: dict[str, tuple[str, bool]] = {}
 
     entries: list[dict] = []
@@ -302,9 +323,7 @@ def get_transcript(
         content = msg.get("content", [])
         ts = entry.get("timestamp")
 
-        # ── 用户消息 ──
         if entry_type == "user" or role == "user":
-            # 收集 tool_result 到 dict
             if isinstance(content, list):
                 for block in content:
                     if isinstance(block, dict) and block.get("type") == "tool_result":
@@ -314,25 +333,21 @@ def get_transcript(
                             is_error = bool(block.get("is_error", False))
                             tool_results[tuid] = (result_text, is_error)
 
-            # 仍然提取用户的文本消息（非纯 tool_result 的）
             if isinstance(content, str):
                 if content.strip():
                     messages.append(TranscriptMessage(
-                        role="user",
-                        ts=ts,
+                        role="user", ts=ts,
                         blocks=[TranscriptBlock(type="text", text=content)],
                     ))
             elif isinstance(content, list):
                 text_blocks = [c for c in content if isinstance(c, dict) and c.get("type") == "text" and c.get("text", "").strip()]
                 if text_blocks:
                     messages.append(TranscriptMessage(
-                        role="user",
-                        ts=ts,
+                        role="user", ts=ts,
                         blocks=[TranscriptBlock(type="text", text=b["text"]) for b in text_blocks],
                     ))
             continue
 
-        # ── 助手消息 ──
         if role == "assistant" or entry_type == "assistant":
             if not isinstance(content, list):
                 continue
@@ -350,22 +365,45 @@ def get_transcript(
                         tool_input=block.get("input") or {},
                         tool_use_id=block.get("id"),
                     ))
-                # 忽略 thinking 块
             if blocks:
                 messages.append(TranscriptMessage(
-                    role="assistant",
-                    ts=ts,
-                    blocks=blocks,
-                    model=msg.get("model"),
+                    role="assistant", ts=ts, blocks=blocks, model=msg.get("model"),
                 ))
 
-    # ── 第二遍：将 tool_result 关联到对应的 tool_use block ──
     for msg in messages:
         for block in msg.blocks:
             if block.type == "tool_use" and block.tool_use_id and block.tool_use_id in tool_results:
                 result_text, is_error = tool_results[block.tool_use_id]
                 block.tool_result = result_text
                 block.tool_error = is_error if is_error else None
+
+    return messages
+
+
+@router.get("/{session_id}/transcript", response_model=TranscriptResponse, summary="读取会话对话记录")
+def get_transcript(
+    session_id: str,
+    limit: int = 50,
+    offset: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    """
+    读取会话对话记录。优先从 DB（session_messages）读取，
+    无数据时回退到 JSONL 文件（~/.claude/projects/.../{session_id}.jsonl）。
+    """
+    s = db.query(ClaudeSession).filter_by(session_id=session_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    # 优先从 DB 读取
+    messages = _load_transcript_from_db(session_id, db)
+
+    # DB 无数据，回退到 JSONL
+    if messages is None:
+        messages = _load_transcript_from_jsonl(session_id, s.cwd or "")
+
+    if messages is None:
+        return TranscriptResponse(messages=[], file_found=False, total=0, has_more=False)
 
     total = len(messages)
     if offset is None:
