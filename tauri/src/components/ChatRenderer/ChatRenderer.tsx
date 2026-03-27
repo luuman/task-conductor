@@ -1772,7 +1772,7 @@ export function CodeBlock({ code = '', lang, label, icon, action, fileName, vari
     <div className={`${styles.codeWrap} ${variantCls ? styles.codeWrapVariant : ''}`}>
       {header}
       {children ? (
-        <div className={styles.codeBodyRich}>{children}</div>
+        <div ref={bodyRef} className={styles.codeBodyRich}>{children}</div>
       ) : (
         <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
           {highlighted ? (
