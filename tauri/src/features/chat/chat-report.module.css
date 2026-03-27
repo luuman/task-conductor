@@ -40,7 +40,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  margin-bottom: 12px;
 }
 .userCopyBtn {
   opacity: 0;
@@ -72,7 +71,7 @@
   max-width: 80%;
 }
 .queryPill .richText { min-width: 0; }
-.turnSection { margin-bottom: 24px; display: flex; flex-direction: column; }
+.turnSection { margin-top: 12px;margin-bottom: 12px; display: flex; flex-direction: column; }
 
 /* ── 消息内嵌文件/图片卡片 ── */
 .msgFileRow {
@@ -238,7 +237,7 @@
 /* 底部操作栏 */
 /* ═══════════════════════════════════════════════ */
 .bottomBar {
-  border-top: 1px solid var(--tc-border);
+  /* border-top: 1px solid var(--tc-border); */
   padding: 10px 16px 12px;
   background: var(--tc-content-bg);
   flex-shrink: 0;
@@ -841,8 +840,8 @@
 /* ═══════════════════════════════════════════════ */
 .aTl { position: relative; padding-left: 24px; }
 .aTl::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 1px; background: var(--tc-border); }
-.aStep { position: relative; margin-bottom: 3px; }
-.aDot { position: absolute; left: -20px; top: 8px; width: 8px; height: 8px; border-radius: 50%; }
+.aStep { position: relative; margin-bottom: 12px; display: flex; align-items: center; flex-wrap: wrap;}
+.aDot { position: absolute; left: -21px; top: 50%; margin-top: -4px; width: 8px; height: 8px; border-radius: 50%; }
 .aText { padding: 8px 12px; border-radius: 5px; border-left: 2px solid var(--tc-accent); margin-left: 4px; background: var(--tc-accent-a3); }
 .aToolRow { display: flex; align-items: flex-start; gap: 8px; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
 .aToolRow:hover { background: rgba(255,255,255,0.02); }

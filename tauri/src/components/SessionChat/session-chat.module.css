@@ -868,7 +868,9 @@
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--tc-border);
-  margin-top: 8px;
+}
+.diffWrap:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .diffHeader {
