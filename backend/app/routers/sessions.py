@@ -446,6 +446,33 @@ def get_questions(session_id: str, db: Session = Depends(get_db)):
     if not s:
         raise HTTPException(status_code=404, detail="会话不存在")
 
+    # 先尝试从 DB 读取
+    from ..models import SessionMessage
+    db_rows = (
+        db.query(SessionMessage)
+        .filter_by(session_id=session_id)
+        .order_by(SessionMessage.created_at)
+        .all()
+    )
+    if db_rows:
+        questions: list[dict] = []
+        msg_index = 0
+        for row in db_rows:
+            try:
+                blocks = _json_mod.loads(row.blocks_json)
+            except Exception:
+                continue
+            if row.role == "user":
+                text_parts = [b.get("text", "") for b in blocks if b.get("type") == "text"]
+                text = " ".join(t.strip() for t in text_parts if t.strip())
+                if text:
+                    questions.append({"index": msg_index, "text": text[:200]})
+                    msg_index += 1
+            elif row.role == "assistant":
+                msg_index += 1
+        return {"questions": questions, "total": msg_index}
+
+    # 回退到 JSONL
     cwd = s.cwd or ""
     project_path = cwd.replace("/", "-")
     home = _os.path.expanduser("~")
@@ -454,7 +481,7 @@ def get_questions(session_id: str, db: Session = Depends(get_db)):
     if not _os.path.exists(transcript_path):
         return {"questions": [], "total": 0}
 
-    questions: list[dict] = []
+    questions = []
     msg_index = 0
 
     with open(transcript_path, "r", encoding="utf-8") as f:
