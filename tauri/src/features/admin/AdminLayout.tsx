@@ -15,14 +15,14 @@ const modKey = isMac ? '\u2318' : 'Ctrl+'
 
 const NAV_ITEMS: Array<{ key: string; icon: React.ReactNode; i18n: string; shortcut: string; devOnly?: boolean }> = [
   { key: '/admin',              icon: <IconLayoutGrid size={18} />, i18n: 'admin.nav.dashboard',     shortcut: `${modKey}1` },
-  { key: '/admin/claude-config', icon: <IconSettings size={18} />,  i18n: 'admin.nav.claude_config', shortcut: `${modKey}2` },
-  { key: '/admin/settings',     icon: <IconMonitor size={18} />,    i18n: 'admin.nav.settings',      shortcut: `${modKey}3` },
-  { key: '/admin/sessions',     icon: <IconSearch size={18} />,     i18n: 'admin.nav.sessions',      shortcut: `${modKey}4` },
+  { key: '/admin/claude-config', icon: <IconBot size={18} />,       i18n: 'admin.nav.claude_config', shortcut: `${modKey}2` },
+  { key: '/admin/settings',     icon: <IconSettings size={18} />,   i18n: 'admin.nav.settings',      shortcut: `${modKey}3` },
+  { key: '/admin/sessions',     icon: <IconRadio size={18} />,      i18n: 'admin.nav.sessions',      shortcut: `${modKey}4` },
   { key: '/admin/mindmap',      icon: <IconGitBranch size={18} />,  i18n: 'admin.nav.mindmap',       shortcut: `${modKey}5` },
   { key: '/admin/chat',        icon: <IconMessage size={18} />,    i18n: 'admin.nav.chat',          shortcut: `${modKey}6` },
-  { key: '/admin/server',      icon: <IconActivity size={18} />,   i18n: 'admin.nav.server',        shortcut: `${modKey}7` },
+  { key: '/admin/server',      icon: <IconMonitor size={18} />,    i18n: 'admin.nav.server',        shortcut: `${modKey}7` },
   ...(import.meta.env.DEV ? [
-    { key: '/admin/dev', icon: <IconLayoutGrid size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}8`, devOnly: true },
+    { key: '/admin/dev', icon: <IconTerminal size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}8`, devOnly: true },
   ] : []),
 ]
 
