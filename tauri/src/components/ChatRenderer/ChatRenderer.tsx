@@ -1844,11 +1844,13 @@ export function BashStatusLine({ block }: { block: TranscriptBlock }) {
 // ── UserCard ────────────────────────────────────────────────
 
 export function UserCard({ msg }: { msg: TranscriptMessage }) {
-  const text = msg.blocks
+  const rawText = msg.blocks
     .filter(b => b.type === 'text')
     .map(b => b.text || '')
     .join('\n')
     .trim()
+  if (!rawText) return null
+  const text = cleanSystemXml(rawText)
   if (!text) return null
 
   return (
