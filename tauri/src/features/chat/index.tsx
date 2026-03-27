@@ -820,19 +820,18 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const { messages: chatMessages, currentReply } = useChatStore()
 
-  // 获取当前项目 cwd（global 模式不过滤）
-  // SENTINEL = 还在加载，不应显示任何会话；undefined = global 模式不过滤
-  const LOADING_SENTINEL = '\x00'
-  const [projectCwd, setProjectCwd] = useState<string | undefined>(global ? undefined : LOADING_SENTINEL)
+  // 获取当前项目 cwd（与 /sessions 页面一致，使用 appStore）
+  const activeProjectId = useAppStore((st) => st.activeProjectId)
+  const [projectCwd, setProjectCwd] = useState<string | undefined>(global ? undefined : undefined)
   useEffect(() => {
     if (global) return
-    const pid = localStorage.getItem('tc_active_project')
-    if (!pid) { setProjectCwd(undefined); return }
+    if (!activeProjectId) { setProjectCwd(undefined); return }
+    const pid = Number(activeProjectId)
     api.getProjects().then(list => {
-      const proj = list.find(p => String(p.id) === pid)
+      const proj = list.find(p => p.id === pid)
       setProjectCwd(proj?.repo_url || undefined)
     }).catch(() => setProjectCwd(undefined))
-  }, [global])
+  }, [global, activeProjectId])
 
   // 使用 useSessionData 统一管理分页加载 + WS 实时更新
   const {
