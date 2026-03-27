@@ -823,15 +823,18 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   // 获取当前项目 cwd（与 /sessions 页面一致，使用 appStore）
   const activeProjectId = useAppStore((st) => st.activeProjectId)
-  const [projectCwd, setProjectCwd] = useState<string | undefined>(global ? undefined : undefined)
+  const [projectCwd, setProjectCwd] = useState<string | undefined>(undefined)
+  const [cwdReady, setCwdReady] = useState(global)  // global 模式立即就绪
   useEffect(() => {
-    if (global) return
-    if (!activeProjectId) { setProjectCwd(undefined); return }
+    if (global) { setCwdReady(true); return }
+    if (!activeProjectId) { setProjectCwd(undefined); setCwdReady(true); return }
+    setCwdReady(false)
     const pid = Number(activeProjectId)
     api.getProjects().then(list => {
       const proj = list.find(p => p.id === pid)
       setProjectCwd(proj?.repo_url || undefined)
-    }).catch(() => setProjectCwd(undefined))
+      setCwdReady(true)
+    }).catch(() => { setProjectCwd(undefined); setCwdReady(true) })
   }, [global, activeProjectId])
 
   // 使用 useSessionData 统一管理分页加载 + WS 实时更新
