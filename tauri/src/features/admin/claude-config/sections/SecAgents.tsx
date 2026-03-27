@@ -161,7 +161,7 @@ export function SecAgents({ showToast }: SectionProps) {
       <div style={{ display: 'flex', gap: 16 }}>
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {agents.length === 0 ? (
-            <EmptyState icon="\uD83E\uDD16" title={t('claudeConfig.agents.empty')} />
+            <EmptyState icon={<IconBot size={24} />} title={t('claudeConfig.agents.empty')} />
           ) : (
             agents.map((agent) => (
               <div
