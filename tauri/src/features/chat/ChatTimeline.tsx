@@ -161,6 +161,18 @@ function TaskNotifBanner({ status, summary, taskId }: { status: string; summary:
   )
 }
 
+/** 本地命令执行横幅（/model, /help 等） */
+function LocalCommandBanner({ command, stdout }: { command: string; stdout: string }) {
+  // 清理 ANSI 转义序列
+  const cleanStdout = stdout.replace(/\x1b\[[0-9;]*m/g, '').trim()
+  return (
+    <div className={s.localCmdBanner}>
+      <code className={s.localCmdName}>{command}</code>
+      {cleanStdout && <span className={s.localCmdStdout}>{cleanStdout}</span>}
+    </div>
+  )
+}
+
 /** 用户消息正文：文字 + 内嵌文件/图片卡片 */
 function UserMsgBody({ text }: { text: string }) {
   const cut = text.indexOf('--- 问题元素') !== -1 ? text.slice(0, text.indexOf('--- 问题元素')).trim() : text
