@@ -1642,16 +1642,9 @@ export interface CodeBlockProps {
 
 export function CodeBlock({ code = '', lang, label, icon, action, fileName, variant, pillColor, children }: CodeBlockProps) {
   const { t } = useTranslation()
-  let highlighted: string | null = null
-  if (!children) {
-    try {
-      if (lang && hljs.getLanguage(lang)) {
-        highlighted = hljs.highlight(code, { language: lang }).value
-      } else {
-        highlighted = hljs.highlightAuto(code).value
-      }
-    } catch { /* fallback */ }
-  }
+  // 使用 Web Worker 异步高亮，避免阻塞主线程
+  const { html: workerHighlighted } = useHighlight(children ? '' : code, lang || undefined)
+  const highlighted = children ? null : (workerHighlighted || null)
   const lineCount = code.split('\n').length
   const globalExp = useContext(CodeExpandCtx)
   const [collapsed, setCollapsed] = useState(lineCount > CODE_COLLAPSE_THRESHOLD)
