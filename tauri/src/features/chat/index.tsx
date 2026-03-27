@@ -357,8 +357,8 @@ const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
 }
 
 // ── Right sidebar ──
-function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggleCode, onScrollToQuestion }: {
-  session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; activeQ: number
+function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExpanded, onToggleCode, onScrollToQuestion }: {
+  session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; allQuestions?: QuestionItem[]; activeQ: number
   codeExpanded: boolean; onToggleCode: () => void; onScrollToQuestion?: (qi: number) => void
 }) {
   const { t } = useTranslation()
