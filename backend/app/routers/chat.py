@@ -142,9 +142,12 @@ async def handle_chat_ws(ws: WebSocket):
         _tool_queue: list[tuple[str, dict]] = []  # (name, input) 按顺序
         _cur_tool = ""
         _input_buf = ""
+        # 收集本轮 assistant 的所有 blocks（文本 + 工具调用），回合结束时一次性写 DB
+        _assistant_blocks: list[dict] = []
+        _used_model = model
 
         try:
-            await c.query(message)
+            await c.query(message, session_id=current_session_id or "default")
 
             async for msg in c.receive_messages():
                 # ── StreamEvent ──
@@ -170,9 +173,12 @@ async def handle_chat_ws(ws: WebSocket):
                     elif et == "content_block_start":
                         bl = evt.get("content_block", {})
                         if bl.get("type") == "tool_use":
+                            # flush 之前累积的文本到 blocks
+                            if full_text.strip():
+                                _assistant_blocks.append({"type": "text", "text": full_text})
+                                full_text = ""
                             _cur_tool = bl.get("name", "")
                             _input_buf = ""
-                            # 立即通知前端（用于显示药丸/卡片）
                             await _send({"type": "chat_tool_use", "data": {"tool": _cur_tool, "session_id": result_session_id}, "ts": _ts()})
 
                     elif et == "content_block_stop":
@@ -183,6 +189,12 @@ async def handle_chat_ws(ws: WebSocket):
                             except Exception:
                                 pass
                             _tool_queue.append((_cur_tool, ti))
+                            # 暂存 tool_use block（result 稍后补充）
+                            _assistant_blocks.append({
+                                "type": "tool_use",
+                                "tool_name": _cur_tool,
+                                "tool_input": ti,
+                            })
                             _cur_tool = ""
                             _input_buf = ""
 
@@ -195,12 +207,19 @@ async def handle_chat_ws(ws: WebSocket):
                         rs = str(content)[:5000] if content else ""
                         if name == "Read" and rs:
                             rs = _re.sub(r'(?m)^\s*\d+→', '', rs)
+                        # 回填 tool_result 到已暂存的 tool_use block
+                        for ab in reversed(_assistant_blocks):
+                            if ab.get("type") == "tool_use" and ab.get("tool_name") == name and "tool_result" not in ab:
+                                ab["tool_result"] = rs
+                                ab["tool_error"] = is_err if is_err else None
+                                break
                         await _send({"type": "chat_tool_result", "data": {"tool": name, "input": ti, "result": rs, "is_error": is_err, "session_id": result_session_id}, "ts": _ts()})
 
                 # ── ResultMessage：回合结束 ──
                 elif isinstance(msg, ResultMessage):
                     result_session_id = getattr(msg, "session_id", "") or result_session_id
                     current_session_id = result_session_id
+                    _used_model = getattr(msg, "model", None) or _used_model
 
                     cost = getattr(msg, "total_cost_usd", 0) or 0
                     duration = getattr(msg, "duration_ms", 0) or 0
@@ -219,6 +238,15 @@ async def handle_chat_ws(ws: WebSocket):
                     # 回合结束，标记为 idle（持久连接仍在，等待下一条消息）
                     if result_session_id:
                         _update_session_status(result_session_id, "idle")
+
+                    # ── 写入 DB：用户消息 + 助手回复 ──
+                    if result_session_id:
+                        _save_message(result_session_id, "user", [{"type": "text", "text": message}])
+                        # flush 剩余文本
+                        if full_text.strip():
+                            _assistant_blocks.append({"type": "text", "text": full_text})
+                        if _assistant_blocks:
+                            _save_message(result_session_id, "assistant", _assistant_blocks, model=_used_model)
 
                     await _send({
                         "type": "chat_done",
