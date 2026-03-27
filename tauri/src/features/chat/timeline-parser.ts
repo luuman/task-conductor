@@ -83,14 +83,17 @@ export interface ParsedTimeline {
 
 /** 清理用户消息中 Claude Code 自动注入的系统 XML 标签，返回纯用户文本 */
 export function cleanSystemXml(text: string): string {
-  // 提取 command-name 内容保留为可读文本（如 /init → 显示为 /init）
+  // 提取 command 信息，转换为可读文本
   const cmdName = text.match(/<command-name>([\s\S]*?)<\/command-name>/)?.[1]?.trim() || ''
+  const cmdArgs = text.match(/<command-args>([\s\S]*?)<\/command-args>/)?.[1]?.trim() || ''
+  const cmdStdout = text.match(/<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/)?.[1]?.trim() || ''
 
   const cleaned = text
-    // 完整 XML 块（含内容）
+    // 完整 XML 块（含内容）— 系统注入的不可见内容
     .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
     .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
     .replace(/<task-notification>[\s\S]*?<\/task-notification>/g, '')
+    // command 相关标签——提取后删除原始标签
     .replace(/<command-name>[\s\S]*?<\/command-name>/g, '')
     .replace(/<command-message>[\s\S]*?<\/command-message>/g, '')
     .replace(/<command-args>[\s\S]*?<\/command-args>/g, '')
@@ -101,8 +104,14 @@ export function cleanSystemXml(text: string): string {
     .replace(/<[^>]+>/g, '')
     .trim()
 
-  // 如果清理后为空但有命令名，用命令名代替
-  return cleaned || cmdName
+  // 如果清理后为空但有命令信息，组装可读文本
+  if (!cleaned && cmdName) {
+    const parts = [cmdName]
+    if (cmdArgs) parts.push(cmdArgs)
+    if (cmdStdout) parts.push(cmdStdout)
+    return parts.join(' ')
+  }
+  return cleaned
 }
 
 export function parseTimelineWithQuestions(messages: TranscriptMessage[]): ParsedTimeline {
