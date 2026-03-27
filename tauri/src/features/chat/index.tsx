@@ -861,7 +861,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   // 构建虚拟列表项：每个用户问题和每组工具步骤各为一项
   const vitems = useMemo<VItem[]>(() => {
-    if (steps.length === 0) return []
+    if (steps.length === 0 && questions.length === 0) return []
     if (questions.length === 0) {
       return groupConsecutiveSameType(steps).map((step, i) => ({
         kind: 'steps' as const, key: `s-${i}`, steps: [step],
