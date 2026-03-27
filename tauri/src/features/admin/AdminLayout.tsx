@@ -22,7 +22,7 @@ const NAV_ITEMS: Array<{ key: string; icon: React.ReactNode; i18n: string; short
   { key: '/admin/chat',        icon: <IconMessage size={18} />,    i18n: 'admin.nav.chat',          shortcut: `${modKey}6` },
   { key: '/admin/server',      icon: <IconActivity size={18} />,   i18n: 'admin.nav.server',        shortcut: `${modKey}7` },
   ...(import.meta.env.DEV ? [
-    { key: '/admin/dev', icon: <IconLayoutGrid size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}7`, devOnly: true },
+    { key: '/admin/dev', icon: <IconLayoutGrid size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}8`, devOnly: true },
   ] : []),
 ]
 
