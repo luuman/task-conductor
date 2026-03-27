@@ -17,6 +17,7 @@ const AdminSettings     = lazy(() => import('../features/admin/pages/AdminSettin
 const AdminSessions     = lazy(() => import('../features/admin/pages/AdminSessions'))
 const AdminMindMap      = lazy(() => import('../features/admin/pages/AdminMindMap'))
 const AdminServerMonitor = lazy(() => import('../features/admin/pages/AdminServerMonitor'))
+const AdminChat         = lazy(() => import('../features/admin/pages/AdminChat'))
 const FilesPage         = lazy(() => import('../features/files'))
 const GitPage           = lazy(() => import('../features/git'))
 const TaskManagerPage   = lazy(() => import('../features/task-manager'))
