@@ -529,13 +529,14 @@ export const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
-/** 移除用户消息中附加的 DOM 上下文（兼容新格式【元素 #N】和旧格式 --- 问题元素） */
+/** 移除用户消息中附加的 DOM 上下文和系统 XML 标签 */
 function stripDomContext(text: string): string {
-  const i1 = text.indexOf('\n\n【元素 #')
-  const i2 = text.indexOf('--- 问题元素')
+  const cleaned = cleanSystemXml(text)
+  const i1 = cleaned.indexOf('\n\n【元素 #')
+  const i2 = cleaned.indexOf('--- 问题元素')
   const candidates = [i1, i2].filter(i => i !== -1)
-  if (candidates.length === 0) return text
-  return text.slice(0, Math.min(...candidates)).trim()
+  if (candidates.length === 0) return cleaned
+  return cleaned.slice(0, Math.min(...candidates)).trim()
 }
 
 /** 将 messages 分段：user 气泡 / assistant steps / notification / local-command 交替出现 */
