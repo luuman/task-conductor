@@ -167,7 +167,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
   if (step.category === 'agent' && step.toolResult) {
     const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
     return (
-      <CodeBlock icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+      <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
         <RichTextBlock text={step.toolResult} />
       </CodeBlock>
     )
