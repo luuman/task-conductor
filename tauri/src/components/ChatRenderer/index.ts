@@ -16,6 +16,7 @@ export {
   DiffBlock,
   fileExtIcon,
   CodeExpandCtx,
+  parseTextSegments,
 } from './ChatRenderer'
 
 export type { ChatMessageListProps, AssistantTurn, GroupedTurnItem, CodeBlockVariant } from './ChatRenderer'
