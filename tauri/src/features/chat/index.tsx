@@ -916,7 +916,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
           options={sessions.map(ss => ({
             value: ss.session_id,
             label: stripDomContext(ss.summary || '') || (ss.note?.alias || `会话 ${ss.session_id.slice(0, 8)}`),
-            desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${ss.cwd?.split('/').pop() || ''}${global ? `|${ss.cwd?.split('/').pop() || ''}` : ''}`,
+            desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${global ? (ss.cwd?.split('/').pop() || '') : ''}`,
           }))}
           value={selectedId || ''}
           onChange={v => selectSession(v)}
