@@ -73,7 +73,7 @@ export function SecMonitoring({ overview }: SectionProps) {
 
       {/* Project grid */}
       {overview && overview.projects.length === 0 && (
-        <EmptyState icon="\uD83D\uDCC2" title={t('claudeConfig.monitoring.noProjects', 'No projects')} />
+        <EmptyState icon={<IconFolder size={24} />} title={t('claudeConfig.monitoring.noProjects', 'No projects')} />
       )}
       {overview && overview.projects.length > 0 && (
         <>
