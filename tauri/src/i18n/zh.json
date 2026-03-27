@@ -733,6 +733,8 @@
     "cat_text": "文本",
     "cat_other": "其他",
     "badge_text": "文本",
-    "badge_tool": "工具"
+    "badge_tool": "工具",
+    "load_all": "加载全部",
+    "loaded_count": "已加载 {{loaded}} / {{total}}"
   }
 }
