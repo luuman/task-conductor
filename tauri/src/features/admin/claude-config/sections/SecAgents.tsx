@@ -4,6 +4,7 @@ import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, AgentInfo, PresetItem } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
 import { EmptyState } from '../../../../ui/empty-state'
+import { IconBot } from '../../../../ui/icon'
 import { SectionHeader, DetailPanel, PresetGallery } from '../shared'
 import styles from '../claude-config.module.css'
 
