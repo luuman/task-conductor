@@ -36,6 +36,27 @@ function badgeCls(cat: TimelineStep['category']): string {
   return `${s.badge} ${map[cat] || s.bOther}`
 }
 
+function buildToolLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    Read: t('chat_sidebar.tool_read'), Write: t('chat_sidebar.tool_write'), Edit: t('chat_sidebar.tool_edit'), MultiEdit: t('chat_sidebar.tool_multi_edit'),
+    Bash: t('chat_sidebar.tool_bash'), Grep: t('chat_sidebar.tool_grep'), Glob: t('chat_sidebar.tool_glob'),
+    Agent: t('chat_sidebar.tool_agent'), AskUserQuestion: t('chat_sidebar.tool_ask'),
+    WebSearch: t('chat_sidebar.tool_web_search'), WebFetch: t('chat_sidebar.tool_web_fetch'),
+    ToolSearch: t('chat_sidebar.tool_search'), Skill: t('chat_sidebar.tool_skill'),
+    TaskCreate: t('chat_sidebar.tool_task_create'), TaskUpdate: t('chat_sidebar.tool_task_update'), TaskList: t('chat_sidebar.tool_task_list'),
+    TaskGet: t('chat_sidebar.tool_task_get'), TaskStop: t('chat_sidebar.tool_task_stop'),
+  }
+}
+
+function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    read: t('chat_sidebar.cat_read'), edit: t('chat_sidebar.cat_edit'), write: t('chat_sidebar.cat_write'), bash: t('chat_sidebar.cat_bash'),
+    grep: t('chat_sidebar.cat_grep'), glob: t('chat_sidebar.cat_glob'), agent: t('chat_sidebar.cat_agent'), ask: t('chat_sidebar.cat_ask'),
+    search: t('chat_sidebar.cat_search'), task: t('chat_sidebar.cat_task'), text: t('chat_sidebar.cat_text'), other: t('chat_sidebar.cat_other'),
+  }
+}
+
+// Fallback label maps for contexts without i18n (style renderers)
 const TOOL_LABEL_MAP: Record<string, string> = {
   Read: '读取', Write: '写入', Edit: '编辑', MultiEdit: '多处编辑',
   Bash: '命令', Grep: '内容搜索', Glob: '文件匹配',
