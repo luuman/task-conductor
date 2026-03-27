@@ -733,6 +733,8 @@
     "cat_text": "Text",
     "cat_other": "Other",
     "badge_text": "Text",
-    "badge_tool": "Tool"
+    "badge_tool": "Tool",
+    "load_all": "Load All",
+    "loaded_count": "Loaded {{loaded}} / {{total}}"
   }
 }
