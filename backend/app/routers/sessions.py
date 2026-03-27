@@ -19,6 +19,8 @@ def get_db():
 
 import re as _re
 
+_CMD_NAME_RE = _re.compile(r'<command-name>([\s\S]*?)</command-name>')
+
 _SYSTEM_XML_PATTERNS = [
     _re.compile(r'<local-command-caveat>[\s\S]*?</local-command-caveat>'),
     _re.compile(r'<system-reminder>[\s\S]*?</system-reminder>'),
@@ -34,9 +36,14 @@ _SYSTEM_XML_PATTERNS = [
 
 def _clean_system_xml(text: str) -> str:
     """清理 Claude Code 注入的系统 XML 标签，返回纯用户文本。"""
+    cmd_name = ""
+    m = _CMD_NAME_RE.search(text)
+    if m:
+        cmd_name = m.group(1).strip()
     for pat in _SYSTEM_XML_PATTERNS:
         text = pat.sub('', text)
-    return text.strip()
+    cleaned = text.strip()
+    return cleaned or cmd_name
 
 
 def _get_session_summary(session_id: str, cwd: str, db=None) -> Optional[str]:
