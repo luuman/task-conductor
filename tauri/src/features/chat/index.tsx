@@ -480,7 +480,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
       {/* 推荐问题 */}
       <div className={s.sbSection}>
-        <div className={s.sbTitle}>推荐问题</div>
+        <div className={s.sbTitle}>{t('chat_sidebar.recommended_questions')}</div>
         <ul className={s.sbQuestions}>
           <li className={s.sbQuestion}>哪种类型最需要优先改进？</li>
           <li className={s.sbQuestion}>Edit diff 需要 side-by-side？</li>
