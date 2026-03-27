@@ -460,10 +460,18 @@ export function RichTextBlock({ text }: { text: string }) {
 export function CopyButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
+    const finish = () => { setCopied(true); setTimeout(() => setCopied(false), 1500) }
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(finish).catch(() => {
+        const el = document.createElement('textarea')
+        el.value = text; document.body.appendChild(el); el.select()
+        document.execCommand('copy'); document.body.removeChild(el); finish()
+      })
+    } else {
+      const el = document.createElement('textarea')
+      el.value = text; document.body.appendChild(el); el.select()
+      document.execCommand('copy'); document.body.removeChild(el); finish()
+    }
   }, [text])
   return (
     <button onClick={copy} className={`${styles.copyBtn} ${className ?? ''}`} title="Copy">
