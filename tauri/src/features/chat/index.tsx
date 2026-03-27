@@ -402,6 +402,9 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
     return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}m`
   }, [session?.started_at, session?.last_seen_at])
 
+  const i18nToolMap = useMemo(() => buildToolLabelMap(t), [t])
+  const i18nCatMap = useMemo(() => buildCatLabelMap(t), [t])
+
   const fileStats = useMemo(() => {
     const readFiles = new Set<string>()
     const editFiles = new Set<string>()
