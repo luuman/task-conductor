@@ -73,6 +73,35 @@
 .queryPill .richText { min-width: 0; }
 .turnSection { margin-top: 12px;margin-bottom: 12px; display: flex; flex-direction: column; }
 
+/* ── 后台任务通知横幅 ── */
+.taskNotifBanner {
+  display: flex; align-items: center; gap: 8px;
+  margin: 6px 0;
+  padding: 6px 12px;
+  border-left: 3px solid;
+  border-radius: 6px;
+  font-size: 11.5px; line-height: 1.4;
+  color: var(--tc-foreground-muted);
+}
+.taskNotifIcon {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+.taskNotifSummary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.taskNotifId {
+  flex-shrink: 0;
+  font-size: 10px;
+  opacity: 0.5;
+  font-family: ui-monospace, monospace;
+}
+
 /* ── 消息内嵌文件/图片卡片 ── */
 .msgFileRow {
   display: flex;
