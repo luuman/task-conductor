@@ -940,10 +940,18 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
         <div className={s.mainCol}>
           <div className={s.mainArea} ref={mainAreaRef} style={{ overflow: 'hidden', padding: 0 }}>
             <CodeExpandCtx.Provider value={codeExpanded}>
+              {hasMore && total > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0', fontSize: 11, opacity: 0.6, gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                  <span>{transcript.length} / {total}</span>
+                  <button onClick={loadAll} style={{ background: 'var(--tc-border-active)', border: 'none', borderRadius: 4, color: 'var(--tc-text-primary)', padding: '2px 8px', cursor: 'pointer', fontSize: 11 }}>
+                    Load All
+                  </button>
+                </div>
+              )}
               {loading ? (
-                <div className={s.empty}><span>加载中...</span></div>
+                <div className={s.empty}><span>{t('common.loading')}</span></div>
               ) : vitems.length === 0 ? (
-                <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>选择一个会话查看操作时间线</span></div>
+                <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>{t('admin.sessions.select_session')}</span></div>
               ) : (
                 <Virtuoso
                   ref={virtuosoRef}
