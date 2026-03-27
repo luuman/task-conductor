@@ -17,8 +17,30 @@ def get_db():
         yield session
 
 
+import re as _re
+
+_SYSTEM_XML_PATTERNS = [
+    _re.compile(r'<local-command-caveat>[\s\S]*?</local-command-caveat>'),
+    _re.compile(r'<system-reminder>[\s\S]*?</system-reminder>'),
+    _re.compile(r'<task-notification>[\s\S]*?</task-notification>'),
+    _re.compile(r'<command-name>[\s\S]*?</command-name>'),
+    _re.compile(r'<command-message>[\s\S]*?</command-message>'),
+    _re.compile(r'<command-args>[\s\S]*?</command-args>'),
+    _re.compile(r'<local-command-stdout>[\s\S]*?</local-command-stdout>'),
+    _re.compile(r'Read the output file to retrieve the result:\s*\S+'),
+    _re.compile(r'<[^>]+>'),
+]
+
+
+def _clean_system_xml(text: str) -> str:
+    """清理 Claude Code 注入的系统 XML 标签，返回纯用户文本。"""
+    for pat in _SYSTEM_XML_PATTERNS:
+        text = pat.sub('', text)
+    return text.strip()
+
+
 def _get_session_summary(session_id: str, cwd: str, db=None) -> Optional[str]:
-    """提取会话摘要（第一条用户消息，最多 120 字符）。优先 JSONL，回退 DB。"""
+    """提取会话摘要（第一条有实际内容的用户消息，最多 120 字符）。优先 JSONL，回退 DB。"""
     # 先尝试从 JSONL 读取
     project_path = (cwd or "").replace("/", "-")
     home = _os.path.expanduser("~")
@@ -39,14 +61,20 @@ def _get_session_summary(session_id: str, cwd: str, db=None) -> Optional[str]:
                     role = msg.get("role", "")
                     content = msg.get("content", [])
                     if entry_type == "user" or role == "user":
+                        raw_text = ""
                         if isinstance(content, str) and content.strip():
-                            return content.strip()[:120]
-                        if isinstance(content, list):
+                            raw_text = content.strip()
+                        elif isinstance(content, list):
                             for block in content:
                                 if isinstance(block, dict) and block.get("type") == "text":
                                     text = (block.get("text") or "").strip()
                                     if text:
-                                        return text[:120]
+                                        raw_text = text
+                                        break
+                        if raw_text:
+                            cleaned = _clean_system_xml(raw_text)
+                            if cleaned:
+                                return cleaned[:120]
         except Exception:
             pass
 
@@ -54,17 +82,20 @@ def _get_session_summary(session_id: str, cwd: str, db=None) -> Optional[str]:
     if db is not None:
         try:
             from ..models import SessionMessage
-            first_user = (
+            user_rows = (
                 db.query(SessionMessage)
                 .filter_by(session_id=session_id, role="user")
                 .order_by(SessionMessage.created_at)
-                .first()
+                .limit(10)
+                .all()
             )
-            if first_user:
-                blocks = _json_mod.loads(first_user.blocks_json)
+            for row in user_rows:
+                blocks = _json_mod.loads(row.blocks_json)
                 for b in blocks:
                     if b.get("type") == "text" and b.get("text", "").strip():
-                        return b["text"].strip()[:120]
+                        cleaned = _clean_system_xml(b["text"].strip())
+                        if cleaned:
+                            return cleaned[:120]
         except Exception:
             pass
 
