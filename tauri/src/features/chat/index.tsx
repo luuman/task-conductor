@@ -467,7 +467,7 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
       {/* 推荐任务 */}
       <div className={s.sbSection}>
-        <div className={s.sbTitle}>推荐任务</div>
+        <div className={s.sbTitle}>{t('chat_sidebar.recommended_tasks')}</div>
         <div className={s.sbTasks}>
           <div className={s.sbTask}>优化 UserCard 气泡样式</div>
           <div className={s.sbTask}>改进 BashStatusLine 高亮</div>
