@@ -92,7 +92,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
 
   // Filter helper
   const filterSessions = useCallback((allSessions: AiSession[]) => {
-    let result = allSessions.filter(s => !!s.summary)
+    let result = allSessions
     if (filterByCwd) {
       result = result.filter(s => s.cwd && s.cwd.startsWith(filterByCwd))
     }
