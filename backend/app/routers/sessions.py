@@ -99,7 +99,7 @@ def list_sessions(db: Session = Depends(get_db)):
 
     results = []
     for s, event_count, note in rows:
-        summary = _get_session_summary(s.session_id, s.cwd or "")
+        summary = _get_session_summary(s.session_id, s.cwd or "", db=db)
         results.append({
             "id": s.id,
             "session_id": s.session_id,
