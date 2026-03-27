@@ -90,12 +90,19 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
   // Scroll
   const isFirstLoad = useRef(true)
 
-  // Filter helper
+  // Filter + sort (参考 SessionList: active > idle > stopped, 同组按时间倒序)
   const filterSessions = useCallback((allSessions: AiSession[]) => {
-    let result = allSessions
+    let result = allSessions.filter(s => !!s.summary)
     if (filterByCwd) {
       result = result.filter(s => s.cwd && s.cwd.startsWith(filterByCwd))
     }
+    result.sort((a, b) => {
+      const statusOrder = (s: string | undefined) => s === 'active' ? 2 : s === 'idle' ? 1 : 0
+      const diff = statusOrder(b.status) - statusOrder(a.status)
+      if (diff !== 0) return diff
+      return new Date(b.last_seen_at || b.started_at).getTime() -
+        new Date(a.last_seen_at || a.started_at).getTime()
+    })
     return result
   }, [filterByCwd])
 
