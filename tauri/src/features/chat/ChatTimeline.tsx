@@ -661,6 +661,8 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
           </div>
         ) : seg.type === 'notification' ? (
           <TaskNotifBanner key={i} status={seg.status} summary={seg.summary} taskId={seg.taskId} />
+        ) : seg.type === 'local-command' ? (
+          <LocalCommandBanner key={i} command={seg.command} stdout={seg.stdout} />
         ) : (
           <Renderer key={i} steps={seg.steps} />
         )
