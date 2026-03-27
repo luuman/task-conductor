@@ -160,7 +160,7 @@ export function SecCommands({ showToast }: SectionProps) {
       <div style={{ display: 'flex', gap: 16 }}>
         <div className={styles.card} style={{ flex: selected ? '0 0 50%' : '1 1 100%' }}>
           {commands.length === 0 ? (
-            <EmptyState icon="\uD83D\uDCDD" title={t('claudeConfig.commands.empty')} />
+            <EmptyState icon={<IconTerminal size={24} />} title={t('claudeConfig.commands.empty')} />
           ) : (
             commands.map((cmd) => (
               <div
