@@ -230,7 +230,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
         setTranscriptLoading(false)
 
         // Auto-load remaining older messages if there are more
-        if (hm && from > 0) {
+        if (autoLoadAll && hm && from > 0) {
           api.getTranscript(id, { limit: from, offset: 0 })
             .then(rest => {
               if (selectedIdRef.current !== id) return // switched away
