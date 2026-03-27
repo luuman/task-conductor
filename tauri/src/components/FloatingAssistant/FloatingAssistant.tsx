@@ -502,7 +502,7 @@ export function FloatingAssistant() {
               <div className={styles.historyEmpty}>暂无历史会话</div>
             )}
             {sessions.map(s => {
-              const title = s.note?.alias || s.summary || s.session_id.slice(0, 8)
+              const title = (s.note?.alias || s.summary || '').replace(/<[^>]+>/g, '').trim() || `会话 ${s.session_id.slice(0, 8)}`
               const isCurrent = tabs.find(t => t.id === activeTabId)?.sessionId === s.session_id
               const dotCls = s.status === 'active'
                 ? `${styles.historyDot} ${styles.historyDotActive}`
