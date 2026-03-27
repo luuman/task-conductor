@@ -1650,6 +1650,7 @@ export interface CodeBlockProps {
 
 export function CodeBlock({ code = '', lang, label, icon, action, fileName, variant, pillColor, children }: CodeBlockProps) {
   const { t } = useTranslation()
+  const bodyRef = useRef<HTMLDivElement>(null)
   // 使用 Web Worker 异步高亮，避免阻塞主线程
   const { html: workerHighlighted } = useHighlight(children ? '' : code, lang || undefined)
   const highlighted = children ? null : (workerHighlighted || null)
@@ -1675,7 +1676,9 @@ export function CodeBlock({ code = '', lang, label, icon, action, fileName, vari
       {collapsed ? t('admin.sessions.code_expand') : t('admin.sessions.code_collapse')}
     </button>
   )
-  const copyBtn = <CopyButton text={code} />
+  // children 模式下 code 为空，从 DOM 中提取文本用于复制
+  const getCopyText = useCallback(() => code || bodyRef.current?.textContent || '', [code])
+  const copyBtn = <CopyButton text={getCopyText()} />
 
   const variantCls = styles[`cbV${variant}` as keyof typeof styles] || ''
 
