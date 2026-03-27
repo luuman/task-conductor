@@ -661,11 +661,13 @@ function ChatFooter({ chatEndRef }: { chatEndRef: React.RefObject<HTMLDivElement
 }
 
 function stripDomContext(text: string): string {
-  const i1 = text.indexOf('\n\n【元素 #')
-  const i2 = text.indexOf('--- 问题元素')
+  // 先清理系统 XML 标签
+  const cleaned = cleanSystemXml(text)
+  const i1 = cleaned.indexOf('\n\n【元素 #')
+  const i2 = cleaned.indexOf('--- 问题元素')
   const candidates = [i1, i2].filter(i => i !== -1)
-  if (candidates.length === 0) return text
-  return text.slice(0, Math.min(...candidates)).trim()
+  if (candidates.length === 0) return cleaned
+  return cleaned.slice(0, Math.min(...candidates)).trim()
 }
 
 /** 从原始消息文本中解析 DOM context 块 */
