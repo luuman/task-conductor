@@ -839,6 +839,12 @@ export default function ChatReportPage() {
       }))
     }
     const result: VItem[] = []
+    // 第一个问题之前可能有孤儿 steps（来自被跳过的系统消息后的 assistant 响应）
+    if (questions[0]?.stepIndex > 0) {
+      groupConsecutiveSameType(steps.slice(0, questions[0].stepIndex)).forEach((step, si) => {
+        result.push({ kind: 'steps', key: `orphan-s${si}`, steps: [step] })
+      })
+    }
     questions.forEach((q, qi) => {
       result.push({ kind: 'user', key: `q-${qi}`, qi, question: q })
       const nextQ = questions[qi + 1]
