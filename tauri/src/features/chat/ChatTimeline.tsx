@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { TranscriptMessage } from '../../lib/api/types'
 import { parseTimelineWithQuestions, guessHljsLang } from './timeline-parser'
 import type { TimelineStep } from './timeline-parser'
-import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx, parseTextSegments } from '../../components/ChatRenderer'
+import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
 import {
   IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
   IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
