@@ -1,3 +1,4 @@
+import type React from 'react'
 import styles from './empty-state.module.css'
 
 export interface EmptyStateProps {
