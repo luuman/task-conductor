@@ -146,52 +146,47 @@ function MsgFileCard({ path, ext }: { path: string; ext: string }) {
 function UserMsgBody({ text }: { text: string }) {
   const cut = text.indexOf('--- 问题元素') !== -1 ? text.slice(0, text.indexOf('--- 问题元素')).trim() : text
 
-  // 先用 parseTextSegments 提取 task-notification / system-reminder / 图片文件引用
-  const segments = useMemo(() => parseTextSegments(cut), [cut])
-  const hasSpecial = segments.some(seg => seg.kind !== 'text')
+  // 检测是否包含 task-notification 等特殊 XML 标签
+  const hasSpecialXml = /<task-notification>/.test(cut)
 
-  if (hasSpecial) {
-    // 有特殊 XML 标签 → 使用 RichTextBlock 渲染（包含 TaskNotificationCard 等）
-    // 但需要把非特殊的纯文本段中的残余 XML 标签清理掉
-    const cleanedText = segments.map(seg => {
-      if (seg.kind === 'text') {
-        const stripped = seg.content.includes('<') ? seg.content.replace(/<[^>]+>/g, '').trim() : seg.content
-        return stripped
-      }
-      return null
-    }).filter(Boolean)
-
+  if (hasSpecialXml) {
+    // 去掉 system-reminder 噪音，保留 task-notification
+    const cleaned = cut.replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '').trim()
+    // 用 parseTextSegments 拆分，对纯文本段清理残余 XML 标签
+    const segments = parseTextSegments(cleaned)
     return (
       <>
         {segments.map((seg, i) => {
           if (seg.kind === 'text') {
+            // 清理纯文本中残余的无关 XML 标签
             const stripped = seg.content.includes('<') ? seg.content.replace(/<[^>]+>/g, '').trim() : seg.content
             if (!stripped) return null
             const parts = parseFilePaths(stripped)
             const hasFiles = parts.some(p => p.kind !== 'text')
             if (!hasFiles) return <div key={i} className={s.richText}>{stripped}</div>
+            const textOnly = parts.filter(p => p.kind === 'text').map(p => p.content).join('').trim()
+            const fileParts = parts.filter((p): p is Exclude<MsgPart, { kind: 'text' }> => p.kind !== 'text')
             return (
               <React.Fragment key={i}>
-                {parts.map((p, j) =>
-                  p.kind === 'text'
-                    ? p.content.trim() ? <div key={j} className={s.richText}>{p.content}</div> : null
-                    : p.kind === 'image'
+                {textOnly && <div className={s.richText}>{textOnly}</div>}
+                <div className={s.msgFileRow}>
+                  {fileParts.map((p, j) =>
+                    p.kind === 'image'
                       ? <MsgImgCard key={j} path={p.path} />
                       : <MsgFileCard key={j} path={p.path} ext={p.ext} />
-                )}
+                  )}
+                </div>
               </React.Fragment>
             )
           }
-          // 非文本段走 RichTextBlock 的对应组件
-          return <RichTextBlock key={i} text={
-            seg.kind === 'task-notification'
-              ? `<task-notification><task-id>${seg.data.taskId}</task-id><tool-use-id>${seg.data.toolUseId}</tool-use-id><output-file>${seg.data.outputFile}</output-file><status>${seg.data.status}</status><summary>${seg.data.summary}</summary></task-notification>`
-              : seg.kind === 'system-reminder'
-                ? `<system-reminder>${seg.data.content}</system-reminder>`
-                : seg.kind === 'image-ref'
-                  ? `[Image: ${seg.path}]`
-                  : `[File: ${seg.path}]`
-          } />
+          // task-notification / image-ref / file-ref → 交给 RichTextBlock 渲染卡片
+          if (seg.kind === 'task-notification') {
+            const d = seg.data
+            return <RichTextBlock key={i} text={`<task-notification><task-id>${d.taskId}</task-id><tool-use-id>${d.toolUseId}</tool-use-id><output-file>${d.outputFile}</output-file><status>${d.status}</status><summary>${d.summary}</summary></task-notification>`} />
+          }
+          if (seg.kind === 'image-ref') return <MsgImgCard key={i} path={seg.path} />
+          if (seg.kind === 'file-ref') return <MsgFileCard key={i} path={seg.path} ext={seg.path.split('.').pop() ?? ''} />
+          return null
         })}
       </>
     )
@@ -199,7 +194,7 @@ function UserMsgBody({ text }: { text: string }) {
 
   // 无特殊标签 → 原有逻辑：清理残余 XML + 解析文件路径
   const clean = cut.includes('<') ? cut.replace(/<[^>]+>/g, '').trim() : cut
-  const parts = parseFilePaths(clean)
+  const parts = useMemo(() => parseFilePaths(clean), [clean])
   const hasFileParts = parts.some(p => p.kind !== 'text')
 
   if (!hasFileParts) {
