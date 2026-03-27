@@ -526,11 +526,12 @@ function stripDomContext(text: string): string {
   return text.slice(0, Math.min(...candidates)).trim()
 }
 
-/** 将 messages 分段：user 气泡 / assistant steps / notification 交替出现 */
+/** 将 messages 分段：user 气泡 / assistant steps / notification / local-command 交替出现 */
 type Segment =
   | { type: 'user'; text: string; ts: string | null }
   | { type: 'assistant'; steps: TimelineStep[] }
   | { type: 'notification'; status: string; summary: string; taskId: string; ts: string | null }
+  | { type: 'local-command'; command: string; stdout: string; ts: string | null }
 
 /** 从用户消息中提取 task-notification，返回 { notifications, remainingText } */
 function extractTaskNotifications(text: string) {
