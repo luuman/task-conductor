@@ -783,6 +783,7 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
   const status = parts[0] || ''
   const events = parts[1] || ''
   const time = parts[2] || ''
+  const project = parts[3] || ''
   const dotBg = status === 'active' ? '#56d364' : status === 'idle' ? '#e3b341' : '#8b949e'
 
   return (
@@ -790,6 +791,9 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
       <span style={{ width: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotBg }} />
       </span>
+      {project && (
+        <span style={{ flexShrink: 0, fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'var(--tc-background-tertiary)', color: 'var(--tc-foreground-secondary)', marginRight: 4, maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project}</span>
+      )}
       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11, fontWeight: 500 }}>{option.label}</span>
       <span style={{ width: 30, flexShrink: 0, textAlign: 'right', fontSize: 10, fontFamily: "'Geist Mono', monospace", color: 'var(--tc-foreground-secondary)' }}>{events}</span>
       <span style={{ width: 50, flexShrink: 0, textAlign: 'right', fontSize: 9, color: 'var(--tc-foreground-secondary)' }}>{time}</span>
