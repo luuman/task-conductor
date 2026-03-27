@@ -11,6 +11,7 @@ export interface UseSessionDataOptions {
   autoRefreshInterval?: number   // session list poll interval (default 5000)
   transcriptPollInterval?: number // fallback transcript poll (default 10000)
   autoLoadAll?: boolean          // auto-load all remaining messages after initial fetch (default true)
+  initialLimit?: number          // number of messages to fetch on initial load (default 50)
 }
 
 export interface QuestionItem {
