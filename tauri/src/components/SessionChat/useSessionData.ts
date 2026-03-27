@@ -64,6 +64,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     filterByCwd,
     autoRefreshInterval = 5000,
     transcriptPollInterval = 10000,
+    autoLoadAll = true,
   } = options
 
   // Session list
