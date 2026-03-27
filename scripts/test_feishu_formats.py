@@ -361,7 +361,11 @@ async def main():
         print("❌ 请设置 FEISHU_APP_ID 和 FEISHU_APP_SECRET")
         sys.exit(1)
 
-    async with httpx.AsyncClient(timeout=15) as client:
+    # 跳过 socks 代理，使用 HTTP 代理
+    proxy = os.getenv("https_proxy") or os.getenv("http_proxy") or None
+    if proxy and proxy.startswith("socks"):
+        proxy = None
+    async with httpx.AsyncClient(timeout=15, proxy=proxy) as client:
         # 1. 创建测试群
         print("\n📋 创建测试群...")
         ts = time.strftime("%H:%M")
