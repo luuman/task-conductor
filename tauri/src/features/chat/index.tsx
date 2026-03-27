@@ -804,7 +804,7 @@ type VItem =
   | { kind: 'user'; key: string; qi: number; question: UserQuestion }
   | { kind: 'steps'; key: string; steps: TimelineStep[] }
 
-export default function ChatReportPage() {
+export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const [style] = useState<StyleKey>(getDefaultStyle)
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
@@ -815,23 +815,24 @@ export default function ChatReportPage() {
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const { messages: chatMessages, currentReply } = useChatStore()
 
-  // 获取当前项目 cwd
+  // 获取当前项目 cwd（global 模式不过滤）
   const [projectCwd, setProjectCwd] = useState<string | undefined>()
   useEffect(() => {
+    if (global) return
     const pid = localStorage.getItem('tc_active_project')
     if (!pid) return
     api.getProjects().then(list => {
       const proj = list.find(p => String(p.id) === pid)
       if (proj?.repo_url) setProjectCwd(proj.repo_url)
     }).catch(() => {})
-  }, [])
+  }, [global])
 
   // 使用 useSessionData 统一管理分页加载 + WS 实时更新
   const {
     sessions, selectedId, selectSession,
     transcript, transcriptLoading: loading,
     loadMore, hasMore,
-  } = useSessionData({ filterByCwd: projectCwd })
+  } = useSessionData({ filterByCwd: global ? undefined : projectCwd })
 
   // 自动选中第一个会话
   useEffect(() => {
