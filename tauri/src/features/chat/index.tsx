@@ -911,13 +911,6 @@ export default function ChatReportPage() {
           renderItem={SessionItem}
           style={{ flex: 1, minWidth: 0 }}
         />
-        <span className={s.topLabel} style={{ marginLeft: 'auto' }}>样式</span>
-        <Select
-          options={STYLES.map(st => ({ value: st.key, label: st.label }))}
-          value={style}
-          onChange={v => { setStyle(v as StyleKey); localStorage.setItem(LS_KEY, v) }}
-          style={{ minWidth: 140 }}
-        />
       </div>
 
       <SelectionToolbar containerRef={mainAreaRef} />
