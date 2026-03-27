@@ -1014,7 +1014,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
             </div>
           )}
         </div>
-        <MetaSidebar session={selectedSession} steps={steps} questions={questions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} onScrollToQuestion={scrollToQuestion} />
+        <MetaSidebar session={selectedSession} steps={steps} questions={questions} allQuestions={allQuestions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} onScrollToQuestion={scrollToQuestion} />
       </div>
     </div>
   )
