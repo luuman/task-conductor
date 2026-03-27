@@ -122,19 +122,17 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     [sessions, selectedId],
   )
 
-  // Refresh transcript (legacy — kept for backward compat, delegates to full reload)
+  // Refresh transcript — load all messages (no limit)
   const refreshTranscript = useCallback((sid: string) => {
-    api.getTranscript(sid, { limit: 50 })
+    api.getTranscript(sid, { limit: 10000, offset: 0 })
       .then(r => {
         const t = r.total ?? r.messages.length
-        const hm = r.has_more ?? false
-        const from = Math.max(0, t - r.messages.length)
         transcriptCache.current.set(sid, {
           messages: r.messages,
           file_found: r.file_found,
           total: t,
-          has_more: hm,
-          loadedFrom: from,
+          has_more: false,
+          loadedFrom: 0,
         })
         // Only update if still selected
         setSelectedId(prev => {
@@ -143,8 +141,8 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
             setFileFound(r.file_found)
             setTotal(t)
             totalRef.current = t
-            setLoadedFrom(from)
-            setHasMore(hm)
+            setLoadedFrom(0)
+            setHasMore(false)
           }
           return prev
         })
