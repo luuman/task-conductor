@@ -790,7 +790,7 @@ type VItem =
   | { kind: 'steps'; key: string; steps: TimelineStep[] }
 
 export default function ChatReportPage() {
-  const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
+  const [style] = useState<StyleKey>(getDefaultStyle)
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
