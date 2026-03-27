@@ -555,10 +555,33 @@ function stripDomContext(text: string): string {
   return text.slice(0, Math.min(...candidates)).trim()
 }
 
-/** 将 messages 分段：user 气泡 / assistant steps 块交替出现 */
+/** 将 messages 分段：user 气泡 / assistant steps / notification 交替出现 */
 type Segment =
   | { type: 'user'; text: string; ts: string | null }
   | { type: 'assistant'; steps: TimelineStep[] }
+  | { type: 'notification'; status: string; summary: string; taskId: string; ts: string | null }
+
+/** 从用户消息中提取 task-notification，返回 { notifications, remainingText } */
+function extractTaskNotifications(text: string) {
+  const notifications: { status: string; summary: string; taskId: string }[] = []
+  const re = /<task-notification>([\s\S]*?)<\/task-notification>/g
+  const cleaned = text.replace(re, (_, xml: string) => {
+    const extractTag = (t: string) => new RegExp(`<${t}>([\\s\\S]*?)</${t}>`).exec(xml)?.[1]?.trim() ?? ''
+    notifications.push({
+      status: extractTag('status'),
+      summary: extractTag('summary'),
+      taskId: extractTag('task-id'),
+    })
+    return ''
+  })
+  // 清理 "Read the output file..." 这类自动追加的提示文本
+  const remaining = cleaned
+    .replace(/Read the output file to retrieve the result:\s*\S+/g, '')
+    .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .trim()
+  return { notifications, remainingText: remaining }
+}
 
 function splitSegments(messages: TranscriptMessage[]): Segment[] {
   const segs: Segment[] = []
@@ -573,8 +596,19 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
     if (msg.role === 'user') {
       flushBuf()
       const rawText = msg.blocks.find(b => b.type === 'text')?.text?.trim()
-      const text = rawText ? stripDomContext(rawText) : rawText
-      if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
+      if (!rawText) continue
+      const text = stripDomContext(rawText)
+
+      // 检测 task-notification XML
+      if (/<task-notification>/.test(text)) {
+        const { notifications, remainingText } = extractTaskNotifications(text)
+        for (const n of notifications) {
+          segs.push({ type: 'notification', status: n.status, summary: n.summary, taskId: n.taskId, ts: msg.ts ?? null })
+        }
+        if (remainingText) segs.push({ type: 'user', text: remainingText, ts: msg.ts ?? null })
+      } else {
+        if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
+      }
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
       const { steps } = parseTimelineWithQuestions([msg])
