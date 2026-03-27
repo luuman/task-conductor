@@ -146,6 +146,17 @@ class ClaudeInstance(Base):
     task: Mapped["Task"] = relationship(back_populates="instances")
 
 
+class SessionMessage(Base):
+    """会话对话消息（统一存储 Chat SDK / Hook / CLI 的对话内容）"""
+    __tablename__ = "session_messages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(128), index=True)  # Claude session_id
+    role: Mapped[str] = mapped_column(String(20))  # "user" | "assistant"
+    blocks_json: Mapped[str] = mapped_column(Text)  # JSON: TranscriptBlock[]
+    model: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class ConversationNote(Base):
     """用户对 Claude 会话添加的元数据（别名/标签/备注/关联任务）"""
     __tablename__ = "conversation_notes"
