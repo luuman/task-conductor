@@ -508,12 +508,12 @@ function MetaSidebar({ session, steps, questions, activeQ, codeExpanded, onToggl
 
       {/* 操作统计 */}
       <div className={s.sbSection}>
-        <div className={s.sbTitle}>操作统计</div>
-        <div className={s.sbRow}><span className={s.sbKey}>工具调用</span><span className={s.sbVal}>{toolSteps.length}</span></div>
-        <div className={s.sbRow}><span className={s.sbKey}>文本输出</span><span className={s.sbVal}>{steps.length - toolSteps.length} 段</span></div>
+        <div className={s.sbTitle}>{t('chat_sidebar.op_stats')}</div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.tool_calls')}</span><span className={s.sbVal}>{toolSteps.length}</span></div>
+        <div className={s.sbRow}><span className={s.sbKey}>{t('chat_sidebar.text_output')}</span><span className={s.sbVal}>{steps.length - toolSteps.length} {t('chat_sidebar.text_output_unit')}</span></div>
         {cats.map(([cat, count]) => (
           <div key={cat} className={s.sbRow}>
-            <span className={s.sbKey}>{CAT_LABEL_MAP[cat] || cat}</span>
+            <span className={s.sbKey}>{i18nCatMap[cat] || cat}</span>
             <span className={s.sbVal} style={{ color: dotColor(cat as TimelineStep['category']) }}>{count}</span>
           </div>
         ))}
