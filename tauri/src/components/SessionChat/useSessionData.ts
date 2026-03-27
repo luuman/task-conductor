@@ -10,6 +10,7 @@ export interface UseSessionDataOptions {
   filterByCwd?: string           // filter sessions by project path
   autoRefreshInterval?: number   // session list poll interval (default 5000)
   transcriptPollInterval?: number // fallback transcript poll (default 10000)
+  autoLoadAll?: boolean          // auto-load all remaining messages after initial fetch (default true)
 }
 
 export interface QuestionItem {
