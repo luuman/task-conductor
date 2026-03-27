@@ -62,6 +62,7 @@ export function AppRouter() {
             <Route path="/admin/sessions"     element={<AdminSessions />} />
             <Route path="/admin/mindmap"      element={<AdminMindMap />} />
             <Route path="/admin/server"      element={<AdminServerMonitor />} />
+            <Route path="/admin/chat"        element={<AdminChat />} />
             {DevToolsPage && <Route path="/admin/dev" element={<DevToolsPage />} />}
           </Route>
 
