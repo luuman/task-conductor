@@ -201,7 +201,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
       .then(r => setAllQuestions(r.questions))
       .catch(() => setAllQuestions([]))
 
-    // Fetch latest (last 50 messages)
+    // Fetch latest messages first for quick display, then auto-load rest
     api.getTranscript(id, { limit: 50 })
       .then(r => {
         const t = r.total ?? r.messages.length
@@ -221,6 +221,26 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
         setLoadedFrom(from)
         setHasMore(hm)
         setTranscriptLoading(false)
+
+        // Auto-load remaining older messages if there are more
+        if (hm && from > 0) {
+          api.getTranscript(id, { limit: from, offset: 0 })
+            .then(rest => {
+              if (selectedIdRef.current !== id) return // switched away
+              const allMessages = [...rest.messages, ...r.messages]
+              transcriptCache.current.set(id, {
+                messages: allMessages,
+                file_found: r.file_found,
+                total: t,
+                has_more: false,
+                loadedFrom: 0,
+              })
+              setTranscript(allMessages)
+              setLoadedFrom(0)
+              setHasMore(false)
+            })
+            .catch(() => {})
+        }
       })
       .catch(() => {
         setTranscript([])
