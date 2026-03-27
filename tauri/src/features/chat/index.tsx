@@ -722,11 +722,7 @@ export default function ChatReportPage() {
   const virtuosoRef = useRef<VirtuosoHandle>(null)
 
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
-  const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
-
-  const makeAiMsg = (role: 'user' | 'assistant', text: string): TranscriptMessage => ({
-    role, ts: new Date().toISOString(), blocks: [{ type: 'text', text }],
-  })
+  const { messages: chatMessages, currentReply } = useChatStore()
 
   // 获取当前项目 cwd
   const [projectCwd, setProjectCwd] = useState<string | undefined>()
