@@ -852,8 +852,10 @@
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  margin-top: 8px;
   background: rgba(0, 0, 0, 0.15);
+}
+.diffWrap:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .diffHeader {
@@ -1797,11 +1799,14 @@
 
 /* ── Collapsible code block ── */
 .codeWrap {
-  margin: 6px 0;
+  width: stretch;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid var(--tc-border);
   background: var(--tc-panel-bg);
+}
+.codeWrap:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .codeHeader {
