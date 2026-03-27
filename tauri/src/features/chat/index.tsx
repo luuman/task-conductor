@@ -810,6 +810,7 @@ type VItem =
   | { kind: 'steps'; key: string; steps: TimelineStep[] }
 
 export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
+  const { t } = useTranslation()
   const [style] = useState<StyleKey>(getDefaultStyle)
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
