@@ -457,22 +457,23 @@ export function RichTextBlock({ text }: { text: string }) {
 
 // ── Copy button ─────────────────────────────────────────────
 
-export function CopyButton({ text, className }: { text: string; className?: string }) {
+export function CopyButton({ text, getText, className }: { text?: string; getText?: () => string; className?: string }) {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
+    const content = getText ? getText() : (text ?? '')
     const finish = () => { setCopied(true); setTimeout(() => setCopied(false), 1500) }
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(finish).catch(() => {
+      navigator.clipboard.writeText(content).then(finish).catch(() => {
         const el = document.createElement('textarea')
-        el.value = text; document.body.appendChild(el); el.select()
+        el.value = content; document.body.appendChild(el); el.select()
         document.execCommand('copy'); document.body.removeChild(el); finish()
       })
     } else {
       const el = document.createElement('textarea')
-      el.value = text; document.body.appendChild(el); el.select()
+      el.value = content; document.body.appendChild(el); el.select()
       document.execCommand('copy'); document.body.removeChild(el); finish()
     }
-  }, [text])
+  }, [text, getText])
   return (
     <button onClick={copy} className={`${styles.copyBtn} ${className ?? ''}`} title="Copy">
       {copied ? '\u2713' : (
