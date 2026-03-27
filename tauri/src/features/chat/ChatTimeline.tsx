@@ -591,8 +591,16 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
       if (!rawText) continue
       const text = stripDomContext(rawText)
 
+      // 检测 local-command-caveat（本地命令，如 /model、/help）
+      const localCmd = extractLocalCommand(text)
+      if (localCmd) {
+        if (localCmd.command || localCmd.stdout) {
+          segs.push({ type: 'local-command', command: localCmd.command, stdout: localCmd.stdout, ts: msg.ts ?? null })
+        }
+        if (localCmd.remainingText) segs.push({ type: 'user', text: localCmd.remainingText, ts: msg.ts ?? null })
+      }
       // 检测 task-notification XML
-      if (/<task-notification>/.test(text)) {
+      else if (/<task-notification>/.test(text)) {
         const { notifications, remainingText } = extractTaskNotifications(text)
         for (const n of notifications) {
           segs.push({ type: 'notification', status: n.status, summary: n.summary, taskId: n.taskId, ts: msg.ts ?? null })
