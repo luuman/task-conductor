@@ -671,6 +671,55 @@ function stripDomContext(text: string): string {
   return text.slice(0, Math.min(...candidates)).trim()
 }
 
+/** 从原始消息文本中解析 DOM context 块 */
+type ParsedDomChip = { index: number; selector: string; path: string; text: string }
+
+function parseDomContextChips(raw: string): ParsedDomChip[] {
+  const results: ParsedDomChip[] = []
+  const re = /【元素 #(\d+)】(\S+)/g
+  let match: RegExpExecArray | null
+  while ((match = re.exec(raw)) !== null) {
+    const idx = parseInt(match[1], 10)
+    const selector = match[2]
+    // 从匹配位置向后提取路径和文本
+    const blockStart = match.index
+    const nextBlock = raw.indexOf('【元素 #', blockStart + 1)
+    const block = raw.slice(blockStart, nextBlock === -1 ? undefined : nextBlock)
+    const pathMatch = block.match(/路径:\s*(.+)/)
+    const textMatch = block.match(/文本:\s*"(.+?)"/)
+    results.push({
+      index: idx,
+      selector,
+      path: pathMatch?.[1]?.trim() || '',
+      text: textMatch?.[1]?.trim() || '',
+    })
+  }
+  return results
+}
+
+/** 消息中内联展示 DOM context chips */
+function InlineDomChips({ raw }: { raw: string }) {
+  const chips = parseDomContextChips(raw)
+  if (chips.length === 0) return null
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+      {chips.map((chip) => {
+        // 从 selector 中提取简短的标签（最后一个 tag.class）
+        const label = chip.path
+          ? chip.path.split(' > ').pop() || chip.selector
+          : chip.selector
+        return (
+          <span key={chip.index} className={s.pDomChip} title={`${chip.selector}\n${chip.path}\n${chip.text}`}>
+            <span className={s.pDomChipIndex}>{chip.index}</span>
+            <span className={s.pDomChipLabel}>{label}</span>
+            {chip.text && <span className={s.pDomChipText}>"{chip.text.slice(0, 30)}{chip.text.length > 30 ? '…' : ''}"</span>}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── 时间格式化（相对时间） ──
 function relativeTime(iso: string): string {
   if (!iso) return ''
