@@ -4,6 +4,7 @@ import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, McpServer } from '../../../../lib/api/types'
 import { SectionHeader } from '../shared'
 import { EmptyState } from '../../../../ui/empty-state'
+import { IconLink } from '../../../../ui/icon'
 import styles from '../claude-config.module.css'
 
 interface SectionProps {
