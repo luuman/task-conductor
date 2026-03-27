@@ -364,6 +364,14 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
   const { t } = useTranslation()
   const qNavRef = useRef<HTMLDivElement>(null)
 
+  // Use allQuestions (from /questions API, full list) if available, else fall back to loaded questions
+  const navQuestions = useMemo(() => {
+    if (allQuestions && allQuestions.length > 0) {
+      return allQuestions.map((q, i) => ({ id: `aq${i}`, text: q.text, ts: null, stepIndex: 0 }))
+    }
+    return questions
+  }, [allQuestions, questions])
+
   // 联动：activeQ 变化时自动滚动导航列表
   useEffect(() => {
     const container = qNavRef.current
