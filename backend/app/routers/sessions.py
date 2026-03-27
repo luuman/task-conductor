@@ -20,6 +20,9 @@ def get_db():
 import re as _re
 
 _CMD_NAME_RE = _re.compile(r'<command-name>([\s\S]*?)</command-name>')
+_CMD_ARGS_RE = _re.compile(r'<command-args>([\s\S]*?)</command-args>')
+_CMD_STDOUT_RE = _re.compile(r'<local-command-stdout>([\s\S]*?)</local-command-stdout>')
+_ANSI_RE = _re.compile(r'\x1b\[\d+m')
 
 _SYSTEM_XML_PATTERNS = [
     _re.compile(r'<local-command-caveat>[\s\S]*?</local-command-caveat>'),
@@ -35,15 +38,30 @@ _SYSTEM_XML_PATTERNS = [
 
 
 def _clean_system_xml(text: str) -> str:
-    """清理 Claude Code 注入的系统 XML 标签，返回纯用户文本。"""
-    cmd_name = ""
-    m = _CMD_NAME_RE.search(text)
-    if m:
-        cmd_name = m.group(1).strip()
+    """清理 Claude Code 注入的系统 XML 标签，将 command 标签转换为可读文本。"""
+    # 提取 command 信息
+    cmd_name = (m.group(1).strip() if (m := _CMD_NAME_RE.search(text)) else "")
+    cmd_args = (m.group(1).strip() if (m := _CMD_ARGS_RE.search(text)) else "")
+    cmd_stdout = (_ANSI_RE.sub("", m.group(1)).strip() if (m := _CMD_STDOUT_RE.search(text)) else "")
+
+    # 组装命令可读文本
+    cmd_readable = ""
+    if cmd_name:
+        cmd_readable = f"{cmd_name} {cmd_args}".strip() if cmd_args else cmd_name
+        if cmd_stdout:
+            cmd_readable += f"\n→ {cmd_stdout}"
+    elif cmd_stdout:
+        cmd_readable = f"→ {cmd_stdout}"
+
+    # 清除标签
     for pat in _SYSTEM_XML_PATTERNS:
         text = pat.sub('', text)
     cleaned = text.strip()
-    return cleaned or cmd_name
+
+    # 组合
+    if cmd_readable and cleaned:
+        return f"{cmd_readable}\n{cleaned}"
+    return cmd_readable or cleaned
 
 
 def _get_session_summary(session_id: str, cwd: str, db=None) -> Optional[str]:
