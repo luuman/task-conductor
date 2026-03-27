@@ -4,6 +4,7 @@ import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, SkillDetail } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
 import { EmptyState } from '../../../../ui/empty-state'
+import { IconZap } from '../../../../ui/icon'
 import { SectionHeader, DetailPanel } from '../shared'
 import styles from '../claude-config.module.css'
 
