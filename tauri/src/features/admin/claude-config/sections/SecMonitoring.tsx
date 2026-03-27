@@ -4,6 +4,7 @@ import { api } from '../../../../lib/api'
 import type { ClaudeConfig, ClaudeOverview, ProjectDetails } from '../../../../lib/api/types'
 import { SectionHeader, ActivityChart } from '../shared'
 import { EmptyState } from '../../../../ui/empty-state'
+import { IconFolder } from '../../../../ui/icon'
 import styles from '../claude-config.module.css'
 
 interface SectionProps {
