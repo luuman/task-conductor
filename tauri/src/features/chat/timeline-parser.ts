@@ -83,7 +83,10 @@ export interface ParsedTimeline {
 
 /** 清理用户消息中 Claude Code 自动注入的系统 XML 标签，返回纯用户文本 */
 export function cleanSystemXml(text: string): string {
-  return text
+  // 提取 command-name 内容保留为可读文本（如 /init → 显示为 /init）
+  const cmdName = text.match(/<command-name>([\s\S]*?)<\/command-name>/)?.[1]?.trim() || ''
+
+  const cleaned = text
     // 完整 XML 块（含内容）
     .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
     .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
@@ -97,6 +100,9 @@ export function cleanSystemXml(text: string): string {
     // 残余未匹配的 XML 标签
     .replace(/<[^>]+>/g, '')
     .trim()
+
+  // 如果清理后为空但有命令名，用命令名代替
+  return cleaned || cmdName
 }
 
 export function parseTimelineWithQuestions(messages: TranscriptMessage[]): ParsedTimeline {
