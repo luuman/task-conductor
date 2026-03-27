@@ -171,7 +171,7 @@ export function SecMcp({ showToast }: SectionProps) {
       {/* Server list */}
       {servers.length === 0 ? (
         <EmptyState
-          icon="\uD83D\uDD0C"
+          icon={<IconLink size={24} />}
           title={t('claudeConfig.mcp.noServers')}
           action={{ label: t('claudeConfig.mcp.add'), onClick: () => setShowForm(true) }}
         />
