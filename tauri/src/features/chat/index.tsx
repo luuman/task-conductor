@@ -413,11 +413,11 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
     <div className={s.sidebar}>
       
       {/* 问题导航 */}
-      {questions.length > 0 && (
+      {(navQuestions.length > 0) && (
         <>
           <div className={s.sbSection}>
             <div className={s.sbTitle} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>问题导航 ({questions.length})</span>
+              <span>{t('chat_sidebar.question_nav')} ({navQuestions.length})</span>
               <span style={{ flex: 1 }} />
               <span className={s.expandToggleWrap}>
                 <button
@@ -430,9 +430,9 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
               </span>
             </div>
             <div className={s.qNav} ref={qNavRef}>
-              {questions.map((q, i) => (
+              {navQuestions.map((q, i) => (
                 <a
-                  key={q.id}
+                  key={`nq-${i}`}
                   className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}
                   href="#"
                   onClick={e => {
