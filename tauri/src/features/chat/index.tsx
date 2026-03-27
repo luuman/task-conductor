@@ -900,13 +900,33 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     }
   }, [questionVirtuosoIndices])
 
-  // 问题导航跳转
+  // 问题导航跳转（如果数据未全部加载则先 loadAll）
+  const pendingScrollQ = useRef<number | null>(null)
   const scrollToQuestion = useCallback((qi: number) => {
+    if (hasMore) {
+      pendingScrollQ.current = qi
+      loadAll()
+      return
+    }
     const vIdx = questionVirtuosoIndices[qi]
     if (vIdx != null) {
       virtuosoRef.current?.scrollToIndex({ index: vIdx, align: 'start', behavior: 'smooth' })
     }
-  }, [questionVirtuosoIndices])
+  }, [questionVirtuosoIndices, hasMore, loadAll])
+
+  // loadAll 完成后执行待定的跳转
+  useEffect(() => {
+    if (pendingScrollQ.current != null && !hasMore && questionVirtuosoIndices.length > 0) {
+      const qi = pendingScrollQ.current
+      pendingScrollQ.current = null
+      const vIdx = questionVirtuosoIndices[qi]
+      if (vIdx != null) {
+        setTimeout(() => {
+          virtuosoRef.current?.scrollToIndex({ index: vIdx, align: 'start', behavior: 'smooth' })
+        }, 100)
+      }
+    }
+  }, [hasMore, questionVirtuosoIndices])
 
   // 新对话消息到达时滚动到底部
   useEffect(() => {
