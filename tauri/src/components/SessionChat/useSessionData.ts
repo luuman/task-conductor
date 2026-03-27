@@ -211,7 +211,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
       .catch(() => setAllQuestions([]))
 
     // Fetch latest messages first for quick display, then auto-load rest
-    api.getTranscript(id, { limit: 50 })
+    api.getTranscript(id, { limit: initialLimit })
       .then(r => {
         const t = r.total ?? r.messages.length
         const hm = r.has_more ?? false
