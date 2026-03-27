@@ -5,6 +5,7 @@ import type { ClaudeConfig, ClaudeOverview } from '../../../../lib/api/types'
 import { Toggle } from '../../../../ui/toggle'
 import { SectionHeader } from '../shared'
 import { EmptyState } from '../../../../ui/empty-state'
+import { IconBlocks } from '../../../../ui/icon'
 import styles from '../claude-config.module.css'
 
 interface SectionProps {
