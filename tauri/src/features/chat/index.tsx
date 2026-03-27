@@ -805,48 +805,10 @@ export default function ChatReportPage() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages, currentReply])
 
-  const chatDisplayMessages = currentReply
-    ? [...chatMessages, makeAiMsg('assistant', currentReply)]
-    : chatMessages
-
   const Renderer = RENDERERS[style]
 
-  // Virtuoso Footer: AI 对话区
-  const VirtuosoFooter = useCallback(() => {
-    if (chatDisplayMessages.length === 0) return null
-    return (
-      <div className={s.chatSection}>
-        <div className={s.chatSectionDivider}>
-          <span>以下为 AI 对话</span>
-        </div>
-        {chatDisplayMessages.map((msg, i) => {
-          const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
-          const text = msg.role === 'user' ? stripDomContext(raw) : raw
-          if (!text) return null
-          return (
-            <div key={i} className={msg.role === 'user' ? s.turnSection : undefined}>
-              {msg.role === 'user' ? (
-                <UserMsgRow rawText={raw}>
-                  <ImageAwareRichText text={stripDomContext(raw)} />
-                </UserMsgRow>
-              ) : (
-                <div className={s.chatAiBlock}>
-                  <div className={s.richText}><RichTextBlock text={text} /></div>
-                </div>
-              )}
-            </div>
-          )
-        })}
-        {isGenerating && !currentReply && (
-          <div className={s.pThinking}>
-            <span className={s.pThinkingDot} />
-            <span>思考中...</span>
-          </div>
-        )}
-        <div ref={chatEndRef} />
-      </div>
-    )
-  }, [chatDisplayMessages, isGenerating, currentReply])
+  // Virtuoso Footer: 使用独立组件，直接从 store 订阅更新
+  const VirtuosoFooter = useCallback(() => <ChatFooter chatEndRef={chatEndRef} />, [chatEndRef])
 
   return (
     <div className={s.page}>
