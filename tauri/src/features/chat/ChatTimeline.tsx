@@ -145,8 +145,61 @@ function MsgFileCard({ path, ext }: { path: string; ext: string }) {
 /** 用户消息正文：文字 + 内嵌文件/图片卡片 */
 function UserMsgBody({ text }: { text: string }) {
   const cut = text.indexOf('--- 问题元素') !== -1 ? text.slice(0, text.indexOf('--- 问题元素')).trim() : text
+
+  // 先用 parseTextSegments 提取 task-notification / system-reminder / 图片文件引用
+  const segments = useMemo(() => parseTextSegments(cut), [cut])
+  const hasSpecial = segments.some(seg => seg.kind !== 'text')
+
+  if (hasSpecial) {
+    // 有特殊 XML 标签 → 使用 RichTextBlock 渲染（包含 TaskNotificationCard 等）
+    // 但需要把非特殊的纯文本段中的残余 XML 标签清理掉
+    const cleanedText = segments.map(seg => {
+      if (seg.kind === 'text') {
+        const stripped = seg.content.includes('<') ? seg.content.replace(/<[^>]+>/g, '').trim() : seg.content
+        return stripped
+      }
+      return null
+    }).filter(Boolean)
+
+    return (
+      <>
+        {segments.map((seg, i) => {
+          if (seg.kind === 'text') {
+            const stripped = seg.content.includes('<') ? seg.content.replace(/<[^>]+>/g, '').trim() : seg.content
+            if (!stripped) return null
+            const parts = parseFilePaths(stripped)
+            const hasFiles = parts.some(p => p.kind !== 'text')
+            if (!hasFiles) return <div key={i} className={s.richText}>{stripped}</div>
+            return (
+              <React.Fragment key={i}>
+                {parts.map((p, j) =>
+                  p.kind === 'text'
+                    ? p.content.trim() ? <div key={j} className={s.richText}>{p.content}</div> : null
+                    : p.kind === 'image'
+                      ? <MsgImgCard key={j} path={p.path} />
+                      : <MsgFileCard key={j} path={p.path} ext={p.ext} />
+                )}
+              </React.Fragment>
+            )
+          }
+          // 非文本段走 RichTextBlock 的对应组件
+          return <RichTextBlock key={i} text={
+            seg.kind === 'task-notification'
+              ? `<task-notification><task-id>${seg.data.taskId}</task-id><tool-use-id>${seg.data.toolUseId}</tool-use-id><output-file>${seg.data.outputFile}</output-file><status>${seg.data.status}</status><summary>${seg.data.summary}</summary></task-notification>`
+              : seg.kind === 'system-reminder'
+                ? `<system-reminder>${seg.data.content}</system-reminder>`
+                : seg.kind === 'image-ref'
+                  ? `[Image: ${seg.path}]`
+                  : `[File: ${seg.path}]`
+          } />
+        })}
+      </>
+    )
+  }
+
+  // 无特殊标签 → 原有逻辑：清理残余 XML + 解析文件路径
   const clean = cut.includes('<') ? cut.replace(/<[^>]+>/g, '').trim() : cut
-  const parts = useMemo(() => parseFilePaths(clean), [clean])
+  const parts = parseFilePaths(clean)
   const hasFileParts = parts.some(p => p.kind !== 'text')
 
   if (!hasFileParts) {
