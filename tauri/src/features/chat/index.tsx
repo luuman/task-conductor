@@ -943,9 +943,9 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
             <CodeExpandCtx.Provider value={codeExpanded}>
               {hasMore && total > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0', fontSize: 11, opacity: 0.6, gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                  <span>{transcript.length} / {total}</span>
+                  <span>{t('chat_sidebar.loaded_count', { loaded: transcript.length, total })}</span>
                   <button onClick={loadAll} style={{ background: 'var(--tc-border-active)', border: 'none', borderRadius: 4, color: 'var(--tc-text-primary)', padding: '2px 8px', cursor: 'pointer', fontSize: 11 }}>
-                    Load All
+                    {t('chat_sidebar.load_all')}
                   </button>
                 </div>
               )}
