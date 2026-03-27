@@ -15,7 +15,7 @@ import {
 } from '../../ui/icon'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useTranslation } from 'react-i18next'
-import { useSessionData } from '../../components/SessionChat/useSessionData'
+import { useSessionData, type QuestionItem } from '../../components/SessionChat/useSessionData'
 import { useAppStore } from '../../lib/store/app'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
