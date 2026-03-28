@@ -399,6 +399,6 @@ def get_claude_usage(db: Session = Depends(get_db)):
         },
         "performance": {
             **metrics_store.summary(),
-            "active_processes": len(ClaudePool()._processes),
+            "active_processes": len(ClaudePool()._clients),
         },
     }
