@@ -112,18 +112,23 @@ async def lifespan(app: FastAPI):
         pass  # sync 模块尚未创建时忽略
 
     # APScheduler：每日零点触发 GitHub 备份 Job
-    from apscheduler.schedulers.asyncio import AsyncIOScheduler
-    from .sync.job import run_sync_job as _run_sync_job
-    _scheduler = AsyncIOScheduler()
-    _scheduler.add_job(_run_sync_job, "cron", hour=0, minute=0, id="github_sync")
-    _scheduler.start()
+    _scheduler = None
+    try:
+        from apscheduler.schedulers.asyncio import AsyncIOScheduler
+        from .sync.job import run_sync_job as _run_sync_job
+        _scheduler = AsyncIOScheduler()
+        _scheduler.add_job(_run_sync_job, "cron", hour=0, minute=0, id="github_sync")
+        _scheduler.start()
+    except (ImportError, Exception) as e:
+        print(f"  [Sync] APScheduler 初始化失败（跳过）: {e}")
 
     # 飞书初始化
     from .feishu.client import feishu_client as _fc
     if _fc.enabled:
         asyncio.create_task(_init_feishu())
     yield
-    _scheduler.shutdown(wait=False)
+    if _scheduler is not None:
+        _scheduler.shutdown(wait=False)
     stop_tunnel()
     await _send_shutdown_card()
 

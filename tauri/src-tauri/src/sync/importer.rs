@@ -56,9 +56,18 @@ pub fn upsert_session(
 ) -> Result<()> {
     let synced_at = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT OR REPLACE INTO archived_sessions
+        "INSERT INTO archived_sessions
          (session_id, summary, cwd, started_at, last_event_at, event_count, enc_path, transcript, synced_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+         ON CONFLICT(session_id) DO UPDATE SET
+           summary       = excluded.summary,
+           cwd           = excluded.cwd,
+           started_at    = excluded.started_at,
+           last_event_at = excluded.last_event_at,
+           event_count   = excluded.event_count,
+           enc_path      = excluded.enc_path,
+           transcript    = excluded.transcript,
+           synced_at     = excluded.synced_at",
         params![session_id, summary, cwd, started_at, last_event_at, event_count, enc_path, transcript, synced_at],
     )?;
     Ok(())
