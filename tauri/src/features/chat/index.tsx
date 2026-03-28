@@ -285,7 +285,7 @@ export function StyleD({ steps }: { steps: TimelineStep[] }) {
 }
 
 
-function StyleG({ steps }: { steps: TimelineStep[] }) {
+export function StyleG({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step) => (
