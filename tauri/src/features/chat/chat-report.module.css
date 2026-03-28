@@ -1003,7 +1003,7 @@
 
 /* 文本内容 */
 .richText {
-  font-size: 12px; color: var(--tc-foreground-secondary); line-height: 1.8;
+  font-size: 12px; color: var(--tc-foreground-secondary); line-height: 1.5;
 }
 .richText strong { color: var(--tc-foreground); font-weight: 600; }
 .richText code {
