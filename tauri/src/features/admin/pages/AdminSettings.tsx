@@ -452,15 +452,15 @@ export default function AdminSettings() {
               min={100} max={5000} step={100}
             />
             <div className={styles.fieldGroup}>
-              <span className={styles.fieldLabel}>会话时间线样式</span>
+              <span className={styles.fieldLabel}>{t('settings.ui.chatStyle')}</span>
               <div className={styles.pillGroup}>
-                {CHAT_STYLES.map(st => (
+                {CHAT_STYLE_KEYS.map(key => (
                   <button
-                    key={st.key}
-                    className={chatStyle === st.key ? styles.pillActive : styles.pill}
-                    onClick={() => { setChatStyle(st.key); localStorage.setItem(CHAT_STYLE_LS_KEY, st.key) }}
+                    key={key}
+                    className={chatStyle === key ? styles.pillActive : styles.pill}
+                    onClick={() => { setChatStyle(key); localStorage.setItem(CHAT_STYLE_LS_KEY, key) }}
                   >
-                    {st.label}
+                    {t(`settings.ui.chatStyles.${key}`)}
                   </button>
                 ))}
               </div>
