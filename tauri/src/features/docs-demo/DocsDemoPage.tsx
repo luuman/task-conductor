@@ -767,6 +767,200 @@ function ViewTriptych() {
 }
 
 // ─────────────────────────────────────────────
+// View 5: Grouped — 左侧类型分组 + 右侧卡片 + 抽屉
+// ─────────────────────────────────────────────
+
+interface DocGroup {
+  id: string
+  label: string
+  icon: string
+  desc: string
+  color: string
+  types: DocItem['type'][]
+}
+
+const DOC_GROUPS: DocGroup[] = [
+  { id: 'all',  label: '全部文档', icon: '📁', desc: '所有类型',    color: '#64748b', types: ['prd','tech','api','ui','plan','test'] },
+  { id: 'prd',  label: 'PRD 类',   icon: '📋', desc: '需求与规格',  color: '#22d3ee', types: ['prd'] },
+  { id: 'tech', label: '技术类',   icon: '🏗️', desc: '架构与接口',  color: '#a78bfa', types: ['tech','api'] },
+  { id: 'ui',   label: 'UI 类',    icon: '🎨', desc: '设计与组件',  color: '#fbbf24', types: ['ui'] },
+  { id: 'plan', label: '规划类',   icon: '📅', desc: '计划与里程碑', color: '#818cf8', types: ['plan'] },
+]
+
+function ViewGrouped() {
+  const [activeGroupId, setActiveGroupId] = useState('all')
+  const [openDocId, setOpenDocId] = useState<string | null>(null)
+
+  const activeGroup = DOC_GROUPS.find(g => g.id === activeGroupId)!
+  const filteredDocs = activeGroupId === 'all'
+    ? DOCS
+    : DOCS.filter(d => activeGroup.types.includes(d.type))
+
+  const openDoc = openDocId ? DOC_MAP[openDocId] : null
+  const openDocColor = openDoc ? (NODE_COLOR[openDoc.type] ?? '#22d3ee') : '#22d3ee'
+
+  const openDocParagraphs = openDoc?.content.split('\n\n').filter(Boolean) ?? []
+
+  const handleCardClick = (id: string) => {
+    setOpenDocId(prev => prev === id ? null : id)
+  }
+
+  return (
+    <div className={styles.grpLayout}>
+      {/* ── 左侧分组列表 ── */}
+      <div className={styles.grpSidebar}>
+        <div className={styles.grpSidebarTitle}>文档类型</div>
+        {DOC_GROUPS.map(g => {
+          const count = g.id === 'all' ? DOCS.length : DOCS.filter(d => g.types.includes(d.type)).length
+          const isActive = activeGroupId === g.id
+          return (
+            <div
+              key={g.id}
+              className={[styles.grpGroupItem, isActive ? styles.grpGroupItemActive : ''].join(' ')}
+              style={{ '--group-color': g.color } as React.CSSProperties}
+              onClick={() => { setActiveGroupId(g.id); setOpenDocId(null) }}
+            >
+              <div className={styles.grpGroupIcon}>{g.icon}</div>
+              <div className={styles.grpGroupInfo}>
+                <div className={styles.grpGroupName}>{g.label}</div>
+                <div className={styles.grpGroupDesc}>{g.desc}</div>
+              </div>
+              <span className={styles.grpGroupCount}>{count}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ── 右侧主区域（抽屉打开时收缩） ── */}
+      <div className={[styles.grpMain, openDoc ? styles.grpMainWithDrawer : ''].join(' ')}>
+        <div className={styles.grpMainHeader}>
+          <span className={styles.grpMainHeaderTitle}>{activeGroup.label}</span>
+          <span className={styles.grpMainHeaderCount}>{filteredDocs.length} 篇文档</span>
+        </div>
+
+        <div className={styles.grpCardGrid}>
+          {filteredDocs.map(doc => {
+            const color = NODE_COLOR[doc.type] ?? '#22d3ee'
+            const isOpen = openDocId === doc.id
+            return (
+              <div
+                key={doc.id}
+                className={[styles.grpDocCard, isOpen ? styles.grpDocCardActive : ''].join(' ')}
+                style={{ '--card-color': color } as React.CSSProperties}
+                onClick={() => handleCardClick(doc.id)}
+              >
+                <div className={styles.grpDocCardStripe} style={{ background: color }} />
+                <div className={styles.grpDocCardBody}>
+                  <div className={styles.grpDocCardTitle}>{doc.title}</div>
+                  <div className={styles.grpDocCardExcerpt}>{doc.excerpt}</div>
+                  <div className={styles.grpDocCardFoot}>
+                    <span className={styles.grpDocCardTag}>{doc.type.toUpperCase()}</span>
+                    <span className={styles.grpDocCardTag}>{doc.stage}</span>
+                    {doc.refs.length + doc.backRefs.length > 0 && (
+                      <span className={styles.grpDocCardRefCount}>
+                        🔗 {doc.refs.length + doc.backRefs.length}
+                      </span>
+                    )}
+                    <span className={styles.grpDocCardDate}>{doc.updatedAt}</span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ── 右侧抽屉 ── */}
+      <div className={[styles.grpDrawer, openDoc ? styles.grpDrawerOpen : ''].join(' ')}>
+        {openDoc && (
+          <>
+            {/* 顶部彩色条 */}
+            <div className={styles.grpDrawerColorBar} style={{ background: openDocColor }} />
+
+            {/* 标题栏 */}
+            <div className={styles.grpDrawerHeader}>
+              <div className={styles.grpDrawerTitleWrap}>
+                <div className={styles.grpDrawerTitle}>{openDoc.title}</div>
+                <div className={styles.grpDrawerMeta}>
+                  <span className={styles.grpDrawerMetaTag}>{openDoc.type.toUpperCase()}</span>
+                  <span className={styles.grpDrawerMetaTag}>{openDoc.stage}</span>
+                  <span className={styles.grpDrawerMetaTag}>{openDoc.updatedAt}</span>
+                </div>
+              </div>
+              <button className={styles.grpDrawerClose} onClick={() => setOpenDocId(null)}>✕</button>
+            </div>
+
+            {/* 正文 */}
+            <div className={styles.grpDrawerBody}>
+              {openDocParagraphs.map((para, i) => {
+                if (para.startsWith('## ')) return <h2 key={i} className={styles.mdH2}>{para.slice(3)}</h2>
+                if (para.startsWith('```')) {
+                  const code = para.replace(/^```\w*\n?/, '').replace(/```$/, '')
+                  return <pre key={i} className={styles.mdCodeBlock}>{code}</pre>
+                }
+                return <p key={i} className={styles.mdPara}>{renderContent(para, DOC_MAP)}</p>
+              })}
+
+              {/* 引用关系 */}
+              {(openDoc.refs.length > 0 || openDoc.backRefs.length > 0) && (
+                <div className={styles.grpDrawerRefSection}>
+                  {openDoc.refs.length > 0 && (
+                    <>
+                      <div className={styles.grpDrawerRefTitle}>本文引用 ({openDoc.refs.length})</div>
+                      <div className={styles.grpDrawerRefChips} style={{ marginBottom: 12 }}>
+                        {openDoc.refs.map(r => {
+                          const rd = DOC_MAP[r]
+                          if (!rd) return null
+                          const rc = NODE_COLOR[rd.type] ?? '#22d3ee'
+                          return (
+                            <span
+                              key={r}
+                              className={styles.grpDrawerRefChip}
+                              style={{ '--card-color': rc } as React.CSSProperties}
+                              onClick={() => setOpenDocId(r)}
+                            >
+                              <span className={styles.grpDrawerRefDot} style={{ background: rc }} />
+                              {rd.title.split(' — ')[0]}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+                  {openDoc.backRefs.length > 0 && (
+                    <>
+                      <div className={styles.grpDrawerRefTitle}>被引用 ({openDoc.backRefs.length})</div>
+                      <div className={styles.grpDrawerRefChips}>
+                        {openDoc.backRefs.map(r => {
+                          const rd = DOC_MAP[r]
+                          if (!rd) return null
+                          const rc = NODE_COLOR[rd.type] ?? '#22d3ee'
+                          return (
+                            <span
+                              key={r}
+                              className={styles.grpDrawerRefChip}
+                              style={{ '--card-color': rc } as React.CSSProperties}
+                              onClick={() => setOpenDocId(r)}
+                            >
+                              <span className={styles.grpDrawerRefDot} style={{ background: rc }} />
+                              {rd.title.split(' — ')[0]}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
 // 主页面
 // ─────────────────────────────────────────────
 const VIEWS = [
@@ -774,6 +968,7 @@ const VIEWS = [
   { id: 'graph',    label: '知识图谱',        badge: 'flow',   desc: '@xyflow/react 节点关系图，点击节点展开预览' },
   { id: 'pipeline', label: '流水线绑定',      badge: 'P0',     desc: '文档锚定阶段，点击 stage 展示关联文档卡片' },
   { id: 'triptych', label: '三栏+引用面板',   badge: 'rec',    desc: '目录|正文|引用，hover 展开全文预览' },
+  { id: 'grouped',  label: '分组+卡片+抽屉',  badge: 'new',    desc: '左侧类型分组，右侧缩略卡片，点击抽屉展开全文' },
 ] as const
 
 type ViewId = typeof VIEWS[number]['id']
@@ -783,10 +978,11 @@ const BADGE_COLOR: Record<string, string> = {
   flow:   '#0ea5e9',
   P0:     '#7c3aed',
   rec:    '#10b981',
+  new:    '#f59e0b',
 }
 
 export default function DocsDemoPage() {
-  const [view, setView] = useState<ViewId>('md')
+  const [view, setView] = useState<ViewId>('grouped')
 
   return (
     <div className={styles.page}>
@@ -795,7 +991,7 @@ export default function DocsDemoPage() {
           <button
             key={v.id}
             className={[styles.viewTab, view === v.id ? styles.viewTabActive : ''].join(' ')}
-            onClick={() => setView(v.id)}
+            onClick={() => setView(v.id as ViewId)}
             title={v.desc}
           >
             {v.label}
@@ -807,9 +1003,6 @@ export default function DocsDemoPage() {
             </span>
           </button>
         ))}
-        <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--tc-text-secondary)' }}>
-          hover 引用链接/面板查看预览
-        </span>
       </div>
 
       <div className={styles.viewContent}>
@@ -817,6 +1010,7 @@ export default function DocsDemoPage() {
         {view === 'graph'    && <ViewGraph />}
         {view === 'pipeline' && <ViewPipeline />}
         {view === 'triptych' && <ViewTriptych />}
+        {view === 'grouped'  && <ViewGrouped />}
       </div>
     </div>
   )
