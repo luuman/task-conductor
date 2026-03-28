@@ -637,48 +637,6 @@ function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTML
 // ════════════════════════════════════════════════
 // Main page
 // ════════════════════════════════════════════════
-/** Virtuoso Footer: 直接从 store 读取，避免闭包 + components prop 导致不更新 */
-function ChatFooter({ chatEndRef }: { chatEndRef: React.RefObject<HTMLDivElement | null> }) {
-  const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
-  const chatDisplayMessages = currentReply
-    ? [...chatMessages, { role: 'assistant' as const, ts: new Date().toISOString(), blocks: [{ type: 'text' as const, text: currentReply }] }]
-    : chatMessages
-
-  if (chatDisplayMessages.length === 0) return null
-  return (
-    <>
-      {chatDisplayMessages.map((msg, i) => {
-        const raw = msg.blocks.filter(b => b.type === 'text').map(b => b.text ?? '').join('\n').trim()
-        const text = msg.role === 'user' ? stripDomContext(raw) : raw
-        if (!text && msg.role !== 'user') return null
-        // 用户消息：即使纯文本为空，只要有 DOM chips 也展示
-        if (msg.role === 'user' && !text && parseDomContextChips(raw).length === 0) return null
-        return msg.role === 'user' ? (
-          <div key={i} className={s.turnSection} style={{ padding: '0 20px' }}>
-            <UserMsgRow rawText={raw}>
-              {text && <ImageAwareRichText text={text} />}
-              <InlineDomChips raw={raw} />
-            </UserMsgRow>
-          </div>
-        ) : (
-          <div key={i} style={{ padding: '0 20px' }}>
-            <div className={s.chatAiBlock}>
-              <div className={s.richText}><RichTextBlock text={text} /></div>
-            </div>
-          </div>
-        )
-      })}
-      {isGenerating && !currentReply && (
-        <div className={s.pThinking} style={{ padding: '0 20px' }}>
-          <span className={s.pThinkingDot} />
-          <span>思考中...</span>
-        </div>
-      )}
-      <div ref={chatEndRef} />
-    </>
-  )
-}
-
 function stripDomContext(text: string): string {
   // 先清理系统 XML 标签
   const cleaned = cleanSystemXml(text)
@@ -813,6 +771,14 @@ import { PromptInput } from './PromptInput'
 type VItem =
   | { kind: 'user'; key: string; qi: number; question: UserQuestion }
   | { kind: 'steps'; key: string; steps: TimelineStep[] }
+  | { kind: 'live'; key: string; message: AiSessionMessage }
+  | { kind: 'thinking'; key: string }
+
+type AiSessionMessage = {
+  role: 'user' | 'assistant'
+  ts: string
+  blocks: Array<{ type: 'text'; text?: string | null }>
+}
 
 export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const { t } = useTranslation()
@@ -827,13 +793,14 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
-  const chatEndRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
+  const selectedSyncRef = useRef<string | null>(null)
 
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const {
     messages: chatMessages,
     currentReply,
+    isGenerating,
     claudeSessionId,
     setMessages: setChatMessages,
     setCurrentReply,
@@ -872,23 +839,41 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   useEffect(() => {
     if (!claudeSessionId) return
+    if (selectedSyncRef.current === claudeSessionId) {
+      selectedSyncRef.current = null
+      return
+    }
     if (claudeSessionId === selectedId) return
     if (!sessions.some(s => s.session_id === claudeSessionId)) return
     selectSession(claudeSessionId)
   }, [claudeSessionId, selectedId, sessions, selectSession])
 
   useEffect(() => {
+    selectedSyncRef.current = selectedId || null
     setClaudeSessionId(selectedId || null)
     setCurrentReply('')
   }, [selectedId, setClaudeSessionId, setCurrentReply])
 
   // 切换会话时清空 AI 对话记录，不把 transcript 同步进 chatMessages（那会导致 ChatFooter 重复渲染）
   useEffect(() => {
-    setChatMessages([])
-  }, [selectedId, setChatMessages])
+    if (chatMessages.length > 0) setChatMessages([])
+  }, [selectedId, chatMessages.length, setChatMessages])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
+  const liveItems = useMemo<VItem[]>(() => {
+    const displayMessages: AiSessionMessage[] = currentReply
+      ? [...chatMessages, { role: 'assistant', ts: new Date().toISOString(), blocks: [{ type: 'text', text: currentReply }] }]
+      : chatMessages
+
+    const items = displayMessages.map((message, i) => ({
+      kind: 'live' as const,
+      key: `live-${message.ts}-${i}`,
+      message,
+    }))
+    if (isGenerating && !currentReply) items.push({ kind: 'thinking', key: 'live-thinking' })
+    return items
+  }, [chatMessages, currentReply, isGenerating])
 
   // 构建虚拟列表项：每个用户问题和每组工具步骤各为一项
   const vitems = useMemo<VItem[]>(() => {
@@ -916,6 +901,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     })
     return result
   }, [steps, questions])
+  const listItems = useMemo(() => [...vitems, ...liveItems], [vitems, liveItems])
 
   // 问题在虚拟列表中的索引映射
   const questionVirtuosoIndices = useMemo(() =>
@@ -929,6 +915,8 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   // （prop 变化 → Virtuoso 重新绑定内部 stream → 触发循环 bug）
   const questionVirtuosoIndicesRef = useRef(questionVirtuosoIndices)
   useEffect(() => { questionVirtuosoIndicesRef.current = questionVirtuosoIndices }, [questionVirtuosoIndices])
+  const activeQRef = useRef(0)
+  useEffect(() => { activeQRef.current = activeQ }, [activeQ])
 
   // 滚动时自动高亮当前可见的问题
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -937,7 +925,11 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     for (let i = indices.length - 1; i >= 0; i--) {
       if (indices[i] <= startIndex) {
         const next = i
-        setTimeout(() => setActiveQ(next), 0)
+        if (activeQRef.current !== next) {
+          setTimeout(() => {
+            if (activeQRef.current !== next) setActiveQ(next)
+          }, 0)
+        }
         break
       }
     }
@@ -973,15 +965,18 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   // 新对话消息到达时滚动到底部
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [chatMessages, currentReply])
+    if (liveItems.length === 0) return
+    requestAnimationFrame(() => {
+      virtuosoRef.current?.scrollToIndex({ index: listItems.length - 1, align: 'end', behavior: 'smooth' })
+    })
+  }, [liveItems.length, listItems.length])
+
+  useEffect(() => {
+    pendingScrollQ.current = null
+    setActiveQ(0)
+  }, [selectedId])
 
   const Renderer = RENDERERS[style]
-
-  // Virtuoso Footer: 使用独立组件，直接从 store 订阅更新
-  // 注意：components 对象必须用 useMemo 缓存，否则每次渲染创建新对象会导致 Virtuoso 无限更新
-  const VirtuosoFooter = useCallback(() => <ChatFooter chatEndRef={chatEndRef} />, [chatEndRef])
-  const virtuosoComponents = useMemo(() => ({ Footer: VirtuosoFooter }), [VirtuosoFooter])
 
   return (
     <div className={s.page}>
@@ -1011,18 +1006,18 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
             <CodeExpandCtx.Provider value={codeExpanded}>
               {loading ? (
                 <div className={s.empty}><span>{t('common.loading')}</span></div>
-              ) : vitems.length === 0 ? (
+              ) : listItems.length === 0 ? (
                 <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>{t('admin.sessions.select_session')}</span></div>
               ) : (
                 <Virtuoso
+                  key={selectedId ?? 'empty'}
                   ref={virtuosoRef}
-                  data={vitems}
+                  data={listItems}
                   style={{ height: '100%', width: '100%' }}
                   increaseViewportBy={600}
                   rangeChanged={handleRangeChanged}
                   startReached={hasMore ? loadMore : undefined}
                   computeItemKey={(_, item) => item.key}
-                  components={virtuosoComponents}
                   itemContent={(_, item) => {
                     if (item.kind === 'user') {
                       return (
@@ -1030,6 +1025,34 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
                           <UserMsgRow rawText={item.question.text}>
                             <div className={s.richText}>{stripDomContext(item.question.text)}</div>
                           </UserMsgRow>
+                        </div>
+                      )
+                    }
+                    if (item.kind === 'live') {
+                      const raw = item.message.blocks.map((b) => b.text ?? '').join('\n').trim()
+                      const text = item.message.role === 'user' ? stripDomContext(raw) : raw
+                      if (!text && item.message.role !== 'user') return null
+                      if (item.message.role === 'user' && !text && parseDomContextChips(raw).length === 0) return null
+                      return item.message.role === 'user' ? (
+                        <div className={s.turnSection} style={{ padding: '0 20px' }}>
+                          <UserMsgRow rawText={raw}>
+                            {text && <ImageAwareRichText text={text} />}
+                            <InlineDomChips raw={raw} />
+                          </UserMsgRow>
+                        </div>
+                      ) : (
+                        <div style={{ padding: '0 20px' }}>
+                          <div className={s.chatAiBlock}>
+                            <div className={s.richText}><RichTextBlock text={text} /></div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    if (item.kind === 'thinking') {
+                      return (
+                        <div className={s.pThinking} style={{ padding: '0 20px' }}>
+                          <span className={s.pThinkingDot} />
+                          <span>思考中...</span>
                         </div>
                       )
                     }
