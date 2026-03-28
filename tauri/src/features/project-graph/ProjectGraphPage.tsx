@@ -390,17 +390,26 @@ function buildElements(selectedId: string | null, onSelect: (id: string) => void
   const edges: Edge[] = []
   NODES_DATA.forEach(n => {
     n.deps?.forEach(depId => {
-      const active = selectedId === n.id || selectedId === depId
       const depNode = NODE_MAP[depId]
+      if (!depNode) return
+      const active = selectedId === n.id || selectedId === depId
       const color = active
-        ? (n.color !== '#22d3ee' ? n.color : depNode?.color ?? '#22d3ee')
-        : undefined
+        ? (n.color !== '#22d3ee' ? n.color : depNode.color)
+        : '#22d3ee'
+
+      // 布局左→右：store(x=0) → feature(x=280) → api/component(x=680/940)
+      // store 依赖：store 是 source，feature 是 target
+      // api/component 依赖：feature 是 source，api/component 是 target
+      const isStoreDep = depNode.layer === 'store'
+      const sourceId = isStoreDep ? depId : n.id
+      const targetId = isStoreDep ? n.id  : depId
+
       edges.push({
-        id: `${n.id}→${depId}`,
+        id: `${sourceId}→${targetId}`,
         type: 'glow',
-        source: n.id,
-        target: depId,
-        data: { color: color ?? '#22d3ee', active },
+        source: sourceId,
+        target: targetId,
+        data: { color, active },
       })
     })
   })
