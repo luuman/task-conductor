@@ -1033,7 +1033,6 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
                 <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>{t('admin.sessions.select_session')}</span></div>
               ) : (
                 <Virtuoso
-                  key={selectedId}
                   ref={virtuosoRef}
                   data={vitems}
                   style={{ height: '100%', width: '100%' }}
