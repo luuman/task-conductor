@@ -647,7 +647,7 @@ function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTML
       onMouseDown={e => e.preventDefault()}
     >
       <button className={`${s.selBtn} ${copied ? s.selBtnCopied : ''}`} onClick={handleCopy} tabIndex={-1}>
-        {copied ? '✓ 已复制' : '复制'}
+        {copied ? t('chat_sidebar.selection_copied') : t('chat_sidebar.selection_copy')}
       </button>
     </div>,
     document.body
