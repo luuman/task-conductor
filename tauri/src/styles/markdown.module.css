@@ -81,25 +81,19 @@
   font-size: 11px;
   font-family: 'Geist Mono', monospace;
   padding: 10px 14px;
-  border-radius: 10px;
-  margin: 6px 0;
   overflow-x: auto;
   white-space: pre;
   background: var(--tc-panel-bg);
-  border: 1px solid var(--tc-border);
 }
 .mdCodeBlockPlain {
   display: block;
   font-size: 11px;
   font-family: 'Geist Mono', monospace;
   padding: 10px 14px;
-  border-radius: 10px;
-  margin: 6px 0;
   overflow-x: auto;
   white-space: pre;
   background: var(--tc-panel-bg);
   color: var(--tc-foreground-secondary);
-  border: 1px solid var(--tc-border);
 }
 .mdInlineCode {
   font-size: 11px;
