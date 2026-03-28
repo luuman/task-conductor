@@ -771,176 +771,238 @@ function ViewTriptych() {
 // 左侧详情面板 + 右侧竖排节点列表 (React Flow)
 // ─────────────────────────────────────────────
 
-function ViewGrouped() {
-  const [activeGroupId, setActiveGroupId] = useState('all')
-  const [openDocId, setOpenDocId] = useState<string | null>(null)
+// 竖排节点组件
+interface VNodeData extends Record<string, unknown> {
+  doc: DocItem
+  selected: boolean
+  onSelect: (id: string) => void
+}
 
-  const activeGroup = DOC_GROUPS.find(g => g.id === activeGroupId)!
-  const filteredDocs = activeGroupId === 'all'
-    ? DOCS
-    : DOCS.filter(d => activeGroup.types.includes(d.type))
+const NODE_ROW_HEIGHT = 130   // 节点高度 + 间距
+const NODE_WIDTH      = 300
 
-  const openDoc = openDocId ? DOC_MAP[openDocId] : null
-  const openDocColor = openDoc ? (NODE_COLOR[openDoc.type] ?? '#22d3ee') : '#22d3ee'
-
-  const openDocParagraphs = openDoc?.content.split('\n\n').filter(Boolean) ?? []
-
-  const handleCardClick = (id: string) => {
-    setOpenDocId(prev => prev === id ? null : id)
-  }
+function VDocNode({ data }: NodeProps) {
+  const d = data as VNodeData
+  const color = NODE_COLOR[d.doc.type] ?? '#22d3ee'
+  const progress = NODE_PROGRESS[d.doc.id] ?? 60
+  const totalRefs = d.doc.refs.length + d.doc.backRefs.length
 
   return (
-    <div className={styles.grpLayout}>
-      {/* ── 左侧分组列表 ── */}
-      <div className={styles.grpSidebar}>
-        <div className={styles.grpSidebarTitle}>文档类型</div>
-        {DOC_GROUPS.map(g => {
-          const count = g.id === 'all' ? DOCS.length : DOCS.filter(d => g.types.includes(d.type)).length
-          const isActive = activeGroupId === g.id
-          return (
-            <div
-              key={g.id}
-              className={[styles.grpGroupItem, isActive ? styles.grpGroupItemActive : ''].join(' ')}
-              style={{ '--group-color': g.color } as React.CSSProperties}
-              onClick={() => { setActiveGroupId(g.id); setOpenDocId(null) }}
-            >
-              <div className={styles.grpGroupIcon}>{g.icon}</div>
-              <div className={styles.grpGroupInfo}>
-                <div className={styles.grpGroupName}>{g.label}</div>
-                <div className={styles.grpGroupDesc}>{g.desc}</div>
-              </div>
-              <span className={styles.grpGroupCount}>{count}</span>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* ── 右侧主区域（抽屉打开时收缩） ── */}
-      <div className={[styles.grpMain, openDoc ? styles.grpMainWithDrawer : ''].join(' ')}>
-        <div className={styles.grpMainHeader}>
-          <span className={styles.grpMainHeaderTitle}>{activeGroup.label}</span>
-          <span className={styles.grpMainHeaderCount}>{filteredDocs.length} 篇文档</span>
+    <>
+      {/* Top handle：接收来自上方节点的边 */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ left: NODE_WIDTH - 40, background: color, border: 'none', width: 5, height: 5, opacity: 0.6 }}
+      />
+      <div
+        className={[styles.vlNode, d.selected ? styles.vlNodeSelected : ''].join(' ')}
+        style={{ '--vn-color': color } as React.CSSProperties}
+        onClick={() => d.onSelect(d.doc.id)}
+      >
+        <div className={styles.vlNodeHead}>
+          <span className={styles.vlNodeType}>{d.doc.type.toUpperCase()}</span>
+          <span className={styles.vlNodeTitle}>{d.doc.title.split(' — ')[0]}</span>
+          <span className={styles.vlNodeDate}>{d.doc.updatedAt}</span>
         </div>
+        <div className={styles.vlNodeExcerpt}>{d.doc.excerpt}</div>
+        <div className={styles.vlNodeFoot}>
+          <div className={styles.vlNodeProgress}>
+            <div
+              className={styles.vlNodeProgressFill}
+              style={{
+                width: `${progress}%`,
+                background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color} 55%, white))`,
+              }}
+            />
+          </div>
+          {totalRefs > 0 && (
+            <span className={styles.vlNodeRefBadge}>🔗 {totalRefs}</span>
+          )}
+          <span className={styles.vlNodeRefBadge} style={{ marginLeft: 4 }}>{progress}%</span>
+        </div>
+      </div>
+      {/* Bottom handle：连向下方被引用的节点 */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ left: NODE_WIDTH - 40, background: color, border: 'none', width: 5, height: 5, opacity: 0.6 }}
+      />
+    </>
+  )
+}
 
-        <div className={styles.grpCardGrid}>
-          {filteredDocs.map(doc => {
-            const color = NODE_COLOR[doc.type] ?? '#22d3ee'
-            const isOpen = openDocId === doc.id
+const vNodeTypes = { vDoc: VDocNode }
+
+function buildVerticalElements(selectedId: string | null, onSelect: (id: string) => void) {
+  // 按 stage 顺序排列（plan → prd → tech-arch → ui-spec → api-spec → db-schema → comp-lib）
+  const ORDER = ['plan', 'prd', 'tech-arch', 'ui-spec', 'api-spec', 'db-schema', 'comp-lib']
+  const sorted = [...DOCS].sort((a, b) => {
+    const ai = ORDER.indexOf(a.id)
+    const bi = ORDER.indexOf(b.id)
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi)
+  })
+
+  const nodes: Node[] = sorted.map((d, i) => ({
+    id: d.id,
+    type: 'vDoc',
+    position: { x: 0, y: i * NODE_ROW_HEIGHT },
+    data: { doc: d, selected: selectedId === d.id, onSelect } as unknown as Record<string, unknown>,
+  }))
+
+  const edges: Edge[] = []
+  DOCS.forEach(d => {
+    d.refs.forEach(r => {
+      const active = selectedId === d.id || selectedId === r
+      edges.push({
+        id: `v-${d.id}->${r}`,
+        type: 'glow',
+        source: d.id,
+        target: r,
+        sourceHandle: null,
+        targetHandle: null,
+        data: { color: NODE_COLOR[d.type] ?? '#22d3ee', active },
+      })
+    })
+  })
+
+  return { nodes, edges }
+}
+
+function ViewGroupedInner() {
+  const [selectedId, setSelectedId] = useState<string | null>('prd')
+  const selected = selectedId ? DOC_MAP[selectedId] : null
+
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(prev => prev === id ? null : id)
+  }, [])
+
+  const { nodes, edges } = buildVerticalElements(selectedId, handleSelect)
+
+  const selColor = selected ? (NODE_COLOR[selected.type] ?? '#22d3ee') : '#22d3ee'
+  const selProgress = selected ? (NODE_PROGRESS[selected.id] ?? 60) : 0
+
+  return (
+    <div className={styles.vlLayout}>
+      {/* ── 左侧面板 ── */}
+      <div className={styles.vlPanel}>
+        {/* 汇总卡 */}
+        <div className={styles.vlPanelCard}>
+          <div className={styles.vlPanelLabel}>项目文档</div>
+          <div style={{ fontSize: 11, color: 'rgba(140,160,200,0.5)', lineHeight: 1.7 }}>
+            {DOCS.length} 篇文档<br />
+            {DOCS.reduce((n, d) => n + d.refs.length, 0)} 条引用关系
+          </div>
+          {/* 各类型数量 mini bars */}
+          {(['prd','tech','api','ui','plan'] as DocItem['type'][]).map(t => {
+            const count = DOCS.filter(d => d.type === t).length
+            const color = NODE_COLOR[t] ?? '#888'
             return (
-              <div
-                key={doc.id}
-                className={[styles.grpDocCard, isOpen ? styles.grpDocCardActive : ''].join(' ')}
-                style={{ '--card-color': color } as React.CSSProperties}
-                onClick={() => handleCardClick(doc.id)}
-              >
-                <div className={styles.grpDocCardStripe} style={{ background: color }} />
-                <div className={styles.grpDocCardBody}>
-                  <div className={styles.grpDocCardTitle}>{doc.title}</div>
-                  <div className={styles.grpDocCardExcerpt}>{doc.excerpt}</div>
-                  <div className={styles.grpDocCardFoot}>
-                    <span className={styles.grpDocCardTag}>{doc.type.toUpperCase()}</span>
-                    <span className={styles.grpDocCardTag}>{doc.stage}</span>
-                    {doc.refs.length + doc.backRefs.length > 0 && (
-                      <span className={styles.grpDocCardRefCount}>
-                        🔗 {doc.refs.length + doc.backRefs.length}
-                      </span>
-                    )}
-                    <span className={styles.grpDocCardDate}>{doc.updatedAt}</span>
-                  </div>
+              <div key={t} className={styles.vlBarRow} style={{ marginTop: 8 }}>
+                <div className={styles.vlBarRowHead}>
+                  <span>{t.toUpperCase()}</span>
+                  <span className={styles.vlBarRowVal}>{count}</span>
+                </div>
+                <div className={styles.vlBarTrack}>
+                  <div className={styles.vlBarFill}
+                    style={{ width: `${(count / DOCS.length) * 100}%`, background: color }} />
                 </div>
               </div>
             )
           })}
         </div>
-      </div>
 
-      {/* ── 右侧抽屉 ── */}
-      <div className={[styles.grpDrawer, openDoc ? styles.grpDrawerOpen : ''].join(' ')}>
-        {openDoc && (
-          <>
-            {/* 顶部彩色条 */}
-            <div className={styles.grpDrawerColorBar} style={{ background: openDocColor }} />
+        {/* 选中文档详情卡 */}
+        {selected ? (
+          <div className={[styles.vlPanelCard, styles.vlPanelCardGlow].join(' ')}
+            style={{ borderColor: `color-mix(in srgb, ${selColor} 35%, transparent)` }}>
+            <div className={styles.vlPanelLabel} style={{ color: `color-mix(in srgb, ${selColor} 70%, rgba(100,120,160,0.6))` }}>
+              {selected.type.toUpperCase()}
+            </div>
+            <div className={styles.vlPanelTitle}>{selected.title.split(' — ')[0]}</div>
+            <div className={styles.vlPanelMeta}>{selected.stage} · {selected.updatedAt}</div>
+            <div className={styles.vlPanelExcerpt}>{selected.excerpt}</div>
 
-            {/* 标题栏 */}
-            <div className={styles.grpDrawerHeader}>
-              <div className={styles.grpDrawerTitleWrap}>
-                <div className={styles.grpDrawerTitle}>{openDoc.title}</div>
-                <div className={styles.grpDrawerMeta}>
-                  <span className={styles.grpDrawerMetaTag}>{openDoc.type.toUpperCase()}</span>
-                  <span className={styles.grpDrawerMetaTag}>{openDoc.stage}</span>
-                  <span className={styles.grpDrawerMetaTag}>{openDoc.updatedAt}</span>
-                </div>
+            <div className={styles.vlBarRow}>
+              <div className={styles.vlBarRowHead}>
+                <span>完成度</span>
+                <span className={styles.vlBarRowVal}>{selProgress}%</span>
               </div>
-              <button className={styles.grpDrawerClose} onClick={() => setOpenDocId(null)}>✕</button>
+              <div className={styles.vlBarTrack}>
+                <div className={styles.vlBarFill}
+                  style={{ width: `${selProgress}%`, background: selColor,
+                    boxShadow: `0 0 6px ${selColor}` }} />
+              </div>
             </div>
 
-            {/* 正文 */}
-            <div className={styles.grpDrawerBody}>
-              {openDocParagraphs.map((para, i) => {
-                if (para.startsWith('## ')) return <h2 key={i} className={styles.mdH2}>{para.slice(3)}</h2>
-                if (para.startsWith('```')) {
-                  const code = para.replace(/^```\w*\n?/, '').replace(/```$/, '')
-                  return <pre key={i} className={styles.mdCodeBlock}>{code}</pre>
-                }
-                return <p key={i} className={styles.mdPara}>{renderContent(para, DOC_MAP)}</p>
-              })}
-
-              {/* 引用关系 */}
-              {(openDoc.refs.length > 0 || openDoc.backRefs.length > 0) && (
-                <div className={styles.grpDrawerRefSection}>
-                  {openDoc.refs.length > 0 && (
-                    <>
-                      <div className={styles.grpDrawerRefTitle}>本文引用 ({openDoc.refs.length})</div>
-                      <div className={styles.grpDrawerRefChips} style={{ marginBottom: 12 }}>
-                        {openDoc.refs.map(r => {
-                          const rd = DOC_MAP[r]
-                          if (!rd) return null
-                          const rc = NODE_COLOR[rd.type] ?? '#22d3ee'
-                          return (
-                            <span
-                              key={r}
-                              className={styles.grpDrawerRefChip}
-                              style={{ '--card-color': rc } as React.CSSProperties}
-                              onClick={() => setOpenDocId(r)}
-                            >
-                              <span className={styles.grpDrawerRefDot} style={{ background: rc }} />
-                              {rd.title.split(' — ')[0]}
-                            </span>
-                          )
-                        })}
-                      </div>
-                    </>
-                  )}
-                  {openDoc.backRefs.length > 0 && (
-                    <>
-                      <div className={styles.grpDrawerRefTitle}>被引用 ({openDoc.backRefs.length})</div>
-                      <div className={styles.grpDrawerRefChips}>
-                        {openDoc.backRefs.map(r => {
-                          const rd = DOC_MAP[r]
-                          if (!rd) return null
-                          const rc = NODE_COLOR[rd.type] ?? '#22d3ee'
-                          return (
-                            <span
-                              key={r}
-                              className={styles.grpDrawerRefChip}
-                              style={{ '--card-color': rc } as React.CSSProperties}
-                              onClick={() => setOpenDocId(r)}
-                            >
-                              <span className={styles.grpDrawerRefDot} style={{ background: rc }} />
-                              {rd.title.split(' — ')[0]}
-                            </span>
-                          )
-                        })}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+            <div className={styles.vlBarRow}>
+              <div className={styles.vlBarRowHead}>
+                <span>引用关系</span>
+                <span className={styles.vlBarRowVal}>{selected.refs.length + selected.backRefs.length}</span>
+              </div>
+              <div className={styles.vlBarTrack}>
+                <div className={styles.vlBarFill}
+                  style={{
+                    width: `${Math.min(100, (selected.refs.length + selected.backRefs.length) * 25)}%`,
+                    background: '#a78bfa',
+                  }} />
+              </div>
             </div>
-          </>
+
+            {(selected.refs.length > 0 || selected.backRefs.length > 0) && (
+              <div className={styles.vlPanelRefChips}>
+                {[...selected.refs, ...selected.backRefs].map(r => {
+                  const rd = DOC_MAP[r]
+                  if (!rd) return null
+                  const rc = NODE_COLOR[rd.type] ?? '#22d3ee'
+                  return (
+                    <span key={r} className={styles.vlPanelRefChip} onClick={() => handleSelect(r)}>
+                      <span className={styles.vlPanelDot} style={{ background: rc }} />
+                      {rd.title.split(' — ')[0]}
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className={styles.vlPanelCard} style={{ textAlign: 'center', padding: '20px 14px' }}>
+            <div style={{ fontSize: 11, color: 'rgba(100,120,160,0.4)' }}>点击节点查看详情</div>
+          </div>
         )}
       </div>
+
+      {/* ── 右侧竖排 React Flow ── */}
+      <div className={styles.vlCanvas}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={vNodeTypes}
+          edgeTypes={edgeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.15 }}
+          minZoom={0.2}
+          maxZoom={1.5}
+          proOptions={{ hideAttribution: true }}
+          style={{ background: 'transparent' }}
+          nodesDraggable={false}
+        >
+          <Background
+            variant={BackgroundVariant.Lines}
+            gap={40} size={1}
+            color="rgba(255,255,255,0.02)"
+          />
+        </ReactFlow>
+      </div>
     </div>
+  )
+}
+
+function ViewGrouped() {
+  return (
+    <ReactFlowProvider>
+      <ViewGroupedInner />
+    </ReactFlowProvider>
   )
 }
 
