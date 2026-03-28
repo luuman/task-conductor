@@ -181,6 +181,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
 
   // Select session
   const selectSession = useCallback((id: string) => {
+    if (selectedIdRef.current === id) return
     selectedIdRef.current = id
     setSelectedId(id)
     setTranscriptLoading(true)
