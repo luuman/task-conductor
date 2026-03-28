@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
-import { parseTimelineWithQuestions, formatTs, guessHljsLang, cleanSystemXml, type TimelineStep, type UserQuestion } from './timeline-parser'
+import { parseTimelineWithQuestions, formatTs, guessHljsLang, cleanSystemXml, detectRisks, inferBlockIntent, generateCommitMessage, type TimelineStep, type UserQuestion, type RiskItem, type IntentLabel } from './timeline-parser'
 import { Select } from '../../ui/select'
 import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
 import {
