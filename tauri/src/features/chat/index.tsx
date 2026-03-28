@@ -568,6 +568,54 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
         <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconPencil size={11} /> {t('chat_sidebar.file_edit')}</span><span className={s.sbVal}>{fileStats.edit} {t('chat_sidebar.file_unit')}</span></div>
         <div className={s.sbRow}><span className={s.sbKey} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><IconFilePlus size={11} /> {t('chat_sidebar.file_write')}</span><span className={s.sbVal}>{fileStats.write} {t('chat_sidebar.file_unit')}</span></div>
       </div>
+
+      {/* 风险检测 */}
+      {risks.length > 0 && (
+        <>
+          <hr className={s.sbDivider} />
+          <div className={s.sbSection}>
+            <div className={s.sbTitle} style={{ color: '#f87171' }}>⚠ {t('chat_sidebar.risk_detection')} ({risks.length})</div>
+            <div className={s.riskList}>
+              {risks.map((r, i) => (
+                <div key={i} className={s.riskItem}>
+                  <span className={r.level === 'high' ? s.riskLevelHigh : s.riskLevelMed}>
+                    {r.level === 'high' ? t('chat_sidebar.risk_high') : t('chat_sidebar.risk_medium')}
+                  </span>
+                  <div className={s.riskBody}>
+                    <span className={s.riskLabel}>{r.label}</span>
+                    <span className={s.riskDetail}>{r.detail}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* 一键生成 Commit 消息 */}
+      {(fileStats.edit > 0 || fileStats.write > 0) && (
+        <>
+          <hr className={s.sbDivider} />
+          <div className={s.sbSection}>
+            <div className={s.sbTitle}>{t('chat_sidebar.commit_msg_title')}</div>
+            {commitMsg ? (
+              <div className={s.commitBox}>
+                <pre className={s.commitPre}>{commitMsg}</pre>
+                <button
+                  className={`${s.commitCopyBtn} ${commitCopied ? s.commitCopied : ''}`}
+                  onClick={handleCopyCommit}
+                >
+                  {commitCopied ? '✓' : t('chat_sidebar.commit_copy')}
+                </button>
+              </div>
+            ) : (
+              <button className={s.commitGenBtn} onClick={handleGenCommit}>
+                {t('chat_sidebar.commit_gen')}
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }
