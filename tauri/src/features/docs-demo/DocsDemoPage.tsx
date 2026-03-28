@@ -356,34 +356,39 @@ function GraphNode({ data }: NodeProps) {
 }
 
 // 发光 Bezier 边
+// 用多层叠加模拟 glow，不依赖 SVG filter（跨浏览器更可靠）
 function GlowEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) {
   const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
   const color = (data?.color as string) ?? '#22d3ee'
   const active = data?.active as boolean
 
+  // 箭头 marker id 基于颜色（避免重复）
+  const markerId = `arrow-${color.replace('#', '')}`
+
   return (
     <g>
-      {/* 外层宽发光（仅激活时） */}
-      {active && (
-        <path
-          d={edgePath} fill="none"
-          stroke={color} strokeWidth={10} opacity={0.06}
-          style={{ filter: 'blur(5px)' }}
-        />
-      )}
-      {/* 中层发光 */}
-      {active && (
-        <path
-          d={edgePath} fill="none"
-          stroke={color} strokeWidth={4} opacity={0.2}
-          style={{ filter: 'blur(2px)' }}
-        />
-      )}
-      {/* 实线 */}
+      <defs>
+        <marker
+          id={markerId}
+          markerWidth="8" markerHeight="8"
+          refX="6" refY="3"
+          orient="auto"
+        >
+          <path d="M0,0 L0,6 L8,3 z" fill={active ? color : 'rgba(100,120,160,0.5)'} />
+        </marker>
+      </defs>
+
+      {/* 激活时：多层宽度递减 + 不透明度递减，堆叠出 glow 光晕 */}
+      {active && <path d={edgePath} fill="none" stroke={color} strokeWidth={12} opacity={0.04} />}
+      {active && <path d={edgePath} fill="none" stroke={color} strokeWidth={7}  opacity={0.09} />}
+      {active && <path d={edgePath} fill="none" stroke={color} strokeWidth={3}  opacity={0.20} />}
+
+      {/* 实线（所有状态都渲染，非激活用可见灰色） */}
       <path
         d={edgePath} fill="none"
-        stroke={active ? color : 'rgba(80,100,140,0.25)'}
+        stroke={active ? color : 'rgba(100,130,170,0.45)'}
         strokeWidth={active ? 1.5 : 1}
+        markerEnd={`url(#${markerId})`}
       />
     </g>
   )
@@ -392,15 +397,24 @@ function GlowEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPo
 const nodeTypes = { docNode: GraphNode }
 const edgeTypes = { glow: GlowEdge }
 
+/**
+ * 层级布局（从左到右体现引用依赖关系）
+ *
+ *  plan ──→ prd ──────→ tech-arch ──→ api-spec
+ *            │                    └──→ db-schema
+ *            └──→ ui-spec ──────────→ comp-lib
+ *
+ * x 轴 = 层级深度，y 轴 = 在本层中的垂直位置
+ */
 function buildFlowElements(selectedId: string | null, onSelect: (id: string) => void) {
   const positions: Record<string, [number, number]> = {
-    prd:         [60,  170],
-    'tech-arch': [360,  60],
-    'ui-spec':   [360, 290],
-    'api-spec':  [660,   0],
-    'db-schema': [660, 150],
-    'comp-lib':  [660, 300],
-    plan:        [60,  380],
+    plan:        [  0, 200],   // 层 0：最上层规划
+    prd:         [240,  90],   // 层 1
+    'tech-arch': [480,  30],   // 层 2
+    'ui-spec':   [480, 240],   // 层 2
+    'api-spec':  [720,   0],   // 层 3
+    'db-schema': [720, 130],   // 层 3
+    'comp-lib':  [720, 260],   // 层 3
   }
 
   const nodes: Node[] = DOCS.map(d => ({
@@ -419,7 +433,7 @@ function buildFlowElements(selectedId: string | null, onSelect: (id: string) => 
         type: 'glow',
         source: d.id,
         target: r,
-        data: { color: NODE_COLOR[d.type] ?? '#22d3ee', active },
+        data: { color: NODE_COLOR[d.doc?.type ?? d.type] ?? NODE_COLOR[DOC_MAP[d.id]?.type ?? 'prd'], active },
       })
     })
   })
