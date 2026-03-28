@@ -66,6 +66,7 @@
       "mindmap": "Mind Map",
       "chat": "Chat Timeline",
       "server": "Server Monitor",
+      "project_graph": "Project Graph",
       "dev_tools": "Dev Tools"
     },
     "server": {
