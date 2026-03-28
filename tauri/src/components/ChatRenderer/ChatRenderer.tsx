@@ -539,10 +539,10 @@ function CollapsibleCode({ html, raw, lang, label, lineCount, hideHeader }: {
       {/* 代码内容 */}
       <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
         {html ? (
-          <code className={`hljs ${styles.mdCodeBlock}`}
+          <code className={`hljs ${mdStyles.mdCodeBlock}`}
                 dangerouslySetInnerHTML={{ __html: html }} />
         ) : (
-          <code className={styles.mdCodeBlockPlain}>{raw}</code>
+          <code className={mdStyles.mdCodeBlockPlain}>{raw}</code>
         )}
         {collapsed && (
           <div className={styles.codeFade} onClick={() => setCollapsed(false)} />
