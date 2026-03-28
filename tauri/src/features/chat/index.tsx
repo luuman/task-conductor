@@ -999,12 +999,8 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   const Renderer = RENDERERS[style]
 
-<<<<<<< HEAD
   // Virtuoso 回调全部稳定引用，防止 Virtuoso 内部 layout effect 循环触发
-  // 1. components 对象 useMemo 缓存
-  // 2. computeItemKey / itemContent 用 useCallback 缓存，避免每次渲染新函数引用
-  const VirtuosoFooter = useCallback(() => <ChatFooter chatEndRef={chatEndRef} />, [chatEndRef])
-  const virtuosoComponents = useMemo(() => ({ Footer: VirtuosoFooter }), [VirtuosoFooter])
+  // computeItemKey / itemContent 用 useCallback 缓存，避免每次渲染新函数引用
   const computeItemKey = useCallback((_: number, item: VItem) => item.key, [])
   const itemContent = useCallback((_: number, item: VItem) => {
     if (item.kind === 'user') {
@@ -1016,6 +1012,34 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
         </div>
       )
     }
+    if (item.kind === 'live') {
+      const raw = item.message.blocks.map((b) => b.text ?? '').join('\n').trim()
+      const text = item.message.role === 'user' ? stripDomContext(raw) : raw
+      if (!text && item.message.role !== 'user') return null
+      if (item.message.role === 'user' && !text && parseDomContextChips(raw).length === 0) return null
+      return item.message.role === 'user' ? (
+        <div className={s.turnSection} style={{ padding: '0 20px' }}>
+          <UserMsgRow rawText={raw}>
+            {text && <ImageAwareRichText text={text} />}
+            <InlineDomChips raw={raw} />
+          </UserMsgRow>
+        </div>
+      ) : (
+        <div style={{ padding: '0 20px' }}>
+          <div className={s.chatAiBlock}>
+            <div className={s.richText}><RichTextBlock text={text} /></div>
+          </div>
+        </div>
+      )
+    }
+    if (item.kind === 'thinking') {
+      return (
+        <div className={s.pThinking} style={{ padding: '0 20px' }}>
+          <span className={s.pThinkingDot} />
+          <span>思考中...</span>
+        </div>
+      )
+    }
     return (
       <div style={{ padding: '0 20px' }}>
         <Renderer steps={item.steps} />
@@ -1023,8 +1047,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     )
   }, [Renderer])
 
-=======
->>>>>>> 485e5759e43e67cf2a16f58494892ff08e8b23c5
+
   return (
     <div className={s.page}>
       <div className={s.topBar}>
