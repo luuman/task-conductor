@@ -510,9 +510,9 @@ export function PromptInput() {
               <button
                 className={s.pDomClearAll}
                 onClick={() => setDomCtxList([])}
-                title="清除所有标记元素"
+                title={t('prompt_input.clear_all_elements')}
               >
-                全部清除
+                {t('prompt_input.clear_all_btn')}
               </button>
             )}
           </div>
