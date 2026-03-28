@@ -816,7 +816,14 @@ type VItem =
 
 export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const { t } = useTranslation()
-  const [style] = useState<StyleKey>(getDefaultStyle)
+  const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === LS_KEY && e.newValue) setStyle(e.newValue as StyleKey)
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
   const [activeQ, setActiveQ] = useState(0)
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
