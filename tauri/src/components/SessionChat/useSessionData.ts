@@ -250,8 +250,9 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
               setTranscript(allMessages)
               setLoadedFrom(0)
               setHasMore(false)
+              setLoadingMore(false)
             })
-            .catch(() => {})
+            .catch(() => setLoadingMore(false))
         }
       })
       .catch(() => {
