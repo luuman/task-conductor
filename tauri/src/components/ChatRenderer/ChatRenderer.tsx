@@ -1880,7 +1880,7 @@ export function AssistantTurnCard({ turn }: { turn: AssistantTurn }) {
       <ClaudeAvatar />
       <div className={styles.bubbleWrap}>
         <div className={styles.assistantBubble}>
-          <div className={styles.mdContent}>
+          <div className={mdStyles.mdContent}>
             {/* Text segments */}
             {turn.texts.map((t, i) => (
               <RichTextBlock key={`t${i}`} text={t} />
