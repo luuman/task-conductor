@@ -1011,7 +1011,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
                   rangeChanged={handleRangeChanged}
                   startReached={hasMore ? loadMore : undefined}
                   computeItemKey={(_, item) => item.key}
-                  components={{ Footer: VirtuosoFooter }}
+                  components={virtuosoComponents}
                   itemContent={(_, item) => {
                     if (item.kind === 'user') {
                       return (
