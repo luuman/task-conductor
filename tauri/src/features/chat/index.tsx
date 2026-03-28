@@ -1103,7 +1103,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
       return item.message.role === 'user' ? (
         <div className={s.turnSection} style={{ padding: '0 20px' }}>
           <UserMsgRow rawText={raw}>
-            {text && <div className={s.userText}>{text}</div>}
+            {text && <div className={s.userText}><RichText text={text} /></div>}
             <InlineDomChips raw={raw} />
           </UserMsgRow>
         </div>
