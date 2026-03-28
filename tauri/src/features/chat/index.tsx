@@ -22,7 +22,7 @@ import s from './chat-report.module.css'
 
 // ── 样式常量 ──
 const CHAT_STYLE_OPTIONS = ['a', 'b', 'd', 'g', 'h'] as const
-type StyleKey = typeof CHAT_STYLE_OPTIONS[number]
+export type StyleKey = typeof CHAT_STYLE_OPTIONS[number]
 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'

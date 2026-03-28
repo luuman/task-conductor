@@ -3,5 +3,7 @@
   "feishu_default_chat_id": "oc_8691fff3781dda15c173c85a47ced3c9",
   "ui_theme": "dark",
   "ui_default_page": "canvas",
-  "notify_tts_enabled": true
+  "notify_tts_enabled": true,
+  "notify_browser_enabled": true,
+  "pipeline_confidence_threshold": 0.7
 }
