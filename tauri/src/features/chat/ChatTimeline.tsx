@@ -201,7 +201,22 @@ function UserMsgBody({ text }: { text: string }) {
   )
 }
 
-// ── 样式常量 ──
+// ── 样式常量（key 不变，label 通过 i18n 获取） ──
+export const STYLE_KEYS = ['a', 'b', 'd', 'g', 'h'] as const
+export type StyleKey = typeof STYLE_KEYS[number]
+
+export function useStyleOptions() {
+  const { t } = useTranslation()
+  return useMemo(() => [
+    { key: 'a' as StyleKey, label: t('chat_sidebar.style_a') },
+    { key: 'b' as StyleKey, label: t('chat_sidebar.style_b') },
+    { key: 'd' as StyleKey, label: t('chat_sidebar.style_d') },
+    { key: 'g' as StyleKey, label: t('chat_sidebar.style_g') },
+    { key: 'h' as StyleKey, label: t('chat_sidebar.style_h') },
+  ], [t])
+}
+
+/** @deprecated 使用 buildToolLabelMap(t) 替代 */
 export const STYLES = [
   { key: 'a', label: 'A 竖线时间线' },
   { key: 'b', label: 'B 卡片瀑布' },
@@ -209,9 +224,35 @@ export const STYLES = [
   { key: 'g', label: 'G 气泡聊天' },
   { key: 'h', label: 'H 折叠手风琴' },
 ] as const
-export type StyleKey = typeof STYLES[number]['key']
 
-// ── Tool 标签映射 ──
+// ── Tool 标签映射构建函数 ──
+export function buildToolLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    Read: t('chat_sidebar.tool_read'), Write: t('chat_sidebar.tool_write'),
+    Edit: t('chat_sidebar.tool_edit'), MultiEdit: t('chat_sidebar.tool_multi_edit'),
+    Bash: t('chat_sidebar.tool_bash'), Grep: t('chat_sidebar.tool_grep'),
+    Glob: t('chat_sidebar.tool_glob'), Agent: t('chat_sidebar.tool_agent'),
+    AskUserQuestion: t('chat_sidebar.tool_ask'),
+    WebSearch: t('chat_sidebar.tool_web_search'), WebFetch: t('chat_sidebar.tool_web_fetch'),
+    ToolSearch: t('chat_sidebar.tool_search'), Skill: t('chat_sidebar.tool_skill'),
+    TaskCreate: t('chat_sidebar.tool_task_create'), TaskUpdate: t('chat_sidebar.tool_task_update'),
+    TaskList: t('chat_sidebar.tool_task_list'), TaskGet: t('chat_sidebar.tool_task_get'),
+    TaskStop: t('chat_sidebar.tool_task_stop'),
+  }
+}
+
+export function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    read: t('chat_sidebar.cat_read'), edit: t('chat_sidebar.cat_edit'),
+    write: t('chat_sidebar.cat_write'), bash: t('chat_sidebar.cat_bash'),
+    grep: t('chat_sidebar.cat_grep'), glob: t('chat_sidebar.cat_glob'),
+    agent: t('chat_sidebar.cat_agent'), ask: t('chat_sidebar.cat_ask'),
+    search: t('chat_sidebar.cat_search'), task: t('chat_sidebar.cat_task'),
+    text: t('chat_sidebar.cat_text'), other: t('chat_sidebar.cat_other'),
+  }
+}
+
+/** @deprecated 保留作向后兼容，新代码请用 buildToolLabelMap(t) */
 export const TOOL_LABEL_MAP: Record<string, string> = {
   Read: '读取', Write: '写入', Edit: '编辑', MultiEdit: '多处编辑',
   Bash: '命令', Grep: '内容搜索', Glob: '文件匹配',
@@ -222,6 +263,7 @@ export const TOOL_LABEL_MAP: Record<string, string> = {
   TaskGet: '获取任务', TaskStop: '停止任务',
 }
 
+/** @deprecated 保留作向后兼容 */
 export const CAT_LABEL_MAP: Record<string, string> = {
   read: '读取', edit: '编辑', write: '写入', bash: '命令',
   grep: '内容搜索', glob: '文件匹配', agent: '子代理', ask: '提问',
@@ -238,9 +280,9 @@ export function badgeCls(cat: TimelineStep['category']): string {
   return `${s.badge} ${map[cat] || s.bOther}`
 }
 
-export function badgeLabel(step: TimelineStep): string {
-  if (step.kind === 'text') return '文本'
-  const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || '工具'
+export function badgeLabel(step: TimelineStep, toolMap: Record<string, string>, t: (key: string) => string): string {
+  if (step.kind === 'text') return t('chat_sidebar.badge_text')
+  const label = toolMap[step.toolName || ''] || step.toolName || t('chat_sidebar.badge_tool')
   return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
 }
 
