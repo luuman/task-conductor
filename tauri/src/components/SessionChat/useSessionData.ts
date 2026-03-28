@@ -232,7 +232,10 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
         setTranscriptLoading(false)
 
         // Auto-load remaining older messages if there are more
+        // 立即设置 loadingMore=true + hasMore=false，防止 Virtuoso startReached 并发触发 loadMore 导致重复
         if (autoLoadAll && hm && from > 0) {
+          setLoadingMore(true)
+          setHasMore(false)
           api.getTranscript(id, { limit: from, offset: 0 })
             .then(rest => {
               if (selectedIdRef.current !== id) return // switched away
