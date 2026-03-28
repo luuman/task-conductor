@@ -8,6 +8,7 @@ interface ChannelState {
   url: string
   reconnectTimer: ReturnType<typeof setTimeout> | null
   reconnectAttempt: number
+  disposed: boolean
 }
 
 const MAX_DELAY_MS = 30_000
@@ -26,6 +27,7 @@ export class BrowserWsManager implements WsManager {
       url,
       reconnectTimer: null,
       reconnectAttempt: 0,
+      disposed: false,
     }
     this.channels.set(channel, state)
     this.openSocket(state)
@@ -38,11 +40,16 @@ export class BrowserWsManager implements WsManager {
       state.status = 'reconnecting'
 
       ws.onopen = () => {
+        if (state.disposed) {
+          ws.close(1000)
+          return
+        }
         state.status = 'connected'
         state.reconnectAttempt = 0
       }
 
       ws.onmessage = (e) => {
+        if (state.disposed) return
         try {
           const event: AiStreamEvent = typeof e.data === 'string'
             ? JSON.parse(e.data)
@@ -56,7 +63,7 @@ export class BrowserWsManager implements WsManager {
       ws.onclose = (e) => {
         state.status = 'disconnected'
         state.ws = null
-        if (e.code !== 1000) {
+        if (!state.disposed && e.code !== 1000) {
           this.scheduleReconnect(state)
         }
       }
@@ -108,12 +115,20 @@ export class BrowserWsManager implements WsManager {
   disconnect(channel: string): void {
     const state = this.channels.get(channel)
     if (state) {
+      state.disposed = true
       if (state.reconnectTimer) {
         clearTimeout(state.reconnectTimer)
         state.reconnectTimer = null
       }
       if (state.ws) {
-        state.ws.close(1000)
+        if (state.ws.readyState === WebSocket.OPEN) {
+          state.ws.close(1000)
+        } else {
+          state.ws.onopen = null
+          state.ws.onmessage = null
+          state.ws.onclose = null
+          state.ws.onerror = null
+        }
         state.ws = null
       }
       this.channels.delete(channel)

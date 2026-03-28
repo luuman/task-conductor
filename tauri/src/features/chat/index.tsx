@@ -864,12 +864,11 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   }, [sessions, selectedId, selectSession])
 
   useEffect(() => {
-    if (!claudeSessionId) return
+    if (selectedId || !claudeSessionId) return
     if (selectedSyncRef.current === claudeSessionId) {
       selectedSyncRef.current = null
       return
     }
-    if (claudeSessionId === selectedId) return
     if (!sessions.some(s => s.session_id === claudeSessionId)) return
     selectSession(claudeSessionId)
   }, [claudeSessionId, selectedId, sessions, selectSession])
@@ -887,7 +886,9 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
+  const showLiveConversation = !!selectedId && claudeSessionId === selectedId
   const liveItems = useMemo<VItem[]>(() => {
+    if (!showLiveConversation) return []
     const displayMessages = currentReply
       ? [...chatMessages, { role: 'assistant' as const, ts: new Date().toISOString(), blocks: [{ type: 'text' as const, text: currentReply }] }]
       : chatMessages
@@ -899,7 +900,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     }))
     if (isGenerating && !currentReply) items.push({ kind: 'thinking', key: 'live-thinking' })
     return items
-  }, [chatMessages, currentReply, isGenerating])
+  }, [chatMessages, currentReply, isGenerating, showLiveConversation])
 
   // 构建虚拟列表项：每个用户问题和每组工具步骤各为一项
   const vitems = useMemo<VItem[]>(() => {

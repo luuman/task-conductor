@@ -176,7 +176,7 @@ export function FloatingAssistant() {
     selectSession: sharedSelectSession,
     selectedId: _activeSessionId,
     clearSelection: sharedClearSelection,
-  } = useSessionData({ filterByCwd: repoUrlRef.current || undefined })
+  } = useSessionData({ filterByCwd: repoUrlRef.current || undefined, enableLiveSessionWs: false })
 
   // 关闭历史下拉
   useEffect(() => {
