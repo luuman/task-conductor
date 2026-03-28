@@ -1,6 +1,11 @@
 mod sync;
 
+use crate::sync::{
+    importer::{init_db, get_archived_sessions, ArchivedSession},
+    puller::{pull, SyncParams},
+};
 use serde::Serialize;
+use tauri::Manager;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -257,6 +262,60 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+// ── Sync 辅助 ──
+
+fn get_db_path(app: &tauri::AppHandle) -> std::path::PathBuf {
+    app.path()
+        .app_data_dir()
+        .unwrap_or_else(|_| std::path::PathBuf::from("."))
+        .join("tc_sync.db")
+}
+
+// ── Sync Tauri 命令 ──
+
+#[tauri::command]
+fn sync_pull(
+    app: tauri::AppHandle,
+    master_key_hex: String,
+    github_repo: String,
+    github_pat: String,
+) -> Result<usize, String> {
+    let db_path = get_db_path(&app);
+    let params = SyncParams { master_key_hex, github_repo, github_pat };
+    pull(params, &db_path)
+}
+
+#[tauri::command]
+fn get_archived_sessions_cmd(app: tauri::AppHandle) -> Result<Vec<ArchivedSession>, String> {
+    let db_path = get_db_path(&app);
+    let conn = init_db(&db_path).map_err(|e| e.to_string())?;
+    get_archived_sessions(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn toggle_favorite(app: tauri::AppHandle, session_id: String) -> Result<(), String> {
+    let db_path = get_db_path(&app);
+    let conn = init_db(&db_path).map_err(|e| e.to_string())?;
+    conn.execute(
+        "UPDATE archived_sessions SET is_favorite = CASE WHEN is_favorite=1 THEN 0 ELSE 1 END WHERE session_id = ?1",
+        rusqlite::params![session_id],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn delete_archived(app: tauri::AppHandle, session_id: String) -> Result<(), String> {
+    let db_path = get_db_path(&app);
+    let conn = init_db(&db_path).map_err(|e| e.to_string())?;
+    conn.execute(
+        "UPDATE archived_sessions SET is_deleted = 1 WHERE session_id = ?1",
+        rusqlite::params![session_id],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -267,7 +326,11 @@ pub fn run() {
             greet,
             list_dir,
             scan_tree,
-            invalidate_file_cache
+            invalidate_file_cache,
+            sync_pull,
+            get_archived_sessions_cmd,
+            toggle_favorite,
+            delete_archived
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
