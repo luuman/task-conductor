@@ -228,8 +228,8 @@ function GlowEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPo
       {active && <path d={path} fill="none" stroke={color} strokeWidth={2.5}opacity={0.30} />}
       <path
         d={path} fill="none"
-        stroke={active ? color : 'rgba(80,100,140,0.2)'}
-        strokeWidth={active ? 1.5 : 0.8}
+        stroke={active ? color : 'rgba(100,130,180,0.45)'}
+        strokeWidth={active ? 1.5 : 1}
       />
     </g>
   )
