@@ -584,6 +584,7 @@ def ensure_repo(repo_dir: str, github_repo: str, github_pat: str) -> None:
             cwd=parent,
             check=True,
             capture_output=True,
+            timeout=300,
         )
     else:
         git_run(repo_dir, "remote", "set-url", "origin", remote_url)
