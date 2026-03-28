@@ -523,7 +523,7 @@ export function PromptInput() {
             ref={textareaRef}
             className={s.pTextarea}
             style={{ maxHeight: expanded ? 400 : 160 }}
-            placeholder={isGenerating ? '正在处理...' : (isPicking ? '点击页面上任意元素以选取…' : '向 AI 提问... (⌘↵ 发送)')}
+            placeholder={isGenerating ? t('prompt_input.placeholder_generating') : (isPicking ? t('prompt_input.placeholder_picking') : t('prompt_input.placeholder_default'))}
             value={value}
             onChange={e => { setValue(e.target.value); autoResize() }}
             onKeyDown={handleKeyDown}
