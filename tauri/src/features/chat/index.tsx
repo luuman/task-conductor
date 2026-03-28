@@ -692,7 +692,7 @@ function ChatFooter({ chatEndRef }: { chatEndRef: React.RefObject<HTMLDivElement
       {isGenerating && !currentReply && (
         <div className={s.pThinking} style={{ padding: '0 20px' }}>
           <span className={s.pThinkingDot} />
-          <span>思考中...</span>
+          <span>{t('chat_sidebar.thinking')}</span>
         </div>
       )}
       <div ref={chatEndRef} />
