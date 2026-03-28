@@ -968,7 +968,9 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const Renderer = RENDERERS[style]
 
   // Virtuoso Footer: 使用独立组件，直接从 store 订阅更新
+  // 注意：components 对象必须用 useMemo 缓存，否则每次渲染创建新对象会导致 Virtuoso 无限更新
   const VirtuosoFooter = useCallback(() => <ChatFooter chatEndRef={chatEndRef} />, [chatEndRef])
+  const virtuosoComponents = useMemo(() => ({ Footer: VirtuosoFooter }), [VirtuosoFooter])
 
   return (
     <div className={s.page}>
