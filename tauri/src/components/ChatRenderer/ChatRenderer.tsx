@@ -48,7 +48,8 @@ hljs.registerLanguage('cpp', cpp)
 import mermaid from 'mermaid'
 
 import type { TranscriptMessage, TranscriptBlock } from '../../lib/api/types'
-import styles from '../../styles/markdown.module.css'
+import styles from '../../features/admin/pages/sessions/sessions.module.css'
+import mdStyles from '../../styles/markdown.module.css'
 
 // ── Mermaid 初始化 ──────────────────────────────────────
 mermaid.initialize({
