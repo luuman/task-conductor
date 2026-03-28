@@ -26,6 +26,7 @@ const CanvasPage        = lazy(() => import('../features/canvas'))
 const SessionsPage      = lazy(() => import('../features/sessions'))
 const ChatReportPage    = lazy(() => import('../features/chat'))
 const DocsDemoPage      = lazy(() => import('../features/docs-demo'))
+const ProjectGraphPage  = lazy(() => import('../features/project-graph/ProjectGraphPage'))
 
 function PlaceholderPageComponent() {
   const { t } = useTranslation()
