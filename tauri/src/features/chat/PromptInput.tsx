@@ -180,6 +180,13 @@ function _fmtTokens(n: number): string {
 }
 
 export function PromptInput() {
+  const { t } = useTranslation()
+  const quickChips = useMemo(() => [
+    { label: t('prompt_input.quick_chip_clarify'), color: QUICK_CHIP_COLORS[0] },
+    { label: t('prompt_input.quick_chip_context'), color: QUICK_CHIP_COLORS[1] },
+    { label: t('prompt_input.quick_chip_deliverable'), color: QUICK_CHIP_COLORS[2] },
+    { label: t('prompt_input.quick_chip_refine'), color: QUICK_CHIP_COLORS[3] },
+  ], [t])
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [expanded, setExpanded] = useState(false)
