@@ -72,6 +72,7 @@ export function TranscriptViewer({
   // rangeChanged → update sticky question header
   // startIndex from Virtuoso is in virtual space, convert to data-array index
   const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
+    // rangeChanged 由 Virtuoso 内部 useLayoutEffect 同步调用，直接 setState 会形成无限循环
     const dataIndex = startIndex - firstItemIdx
     let found: string | null = null
     for (let i = questionIndices.length - 1; i >= 0; i--) {
@@ -80,7 +81,7 @@ export function TranscriptViewer({
         break
       }
     }
-    setCurrentQuestion(found)
+    setTimeout(() => setCurrentQuestion(found), 0)
   }, [questionIndices, firstItemIdx])
 
   // Sync expand signal when transcript changes
