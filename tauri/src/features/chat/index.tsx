@@ -403,6 +403,30 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
     return Object.entries(m).sort((a, b) => b[1] - a[1])
   }, [toolSteps])
 
+  // 风险检测
+  const risks = useMemo<RiskItem[]>(() => detectRisks(steps), [steps])
+
+  // 每个问题块的意图推断
+  const questionIntents = useMemo<IntentLabel[]>(() =>
+    questions.map((q, qi) => {
+      const nextQ = questions[qi + 1]
+      return inferBlockIntent(steps.slice(q.stepIndex, nextQ ? nextQ.stepIndex : steps.length))
+    }),
+    [questions, steps]
+  )
+
+  // Commit 消息
+  const [commitMsg, setCommitMsg] = useState('')
+  const [commitCopied, setCommitCopied] = useState(false)
+  const handleGenCommit = useCallback(() => {
+    setCommitMsg(generateCommitMessage(steps, questions))
+  }, [steps, questions])
+  const handleCopyCommit = useCallback(() => {
+    navigator.clipboard.writeText(commitMsg).catch(() => {})
+    setCommitCopied(true)
+    setTimeout(() => setCommitCopied(false), 1500)
+  }, [commitMsg])
+
   const duration = useMemo(() => {
     if (!session?.started_at || !session?.last_seen_at) return ''
     const start = new Date(session.started_at).getTime()
