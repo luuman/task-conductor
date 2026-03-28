@@ -812,6 +812,9 @@
     "picking_hint_empty": "Click any element to pick, Esc to cancel",
     "folder_label": "Folder",
     "files_count": "{{count}} files",
-    "analyze_elements": "Please analyze the following {{count}} elements"
+    "analyze_elements": "Please analyze the following {{count}} elements",
+    "templates": "Prompt Templates",
+    "save_template": "Save current",
+    "templates_empty": "No templates yet. Type something and click the bookmark icon to save"
   }
 }
