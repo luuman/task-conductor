@@ -319,7 +319,7 @@ export function PromptInput() {
       }
       return `\n[File: ${a.name}]`
     }).join('')
-    const displayText = text || (attachments.length > 0 ? '' : `请帮我分析以下 ${domCtxList.length} 个元素`)
+    const displayText = text || (attachments.length > 0 ? '' : t('prompt_input.analyze_elements', { count: domCtxList.length }))
     const fullText = [displayText, attachText, ctxText].filter(Boolean).join('')
     const userMsg = displayText + attachText
     console.log(`[发送消息] 附件数=${attachments.length} 附件文本="${attachText.slice(0, 120)}" 用户消息="${userMsg.slice(0, 120)}"`)
