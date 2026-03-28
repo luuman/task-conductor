@@ -66,6 +66,7 @@
       "mindmap": "脑图",
       "chat": "会话时间线",
       "server": "服务器监控",
+      "project_graph": "项目架构图",
       "dev_tools": "开发工具"
     },
     "server": {
