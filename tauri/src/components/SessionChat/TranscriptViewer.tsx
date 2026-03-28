@@ -69,20 +69,27 @@ export function TranscriptViewer({
     return result
   }, [turns])
 
+  // ref 版：同 chat/index.tsx 的方案 — 保持 handleRangeChanged 引用稳定
+  // 防止 rangeChanged prop 随 turns 更新而变化，导致 Virtuoso 内部 stream 循环
+  const questionIndicesRef = useRef(questionIndices)
+  useEffect(() => { questionIndicesRef.current = questionIndices }, [questionIndices])
+  const firstItemIdxRef = useRef(firstItemIdx)
+  useEffect(() => { firstItemIdxRef.current = firstItemIdx }, [firstItemIdx])
+
   // rangeChanged → update sticky question header
-  // startIndex from Virtuoso is in virtual space, convert to data-array index
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
-    // rangeChanged 由 Virtuoso 内部 useLayoutEffect 同步调用，直接 setState 会形成无限循环
-    const dataIndex = startIndex - firstItemIdx
+    const dataIndex = startIndex - firstItemIdxRef.current
     let found: string | null = null
-    for (let i = questionIndices.length - 1; i >= 0; i--) {
-      if (questionIndices[i].turnIndex <= dataIndex) {
-        found = questionIndices[i].text
+    const indices = questionIndicesRef.current
+    for (let i = indices.length - 1; i >= 0; i--) {
+      if (indices[i].turnIndex <= dataIndex) {
+        found = indices[i].text
         break
       }
     }
     setTimeout(() => setCurrentQuestion(found), 0)
-  }, [questionIndices, firstItemIdx])
+  }, []) // 空依赖：引用永远稳定
 
   // Sync expand signal when transcript changes
   useEffect(() => {
