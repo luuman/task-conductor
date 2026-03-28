@@ -738,6 +738,8 @@
     "loaded_count": "Loaded {{loaded}} / {{total}}",
     "session_label": "Session",
     "copy_message": "Copy message",
+    "collapse": "Collapse",
+    "expand_all": "Expand all",
     "selection_copy": "Copy",
     "selection_copied": "✓ Copied",
     "thinking": "Thinking...",
