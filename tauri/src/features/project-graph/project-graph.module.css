@@ -1,0 +1,370 @@
+/* project-graph.module.css — 项目架构知识图谱 */
+
+.page {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07080f;
+  position: relative;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* 大气光晕背景 */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 50% at 55% 35%, rgba(34,211,238,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 25% 65%, rgba(167,139,250,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 35% at 80% 75%, rgba(52,211,153,0.04) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── 左侧详情面板 ── */
+.panel {
+  width: 260px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px;
+  overflow-y: auto;
+  z-index: 10;
+  background: rgba(7,8,15,0.7);
+}
+
+.panelCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px 13px;
+}
+
+.panelLabel {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: rgba(100,120,160,0.55);
+  margin-bottom: 7px;
+}
+
+.panelTitle {
+  font-size: 14px; font-weight: 600;
+  color: rgba(230,240,255,0.92);
+  margin-bottom: 3px;
+}
+
+.panelSub {
+  font-size: 11px;
+  color: rgba(120,140,180,0.5);
+  margin-bottom: 10px;
+}
+
+.panelBarRow { margin-bottom: 7px; }
+.panelBarHead {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: rgba(120,140,180,0.5);
+  margin-bottom: 3px;
+}
+.panelBarVal { color: rgba(200,220,255,0.7); font-weight: 500; }
+.panelBarTrack {
+  height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.05); overflow: hidden;
+}
+.panelBarFill { height: 100%; border-radius: 2px; }
+
+.panelSection {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.panelSectionLabel {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(100,120,160,0.45);
+  margin-bottom: 6px;
+}
+
+.panelFileRow {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 11px;
+  color: rgba(160,180,210,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.panelFileRows:last-child { border-bottom: none; }
+.panelFileLines {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', 'Geist Mono', monospace;
+  color: rgba(34,211,238,0.55);
+}
+
+.panelFeatureChip {
+  display: inline-flex;
+  align-items: center; gap: 4px;
+  padding: 2px 7px; margin: 2px;
+  border-radius: 4px;
+  font-size: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: rgba(160,180,220,0.55);
+}
+
+.panelDepChip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; margin: 2px;
+  border-radius: 4px; font-size: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: rgba(34,211,238,0.6);
+  cursor: pointer; transition: all 0.1s;
+}
+.panelDepChip:hover {
+  background: rgba(34,211,238,0.08);
+  border-color: rgba(34,211,238,0.25);
+}
+.panelDepDot {
+  width: 5px; height: 5px;
+  border-radius: 50%; flex-shrink: 0;
+}
+
+/* ── React Flow canvas ── */
+.canvas { flex: 1; position: relative; overflow: hidden; }
+
+/* ─── 节点：Feature（普通） ─── */
+.fnCard {
+  width: 210px;
+  background: rgba(12, 18, 30, 0.88);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 13px 9px;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  position: relative; overflow: hidden;
+}
+.fnCard::before {
+  content: '';
+  position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 2.5px; border-radius: 2px;
+  background: var(--fn-color, #22d3ee); opacity: 0.7;
+}
+.fnCard:hover {
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+.fnCardSelected {
+  border-color: var(--fn-color, #22d3ee) !important;
+  box-shadow:
+    0 0 0 1px var(--fn-color, #22d3ee),
+    0 0 20px color-mix(in srgb, var(--fn-color, #22d3ee) 30%, transparent) !important;
+}
+.fnHead {
+  display: flex; align-items: center;
+  gap: 7px; margin-bottom: 4px;
+}
+.fnTypeBadge {
+  font-size: 9px; font-weight: 700;
+  padding: 1px 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--fn-color, #22d3ee);
+}
+.fnTitle {
+  font-size: 12px; font-weight: 600;
+  color: rgba(220,235,255,0.9);
+  flex: 1;
+}
+.fnLines {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(100,120,160,0.45);
+}
+.fnDesc {
+  font-size: 10px; color: rgba(130,150,190,0.5);
+  line-height: 1.5; margin-bottom: 6px;
+}
+.fnProgressBar {
+  height: 2.5px; border-radius: 2px;
+  background: rgba(255,255,255,0.05); overflow: hidden;
+}
+.fnProgressFill {
+  height: 100%; border-radius: 2px;
+  background: var(--fn-color, #22d3ee);
+  opacity: 0.6;
+}
+
+/* ─── 节点：Chat 详细卡片（宽） ─── */
+.chatCard {
+  width: 300px;
+  background: rgba(8, 16, 30, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(34,211,238,0.18);
+  border-radius: 12px;
+  padding: 13px 15px 12px;
+  cursor: pointer;
+  transition: box-shadow 0.18s;
+  position: relative; overflow: hidden;
+}
+.chatCard::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; border-radius: 12px 0 0 12px;
+  background: linear-gradient(180deg, #22d3ee, #a78bfa);
+}
+.chatCardSelected {
+  box-shadow:
+    0 0 0 1px rgba(34,211,238,0.45),
+    0 0 28px rgba(34,211,238,0.12) !important;
+}
+.chatCardHead {
+  display: flex; align-items: center;
+  gap: 8px; margin-bottom: 8px;
+}
+.chatCardBadge {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+  padding: 2px 7px; border-radius: 4px;
+  background: rgba(34,211,238,0.1);
+  border: 1px solid rgba(34,211,238,0.2);
+  color: #67e8f9;
+}
+.chatCardTitle {
+  font-size: 13px; font-weight: 700;
+  color: #d6deeb;
+  flex: 1;
+}
+.chatCardLines {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(34,211,238,0.5);
+}
+.chatCardFiles {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 1px 10px; margin-bottom: 8px;
+}
+.chatCardFileName {
+  font-size: 10px; color: rgba(160,180,210,0.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chatCardFileLines {
+  font-size: 10px; font-family: 'JetBrains Mono', monospace;
+  color: rgba(34,211,238,0.5); text-align: right;
+}
+.chatCardDivider {
+  height: 1px; background: rgba(255,255,255,0.05);
+  margin: 7px 0;
+}
+.chatCardFeatures {
+  display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px;
+}
+.chatCardFeatureChip {
+  font-size: 9px; padding: 1px 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: rgba(150,170,210,0.55);
+}
+.chatCardProgressBar {
+  height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.05); overflow: hidden;
+}
+.chatCardProgressFill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa);
+  box-shadow: 0 0 6px #22d3ee;
+  width: 100%;
+}
+
+/* ─── 节点：Store ─── */
+.storeCard {
+  width: 160px;
+  background: rgba(10, 14, 26, 0.88);
+  border: 1px solid rgba(167,139,250,0.12);
+  border-radius: 8px;
+  padding: 8px 11px;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.storeCard:hover { border-color: rgba(167,139,250,0.3); }
+.storeCardSelected {
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 0 1px #a78bfa, 0 0 16px rgba(167,139,250,0.18) !important;
+}
+.storeHead { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.storeDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #a78bfa; flex-shrink: 0;
+  box-shadow: 0 0 6px #a78bfa;
+}
+.storeTitle { font-size: 11px; font-weight: 600; color: rgba(200,210,240,0.8); }
+.storeDesc { font-size: 10px; color: rgba(120,130,165,0.5); line-height: 1.4; }
+.storeLines {
+  font-size: 9px; font-family: 'JetBrains Mono', monospace;
+  color: rgba(167,139,250,0.4); margin-top: 3px;
+}
+
+/* ─── 节点：API ─── */
+.apiCard {
+  width: 150px;
+  background: rgba(10, 18, 18, 0.88);
+  border: 1px solid rgba(52,211,153,0.12);
+  border-radius: 8px;
+  padding: 8px 11px;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.apiCard:hover { border-color: rgba(52,211,153,0.3); }
+.apiCardSelected {
+  border-color: #34d399 !important;
+  box-shadow: 0 0 0 1px #34d399, 0 0 14px rgba(52,211,153,0.15) !important;
+}
+.apiHead { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.apiDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #34d399; flex-shrink: 0;
+  box-shadow: 0 0 6px #34d399;
+}
+.apiTitle { font-size: 11px; font-weight: 600; color: rgba(200,235,220,0.8); }
+.apiDesc { font-size: 10px; color: rgba(100,150,130,0.5); line-height: 1.4; }
+
+/* ─── 节点：Component ─── */
+.compCard {
+  width: 155px;
+  background: rgba(18, 14, 10, 0.88);
+  border: 1px solid rgba(251,191,36,0.1);
+  border-radius: 8px;
+  padding: 8px 11px;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.compCard:hover { border-color: rgba(251,191,36,0.28); }
+.compCardSelected {
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 0 1px #fbbf24, 0 0 14px rgba(251,191,36,0.14) !important;
+}
+.compHead { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.compDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #fbbf24; flex-shrink: 0;
+  box-shadow: 0 0 5px #fbbf24;
+}
+.compTitle { font-size: 11px; font-weight: 600; color: rgba(240,220,180,0.8); }
+.compDesc { font-size: 10px; color: rgba(150,130,80,0.55); line-height: 1.4; }
+
+/* 图例 */
+.legend {
+  position: absolute; bottom: 14px; right: 14px;
+  display: flex; gap: 10px;
+  font-size: 9px; color: rgba(120,140,180,0.45);
+  background: rgba(7,8,15,0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 6px; padding: 6px 10px;
+  z-index: 10;
+}
+.legendDot {
+  width: 7px; height: 7px; border-radius: 50%;
+  display: inline-block; margin-right: 4px;
+}
