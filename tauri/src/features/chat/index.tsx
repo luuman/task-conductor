@@ -1033,30 +1033,16 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
                 <div className={s.empty}><span className={s.emptyIcon}>💬</span><span>{t('admin.sessions.select_session')}</span></div>
               ) : (
                 <Virtuoso
+                  key={selectedId}
                   ref={virtuosoRef}
                   data={vitems}
                   style={{ height: '100%', width: '100%' }}
                   increaseViewportBy={600}
                   rangeChanged={handleRangeChanged}
                   startReached={hasMore ? loadMore : undefined}
-                  computeItemKey={(_, item) => item.key}
+                  computeItemKey={computeItemKey}
                   components={virtuosoComponents}
-                  itemContent={(_, item) => {
-                    if (item.kind === 'user') {
-                      return (
-                        <div className={s.turnSection} style={{ padding: '0 20px' }}>
-                          <UserMsgRow rawText={item.question.text}>
-                            <div className={s.richText}>{stripDomContext(item.question.text)}</div>
-                          </UserMsgRow>
-                        </div>
-                      )
-                    }
-                    return (
-                      <div style={{ padding: '0 20px' }}>
-                        <Renderer steps={item.steps} />
-                      </div>
-                    )
-                  }}
+                  itemContent={itemContent}
                 />
               )}
             </CodeExpandCtx.Provider>
