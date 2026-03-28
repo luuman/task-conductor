@@ -176,13 +176,20 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
   }
 
   // Agent — 统一 CodeBlock 外框 + RichTextBlock 内容
-  if (step.category === 'agent' && step.toolResult) {
+  if (step.category === 'agent') {
     const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
-    return (
-      <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
-        <RichTextBlock text={step.toolResult} />
-      </CodeBlock>
-    )
+    const prompt = String(step.toolInput?.prompt || '')
+    if (step.toolResult) {
+      return (
+        <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+          <RichTextBlock text={step.toolResult} />
+        </CodeBlock>
+      )
+    }
+    if (prompt) {
+      return <CodeBlock code={prompt} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color} />
+    }
+    return null
   }
 
   // Bash
