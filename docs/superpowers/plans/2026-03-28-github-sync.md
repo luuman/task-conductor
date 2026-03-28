@@ -549,14 +549,15 @@ import subprocess
 from pathlib import Path
 
 
-def git_run(cwd: str, *args: str) -> str:
-    """运行 git 命令，返回 stdout，失败时抛 CalledProcessError。"""
+def git_run(cwd: str, *args: str, timeout: int = 300) -> str:
+    """运行 git 命令，返回 stdout，失败时抛 CalledProcessError。timeout 默认 300s。"""
     result = subprocess.run(
         ["git"] + list(args),
         cwd=cwd,
         capture_output=True,
         text=True,
         check=True,
+        timeout=timeout,
     )
     return result.stdout.strip()
 
