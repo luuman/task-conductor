@@ -1018,7 +1018,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
       return (
         <div className={s.turnSection} style={{ padding: '0 20px' }}>
           <UserMsgRow rawText={item.question.text}>
-            <div className={s.richText}>{stripDomContext(item.question.text)}</div>
+            <div className={s.userText}>{stripDomContext(item.question.text)}</div>
           </UserMsgRow>
         </div>
       )
