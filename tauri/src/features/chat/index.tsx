@@ -883,8 +883,8 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
   const liveItems = useMemo<VItem[]>(() => {
-    const displayMessages: AiSessionMessage[] = currentReply
-      ? [...chatMessages, { role: 'assistant', ts: new Date().toISOString(), blocks: [{ type: 'text', text: currentReply }] }]
+    const displayMessages = currentReply
+      ? [...chatMessages, { role: 'assistant' as const, ts: new Date().toISOString(), blocks: [{ type: 'text' as const, text: currentReply }] }]
       : chatMessages
 
     const items: VItem[] = displayMessages.map((message, i) => ({
