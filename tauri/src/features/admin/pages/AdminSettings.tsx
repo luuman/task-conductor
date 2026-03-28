@@ -11,14 +11,8 @@ import styles from './admin-settings.module.css'
 
 const ALL_STAGES = ['input', 'analysis', 'prd', 'ui', 'plan', 'dev', 'test', 'deploy', 'monitor']
 
-const CHAT_STYLES = [
-  { key: 'a', label: 'A 竖线时间线' },
-  { key: 'b', label: 'B 卡片瀑布' },
-  { key: 'd', label: 'D GitHub PR' },
-  { key: 'g', label: 'G 气泡聊天' },
-  { key: 'h', label: 'H 折叠手风琴' },
-] as const
-type ChatStyleKey = typeof CHAT_STYLES[number]['key']
+const CHAT_STYLE_KEYS = ['a', 'b', 'd', 'g', 'h'] as const
+type ChatStyleKey = typeof CHAT_STYLE_KEYS[number]
 const CHAT_STYLE_LS_KEY = 'tc_chat_style'
 
 const CACHE_KEY = 'tc-settings-cache'
