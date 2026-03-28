@@ -640,7 +640,7 @@ export function PromptInput() {
         {isGenerating && !isPicking && (
           <div className={s.pThinking}>
             <span className={s.pThinkingDot} />
-            <span>正在生成回复...</span>
+            <span>{t('prompt_input.generating')}</span>
           </div>
         )}
 
