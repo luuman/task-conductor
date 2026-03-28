@@ -61,7 +61,7 @@
 .userCopyBtn:hover { background: var(--tc-accent-a10); color: var(--tc-foreground); }
 .userCopyBtnDone { color: var(--tc-success, #4ade80) !important; opacity: 1 !important; }
 .queryPill {
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 6px;
   background: var(--tc-accent-a8);
   border: 1px solid var(--tc-accent-a20);
   border-radius: 12px;
@@ -71,6 +71,32 @@
   max-width: 80%;
 }
 .queryPill .richText { min-width: 0; }
+.queryPillBody { position: relative; }
+.queryPillBodyCollapsed {
+  max-height: 80px;
+  overflow: hidden;
+}
+.queryPillBodyCollapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, var(--tc-accent-a8, rgba(0,0,0,0.12)));
+  pointer-events: none;
+}
+.queryPillExpandBtn {
+  align-self: flex-start;
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  letter-spacing: 0.02em;
+}
+.queryPillExpandBtn:hover { color: var(--tc-foreground); }
 .turnSection { margin-top: 12px;margin-bottom: 12px; display: flex; flex-direction: column; }
 
 /* ── 后台任务通知横幅 ── */
