@@ -351,7 +351,7 @@ export function StyleH({ steps }: { steps: TimelineStep[] }) {
         return (
           <React.Fragment key={step.id}>
             {step.kind === 'text' ? (
-              <RichText text={step.text!} />
+              <div className={s.chatAiBlock}><RichText text={step.text!} /></div>
             ) : (
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
