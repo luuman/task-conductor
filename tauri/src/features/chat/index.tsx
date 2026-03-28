@@ -931,16 +931,16 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   useEffect(() => { activeQRef.current = activeQ }, [activeQ])
 
   // 滚动时自动高亮当前可见的问题
+  // 用视口上 1/3 处作为判断基准：问题项进入该区域就立即切换，比只用 startIndex 更灵敏
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
+  const handleRangeChanged = useCallback(({ startIndex, endIndex }: { startIndex: number; endIndex: number }) => {
     const indices = questionVirtuosoIndicesRef.current
+    const threshold = startIndex + Math.max(1, Math.floor((endIndex - startIndex) / 3))
     for (let i = indices.length - 1; i >= 0; i--) {
-      if (indices[i] <= startIndex) {
-        const next = i
-        if (activeQRef.current !== next) {
-          setTimeout(() => {
-            if (activeQRef.current !== next) setActiveQ(next)
-          }, 0)
+      if (indices[i] <= threshold) {
+        if (activeQRef.current !== i) {
+          activeQRef.current = i
+          setActiveQ(i)
         }
         break
       }
