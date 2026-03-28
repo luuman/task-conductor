@@ -875,7 +875,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     setCurrentReply('')
   }, [selectedId, setClaudeSessionId, setCurrentReply])
 
-  // 切换会话时清空 AI 对话记录，不把 transcript 同步进 chatMessages（那会导致 ChatFooter 重复渲染）
+  // 切换会话时清空 AI 对话记录，不把 transcript 同步进 chatMessages（那会导致 live 消息重复渲染）
   useEffect(() => {
     if (chatMessages.length > 0) setChatMessages([])
   }, [selectedId, chatMessages.length, setChatMessages])
