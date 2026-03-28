@@ -559,7 +559,7 @@ export function PromptInput() {
             <button
               ref={modelBtnRef}
               className={s.pModelBtn}
-              title="选择模型"
+              title={t('prompt_input.select_model')}
               onClick={() => {
                 if (showModelMenu) { setShowModelMenu(false); return }
                 const r = modelBtnRef.current?.getBoundingClientRect()
