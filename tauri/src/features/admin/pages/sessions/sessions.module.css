@@ -1304,6 +1304,10 @@
 .mdLi {
   line-height: 1.4;
 }
+.mdLi > .mdP {
+  line-height: 1.4;
+  margin: 0;
+}
 
 .mdStrong {
   font-weight: 600;
