@@ -824,7 +824,14 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const virtuosoRef = useRef<VirtuosoHandle>(null)
 
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
-  const { messages: chatMessages, currentReply } = useChatStore()
+  const {
+    messages: chatMessages,
+    currentReply,
+    claudeSessionId,
+    setMessages: setChatMessages,
+    setCurrentReply,
+    setClaudeSessionId,
+  } = useChatStore()
 
   // 获取当前项目 cwd（与 /sessions 页面一致，使用 appStore）
   const activeProjectId = useAppStore((st) => st.activeProjectId)
@@ -855,6 +862,26 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
       selectSession(sessions[0].session_id)
     }
   }, [sessions, selectedId, selectSession])
+
+  useEffect(() => {
+    if (!claudeSessionId) return
+    if (claudeSessionId === selectedId) return
+    if (!sessions.some(s => s.session_id === claudeSessionId)) return
+    selectSession(claudeSessionId)
+  }, [claudeSessionId, selectedId, sessions, selectSession])
+
+  useEffect(() => {
+    setClaudeSessionId(selectedId || null)
+    setCurrentReply('')
+  }, [selectedId, setClaudeSessionId, setCurrentReply])
+
+  useEffect(() => {
+    if (!selectedId) {
+      setChatMessages([])
+      return
+    }
+    setChatMessages(transcript)
+  }, [selectedId, transcript, setChatMessages])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null

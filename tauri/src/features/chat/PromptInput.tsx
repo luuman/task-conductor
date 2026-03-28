@@ -197,7 +197,7 @@ export function PromptInput() {
   const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft,
           selectedModel, setSelectedModel, lastStats,
           permissionMode, setPermissionMode } = useChatStore()
-  const { send, stop, sendNewSession } = useChatStream()
+  const { send, stop } = useChatStream()
   const [modelMenuPos, setModelMenuPos] = useState<{ left: number; bottom: number } | null>(null)
   const [permMenuPos, setPermMenuPos] = useState<{ left: number; bottom: number } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -431,7 +431,6 @@ export function PromptInput() {
               style={m.id === permissionMode ? { color: 'var(--tc-accent)', display: 'flex', alignItems: 'center' } : { display: 'flex', alignItems: 'center' }}
               onClick={() => {
                 setPermissionMode(m.id)
-                sendNewSession()
                 setShowPermMenu(false)
               }}
             >
