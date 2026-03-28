@@ -314,9 +314,12 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
   }, [])
 
   // WS: subscribe to active session for real-time refresh
+  // 依赖只用原始值（session_id / status），避免 selectedSession 对象引用频繁变更触发重连
+  const selectedSessionId = selectedSession?.session_id ?? null
+  const selectedSessionStatus = selectedSession?.status ?? null
   useEffect(() => {
-    if (!selectedSession || selectedSession.status !== 'active') return
-    const sid = selectedSession.session_id
+    if (!selectedSessionId || selectedSessionStatus !== 'active') return
+    const sid = selectedSessionId
     const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/session/${sid}`
     const channel = `session-chat:${sid}`
 
@@ -339,7 +342,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
       wsManager.disconnect(channel)
       clearInterval(pollId)
     }
-  }, [selectedSession, appendNewMessages, refreshSessions, transcriptPollInterval])
+  }, [selectedSessionId, selectedSessionStatus, appendNewMessages, refreshSessions, transcriptPollInterval])
 
   return {
     sessions,
