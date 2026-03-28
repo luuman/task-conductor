@@ -640,16 +640,16 @@ export const mdComponents: Components = {
     const text = getChildText(children).trim()
     const card = tryRenderFileRef(text)
     if (card) return card
-    return <p className={styles.mdP}>{children}</p>
+    return <p className={mdStyles.mdP}>{children}</p>
   },
-  h1: ({ children }) => <h1 className={styles.mdH1}>{children}</h1>,
-  h2: ({ children }) => <h2 className={styles.mdH2}>{children}</h2>,
-  h3: ({ children }) => <h3 className={styles.mdH3}>{children}</h3>,
-  ul: ({ children }) => <ul className={styles.mdUl}>{children}</ul>,
-  ol: ({ children }) => <ol className={styles.mdOl}>{children}</ol>,
-  li: ({ children }) => <li className={styles.mdLi}>{children}</li>,
-  strong: ({ children }) => <strong className={styles.mdStrong}>{children}</strong>,
-  em: ({ children }) => <em className={styles.mdEm}>{children}</em>,
+  h1: ({ children }) => <h1 className={mdStyles.mdH1}>{children}</h1>,
+  h2: ({ children }) => <h2 className={mdStyles.mdH2}>{children}</h2>,
+  h3: ({ children }) => <h3 className={mdStyles.mdH3}>{children}</h3>,
+  ul: ({ children }) => <ul className={mdStyles.mdUl}>{children}</ul>,
+  ol: ({ children }) => <ol className={mdStyles.mdOl}>{children}</ol>,
+  li: ({ children }) => <li className={mdStyles.mdLi}>{children}</li>,
+  strong: ({ children }) => <strong className={mdStyles.mdStrong}>{children}</strong>,
+  em: ({ children }) => <em className={mdStyles.mdEm}>{children}</em>,
   code: ({ children, className }) => {
     if (className?.includes('language-')) {
       const lang = className.replace('language-', '')
@@ -681,14 +681,14 @@ export const mdComponents: Components = {
       return <CollapsibleCode raw={raw} lineCount={lineCount} />
     }
     return (
-      <code className={styles.mdInlineCode}>
+      <code className={mdStyles.mdInlineCode}>
         {children}
       </code>
     )
   },
-  pre: ({ children }) => <pre className={styles.mdPre}>{children}</pre>,
+  pre: ({ children }) => <pre className={mdStyles.mdPre}>{children}</pre>,
   blockquote: ({ children }) => (
-    <blockquote className={styles.mdBlockquote}>
+    <blockquote className={mdStyles.mdBlockquote}>
       {children}
     </blockquote>
   ),
@@ -705,22 +705,22 @@ export const mdComponents: Components = {
     // 本地文件路径 → InlineImgCard
     return <InlineImgCard path={src} />
   },
-  hr: () => <hr className={styles.mdHr} />,
+  hr: () => <hr className={mdStyles.mdHr} />,
   a: ({ href, children }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={styles.mdLink}>
+    <a href={href} target="_blank" rel="noopener noreferrer" className={mdStyles.mdLink}>
       {children}
     </a>
   ),
   table: ({ children }) => (
-    <div className={styles.mdTableWrap}>
-      <table className={styles.mdTable}>{children}</table>
+    <div className={mdStyles.mdTableWrap}>
+      <table className={mdStyles.mdTable}>{children}</table>
     </div>
   ),
   th: ({ children }) => (
-    <th className={styles.mdTh}>{children}</th>
+    <th className={mdStyles.mdTh}>{children}</th>
   ),
   td: ({ children }) => (
-    <td className={styles.mdTd}>{children}</td>
+    <td className={mdStyles.mdTd}>{children}</td>
   ),
 }
 
