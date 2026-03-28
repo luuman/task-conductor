@@ -210,7 +210,7 @@ function RichText({ text }: { text: string }) {
 // 样式渲染器
 // ════════════════════════════════════════════════
 
-function StyleA({ steps }: { steps: TimelineStep[] }) {
+export function StyleA({ steps }: { steps: TimelineStep[] }) {
   return (
     <div className={s.aTl}>
       {steps.map((step) => (
