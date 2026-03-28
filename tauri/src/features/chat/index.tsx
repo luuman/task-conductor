@@ -921,9 +921,13 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   // 滚动时自动高亮当前可见的问题
   const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
+    // rangeChanged 由 Virtuoso 内部的 useLayoutEffect 同步调用
+    // 直接 setState 会触发 React 同步刷新 → layout effect 再次触发 → 无限循环
+    // 用 setTimeout 逃出 layout effect 同步链
     for (let i = questionVirtuosoIndices.length - 1; i >= 0; i--) {
       if (questionVirtuosoIndices[i] <= startIndex) {
-        setActiveQ(i)
+        const next = i
+        setTimeout(() => setActiveQ(next), 0)
         break
       }
     }
