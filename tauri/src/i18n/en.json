@@ -785,6 +785,20 @@
     "commit_gen": "Generate",
     "commit_copy": "Copy"
   },
+  "chat": {
+    "filter": {
+      "all": "All",
+      "live": "Local only",
+      "archived": "Archived",
+      "favorite": "Favorites"
+    },
+    "session": {
+      "archived": "Archived"
+    },
+    "sync": {
+      "pull": "Sync now"
+    }
+  },
   "prompt_input": {
     "quick_chip_clarify": "Clarify user question",
     "quick_chip_context": "Define user context",

@@ -27,6 +27,7 @@ from .routers import ai as ai_router
 from .routers import interview as interview_router
 from .routers import canvas as canvas_router
 from .routers import screenshot as screenshot_router
+from .routers import sync as sync_router
 from .feishu.dispatcher import router as feishu_router
 from .session import pin_session
 from .tunnel import start_cloudflare_tunnel, get_tunnel_url, stop_tunnel, detect_tunnel_url_from_request
@@ -103,11 +104,31 @@ async def lifespan(app: FastAPI):
         if fixed_backend:
             asyncio.create_task(_send_startup_card(pin, fixed_backend))
 
+    # sync 模块：确保 sync_config 表有默认行（Task 2 会创建此函数）
+    try:
+        from .sync.config import ensure_sync_config
+        ensure_sync_config()
+    except ImportError:
+        pass  # sync 模块尚未创建时忽略
+
+    # APScheduler：每日零点触发 GitHub 备份 Job
+    _scheduler = None
+    try:
+        from apscheduler.schedulers.asyncio import AsyncIOScheduler
+        from .sync.job import run_sync_job as _run_sync_job
+        _scheduler = AsyncIOScheduler()
+        _scheduler.add_job(_run_sync_job, "cron", hour=0, minute=0, id="github_sync")
+        _scheduler.start()
+    except (ImportError, Exception) as e:
+        print(f"  [Sync] APScheduler 初始化失败（跳过）: {e}")
+
     # 飞书初始化
     from .feishu.client import feishu_client as _fc
     if _fc.enabled:
         asyncio.create_task(_init_feishu())
     yield
+    if _scheduler is not None:
+        _scheduler.shutdown(wait=False)
     stop_tunnel()
     await _send_shutdown_card()
 
@@ -388,6 +409,7 @@ app.include_router(ai_router.router)              # POST /api/ai/inline-edit
 app.include_router(interview_router.router)       # Interview API
 app.include_router(canvas_router.router)           # Canvas API
 app.include_router(screenshot_router.router)      # POST /api/tools/screenshot
+app.include_router(sync_router.router)            # GET/PUT /api/sync/status|config|crypto-params|push
 app.include_router(feishu_router)
 
 # ── MCP Server（SSE 端点，供 Claude Code 调用）──────────────────
