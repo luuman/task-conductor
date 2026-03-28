@@ -319,7 +319,7 @@ export function PromptInput() {
     const displayText = text || (attachments.length > 0 ? '' : `请帮我分析以下 ${domCtxList.length} 个元素`)
     const fullText = [displayText, attachText, ctxText].filter(Boolean).join('')
     const userMsg = displayText + attachText
-    console.log(`[PromptInput] handleSend: attachments=${attachments.length} attachText="${attachText.slice(0, 120)}" userMsg="${userMsg.slice(0, 120)}"`)
+    console.log(`[发送消息] 附件数=${attachments.length} 附件文本="${attachText.slice(0, 120)}" 用户消息="${userMsg.slice(0, 120)}"`)
     addMessage(makeAiMsg('user', fullText))
     send(fullText)
     setValue('')
