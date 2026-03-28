@@ -785,6 +785,20 @@
     "commit_gen": "一键生成",
     "commit_copy": "复制"
   },
+  "chat": {
+    "filter": {
+      "all": "全部",
+      "live": "仅本地",
+      "archived": "仅归档",
+      "favorite": "收藏"
+    },
+    "session": {
+      "archived": "已归档"
+    },
+    "sync": {
+      "pull": "立即同步"
+    }
+  },
   "prompt_input": {
     "quick_chip_clarify": "澄清用户问题",
     "quick_chip_context": "定义用户上下文",

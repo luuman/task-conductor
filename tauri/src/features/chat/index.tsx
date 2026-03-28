@@ -851,12 +851,15 @@ function relativeTime(iso: string): string {
 }
 
 // ── 会话行渲染（Notion 表格风格：圆点 | 标题 | 事件数 | 时间） ──
+// desc 格式: status|events|time|project|source|is_favorite
 function SessionItem(option: { value: string; label: string; desc?: string }) {
   const parts = (option.desc || '').split('|')
   const status = parts[0] || ''
   const events = parts[1] || ''
   const time = parts[2] || ''
   const project = parts[3] || ''
+  const source = parts[4] || 'live'
+  const isFavorite = parts[5] === '1'
   const dotBg = status === 'active' ? '#56d364' : status === 'idle' ? '#e3b341' : '#8b949e'
 
   return (
@@ -868,6 +871,12 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
         <span style={{ flexShrink: 0, fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'var(--tc-background-tertiary)', color: 'var(--tc-foreground-secondary)', marginRight: 4, maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project}</span>
       )}
       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11, fontWeight: 500 }}>{option.label}</span>
+      {isFavorite && (
+        <span style={{ flexShrink: 0, fontSize: 10, color: '#f5a623', marginRight: 2 }}>★</span>
+      )}
+      {source === 'archived' && (
+        <span style={{ flexShrink: 0, fontSize: 9, padding: '1px 3px', borderRadius: 3, background: 'var(--tc-background-tertiary)', color: 'var(--tc-foreground-secondary)', marginRight: 2 }}>☁</span>
+      )}
       <span style={{ width: 30, flexShrink: 0, textAlign: 'right', fontSize: 10, fontFamily: "'Geist Mono', monospace", color: 'var(--tc-foreground-secondary)' }}>{events}</span>
       <span style={{ width: 50, flexShrink: 0, textAlign: 'right', fontSize: 9, color: 'var(--tc-foreground-secondary)' }}>{time}</span>
     </>
@@ -875,6 +884,8 @@ function SessionItem(option: { value: string; label: string; desc?: string }) {
 }
 
 import { PromptInput } from './PromptInput'
+import { useArchivedSessions, useToggleFavorite, useDeleteArchived } from './useArchivedSessions'
+import type { ArchivedSession } from '../../lib/tauri-sync'
 
 // Virtuoso 虚拟列表项类型
 type VItem =
@@ -928,10 +939,45 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
 
   // 使用 useSessionData 统一管理分页加载 + WS 实时更新
   const {
-    sessions, selectedId, selectSession,
+    sessions: liveSessions, selectedId, selectSession,
     transcript, transcriptLoading: loading,
     loadMore, hasMore, loadAll, allQuestions,
   } = useSessionData({ filterByCwd: cwdReady ? (global ? undefined : projectCwd) : '\x00', autoLoadAll: false, initialLimit: 200 })
+
+  // 归档会话（来自 Tauri IPC，仅在 Tauri 环境下可用）
+  const { data: archivedSessions = [] } = useArchivedSessions()
+  const toggleFavoriteMutation = useToggleFavorite()
+  const deleteArchivedMutation = useDeleteArchived()
+
+  // 筛选器状态
+  type FilterType = 'all' | 'live' | 'archived' | 'favorite'
+  const [filter, setFilter] = useState<FilterType>('all')
+
+  // 合并 live + archived 会话，按最新事件时间排序，archived 去重
+  const mergedSessions = useMemo(() => {
+    const liveIds = new Set(liveSessions.map((s: any) => s.session_id))
+    const archivedOnly = archivedSessions
+      .filter((s: ArchivedSession) => !liveIds.has(s.session_id) && s.is_deleted !== 1)
+      .map((s: ArchivedSession) => ({ ...s, source: 'archived' as const, last_seen_at: s.last_event_at }))
+    return [
+      ...liveSessions.map((s: any) => ({ ...s, source: 'live' as const })),
+      ...archivedOnly,
+    ].sort((a, b) => {
+      const ta = (a as any).last_seen_at || (a as any).last_event_at || ''
+      const tb = (b as any).last_seen_at || (b as any).last_event_at || ''
+      return tb.localeCompare(ta)
+    })
+  }, [liveSessions, archivedSessions])
+
+  // 根据筛选器过滤
+  const sessions = useMemo(() => {
+    switch (filter) {
+      case 'live': return mergedSessions.filter((s) => s.source === 'live')
+      case 'archived': return mergedSessions.filter((s) => s.source === 'archived')
+      case 'favorite': return mergedSessions.filter((s) => (s as any).is_favorite === 1)
+      default: return mergedSessions
+    }
+  }, [mergedSessions, filter])
 
   // 自动选中第一个会话
   useEffect(() => {
@@ -1135,11 +1181,35 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     <div className={s.page}>
       <div className={s.topBar}>
         <span className={s.topLabel}>{t('chat_sidebar.session_label')}</span>
+        {/* 筛选器 */}
+        <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+          {(['all', 'live', 'archived', 'favorite'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              style={{
+                padding: '2px 8px',
+                fontSize: 10,
+                borderRadius: 4,
+                border: '1px solid var(--tc-border)',
+                background: filter === f ? 'var(--tc-accent)' : 'var(--tc-panel-bg)',
+                color: filter === f ? 'var(--tc-accent-fg, #fff)' : 'var(--tc-foreground-secondary)',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {f === 'all' ? t('chat.filter.all')
+                : f === 'live' ? t('chat.filter.live')
+                : f === 'archived' ? t('chat.filter.archived')
+                : t('chat.filter.favorite')}
+            </button>
+          ))}
+        </div>
         <Select
-          options={sessions.map(ss => ({
+          options={sessions.map((ss: any) => ({
             value: ss.session_id,
             label: stripDomContext(ss.summary || '') || (ss.note?.alias || t('chat_sidebar.session_default_label', { id: ss.session_id.slice(0, 8) })),
-            desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${global ? (ss.cwd?.split('/').pop() || '') : ''}`,
+            desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at || ss.last_event_at || '')}|${global ? (ss.cwd?.split('/').pop() || '') : ''}|${ss.source || 'live'}|${(ss as any).is_favorite || 0}`,
           }))}
           value={selectedId || ''}
           onChange={v => selectSession(v)}
@@ -1150,6 +1220,41 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
           renderItem={SessionItem}
           style={{ flex: 1, minWidth: 0 }}
         />
+        {/* 归档会话操作按钮：★ 收藏 / 🗑 软删除 */}
+        {selectedId && (() => {
+          const sel = sessions.find((s: any) => s.session_id === selectedId)
+          if (!sel || (sel as any).source !== 'archived') return null
+          const isFav = (sel as any).is_favorite === 1
+          return (
+            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+              <button
+                title={t('chat.filter.favorite')}
+                onClick={() => toggleFavoriteMutation.mutate(selectedId)}
+                style={{
+                  padding: '2px 6px', fontSize: 12, borderRadius: 4,
+                  border: '1px solid var(--tc-border)',
+                  background: isFav ? 'var(--tc-accent)' : 'var(--tc-panel-bg)',
+                  color: isFav ? 'var(--tc-accent-fg, #fff)' : '#f5a623',
+                  cursor: 'pointer',
+                }}
+              >★</button>
+              <button
+                title={t('common.delete')}
+                onClick={() => {
+                  deleteArchivedMutation.mutate(selectedId)
+                  selectSession('')
+                }}
+                style={{
+                  padding: '2px 6px', fontSize: 12, borderRadius: 4,
+                  border: '1px solid var(--tc-border)',
+                  background: 'var(--tc-panel-bg)',
+                  color: '#f87171',
+                  cursor: 'pointer',
+                }}
+              >🗑</button>
+            </div>
+          )
+        })()}
       </div>
 
       <SelectionToolbar containerRef={mainAreaRef} />
