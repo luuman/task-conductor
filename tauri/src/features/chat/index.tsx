@@ -588,6 +588,7 @@ function UserMsgRow({ rawText, children }: { rawText: string; children: React.Re
 // 选词浮动工具栏
 // ════════════════════════════════════════════════
 function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const { t } = useTranslation()
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
   const [selText, setSelText] = useState('')
   const [copied, setCopied] = useState(false)
