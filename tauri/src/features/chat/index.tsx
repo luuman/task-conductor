@@ -476,20 +476,26 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
               </span>
             </div>
             <div className={s.qNav} ref={qNavRef}>
-              {navQuestions.map((q, i) => (
-                <a
-                  key={`nq-${i}`}
-                  className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}
-                  href="#"
-                  onClick={e => {
-                    e.preventDefault()
-                    onScrollToQuestion?.(i)
-                  }}
-                >
-                  <span className={s.qNavNum}>Q{i + 1}</span>
-                  <span className={s.qNavText}>{stripDomContext(q.text)}</span>
-                </a>
-              ))}
+              {navQuestions.map((q, i) => {
+                const intent = questionIntents[i]
+                const intentCls = intent ? (s as Record<string, string>)[`intent_${intent}`] : ''
+                const intentLabel = intent ? t(`chat_sidebar.intent_${intent}`) : ''
+                return (
+                  <a
+                    key={`nq-${i}`}
+                    className={`${s.qNavItem} ${i === activeQ ? s.qNavActive : ''}`}
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault()
+                      onScrollToQuestion?.(i)
+                    }}
+                  >
+                    <span className={s.qNavNum}>Q{i + 1}</span>
+                    <span className={s.qNavText}>{stripDomContext(q.text)}</span>
+                    {intentLabel && <span className={`${s.intentBadge} ${intentCls}`}>{intentLabel}</span>}
+                  </a>
+                )
+              })}
             </div>
           </div>
         </>
