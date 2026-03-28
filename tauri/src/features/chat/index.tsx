@@ -440,7 +440,7 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
         <>
           <div className={s.sbSection}>
             <div className={s.sbTitle} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>{t('chat_sidebar.question_nav')} ({navQuestions.length})</span>
+              <span>{t('chat_sidebar.question_nav')} ({navQuestions.length}{totalQCount > navQuestions.length ? `/${totalQCount}` : ''})</span>
               <span style={{ flex: 1 }} />
               <span className={s.expandToggleWrap}>
                 <button
