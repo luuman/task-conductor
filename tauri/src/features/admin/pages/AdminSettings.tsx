@@ -236,16 +236,65 @@ export default function AdminSettings() {
             </div>
             <div className={styles.fieldGroup}>
               <span className={styles.fieldLabel}>{t('settings.appearance.theme')}</span>
-              <div className={styles.pillGroup}>
-                {themes.map(name => (
-                  <button
-                    key={name}
-                    className={theme === name ? styles.pillActive : styles.pill}
-                    onClick={() => setTheme(name)}
-                  >
-                    {name}
-                  </button>
-                ))}
+              <div className={styles.themeGrid}>
+                {themeList.map(t2 => {
+                  const colors = t2[mode] ?? t2.dark
+                  const bg1    = colors['base.bg-primary']
+                  const bg2    = colors['base.bg-secondary']
+                  const accent = colors['base.accent']
+                  const fg1    = colors['base.fg-primary']
+                  const fg2    = colors['base.fg-secondary']
+                  const border = colors['base.border']
+                  const active = theme === t2.name
+                  return (
+                    <button
+                      key={t2.name}
+                      className={active ? styles.themeCardActive : styles.themeCard}
+                      style={active ? { borderColor: accent } : undefined}
+                      onClick={() => setTheme(t2.name)}
+                      title={t2.name}
+                    >
+                      <div className={styles.themePreview} style={{ background: bg1 }}>
+                        <div className={styles.themePreviewSidebar}
+                          style={{ background: bg1, borderRight: `1px solid ${border}` }}>
+                          <div style={{ width: 8, height: 8, borderRadius: 2, margin: '5px auto 3px',
+                            background: `linear-gradient(135deg, ${accent}, ${accent}88)` }} />
+                          <div style={{ width: 8, height: 3, borderRadius: 1, margin: '0 auto 2px',
+                            background: `${accent}44` }} />
+                          <div style={{ width: 8, height: 3, borderRadius: 1, margin: '0 auto 2px',
+                            background: border }} />
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ height: 13, background: bg2, borderBottom: `1px solid ${border}`,
+                            display: 'flex', alignItems: 'center', padding: '0 4px', gap: 3 }}>
+                            <div style={{ flex: 1, height: 3, borderRadius: 2, background: fg1, opacity: 0.7 }} />
+                            <div style={{ width: 10, height: 10, borderRadius: 2, background: accent }} />
+                          </div>
+                          <div style={{ flex: 1, padding: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <div style={{ background: bg2, border: `1px solid ${border}`, borderRadius: 3,
+                              padding: '3px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <div style={{ height: 3, width: '80%', borderRadius: 2, background: fg1 }} />
+                              <div style={{ height: 2, width: '55%', borderRadius: 1, background: fg2 }} />
+                            </div>
+                            <div style={{ background: bg2, border: `1px solid ${border}`, borderRadius: 3,
+                              padding: '3px 4px', display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <div style={{ flex: 1, height: 2, borderRadius: 1, background: fg2 }} />
+                              <div style={{ width: 16, height: 7, borderRadius: 2, background: accent }} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={styles.themeCardInfo} style={{ background: bg2, borderTop: `1px solid ${border}` }}>
+                        <span className={styles.themeCardName} style={{ color: fg1 }}>{t2.name}</span>
+                        <div className={styles.themeSwatches}>
+                          <div className={styles.themeSwatch} style={{ background: bg1 }} />
+                          <div className={styles.themeSwatch} style={{ background: accent }} />
+                          <div className={styles.themeSwatch} style={{ background: fg1 }} />
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
             <div className={styles.fieldGroup}>
