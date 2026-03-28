@@ -395,7 +395,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
     return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} pillColor={color} />
   }
   if (step.toolResult) {
-    const displayName = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || ''
+    const displayName = toolMap[step.toolName || ''] || step.toolName || ''
     return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={displayName} variant={variant} pillColor={color} />
   }
   return null
