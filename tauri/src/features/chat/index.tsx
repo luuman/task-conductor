@@ -1038,6 +1038,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
                   data={vitems}
                   style={{ height: '100%', width: '100%' }}
                   increaseViewportBy={600}
+                  suppressFlushSync
                   rangeChanged={handleRangeChanged}
                   startReached={hasMore ? loadMore : undefined}
                   computeItemKey={computeItemKey}
