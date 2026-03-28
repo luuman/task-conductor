@@ -738,6 +738,8 @@
     "loaded_count": "已加载 {{loaded}} / {{total}}",
     "session_label": "会话",
     "copy_message": "复制消息",
+    "collapse": "收起",
+    "expand_all": "展开全部",
     "selection_copy": "复制",
     "selection_copied": "✓ 已复制",
     "thinking": "思考中...",
