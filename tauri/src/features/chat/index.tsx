@@ -234,7 +234,7 @@ export function StyleA({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-function StyleB({ steps }: { steps: TimelineStep[] }) {
+export function StyleB({ steps }: { steps: TimelineStep[] }) {
   return (
     <>
       {steps.map((step) => (
