@@ -1858,7 +1858,7 @@ export function UserCard({ msg }: { msg: TranscriptMessage }) {
     <div className={styles.msgRowRight}>
       <div className={styles.bubbleWrap}>
         <div className={styles.userBubble}>
-          <div className={styles.mdContent}>
+          <div className={styles.userBubbleText}>
             {text}
           </div>
         </div>
