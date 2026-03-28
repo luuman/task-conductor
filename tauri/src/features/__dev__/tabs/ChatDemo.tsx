@@ -1,7 +1,8 @@
 /**
- * ChatDemo — 画布卡片 + SVG 手绘连线（不依赖 xyflow edge）
+ * ChatDemo — 画布卡片 + SVG 手绘连线
+ * 展示 /chat 页面的 5 种实际渲染样式（a/b/d/g/h）与原始消息并排对比
  */
-import React, { useState, useMemo, useCallback, useEffect, memo } from 'react'
+import React, { useMemo, useCallback, useEffect, memo } from 'react'
 import {
   IconUser, IconPencil, IconLayoutGrid, IconClipboard, IconSettings, IconSearch,
   IconFileText, IconTerminal, IconBot, IconCircleHelp, IconGlobe, IconRadio,
@@ -23,17 +24,10 @@ import {
 import '@xyflow/react/dist/style.css'
 import { DEMO_MESSAGES, DEMO_SECTIONS } from './chat-demo-data'
 import type { TranscriptMessage, TranscriptBlock } from '../../../lib/api/types'
-import type { GroupedTurnItem } from '../../../components/ChatRenderer'
-import {
-  groupMessagesIntoTurns,
-  RichTextBlock,
-  ReadPillRow,
-  EditInlineCard,
-  BashStatusLine,
-  ToolWidget,
-  ExpandSignalCtx,
-  AutoExpandCtx,
-} from '../../../components/ChatRenderer'
+import { parseTimelineWithQuestions } from '../../chat/timeline-parser'
+import type { TimelineStep } from '../../chat/timeline-parser'
+import { StyleA, StyleB, StyleD, StyleG, StyleH, groupConsecutiveSameType } from '../../chat'
+import type { StyleKey } from '../../chat'
 
 // ── 颜色 ────────────────────────────────────────────
 
@@ -118,10 +112,19 @@ function RawBlockContent({ block }: { block: TranscriptBlock }) {
   )
 }
 
-// ── 节点数据 ────────────────────────────────────────
+// ── 节点数据类型 ─────────────────────────────────────
 
-interface RawNodeData { label: string; color: string; icon: React.ReactNode; messages: TranscriptMessage[]; pairIndex: number; [k: string]: unknown }
-interface StyledNodeData { label: string; color: string; icon: React.ReactNode; turns: GroupedTurnItem[]; rawCount: number; pairIndex: number; [k: string]: unknown }
+interface RawNodeData {
+  label: string; color: string; icon: React.ReactNode
+  messages: TranscriptMessage[]; pairIndex: number
+  [k: string]: unknown
+}
+
+interface StyledNodeData {
+  label: string; color: string
+  steps: TimelineStep[]; pairIndex: number
+  [k: string]: unknown
+}
 
 // ── Raw 节点 ────────────────────────────────────────
 
@@ -167,200 +170,19 @@ export function getFileIcon(filePath: string): string {
   return `/file-icons/${map[ext] || 'file_type_default.svg'}`
 }
 
-// ── 变体组件（4 种差异最大化风格）───────────────────
+// ── 5 种 chat 样式变体定义 ────────────────────────────
 
-import type { TranscriptBlock as TB } from '../../../lib/api/types'
-
-// 提取文件信息
-function fileInfo(b: TB) {
-  const fp = String(b.tool_input?.file_path || b.tool_input?.pattern || b.tool_input?.query || '')
-  const fileName = fp.split('/').pop() || fp
-  const dir = fp.includes('/') ? fp.split('/').slice(0, -1).join('/') : ''
-  const lines = b.tool_result ? b.tool_result.split('\n').length : 0
-  return { fp, fileName, dir, lines, name: b.tool_name || '' }
-}
-
-function editInfo(b: TB) {
-  const fp = String(b.tool_input?.file_path || '')
-  const fileName = fp.split('/').pop() || fp
-  const addN = b.tool_input?.new_string ? String(b.tool_input.new_string).split('\n').length : 0
-  const delN = b.tool_input?.old_string ? String(b.tool_input.old_string).split('\n').length : 0
-  return { fp, fileName, addN, delN }
-}
-
-function bashInfo(b: TB) {
-  const cmd = String(b.tool_input?.command ?? '').replace(/^cd [^ ]+ && /, '').slice(0, 100)
-  const isErr = b.tool_error === true
-  const result = (b.tool_result || '').trim()
-  const noOut = !result || result === '(Bash completed with no output)'
-  const lines = result ? result.split('\n').length : 0
-  return { cmd, isErr, result, noOut, lines }
-}
-
-// ═══════ A: 默认（ChatRenderer 原组件）═══════
-
-// ═══════ B: 可视化大卡片（参考 Dribbble 风格）═══════
-
-function ReadStyleB({ blocks }: { blocks: TB[] }) {
-  return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, margin: '8px 0' }}>
-      {blocks.map((b, i) => {
-        const f = fileInfo(b)
-        return (
-          <div key={i} style={{
-            width: 150, padding: '14px', borderRadius: 14,
-            background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-            transition: 'transform 0.2s, box-shadow 0.2s',
-          }}>
-            <img src={getFileIcon(f.fp)} alt="" style={{ width: 36, height: 36 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground)', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.fileName}</span>
-            <div style={{ display: 'flex', gap: 6, fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-              <span>{f.lines} ln</span>
-              <span style={{ opacity: 0.3 }}>|</span>
-              <span>{f.name}</span>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function EditStyleB({ block }: { block: TB }) {
-  const e = editInfo(block)
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', margin: '6px 0',
-      borderRadius: 14, background: 'rgba(86,211,100,0.05)', border: '1px solid rgba(86,211,100,0.12)',
-    }}>
-      <img src={getFileIcon(e.fp)} alt="" style={{ width: 28, height: 28 }} />
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tc-foreground)' }}>{e.fileName}</div>
-        <div style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace", marginTop: 2 }}>
-          {e.addN > 0 && <span style={{ color: '#56d364' }}>+{e.addN} </span>}
-          {e.delN > 0 && <span style={{ color: '#f85149' }}>-{e.delN}</span>}
-          {e.addN === 0 && e.delN === 0 && 'created'}
-        </div>
-      </div>
-      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(86,211,100,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#56d364', fontSize: 14 }}>✓</div>
-    </div>
-  )
-}
-
-function BashStyleB({ block }: { block: TB }) {
-  const b = bashInfo(block)
-  return (
-    <div style={{
-      margin: '6px 0', borderRadius: 14, overflow: 'hidden',
-      border: `1px solid ${b.isErr ? 'rgba(248,81,73,0.2)' : 'rgba(255,255,255,0.06)'}`,
-      background: 'rgba(0,0,0,0.3)',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px' }}>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: b.isErr ? '#f85149' : '#56d364' }} />
-        <code style={{ fontSize: 11, color: 'var(--tc-foreground)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Geist Mono', monospace" }}>{b.cmd}</code>
-        {!b.noOut && <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>{b.lines} ln</span>}
-      </div>
-      {!b.noOut && (
-        <pre style={{ margin: 0, padding: '8px 14px', fontSize: 10, fontFamily: "'Geist Mono', monospace", color: b.isErr ? '#fda4af' : 'var(--tc-foreground-secondary)', borderTop: '1px solid rgba(255,255,255,0.04)', maxHeight: 120, overflow: 'hidden', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-          {b.result.slice(0, 500)}
-        </pre>
-      )}
-    </div>
-  )
-}
-
-// ═══════ C: 时间线（左侧色条 + 圆点）═══════
-
-function ReadStyleC({ blocks }: { blocks: TB[] }) {
-  return (
-    <div style={{ margin: '6px 0', paddingLeft: 16, borderLeft: '2px solid rgba(88,166,255,0.3)' }}>
-      {blocks.map((b, i) => {
-        const f = fileInfo(b)
-        return (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0', position: 'relative' }}>
-            <div style={{ position: 'absolute', left: -21, width: 10, height: 10, borderRadius: '50%', background: '#58a6ff', border: '2px solid rgba(30,30,40,0.8)' }} />
-            <img src={getFileIcon(f.fp)} alt="" style={{ width: 14, height: 14 }} />
-            <span style={{ fontSize: 11, color: 'var(--tc-foreground)', fontWeight: 500 }}>{f.fileName}</span>
-            <span style={{ fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace", opacity: 0.5 }}>{f.dir}</span>
-            <span style={{ marginLeft: 'auto', fontSize: 9, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>{f.lines}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function EditStyleC({ block }: { block: TB }) {
-  const e = editInfo(block)
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0 3px 16px', borderLeft: '2px solid rgba(86,211,100,0.3)', position: 'relative' }}>
-      <div style={{ position: 'absolute', left: -5, width: 10, height: 10, borderRadius: '50%', background: '#56d364', border: '2px solid rgba(30,30,40,0.8)' }} />
-      <img src={getFileIcon(e.fp)} alt="" style={{ width: 14, height: 14 }} />
-      <span style={{ fontSize: 11, color: 'var(--tc-foreground)', fontWeight: 500 }}>{e.fileName}</span>
-      <span style={{ fontSize: 10, fontFamily: "'Geist Mono', monospace" }}>
-        {e.addN > 0 && <span style={{ color: '#56d364' }}>+{e.addN}</span>}
-        {e.delN > 0 && <span style={{ color: '#f85149' }}> -{e.delN}</span>}
-      </span>
-    </div>
-  )
-}
-
-function BashStyleC({ block }: { block: TB }) {
-  const b = bashInfo(block)
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '3px 0 3px 16px', borderLeft: `2px solid ${b.isErr ? 'rgba(248,81,73,0.3)' : 'rgba(255,255,255,0.1)'}`, position: 'relative' }}>
-      <div style={{ position: 'absolute', left: -5, width: 10, height: 10, borderRadius: '50%', background: b.isErr ? '#f85149' : '#8b949e', border: '2px solid rgba(30,30,40,0.8)', marginTop: 3 }} />
-      <code style={{ fontSize: 10.5, fontFamily: "'Geist Mono', monospace", color: 'var(--tc-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>$ {b.cmd}</code>
-    </div>
-  )
-}
-
-// ═══════ D: 极简纯文字（无图标无边框）═══════
-
-function ReadStyleD({ blocks }: { blocks: TB[] }) {
-  const summary = blocks.map(b => {
-    const f = fileInfo(b)
-    return f.fileName
-  }).join(', ')
-  return (
-    <div style={{ margin: '4px 0', fontSize: 10, color: 'var(--tc-foreground-secondary)', fontFamily: "'Geist Mono', monospace" }}>
-      <span style={{ opacity: 0.5 }}>read </span>{summary}<span style={{ opacity: 0.3 }}> ({blocks.length})</span>
-    </div>
-  )
-}
-
-function EditStyleD({ block }: { block: TB }) {
-  const e = editInfo(block)
-  return (
-    <div style={{ margin: '2px 0', fontSize: 10, fontFamily: "'Geist Mono', monospace" }}>
-      <span style={{ color: 'var(--tc-foreground-secondary)', opacity: 0.5 }}>edit </span>
-      <span style={{ color: 'var(--tc-foreground)' }}>{e.fileName}</span>
-      {e.addN > 0 && <span style={{ color: '#56d364' }}> +{e.addN}</span>}
-      {e.delN > 0 && <span style={{ color: '#f85149' }}> -{e.delN}</span>}
-    </div>
-  )
-}
-
-function BashStyleD({ block }: { block: TB }) {
-  const b = bashInfo(block)
-  return (
-    <div style={{ margin: '2px 0', fontSize: 10, fontFamily: "'Geist Mono', monospace" }}>
-      <span style={{ color: b.isErr ? '#f85149' : '#56d364' }}>$ </span>
-      <span style={{ color: 'var(--tc-foreground)' }}>{b.cmd}</span>
-      {b.isErr && <span style={{ color: '#f85149' }}> ✗</span>}
-    </div>
-  )
-}
-
-// ── 变体定义 ────────────────────────────────────────
-
-const VARIANT_STYLES = [
-  { key: 'A', label: '完整组件', color: '#58a6ff' },
-  { key: 'B', label: '可视化卡片', color: '#3fb950' },
-  { key: 'C', label: '时间线', color: '#d29922' },
-  { key: 'D', label: '极简文字', color: '#bc8cff' },
+const VARIANT_STYLES: Array<{ key: StyleKey; label: string; color: string }> = [
+  { key: 'a', label: '时间线点', color: '#58a6ff' },
+  { key: 'b', label: '气泡行',  color: '#3fb950' },
+  { key: 'd', label: '叙事流',  color: '#d29922' },
+  { key: 'g', label: '头像气泡', color: '#bc8cff' },
+  { key: 'h', label: '折叠卡片', color: '#39d2c0' },
 ]
+
+const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
+  a: StyleA, b: StyleB, d: StyleD, g: StyleG, h: StyleH,
+}
 
 function VariantLabel({ label, idx, color }: { label: string; idx: string; color: string }) {
   return (
@@ -375,74 +197,19 @@ function VariantLabel({ label, idx, color }: { label: string; idx: string; color
   )
 }
 
-// 渲染单个变体
-function StyledContentVariant({ turns, variant }: { turns: GroupedTurnItem[]; variant: string }) {
-  return (
-    <ExpandSignalCtx.Provider value={1}>
-      <AutoExpandCtx.Provider value={true}>
-        {turns.map((item, i) => {
-          if (item.kind === 'user') {
-            const text = item.msg.blocks.filter(b => b.type === 'text').map(b => b.text || '').join('\n').trim()
-            if (!text) return null
-            return (
-              <div key={i} style={{
-                padding: '10px 16px', borderRadius: 16, marginBottom: 8,
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-                fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
-              }}>
-                <RichTextBlock text={text} />
-              </div>
-            )
-          }
-          const { turn } = item
-          return (
-            <div key={i} style={{
-              padding: '12px 16px', borderRadius: 16, marginBottom: 8,
-              background: 'rgba(30,30,40,0.6)', border: '1px solid rgba(255,255,255,0.06)',
-              fontSize: 12.5, lineHeight: 1.6, color: 'var(--tc-foreground)',
-            }}>
-              {turn.texts.map((t, ti) => <RichTextBlock key={`t${ti}`} text={t} />)}
-
-              {turn.reads.length > 0 && (
-                variant === 'A' ? <ReadPillRow blocks={turn.reads} />
-                : variant === 'B' ? <ReadStyleB blocks={turn.reads} />
-                : variant === 'C' ? <ReadStyleC blocks={turn.reads} />
-                : <ReadStyleD blocks={turn.reads} />
-              )}
-
-              {turn.edits.map((block, ei) => (
-                variant === 'A' ? <EditInlineCard key={`e${ei}`} block={block} />
-                : variant === 'B' ? <EditStyleB key={`e${ei}`} block={block} />
-                : variant === 'C' ? <EditStyleC key={`e${ei}`} block={block} />
-                : <EditStyleD key={`e${ei}`} block={block} />
-              ))}
-
-              {turn.bashes.map((block, bi) => (
-                variant === 'A' ? <BashStatusLine key={`b${bi}`} block={block} />
-                : variant === 'B' ? <BashStyleB key={`b${bi}`} block={block} />
-                : variant === 'C' ? <BashStyleC key={`b${bi}`} block={block} />
-                : <BashStyleD key={`b${bi}`} block={block} />
-              ))}
-
-              {turn.others.map((block, oi) => <ToolWidget key={`o${oi}`} block={block} />)}
-            </div>
-          )
-        })}
-      </AutoExpandCtx.Provider>
-    </ExpandSignalCtx.Provider>
-  )
-}
-
-// ── Styled 节点：4 种变体横向排列 ───────────────────
+// ── Styled 节点：5 种实际 chat 样式横向排列 ──────────
 
 const StyledNode = memo(({ data }: NodeProps<Node<StyledNodeData>>) => (
   <div style={{ display: 'flex', gap: 16 }}>
-    {VARIANT_STYLES.map(s => (
-      <div key={s.key} style={{ width: 420, flexShrink: 0 }}>
-        <VariantLabel label={s.label} idx={s.key} color={s.color} />
-        <StyledContentVariant turns={data.turns} variant={s.key} />
-      </div>
-    ))}
+    {VARIANT_STYLES.map(v => {
+      const Renderer = RENDERERS[v.key]
+      return (
+        <div key={v.key} style={{ width: 420, flexShrink: 0 }}>
+          <VariantLabel label={v.label} idx={v.key} color={v.color} />
+          <Renderer steps={data.steps} />
+        </div>
+      )
+    })}
   </div>
 ))
 StyledNode.displayName = 'StyledNode'
@@ -452,15 +219,15 @@ const nodeTypes = { rawNode: RawNode, styledNode: StyledNode }
 // ── 布局 ────────────────────────────────────────────
 
 const RAW_W = 340
-const STYLED_W = 4 * 420 + 3 * 16  // 4 变体 × 420px + 3 间距
+const STYLED_W = 5 * 420 + 4 * 16  // 5 样式 × 420px + 4 间距
 const PAIR_GAP = 200
 const PAIR_TOTAL = RAW_W + PAIR_GAP + STYLED_W
 const COL_GAP = 200
 const ROW_PAD = 120
-const COLS = 1  // 单列（太宽了放不下 2 列）
+const COLS = 1
 
-function estimateH(msgCount: number, turnCount: number): number {
-  return Math.max(msgCount * 160 + 60, turnCount * 250 + 60, 300)
+function estimateH(msgCount: number, stepCount: number): number {
+  return Math.max(msgCount * 160 + 60, stepCount * 100 + 60, 300)
 }
 
 // 存储每对节点的位置，供 SVG 连线使用
@@ -470,42 +237,31 @@ interface PairPosition {
   color: string
 }
 
-function buildGraph(turns: GroupedTurnItem[]): { nodes: Node[]; pairs: PairPosition[] } {
+function buildGraph(): { nodes: Node[]; pairs: PairPosition[] } {
   const nodes: Node[] = []
   const pairs: PairPosition[] = []
 
-  const secs: Array<{
-    rawMsgs: TranscriptMessage[]
-    sectionTurns: GroupedTurnItem[]
-    color: string; icon: React.ReactNode; label: string; height: number
-  }> = []
-
-  for (let si = 0; si < DEMO_SECTIONS.length; si++) {
-    const sec = DEMO_SECTIONS[si]
+  const secs = DEMO_SECTIONS.map((sec, si) => {
     const nextSec = DEMO_SECTIONS[si + 1]
     const startMsg = sec.index
     const endMsg = nextSec ? nextSec.index : DEMO_MESSAGES.length
     const rawMsgs = DEMO_MESSAGES.slice(startMsg, endMsg)
-    const turnStart = turns.findIndex(t => t.startIndex >= startMsg)
-    const turnEnd = nextSec ? turns.findIndex(t => t.startIndex >= nextSec.index) : turns.length
-    const sectionTurns = turns.slice(
-      turnStart >= 0 ? turnStart : 0,
-      turnEnd > (turnStart >= 0 ? turnStart : 0) ? turnEnd : (turnStart >= 0 ? turnStart : 0) + 1,
-    )
-    secs.push({
-      rawMsgs, sectionTurns,
+    const { steps: rawSteps } = parseTimelineWithQuestions(rawMsgs)
+    const steps = groupConsecutiveSameType(rawSteps)
+    return {
+      rawMsgs, steps,
       color: PALETTE[si % PALETTE.length],
       icon: getIcon(sec.label),
       label: sec.label,
-      height: estimateH(rawMsgs.length, sectionTurns.length),
-    })
-  }
+      height: estimateH(rawMsgs.length, steps.length),
+    }
+  })
 
   const colY = new Array(COLS).fill(0)
 
   for (let si = 0; si < secs.length; si++) {
     const col = colY.indexOf(Math.min(...colY))
-    const { rawMsgs, sectionTurns, color, icon, label, height } = secs[si]
+    const { rawMsgs, steps, color, icon, label, height } = secs[si]
     const rawX = col * (PAIR_TOTAL + COL_GAP)
     const y = colY[col]
     const styledX = rawX + RAW_W + PAIR_GAP
@@ -518,7 +274,7 @@ function buildGraph(turns: GroupedTurnItem[]): { nodes: Node[]; pairs: PairPosit
     nodes.push({
       id: `styled-${si}`, type: 'styledNode',
       position: { x: styledX, y },
-      data: { label, color, icon, turns: sectionTurns, rawCount: rawMsgs.length, pairIndex: si },
+      data: { label, color, steps, pairIndex: si },
     })
 
     pairs.push({ rawX, rawY: y, styledX, styledY: y, color })
@@ -570,7 +326,7 @@ function FloatingNav({ sections, onJump }: {
   sections: typeof DEMO_SECTIONS
   onJump: (i: number) => void
 }) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = React.useState(false)
   return (
     <div style={{
       position: 'absolute', top: 12, right: 12, zIndex: 10,
@@ -617,8 +373,7 @@ function FloatingNav({ sections, onJump }: {
 // ── 画布 ────────────────────────────────────────────
 
 function ChatDemoCanvas() {
-  const turns = useMemo(() => groupMessagesIntoTurns(DEMO_MESSAGES), [])
-  const { nodes: initNodes, pairs } = useMemo(() => buildGraph(turns), [turns])
+  const { nodes: initNodes, pairs } = useMemo(() => buildGraph(), [])
   const [nodes, , onNodesChange] = useNodesState(initNodes)
   const { fitView, fitBounds } = useReactFlow()
 
