@@ -812,6 +812,9 @@
     "picking_hint_empty": "点击页面任意元素以选取，Esc 取消",
     "folder_label": "文件夹",
     "files_count": "{{count}} 个文件",
-    "analyze_elements": "请帮我分析以下 {{count}} 个元素"
+    "analyze_elements": "请帮我分析以下 {{count}} 个元素",
+    "templates": "Prompt 模板库",
+    "save_template": "保存当前",
+    "templates_empty": "暂无模板，输入内容后点击书签图标保存"
   }
 }
