@@ -887,7 +887,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
       ? [...chatMessages, { role: 'assistant', ts: new Date().toISOString(), blocks: [{ type: 'text', text: currentReply }] }]
       : chatMessages
 
-    const items = displayMessages.map((message, i) => ({
+    const items: VItem[] = displayMessages.map((message, i) => ({
       kind: 'live' as const,
       key: `live-${message.ts}-${i}`,
       message,
