@@ -513,6 +513,14 @@
         "dashboard": "Dashboard",
         "sessions": "Sessions",
         "chat": "AI Chat"
+      },
+      "chatStyle": "Session Timeline Style",
+      "chatStyles": {
+        "a": "A Vertical Timeline",
+        "b": "B Card Waterfall",
+        "d": "D GitHub PR",
+        "g": "G Bubble Chat",
+        "h": "H Accordion"
       }
     },
     "security": {
@@ -762,7 +770,20 @@
     "style_b": "B Card Cascade",
     "style_d": "D GitHub PR",
     "style_g": "G Bubble Chat",
-    "style_h": "H Accordion"
+    "style_h": "H Accordion",
+    "risk_detection": "Risk Detection",
+    "risk_high": "Danger",
+    "risk_medium": "Caution",
+    "intent_explore": "Explore",
+    "intent_modify": "Modify",
+    "intent_execute": "Execute",
+    "intent_search": "Search",
+    "intent_delegate": "Delegate",
+    "intent_analyze": "Analyze",
+    "intent_mixed": "Mixed",
+    "commit_msg_title": "Commit Message",
+    "commit_gen": "Generate",
+    "commit_copy": "Copy"
   },
   "prompt_input": {
     "quick_chip_clarify": "Clarify user question",
