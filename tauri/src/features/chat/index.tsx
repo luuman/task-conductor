@@ -213,6 +213,8 @@ function RichText({ text }: { text: string }) {
 // ════════════════════════════════════════════════
 
 export function StyleA({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   return (
     <div className={s.aTl}>
       {steps.map((step) => (
@@ -224,7 +226,7 @@ export function StyleA({ steps }: { steps: TimelineStep[] }) {
             ) : (
               <>
                 {!step.toolResult && !step.oldString && (
-                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step)}</span>
+                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step, toolMap, t)}</span>
                 )}
                 <ResultBlock step={step} />
               </>
@@ -237,6 +239,8 @@ export function StyleA({ steps }: { steps: TimelineStep[] }) {
 }
 
 export function StyleB({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   return (
     <>
       {steps.map((step) => (
@@ -246,7 +250,7 @@ export function StyleB({ steps }: { steps: TimelineStep[] }) {
           ) : (
             <div>
               {!step.toolResult && !step.oldString && (
-                <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
               )}
               {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
             </div>
@@ -259,12 +263,20 @@ export function StyleB({ steps }: { steps: TimelineStep[] }) {
 
 
 export function StyleD({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   return (
     <>
       {steps.map((step, i) => {
         const n = step.mergedCount && step.mergedCount > 1 ? ` ×${step.mergedCount}` : ''
-        const catDesc = step.kind === 'text' ? '说：'
-          : step.category === 'read' ? `读取了文件${n}` : step.category === 'edit' ? `编辑了文件${n}` : step.category === 'write' ? `新建了文件${n}` : step.category === 'bash' ? `执行了命令${n}` : step.category === 'agent' ? `启动了子代理${n}` : step.category === 'task' ? `执行了${TOOL_LABEL_MAP[step.toolName || ''] || '任务操作'}${n}` : `调用了工具${n}`
+        const catDesc = step.kind === 'text' ? t('chat_sidebar.cat_desc_text')
+          : step.category === 'read' ? t('chat_sidebar.cat_desc_read', { n })
+          : step.category === 'edit' ? t('chat_sidebar.cat_desc_edit', { n })
+          : step.category === 'write' ? t('chat_sidebar.cat_desc_write', { n })
+          : step.category === 'bash' ? t('chat_sidebar.cat_desc_bash', { n })
+          : step.category === 'agent' ? t('chat_sidebar.cat_desc_agent', { n })
+          : step.category === 'task' ? t('chat_sidebar.cat_desc_task', { action: toolMap[step.toolName || ''] || t('chat_sidebar.task_op'), n })
+          : t('chat_sidebar.cat_desc_other', { n })
         return (
           <React.Fragment key={step.id}>
             {i > 0 && <div className={s.dConnector} />}
@@ -288,6 +300,8 @@ export function StyleD({ steps }: { steps: TimelineStep[] }) {
 
 
 export function StyleG({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   return (
     <>
       {steps.map((step) => (
@@ -306,7 +320,7 @@ export function StyleG({ steps }: { steps: TimelineStep[] }) {
             ) : (
               <div className={s.gBubbleTool}>
                 {!step.toolResult && !step.oldString && (
-                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                  <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
                 )}
                 <ResultBlock step={step} />
               </div>
@@ -319,6 +333,8 @@ export function StyleG({ steps }: { steps: TimelineStep[] }) {
 }
 
 export function StyleH({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   const [openIds, setOpenIds] = useState<Set<string>>(() => {
     const set = new Set<string>()
     steps.forEach(st => { if (st.kind === 'text') set.add(st.id) })
@@ -340,7 +356,7 @@ export function StyleH({ steps }: { steps: TimelineStep[] }) {
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
                   <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
-                  <span className={badgeCls(step.category)}>{badgeLabel(step)}</span>
+                  <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
                 </div>
                 {isOpen && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
                   <div className={s.hBody}><ResultBlock step={step} /></div>
