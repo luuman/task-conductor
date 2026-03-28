@@ -612,7 +612,7 @@ export function PromptInput() {
               )}
             </div>
             {isGenerating ? (
-              <button className={s.pStopBtn} onClick={handleStop} title="停止">
+              <button className={s.pStopBtn} onClick={handleStop} title={t('prompt_input.stop')}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="4" y="4" width="16" height="16" rx="2" />
                 </svg>
