@@ -665,7 +665,7 @@ export function PromptInput() {
 
       {isEmpty && !isGenerating && !isPicking && (
         <div className={s.pChips}>
-          {QUICK_CHIPS.map(chip => (
+          {quickChips.map(chip => (
             <button
               key={chip.label}
               className={s.pChip}
