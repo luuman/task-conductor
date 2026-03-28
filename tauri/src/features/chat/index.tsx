@@ -201,7 +201,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
 
 // ── Rich text — 复用 ChatRenderer 的 Markdown 渲染 ──
 function RichText({ text }: { text: string }) {
-  return <div className={s.richText}><RichTextBlock text={text} /></div>
+  return <div className={s.chatAiBlock}><RichTextBlock text={text} /></div>
 }
 
 
