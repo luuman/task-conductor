@@ -767,25 +767,9 @@ function ViewTriptych() {
 }
 
 // ─────────────────────────────────────────────
-// View 5: Grouped — 左侧类型分组 + 右侧卡片 + 抽屉
+// View 5: Vertical Flow — Dribbble 参考风格
+// 左侧详情面板 + 右侧竖排节点列表 (React Flow)
 // ─────────────────────────────────────────────
-
-interface DocGroup {
-  id: string
-  label: string
-  icon: string
-  desc: string
-  color: string
-  types: DocItem['type'][]
-}
-
-const DOC_GROUPS: DocGroup[] = [
-  { id: 'all',  label: '全部文档', icon: '📁', desc: '所有类型',    color: '#64748b', types: ['prd','tech','api','ui','plan','test'] },
-  { id: 'prd',  label: 'PRD 类',   icon: '📋', desc: '需求与规格',  color: '#22d3ee', types: ['prd'] },
-  { id: 'tech', label: '技术类',   icon: '🏗️', desc: '架构与接口',  color: '#a78bfa', types: ['tech','api'] },
-  { id: 'ui',   label: 'UI 类',    icon: '🎨', desc: '设计与组件',  color: '#fbbf24', types: ['ui'] },
-  { id: 'plan', label: '规划类',   icon: '📅', desc: '计划与里程碑', color: '#818cf8', types: ['plan'] },
-]
 
 function ViewGrouped() {
   const [activeGroupId, setActiveGroupId] = useState('all')
