@@ -287,8 +287,25 @@ function ViewMD() {
 }
 
 // ─────────────────────────────────────────────
-// View 2: Flow Graph
+// View 2: Flow Graph（Cinematic 风格）
 // ─────────────────────────────────────────────
+
+// 节点颜色表：对应 Dribbble 参考图的 cyan / purple / green 色系
+const NODE_COLOR: Record<string, string> = {
+  prd:  '#22d3ee',   // cyan
+  tech: '#a78bfa',   // purple
+  api:  '#34d399',   // green
+  ui:   '#fbbf24',   // amber
+  test: '#f87171',   // red
+  plan: '#818cf8',   // indigo
+}
+
+// 节点完成度 mock（用于 progress bar）
+const NODE_PROGRESS: Record<string, number> = {
+  prd: 85, 'tech-arch': 70, 'ui-spec': 60,
+  'api-spec': 90, 'db-schema': 95, 'comp-lib': 55, plan: 40,
+}
+
 interface GraphNodeData extends Record<string, unknown> {
   doc: DocItem
   selected: boolean
@@ -297,34 +314,93 @@ interface GraphNodeData extends Record<string, unknown> {
 
 function GraphNode({ data }: NodeProps) {
   const d = data as GraphNodeData
-  const color = TYPE_COLOR[d.doc.type] ?? '#666'
+  const color = NODE_COLOR[d.doc.type] ?? '#22d3ee'
+  const progress = NODE_PROGRESS[d.doc.id] ?? 60
+
   return (
     <>
-      <Handle type="target" position={Position.Left} style={{ background: color, border: 'none', width: 6, height: 6 }} />
+      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
       <div
-        className={[styles.graphNodeWrap, d.selected ? styles.graphNodeSelected : ''].join(' ')}
-        style={{ borderColor: d.selected ? color : undefined }}
+        className={[styles.gnCard, d.selected ? styles.gnCardSelected : ''].join(' ')}
+        style={{ '--node-color': color } as React.CSSProperties}
         onClick={() => d.onSelect(d.doc.id)}
       >
-        <div className={styles.graphNodeTitle}>{d.doc.title.split(' — ')[0]}</div>
-        <div className={styles.graphNodeType} style={{ color }}>{d.doc.type.toUpperCase()}</div>
+        {/* 顶部：图标 + 标题 + 类型徽章 */}
+        <div className={styles.gnTop}>
+          <span className={styles.gnDot} style={{ background: color }} />
+          <span className={styles.gnTitle}>{d.doc.title.split(' — ')[0]}</span>
+          <span className={styles.gnBadge}>{d.doc.type.toUpperCase()}</span>
+        </div>
+
+        {/* 摘要 */}
+        <div className={styles.gnExcerpt}>{d.doc.excerpt}</div>
+
+        {/* 进度条 */}
+        <div className={styles.gnBar}>
+          <div className={styles.gnBarFill} style={{ width: `${progress}%` }} />
+        </div>
+
+        {/* 底部 meta */}
+        <div className={styles.gnFoot}>
+          <span>{d.doc.stage}</span>
+          <span>·</span>
+          <span>{d.doc.updatedAt}</span>
+          <span className={styles.gnFootDivider} />
+          {d.doc.refs.length > 0 && <span>↗ {d.doc.refs.length}</span>}
+          {d.doc.backRefs.length > 0 && <span>↙ {d.doc.backRefs.length}</span>}
+        </div>
       </div>
-      <Handle type="source" position={Position.Right} style={{ background: color, border: 'none', width: 6, height: 6 }} />
+      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
     </>
   )
 }
 
+// 发光 Bezier 边
+function GlowEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) {
+  const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
+  const color = (data?.color as string) ?? '#22d3ee'
+  const active = data?.active as boolean
+
+  return (
+    <g>
+      {/* 外层宽发光（仅激活时） */}
+      {active && (
+        <path
+          d={edgePath} fill="none"
+          stroke={color} strokeWidth={10} opacity={0.06}
+          style={{ filter: 'blur(5px)' }}
+        />
+      )}
+      {/* 中层发光 */}
+      {active && (
+        <path
+          d={edgePath} fill="none"
+          stroke={color} strokeWidth={4} opacity={0.2}
+          style={{ filter: 'blur(2px)' }}
+        />
+      )}
+      {/* 实线 */}
+      <path
+        d={edgePath} fill="none"
+        stroke={active ? color : 'rgba(80,100,140,0.25)'}
+        strokeWidth={active ? 1.5 : 1}
+      />
+    </g>
+  )
+}
+
 const nodeTypes = { docNode: GraphNode }
+const edgeTypes = { glow: GlowEdge }
 
 function buildFlowElements(selectedId: string | null, onSelect: (id: string) => void) {
   const positions: Record<string, [number, number]> = {
-    prd: [0, 60],
-    'tech-arch': [220, 0],
-    'ui-spec': [220, 120],
-    'api-spec': [440, -40],
-    'db-schema': [440, 60],
-    'comp-lib': [440, 160],
-    plan: [0, 220],
+    prd:         [60,  170],
+    'tech-arch': [360,  60],
+    'ui-spec':   [360, 290],
+    'api-spec':  [660,   0],
+    'db-schema': [660, 150],
+    'comp-lib':  [660, 300],
+    plan:        [60,  380],
   }
 
   const nodes: Node[] = DOCS.map(d => ({
@@ -337,17 +413,13 @@ function buildFlowElements(selectedId: string | null, onSelect: (id: string) => 
   const edges: Edge[] = []
   DOCS.forEach(d => {
     d.refs.forEach(r => {
+      const active = selectedId === d.id || selectedId === r
       edges.push({
         id: `${d.id}->${r}`,
+        type: 'glow',
         source: d.id,
         target: r,
-        animated: selectedId === d.id || selectedId === r,
-        style: {
-          stroke: selectedId === d.id || selectedId === r
-            ? TYPE_COLOR[d.type]
-            : '#2a2a3a',
-          strokeWidth: 1.5,
-        },
+        data: { color: NODE_COLOR[d.type] ?? '#22d3ee', active },
       })
     })
   })
@@ -371,56 +443,88 @@ function ViewGraphInner() {
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: 0.25 }}
         minZoom={0.3}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
+        style={{ background: 'transparent' }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="rgba(255,255,255,0.04)" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={28} size={1}
+          color="rgba(255,255,255,0.03)"
+        />
       </ReactFlow>
 
-      {selected && (
-        <div className={styles.graphPreviewPanel}>
-          <div className={styles.graphPreviewTitle}>{selected.title}</div>
-          <div className={styles.graphPreviewMeta}>
-            {selected.stage} · {selected.updatedAt}
+      {/* 左侧详情卡片 */}
+      <div className={styles.graphDetailPanel}>
+        {/* 固定：图谱标题卡 */}
+        <div className={styles.gdpCard}>
+          <div className={styles.gdpLabel}>知识图谱</div>
+          <div style={{ fontSize: 11, color: 'rgba(140,160,200,0.5)' }}>
+            {DOCS.length} 篇文档 · {DOCS.reduce((n, d) => n + d.refs.length, 0)} 条引用关系
           </div>
-          <div className={styles.graphPreviewBody}>{selected.excerpt}</div>
-          <div style={{ fontSize: 10, color: 'var(--tc-text-secondary)', marginBottom: 6 }}>
-            引用：
-          </div>
-          <div className={styles.graphPreviewLinks}>
-            {selected.refs.map(r => (
-              <span key={r} className={styles.graphPreviewLink} onClick={() => handleSelect(r)}>
-                {DOC_MAP[r]?.title.split(' — ')[0]}
-              </span>
-            ))}
-            {selected.refs.length === 0 && (
-              <span style={{ fontSize: 10, color: 'var(--tc-text-secondary)' }}>无引用</span>
-            )}
-          </div>
-          {selected.backRefs.length > 0 && (
-            <>
-              <div style={{ fontSize: 10, color: 'var(--tc-text-secondary)', margin: '8px 0 6px' }}>
-                被引用：
-              </div>
-              <div className={styles.graphPreviewLinks}>
-                {selected.backRefs.map(r => (
-                  <span key={r} className={styles.graphPreviewLink} onClick={() => handleSelect(r)}>
-                    {DOC_MAP[r]?.title.split(' — ')[0]}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
         </div>
-      )}
 
+        {/* 选中文档详情卡 */}
+        {selected && (() => {
+          const color = NODE_COLOR[selected.type] ?? '#22d3ee'
+          const progress = NODE_PROGRESS[selected.id] ?? 60
+          return (
+            <div className={[styles.gdpCard, styles.gdpCardActive].join(' ')}>
+              <div className={styles.gdpLabel} style={{ color: `color-mix(in srgb, ${color} 60%, rgba(120,140,180,0.6))` }}>
+                {selected.type.toUpperCase()}
+              </div>
+              <div className={styles.gdpTitle}>{selected.title.split(' — ')[0]}</div>
+              <div className={styles.gdpMeta}>{selected.stage} · {selected.updatedAt}</div>
+              <div className={styles.gdpExcerpt}>{selected.excerpt}</div>
+
+              {/* 完成度 */}
+              <div className={styles.gdpMetricRow}>
+                <div className={styles.gdpMetricLabel}>
+                  <span>完成度</span>
+                  <span className={styles.gdpMetricValue}>{progress}%</span>
+                </div>
+                <div className={styles.gdpMetricBar}>
+                  <div className={styles.gdpMetricFill}
+                    style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color} 60%, white))`, boxShadow: `0 0 6px ${color}` }} />
+                </div>
+              </div>
+
+              {/* 引用数 */}
+              <div className={styles.gdpMetricRow}>
+                <div className={styles.gdpMetricLabel}>
+                  <span>引用 / 被引</span>
+                  <span className={styles.gdpMetricValue}>{selected.refs.length} / {selected.backRefs.length}</span>
+                </div>
+                <div className={styles.gdpMetricBar}>
+                  <div className={styles.gdpMetricFill}
+                    style={{ width: `${Math.min(100, (selected.refs.length + selected.backRefs.length) * 20)}%`, background: 'rgba(168,139,250,0.7)' }} />
+                </div>
+              </div>
+
+              {/* 快速跳转 */}
+              {(selected.refs.length > 0 || selected.backRefs.length > 0) && (
+                <div className={styles.gdpLinks}>
+                  {[...selected.refs, ...selected.backRefs].map(r => (
+                    <span key={r} className={styles.gdpLink} onClick={() => handleSelect(r)}>
+                      {DOC_MAP[r]?.title.split(' — ')[0]}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })()}
+      </div>
+
+      {/* 右下角图例 */}
       <div className={styles.graphLegend}>
-        {Object.entries(TYPE_COLOR).map(([type, color]) => (
-          <span key={type}>
-            <span className={styles.graphLegendDot} style={{ background: color }} />
+        {Object.entries(NODE_COLOR).map(([type, color]) => (
+          <span key={type} style={{ display: 'flex', alignItems: 'center' }}>
+            <span className={styles.graphLegendDot} style={{ background: color, color }} />
             {type.toUpperCase()}
           </span>
         ))}
