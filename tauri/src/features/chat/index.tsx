@@ -1026,18 +1026,18 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   return (
     <div className={s.page}>
       <div className={s.topBar}>
-        <span className={s.topLabel}>会话</span>
+        <span className={s.topLabel}>{t('chat_sidebar.session_label')}</span>
         <Select
           options={sessions.map(ss => ({
             value: ss.session_id,
-            label: stripDomContext(ss.summary || '') || (ss.note?.alias || `会话 ${ss.session_id.slice(0, 8)}`),
+            label: stripDomContext(ss.summary || '') || (ss.note?.alias || t('chat_sidebar.session_default_label', { id: ss.session_id.slice(0, 8) })),
             desc: `${ss.status || ''}|${ss.event_count}|${relativeTime(ss.last_seen_at || ss.started_at)}|${global ? (ss.cwd?.split('/').pop() || '') : ''}`,
           }))}
           value={selectedId || ''}
           onChange={v => selectSession(v)}
-          placeholder="选择会话"
+          placeholder={t('chat_sidebar.select_session_placeholder')}
           searchable
-          searchPlaceholder="搜索会话..."
+          searchPlaceholder={t('chat_sidebar.search_session_placeholder')}
           wide
           renderItem={SessionItem}
           style={{ flex: 1, minWidth: 0 }}
