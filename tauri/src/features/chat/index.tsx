@@ -114,7 +114,7 @@ function catIcon(cat: TimelineStep['category'], size = 12): React.ReactNode {
 
 
 /** 将相邻同 toolName 的 tool 步骤合并为 1，用 mergedCount 标记数量 */
-function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
+export function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
   const result: TimelineStep[] = []
   let i = 0
   while (i < steps.length) {
