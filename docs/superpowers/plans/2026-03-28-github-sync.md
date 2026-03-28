@@ -1593,7 +1593,56 @@ fn delete_archived(app: tauri::AppHandle, session_id: String) -> Result<(), Stri
 }
 ```
 
-- [ ] **Step 3: 在 `invoke_handler!` 中注册新命令**
+- [ ] **Step 3: 在 `run()` 的 `setup` hook 中触发启动检查**
+
+在 `tauri/src-tauri/src/lib.rs` 的 `tauri::Builder::default()` 链中，在 `.manage(FileCache::new())` 之后添加：
+
+```rust
+.setup(|app| {
+    let app_handle = app.handle().clone();
+    tauri::async_runtime::spawn(async move {
+        use crate::sync::scheduler::pulled_today;
+        let db_path = match app_handle.path().app_data_dir() {
+            Ok(d) => {
+                let _ = std::fs::create_dir_all(&d);
+                d.join("tc_sync.db")
+            }
+            Err(_) => return,
+        };
+        // 首次启动今日未 pull 时，记录日志（实际 pull 需前端调用 sync_pull 命令）
+        if !pulled_today(&db_path) {
+            log::info!("[sync] 今日尚未同步，建议调用 sync_pull");
+        }
+    });
+    Ok(())
+})
+```
+
+- [ ] **Step 3b: 在 SessionChat 中提供手动同步入口**
+
+在 `tauri/src/components/SessionChat/SessionChat.tsx` 的搜索框旁边添加同步按钮（layout=full 时显示）：
+
+```tsx
+// SessionChat.tsx 顶部新增 import
+import { useSyncPull } from '../../hooks/useArchivedSessions'
+import { useAuthStore } from '../../lib/store/auth'
+import { useConfig } from '../../lib/api'
+
+// 在 SessionChat 函数体内添加（layout=full 时）：
+const token = useAuthStore(s => s.token) ?? ''
+const apiBase = '' // 通过 Vite proxy，base 为空
+const { mutate: doSyncPull, isPending: syncing } = useSyncPull(apiBase, token)
+```
+
+在 full layout 的搜索栏 JSX 旁加一个小按钮：
+```tsx
+{!syncing
+  ? <button onClick={() => doSyncPull()} title="同步归档" style={{background:'none',border:'none',cursor:'pointer',opacity:0.6}}>☁↓</button>
+  : <span style={{opacity:0.4,fontSize:12}}>同步中…</span>
+}
+```
+
+- [ ] **Step 4: 在 `invoke_handler!` 中注册新命令**
 
 找到 `lib.rs` 中的：
 ```rust
