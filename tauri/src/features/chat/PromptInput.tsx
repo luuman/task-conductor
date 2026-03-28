@@ -631,8 +631,8 @@ export function PromptInput() {
           <div className={s.pPickingHint}>
             <IconCrosshair size={12} />
             {domCtxList.length > 0
-              ? <span>已选 <strong>{domCtxList.length}</strong> 个，继续点击选更多，<kbd>Esc</kbd> 完成</span>
-              : <span>点击页面任意元素以选取，<kbd>Esc</kbd> 取消</span>
+              ? <span>{t('prompt_input.picking_hint_selected', { count: domCtxList.length })}</span>
+              : <span>{t('prompt_input.picking_hint_empty')}</span>
             }
           </div>
         )}
