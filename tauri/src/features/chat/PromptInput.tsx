@@ -211,6 +211,12 @@ export function PromptInput() {
   const [isPicking, setIsPicking] = useState(false)
   const [pickRect, setPickRect] = useState<DOMRectReadOnly | null>(null)
   const [domCtxList, setDomCtxList] = useState<DomContext[]>([])
+  // 模板库
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [templates, setTemplates] = useState<PromptTemplate[]>(loadTemplatesLS)
+  const templateBtnRef = useRef<HTMLButtonElement>(null)
+  const templateMenuRef = useRef<HTMLDivElement>(null)
+  const [templateMenuPos, setTemplateMenuPos] = useState<{ left: number; bottom: number } | null>(null)
   const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft,
           selectedModel, setSelectedModel, lastStats,
           permissionMode, setPermissionMode } = useChatStore()
