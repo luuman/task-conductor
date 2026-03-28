@@ -792,14 +792,8 @@ import { PromptInput } from './PromptInput'
 type VItem =
   | { kind: 'user'; key: string; qi: number; question: UserQuestion }
   | { kind: 'steps'; key: string; steps: TimelineStep[] }
-  | { kind: 'live'; key: string; message: AiSessionMessage }
+  | { kind: 'live'; key: string; message: TranscriptMessage }
   | { kind: 'thinking'; key: string }
-
-type AiSessionMessage = {
-  role: 'user' | 'assistant'
-  ts: string | null
-  blocks: Array<{ type: 'text'; text?: string | null }>
-}
 
 export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const { t } = useTranslation()
