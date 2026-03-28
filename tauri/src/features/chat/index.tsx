@@ -925,20 +925,23 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     }, []),
     [vitems],
   )
+  // ref 版：让 handleRangeChanged 引用稳定，避免 rangeChanged prop 每次 transcript 更新都变化
+  // （prop 变化 → Virtuoso 重新绑定内部 stream → 触发循环 bug）
+  const questionVirtuosoIndicesRef = useRef(questionVirtuosoIndices)
+  useEffect(() => { questionVirtuosoIndicesRef.current = questionVirtuosoIndices }, [questionVirtuosoIndices])
 
   // 滚动时自动高亮当前可见的问题
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleRangeChanged = useCallback(({ startIndex }: { startIndex: number; endIndex: number }) => {
-    // rangeChanged 由 Virtuoso 内部的 useLayoutEffect 同步调用
-    // 直接 setState 会触发 React 同步刷新 → layout effect 再次触发 → 无限循环
-    // 用 setTimeout 逃出 layout effect 同步链
-    for (let i = questionVirtuosoIndices.length - 1; i >= 0; i--) {
-      if (questionVirtuosoIndices[i] <= startIndex) {
+    const indices = questionVirtuosoIndicesRef.current
+    for (let i = indices.length - 1; i >= 0; i--) {
+      if (indices[i] <= startIndex) {
         const next = i
         setTimeout(() => setActiveQ(next), 0)
         break
       }
     }
-  }, [questionVirtuosoIndices])
+  }, []) // 空依赖：引用永远稳定，rangeChanged prop 不变，不触发 Virtuoso 内部重新订阅
 
   // 问题导航跳转（如果数据未全部加载则先 loadAll）
   const pendingScrollQ = useRef<number | null>(null)
