@@ -1,17 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { useChatStream } from '../../hooks/useChatStream'
 import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconCrosshair } from '../../ui/icon'
+import { useTranslation } from 'react-i18next'
 import s from './chat-report.module.css'
 
-const QUICK_CHIPS = [
-  { label: '澄清用户问题', color: '#60a5fa' },
-  { label: '定义用户上下文', color: '#a78bfa' },
-  { label: '选择可交付成果', color: '#34d399' },
-  { label: '精化需求', color: '#fb923c' },
-]
+const QUICK_CHIP_COLORS = ['#60a5fa', '#a78bfa', '#34d399', '#fb923c']
 
 type Attachment = { id: string; name: string; kind: 'image' | 'file' | 'folder'; dataUrl?: string; ext?: string; size?: number; itemCount?: number }
 
