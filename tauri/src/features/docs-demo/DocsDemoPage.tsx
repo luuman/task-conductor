@@ -433,7 +433,7 @@ function buildFlowElements(selectedId: string | null, onSelect: (id: string) => 
         type: 'glow',
         source: d.id,
         target: r,
-        data: { color: NODE_COLOR[d.doc?.type ?? d.type] ?? NODE_COLOR[DOC_MAP[d.id]?.type ?? 'prd'], active },
+        data: { color: NODE_COLOR[d.type] ?? '#22d3ee', active },
       })
     })
   })
