@@ -178,7 +178,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
   // Agent — 统一 CodeBlock 外框 + RichTextBlock 内容
   if (step.category === 'agent') {
     const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
-    const prompt = String(step.toolInput?.prompt || '')
+    const prompt = String(step.toolInput?.prompt || step.toolInput?.task || '')
     if (step.toolResult) {
       return (
         <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
@@ -186,8 +186,9 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
         </CodeBlock>
       )
     }
-    if (prompt) {
-      return <CodeBlock code={prompt} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color} />
+    const content = prompt || (step.toolInput ? JSON.stringify(step.toolInput, null, 2) : '')
+    if (content) {
+      return <CodeBlock code={content} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color} />
     }
     return null
   }
