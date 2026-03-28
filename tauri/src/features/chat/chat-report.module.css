@@ -79,6 +79,8 @@
   line-height: 1.6;
   color: var(--tc-foreground);
 }
+.userText p { margin: 0; }
+.userText p + p { margin-top: 0.3em; }
 .queryPillBodyCollapsed {
   position: relative;
   max-height: 80px;
