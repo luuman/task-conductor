@@ -541,15 +541,15 @@ export function PromptInput() {
 
         <div className={s.pToolbar}>
           <div className={s.pToolLeft}>
-            <button className={s.pToolBtn} title="添加附件" onClick={() => fileInputRef.current?.click()}>
+            <button className={s.pToolBtn} title={t('prompt_input.add_attachment')} onClick={() => fileInputRef.current?.click()}>
               <IconPlus size={14} />
             </button>
-            <button className={s.pToolBtn} title="插入链接">
+            <button className={s.pToolBtn} title={t('prompt_input.insert_link')}>
               <IconLink size={14} />
             </button>
             <button
               className={`${s.pToolBtn} ${isPicking ? s.pToolBtnActive : ''}`}
-              title={isPicking ? '取消拾取 (Esc)' : '点选页面元素，告诉 AI 哪里有问题'}
+              title={isPicking ? t('prompt_input.pick_cancel') : t('prompt_input.pick_hint')}
               onClick={() => setIsPicking(v => !v)}
             >
               <IconCrosshair size={14} />
