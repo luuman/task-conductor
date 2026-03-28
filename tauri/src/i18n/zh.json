@@ -513,6 +513,14 @@
         "dashboard": "仪表盘",
         "sessions": "会话监控",
         "chat": "AI 对话"
+      },
+      "chatStyle": "会话时间线样式",
+      "chatStyles": {
+        "a": "A 竖线时间线",
+        "b": "B 卡片瀑布",
+        "d": "D GitHub PR",
+        "g": "G 气泡聊天",
+        "h": "H 折叠手风琴"
       }
     },
     "security": {
@@ -762,7 +770,20 @@
     "style_b": "B 卡片瀑布",
     "style_d": "D GitHub PR",
     "style_g": "G 气泡聊天",
-    "style_h": "H 折叠手风琴"
+    "style_h": "H 折叠手风琴",
+    "risk_detection": "风险操作检测",
+    "risk_high": "危险",
+    "risk_medium": "注意",
+    "intent_explore": "探索",
+    "intent_modify": "修改",
+    "intent_execute": "执行",
+    "intent_search": "检索",
+    "intent_delegate": "委派",
+    "intent_analyze": "分析",
+    "intent_mixed": "综合",
+    "commit_msg_title": "生成 Commit 消息",
+    "commit_gen": "一键生成",
+    "commit_copy": "复制"
   },
   "prompt_input": {
     "quick_chip_clarify": "澄清用户问题",
