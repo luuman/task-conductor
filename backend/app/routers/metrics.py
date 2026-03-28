@@ -52,7 +52,7 @@ def get_metrics(db: Session = Depends(get_db)):
         },
         "claude": {
             **metrics_store.summary(),
-            "active_processes": len(ClaudePool()._processes),
+            "active_processes": len(ClaudePool()._clients),
         },
         "kpi": {
             "ai_rating":           ai_rating,
@@ -399,6 +399,6 @@ def get_claude_usage(db: Session = Depends(get_db)):
         },
         "performance": {
             **metrics_store.summary(),
-            "active_processes": len(ClaudePool()._processes),
+            "active_processes": len(ClaudePool()._clients),
         },
     }
