@@ -220,46 +220,73 @@ function renderContent(text: string, allDocs: Record<string, DocItem>) {
   })
 }
 
+// 侧边栏分类配置
+const MD_CATEGORIES = [
+  { id: 'prd',  label: 'PRD 类',  color: '#22d3ee', types: ['prd'] as DocItem['type'][] },
+  { id: 'tech', label: '技术类',  color: '#a78bfa', types: ['tech','api'] as DocItem['type'][] },
+  { id: 'ui',   label: 'UI 类',   color: '#fbbf24', types: ['ui'] as DocItem['type'][] },
+  { id: 'plan', label: '规划类',  color: '#818cf8', types: ['plan'] as DocItem['type'][] },
+]
+
 function ViewMD() {
   const [selectedId, setSelectedId] = useState('prd')
+  const [activeToc, setActiveToc] = useState(0)
   const doc = DOC_MAP[selectedId]
-
   const paragraphs = doc.content.split('\n\n').filter(Boolean)
 
   return (
     <div className={styles.mdLayout}>
-      {/* 左侧文档树 */}
+      {/* ── 左侧分类侧边栏 ── */}
       <div className={styles.mdSidebar}>
-        <div className={styles.mdSidebarHeader}>文档</div>
+        <div className={styles.mdSidebarHeader}>文档库</div>
         <div className={styles.mdDocList}>
-          {DOCS.map(d => (
-            <div
-              key={d.id}
-              className={[styles.mdDocItem, selectedId === d.id ? styles.mdDocItemActive : ''].join(' ')}
-              onClick={() => setSelectedId(d.id)}
-            >
-              <span className={styles.mdDocIcon}>
-                {d.type === 'prd' ? '📋' : d.type === 'tech' ? '🏗️' : d.type === 'api' ? '🔌' : d.type === 'ui' ? '🎨' : d.type === 'plan' ? '📅' : '📄'}
-              </span>
-              <span style={{ flex: 1 }}>{d.title.split(' — ')[0]}</span>
-              {d.stage === 'analysis' && <span className={styles.mdDocTag}>AI</span>}
-            </div>
-          ))}
+          {MD_CATEGORIES.map(cat => {
+            const catDocs = DOCS.filter(d => cat.types.includes(d.type))
+            if (catDocs.length === 0) return null
+            return (
+              <div key={cat.id}>
+                <div className={styles.mdCategoryRow}>
+                  <span className={styles.mdCategoryDot} style={{ background: cat.color }} />
+                  <span className={styles.mdCategoryName}>{cat.label}</span>
+                  <span className={styles.mdCategoryCount}>{catDocs.length}</span>
+                </div>
+                {catDocs.map(d => (
+                  <div
+                    key={d.id}
+                    className={[styles.mdDocItem, selectedId === d.id ? styles.mdDocItemActive : ''].join(' ')}
+                    onClick={() => { setSelectedId(d.id); setActiveToc(0) }}
+                  >
+                    <span className={styles.mdDocIcon}>
+                      {d.type === 'prd' ? '📋' : d.type === 'tech' ? '🏗️' : d.type === 'api' ? '🔌' : d.type === 'ui' ? '🎨' : '📅'}
+                    </span>
+                    <span style={{ flex: 1 }}>{d.title.split(' — ')[0]}</span>
+                    {d.refs.length > 0 && (
+                      <span className={styles.mdDocTag}>↗{d.refs.length}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      {/* 正文 */}
+      {/* ── 正文 prose ── */}
       <div className={styles.mdMain}>
         <h1 className={styles.mdH1}>{doc.title}</h1>
         <div className={styles.mdMeta}>
           <span className={styles.mdMetaTag}>{doc.stage}</span>
           <span className={styles.mdMetaTag}>{doc.updatedAt}</span>
-          <span style={{ color: 'var(--tc-text-secondary)' }}>引用 {doc.refs.length} 篇 · 被引用 {doc.backRefs.length} 篇</span>
+          {doc.refs.length > 0 && (
+            <span className={styles.mdMetaTag}>引用 {doc.refs.length} 篇</span>
+          )}
+          {doc.backRefs.length > 0 && (
+            <span className={styles.mdMetaTag}>被引 {doc.backRefs.length} 篇</span>
+          )}
         </div>
         {paragraphs.map((para, i) => {
-          if (para.startsWith('## ')) {
+          if (para.startsWith('## '))
             return <h2 key={i} className={styles.mdH2}>{para.slice(3)}</h2>
-          }
           if (para.startsWith('```')) {
             const code = para.replace(/^```\w*\n?/, '').replace(/```$/, '')
             return <pre key={i} className={styles.mdCodeBlock}>{code}</pre>
@@ -272,12 +299,15 @@ function ViewMD() {
         })}
       </div>
 
-      {/* 右侧 TOC */}
+      {/* ── 右侧 TOC ── */}
       <div className={styles.mdToc}>
-        <div className={styles.mdTocHeader}>目录</div>
+        <div className={styles.mdTocHeader}>On this page</div>
         {doc.toc.map((item, i) => (
-          <div key={i} className={styles.mdTocItem}>
-            <span className={styles.mdTocDot} />
+          <div
+            key={i}
+            className={[styles.mdTocItem, activeToc === i ? styles.mdTocItemActive : ''].join(' ')}
+            onClick={() => setActiveToc(i)}
+          >
             {item}
           </div>
         ))}
