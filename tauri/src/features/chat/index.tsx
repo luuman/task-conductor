@@ -792,15 +792,16 @@ function InlineDomChips({ raw }: { raw: string }) {
 // ── 时间格式化（相对时间） ──
 function relativeTime(iso: string): string {
   if (!iso) return ''
+  const t = i18n.t.bind(i18n)
   const d = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z')
   const now = new Date()
   const diff = now.getTime() - d.getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return '刚刚'
-  if (mins < 60) return `${mins}分钟前`
+  if (mins < 1) return t('chat_sidebar.relative_just_now')
+  if (mins < 60) return t('chat_sidebar.relative_minutes_ago', { mins })
   if (d.toDateString() === now.toDateString())
     return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
-  if (diff < 7 * 86400000) return `${Math.floor(diff / 86400000)}天前`
+  if (diff < 7 * 86400000) return t('chat_sidebar.relative_days_ago', { days: Math.floor(diff / 86400000) })
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
