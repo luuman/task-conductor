@@ -67,6 +67,7 @@ export function AppRouter() {
             <Route path="/admin/chat"        element={<AdminChat />} />
             {DevToolsPage && <Route path="/admin/dev" element={<DevToolsPage />} />}
             <Route path="/admin/docs-demo" element={<DocsDemoPage />} />
+            <Route path="/admin/project-graph" element={<ProjectGraphPage />} />
           </Route>
 
           {/* 项目工作台（需要选中项目） */}
