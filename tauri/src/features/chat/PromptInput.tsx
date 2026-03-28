@@ -502,6 +502,51 @@ export function PromptInput() {
         document.body
       )}
 
+      {showTemplates && templateMenuPos && createPortal(
+        <div
+          ref={templateMenuRef}
+          style={{
+            position: 'fixed',
+            left: templateMenuPos.left,
+            bottom: templateMenuPos.bottom,
+            width: 300,
+            maxHeight: 340,
+            background: 'var(--tc-sidebar-bg)',
+            border: '1px solid var(--tc-border)',
+            borderRadius: 8,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            zIndex: 9999,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--tc-border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground)', flex: 1 }}>{t('prompt_input.templates')}</span>
+            {!isEmpty && (
+              <button className={s.templateSaveBtn} onClick={handleSaveTemplate}>
+                {t('prompt_input.save_template')}
+              </button>
+            )}
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {templates.length === 0 ? (
+              <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 11, color: 'var(--tc-foreground-secondary)' }}>
+                {t('prompt_input.templates_empty')}
+              </div>
+            ) : templates.map(tpl => (
+              <div key={tpl.id} className={s.templateItem}>
+                <span className={s.templateTitle} onClick={() => handleInsertTemplate(tpl.content)}>{tpl.title}</span>
+                <button className={s.pAttachClose} onClick={() => handleDeleteTemplate(tpl.id)} title={t('common.delete')}>
+                  <IconX size={10} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>,
+        document.body
+      )}
+
       <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} />
       <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
 
