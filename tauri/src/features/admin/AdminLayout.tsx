@@ -21,6 +21,7 @@ const NAV_ITEMS: Array<{ key: string; icon: React.ReactNode; i18n: string; short
   { key: '/admin/mindmap',      icon: <IconGitBranch size={18} />,  i18n: 'admin.nav.mindmap',       shortcut: `${modKey}5` },
   { key: '/admin/chat',        icon: <IconMessage size={18} />,    i18n: 'admin.nav.chat',          shortcut: `${modKey}6` },
   { key: '/admin/server',      icon: <IconMonitor size={18} />,    i18n: 'admin.nav.server',        shortcut: `${modKey}7` },
+  { key: '/admin/project-graph', icon: <IconBlocks size={18} />,  i18n: 'admin.nav.project_graph', shortcut: `${modKey}8` },
   ...(import.meta.env.DEV ? [
     { key: '/admin/dev', icon: <IconTerminal size={18} />, i18n: 'admin.nav.dev_tools', shortcut: `${modKey}8`, devOnly: true },
   ] : []),
