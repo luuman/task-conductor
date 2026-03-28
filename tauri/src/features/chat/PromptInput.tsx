@@ -618,7 +618,7 @@ export function PromptInput() {
                 </svg>
               </button>
             ) : (
-              <button className={s.pSendBtn} onClick={handleSend} disabled={isEmpty} title="发送 (⌘↵)">
+              <button className={s.pSendBtn} onClick={handleSend} disabled={isEmpty} title={t('prompt_input.send')}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
                 </svg>
