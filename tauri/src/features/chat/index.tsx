@@ -797,7 +797,7 @@ type VItem =
 
 type AiSessionMessage = {
   role: 'user' | 'assistant'
-  ts: string
+  ts: string | null
   blocks: Array<{ type: 'text'; text?: string | null }>
 }
 
