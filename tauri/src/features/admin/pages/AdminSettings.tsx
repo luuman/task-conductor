@@ -54,10 +54,13 @@ type ActionStatus = 'idle' | 'loading' | 'ok' | 'error'
 export default function AdminSettings() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { theme, mode, setTheme, setMode, themes } = useTheme()
+  const { theme, mode, setTheme, setMode, themeList } = useTheme()
   const { logout } = useAuthStore()
 
   const [settings, setSettings] = useState<Settings>(readCache)
+  const [chatStyle, setChatStyle] = useState<ChatStyleKey>(
+    () => (localStorage.getItem(CHAT_STYLE_LS_KEY) as ChatStyleKey) || 'a'
+  )
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>('checking')
   const [checking, setChecking] = useState(false)
   const [newPin, setNewPin] = useState('')
