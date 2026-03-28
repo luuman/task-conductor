@@ -12,6 +12,7 @@ export interface UseSessionDataOptions {
   transcriptPollInterval?: number // fallback transcript poll (default 10000)
   autoLoadAll?: boolean          // auto-load all remaining messages after initial fetch (default true)
   initialLimit?: number          // number of messages to fetch on initial load (default 50)
+  enableLiveSessionWs?: boolean  // subscribe active session websocket (default true)
 }
 
 export interface QuestionItem {
@@ -67,6 +68,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
     transcriptPollInterval = 10000,
     autoLoadAll = true,
     initialLimit = 50,
+    enableLiveSessionWs = true,
   } = options
 
   // Session list
@@ -318,6 +320,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
   const selectedSessionId = selectedSession?.session_id ?? null
   const selectedSessionStatus = selectedSession?.status ?? null
   useEffect(() => {
+    if (!enableLiveSessionWs) return
     if (!selectedSessionId || selectedSessionStatus !== 'active') return
     const sid = selectedSessionId
     const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/session/${sid}`
@@ -342,7 +345,7 @@ export function useSessionData(options: UseSessionDataOptions = {}): UseSessionD
       wsManager.disconnect(channel)
       clearInterval(pollId)
     }
-  }, [selectedSessionId, selectedSessionStatus, appendNewMessages, refreshSessions, transcriptPollInterval])
+  }, [enableLiveSessionWs, selectedSessionId, selectedSessionStatus, appendNewMessages, refreshSessions, transcriptPollInterval])
 
   return {
     sessions,
