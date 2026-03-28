@@ -144,7 +144,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
   const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   const catMap = useMemo(() => buildCatLabelMap(t), [t])
   const variant = 2 as const
-  if (!step.toolResult && !step.oldString) return null
+  if (!step.toolResult && !step.oldString && step.category !== 'agent') return null
 
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
