@@ -677,11 +677,6 @@ function stripDomContext(text: string): string {
   return cleaned.slice(0, Math.min(...candidates)).trim()
 }
 
-/** 将单个 \n 转换为 markdown 硬换行（两个尾随空格），保留段落间空行 */
-function hardBreak(text: string): string {
-  return text.replace(/([^\n])\n(?!\n)/g, '$1  \n')
-}
-
 /** 从原始消息文本中解析 DOM context 块 */
 type ParsedDomChip = {
   index: number; selector: string; path: string; text: string
