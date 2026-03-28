@@ -659,6 +659,7 @@ function SelectionToolbar({ containerRef }: { containerRef: React.RefObject<HTML
 // ════════════════════════════════════════════════
 /** Virtuoso Footer: 直接从 store 读取，避免闭包 + components prop 导致不更新 */
 function ChatFooter({ chatEndRef }: { chatEndRef: React.RefObject<HTMLDivElement | null> }) {
+  const { t } = useTranslation()
   const { messages: chatMessages, currentReply, isGenerating } = useChatStore()
   const chatDisplayMessages = currentReply
     ? [...chatMessages, { role: 'assistant' as const, ts: new Date().toISOString(), blocks: [{ type: 'text' as const, text: currentReply }] }]
