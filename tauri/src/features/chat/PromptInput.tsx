@@ -606,7 +606,7 @@ export function PromptInput() {
                     className={s.settingsItem}
                     onClick={() => { setMessages([]); setCurrentReply(''); setShowSettings(false) }}
                   >
-                    清除对话记录
+                    {t('prompt_input.clear_history')}
                   </button>
                 </div>
               )}
