@@ -62,6 +62,20 @@ function FolderSvg() {
   )
 }
 
+// ── Prompt 模板库 ──────────────────────────────────────────────────────
+type PromptTemplate = { id: string; title: string; content: string; createdAt: string }
+
+const TEMPLATES_LS_KEY = 'tc_prompt_templates'
+
+function loadTemplatesLS(): PromptTemplate[] {
+  try { return JSON.parse(localStorage.getItem(TEMPLATES_LS_KEY) || '[]') }
+  catch { return [] }
+}
+
+function saveTemplatesLS(templates: PromptTemplate[]) {
+  localStorage.setItem(TEMPLATES_LS_KEY, JSON.stringify(templates))
+}
+
 type DomContext = {
   _id: string
   tag: string
