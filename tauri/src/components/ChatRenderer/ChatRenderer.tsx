@@ -1779,9 +1779,9 @@ export function CodeBlock({ code = '', lang, label, icon, action, fileName, vari
       ) : (
         <div style={collapsed ? { maxHeight: 120, overflow: 'hidden', position: 'relative' } : undefined}>
           {highlighted ? (
-            <code className={`hljs ${styles.mdCodeBlock}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
+            <code className={`hljs ${mdStyles.mdCodeBlock}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
           ) : (
-            <code className={styles.mdCodeBlockPlain}>{code}</code>
+            <code className={mdStyles.mdCodeBlockPlain}>{code}</code>
           )}
           {collapsed && <div className={styles.codeFade} onClick={() => setCollapsed(false)} />}
         </div>
