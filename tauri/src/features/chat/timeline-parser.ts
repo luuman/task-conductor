@@ -181,6 +181,110 @@ export function parseTimeline(messages: TranscriptMessage[]): TimelineStep[] {
   return parseTimelineWithQuestions(messages).steps
 }
 
+// ── 风险检测 ──────────────────────────────────────────────────────────────
+export interface RiskItem {
+  stepId: string
+  level: 'high' | 'medium'
+  label: string
+  detail: string
+}
+
+const RISK_PATTERNS: Array<{ level: RiskItem['level']; label: string; re: RegExp }> = [
+  { level: 'high',   label: 'rm -rf',           re: /\brm\s+.*-[rf]*r[rf]*\b/ },
+  { level: 'high',   label: '强制推送',          re: /git\s+push\s.*(-f\b|--force)/ },
+  { level: 'high',   label: 'git reset --hard',  re: /git\s+reset\s+--hard/ },
+  { level: 'high',   label: '强制删除分支',      re: /git\s+branch\s+-D\b/ },
+  { level: 'high',   label: 'DROP TABLE',        re: /\bDROP\s+TABLE\b/i },
+  { level: 'medium', label: 'sudo',              re: /\bsudo\s/ },
+  { level: 'medium', label: 'chmod 777',         re: /chmod\s+777\b/ },
+  { level: 'medium', label: 'kill -9',           re: /\bkill\s+-9\b/ },
+  { level: 'medium', label: 'git stash drop',    re: /git\s+stash\s+(drop|clear)/ },
+  { level: 'medium', label: '覆盖 db/log 文件',  re: />\s*\S+\.(db|sqlite|log)\b/ },
+]
+
+export function detectRisks(steps: TimelineStep[]): RiskItem[] {
+  const risks: RiskItem[] = []
+  for (const step of steps) {
+    if (step.category === 'bash') {
+      const cmd = String(step.toolInput?.command || '')
+      for (const rule of RISK_PATTERNS) {
+        if (rule.re.test(cmd)) {
+          risks.push({ stepId: step.id, level: rule.level, label: rule.label, detail: cmd.slice(0, 100) })
+          break
+        }
+      }
+    } else if (step.category === 'write') {
+      const fp = String(step.toolInput?.file_path || '')
+      if (/\.env(\.\w+)?$/.test(fp)) {
+        risks.push({ stepId: step.id, level: 'medium', label: '写入 .env', detail: fp })
+      }
+    }
+  }
+  return risks
+}
+
+// ── 操作意图推断 ──────────────────────────────────────────────────────────
+export type IntentLabel = 'explore' | 'modify' | 'execute' | 'search' | 'delegate' | 'analyze' | 'mixed'
+
+export function inferBlockIntent(blockSteps: TimelineStep[]): IntentLabel {
+  const tools = blockSteps.filter(s => s.kind === 'tool')
+  if (tools.length === 0) return 'analyze'
+  const total = tools.length
+  const pct = (cat: string) => tools.filter(s => s.category === cat).length / total
+  if (pct('agent') >= 0.3)                                             return 'delegate'
+  if (pct('search') >= 0.3)                                            return 'search'
+  if (pct('bash') >= 0.5)                                              return 'execute'
+  if (pct('edit') + pct('write') >= 0.5)                               return 'modify'
+  if (pct('read') + pct('grep') + pct('glob') >= 0.6)                  return 'explore'
+  if (pct('read') + pct('grep') + pct('glob') >= 0.25
+      && pct('edit') + pct('write') >= 0.2)                            return 'modify'
+  return 'mixed'
+}
+
+// ── Commit 消息生成 ──────────────────────────────────────────────────────
+export function generateCommitMessage(steps: TimelineStep[], questions: UserQuestion[]): string {
+  const editedFiles = [...new Set(
+    steps.filter(s => s.category === 'edit').map(s => String(s.toolInput?.file_path || '').split('/').pop()).filter(Boolean)
+  )]
+  const newFiles = [...new Set(
+    steps.filter(s => s.category === 'write').map(s => String(s.toolInput?.file_path || '').split('/').pop()).filter(Boolean)
+  )]
+  const hasBash = steps.some(s => s.category === 'bash')
+
+  // 从第一个问题提取意图关键词
+  const firstQ = questions[0]?.text ? cleanSystemXml(questions[0].text).slice(0, 60).trim() : ''
+
+  const parts: string[] = []
+
+  // 确定前缀
+  let prefix = 'fix'
+  if (newFiles.length > 0 && editedFiles.length === 0) prefix = 'feat'
+  else if (newFiles.length > 0) prefix = 'feat'
+  else if (hasBash && editedFiles.length === 0) prefix = 'chore'
+
+  // 构建描述
+  const allChanged = [...newFiles, ...editedFiles]
+  if (allChanged.length === 0) {
+    parts.push(`${prefix}: ${firstQ || '更新代码'}`)
+  } else if (allChanged.length === 1) {
+    parts.push(`${prefix}: update ${allChanged[0]}`)
+  } else if (allChanged.length <= 3) {
+    parts.push(`${prefix}: update ${allChanged.join(', ')}`)
+  } else {
+    parts.push(`${prefix}: update ${allChanged.slice(0, 2).join(', ')} and ${allChanged.length - 2} more files`)
+  }
+
+  // 添加详情
+  const details: string[] = []
+  if (editedFiles.length > 0) details.push(`- 修改: ${editedFiles.slice(0, 5).join(', ')}`)
+  if (newFiles.length > 0) details.push(`- 新建: ${newFiles.slice(0, 5).join(', ')}`)
+  if (firstQ) details.push(`\n背景: ${firstQ}`)
+
+  if (details.length > 0) parts.push('', ...details)
+
+  return parts.join('\n')
+}
+
 /** 从文件路径猜语言 */
 export function guessLang(filePath: string): string {
   const ext = filePath.split('.').pop()?.toLowerCase() || ''
