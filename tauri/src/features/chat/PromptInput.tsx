@@ -473,7 +473,7 @@ export function PromptInput() {
                     <span className={s.pFileCardName}>{a.name}</span>
                     <span className={s.pFileCardInfo}>
                       {a.kind === 'folder'
-                        ? (a.itemCount ? `${a.itemCount} 个文件` : '文件夹')
+                        ? (a.itemCount ? t('prompt_input.files_count', { count: a.itemCount }) : t('prompt_input.folder_label'))
                         : [(a.ext || 'FILE').toUpperCase(), fmtFileSize(a.size)].filter(Boolean).join(' · ')}
                     </span>
                   </div>
