@@ -550,6 +550,7 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
 // 用户消息行（含 hover 复制按钮）
 // ════════════════════════════════════════════════
 function UserMsgRow({ rawText, children }: { rawText: string; children: React.ReactNode }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const handleCopy = useCallback(() => {
@@ -570,7 +571,7 @@ function UserMsgRow({ rawText, children }: { rawText: string; children: React.Re
       <button
         className={`${s.userCopyBtn} ${copied ? s.userCopyBtnDone : ''}`}
         onClick={handleCopy}
-        title="复制消息"
+        title={t('chat_sidebar.copy_message')}
         tabIndex={-1}
       >
         {copied
