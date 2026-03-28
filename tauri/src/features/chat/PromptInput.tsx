@@ -594,7 +594,7 @@ export function PromptInput() {
             <div ref={settingsRef} style={{ position: 'relative' }}>
               <button
                 className={s.pToolBtn}
-                title="设置"
+                title={t('prompt_input.settings')}
                 onClick={() => setShowSettings(v => !v)}
                 style={showSettings ? { color: 'var(--tc-foreground)', background: 'rgba(255,255,255,0.06)' } : undefined}
               >
