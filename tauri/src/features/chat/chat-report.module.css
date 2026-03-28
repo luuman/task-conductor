@@ -72,7 +72,15 @@
 }
 .queryPill .richText { min-width: 0; }
 .queryPillBody { position: relative; }
+.userText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--tc-foreground);
+}
 .queryPillBodyCollapsed {
+  position: relative;
   max-height: 80px;
   overflow: hidden;
 }
@@ -83,6 +91,7 @@
   height: 36px;
   background: linear-gradient(to bottom, transparent, var(--tc-accent-a8, rgba(0,0,0,0.12)));
   pointer-events: none;
+  z-index: 1;
 }
 .queryPillExpandBtn {
   align-self: flex-start;
