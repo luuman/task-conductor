@@ -532,7 +532,7 @@ export function PromptInput() {
           />
           <button
             className={s.pExpandBtn}
-            title={expanded ? '收起' : '展开输入框'}
+            title={expanded ? t('prompt_input.collapse') : t('prompt_input.expand')}
             onClick={() => { setExpanded(v => !v); setTimeout(() => autoResize(), 0) }}
           >
             <IconMaximize size={13} />
