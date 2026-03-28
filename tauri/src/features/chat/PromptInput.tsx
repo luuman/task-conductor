@@ -353,6 +353,40 @@ export function PromptInput() {
 
   const handleStop = useCallback(() => stop(), [stop])
 
+  // 模板库逻辑
+  useEffect(() => {
+    if (!showTemplates) return
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (templateBtnRef.current?.contains(target) || templateMenuRef.current?.contains(target)) return
+      setShowTemplates(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showTemplates])
+
+  const handleSaveTemplate = useCallback(() => {
+    const content = value.trim()
+    if (!content) return
+    const title = content.slice(0, 40) + (content.length > 40 ? '…' : '')
+    const tpl: PromptTemplate = { id: String(Date.now()), title, content, createdAt: new Date().toISOString() }
+    const next = [tpl, ...templates].slice(0, 20)
+    setTemplates(next)
+    saveTemplatesLS(next)
+  }, [value, templates])
+
+  const handleInsertTemplate = useCallback((content: string) => {
+    setValue(content)
+    setShowTemplates(false)
+    setTimeout(() => textareaRef.current?.focus(), 0)
+  }, [])
+
+  const handleDeleteTemplate = useCallback((id: string) => {
+    const next = templates.filter(tpl => tpl.id !== id)
+    setTemplates(next)
+    saveTemplatesLS(next)
+  }, [templates])
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
