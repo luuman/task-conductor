@@ -5,11 +5,7 @@ import topLevelAwait from 'vite-plugin-top-level-await'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [
-    react(),
-    wasm(),
-    topLevelAwait(),
-  ],
+  plugins: [react(), wasm(), topLevelAwait()],
 
   resolve: {
     alias: {
@@ -24,8 +20,8 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 7071,
     proxy: {
-      '/api':    { target: 'http://localhost:8765', changeOrigin: true },
-      '/auth':   { target: 'http://localhost:8765', changeOrigin: true },
+      '/api': { target: 'http://localhost:8765', changeOrigin: true },
+      '/auth': { target: 'http://localhost:8765', changeOrigin: true },
       '/health': { target: 'http://localhost:8765', changeOrigin: true },
       '/ws': {
         target: 'ws://localhost:8765',
