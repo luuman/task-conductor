@@ -382,13 +382,10 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
   const { t } = useTranslation()
   const qNavRef = useRef<HTMLDivElement>(null)
 
-  // Use allQuestions (from /questions API, full list) if available, else fall back to loaded questions
-  const navQuestions = useMemo(() => {
-    if (allQuestions && allQuestions.length > 0) {
-      return allQuestions.map((q, i) => ({ id: `aq${i}`, text: q.text, ts: null, stepIndex: 0 }))
-    }
-    return questions
-  }, [allQuestions, questions])
+  // 始终用解析器产出的 questions（与 questionVirtuosoIndices 完全对齐）
+  // allQuestions 来自后端 API，未过滤 cleanSystemXml，会导致索引错位，仅用于显示总数
+  const navQuestions = questions
+  const totalQCount = allQuestions && allQuestions.length > 0 ? allQuestions.length : questions.length
 
   // 联动：activeQ 变化时自动滚动导航列表
   useEffect(() => {
