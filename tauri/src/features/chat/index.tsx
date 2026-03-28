@@ -46,26 +46,24 @@ function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
   }
 }
 
-// Fallback label maps for contexts without i18n (style renderers)
-const TOOL_LABEL_MAP: Record<string, string> = {
-  Read: '读取', Write: '写入', Edit: '编辑', MultiEdit: '多处编辑',
-  Bash: '命令', Grep: '内容搜索', Glob: '文件匹配',
-  Agent: '子代理', AskUserQuestion: '提问',
-  WebSearch: '网络搜索', WebFetch: '获取网页',
-  ToolSearch: '工具搜索', Skill: '执行技能',
-  TaskCreate: '创建任务', TaskUpdate: '更新任务', TaskList: '任务列表',
-  TaskGet: '获取任务', TaskStop: '停止任务',
+function buildToolLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    Read: t('chat_sidebar.tool_read'), Write: t('chat_sidebar.tool_write'),
+    Edit: t('chat_sidebar.tool_edit'), MultiEdit: t('chat_sidebar.tool_multi_edit'),
+    Bash: t('chat_sidebar.tool_bash'), Grep: t('chat_sidebar.tool_grep'),
+    Glob: t('chat_sidebar.tool_glob'), Agent: t('chat_sidebar.tool_agent'),
+    AskUserQuestion: t('chat_sidebar.tool_ask'),
+    WebSearch: t('chat_sidebar.tool_web_search'), WebFetch: t('chat_sidebar.tool_web_fetch'),
+    ToolSearch: t('chat_sidebar.tool_search'), Skill: t('chat_sidebar.tool_skill'),
+    TaskCreate: t('chat_sidebar.tool_task_create'), TaskUpdate: t('chat_sidebar.tool_task_update'),
+    TaskList: t('chat_sidebar.tool_task_list'), TaskGet: t('chat_sidebar.tool_task_get'),
+    TaskStop: t('chat_sidebar.tool_task_stop'),
+  }
 }
 
-const CAT_LABEL_MAP: Record<string, string> = {
-  read: '读取', edit: '编辑', write: '写入', bash: '命令',
-  grep: '内容搜索', glob: '文件匹配', agent: '子代理', ask: '提问',
-  search: '网络搜索', task: '任务管理', text: '文本', other: '其他',
-}
-
-function badgeLabel(step: TimelineStep): string {
-  if (step.kind === 'text') return '文本'
-  const label = TOOL_LABEL_MAP[step.toolName || ''] || step.toolName || '工具'
+function badgeLabel(step: TimelineStep, toolMap: Record<string, string>, t: (key: string) => string): string {
+  if (step.kind === 'text') return t('chat_sidebar.badge_text')
+  const label = toolMap[step.toolName || ''] || step.toolName || t('chat_sidebar.badge_tool')
   return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
 }
 
