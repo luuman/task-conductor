@@ -316,7 +316,7 @@ export function StyleG({ steps }: { steps: TimelineStep[] }) {
   )
 }
 
-function StyleH({ steps }: { steps: TimelineStep[] }) {
+export function StyleH({ steps }: { steps: TimelineStep[] }) {
   const [openIds, setOpenIds] = useState<Set<string>>(() => {
     const set = new Set<string>()
     steps.forEach(st => { if (st.kind === 'text') set.add(st.id) })
