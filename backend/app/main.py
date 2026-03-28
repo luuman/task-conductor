@@ -103,6 +103,13 @@ async def lifespan(app: FastAPI):
         if fixed_backend:
             asyncio.create_task(_send_startup_card(pin, fixed_backend))
 
+    # sync 模块：确保 sync_config 表有默认行（Task 2 会创建此函数）
+    try:
+        from .sync.config import ensure_sync_config
+        ensure_sync_config()
+    except ImportError:
+        pass  # sync 模块尚未创建时忽略
+
     # 飞书初始化
     from .feishu.client import feishu_client as _fc
     if _fc.enabled:

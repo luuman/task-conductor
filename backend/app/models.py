@@ -176,3 +176,29 @@ class ConversationNote(Base):
     )
     session: Mapped["ClaudeSession"] = relationship(viewonly=True)
     linked_task: Mapped[Optional["Task"]] = relationship(viewonly=True)
+
+
+class SyncConfig(Base):
+    """GitHub 同步配置（单行表）"""
+    __tablename__ = "sync_config"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    github_repo: Mapped[str] = mapped_column(String(200), default="")   # "owner/repo"
+    github_pat: Mapped[str] = mapped_column(Text, default="")
+    encrypt_password: Mapped[str] = mapped_column(Text, default="")
+    salt: Mapped[str] = mapped_column(String(64), default="")            # hex，固定不变
+    argon2_time_cost: Mapped[int] = mapped_column(Integer, default=3)
+    argon2_memory_kb: Mapped[int] = mapped_column(Integer, default=65536)
+    argon2_parallelism: Mapped[int] = mapped_column(Integer, default=4)
+    last_push_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class BackupRecord(Base):
+    """每个 session 的最新备份记录"""
+    __tablename__ = "backup_records"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(128), index=True, unique=True)
+    enc_path: Mapped[str] = mapped_column(String(300))
+    content_hash: Mapped[str] = mapped_column(String(64))
+    backed_up_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    file_size: Mapped[int] = mapped_column(Integer, default=0)
