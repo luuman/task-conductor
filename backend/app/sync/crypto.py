@@ -4,7 +4,6 @@ AES-256-GCM 加密模块，配合 Argon2id 密钥派生 + HKDF-SHA256 文件密�
 存储格式：nonce(12B) | ciphertext | tag(16B)
 """
 import os
-import hashlib
 
 from argon2.low_level import hash_secret_raw, Type
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM

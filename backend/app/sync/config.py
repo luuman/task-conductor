@@ -1,14 +1,14 @@
 """SyncConfig CRUD helpers。"""
 from sqlalchemy.orm import Session
 
-from ..database import SessionLocal
+from ..database import engine
 from ..models import SyncConfig
 from .crypto import new_salt
 
 
 def ensure_sync_config() -> None:
     """若 sync_config 表为空则插入默认行（id=1）。"""
-    with SessionLocal() as db:
+    with Session(engine) as db:
         existing = db.get(SyncConfig, 1)
         if existing is None:
             cfg = SyncConfig(id=1, salt=new_salt())
@@ -18,8 +18,11 @@ def ensure_sync_config() -> None:
 
 def load_sync_config() -> SyncConfig | None:
     """返回单行 SyncConfig（id=1），不存在返回 None。"""
-    with SessionLocal() as db:
-        return db.get(SyncConfig, 1)
+    with Session(engine) as db:
+        cfg = db.get(SyncConfig, 1)
+        if cfg is not None:
+            db.refresh(cfg)
+        return cfg
 
 
 def update_sync_config(data: dict) -> SyncConfig:
@@ -29,7 +32,7 @@ def update_sync_config(data: dict) -> SyncConfig:
         "argon2_time_cost", "argon2_memory_kb", "argon2_parallelism",
         "enabled",
     }
-    with SessionLocal() as db:
+    with Session(engine) as db:
         cfg = db.get(SyncConfig, 1)
         if cfg is None:
             cfg = SyncConfig(id=1, salt=new_salt())
