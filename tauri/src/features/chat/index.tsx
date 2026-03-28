@@ -357,7 +357,7 @@ export function StyleH({ steps }: { steps: TimelineStep[] }) {
                   <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
                   <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
                 </div>
-                {isOpen && (step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
+                {isOpen && (step.category === 'agent' || step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
                   <div className={s.hBody}><ResultBlock step={step} /></div>
                 )}
               </div>
