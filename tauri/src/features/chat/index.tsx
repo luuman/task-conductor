@@ -186,9 +186,12 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
         </CodeBlock>
       )
     }
-    const content = prompt || (step.toolInput ? JSON.stringify(step.toolInput, null, 2) : '')
-    if (content) {
-      return <CodeBlock code={content} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color} />
+    if (prompt) {
+      return (
+        <CodeBlock icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+          <RichTextBlock text={prompt} />
+        </CodeBlock>
+      )
     }
     return null
   }
