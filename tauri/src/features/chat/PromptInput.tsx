@@ -576,7 +576,7 @@ export function PromptInput() {
             <button
               ref={permBtnRef}
               className={s.pModelBtn}
-              title="权限模式"
+              title={t('prompt_input.permission_mode')}
               onClick={() => {
                 if (showPermMenu) { setShowPermMenu(false); return }
                 const r = permBtnRef.current?.getBoundingClientRect()
