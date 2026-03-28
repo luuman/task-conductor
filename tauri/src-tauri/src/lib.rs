@@ -1,3 +1,5 @@
+mod sync;
+
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fs;
