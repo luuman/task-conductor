@@ -18,6 +18,8 @@ import {
   Handle,
   Position,
   type NodeProps,
+  type EdgeProps,
+  getBezierPath,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import styles from './docs-demo.module.css'
