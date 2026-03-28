@@ -1087,57 +1087,8 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
                   increaseViewportBy={600}
                   rangeChanged={handleRangeChanged}
                   startReached={hasMore ? loadMore : undefined}
-<<<<<<< HEAD
                   computeItemKey={computeItemKey}
-                  components={virtuosoComponents}
                   itemContent={itemContent}
-=======
-                  computeItemKey={(_, item) => item.key}
-                  itemContent={(_, item) => {
-                    if (item.kind === 'user') {
-                      return (
-                        <div className={s.turnSection} style={{ padding: '0 20px' }}>
-                          <UserMsgRow rawText={item.question.text}>
-                            <div className={s.richText}>{stripDomContext(item.question.text)}</div>
-                          </UserMsgRow>
-                        </div>
-                      )
-                    }
-                    if (item.kind === 'live') {
-                      const raw = item.message.blocks.map((b) => b.text ?? '').join('\n').trim()
-                      const text = item.message.role === 'user' ? stripDomContext(raw) : raw
-                      if (!text && item.message.role !== 'user') return null
-                      if (item.message.role === 'user' && !text && parseDomContextChips(raw).length === 0) return null
-                      return item.message.role === 'user' ? (
-                        <div className={s.turnSection} style={{ padding: '0 20px' }}>
-                          <UserMsgRow rawText={raw}>
-                            {text && <ImageAwareRichText text={text} />}
-                            <InlineDomChips raw={raw} />
-                          </UserMsgRow>
-                        </div>
-                      ) : (
-                        <div style={{ padding: '0 20px' }}>
-                          <div className={s.chatAiBlock}>
-                            <div className={s.richText}><RichTextBlock text={text} /></div>
-                          </div>
-                        </div>
-                      )
-                    }
-                    if (item.kind === 'thinking') {
-                      return (
-                        <div className={s.pThinking} style={{ padding: '0 20px' }}>
-                          <span className={s.pThinkingDot} />
-                          <span>思考中...</span>
-                        </div>
-                      )
-                    }
-                    return (
-                      <div style={{ padding: '0 20px' }}>
-                        <Renderer steps={item.steps} />
-                      </div>
-                    )
-                  }}
->>>>>>> 485e5759e43e67cf2a16f58494892ff08e8b23c5
                 />
               )}
             </CodeExpandCtx.Provider>
