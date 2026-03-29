@@ -190,6 +190,12 @@ export class HttpAdapter implements ApiAdapter {
     return result
   }
 
+  async startTask(taskId: number) {
+    const result = await this.fetch<Task>(`/api/tasks/${taskId}/start`, { method: 'POST' })
+    cache.invalidate(`task:${taskId}`)
+    return result
+  }
+
   async approveTask(taskId: number, data: { action: 'approve' | 'reject'; reason?: string }) {
     await this.fetch<void>(`/api/tasks/${taskId}/approve`, { method: 'POST', body: JSON.stringify(data) })
     cache.invalidate(`task:${taskId}`)
