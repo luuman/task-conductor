@@ -356,9 +356,10 @@
 .compTitle { font-size: 11px; font-weight: 600; color: rgba(240,220,180,0.8); }
 .compDesc { font-size: 10px; color: rgba(150,130,80,0.55); line-height: 1.4; }
 
-/* 图例 */
+/* 图例（右下角浮层） */
 .legend {
   position: absolute; bottom: 14px; right: 14px;
+  z-index: 10;
   display: flex; gap: 10px;
   font-size: 9px; color: rgba(120,140,180,0.45);
   background: rgba(7,8,15,0.75);
