@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import engine
 from ..models import Project, Task, StageArtifact, ProjectKnowledge, ClaudeInstance, Notification
-from ..schemas import ProjectCreate, ProjectOut, TaskCreate, TaskOut
+from ..schemas import ProjectCreate, ProjectOut, ProjectStagesUpdate, TaskCreate, TaskOut
 from .settings_router import _load as _load_settings
 
 router = APIRouter(prefix="/api/projects", tags=["项目"])
