@@ -530,6 +530,13 @@ export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
   updateProjectStagesConfig(projectId: number, stagesConfig: string[]): Promise<Project>
+  // 版本管理
+  getVersions(projectId: number): Promise<Version[]>
+  createVersion(projectId: number, data: VersionCreate): Promise<Version>
+  updateVersion(projectId: number, versionId: number, data: VersionUpdate): Promise<Version>
+  deleteVersion(projectId: number, versionId: number): Promise<void>
+  assignTaskToVersion(projectId: number, versionId: number, taskId: number): Promise<Task>
+  removeTaskFromVersion(projectId: number, versionId: number, taskId: number): Promise<Task>
   getProjectFiles(projectId: number): Promise<{ path: string; items: FileItem[] }>
   getProjectKnowledge(projectId: number): Promise<ProjectKnowledge[]>
   getTasks(projectId: number): Promise<Task[]>
