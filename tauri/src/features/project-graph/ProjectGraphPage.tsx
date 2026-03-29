@@ -388,8 +388,8 @@ function ProjectGraphInner() {
   }, [selectedId, handleSelect, setNodes, setEdges])
 
   return (
-    // 官方推荐：外层 div 必须有确定的宽高
-    <div style={{ width: '100%', height: '100%', position: 'relative', background: '#07080f' }}>
+    // position: absolute + inset:0 绕过 height:100% 在 flex 容器中解析为 auto 的问题
+    <div style={{ position: 'absolute', inset: 0, background: '#07080f' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
