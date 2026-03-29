@@ -106,10 +106,10 @@ export default function VersionBoardPage() {
   // 筛选：只显示未完成的版本
   const visibleVersions = useMemo(() => {
     if (filter === 'all') return versions
-    return versions.filter((v) => {
-      if (v.status === 'shipped') return false
-      const tasks = tasksByVersion.get(v.id) ?? []
-      return !isVersionDone(tasks)
+    return versions.filter((ver) => {
+      if (ver.status === 'shipped') return false
+      const verTasks = tasksByVersion.get(ver.id) ?? []
+      return !isVersionDone(verTasks)
     })
   }, [versions, filter, tasksByVersion])
 
