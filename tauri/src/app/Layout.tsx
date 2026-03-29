@@ -70,6 +70,7 @@ export function Layout() {
   // 侧边栏 = 导航菜单（首页、任务、会话、文件、Git、设置）
   const sidebarItems = [
     { key: '/',            label: t('nav.dashboard'),     icon: <IconLayoutGrid size={16} /> },
+    { key: '/versions',     label: '版本规划',              icon: <IconBlocks size={16} /> },
     { key: '/task-manager', label: t('layout.tasks'),     icon: <IconFileText size={16} /> },
     { key: '/sessions',    label: t('layout.sessions'),   icon: <IconMonitor size={16} /> },
     { key: '/chat',        label: t('layout.chat'),       icon: <IconMessage size={16} /> },
