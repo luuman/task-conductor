@@ -1,8 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..database import get_db
+from ..database import engine
 from ..models import Version, Task
 from ..schemas import VersionCreate, VersionOut, VersionUpdate, TaskOut
+
+
+def get_db():
+    with Session(engine) as session:
+        yield session
 
 router = APIRouter(prefix="/api/projects/{project_id}/versions", tags=["versions"])
 
