@@ -415,7 +415,7 @@ function buildElements(selectedId: string | null, onSelect: (id: string) => void
       const targetId = isStoreDep ? n.id  : depId
 
       edges.push({
-        id: `${sourceId}→${targetId}`,
+        id: `${sourceId}->${targetId}`,
         type: 'glow',
         source: sourceId,
         target: targetId,
