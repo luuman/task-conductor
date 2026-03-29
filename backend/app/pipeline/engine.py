@@ -46,8 +46,23 @@ class StageTransitionError(Exception):
     pass
 
 
-def get_task_stages(task) -> list[str]:
-    """获取任务的阶段列表：优先 task.stages，fallback STAGE_ORDER"""
+def get_effective_stages(project_stages_config: Optional[str]) -> list[str]:
+    """根据项目的 stages_config（JSON string）返回实际启用的阶段序列。
+    None 表示全部启用（返回完整 STAGE_ORDER）。
+    input 和 done 始终保留。
+    """
+    if not project_stages_config:
+        return STAGE_ORDER
+    try:
+        enabled = set(json.loads(project_stages_config))
+    except (json.JSONDecodeError, TypeError):
+        return STAGE_ORDER
+    enabled |= {"input", "done"}
+    return [s for s in STAGE_ORDER if s in enabled]
+
+
+def get_task_stages(task, project_stages_config: Optional[str] = None) -> list[str]:
+    """获取任务的阶段列表：优先 task.stages，fallback project stages_config，fallback STAGE_ORDER"""
     if task and hasattr(task, 'stages') and task.stages:
         try:
             stages = json.loads(task.stages)
@@ -58,7 +73,7 @@ def get_task_stages(task) -> list[str]:
                 return stages
         except (json.JSONDecodeError, TypeError):
             pass
-    return STAGE_ORDER
+    return get_effective_stages(project_stages_config)
 
 
 class PipelineEngine:
