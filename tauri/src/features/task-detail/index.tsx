@@ -62,6 +62,14 @@ export default function TaskDetailPage() {
           {task.description && <p className={styles.description}>{task.description}</p>}
         </div>
         <div className={styles.headerRight}>
+          {task.stage === 'input' && task.status === 'pending' && (
+            <Button
+              onClick={() => startTask.mutate()}
+              disabled={startTask.isPending}
+            >
+              {startTask.isPending ? '启动中…' : '🚀 启动流水线'}
+            </Button>
+          )}
           {task.status === 'waiting_review' && (
             <>
               <Button onClick={() => approveTask.mutate({ action: 'approve' })}>
