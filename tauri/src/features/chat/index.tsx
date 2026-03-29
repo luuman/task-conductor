@@ -32,11 +32,8 @@ const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKe
 
 
 
-// ════════════════════════════════════════════════
-// 样式渲染器
-// ════════════════════════════════════════════════
-
-export function StyleA({ steps }: { steps: TimelineStep[] }) {
+// ── Right sidebar internal helper ──
+function _noop_StyleA({ steps }: { steps: TimelineStep[] }) {
   const { t } = useTranslation()
   const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   return (
