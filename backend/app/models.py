@@ -93,6 +93,7 @@ class Task(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     project: Mapped["Project"] = relationship(back_populates="tasks")
+    version: Mapped[Optional["Version"]] = relationship(back_populates="tasks")
     artifacts: Mapped[list["StageArtifact"]] = relationship(back_populates="task")
     instances: Mapped[list["ClaudeInstance"]] = relationship(back_populates="task")
     interview_messages: Mapped[list["InterviewMessage"]] = relationship(back_populates="task")
