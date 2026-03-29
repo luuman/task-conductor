@@ -143,6 +143,46 @@ export class HttpAdapter implements ApiAdapter {
     return result
   }
 
+  async getVersions(projectId: number) {
+    return this.fetch<Version[]>(`/api/projects/${projectId}/versions`)
+  }
+
+  async createVersion(projectId: number, data: VersionCreate) {
+    const result = await this.fetch<Version>(`/api/projects/${projectId}/versions`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    cache.invalidate(`project:${projectId}:versions`)
+    return result
+  }
+
+  async updateVersion(projectId: number, versionId: number, data: VersionUpdate) {
+    const result = await this.fetch<Version>(`/api/projects/${projectId}/versions/${versionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+    cache.invalidate(`project:${projectId}:versions`)
+    return result
+  }
+
+  async deleteVersion(projectId: number, versionId: number) {
+    await this.fetch<void>(`/api/projects/${projectId}/versions/${versionId}`, { method: 'DELETE' })
+    cache.invalidate(`project:${projectId}:versions`)
+    cache.invalidate(`project:${projectId}:tasks`)
+  }
+
+  async assignTaskToVersion(projectId: number, versionId: number, taskId: number) {
+    const result = await this.fetch<Task>(`/api/projects/${projectId}/versions/${versionId}/tasks/${taskId}`, { method: 'PUT' })
+    cache.invalidate(`project:${projectId}:tasks`)
+    return result
+  }
+
+  async removeTaskFromVersion(projectId: number, versionId: number, taskId: number) {
+    const result = await this.fetch<Task>(`/api/projects/${projectId}/versions/${versionId}/tasks/${taskId}`, { method: 'DELETE' })
+    cache.invalidate(`project:${projectId}:tasks`)
+    return result
+  }
+
   async createTask(projectId: number, data: { title: string; description?: string }) {
     const result = await this.fetch<Task>(`/api/projects/${projectId}/tasks`, { method: 'POST', body: JSON.stringify(data) })
     cache.invalidate(`project:${projectId}:tasks`)
