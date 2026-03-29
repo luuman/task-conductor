@@ -297,7 +297,7 @@ function FeatureNodeComp({ data }: NodeProps) {
   if (n.layer === 'store') {
     return (
       <>
-        <Handle type="source" position={Position.Right} style={hs(n.color)} />
+        <Handle type="target" position={Position.Left} style={{ ...hs(n.color), opacity: 0 }} />
         <div
           className={[styles.storeCard, d.selected ? styles.storeCardSelected : ''].join(' ')}
           onClick={handleClick}
@@ -309,6 +309,7 @@ function FeatureNodeComp({ data }: NodeProps) {
           <div className={styles.storeDesc}>{n.desc}</div>
           {n.lines > 0 && <div className={styles.storeLines}>{n.lines} lines</div>}
         </div>
+        <Handle type="source" position={Position.Right} style={hs(n.color)} />
       </>
     )
   }
@@ -327,6 +328,7 @@ function FeatureNodeComp({ data }: NodeProps) {
           </div>
           <div className={styles.apiDesc}>{n.desc}</div>
         </div>
+        <Handle type="source" position={Position.Right} style={{ ...hs(n.color), opacity: 0 }} />
       </>
     )
   }
@@ -345,6 +347,7 @@ function FeatureNodeComp({ data }: NodeProps) {
           </div>
           <div className={styles.compDesc}>{n.desc}</div>
         </div>
+        <Handle type="source" position={Position.Right} style={{ ...hs(n.color), opacity: 0 }} />
       </>
     )
   }
