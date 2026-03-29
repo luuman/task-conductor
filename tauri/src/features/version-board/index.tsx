@@ -178,7 +178,7 @@ export default function VersionBoardPage() {
                 className={`${styles.versionCard} ${version.status === 'active' ? styles.active : ''}`}
               >
                 <div className={styles.versionHeader} onClick={() => toggleCollapse(version.id)}>
-                  <span className={`${styles.versionBadge} ${styles[`badge-${version.status}`]}`}>
+                  <span className={`${styles.versionBadge} ${styles[`badge-${version.status}` as keyof typeof styles]}`}>
                     {version.name}
                   </span>
                   {version.title && <span className={styles.versionTitle}>{version.title}</span>}
