@@ -44,7 +44,8 @@ function isVersionDone(tasks: Task[]) {
 export default function VersionBoardPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const activeProjectId = useAppStore((s) => s.activeProjectId)
+  const activeProjectIdStr = useAppStore((s) => s.activeProjectId)
+  const activeProjectId = activeProjectIdStr ? Number(activeProjectIdStr) : null
   const [filter, setFilter] = useState<FilterMode>('incomplete')
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set())
   const [showNewVersion, setShowNewVersion] = useState(false)
