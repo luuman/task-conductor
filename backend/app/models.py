@@ -47,6 +47,7 @@ class Project(Base):
     sort_order: Mapped[int] = mapped_column(Integer, default=0)  # 越小越靠前
     feishu_chat_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     feishu_sync: Mapped[bool] = mapped_column(Boolean, default=False)  # 会话同步到飞书群
+    stages_config: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON list[str]，启用的阶段；null = 全部
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     tasks: Mapped[list["Task"]] = relationship(back_populates="project")
 
