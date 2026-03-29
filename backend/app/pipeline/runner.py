@@ -169,8 +169,12 @@ async def run_pipeline(task_id: int, worktree_path: str):
             return
 
         # 无需审批 → 自动推进
-        idx = STAGE_ORDER.index(current_stage)
-        current_stage = STAGE_ORDER[idx + 1]
+        if current_stage in task_stages:
+            idx = task_stages.index(current_stage)
+            current_stage = task_stages[idx + 1]
+        else:
+            idx = STAGE_ORDER.index(current_stage)
+            current_stage = STAGE_ORDER[idx + 1]
 
     # 所有阶段完成
     with Session(engine) as db:
