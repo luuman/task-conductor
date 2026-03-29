@@ -171,7 +171,6 @@ export default function VersionBoardPage() {
             const tasks = tasksByVersion.get(version.id) ?? []
             const isCollapsed = collapsed.has(version.id)
             const doneTasks = tasks.filter(isTaskDone).length
-            const progress = `${doneTasks}/${tasks.length}`
 
             return (
               <div
