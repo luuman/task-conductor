@@ -54,18 +54,18 @@ export default function VersionBoardPage() {
 
   const { data: versions = [], isLoading: vLoading } = useQuery({
     queryKey: ['versions', activeProjectId],
-    queryFn: () => getApi().getVersions(activeProjectId!),
+    queryFn: () => api.getVersions(activeProjectId!),
     enabled: !!activeProjectId,
   })
 
   const { data: allTasks = [] } = useQuery({
     queryKey: ['tasks', activeProjectId],
-    queryFn: () => getApi().getTasks(activeProjectId!),
+    queryFn: () => api.getTasks(activeProjectId!),
     enabled: !!activeProjectId,
   })
 
   const createVersionMut = useMutation({
-    mutationFn: (data: VersionCreate) => getApi().createVersion(activeProjectId!, data),
+    mutationFn: (data: VersionCreate) => api.createVersion(activeProjectId!, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['versions', activeProjectId] })
       setShowNewVersion(false)
@@ -75,8 +75,8 @@ export default function VersionBoardPage() {
 
   const createTaskMut = useMutation({
     mutationFn: async ({ versionId, title }: { versionId: number; title: string }) => {
-      const task = await getApi().createTask(activeProjectId!, { title, description: '' })
-      await getApi().assignTaskToVersion(activeProjectId!, versionId, task.id)
+      const task = await api.createTask(activeProjectId!, { title, description: '' })
+      await api.assignTaskToVersion(activeProjectId!, versionId, task.id)
       return task
     },
     onSuccess: () => {
@@ -88,7 +88,7 @@ export default function VersionBoardPage() {
 
   const updateVersionMut = useMutation({
     mutationFn: ({ versionId, data }: { versionId: number; data: { status: Version['status'] } }) =>
-      getApi().updateVersion(activeProjectId!, versionId, data),
+      api.updateVersion(activeProjectId!, versionId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['versions', activeProjectId] }),
   })
 
