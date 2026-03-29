@@ -738,7 +738,7 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
       )}
       {streamingStep && (
         <div className={s.chatAiBlock}>
-          <div className={s.richText}>{streamingStep.text}</div>
+          <RichText text={streamingStep.text!} />
         </div>
       )}
     </CodeExpandCtx.Provider>
