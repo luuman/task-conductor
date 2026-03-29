@@ -498,6 +498,7 @@ export interface ConversationNote {
 export interface ApiAdapter {
   getProjects(): Promise<Project[]>
   createProject(data: { name: string; description?: string }): Promise<Project>
+  updateProjectStagesConfig(projectId: number, stagesConfig: string[]): Promise<Project>
   getProjectFiles(projectId: number): Promise<{ path: string; items: FileItem[] }>
   getProjectKnowledge(projectId: number): Promise<ProjectKnowledge[]>
   getTasks(projectId: number): Promise<Task[]>
