@@ -22,11 +22,11 @@ img, picture, video, canvas, svg {
   max-width: 100%;
 }
 
-/* React Flow 的 edges/nodes SVG 需要不受 max-width 限制 */
-.react-flow__edges,
-.react-flow__nodes,
-.react-flow__renderer {
+/* React Flow v12: 每个 edge 独立 svg，不能被 max-width:100% 约束 */
+.react-flow__edges svg,
+.react-flow__edge svg {
   max-width: none;
+  overflow: visible;
 }
 
 input, button, textarea, select {
