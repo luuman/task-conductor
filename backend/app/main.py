@@ -358,6 +358,7 @@ app.add_middleware(
 
 app.include_router(projects.router)
 app.include_router(tasks.router)
+app.include_router(versions_router.router)   # GET/POST/PUT/DELETE /api/projects/{id}/versions
 app.include_router(pipeline_router.router)
 app.include_router(metrics_router.router)
 app.include_router(sessions_router.router)   # GET /api/sessions, GET /api/sessions/{id}/events
