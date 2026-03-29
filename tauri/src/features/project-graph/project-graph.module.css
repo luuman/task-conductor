@@ -21,18 +21,23 @@
   pointer-events: none; z-index: 0;
 }
 
-/* ── 左侧详情面板 ── */
+/* ── 左侧详情面板（浮层，绝对定位在 React Flow 上方） ── */
 .panel {
-  width: 260px;
-  flex-shrink: 0;
-  border-right: 1px solid rgba(255,255,255,0.05);
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 240px;
+  max-height: calc(100% - 28px);
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 14px 12px;
   overflow-y: auto;
   z-index: 10;
-  background: rgba(7,8,15,0.7);
+  background: rgba(7,8,15,0.82);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
 }
 
 .panelCard {
