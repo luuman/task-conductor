@@ -131,7 +131,7 @@
 }
 
 /* ── React Flow canvas ── */
-.canvas { flex: 1; position: relative; overflow: hidden; }
+.canvas { flex: 1; position: relative; overflow: hidden; min-height: 0; }
 
 /* ─── 节点：Feature（普通） ─── */
 .fnCard {
