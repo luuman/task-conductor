@@ -52,10 +52,27 @@ class Project(Base):
     tasks: Mapped[list["Task"]] = relationship(back_populates="project")
 
 
+class Version(Base):
+    """项目版本——按上线节奏将大型任务分组"""
+    __tablename__ = "versions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    name: Mapped[str] = mapped_column(String(50))          # "v1.0" / "v2.1" / 自定义
+    title: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)   # 版本标题
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="planning")
+    # planning | active | shipped
+    target_date: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # YYYY-MM-DD
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    tasks: Mapped[list["Task"]] = relationship(back_populates="version")
+
+
 class Task(Base):
     __tablename__ = "tasks"
     id: Mapped[int] = mapped_column(primary_key=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    version_id: Mapped[Optional[int]] = mapped_column(ForeignKey("versions.id"), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str] = mapped_column(Text)
     stage: Mapped[str] = mapped_column(String(20), default="input")
