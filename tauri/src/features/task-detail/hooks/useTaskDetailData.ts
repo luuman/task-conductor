@@ -24,6 +24,13 @@ export function useTaskDetailData(taskId: number) {
     },
   })
 
+  const startTask = useMutation({
+    mutationFn: () => api.startTask(taskId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] })
+    },
+  })
+
   const advanceTask = useMutation({
     mutationFn: () => api.advanceTask(taskId),
     onSuccess: () => {
@@ -37,6 +44,7 @@ export function useTaskDetailData(taskId: number) {
     artifacts: artifacts.data ?? [],
     loading: task.isLoading,
     approveTask,
+    startTask,
     advanceTask,
   }
 }
