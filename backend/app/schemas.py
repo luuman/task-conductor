@@ -22,8 +22,13 @@ class ProjectOut(BaseModel):
     feishu_chat_id: Optional[str] = None
     feishu_sync: bool = False
     sort_order: int
+    stages_config: Optional[str] = None  # JSON list[str]，启用的阶段；null = 全部
     created_at: datetime
     model_config = {"from_attributes": True}
+
+
+class ProjectStagesUpdate(BaseModel):
+    stages_config: list[str]
 
 
 class TaskCreate(BaseModel):
