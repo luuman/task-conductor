@@ -9,6 +9,7 @@ export interface Project {
   execution_mode: string
   is_test: boolean
   sort_order: number
+  stages_config: string | null  // JSON list[str]，启用的阶段；null = 全部
   created_at: string
 }
 
