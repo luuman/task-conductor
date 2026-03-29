@@ -137,6 +137,18 @@ def update_sort(project_id: int, body: dict, db: Session = Depends(get_db)):
     db.refresh(p)
     return ProjectOut.model_validate(p)
 
+@router.put("/{project_id}/stages-config", response_model=ProjectOut, summary="更新项目流水线阶段配置")
+def update_stages_config(project_id: int, body: ProjectStagesUpdate, db: Session = Depends(get_db)):
+    p = db.get(Project, project_id)
+    if not p:
+        raise HTTPException(404, "项目不存在")
+    import json
+    p.stages_config = json.dumps(body.stages_config, ensure_ascii=False)
+    db.commit()
+    db.refresh(p)
+    return p
+
+
 @router.post("/{project_id}/tasks", response_model=TaskOut, summary="在项目下创建任务")
 def create_task(project_id: int, body: TaskCreate, db: Session = Depends(get_db)):
     t = Task(project_id=project_id, **body.model_dump())
