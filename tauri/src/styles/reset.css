@@ -22,6 +22,13 @@ img, picture, video, canvas, svg {
   max-width: 100%;
 }
 
+/* React Flow 的 edges/nodes SVG 需要不受 max-width 限制 */
+.react-flow__edges,
+.react-flow__nodes,
+.react-flow__renderer {
+  max-width: none;
+}
+
 input, button, textarea, select {
   font: inherit;
   color: inherit;
