@@ -11,7 +11,7 @@ import { IconFileText, IconPencil, IconFilePlus } from '../../ui/icon'
 import {
   RENDERERS, StyleA, StyleB, StyleD, StyleG, StyleH,
   groupConsecutiveSameType, RichText,
-  buildCatLabelMap,
+  buildCatLabelMap, dotColor,
   type StyleKey,
 } from './ChatTimeline'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
