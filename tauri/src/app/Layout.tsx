@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { AppShell, Sidebar, Panel } from '../layouts'
 import {
   IconLayoutGrid, IconLogo, IconFileText, IconMonitor,
-  IconMessage, IconSettings, IconFolder, IconGitBranch,
+  IconMessage, IconSettings, IconFolder, IconGitBranch, IconBlocks,
   IconBot, IconTerminal,
 } from '../ui/icon'
 import { useTheme } from '../ui/theme/useTheme'
