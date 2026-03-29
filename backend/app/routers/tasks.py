@@ -58,6 +58,38 @@ def approve_stage(task_id: int, body: ApprovalBody, db: Session = Depends(get_db
     return t
 
 
+@router.post("/{task_id}/start", response_model=TaskOut, summary="启动流水线（input 阶段 → 下一阶段）")
+async def start_pipeline(
+    task_id: int,
+    bg: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """
+    新任务处于 input/pending 状态时，点击"启动"触发流水线从第一个有效阶段开始执行。
+    """
+    t = db.get(Task, task_id)
+    if not t:
+        raise HTTPException(404, "Task not found")
+    if not (t.stage == "input" and t.status == "pending"):
+        raise HTTPException(400, f"Task is not in startable state: stage={t.stage} status={t.status}")
+    try:
+        task_stages = get_task_stages(t)
+        next_stage = pipeline_engine.next_stage("input", stages=task_stages)
+    except StageTransitionError as e:
+        raise HTTPException(400, str(e))
+
+    t.stage = next_stage
+    t.status = "pending"
+    import datetime
+    t.started_at = datetime.datetime.utcnow()
+    db.commit()
+    db.refresh(t)
+
+    from ..scheduler import scheduler
+    bg.add_task(scheduler.enqueue, task_id)
+    return t
+
+
 @router.post("/{task_id}/advance", response_model=TaskOut, summary="推进到下一阶段并继续执行")
 async def advance_stage(
     task_id: int,
