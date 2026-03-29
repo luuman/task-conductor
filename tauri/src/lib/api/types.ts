@@ -544,6 +544,7 @@ export interface ApiAdapter {
   getTaskArtifacts(taskId: number): Promise<StageArtifact[]>
   createTask(projectId: number, data: { title: string; description?: string }): Promise<Task>
   approveTask(taskId: number, data: { action: 'approve' | 'reject'; reason?: string }): Promise<void>
+  startTask(taskId: number): Promise<Task>
   advanceTask(taskId: number): Promise<void>
   getSessions(): Promise<AiSession[]>
   getSessionEvents(sessionId: string): Promise<SessionEvent[]>
