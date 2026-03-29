@@ -408,10 +408,6 @@ function ProjectGraphInner() {
         <Background variant={BackgroundVariant.Dots} gap={32} size={1} color="rgba(255,255,255,0.025)" />
       </ReactFlow>
 
-      {/* DEBUG: remove after fix */}
-      <div style={{ position:'absolute', top:4, right:4, zIndex:9999, background:'red', color:'#fff', padding:'4px 8px', fontSize:11, borderRadius:4 }}>
-        nodes:{nodes.length} edges:{edges.length}
-      </div>
       <DetailPanel selectedId={selectedId} onSelect={handleSelectWithSync} />
 
       <div className={styles.legend}>
