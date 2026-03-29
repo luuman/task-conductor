@@ -566,6 +566,7 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const mainAreaRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
   const selectedSyncRef = useRef<string | null>(null)
+  const chatPageMountedRef = useRef(false)
 
   // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const {
