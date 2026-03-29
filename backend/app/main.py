@@ -69,6 +69,7 @@ async def lifespan(app: FastAPI):
     for col_sql in [
         "ALTER TABLE projects ADD COLUMN feishu_chat_id VARCHAR(100)",
         "ALTER TABLE projects ADD COLUMN feishu_sync BOOLEAN DEFAULT 0",
+        "ALTER TABLE projects ADD COLUMN stages_config TEXT",
         "ALTER TABLE tasks ADD COLUMN stages TEXT",
         "ALTER TABLE tasks ADD COLUMN prd_content TEXT",
         "ALTER TABLE tasks ADD COLUMN interview_status VARCHAR(20) DEFAULT 'none'",
