@@ -37,9 +37,40 @@ export interface FileItem {
   modified: string
 }
 
+export interface Version {
+  id: number
+  project_id: number
+  name: string          // "v1.0" / 自定义
+  title: string | null
+  description: string | null
+  status: 'planning' | 'active' | 'shipped'
+  target_date: string | null  // YYYY-MM-DD
+  sort_order: number
+  created_at: string
+}
+
+export interface VersionCreate {
+  name: string
+  title?: string | null
+  description?: string | null
+  status?: 'planning' | 'active' | 'shipped'
+  target_date?: string | null
+  sort_order?: number
+}
+
+export interface VersionUpdate {
+  name?: string
+  title?: string | null
+  description?: string | null
+  status?: 'planning' | 'active' | 'shipped'
+  target_date?: string | null
+  sort_order?: number
+}
+
 export interface Task {
   id: number
   project_id: number
+  version_id: number | null
   title: string
   description: string | null
   stage: string
