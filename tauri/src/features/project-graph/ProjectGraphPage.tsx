@@ -568,40 +568,39 @@ function ProjectGraphInner() {
 
   return (
     <div className={styles.page}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        fitView
+        fitViewOptions={{ padding: 0.12 }}
+        minZoom={0.15}
+        maxZoom={1.5}
+        proOptions={{ hideAttribution: true }}
+        style={{ background: 'transparent' }}
+        nodesDraggable={false}
+      >
+        <Background variant={BackgroundVariant.Dots} gap={32} size={1}
+          color="rgba(255,255,255,0.025)" />
+      </ReactFlow>
+
+      {/* 左侧详情面板（浮层） */}
       <DetailPanel selectedId={selectedId} onSelect={handleSelect} />
 
-      <div className={styles.canvas}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.12 }}
-          minZoom={0.15}
-          maxZoom={1.5}
-          proOptions={{ hideAttribution: true }}
-          style={{ background: 'transparent' }}
-          nodesDraggable={false}
-        >
-          <Background variant={BackgroundVariant.Dots} gap={32} size={1}
-            color="rgba(255,255,255,0.025)" />
-        </ReactFlow>
-
-        {/* 图例 */}
-        <div className={styles.legend}>
-          {[
-            { label: 'Feature', color: '#22d3ee' },
-            { label: 'Store',   color: '#a78bfa' },
-            { label: 'API',     color: '#34d399' },
-            { label: 'Comp',    color: '#fbbf24' },
-          ].map(l => (
-            <span key={l.label} style={{ display: 'flex', alignItems: 'center' }}>
-              <span className={styles.legendDot} style={{ background: l.color }} />
-              {l.label}
-            </span>
-          ))}
-        </div>
+      {/* 图例 */}
+      <div className={styles.legend}>
+        {[
+          { label: 'Feature', color: '#22d3ee' },
+          { label: 'Store',   color: '#a78bfa' },
+          { label: 'API',     color: '#34d399' },
+          { label: 'Comp',    color: '#fbbf24' },
+        ].map(l => (
+          <span key={l.label} style={{ display: 'flex', alignItems: 'center' }}>
+            <span className={styles.legendDot} style={{ background: l.color }} />
+            {l.label}
+          </span>
+        ))}
       </div>
     </div>
   )
