@@ -220,16 +220,23 @@ function GlowEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPo
   const [path] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
   const color  = (data?.color as string) ?? '#22d3ee'
   const active = data?.active as boolean
+  const markerId = `pg-arrow-${color.replace('#', '')}`
 
   return (
     <g>
+      <defs>
+        <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill={active ? color : 'rgba(100,120,160,0.5)'} />
+        </marker>
+      </defs>
       {active && <path d={path} fill="none" stroke={color} strokeWidth={12} opacity={0.04} />}
       {active && <path d={path} fill="none" stroke={color} strokeWidth={6}  opacity={0.10} />}
-      {active && <path d={path} fill="none" stroke={color} strokeWidth={2.5}opacity={0.30} />}
+      {active && <path d={path} fill="none" stroke={color} strokeWidth={2.5} opacity={0.30} />}
       <path
         d={path} fill="none"
         stroke={active ? color : 'rgba(100,130,180,0.45)'}
         strokeWidth={active ? 1.5 : 1}
+        markerEnd={`url(#${markerId})`}
       />
     </g>
   )
