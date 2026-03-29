@@ -2,11 +2,34 @@ import json
 from typing import Optional
 
 STAGE_ORDER = [
-    "input", "analysis", "prd", "ui", "plan",
-    "dev", "test", "deploy", "monitor", "done"
+    "input", "discovery", "analysis", "prd", "architecture",
+    "ui", "plan", "dev", "review", "test", "security",
+    "staging", "deploy", "monitor", "done"
 ]
 
-APPROVAL_REQUIRED = {"analysis", "prd", "ui", "plan", "test", "deploy"}
+APPROVAL_REQUIRED = {
+    "discovery", "analysis", "prd", "architecture",
+    "ui", "plan", "review", "test", "security", "staging", "deploy"
+}
+
+# 各阶段说明（供 UI 展示）
+STAGE_LABELS: dict[str, str] = {
+    "input":        "需求输入",
+    "discovery":    "市场与用户调研",
+    "analysis":     "需求分析与方案评估",
+    "prd":          "产品需求文档",
+    "architecture": "系统架构设计",
+    "ui":           "UI/UX 设计",
+    "plan":         "技术规划与里程碑",
+    "dev":          "代码实现",
+    "review":       "代码审查",
+    "test":         "测试",
+    "security":     "安全审查",
+    "staging":      "预发布环境验证",
+    "deploy":       "生产部署",
+    "monitor":      "监控与告警",
+    "done":         "完成",
+}
 
 
 def _get_approval_stages() -> set[str]:
