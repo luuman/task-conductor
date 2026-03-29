@@ -22,22 +22,12 @@ import { useAppStore } from '../../lib/store/app'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
-// ── 样式常量 ──
-const CHAT_STYLE_OPTIONS = ['a', 'b', 'd', 'g', 'h'] as const
-export type StyleKey = typeof CHAT_STYLE_OPTIONS[number]
+// ── 样式常量（从 ChatTimeline 导入共用） ──
+export type { StyleKey }
+export { StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS, groupConsecutiveSameType }
 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
-
-// ── badge class ──
-function badgeCls(cat: TimelineStep['category']): string {
-  const map: Record<string, string> = {
-    text: s.bText, read: s.bRead, edit: s.bEdit, write: s.bWrite,
-    bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
-    ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
-  }
-  return `${s.badge} ${map[cat] || s.bOther}`
-}
 
 function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
   return {
