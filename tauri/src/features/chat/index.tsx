@@ -661,9 +661,15 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   }, [selectedId, setClaudeSessionId, setCurrentReply])
 
   // 切换会话时清空 AI 对话记录，不把 transcript 同步进 chatMessages（那会导致 live 消息重复渲染）
+  // 跳过首次挂载，避免清空 FloatingAssistant 的全局消息
   useEffect(() => {
+    if (!chatPageMountedRef.current) {
+      chatPageMountedRef.current = true
+      return
+    }
     if (chatMessages.length > 0) setChatMessages([])
-  }, [selectedId, chatMessages.length, setChatMessages])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
