@@ -4,14 +4,16 @@ import { createPortal } from 'react-dom'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
-import { parseTimelineWithQuestions, formatTs, guessHljsLang, cleanSystemXml, detectRisks, inferBlockIntent, generateCommitMessage, type TimelineStep, type UserQuestion, type RiskItem, type IntentLabel } from './timeline-parser'
+import { parseTimelineWithQuestions, formatTs, cleanSystemXml, detectRisks, inferBlockIntent, generateCommitMessage, type TimelineStep, type UserQuestion, type RiskItem, type IntentLabel } from './timeline-parser'
 import { Select } from '../../ui/select'
-import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
+import { RichTextBlock, CodeExpandCtx } from '../../components/ChatRenderer'
+import { IconFileText, IconPencil, IconFilePlus } from '../../ui/icon'
 import {
-  IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
-  IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
-  IconChevronRight,
-} from '../../ui/icon'
+  RENDERERS, StyleA, StyleB, StyleD, StyleG, StyleH,
+  groupConsecutiveSameType, RichText,
+  buildCatLabelMap,
+  type StyleKey,
+} from './ChatTimeline'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
