@@ -135,8 +135,7 @@
   border-radius: 50%; flex-shrink: 0;
 }
 
-/* ── React Flow canvas ── */
-.canvas { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+/* canvas class 已不再使用，ReactFlow 直接填充 .page */
 
 /* ─── 节点：Feature（普通） ─── */
 .fnCard {
