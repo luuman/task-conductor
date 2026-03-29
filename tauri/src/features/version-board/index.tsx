@@ -24,7 +24,7 @@ function parseTaskProgress(task: Task): { done: number; total: number; dots: Arr
   }
   const currentIdx = stages.indexOf(task.stage)
   const total = stages.length
-  const dots = stages.slice(0, Math.min(12, total)).map((s, i): 'done' | 'active' | 'pending' => {
+  const dots = stages.slice(0, Math.min(12, total)).map((_s, i): 'done' | 'active' | 'pending' => {
     if (i < currentIdx) return 'done'
     if (i === currentIdx) return task.status === 'running' ? 'active' : 'done'
     return 'pending'
