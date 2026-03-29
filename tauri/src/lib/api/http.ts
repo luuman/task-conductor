@@ -134,6 +134,15 @@ export class HttpAdapter implements ApiAdapter {
     return result
   }
 
+  async updateProjectStagesConfig(projectId: number, stagesConfig: string[]) {
+    const result = await this.fetch<Project>(`/api/projects/${projectId}/stages-config`, {
+      method: 'PUT',
+      body: JSON.stringify({ stages_config: stagesConfig }),
+    })
+    cache.invalidate('projects')
+    return result
+  }
+
   async createTask(projectId: number, data: { title: string; description?: string }) {
     const result = await this.fetch<Task>(`/api/projects/${projectId}/tasks`, { method: 'POST', body: JSON.stringify(data) })
     cache.invalidate(`project:${projectId}:tasks`)
