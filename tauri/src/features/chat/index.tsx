@@ -164,8 +164,15 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
   if (step.category === 'write' && step.toolInput?.content) {
     const lang = guessHljsLang(filePath) || undefined
     const raw = String(step.toolInput.content)
-    const preview = raw.slice(0, 800) + (raw.length > 800 ? '\n...' : '')
-    return <CodeBlock code={preview} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+    const isMd = fileName?.toLowerCase().endsWith('.md')
+    if (isMd) {
+      return (
+        <CodeBlock icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color}>
+          <RichTextBlock text={raw} />
+        </CodeBlock>
+      )
+    }
+    return <CodeBlock code={raw} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
 
   // Read
