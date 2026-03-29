@@ -95,10 +95,10 @@ export default function VersionBoardPage() {
   // 任务按版本分组
   const tasksByVersion = useMemo(() => {
     const map = new Map<number | null, Task[]>()
-    allTasks.forEach((t) => {
-      const key = t.version_id ?? null
+    allTasks.forEach((task) => {
+      const key = task.version_id ?? null
       if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(t)
+      map.get(key)!.push(task)
     })
     return map
   }, [allTasks])
