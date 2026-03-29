@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as DBSession
 from .database import engine
 from .models import Base, ClaudeSession, ClaudeEvent
 from .routers import projects, tasks
+from .routers import versions as versions_router
 from .routers import pipeline as pipeline_router
 from .routers import metrics as metrics_router
 from .routers import sessions as sessions_router
