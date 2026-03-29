@@ -8,6 +8,7 @@ import type {
   TranscriptMessage, ConversationNote, FileTreeNode,
   InterviewMessage, InterviewStartResponse,
   CanvasData, PaginatedMessages,
+  Version, VersionCreate, VersionUpdate,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
