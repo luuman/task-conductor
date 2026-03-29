@@ -9,7 +9,11 @@ import { api } from '../../../lib/api'
 import type { Settings } from '../../../lib/api'
 import styles from './admin-settings.module.css'
 
-const ALL_STAGES = ['input', 'analysis', 'prd', 'ui', 'plan', 'dev', 'test', 'deploy', 'monitor']
+const ALL_STAGES = [
+  'input', 'discovery', 'analysis', 'prd', 'architecture',
+  'ui', 'plan', 'dev', 'review', 'test', 'security',
+  'staging', 'deploy', 'monitor',
+]
 
 const CHAT_STYLE_KEYS = ['a', 'b', 'd', 'g', 'h'] as const
 type ChatStyleKey = typeof CHAT_STYLE_KEYS[number]
