@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 from sqlalchemy.orm import Session
 from ..database import engine
-from ..models import Task, StageArtifact
+from ..models import Task, StageArtifact, Project
 from ..ws.manager import manager
 from ..notify.dispatcher import notify_human_required
 from .stages.analysis import AnalysisExecutor
