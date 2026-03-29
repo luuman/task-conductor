@@ -94,6 +94,7 @@ export function AppRouter() {
             <Route path="/files"          element={<FilesPage />} />
             <Route path="/git"            element={<GitPage />} />
             <Route path="/canvas"         element={<CanvasPage />} />
+            <Route path="/versions"        element={<VersionBoardPage />} />
             <Route path="/settings"       element={<SettingsPage />} />
           </Route>
 
