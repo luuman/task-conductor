@@ -30,9 +30,6 @@ const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
 
-
-
-
 // ── Right sidebar ──
 function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExpanded, onToggleCode, onScrollToQuestion }: {
   session: AiSession | null; steps: TimelineStep[]; questions: UserQuestion[]; allQuestions?: QuestionItem[]; activeQ: number
