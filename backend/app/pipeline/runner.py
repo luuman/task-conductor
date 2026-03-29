@@ -89,9 +89,12 @@ async def run_pipeline(task_id: int, worktree_path: str):
                 await notify_human_required(task_id, current_stage, f"{current_stage} 阶段需要人工操作")
                 return
             # 无 executor 且不需审批（dev/monitor）→ 直接推进
-            idx = task_stages.index(current_stage) if current_stage in task_stages else STAGE_ORDER.index(current_stage)
-            order = task_stages if current_stage in task_stages else STAGE_ORDER
-            current_stage = order[idx + 1]
+            if current_stage in task_stages:
+                idx = task_stages.index(current_stage)
+                current_stage = task_stages[idx + 1]
+            else:
+                idx = STAGE_ORDER.index(current_stage)
+                current_stage = STAGE_ORDER[idx + 1]
             continue
 
         # 更新当前阶段 + 状态
