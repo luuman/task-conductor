@@ -374,15 +374,18 @@ export function FloatingAssistant() {
     isFirstLoadRef.current = true
     sharedSelectSession(session.session_id)
     const store = useChatStore.getState()
+    // 先清空旧消息，避免切换后短暂显示上一个会话的内容
+    store.setMessages([])
     store.setCurrentReply('')
     store.setClaudeSessionId(session.session_id)
     apiRef.current.getTranscript(session.session_id).then(({ messages: msgs }) => {
-      if (!msgs?.length) return
       if (useChatStore.getState().claudeSessionId === session.session_id) {
-        useChatStore.getState().setMessages(msgs)
-        tabCacheRef.current.set(activeTabId, { messages: msgs, sessionId: session.session_id })
+        useChatStore.getState().setMessages(msgs ?? [])
+        tabCacheRef.current.set(activeTabId, { messages: msgs ?? [], sessionId: session.session_id })
       }
-    }).catch(() => {})
+    }).catch(() => {
+      // 加载失败时保持空状态，显示 EmptyState
+    })
   }, [activeTabId, sharedSelectSession])
 
   // 首条消息时更新 tab 标题
