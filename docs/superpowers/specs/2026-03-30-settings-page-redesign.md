@@ -118,7 +118,8 @@ CLAUDE.md（子目录）
 - **显示**：文档卡片网格（路径/URL + 描述），支持"+ 添加"，自动更新架构文档开关
 
 ### ⑩ MCP 工具
-- **数据**：读取 `~/.claude/settings.json` 的 `mcpServers` 字段
+- **数据**：读取 `{project.path}/.mcp.json` 的 `mcpServers` 字段（项目级，团队共享）
+- **注意**：`.mcp.json` 独立于 `settings.json`，是专门为 MCP 设计的配置文件
 - **显示**：每个 server 一张卡片，server 名称 + 状态点 + tool chip 列表
 
 ### ⑪ 权限配置
