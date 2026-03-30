@@ -745,6 +745,7 @@
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid var(--tc-border);
+  border-top-width: 2px;
   background: var(--tc-content-bg);
 }
 
