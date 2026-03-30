@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { TranscriptMessage } from '../../lib/api/types'
-import { useChatStore } from '../../lib/store/chat'
+import { useActiveChatStore } from '../../lib/store/chat-ctx'
 import { useChatStream } from '../../hooks/useChatStream'
 import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconCrosshair } from '../../ui/icon'
 import { useTranslation } from 'react-i18next'
