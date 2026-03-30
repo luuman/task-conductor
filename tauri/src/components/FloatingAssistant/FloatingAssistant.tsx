@@ -181,11 +181,14 @@ export function FloatingAssistant() {
     clearSelection: sharedClearSelection,
   } = useSessionData({ filterByCwd: repoUrlRef.current || undefined, enableLiveSessionWs: false })
 
-  // 关闭历史下拉
+  // 关闭历史下拉（排除下拉框自身，避免 mousedown 在 click 前触发关闭）
   useEffect(() => {
     if (!showHistory) return
     const handler = (e: MouseEvent) => {
-      if (historyRef.current && !historyRef.current.contains(e.target as Node)) setShowHistory(false)
+      const target = e.target as Node
+      const inTrigger = historyRef.current?.contains(target) ?? false
+      const inDropdown = historyDropdownRef.current?.contains(target) ?? false
+      if (!inTrigger && !inDropdown) setShowHistory(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
