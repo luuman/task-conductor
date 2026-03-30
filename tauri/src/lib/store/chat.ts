@@ -17,7 +17,7 @@ export interface ChatStats {
   output_tokens?: number
 }
 
-interface ChatStore {
+export interface ChatStore {
   // 悬浮面板状态
   isOpen: boolean
   isMinimized: boolean
