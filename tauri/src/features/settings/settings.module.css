@@ -695,33 +695,40 @@
 
 .ruleChip {
   display: flex;
-  align-items: flex-start;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 10px;
+  border-radius: 7px;
   background: var(--tc-content-bg);
   border: 1px solid var(--tc-border);
-  font-size: 11px;
   color: var(--tc-foreground);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   break-inside: avoid;
-  line-height: 1.4;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+
+.ruleChip:hover {
+  border-color: color-mix(in srgb, var(--tc-border) 50%, var(--tc-foreground-secondary));
 }
 
 .ruleChipCategory {
   font-size: 9px;
-  padding: 1px 4px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 5px;
   border-radius: 4px;
-  font-weight: 600;
-  white-space: nowrap;
+  align-self: flex-start;
   flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .ruleChipText {
-  word-break: break-all;
+  font-size: 11px;
+  word-break: break-word;
   overflow-wrap: anywhere;
   white-space: normal;
+  color: var(--tc-foreground);
 }
 
 /* ── Hooks 3×3 卡片 ── */
