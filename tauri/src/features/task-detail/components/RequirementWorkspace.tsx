@@ -30,7 +30,6 @@ function parseRequirements(raw: string | null): RequirementFields {
 }
 
 interface Props {
-  taskId: number
   taskTitle: string
   requirementsRaw: string | null
   onSave: (fields: RequirementFields) => void
@@ -49,6 +48,17 @@ export function RequirementWorkspace({
   const [fields, setFields] = useState<RequirementFields>(initial)
   const [expandedField, setExpandedField] = useState<keyof RequirementFields | null>(null)
 
+  useEffect(() => {
+    setFields(parseRequirements(requirementsRaw))
+  }, [requirementsRaw])
+
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const debouncedSave = useCallback((fields: RequirementFields) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => onSave(fields), 300)
+  }, [onSave])
+
   function setField(key: keyof RequirementFields, value: string) {
     const updated: RequirementFields = { ...fields }
     if (key === 'core_features' || key === 'acceptance_criteria') {
@@ -57,7 +67,7 @@ export function RequirementWorkspace({
       (updated as Record<string, string>)[key] = value
     }
     setFields(updated)
-    onSave(updated)
+    debouncedSave(updated)
   }
 
   function getFieldValue(key: keyof RequirementFields): string {
