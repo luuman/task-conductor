@@ -617,14 +617,14 @@ export function StyleH({ steps }: { steps: TimelineStep[] }) {
         return (
           <React.Fragment key={step.id}>
             {step.kind === 'text' ? (
-              <RichText text={step.text!} />
+              <div className={s.chatAiBlock}><RichText text={step.text!} /></div>
             ) : (
               <div className={s.hAcc}>
                 <div className={s.hHead} onClick={() => toggle(step.id)}>
                   <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
                   <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
                 </div>
-                {isOpen && (step.toolResult || step.oldString || step.mergedSteps?.some(ms => ms.toolResult || ms.oldString)) && (
+                {isOpen && (step.category === 'agent' || step.toolResult || step.oldString || step.mergedSteps?.some(ms => ms.toolResult || ms.oldString)) && (
                   <div className={s.hBody}><ResultBlock step={step} /></div>
                 )}
               </div>
