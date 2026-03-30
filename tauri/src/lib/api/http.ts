@@ -698,4 +698,64 @@ export class HttpAdapter implements ApiAdapter {
     getProjectDetails: (dirName: string) =>
       this.fetch<ProjectDetails>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/details`),
   }
+
+  // ─── Documents API ───
+
+  async getProjectDocuments(projectId: number): Promise<ProjectDocumentsResponse> {
+    return this.fetch<ProjectDocumentsResponse>(`/api/projects/${projectId}/documents`)
+  }
+
+  async getTaskDocuments(taskId: number): Promise<Document[]> {
+    return this.fetch<Document[]>(`/api/tasks/${taskId}/documents`)
+  }
+
+  async createDocument(
+    taskId: number,
+    data: { title: string; doc_type: string; initial_content?: string }
+  ): Promise<Document> {
+    return this.fetch<Document>(`/api/tasks/${taskId}/documents`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async getDocumentContent(docId: number): Promise<{ content: string }> {
+    return this.fetch<{ content: string }>(`/api/documents/${docId}/content`)
+  }
+
+  async updateDocumentContent(docId: number, content: string): Promise<{ ok: boolean }> {
+    return this.fetch<{ ok: boolean }>(`/api/documents/${docId}/content`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    })
+  }
+
+  async deleteDocument(docId: number): Promise<void> {
+    return this.fetch<void>(`/api/documents/${docId}`, { method: 'DELETE' })
+  }
+
+  async updateDocumentPosition(
+    docId: number,
+    pos: { pos_x: number; pos_y: number }
+  ): Promise<{ ok: boolean }> {
+    return this.fetch<{ ok: boolean }>(`/api/documents/${docId}/position`, {
+      method: 'PUT',
+      body: JSON.stringify(pos),
+    })
+  }
+
+  async createDocumentLink(data: {
+    source_id: number
+    target_id: number
+    relation: string
+  }): Promise<DocumentLink> {
+    return this.fetch<DocumentLink>(`/api/documents/links`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteDocumentLink(linkId: number): Promise<void> {
+    return this.fetch<void>(`/api/documents/links/${linkId}`, { method: 'DELETE' })
+  }
 }
