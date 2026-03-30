@@ -494,3 +494,310 @@
 .numberInputDirty {
   border-color: color-mix(in srgb, var(--tc-border-active) 60%, transparent);
 }
+
+/* ── PipelineFlow ── */
+.pipelineFlow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+.pipelineItem {
+  display: flex;
+  align-items: center;
+}
+
+.pipelineArrow {
+  font-size: 14px;
+  color: var(--tc-foreground-secondary);
+  margin: 0 1px;
+  user-select: none;
+}
+
+.pipelineNode {
+  position: relative;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-family: monospace;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.pipelineNode:hover:not(.pipelineNodeFixed) {
+  opacity: 0.75;
+}
+
+.pipelineNodeEnabled {
+  background: rgba(100, 80, 255, 0.16);
+  border-color: rgba(100, 80, 255, 0.45);
+  color: var(--tc-foreground);
+}
+
+.pipelineNodeDisabled {
+  background: transparent;
+  border-color: var(--tc-border);
+  color: var(--tc-foreground-secondary);
+}
+
+.pipelineNodeFixed {
+  background: var(--tc-panel-bg);
+  border-color: var(--tc-border);
+  color: var(--tc-foreground-secondary);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.pipelineNodeStrike {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.pipelineApprovalDot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fbbf24;
+  border: 1px solid var(--tc-panel-bg);
+}
+
+/* ── Chip 通用样式 ── */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--tc-border);
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--tc-foreground-secondary);
+  background: transparent;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.chip:hover {
+  border-color: var(--tc-border-active);
+  color: var(--tc-foreground);
+}
+
+.chipActive {
+  background: var(--tc-accent-bg);
+  border-color: var(--tc-accent);
+  color: var(--tc-accent-on-bg, var(--tc-foreground));
+}
+
+/* ── 内联标签行 ── */
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.fieldInput {
+  padding: 4px 8px;
+  border: 1px solid var(--tc-border);
+  border-radius: 6px;
+  background: var(--tc-content-bg);
+  color: var(--tc-foreground);
+  font-size: 12px;
+  width: 90px;
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-color: var(--tc-border-active);
+}
+
+/* ── 星期选择器 ── */
+.weekdayGrid {
+  display: flex;
+  gap: 4px;
+}
+
+.weekdayBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--tc-border);
+  background: transparent;
+  color: var(--tc-foreground-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.weekdayBtn:hover {
+  border-color: var(--tc-border-active);
+}
+
+.weekdayBtnActive {
+  background: var(--tc-accent-bg);
+  border-color: var(--tc-accent);
+  color: var(--tc-accent-on-bg, var(--tc-foreground));
+}
+
+/* ── 规则 chip（CLAUDE.md）── */
+.ruleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--tc-content-bg);
+  border: 1px solid var(--tc-border);
+  font-size: 11px;
+  color: var(--tc-foreground);
+  margin: 2px;
+  max-width: 300px;
+}
+
+.ruleChipCategory {
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ruleChipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Hooks 3×3 卡片 ── */
+.hooksGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hookCard {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hookCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hookEventName {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--tc-foreground);
+}
+
+.hookScopeDots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.scopeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  opacity: 0.3;
+  transition: opacity 0.15s;
+}
+
+.scopeDotActive {
+  opacity: 1;
+  box-shadow: 0 0 4px currentColor;
+}
+
+.hookDesc {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  line-height: 1.4;
+}
+
+.hookCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hookPhaseTag {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* ── 记忆文件 2×2 ── */
+.memoryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.memoryCell {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+}
+
+.memoryCellBadge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.memoryCellCount {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--tc-foreground);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.memoryCellList {
+  font-size: 10px;
+  color: var(--tc-foreground-secondary);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.memoryCellList li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px 0;
+}
