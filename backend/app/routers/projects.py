@@ -149,6 +149,18 @@ def update_stages_config(project_id: int, body: ProjectStagesUpdate, db: Session
     return p
 
 
+@router.patch("/{project_id}/settings", response_model=ProjectOut, summary="批量更新项目配置字段")
+def patch_project_settings(project_id: int, body: ProjectSettingsUpdate, db: Session = Depends(get_db)):
+    p = db.get(Project, project_id)
+    if not p:
+        raise HTTPException(404, "项目不存在")
+    for field, value in body.model_dump(exclude_none=True).items():
+        setattr(p, field, value)
+    db.commit()
+    db.refresh(p)
+    return p
+
+
 @router.post("/{project_id}/tasks", response_model=TaskOut, summary="在项目下创建任务")
 def create_task(project_id: int, body: TaskCreate, db: Session = Depends(get_db)):
     t = Task(project_id=project_id, **body.model_dump())
