@@ -92,6 +92,14 @@ export interface Task {
   provider?: string
 }
 
+export interface RequirementFields {
+  background?: string
+  target_users?: string
+  core_features?: string[]
+  acceptance_criteria?: string[]
+  tech_constraints?: string
+}
+
 export interface InterviewMessage {
   id: number
   task_id: number
