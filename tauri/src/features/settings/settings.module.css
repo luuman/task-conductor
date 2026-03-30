@@ -805,8 +805,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  flex: 1;
-  justify-content: flex-end;
 }
 
 /* ── 记忆文件 2×2 ── */
