@@ -52,6 +52,12 @@ export function RequirementWorkspace({
     setFields(parseRequirements(requirementsRaw))
   }, [requirementsRaw])
 
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    }
+  }, [])
+
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const debouncedSave = useCallback((fields: RequirementFields) => {
