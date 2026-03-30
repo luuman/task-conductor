@@ -496,12 +496,22 @@
 }
 
 /* ── PipelineFlow ── */
+.pipelineScroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tc-border) transparent;
+  margin: 0 -4px;
+}
+
 .pipelineFlow {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 2px;
-  padding: 8px 0;
+  gap: 0;
+  padding: 6px 4px;
+  min-width: max-content;
 }
 
 .pipelineItem {
@@ -510,22 +520,40 @@
 }
 
 .pipelineArrow {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--tc-foreground-secondary);
-  margin: 0 1px;
+  margin: 0 2px;
   user-select: none;
+  opacity: 0.5;
 }
 
 .pipelineNode {
   position: relative;
-  padding: 4px 8px;
+  padding: 5px 8px;
   border-radius: 6px;
   border: 1px solid transparent;
-  font-size: 11px;
-  font-family: monospace;
   cursor: pointer;
   transition: opacity 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.pipelineNodeCode {
+  font-size: 10px;
+  font-family: monospace;
   white-space: nowrap;
+  line-height: 1.2;
+}
+
+.pipelineNodeLabel {
+  font-size: 9px;
+  white-space: nowrap;
+  opacity: 0.65;
+  line-height: 1.2;
 }
 
 .pipelineNode:hover:not(.pipelineNodeFixed) {
