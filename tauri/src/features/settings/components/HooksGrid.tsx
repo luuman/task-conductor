@@ -73,8 +73,8 @@ export function HooksGrid({ projectId: _projectId, hooks }: HooksGridProps) {
             className={styles.hookListRow}
             style={{ borderTopColor: accentColor }}
           >
-            {/* 顶部：标记 + scope */}
-            <div style={{ display: 'flex', gap: 4 }}>
+            {/* 顶部：标记 + scope 并排 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span
                 className={styles.hookOriginTag}
                 style={isSystem
@@ -85,8 +85,8 @@ export function HooksGrid({ projectId: _projectId, hooks }: HooksGridProps) {
                 {isSystem ? '系统' : '用户'}
               </span>
               <span
-                className={styles.hookOriginTag}
-                style={{ background: 'transparent', color: scope === 'global' ? '#4a80cc' : '#3aaa60', border: `1px solid ${scope === 'global' ? '#4a80cc' : '#3aaa60'}40` }}
+                className={styles.hookScopeTag}
+                style={{ color: scope === 'global' ? '#4a80cc' : '#3aaa60' }}
               >
                 {scope === 'global' ? '全局' : '项目级'}
               </span>
