@@ -166,6 +166,7 @@ export default function SettingsPage() {
         CLAUDE CODE 配置文件
       </div>
 
+      {/* Hooks + CLAUDE.md — 宽度需求高，保持2列 */}
       <div className={styles.cardGrid}>
         <SectionCard title="⑤ Hooks 配置" hint="蓝点=全局 / 绿点=项目级；toggle 控制项目级 hook">
           {hooksLoading ? (
@@ -180,6 +181,7 @@ export default function SettingsPage() {
         </SectionCard>
       </div>
 
+      {/* 记忆 + MCP + 权限 — 3列紧凑展示 */}
       <div className={styles.cardGrid}>
         <SectionCard title="⑥ 记忆文件" hint="~/.claude/projects/{project}/memory/">
           <MemoryPanel data={memoryData} isLoading={memoryLoading} />
@@ -188,17 +190,18 @@ export default function SettingsPage() {
         <SectionCard title="⑩ MCP 工具" hint=".mcp.json 中的 mcpServers（只读）">
           <McpPanel data={mcpData} isLoading={mcpLoading} />
         </SectionCard>
-      </div>
 
-      <SectionCard title="⑪ 权限配置" hint="三层 allow/deny 合并展示（只读）：全局 / 项目 / 本地">
-        <PermissionsPanel data={permData} isLoading={permLoading} />
-      </SectionCard>
+        <SectionCard title="⑪ 权限配置" hint="全局 / 项目 / 本地 三层 allow/deny">
+          <PermissionsPanel data={permData} isLoading={permLoading} />
+        </SectionCard>
+      </div>
 
       {/* ── 组三：项目配置 ── */}
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground-secondary)', margin: '20px 0 8px', letterSpacing: '0.05em' }}>
         项目配置
       </div>
 
+      {/* 自动化 + 运行时 + 通知 — 3列 */}
       <div className={styles.cardGrid}>
         <SectionCard title="② 自动化调度" hint="设置任务自动执行时间窗口和并发限制">
           <AutomationPanel
@@ -217,9 +220,7 @@ export default function SettingsPage() {
             disabled={isSaving}
           />
         </SectionCard>
-      </div>
 
-      <div className={styles.cardGrid}>
         <SectionCard title="⑦ 通知配置" hint="语音播报、Webhook、触发时机">
           <NotificationPanel
             key={projectId}
@@ -228,7 +229,10 @@ export default function SettingsPage() {
             disabled={isSaving}
           />
         </SectionCard>
+      </div>
 
+      {/* 知识库 + 文档 + 环境变量 — 3列 */}
+      <div className={styles.cardGrid}>
         <SectionCard title="⑧ 知识库设置" hint="自动积累 + Prompt 注入 + 清理策略">
           <KnowledgeSettingsPanel
             key={projectId}
@@ -238,9 +242,7 @@ export default function SettingsPage() {
             disabled={isSaving}
           />
         </SectionCard>
-      </div>
 
-      <div className={styles.cardGrid}>
         <SectionCard title="⑨ 文档配置" hint="项目相关文档与架构文档链接">
           <DocsPanel
             key={projectId}
