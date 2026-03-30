@@ -164,9 +164,9 @@ export function RequirementWorkspace({
         </div>
       </div>
 
-      {/* 右：PRD 预览 */}
+      {/* 右：PRD 预览（500ms 防抖，避免按键卡顿）*/}
       <div className={styles.previewPanel}>
-        <PrdPreview fields={fields} title={taskTitle} />
+        <PrdPreview fields={previewFields} title={taskTitle} />
       </div>
     </div>
   )
