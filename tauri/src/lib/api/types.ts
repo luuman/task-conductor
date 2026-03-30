@@ -731,6 +731,7 @@ export interface ClaudeRule {
 export interface ClaudeMdSection {
   path: string
   size: number
+  content?: string
   rules: ClaudeRule[]
 }
 
