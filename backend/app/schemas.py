@@ -23,6 +23,12 @@ class ProjectOut(BaseModel):
     feishu_sync: bool = False
     sort_order: int
     stages_config: Optional[str] = None  # JSON list[str]，启用的阶段；null = 全部
+    automation_config:     Optional[str] = None
+    claude_runtime_config: Optional[str] = None
+    notification_config:   Optional[str] = None
+    docs_config:           Optional[str] = None
+    env_config:            Optional[str] = None
+    knowledge_config:      Optional[str] = None
     created_at: datetime
     model_config = {"from_attributes": True}
 
