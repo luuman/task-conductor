@@ -10,7 +10,7 @@ import { RichTextBlock, CodeExpandCtx } from '../../components/ChatRenderer'
 import { IconFileText, IconPencil, IconFilePlus } from '../../ui/icon'
 import {
   RENDERERS, StyleA, StyleB, StyleD, StyleG, StyleH,
-  groupConsecutiveSameType, RichText,
+  groupConsecutiveSameType, RichText, UserMsgRow,
   buildCatLabelMap, dotColor,
   type StyleKey,
 } from './ChatTimeline'
