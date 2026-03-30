@@ -166,8 +166,8 @@ export default function SettingsPage() {
         CLAUDE CODE 配置文件
       </div>
 
-      {/* Hooks + CLAUDE.md — 宽度需求高，保持2列 */}
-      <div className={styles.cardGrid}>
+      {/* Hooks + CLAUDE.md — hooks 窄列，claude.md 宽列 */}
+      <div className={styles.cardGridAsymmetric}>
         <SectionCard title="⑤ Hooks 配置" hint="蓝点=全局 / 绿点=项目级；toggle 控制项目级 hook">
           {hooksLoading ? (
             <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)' }}>加载中...</div>
