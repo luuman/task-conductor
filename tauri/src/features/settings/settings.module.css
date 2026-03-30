@@ -786,6 +786,42 @@
   line-height: 1.4;
 }
 
+.hookCmdList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: var(--tc-panel-bg);
+  border: 1px solid var(--tc-border);
+}
+
+.hookCmdRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hookCmdScope {
+  font-size: 8px;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 12px;
+  text-align: center;
+}
+
+.hookCmdText {
+  font-size: 10px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
 .hookCardFooter {
   display: flex;
   align-items: center;
