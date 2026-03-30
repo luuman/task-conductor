@@ -32,6 +32,14 @@
   margin-bottom: 16px;
 }
 
+/* 非对称两列：左列窄（hooks），右列宽（claude.md） */
+.cardGridAsymmetric {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(320px, 2fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 .cardGrid > .section,
 .cardGrid > .sectionWarning,
 .cardGrid > .sectionDanger {
