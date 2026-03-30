@@ -174,14 +174,14 @@ function LocalCommandBanner({ command, stdout }: { command: string; stdout: stri
   )
 }
 
-/** 用户消息正文：文字 + 内嵌文件/图片卡片 */
+/** 用户消息正文：文字（含 markdown）+ 内嵌文件/图片卡片 */
 function UserMsgBody({ text }: { text: string }) {
   const clean = stripDomContext(text)
   const parts = useMemo(() => parseFilePaths(clean), [clean])
   const hasFileParts = parts.some(p => p.kind !== 'text')
 
   if (!hasFileParts) {
-    return <div className={s.richText}>{clean}</div>
+    return <div className={s.richText}><RichTextBlock text={clean} /></div>
   }
 
   const textOnly = parts.filter(p => p.kind === 'text').map(p => p.content).join('')
@@ -189,7 +189,7 @@ function UserMsgBody({ text }: { text: string }) {
 
   return (
     <>
-      {textOnly.trim() && <div className={s.richText}>{textOnly}</div>}
+      {textOnly.trim() && <div className={s.richText}><RichTextBlock text={textOnly} /></div>}
       <div className={s.msgFileRow}>
         {fileParts.map((p, i) =>
           p.kind === 'image'
