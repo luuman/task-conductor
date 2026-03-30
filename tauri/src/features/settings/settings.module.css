@@ -812,14 +812,28 @@
 }
 
 .hookCmdText {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hookCmdName {
   font-size: 10px;
   font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hookCmdDesc {
+  font-size: 10px;
   color: var(--tc-foreground-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
 }
 
 .hookCardFooter {
