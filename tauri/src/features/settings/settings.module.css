@@ -764,6 +764,15 @@
   white-space: nowrap;
 }
 
+.hookOriginTag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .hookScriptInfo {
   display: flex;
   align-items: center;
