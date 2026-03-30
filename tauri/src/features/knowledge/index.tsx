@@ -82,14 +82,6 @@ function KnowledgeGraph() {
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null)
   const [confirmDeleteLinkId, setConfirmDeleteLinkId] = useState<number | null>(null)
 
-  // 稳定的 mutate 引用，避免 useCallback 依赖整个 mutation 对象
-  const savePosRef = useRef(savePosM.mutate)
-  const createLinkRef = useRef(createLinkM.mutate)
-  const deleteLinkRef = useRef(deleteLinkM.mutate)
-  useEffect(() => { savePosRef.current = savePosM.mutate }, [savePosM.mutate])
-  useEffect(() => { createLinkRef.current = createLinkM.mutate }, [createLinkM.mutate])
-  useEffect(() => { deleteLinkRef.current = deleteLinkM.mutate }, [deleteLinkM.mutate])
-
   const { data: projectDocs, isLoading } = useQuery({
     queryKey: ['project-docs', activeProjectId],
     queryFn: () => api.getProjectDocuments(activeProjectId!),
