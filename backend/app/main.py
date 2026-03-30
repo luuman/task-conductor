@@ -416,6 +416,7 @@ app.include_router(interview_router.router)       # Interview API
 app.include_router(canvas_router.router)           # Canvas API
 app.include_router(screenshot_router.router)      # POST /api/tools/screenshot
 app.include_router(sync_router.router)            # GET/PUT /api/sync/status|config|crypto-params|push
+app.include_router(ui_nav_router.router)          # POST /api/ui/navigate
 app.include_router(feishu_router)
 
 # ── MCP Server（SSE 端点，供 Claude Code 调用）──────────────────
