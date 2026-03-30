@@ -133,7 +133,15 @@ export function RequirementWorkspace({
                       value={getFieldValue(fc.key)}
                       placeholder={fc.placeholder}
                       rows={fc.type === 'list' ? 4 : 3}
-                      onChange={e => setField(fc.key, e.target.value)}
+                      onCompositionStart={() => { composingRef.current = true }}
+                      onCompositionEnd={(e: CompositionEvent<HTMLTextAreaElement>) => {
+                        composingRef.current = false
+                        setField(fc.key, e.currentTarget.value)
+                      }}
+                      onChange={e => {
+                        if (composingRef.current) return
+                        setField(fc.key, e.target.value)
+                      }}
                       autoFocus
                     />
                   </div>
