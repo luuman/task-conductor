@@ -201,6 +201,81 @@ function UserMsgBody({ text }: { text: string }) {
   )
 }
 
+// ── DOM 元素预览卡片（用户消息内嵌）──
+interface ParsedDomChip {
+  index: number; selector: string; path: string; text: string
+  size: string; color: string; bg: string; fontSize: string; html: string
+}
+
+export function parseDomContextChips(raw: string): ParsedDomChip[] {
+  const results: ParsedDomChip[] = []
+  const re = /【元素 #(\d+)】(\S+)/g
+  let match: RegExpExecArray | null
+  while ((match = re.exec(raw)) !== null) {
+    const idx = parseInt(match[1], 10)
+    const selector = match[2]
+    const blockStart = match.index
+    const nextBlock = raw.indexOf('【元素 #', blockStart + 1)
+    const block = raw.slice(blockStart, nextBlock === -1 ? undefined : nextBlock)
+    const pathMatch = block.match(/路径:\s*(.+)/)
+    const textMatch = block.match(/文本:\s*"(.+?)"/)
+    const sizeMatch = block.match(/尺寸:\s*(.+)/)
+    const styleMatch = block.match(/样式:\s*color=(\S+)\s+bg=(\S+)\s+font=(\S+)/)
+    const htmlMatch = block.match(/HTML:\s*(.+)/)
+    results.push({
+      index: idx, selector,
+      path: pathMatch?.[1]?.trim() || '',
+      text: textMatch?.[1]?.trim() || '',
+      size: sizeMatch?.[1]?.trim() || '',
+      color: styleMatch?.[1] || '',
+      bg: styleMatch?.[2] || '',
+      fontSize: styleMatch?.[3] || '',
+      html: htmlMatch?.[1]?.trim() || '',
+    })
+  }
+  return results
+}
+
+export function InlineDomChips({ raw }: { raw: string }) {
+  const chips = parseDomContextChips(raw)
+  if (chips.length === 0) return null
+  return (
+    <div className={s.domCardList}>
+      {chips.map((chip) => {
+        const tag = chip.selector.split(/[.#]/)[0] || 'div'
+        const pathParts = chip.path ? chip.path.split(' > ') : []
+        return (
+          <div key={chip.index} className={s.domCard}>
+            <div className={s.domCardHeader}>
+              <span className={s.domCardIndex}>{chip.index}</span>
+              <span className={s.domCardTag}>&lt;{tag}&gt;</span>
+              {chip.size && <span className={s.domCardSize}>{chip.size.split('@')[0].trim()}</span>}
+            </div>
+            {chip.text && <div className={s.domCardContent}>{chip.text}</div>}
+            {pathParts.length > 0 && (
+              <div className={s.domCardPath}>
+                {pathParts.map((p, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && <span className={s.domCardPathSep}>&rsaquo;</span>}
+                    <span>{p}</span>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+            {(chip.color || chip.bg) && chip.bg !== 'rgba(0, 0, 0, 0)' && (
+              <div className={s.domCardStyles}>
+                {chip.color && <span className={s.domCardSwatch} style={{ background: chip.color }} title={`color: ${chip.color}`} />}
+                {chip.bg && chip.bg !== 'rgba(0, 0, 0, 0)' && <span className={s.domCardSwatch} style={{ background: chip.bg }} title={`bg: ${chip.bg}`} />}
+                {chip.fontSize && <span className={s.domCardMeta}>{chip.fontSize}</span>}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 const COLLAPSE_THRESHOLD = 150
 
 /** 用户消息行：带复制按钮 + 超长折叠，与 chat 页面样式一致 */
