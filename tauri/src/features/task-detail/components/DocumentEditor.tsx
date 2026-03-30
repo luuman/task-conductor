@@ -26,7 +26,10 @@ function renderMd(md: string): string {
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/`(.+?)`/g, '<code>$1</code>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, href) => {
+          const safeHref = /^(https?:\/\/|\/)/.test(href) ? href : '#'
+          return `<a href="${safeHref}">${text}</a>`
+        })
       }</p>`
     })
     .join('')
