@@ -10,6 +10,12 @@ export interface Project {
   is_test: boolean
   sort_order: number
   stages_config: string | null  // JSON list[str]，启用的阶段；null = 全部
+  automation_config:     string | null
+  claude_runtime_config: string | null
+  notification_config:   string | null
+  docs_config:           string | null
+  env_config:            string | null
+  knowledge_config:      string | null
   created_at: string
 }
 
