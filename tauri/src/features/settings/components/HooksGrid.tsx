@@ -74,17 +74,27 @@ export function HooksGrid({ projectId, hooks }: HooksGridProps) {
             {/* 已配置的命令列表 */}
             {allCmds.length > 0 && (
               <div className={styles.hookCmdList}>
-                {allCmds.map(({ cmd, scope }, i) => (
-                  <div key={i} className={styles.hookCmdRow}>
-                    <span
-                      className={styles.hookCmdScope}
-                      style={{ color: scope === 'global' ? '#4a80cc' : '#3aaa60' }}
-                    >
-                      {scope === 'global' ? 'G' : 'P'}
-                    </span>
-                    <span className={styles.hookCmdText} title={cmd}>{cmd}</span>
-                  </div>
-                ))}
+                {allCmds.map(({ cmd, scope }, i) => {
+                  // 提取命令名：去掉路径，只保留文件名
+                  const parts = cmd.trim().split(/\s+/)
+                  const bin = parts[0]
+                  const name = bin.includes('/') ? bin.split('/').pop()! : bin
+                  const args = parts.slice(1).join(' ')
+                  return (
+                    <div key={i} className={styles.hookCmdRow}>
+                      <span
+                        className={styles.hookCmdScope}
+                        style={{ color: scope === 'global' ? '#4a80cc' : '#3aaa60' }}
+                        title={scope === 'global' ? '全局' : '项目级'}
+                      >
+                        {scope === 'global' ? 'G' : 'P'}
+                      </span>
+                      <span className={styles.hookCmdText} title={cmd}>
+                        {name}{args ? ` ${args}` : ''}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             )}
 
