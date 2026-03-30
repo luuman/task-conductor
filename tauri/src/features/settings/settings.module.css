@@ -688,18 +688,24 @@
 }
 
 /* ── 规则 chip（CLAUDE.md）── */
+.ruleChipsWaterfall {
+  columns: 2;
+  column-gap: 8px;
+}
+
 .ruleChip {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: 4px;
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 6px;
   background: var(--tc-content-bg);
   border: 1px solid var(--tc-border);
   font-size: 11px;
   color: var(--tc-foreground);
-  margin: 2px;
-  max-width: 300px;
+  margin-bottom: 4px;
+  break-inside: avoid;
+  line-height: 1.4;
 }
 
 .ruleChipCategory {
@@ -708,12 +714,14 @@
   border-radius: 4px;
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .ruleChipText {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 /* ── Hooks 3×3 卡片 ── */
