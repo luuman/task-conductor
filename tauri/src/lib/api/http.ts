@@ -430,6 +430,15 @@ export class HttpAdapter implements ApiAdapter {
     return this.fetch<InterviewMessage[]>(`/api/tasks/${taskId}/interview/messages`)
   }
 
+  async updateRequirements(taskId: number, requirements: RequirementFields) {
+    const result = await this.fetch<Task>(`/api/tasks/${taskId}/requirements`, {
+      method: 'PUT',
+      body: JSON.stringify({ requirements: JSON.stringify(requirements) }),
+    })
+    cache.invalidate(`task:${taskId}`)
+    return result
+  }
+
   async updatePrd(taskId: number, prd: string) {
     const result = await this.fetch<Task>(`/api/tasks/${taskId}/prd`, {
       method: 'PUT',
