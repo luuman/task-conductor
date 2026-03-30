@@ -732,8 +732,8 @@
 /* ── Hooks 卡片网格（只显示已配置命令的 hooks）── */
 .hookList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 6px;
 }
 
 .hookListRow {
