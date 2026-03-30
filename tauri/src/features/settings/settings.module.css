@@ -731,19 +731,19 @@
   color: var(--tc-foreground);
 }
 
-/* ── Hooks 列表（只显示已配置命令的 hooks）── */
+/* ── Hooks 卡片网格（只显示已配置命令的 hooks）── */
 .hookList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
 }
 
 .hookListRow {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  padding: 7px 10px;
-  border-radius: 7px;
+  padding: 10px 12px;
+  border-radius: 8px;
   border: 1px solid var(--tc-border);
   background: var(--tc-content-bg);
 }
