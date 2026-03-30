@@ -188,6 +188,9 @@ def main():
             continue
 
         req_id = req.get("id")
+        # JSON-RPC notifications have no "id" — must not send a response
+        if req_id is None:
+            continue
         method = req.get("method", "")
 
         if method == "initialize":
