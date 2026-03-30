@@ -31,6 +31,16 @@ export default function TaskDetailPage() {
   const { t } = useTranslation()
   const taskId = Number(id)
   const { task, artifacts, loading, approveTask, startTask, advanceTask, updateRequirements } = useTaskDetailData(taskId)
+  const setPageContext = useChatStore(s => s.setPageContext)
+  const openAssistant = useChatStore(s => s.toggle)
+  const chatIsOpen = useChatStore(s => s.isOpen)
+
+  // 告知 AI 助手当前所在任务
+  useEffect(() => {
+    if (!task) return
+    setPageContext({ page: 'task-detail', taskId: task.id, taskTitle: task.title })
+    return () => setPageContext({ page: 'dashboard' })
+  }, [task?.id, task?.title, setPageContext])
 
   if (loading) {
     return (
