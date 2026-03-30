@@ -163,6 +163,8 @@ class HooksToggleBody(BaseModel):
 
 @router.post("/{project_id}/hooks-toggle", summary="启用/禁用单个 hook 事件")
 def toggle_hook(project_id: int, body: HooksToggleBody, db: Session = Depends(get_db)):
+    if body.event not in HOOK_EVENTS:
+        raise HTTPException(400, f"无效的 hook 事件类型: {body.event}，有效值: {HOOK_EVENTS}")
     project_path = _get_project_path(project_id, db)
 
     if body.scope == "global":
