@@ -638,32 +638,12 @@ export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
     }
   }, [sessions, selectedId, selectSession])
 
+  // 当 chat 页面没有选中会话时，自动选中 FloatingAssistant 的当前会话（如果在列表中）
   useEffect(() => {
     if (selectedId || !claudeSessionId) return
-    if (selectedSyncRef.current === claudeSessionId) {
-      selectedSyncRef.current = null
-      return
-    }
     if (!sessions.some(s => s.session_id === claudeSessionId)) return
     selectSession(claudeSessionId)
   }, [claudeSessionId, selectedId, sessions, selectSession])
-
-  useEffect(() => {
-    selectedSyncRef.current = selectedId || null
-    setClaudeSessionId(selectedId || null)
-    setCurrentReply('')
-  }, [selectedId, setClaudeSessionId, setCurrentReply])
-
-  // 切换会话时清空 AI 对话记录，不把 transcript 同步进 chatMessages（那会导致 live 消息重复渲染）
-  // 跳过首次挂载，避免清空 FloatingAssistant 的全局消息
-  useEffect(() => {
-    if (!chatPageMountedRef.current) {
-      chatPageMountedRef.current = true
-      return
-    }
-    if (chatMessages.length > 0) setChatMessages([])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
