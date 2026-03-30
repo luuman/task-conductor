@@ -20,7 +20,11 @@ data.setdefault("mcpServers", {})["task-conductor"] = {
     "type": "stdio",
     "command": "python3",
     "args": [script],
-    "env": {"TC_BASE_URL": "http://localhost:8765"}
+    "env": {
+        "TC_BASE_URL": "http://localhost:8765",
+        "NO_PROXY": "localhost,127.0.0.1",
+        "no_proxy": "localhost,127.0.0.1"
+    }
 }
 with open(path, "w") as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
