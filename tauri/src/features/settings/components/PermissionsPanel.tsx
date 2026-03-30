@@ -1,4 +1,5 @@
 import type { PermissionsResponse } from '../../../lib/api/types'
+import styles from '../settings.module.css'
 
 const SOURCE_COLORS: Record<string, { bg: string; color: string }> = {
   global:  { bg: '#4a80cc20', color: '#4a80cc' },
@@ -18,31 +19,33 @@ interface PermissionsPanelProps {
 }
 
 export function PermissionsPanel({ data, isLoading }: PermissionsPanelProps) {
-  if (isLoading) return <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)' }}>加载中...</div>
+  if (isLoading) return <div className={styles.emptyHint}>加载中...</div>
 
   const allows = data?.allow ?? []
   const denies = data?.deny ?? []
 
   if (!allows.length && !denies.length) {
-    return <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)' }}>无权限配置</div>
+    return <div className={styles.emptyHint}>无权限配置</div>
   }
 
-  const renderList = (rules: typeof allows, color: string) => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+  const renderList = (rules: typeof allows, borderColor: string, bgColor: string) => (
+    <div className={styles.permRuleList}>
       {rules.map((r, i) => {
         const sc = SOURCE_COLORS[r.source] ?? SOURCE_COLORS.local
         return (
-          <span key={i} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            padding: '3px 8px', borderRadius: 6,
-            border: `1px solid ${color}40`, background: `${color}10`,
-            fontSize: 11, fontFamily: 'monospace',
-          }}>
+          <span
+            key={i}
+            className={styles.permRuleChip}
+            style={{
+              border: `1px solid ${borderColor}`,
+              background: bgColor,
+            }}
+          >
             <span>{r.rule}</span>
-            <span style={{
-              fontSize: 9, padding: '1px 4px', borderRadius: 3,
-              background: sc.bg, color: sc.color, fontFamily: 'sans-serif',
-            }}>
+            <span
+              className={styles.permSourceBadge}
+              style={{ background: sc.bg, color: sc.color }}
+            >
               {SOURCE_LABELS[r.source] ?? r.source}
             </span>
           </span>
@@ -52,17 +55,17 @@ export function PermissionsPanel({ data, isLoading }: PermissionsPanelProps) {
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className={styles.permList}>
       {allows.length > 0 && (
-        <div>
-          <div style={{ fontSize: 10, color: '#10b981', fontWeight: 600, marginBottom: 6 }}>✓ 允许</div>
-          {renderList(allows, '#10b981')}
+        <div className={styles.permGroup}>
+          <div className={styles.permGroupLabel} style={{ color: '#10b981' }}>✓ 允许</div>
+          {renderList(allows, '#10b98140', '#10b98110')}
         </div>
       )}
       {denies.length > 0 && (
-        <div>
-          <div style={{ fontSize: 10, color: '#ef4444', fontWeight: 600, marginBottom: 6 }}>✗ 拒绝</div>
-          {renderList(denies, '#ef4444')}
+        <div className={styles.permGroup}>
+          <div className={styles.permGroupLabel} style={{ color: '#ef4444' }}>✗ 拒绝</div>
+          {renderList(denies, '#ef444440', '#ef444410')}
         </div>
       )}
     </div>
