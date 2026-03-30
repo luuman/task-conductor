@@ -63,7 +63,7 @@
 - **范围点颜色**：
   - 蓝色（`~/.claude/settings.json`）
   - 绿色（`.claude/settings.json`）
-- **toggle 行为**：写回对应 settings.json，删除/添加对应事件的 hook 配置
+- **toggle 行为**：调用 `POST /api/projects/:id/hooks-toggle`，后端直接修改对应的 settings.json 文件（全局 hook 修改 `~/.claude/settings.json`，项目 hook 修改 `{project.path}/.claude/settings.json`）
 - **底部**：hook 命令路径 + "重新安装"按钮（调用 `install-hooks.sh`）
 
 ### ⑥ 记忆文件
