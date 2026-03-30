@@ -68,29 +68,6 @@ function parseFilePaths(text: string): MsgPart[] {
   return parts
 }
 
-function FileTypeSvgInline({ ext }: { ext: string }) {
-  const color = fileColor(ext)
-  const label = (ext || 'FILE').toUpperCase().slice(0, 4)
-  return (
-    <svg width="28" height="34" viewBox="0 0 28 34" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M2 0 H17 L26 9 V32 Q26 34 24 34 H4 Q2 34 2 32 Z" fill={color} fillOpacity="0.15" />
-      <path d="M2 0 H17 L26 9 V32 Q26 34 24 34 H4 Q2 34 2 32 Z" stroke={color} strokeWidth="1" strokeOpacity="0.6" />
-      <path d="M17 0 L17 9 L26 9" stroke={color} strokeWidth="1" strokeOpacity="0.6" fill="none" />
-      <text x="14" y="26" textAnchor="middle" fontSize="6.5" fontWeight="800" fill={color} fontFamily="ui-monospace,monospace">{label}</text>
-    </svg>
-  )
-}
-
-function FolderSvgInline() {
-  return (
-    <svg width="38" height="32" viewBox="0 0 38 32" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M2 12 L2 8 Q2 6 4 6 L13 6 Q16 6 17 9 L18 12 Z" fill="#5ba4f5" />
-      <rect x="2" y="11" width="34" height="19" rx="3" fill="#4b96e8" />
-      <rect x="2" y="11" width="34" height="7" fill="#5ba4f5" />
-      <rect x="2" y="16" width="34" height="2" fill="#4b96e8" />
-    </svg>
-  )
-}
 
 /** 消息中内嵌图片卡片 — data: URL 直接使用，本地路径通过 Tauri convertFileSrc 加载 */
 function MsgImgCard({ path }: { path: string }) {
