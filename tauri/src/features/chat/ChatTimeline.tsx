@@ -462,7 +462,6 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
 export function RichText({ text }: { text: string }) {
   const parts = useMemo(() => parseFilePaths(text), [text])
   const hasFileParts = parts.some(p => p.kind !== 'text')
-  console.log(`[富文本] 内容="${text.slice(0, 80)}" 含文件路径=${hasFileParts} 段落=`, parts.map(p => ({ kind: p.kind, ...(p.kind === 'image' ? { path: (p as any).path.slice(0, 60) } : {}) })))
   if (!hasFileParts) {
     return <div className={s.richText}><RichTextBlock text={text} /></div>
   }
