@@ -64,13 +64,25 @@ export function HooksGrid({ projectId: _projectId, hooks }: HooksGridProps) {
   return (
     <div className={styles.hookList}>
       {[...scriptMap.entries()].map(([name, { fullCmd, scope, phases }]) => {
-        const desc = KNOWN_SCRIPTS[name]
+        const meta = KNOWN_SCRIPTS[name]
+        const isSystem = meta?.system ?? false
         return (
           <div key={name} className={styles.hookListRow}>
+            {/* 系统 / 用户标记 */}
+            <span
+              className={styles.hookOriginTag}
+              style={isSystem
+                ? { background: '#6366f115', color: '#818cf8', border: '1px solid #6366f140' }
+                : { background: '#10b98115', color: '#34d399', border: '1px solid #10b98140' }
+              }
+            >
+              {isSystem ? '系统' : '用户'}
+            </span>
+
             {/* 脚本名 + 描述 */}
             <div className={styles.hookScriptInfo}>
               <span className={styles.hookScriptName} title={fullCmd}>{name}</span>
-              {desc && <span className={styles.hookScriptDesc}>{desc}</span>}
+              {meta?.desc && <span className={styles.hookScriptDesc}>{meta.desc}</span>}
               <span
                 className={styles.hookScopeTag}
                 style={{ color: scope === 'global' ? '#4a80cc' : '#3aaa60' }}
