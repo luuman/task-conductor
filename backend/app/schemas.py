@@ -82,6 +82,7 @@ class TaskOut(BaseModel):
     interview_status: str = "none"           # none|active|completed
     claude_session_id: Optional[str] = None  # 关联的 Claude 会话
     canvas_data: Optional[str] = None        # Canvas JSON 数据
+    requirements: Optional[str] = None       # 结构化需求 JSON
     version_id: Optional[int] = None
     worktree_path: Optional[str] = None
     branch_name: Optional[str] = None
