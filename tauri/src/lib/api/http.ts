@@ -6,7 +6,7 @@ import type {
   GitStatus, GitCommit, GitBranch, GitStash, BranchFileChange,
   InlineEditRequest, InlineEditResponse,
   TranscriptMessage, ConversationNote, FileTreeNode,
-  InterviewMessage, InterviewStartResponse,
+  InterviewMessage, InterviewStartResponse, RequirementFields,
   CanvasData, PaginatedMessages,
   Version, VersionCreate, VersionUpdate,
 } from './types'
