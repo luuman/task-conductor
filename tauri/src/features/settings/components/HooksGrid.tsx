@@ -66,23 +66,24 @@ export function HooksGrid({ projectId: _projectId, hooks }: HooksGridProps) {
       {[...scriptMap.entries()].map(([name, { fullCmd, scope, phases }]) => {
         const meta = KNOWN_SCRIPTS[name]
         const isSystem = meta?.system ?? false
+        const accentColor = isSystem ? '#818cf8' : '#34d399'
         return (
-          <div key={name} className={styles.hookListRow}>
-            {/* 系统 / 用户标记 */}
-            <span
-              className={styles.hookOriginTag}
-              style={isSystem
-                ? { background: '#6366f115', color: '#818cf8', border: '1px solid #6366f140' }
-                : { background: '#10b98115', color: '#34d399', border: '1px solid #10b98140' }
-              }
-            >
-              {isSystem ? '系统' : '用户'}
-            </span>
-
-            {/* 脚本名 + 描述 */}
-            <div className={styles.hookScriptInfo}>
-              <span className={styles.hookScriptName} title={fullCmd}>{name}</span>
-              {meta?.desc && <span className={styles.hookScriptDesc}>{meta.desc}</span>}
+          <div
+            key={name}
+            className={styles.hookListRow}
+            style={{ borderTopColor: accentColor }}
+          >
+            {/* 顶部：标记 + scope */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span
+                className={styles.hookOriginTag}
+                style={isSystem
+                  ? { background: '#6366f115', color: '#818cf8', border: '1px solid #6366f140' }
+                  : { background: '#10b98115', color: '#34d399', border: '1px solid #10b98140' }
+                }
+              >
+                {isSystem ? '系统' : '用户'}
+              </span>
               <span
                 className={styles.hookScopeTag}
                 style={{ color: scope === 'global' ? '#4a80cc' : '#3aaa60' }}
@@ -91,7 +92,13 @@ export function HooksGrid({ projectId: _projectId, hooks }: HooksGridProps) {
               </span>
             </div>
 
-            {/* 阶段标签列表 */}
+            {/* 脚本名 */}
+            <div>
+              <div className={styles.hookScriptName} title={fullCmd}>{name}</div>
+              {meta?.desc && <div className={styles.hookScriptDesc}>{meta.desc}</div>}
+            </div>
+
+            {/* 阶段标签 */}
             <div className={styles.hookPhaseList}>
               {phases.map((event) => {
                 const phase = HOOK_PHASE[event] ?? { label: event, color: '#6b7280' }
