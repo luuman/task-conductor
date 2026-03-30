@@ -13,16 +13,16 @@ const HOOK_PHASE: Record<string, { label: string; color: string }> = {
   Notification:       { label: '通知',      color: '#ec4899' },
 }
 
-const KNOWN_SCRIPTS: Record<string, string> = {
-  'tc-hook.sh':  'TaskConductor 观测',
-  'tc-hook':     'TaskConductor 观测',
-  'notify.sh':   '通知推送',
-  'tts.sh':      '语音播报',
-  'speak.sh':    '语音播报',
-  'logger.sh':   '日志记录',
-  'audit.sh':    '安全审计',
-  'format.sh':   '代码格式化',
-  'lint.sh':     '代码检查',
+const KNOWN_SCRIPTS: Record<string, { desc: string; system: boolean }> = {
+  'tc-hook.sh':  { desc: 'TaskConductor 观测', system: true },
+  'tc-hook':     { desc: 'TaskConductor 观测', system: true },
+  'notify.sh':   { desc: '通知推送',            system: false },
+  'tts.sh':      { desc: '语音播报',            system: false },
+  'speak.sh':    { desc: '语音播报',            system: false },
+  'logger.sh':   { desc: '日志记录',            system: false },
+  'audit.sh':    { desc: '安全审计',            system: false },
+  'format.sh':   { desc: '代码格式化',          system: false },
+  'lint.sh':     { desc: '代码检查',            system: false },
 }
 
 function cmdName(cmd: string) {
