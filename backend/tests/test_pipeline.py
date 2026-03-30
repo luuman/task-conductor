@@ -3,13 +3,14 @@ from app.pipeline.engine import PipelineEngine, STAGE_ORDER, StageTransitionErro
 def test_stage_order():
     assert STAGE_ORDER[0] == "input"
     assert "done" in STAGE_ORDER
-    assert len(STAGE_ORDER) == 10
+    assert len(STAGE_ORDER) == 15  # discovery/architecture/review/security/staging added
 
 def test_can_advance_stage():
     engine = PipelineEngine()
-    assert engine.next_stage("input") == "analysis"
+    assert engine.next_stage("input") == "discovery"
+    assert engine.next_stage("discovery") == "analysis"
     assert engine.next_stage("analysis") == "prd"
-    assert engine.next_stage("prd") == "ui"
+    assert engine.next_stage("prd") == "architecture"
 
 def test_advance_from_done_raises():
     engine = PipelineEngine()
