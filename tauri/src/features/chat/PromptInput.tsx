@@ -219,7 +219,7 @@ export function PromptInput() {
   const [templateMenuPos, setTemplateMenuPos] = useState<{ left: number; bottom: number } | null>(null)
   const { isGenerating, addMessage, setMessages, setCurrentReply, inputDraft, setInputDraft,
           selectedModel, setSelectedModel, lastStats,
-          permissionMode, setPermissionMode } = useChatStore()
+          permissionMode, setPermissionMode } = useActiveChatStore()
   const { send, stop } = useChatStream()
   const [modelMenuPos, setModelMenuPos] = useState<{ left: number; bottom: number } | null>(null)
   const [permMenuPos, setPermMenuPos] = useState<{ left: number; bottom: number } | null>(null)
