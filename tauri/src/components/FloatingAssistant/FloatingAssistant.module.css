@@ -189,11 +189,11 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 14px 14px 8px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
   min-width: 0;
+  user-select: text;
   scrollbar-width: thin;
   scrollbar-color: var(--tc-scrollbar-thumb) transparent;
 }
