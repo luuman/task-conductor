@@ -853,5 +853,178 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 1px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+
+.memoryCellList li:hover {
+  background: color-mix(in srgb, var(--tc-border) 40%, transparent);
+}
+
+.memoryCellListMore {
+  opacity: 0.5;
+  padding: 2px 4px;
+}
+
+/* ── Memory cell: colored top border variant ── */
+.memoryCellColored {
+  composes: memoryCell;
+  /* border-top-color is set inline via CSS variable --cell-accent */
+  border-top: 2px solid var(--cell-accent, var(--tc-border));
+}
+
+.memoryCellCountColored {
+  font-size: 16px;
+  font-weight: 700;
+  /* color set inline via CSS variable --cell-accent */
+  color: var(--cell-accent, var(--tc-foreground));
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+/* ── MCP 服务器卡片 ── */
+.mcpList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mcpServerCard {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+}
+
+.mcpServerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.mcpStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mcpStatusDotOk {
+  composes: mcpStatusDot;
+  background: var(--tc-success);
+  box-shadow: 0 0 4px var(--tc-success);
+}
+
+.mcpStatusDotError {
+  composes: mcpStatusDot;
+  background: var(--tc-error);
+}
+
+.mcpServerName {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+  color: var(--tc-foreground);
+}
+
+.mcpToolChip {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--tc-accent-bg);
+  color: var(--tc-accent-on-bg, var(--tc-foreground));
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ── Permissions 面板 ── */
+.permList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.permGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.permGroupLabel {
+  font-size: 10px;
+  font-weight: 600;
+  /* color set inline */
+}
+
+.permRuleList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.permRuleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  /* border and background set inline via rule color */
+}
+
+.permSourceBadge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: sans-serif;
+  /* bg and color set inline */
+}
+
+/* ── Env 变量面板 ── */
+.envList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.envRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-content-bg);
+  transition: border-color 0.12s;
+}
+
+.envRow:hover {
+  border-color: color-mix(in srgb, var(--tc-border) 50%, var(--tc-foreground-secondary));
+}
+
+.envKey {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--tc-accent);
+  min-width: 160px;
+  flex-shrink: 0;
+}
+
+.envValue {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--tc-foreground-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 空态 & 加载态通用 ── */
+.emptyHint {
+  font-size: 12px;
+  color: var(--tc-foreground-secondary);
+  padding: 4px 0;
 }
