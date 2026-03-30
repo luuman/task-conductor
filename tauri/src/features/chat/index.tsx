@@ -641,12 +641,11 @@ function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
     }
   }, [sessions, selectedId, selectSession])
 
-  // 当 chat 页面没有选中会话时，自动选中 FloatingAssistant 的当前会话（如果在列表中）
+  // 切换会话时同步局部 claudeSessionId，清空流式回复（只影响局部 store）
   useEffect(() => {
-    if (selectedId || !claudeSessionId) return
-    if (!sessions.some(s => s.session_id === claudeSessionId)) return
-    selectSession(claudeSessionId)
-  }, [claudeSessionId, selectedId, sessions, selectSession])
+    setLocalClaudeSessionId(selectedId || null)
+    setLocalCurrentReply('')
+  }, [selectedId, setLocalClaudeSessionId, setLocalCurrentReply])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
