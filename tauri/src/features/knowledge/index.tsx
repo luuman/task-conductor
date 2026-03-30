@@ -148,21 +148,20 @@ function KnowledgeGraph() {
       target_id: Number(connection.target),
       relation: 'references',
     })
-  }, [setEdges, createLinkM])
+  }, [setEdges, createLinkM.mutate])
 
   const onNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
     savePosM.mutate({
       docId: Number(node.id),
       pos: { pos_x: node.position.x, pos_y: node.position.y },
     })
-  }, [savePosM])
+  }, [savePosM.mutate])
 
+  // 用应用内确认代替 window.confirm（Tauri Linux 上 window.confirm 不可靠）
   const onEdgeDoubleClick = useCallback((_: React.MouseEvent, edge: Edge) => {
     const linkId = Number(edge.id.replace('link-', ''))
-    if (!isNaN(linkId) && window.confirm('删除这条关系？')) {
-      deleteLinkM.mutate(linkId)
-    }
-  }, [deleteLinkM])
+    if (!isNaN(linkId)) setConfirmDeleteLinkId(linkId)
+  }, [])
 
   const selectedDoc = selectedDocId
     ? projectDocs?.documents.find(d => d.id === selectedDocId)
