@@ -174,6 +174,7 @@ export function FloatingAssistant() {
   // Use shared session data hook
   const {
     sessions,
+    transcript: sessionTranscript,
     selectSession: sharedSelectSession,
     selectedId: _activeSessionId,
     clearSelection: sharedClearSelection,
