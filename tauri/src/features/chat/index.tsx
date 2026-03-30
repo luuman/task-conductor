@@ -6,24 +6,26 @@ import type { AiSession, TranscriptMessage } from '../../lib/api/types'
 import { useChatStore } from '../../lib/store/chat'
 import { parseTimelineWithQuestions, formatTs, guessHljsLang, cleanSystemXml, detectRisks, inferBlockIntent, generateCommitMessage, type TimelineStep, type UserQuestion, type RiskItem, type IntentLabel } from './timeline-parser'
 import { Select } from '../../ui/select'
-import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
-import {
-  IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
-  IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
-  IconChevronRight,
-} from '../../ui/icon'
+import { RichTextBlock, CodeExpandCtx } from '../../components/ChatRenderer'
+import { IconChevronRight } from '../../ui/icon'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { useSessionData, type QuestionItem } from '../../components/SessionChat/useSessionData'
 import { useAppStore } from '../../lib/store/app'
-import { UserMsgRow } from './ChatTimeline'
+import {
+  UserMsgRow, RichText, InlineDomChips, parseDomContextChips,
+  StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS,
+  badgeCls, badgeLabel, dotColor, catIcon,
+  buildCatLabelMap, buildToolLabelMap, groupConsecutiveSameType,
+  ResultBlock, type StyleKey,
+} from './ChatTimeline'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
-// ── 样式常量 ──
-const CHAT_STYLE_OPTIONS = ['a', 'b', 'd', 'g', 'h'] as const
-export type StyleKey = typeof CHAT_STYLE_OPTIONS[number]
+// 为外部消费者（ChatDemo 等）转导出
+export type { StyleKey }
+export { StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS, groupConsecutiveSameType }
 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
