@@ -368,27 +368,27 @@ export function FloatingAssistant() {
   }, [saveCurrentTab, sharedClearSelection])
 
   const handleOpenHistory = useCallback((session: AiSession) => {
-    // 直接在当前 tab 加载该会话（一个弹窗展示一个会话）
     setShowHistory(false)
     const title = (session.note?.alias || session.summary || '').replace(/<[^>]+>/g, '').trim() || `会话 ${session.session_id.slice(0, 8)}`
     setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
 
+    // 用独立 ref 做竞态保护，不修改 claudeSessionId（避免干扰当前活跃对话）
+    historyLoadRef.current = session.session_id
     isFirstLoadRef.current = true
-    sharedSelectSession(session.session_id)
+
     const store = useChatStore.getState()
-    // 先清空旧消息，避免切换后短暂显示上一个会话的内容
     store.setMessages([])
     store.setCurrentReply('')
-    store.setClaudeSessionId(session.session_id)
+
     apiRef.current.getTranscript(session.session_id).then(({ messages: msgs }) => {
-      if (useChatStore.getState().claudeSessionId === session.session_id) {
+      if (historyLoadRef.current === session.session_id) {
         useChatStore.getState().setMessages(msgs ?? [])
         tabCacheRef.current.set(activeTabId, { messages: msgs ?? [], sessionId: session.session_id })
       }
     }).catch(() => {
-      // 加载失败时保持空状态，显示 EmptyState
+      // 加载失败保持空状态，显示 EmptyState
     })
-  }, [activeTabId, sharedSelectSession])
+  }, [activeTabId])
 
   // 首条消息时更新 tab 标题
   useEffect(() => {
