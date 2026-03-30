@@ -95,3 +95,29 @@ def test_settings_local_not_exists():
     resp = client.get(f"/api/projects/{pid}/settings-local")
     assert resp.status_code == 200
     assert resp.json()["exists"] == False
+
+
+def test_hooks_toggle():
+    """hooks-toggle 应能正确启用/禁用 hook，且读回状态一致"""
+    pid = _create_project("toggle-test")
+    # 启用项目级 PreToolUse hook
+    resp = client.post(f"/api/projects/{pid}/hooks-toggle",
+                       json={"event": "PreToolUse", "scope": "project", "enabled": True})
+    assert resp.status_code == 200
+    assert resp.json()["ok"] == True
+
+    # 读回 hooks-status，PreToolUse 项目级应为 enabled
+    resp2 = client.get(f"/api/projects/{pid}/hooks-status")
+    assert resp2.status_code == 200
+    hooks = {h["event"]: h for h in resp2.json()["hooks"]}
+    assert hooks["PreToolUse"]["project"]["enabled"] == True
+
+    # 禁用
+    resp3 = client.post(f"/api/projects/{pid}/hooks-toggle",
+                        json={"event": "PreToolUse", "scope": "project", "enabled": False})
+    assert resp3.status_code == 200
+
+    # 无效 event 应返回 400
+    resp4 = client.post(f"/api/projects/{pid}/hooks-toggle",
+                        json={"event": "InvalidEvent", "scope": "project", "enabled": True})
+    assert resp4.status_code == 400
