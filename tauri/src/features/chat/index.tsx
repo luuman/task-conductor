@@ -642,55 +642,6 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
 // ════════════════════════════════════════════════
 // 用户消息行（含 hover 复制按钮）
 // ════════════════════════════════════════════════
-const COLLAPSE_THRESHOLD = 150 // 超过此字符数的用户消息默认折叠
-
-function UserMsgRow({ rawText, children }: { rawText: string; children: React.ReactNode }) {
-  const { t } = useTranslation()
-  const [copied, setCopied] = useState(false)
-  const [expanded, setExpanded] = useState(false)
-
-  const needsCollapse = stripDomContext(rawText).length > COLLAPSE_THRESHOLD
-
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(rawText).catch(() => {
-      const el = document.createElement('textarea')
-      el.value = rawText
-      document.body.appendChild(el)
-      el.select()
-      document.execCommand('copy')
-      document.body.removeChild(el)
-    })
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }, [rawText])
-
-  return (
-    <div className={s.userMsgRow}>
-      <button
-        className={`${s.userCopyBtn} ${copied ? s.userCopyBtnDone : ''}`}
-        onClick={handleCopy}
-        title={t('chat_sidebar.copy_message')}
-        tabIndex={-1}
-      >
-        {copied
-          ? '\u2713'
-          : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-        }
-      </button>
-      <div className={s.queryPill}>
-        <div className={needsCollapse && !expanded ? `${s.queryPillBody} ${s.queryPillBodyCollapsed}` : s.queryPillBody}>
-          {children}
-        </div>
-        {needsCollapse && (
-          <button className={s.queryPillExpandBtn} onClick={() => setExpanded(v => !v)}>
-            {expanded ? t('chat_sidebar.collapse') : t('chat_sidebar.expand_all')}
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ════════════════════════════════════════════════
 // 选词浮动工具栏
 // ════════════════════════════════════════════════
