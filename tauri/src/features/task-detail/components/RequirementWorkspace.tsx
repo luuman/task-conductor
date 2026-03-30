@@ -59,6 +59,7 @@ export function RequirementWorkspace({
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
     }
   }, [])
 
