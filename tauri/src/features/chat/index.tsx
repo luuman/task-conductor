@@ -30,16 +30,6 @@ export { StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS, groupConsecutiveSame
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
-// ── badge class ──
-function badgeCls(cat: TimelineStep['category']): string {
-  const map: Record<string, string> = {
-    text: s.bText, read: s.bRead, edit: s.bEdit, write: s.bWrite,
-    bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
-    ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
-  }
-  return `${s.badge} ${map[cat] || s.bOther}`
-}
-
 function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
   return {
     read: t('chat_sidebar.cat_read'), edit: t('chat_sidebar.cat_edit'), write: t('chat_sidebar.cat_write'), bash: t('chat_sidebar.cat_bash'),
