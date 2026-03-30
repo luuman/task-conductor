@@ -418,6 +418,7 @@ app.include_router(canvas_router.router)           # Canvas API
 app.include_router(screenshot_router.router)      # POST /api/tools/screenshot
 app.include_router(sync_router.router)            # GET/PUT /api/sync/status|config|crypto-params|push
 app.include_router(ui_nav_router.router)          # POST /api/ui/navigate
+app.include_router(documents_router.router)   # GET/POST/PUT/DELETE /api/documents, /api/projects/{id}/documents, /api/tasks/{id}/documents
 app.include_router(feishu_router)
 
 # ── MCP Server（SSE 端点，供 Claude Code 调用）──────────────────
