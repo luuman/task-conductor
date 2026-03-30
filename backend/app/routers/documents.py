@@ -36,6 +36,14 @@ def _make_slug(title: str) -> str:
     return slug[:30].strip('-') or 'task'
 
 
+def _safe_file_path(project_cwd: str, rel_path: str) -> str:
+    """验证拼接后的路径仍在 project_cwd 内，防止路径穿越攻击"""
+    abs_path = os.path.normpath(os.path.join(project_cwd, rel_path))
+    if not abs_path.startswith(os.path.normpath(project_cwd)):
+        raise HTTPException(400, "Invalid file path")
+    return abs_path
+
+
 def _task_doc_dir(project_cwd: str, task_id: int, task_title: str) -> str:
     slug = _make_slug(task_title)
     return os.path.join(project_cwd, "docs", "tasks", f"{task_id}-{slug}")
