@@ -368,6 +368,7 @@ export function FloatingAssistant() {
   }, [saveCurrentTab, sharedClearSelection])
 
   const handleOpenHistory = useCallback((session: AiSession) => {
+    console.log('[FA] handleOpenHistory', session.session_id)
     setShowHistory(false)
     const title = (session.note?.alias || session.summary || '').replace(/<[^>]+>/g, '').trim() || `会话 ${session.session_id.slice(0, 8)}`
     setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
