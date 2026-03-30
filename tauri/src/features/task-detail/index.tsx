@@ -96,6 +96,26 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
+      {/* Input Stage: Requirement Workspace */}
+      {task.stage === 'input' && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>需求完善工作台</span>
+          </div>
+          <div className={styles.sectionBody}>
+            <RequirementWorkspace
+              taskTitle={task.title}
+              requirementsRaw={task.requirements ?? null}
+              onSave={(fields: RequirementFields) => updateRequirements.mutate(fields)}
+              onRequestReview={() => {
+                console.log('[TC] 用户请求 AI 审核需求', { taskId })
+              }}
+              isSaving={updateRequirements.isPending}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Pipeline Stage Timeline */}
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
