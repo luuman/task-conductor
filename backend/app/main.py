@@ -30,6 +30,7 @@ from .routers import canvas as canvas_router
 from .routers import screenshot as screenshot_router
 from .routers import sync as sync_router
 from .routers import ui_nav as ui_nav_router
+from .routers import documents as documents_router
 from .feishu.dispatcher import router as feishu_router
 from .session import pin_session
 from .tunnel import start_cloudflare_tunnel, get_tunnel_url, stop_tunnel, detect_tunnel_url_from_request
