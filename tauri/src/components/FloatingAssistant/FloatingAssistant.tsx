@@ -352,7 +352,6 @@ export function FloatingAssistant() {
     store.setCurrentReply('')
     store.setClaudeSessionId(null)
     sharedClearSelection()
-    isFirstLoadRef.current = true
     setActiveTabId(tab.id)
   }, [saveCurrentTab, sharedClearSelection])
 
