@@ -552,7 +552,7 @@ type VItem =
   | { kind: 'live'; key: string; message: TranscriptMessage }
   | { kind: 'thinking'; key: string }
 
-export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
+function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
   const { t } = useTranslation()
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
   useEffect(() => {
