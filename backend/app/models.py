@@ -222,3 +222,34 @@ class BackupRecord(Base):
     content_hash: Mapped[str] = mapped_column(String(64))
     backed_up_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     file_size: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class Document(Base):
+    """任务关联的 Markdown 文档，对应本地 .md 文件"""
+    __tablename__ = "documents"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    task_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tasks.id"), nullable=True, index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    doc_type: Mapped[str] = mapped_column(String(50))
+    # requirements/research/prd/architecture/ui-spec/dev-plan/test-plan/note
+    file_path: Mapped[str] = mapped_column(String(500))
+    # 相对于 project.repo_url 的路径
+    pos_x: Mapped[float] = mapped_column(Float, default=0.0)
+    pos_y: Mapped[float] = mapped_column(Float, default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class DocumentLink(Base):
+    """两篇文档之间的关系边"""
+    __tablename__ = "document_links"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), index=True)
+    target_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
+    relation: Mapped[str] = mapped_column(String(50), default="references")
+    # derived_from / depends_on / references / contradicts
+    auto: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
