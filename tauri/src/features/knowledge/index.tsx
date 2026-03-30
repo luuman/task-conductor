@@ -189,6 +189,23 @@ function KnowledgeGraph() {
             <span className={styles.emptyHint}>暂无文档，在任务详情页创建文档后刷新</span>
           )}
         </div>
+        {confirmDeleteLinkId !== null && (
+          <div className={styles.confirmBar}>
+            <span>确认删除这条关系？</span>
+            <button
+              className={styles.confirmYes}
+              onClick={() => {
+                deleteLinkM.mutate(confirmDeleteLinkId)
+                setConfirmDeleteLinkId(null)
+              }}
+            >
+              删除
+            </button>
+            <button className={styles.confirmNo} onClick={() => setConfirmDeleteLinkId(null)}>
+              取消
+            </button>
+          </div>
+        )}
         <div style={{ flex: 1, position: 'relative' }}>
           <ReactFlow
             nodes={nodes}
