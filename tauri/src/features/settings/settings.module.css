@@ -697,19 +697,21 @@
 
 /* ── 规则 chip（CLAUDE.md）── */
 .ruleChipsWaterfall {
-  display: flex;
-  flex-direction: column;
+  columns: 2;
+  column-gap: 8px;
 }
 
 .ruleChip {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 6px 10px 6px 10px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
   border-radius: 6px;
   background: var(--tc-content-bg);
   border: 1px solid var(--tc-border);
   border-left: 3px solid var(--rule-accent, var(--tc-border));
+  margin-bottom: 6px;
+  break-inside: avoid;
   transition: background 0.12s;
 }
 
@@ -723,9 +725,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
-  flex-shrink: 0;
-  margin-top: 2px;
-  min-width: 28px;
+  align-self: flex-start;
 }
 
 .ruleChipText {
@@ -734,7 +734,6 @@
   word-break: break-word;
   overflow-wrap: anywhere;
   color: var(--tc-foreground);
-  flex: 1;
 }
 
 /* ── Hooks 卡片网格（只显示已配置命令的 hooks）── */
