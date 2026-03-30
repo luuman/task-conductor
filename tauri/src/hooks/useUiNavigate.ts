@@ -1,7 +1,12 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8765'
+function getWsBaseUrl(): string {
+  const tunnelUrl = localStorage.getItem('tc_tunnel_url')
+  if (tunnelUrl) return tunnelUrl.replace(/^http/, 'ws')
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}`
+}
 
 export function useUiNavigate() {
   const navigate = useNavigate()
@@ -11,7 +16,8 @@ export function useUiNavigate() {
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
     function connect() {
-      ws = new WebSocket(`${WS_BASE}/ws/ui`)
+      const baseUrl = getWsBaseUrl()
+      ws = new WebSocket(`${baseUrl}/ws/ui`)
 
       ws.onmessage = (event) => {
         try {
@@ -23,6 +29,8 @@ export function useUiNavigate() {
           // ignore malformed messages
         }
       }
+
+      ws.onerror = () => {}
 
       ws.onclose = () => {
         reconnectTimer = setTimeout(connect, 3000)
