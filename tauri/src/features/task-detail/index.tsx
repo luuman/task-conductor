@@ -97,7 +97,7 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Input Stage: Requirement Workspace */}
-      {task.stage === 'input' && (
+      {task.stage === 'input' && task.status === 'pending' && (
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionTitle}>需求完善工作台</span>
