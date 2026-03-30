@@ -46,33 +46,38 @@ export function PipelineFlow({ enabledStages, onToggle, disabled }: PipelineFlow
   }
 
   return (
-    <div className={styles.pipelineFlow}>
-      {ALL_STAGES.map((stage, index) => {
-        const fixed = FIXED_STAGES.has(stage)
-        const enabled = isEnabled(stage)
-        const approval = APPROVAL_STAGES.has(stage)
-        const nodeClass = fixed
-          ? styles.pipelineNodeFixed
-          : enabled
-            ? styles.pipelineNodeEnabled
-            : styles.pipelineNodeDisabled
+    <div className={styles.pipelineScroll}>
+      <div className={styles.pipelineFlow}>
+        {ALL_STAGES.map((stage, index) => {
+          const fixed = FIXED_STAGES.has(stage)
+          const enabled = isEnabled(stage)
+          const approval = APPROVAL_STAGES.has(stage)
+          const nodeClass = fixed
+            ? styles.pipelineNodeFixed
+            : enabled
+              ? styles.pipelineNodeEnabled
+              : styles.pipelineNodeDisabled
 
-        return (
-          <div key={stage} className={styles.pipelineItem}>
-            {index > 0 && <div className={styles.pipelineArrow}>›</div>}
-            <div
-              className={`${styles.pipelineNode} ${nodeClass}`}
-              onClick={() => handleClick(stage)}
-              title={`${STAGE_LABELS[stage]}${approval ? '（需审批）' : ''}`}
-            >
-              <span className={!enabled ? styles.pipelineNodeStrike : ''}>
-                {stage}
-              </span>
-              {approval && <span className={styles.pipelineApprovalDot} />}
+          return (
+            <div key={stage} className={styles.pipelineItem}>
+              {index > 0 && <div className={styles.pipelineArrow}>›</div>}
+              <div
+                className={`${styles.pipelineNode} ${nodeClass}`}
+                onClick={() => handleClick(stage)}
+                title={`${STAGE_LABELS[stage]}${approval ? '（需审批）' : ''}`}
+              >
+                <span className={`${styles.pipelineNodeCode} ${!enabled ? styles.pipelineNodeStrike : ''}`}>
+                  {stage}
+                </span>
+                <span className={styles.pipelineNodeLabel}>
+                  {STAGE_LABELS[stage]}
+                </span>
+                {approval && <span className={styles.pipelineApprovalDot} />}
+              </div>
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }
