@@ -19,29 +19,6 @@ function fmtFileSize(bytes?: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function FileTypeSvg({ ext }: { ext: string }) {
-  const color = getFileColor(ext)
-  const label = (ext || 'FILE').toUpperCase().slice(0, 4)
-  return (
-    <svg width="30" height="36" viewBox="0 0 30 36" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M3 0 H18 L27 9 V33 Q27 36 24 36 H6 Q3 36 3 33 Z" fill={color} fillOpacity="0.15" />
-      <path d="M3 0 H18 L27 9 V33 Q27 36 24 36 H6 Q3 36 3 33 Z" stroke={color} strokeWidth="1" strokeOpacity="0.6" />
-      <path d="M18 0 L18 9 L27 9" stroke={color} strokeWidth="1" strokeOpacity="0.6" fill="none" />
-      <text x="15" y="27" textAnchor="middle" fontSize="7" fontWeight="800" fill={color} fontFamily="ui-monospace,monospace">{label}</text>
-    </svg>
-  )
-}
-
-function FolderSvg() {
-  return (
-    <svg width="40" height="34" viewBox="0 0 40 34" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M2 13 L2 9 Q2 7 4 7 L14 7 Q17 7 18 10 L19 13 Z" fill="#5ba4f5" />
-      <rect x="2" y="12" width="36" height="20" rx="3" fill="#4b96e8" />
-      <rect x="2" y="12" width="36" height="7" fill="#5ba4f5" />
-      <rect x="2" y="17" width="36" height="2" fill="#4b96e8" />
-    </svg>
-  )
-}
 
 // ── Prompt 模板库 ──────────────────────────────────────────────────────
 type PromptTemplate = { id: string; title: string; content: string; createdAt: string }
