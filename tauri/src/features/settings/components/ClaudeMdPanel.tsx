@@ -15,12 +15,12 @@ function RuleChips({ rules, label }: { rules: Array<{ text: string; category: st
   if (!rules.length) return null
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginBottom: 4 }}>{label}</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+      <div style={{ fontSize: 10, color: 'var(--tc-foreground-secondary)', marginBottom: 6 }}>{label}</div>
+      <div className={styles.ruleChipsWaterfall}>
         {rules.map((rule, i) => {
           const c = CATEGORY_COLORS[rule.category] ?? { bg: '#6b728015', color: '#9ca3af' }
           return (
-            <span key={i} className={styles.ruleChip} title={rule.text}>
+            <div key={i} className={styles.ruleChip}>
               <span
                 className={styles.ruleChipCategory}
                 style={{ background: c.bg, color: c.color }}
@@ -28,7 +28,7 @@ function RuleChips({ rules, label }: { rules: Array<{ text: string; category: st
                 {rule.category}
               </span>
               <span className={styles.ruleChipText}>{rule.text}</span>
-            </span>
+            </div>
           )
         })}
       </div>
