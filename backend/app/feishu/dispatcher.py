@@ -46,28 +46,30 @@ def start_ws_client(loop: asyncio.AbstractEventLoop) -> None:
     global _ws_thread, _main_loop
     _main_loop = loop
 
-    from lark_oapi import EventDispatcherHandler
-    from lark_oapi.ws import Client as WsClient
-
-    handler = (
-        EventDispatcherHandler.builder("", "")
-        .register_p2_im_message_receive_v1(_on_message)
-        .register_p2_card_action_trigger(_on_card_action)
-        .build()
-    )
-
-    ws_client = WsClient(
-        app_id=feishu_client.app_id,
-        app_secret=feishu_client.app_secret,
-        event_handler=handler,
-        auto_reconnect=True,
-    )
-
     def _run():
         try:
-            # 子线程必须创建独立的事件循环，否则会与主线程的 uvloop 冲突
+            # 必须在子线程中创建新循环并设置后，再初始化 WsClient
+            # 否则 WsClient.__init__ 会捕获主线程的 uvloop，导致 run_until_complete 报错
             new_loop = asyncio.new_event_loop()
             asyncio.set_event_loop(new_loop)
+
+            from lark_oapi import EventDispatcherHandler
+            from lark_oapi.ws import Client as WsClient
+
+            handler = (
+                EventDispatcherHandler.builder("", "")
+                .register_p2_im_message_receive_v1(_on_message)
+                .register_p2_card_action_trigger(_on_card_action)
+                .build()
+            )
+
+            ws_client = WsClient(
+                app_id=feishu_client.app_id,
+                app_secret=feishu_client.app_secret,
+                event_handler=handler,
+                auto_reconnect=True,
+            )
+
             logger.info("[Feishu WS] 长连接启动中...")
             ws_client.start()
         except Exception:
