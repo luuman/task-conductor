@@ -1,35 +1,24 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Toggle } from '../../ui/toggle'
 import { api } from '../../lib/api'
 import { useAppStore } from '../../lib/store/app'
+import type { ProjectSettingsUpdate } from '../../lib/api/types'
+import { PipelineFlow } from './components/PipelineFlow'
+import { HooksGrid } from './components/HooksGrid'
+import { ClaudeMdPanel } from './components/ClaudeMdPanel'
+import { MemoryPanel } from './components/MemoryPanel'
+import { AutomationPanel } from './components/AutomationPanel'
+import { ClaudeRuntimePanel } from './components/ClaudeRuntimePanel'
+import { NotificationPanel } from './components/NotificationPanel'
+import { KnowledgeSettingsPanel } from './components/KnowledgeSettingsPanel'
+import { DocsPanel } from './components/DocsPanel'
+import { McpPanel } from './components/McpPanel'
+import { PermissionsPanel } from './components/PermissionsPanel'
+import { EnvPanel } from './components/EnvPanel'
 import styles from './settings.module.css'
 
-// 完整阶段顺序（不含 input/done，由后端 STAGE_ORDER 定义）
-const CONFIGURABLE_STAGES = [
-  'discovery', 'analysis', 'prd', 'architecture',
-  'ui', 'plan', 'dev', 'review', 'test', 'security',
-  'staging', 'deploy', 'monitor',
-] as const
-
-const STAGE_LABELS: Record<string, string> = {
-  discovery:    '市场与用户调研',
-  analysis:     '需求分析与方案评估',
-  prd:          '产品需求文档',
-  architecture: '系统架构设计',
-  ui:           'UI/UX 设计',
-  plan:         '技术规划与里程碑',
-  dev:          '代码实现',
-  review:       '代码审查',
-  test:         '测试',
-  security:     '安全审查',
-  staging:      '预发布环境验证',
-  deploy:       '生产部署',
-  monitor:      '监控与告警',
-}
-
 function parseStagesConfig(raw: string | null): Set<string> | null {
-  if (!raw) return null // null = 全部启用
+  if (!raw) return null
   try {
     const arr = JSON.parse(raw)
     if (Array.isArray(arr)) return new Set(arr)
@@ -37,113 +26,229 @@ function parseStagesConfig(raw: string | null): Set<string> | null {
   return null
 }
 
+const CONFIGURABLE_STAGES = [
+  'discovery', 'analysis', 'prd', 'architecture',
+  'ui', 'plan', 'dev', 'review', 'test', 'security',
+  'staging', 'deploy', 'monitor',
+] as const
+
+function SectionCard({
+  title,
+  hint,
+  children,
+  warning,
+}: {
+  title: string
+  hint?: string
+  children: React.ReactNode
+  warning?: boolean
+}) {
+  return (
+    <div className={warning ? styles.sectionWarning : styles.section}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitle}>{title}</div>
+        {hint && <div className={styles.sectionHint}>{hint}</div>}
+      </div>
+      <div className={styles.sectionBody}>{children}</div>
+    </div>
+  )
+}
+
 export default function SettingsPage() {
   const activeProjectId = useAppStore((s) => s.activeProjectId)
   const projectId = activeProjectId ? Number(activeProjectId) : null
   const queryClient = useQueryClient()
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
+  // ── 项目基础数据 ──
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => api.getProjects(),
     staleTime: 30_000,
   })
-
   const project = projects?.find((p) => p.id === projectId)
 
-  const mutation = useMutation({
-    mutationFn: (stages: string[]) => api.updateProjectStagesConfig(projectId!, stages),
-    onMutate: () => setSaveStatus('saving'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 1500)
-    },
-    onError: () => setSaveStatus('idle'),
+  // ── 文件系统数据（60s 缓存）──
+  const { data: claudeConfig, isLoading: claudeConfigLoading } = useQuery({
+    queryKey: ['project-claude-config', projectId],
+    queryFn: () => api.getProjectClaudeConfig(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
   })
 
-  // 当前启用的阶段集合（null = 全部）
+  const { data: hooksStatus, isLoading: hooksLoading } = useQuery({
+    queryKey: ['project-hooks', projectId],
+    queryFn: () => api.getProjectHooksStatus(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  })
+
+  const { data: memoryData, isLoading: memoryLoading } = useQuery({
+    queryKey: ['project-memory', projectId],
+    queryFn: () => api.getProjectMemory(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  })
+
+  const { data: mcpData, isLoading: mcpLoading } = useQuery({
+    queryKey: ['project-mcp', projectId],
+    queryFn: () => api.getProjectMcpServers(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  })
+
+  const { data: permData, isLoading: permLoading } = useQuery({
+    queryKey: ['project-permissions', projectId],
+    queryFn: () => api.getProjectPermissions(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  })
+
+  // 知识库条目数（复用已有接口）
+  const { data: knowledgeItems } = useQuery({
+    queryKey: ['project-knowledge', projectId],
+    queryFn: () => api.getProjectKnowledge(projectId!),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  })
+
+  // ── 流水线阶段 Mutation ──
+  const stagesMutation = useMutation({
+    mutationFn: (stages: string[]) => api.updateProjectStagesConfig(projectId!, stages),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+  })
+
   const enabledSet = project ? parseStagesConfig(project.stages_config) : null
-  const isEnabled = useCallback(
-    (stage: string) => enabledSet === null || enabledSet.has(stage),
-    [enabledSet]
+
+  const handleStageToggle = useCallback(
+    (stage: string, enabled: boolean) => {
+      if (!project) return
+      const current = enabledSet ?? new Set(CONFIGURABLE_STAGES)
+      if (enabled) current.add(stage)
+      else current.delete(stage)
+      stagesMutation.mutate(CONFIGURABLE_STAGES.filter((s) => current.has(s)))
+    },
+    [project, enabledSet, stagesMutation]
   )
 
-  const handleToggle = useCallback(
-    (stage: string, checked: boolean) => {
-      if (!project) return
-      // 构建新的启用列表（始终按 CONFIGURABLE_STAGES 顺序）
-      const current = enabledSet ?? new Set(CONFIGURABLE_STAGES)
-      if (checked) {
-        current.add(stage)
-      } else {
-        current.delete(stage)
-      }
-      const newConfig = CONFIGURABLE_STAGES.filter((s) => current.has(s))
-      mutation.mutate(newConfig)
-    },
-    [project, enabledSet, mutation]
-  )
+  // ── 项目设置 Mutation（批量保存 6 个 JSON 字段）──
+  const settingsMutation = useMutation({
+    mutationFn: (data: ProjectSettingsUpdate) => api.patchProjectSettings(projectId!, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+  })
 
   if (!project) return null
+
+  const isSaving = stagesMutation.isPending || settingsMutation.isPending
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div className={styles.headerTitle}>项目设置</div>
-        <div className={styles.headerHint}>{project.name} · 流水线阶段配置</div>
-      </div>
-
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionTitle}>流水线阶段</div>
-          <div className={styles.sectionHint}>
-            关闭不需要的阶段，流水线执行时将自动跳过；input 和 done 始终保留
-          </div>
-        </div>
-
-        {/* 固定阶段：input */}
-        <div className={`${styles.actionRow}`}>
-          <div className={styles.actionInfo}>
-            <div className={styles.actionLabel} style={{ fontFamily: 'monospace' }}>input</div>
-            <div className={styles.actionHint}>需求输入（始终启用）</div>
-          </div>
-          <Toggle checked disabled onChange={() => {}} />
-        </div>
-
-        {CONFIGURABLE_STAGES.map((stage, i) => (
-          <div key={stage}>
-            {i > 0 && <div style={{ height: 1, background: 'var(--tc-border)', margin: '0 16px' }} />}
-            <div className={styles.actionRow}>
-              <div className={styles.actionInfo}>
-                <div className={styles.actionLabel} style={{ fontFamily: 'monospace' }}>{stage}</div>
-                <div className={styles.actionHint}>{STAGE_LABELS[stage]}</div>
-              </div>
-              <Toggle
-                checked={isEnabled(stage)}
-                onChange={(checked) => handleToggle(stage, checked)}
-                disabled={mutation.isPending}
-              />
-            </div>
-          </div>
-        ))}
-
-        {/* 固定阶段：done */}
-        <div style={{ height: 1, background: 'var(--tc-border)', margin: '0 16px' }} />
-        <div className={styles.actionRow}>
-          <div className={styles.actionInfo}>
-            <div className={styles.actionLabel} style={{ fontFamily: 'monospace' }}>done</div>
-            <div className={styles.actionHint}>完成（始终启用）</div>
-          </div>
-          <Toggle checked disabled onChange={() => {}} />
+        <div className={styles.headerTitle}>{project.name} · 项目设置</div>
+        <div className={styles.headerHint}>
+          Claude Code 配置可视化 · {isSaving ? '保存中...' : ''}
         </div>
       </div>
 
-      {saveStatus !== 'idle' && (
-        <div className={styles.actionHint} style={{ marginTop: 8, maxWidth: 640, textAlign: 'right' }}>
-          {saveStatus === 'saving' ? '保存中...' : '✓ 已保存'}
-        </div>
-      )}
+      {/* ── 组一：流水线 ── */}
+      <SectionCard
+        title="① 流水线阶段"
+        hint="点击节点切换启用/禁用；黄色点 = 需人工审批；input/done 始终保留"
+      >
+        <PipelineFlow
+          enabledStages={enabledSet}
+          onToggle={handleStageToggle}
+          disabled={stagesMutation.isPending}
+        />
+      </SectionCard>
+
+      {/* ── 组二：Claude 配置文件 ── */}
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground-secondary)', margin: '20px 0 8px', letterSpacing: '0.05em' }}>
+        CLAUDE CODE 配置文件
+      </div>
+
+      <div className={styles.cardGrid}>
+        <SectionCard title="⑤ Hooks 配置" hint="蓝点=全局 / 绿点=项目级；toggle 控制项目级 hook">
+          {hooksLoading ? (
+            <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)' }}>加载中...</div>
+          ) : (
+            <HooksGrid projectId={projectId!} hooks={hooksStatus?.hooks ?? []} />
+          )}
+        </SectionCard>
+
+        <SectionCard title="④ CLAUDE.md 规则" hint="从项目根目录与全局配置文件提取规则条目">
+          <ClaudeMdPanel data={claudeConfig} isLoading={claudeConfigLoading} />
+        </SectionCard>
+      </div>
+
+      <div className={styles.cardGrid}>
+        <SectionCard title="⑥ 记忆文件" hint="~/.claude/projects/{project}/memory/">
+          <MemoryPanel data={memoryData} isLoading={memoryLoading} />
+        </SectionCard>
+
+        <SectionCard title="⑩ MCP 工具" hint=".mcp.json 中的 mcpServers（只读）">
+          <McpPanel data={mcpData} isLoading={mcpLoading} />
+        </SectionCard>
+      </div>
+
+      <SectionCard title="⑪ 权限配置" hint="三层 allow/deny 合并展示（只读）：全局 / 项目 / 本地">
+        <PermissionsPanel data={permData} isLoading={permLoading} />
+      </SectionCard>
+
+      {/* ── 组三：项目配置 ── */}
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tc-foreground-secondary)', margin: '20px 0 8px', letterSpacing: '0.05em' }}>
+        项目配置
+      </div>
+
+      <div className={styles.cardGrid}>
+        <SectionCard title="② 自动化调度" hint="设置任务自动执行时间窗口和并发限制">
+          <AutomationPanel
+            value={project.automation_config ?? null}
+            onChange={(json) => settingsMutation.mutate({ automation_config: json })}
+            disabled={isSaving}
+          />
+        </SectionCard>
+
+        <SectionCard title="③ Claude 运行时" hint="超时、重试、模型、区域预设">
+          <ClaudeRuntimePanel
+            value={project.claude_runtime_config ?? null}
+            onChange={(json) => settingsMutation.mutate({ claude_runtime_config: json })}
+            disabled={isSaving}
+          />
+        </SectionCard>
+      </div>
+
+      <div className={styles.cardGrid}>
+        <SectionCard title="⑦ 通知配置" hint="语音播报、Webhook、触发时机">
+          <NotificationPanel
+            value={project.notification_config ?? null}
+            onChange={(json) => settingsMutation.mutate({ notification_config: json })}
+            disabled={isSaving}
+          />
+        </SectionCard>
+
+        <SectionCard title="⑧ 知识库设置" hint="自动积累 + Prompt 注入 + 清理策略">
+          <KnowledgeSettingsPanel
+            value={project.knowledge_config ?? null}
+            knowledgeCount={knowledgeItems?.length ?? 0}
+            onChange={(json) => settingsMutation.mutate({ knowledge_config: json })}
+            disabled={isSaving}
+          />
+        </SectionCard>
+      </div>
+
+      <div className={styles.cardGrid}>
+        <SectionCard title="⑨ 文档配置" hint="项目相关文档与架构文档链接">
+          <DocsPanel
+            value={project.docs_config ?? null}
+            onChange={(json) => settingsMutation.mutate({ docs_config: json })}
+            disabled={isSaving}
+          />
+        </SectionCard>
+
+        <SectionCard title="⑫ 环境变量" hint="TC_ 前缀变量（只读，敏感字段脱敏）">
+          <EnvPanel envConfig={project.env_config ?? null} />
+        </SectionCard>
+      </div>
     </div>
   )
 }
