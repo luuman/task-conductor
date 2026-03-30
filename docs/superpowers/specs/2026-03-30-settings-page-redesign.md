@@ -123,8 +123,16 @@ CLAUDE.md（子目录）
 - **显示**：每个 server 一张卡片，server 名称 + 状态点 + tool chip 列表
 
 ### ⑪ 权限配置
-- **数据**：读取 `~/.claude/settings.json` 的 `allow` / `deny` 列表
-- **显示**：绿/红双栏，每条规则一个 pill
+- **数据**：合并展示三层权限
+  - `~/.claude/settings.json`（全局基线）
+  - `{project.path}/.claude/settings.json`（项目覆盖）
+  - `{project.path}/.claude/settings.local.json`（本地覆盖，只读，标注"本地"）
+- **显示**：绿/红双栏，每条规则一个 pill，右侧标注来源层级
+
+### ⑫a settings.local.json（本地覆盖，只读）
+- **数据**：读取 `{project.path}/.claude/settings.local.json`
+- **显示**：只读，灰色背景，顶部显示"⚠️ 本地文件，不提交 Git"说明
+- 文件不存在时显示"未创建"占位提示
 
 ### ⑫ 环境变量
 - **数据**：`project.env_config`（新增 JSON 字段，或读取 `.env` 文件）
