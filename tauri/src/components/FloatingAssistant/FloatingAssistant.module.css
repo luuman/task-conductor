@@ -187,21 +187,13 @@
 /* ── 消息区域 ── */
 .messages {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden; /* Virtuoso 管理内部滚动 */
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   user-select: text;
-  scrollbar-width: thin;
-  scrollbar-color: var(--tc-scrollbar-thumb) transparent;
-}
-.messages::-webkit-scrollbar { width: 4px; }
-.messages::-webkit-scrollbar-track { background: transparent; }
-.messages::-webkit-scrollbar-thumb {
-  background: var(--tc-scrollbar-thumb);
-  border-radius: 2px;
 }
 .messages pre {
   overflow-x: auto;
