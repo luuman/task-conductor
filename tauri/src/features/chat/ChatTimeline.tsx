@@ -774,11 +774,11 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
       {segments.map((seg, i) =>
         seg.type === 'user' ? (
           <div key={i} className={s.turnSection}>
-            <div className={s.queryPill}>
+            <UserMsgRow rawText={seg.text}>
               <UserMsgBody text={seg.text} />
-            </div>
+            </UserMsgRow>
           </div>
-        ) : seg.type === 'notification' ? (
+        ) :seg.type === 'notification' ? (
           <TaskNotifBanner key={i} status={seg.status} summary={seg.summary} taskId={seg.taskId} />
         ) : seg.type === 'local-command' ? (
           <LocalCommandBanner key={i} command={seg.command} stdout={seg.stdout} />
