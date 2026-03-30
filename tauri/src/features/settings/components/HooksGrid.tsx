@@ -45,6 +45,13 @@ export function HooksGrid({ projectId, hooks }: HooksGridProps) {
         const globalEnabled = h.global?.enabled ?? false
         const projectEnabled = h.project?.enabled ?? false
 
+        const globalCmds = h.global?.commands ?? []
+        const projectCmds = h.project?.commands ?? []
+        const allCmds = [
+          ...globalCmds.map((c) => ({ cmd: c, scope: 'global' as const })),
+          ...projectCmds.map((c) => ({ cmd: c, scope: 'project' as const })),
+        ]
+
         return (
           <div key={h.event} className={styles.hookCard}>
             <div className={styles.hookCardHeader}>
@@ -53,16 +60,34 @@ export function HooksGrid({ projectId, hooks }: HooksGridProps) {
                 <span
                   className={`${styles.scopeDot} ${globalEnabled ? styles.scopeDotActive : ''}`}
                   style={{ color: '#4a80cc', background: '#4a80cc' }}
-                  title={`全局: ${globalEnabled ? '启用' : '未配置'}`}
+                  title={`全局: ${globalEnabled ? '启用' : '未配置'}${globalCmds.length ? `（${globalCmds.length} 条命令）` : ''}`}
                 />
                 <span
                   className={`${styles.scopeDot} ${projectEnabled ? styles.scopeDotActive : ''}`}
                   style={{ color: '#3aaa60', background: '#3aaa60' }}
-                  title={`项目级: ${projectEnabled ? '启用' : '未配置'}`}
+                  title={`项目级: ${projectEnabled ? '启用' : '未配置'}${projectCmds.length ? `（${projectCmds.length} 条命令）` : ''}`}
                 />
               </div>
             </div>
             <div className={styles.hookDesc}>{meta.desc}</div>
+
+            {/* 已配置的命令列表 */}
+            {allCmds.length > 0 && (
+              <div className={styles.hookCmdList}>
+                {allCmds.map(({ cmd, scope }, i) => (
+                  <div key={i} className={styles.hookCmdRow}>
+                    <span
+                      className={styles.hookCmdScope}
+                      style={{ color: scope === 'global' ? '#4a80cc' : '#3aaa60' }}
+                    >
+                      {scope === 'global' ? 'G' : 'P'}
+                    </span>
+                    <span className={styles.hookCmdText} title={cmd}>{cmd}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className={styles.hookCardFooter}>
               <span
                 className={styles.hookPhaseTag}
