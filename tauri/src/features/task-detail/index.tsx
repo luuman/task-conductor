@@ -109,35 +109,15 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
-      {/* Input Stage: Requirement Workspace */}
-      {task.stage === 'input' && task.status === 'pending' && (
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionTitle}>需求完善工作台</span>
-          </div>
-          <div className={styles.sectionBody}>
-            <RequirementWorkspace
-              taskTitle={task.title}
-              requirementsRaw={task.requirements ?? null}
-              onSave={(fields: RequirementFields) => updateRequirements.mutate(fields)}
-              onRequestReview={() => {
-                const req = task.requirements ? JSON.parse(task.requirements) : {}
-                const summary = [
-                  req.background && `背景：${req.background}`,
-                  req.target_users && `目标用户：${req.target_users}`,
-                  req.core_features?.length && `核心功能：\n${(req.core_features as string[]).map((f: string) => `- ${f}`).join('\n')}`,
-                  req.acceptance_criteria?.length && `验收标准：\n${(req.acceptance_criteria as string[]).map((c: string) => `- ${c}`).join('\n')}`,
-                  req.tech_constraints && `技术约束：${req.tech_constraints}`,
-                ].filter(Boolean).join('\n\n')
-                const msg = `我已完成「${task.title}」的需求填写，请帮我审核以下需求是否完整、是否有遗漏或矛盾：\n\n${summary}\n\n请逐项检查，如有问题请直接指出。`
-                setInputDraft(msg)
-                if (!chatIsOpen) openAssistant()
-              }}
-              isSaving={updateRequirements.isPending}
-            />
-          </div>
+      {/* 文档区域（所有阶段均显示） */}
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionTitle}>任务文档</span>
         </div>
-      )}
+        <div className={styles.sectionBody} style={{ height: 480 }}>
+          <DocumentSection taskId={task.id} taskTitle={task.title} />
+        </div>
+      </div>
 
       {/* Pipeline Stage Timeline */}
       <div className={styles.section}>
