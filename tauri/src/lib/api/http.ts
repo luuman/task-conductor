@@ -700,6 +700,46 @@ export class HttpAdapter implements ApiAdapter {
       this.fetch<ProjectDetails>(`/api/claude-config/projects/${encodeURIComponent(dirName)}/details`),
   }
 
+  // ─── Project-scoped settings API ───
+
+  getProjectClaudeConfig(projectId: number) {
+    return this.fetch<ClaudeConfigResponse>(`/api/projects/${projectId}/claude-config`)
+  }
+
+  getProjectHooksStatus(projectId: number) {
+    return this.fetch<HooksStatusResponse>(`/api/projects/${projectId}/hooks-status`)
+  }
+
+  toggleProjectHook(projectId: number, event: string, scope: 'global' | 'project', enabled: boolean) {
+    return this.fetch<{ ok: boolean }>(`/api/projects/${projectId}/hooks-toggle`, {
+      method: 'POST',
+      body: JSON.stringify({ event, scope, enabled }),
+    })
+  }
+
+  getProjectMemory(projectId: number) {
+    return this.fetch<MemoryResponse>(`/api/projects/${projectId}/memory`)
+  }
+
+  getProjectMcpServers(projectId: number) {
+    return this.fetch<McpServersResponse>(`/api/projects/${projectId}/mcp-servers`)
+  }
+
+  getProjectPermissions(projectId: number) {
+    return this.fetch<PermissionsResponse>(`/api/projects/${projectId}/permissions`)
+  }
+
+  getProjectSettingsLocal(projectId: number) {
+    return this.fetch<SettingsLocalResponse>(`/api/projects/${projectId}/settings-local`)
+  }
+
+  patchProjectSettings(projectId: number, data: ProjectSettingsUpdate) {
+    return this.fetch<Project>(`/api/projects/${projectId}/settings`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
   // ─── Documents API ───
 
   async getProjectDocuments(projectId: number): Promise<ProjectDocumentsResponse> {
