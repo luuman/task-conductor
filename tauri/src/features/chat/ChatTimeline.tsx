@@ -174,53 +174,30 @@ function LocalCommandBanner({ command, stdout }: { command: string; stdout: stri
   )
 }
 
-// ── 用户消息行（导出，与 ChatReportPage 共用同一份代码） ──
-const COLLAPSE_THRESHOLD = 150
+/** 用户消息正文：文字 + 内嵌文件/图片卡片 */
+function UserMsgBody({ text }: { text: string }) {
+  const clean = stripDomContext(text)
+  const parts = useMemo(() => parseFilePaths(clean), [clean])
+  const hasFileParts = parts.some(p => p.kind !== 'text')
 
-export function UserMsgRow({ rawText, children }: { rawText: string; children: React.ReactNode }) {
-  const { t } = useTranslation()
-  const [copied, setCopied] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  if (!hasFileParts) {
+    return <div className={s.richText}>{clean}</div>
+  }
 
-  const needsCollapse = stripDomContext(rawText).length > COLLAPSE_THRESHOLD
-
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(rawText).catch(() => {
-      const el = document.createElement('textarea')
-      el.value = rawText
-      document.body.appendChild(el)
-      el.select()
-      document.execCommand('copy')
-      document.body.removeChild(el)
-    })
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }, [rawText])
+  const textOnly = parts.filter(p => p.kind === 'text').map(p => p.content).join('')
+  const fileParts = parts.filter((p): p is Exclude<MsgPart, { kind: 'text' }> => p.kind !== 'text')
 
   return (
-    <div className={s.userMsgRow}>
-      <button
-        className={`${s.userCopyBtn} ${copied ? s.userCopyBtnDone : ''}`}
-        onClick={handleCopy}
-        title={t('chat_sidebar.copy_message')}
-        tabIndex={-1}
-      >
-        {copied
-          ? '\u2713'
-          : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-        }
-      </button>
-      <div className={s.queryPill}>
-        <div className={needsCollapse && !expanded ? `${s.queryPillBody} ${s.queryPillBodyCollapsed}` : s.queryPillBody}>
-          {children}
-        </div>
-        {needsCollapse && (
-          <button className={s.queryPillExpandBtn} onClick={() => setExpanded(v => !v)}>
-            {expanded ? t('chat_sidebar.collapse') : t('chat_sidebar.expand_all')}
-          </button>
+    <>
+      {textOnly.trim() && <div className={s.richText}>{textOnly}</div>}
+      <div className={s.msgFileRow}>
+        {fileParts.map((p, i) =>
+          p.kind === 'image'
+            ? <MsgImgCard key={i} path={p.path} />
+            : <MsgFileCard key={i} path={p.path} ext={p.ext} />
         )}
       </div>
-    </div>
+    </>
   )
 }
 
@@ -435,6 +412,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
 export function RichText({ text }: { text: string }) {
   const parts = useMemo(() => parseFilePaths(text), [text])
   const hasFileParts = parts.some(p => p.kind !== 'text')
+  console.log(`[富文本] 内容="${text.slice(0, 80)}" 含文件路径=${hasFileParts} 段落=`, parts.map(p => ({ kind: p.kind, ...(p.kind === 'image' ? { path: (p as any).path.slice(0, 60) } : {}) })))
   if (!hasFileParts) {
     return <div className={s.richText}><RichTextBlock text={text} /></div>
   }
@@ -631,7 +609,7 @@ function stripDomContext(text: string): string {
 
 /** 将 messages 分段：user 气泡 / assistant steps / notification / local-command 交替出现 */
 type Segment =
-  | { type: 'user'; text: string; rawText: string; ts: string | null }
+  | { type: 'user'; text: string; ts: string | null }
   | { type: 'assistant'; steps: TimelineStep[] }
   | { type: 'notification'; status: string; summary: string; taskId: string; ts: string | null }
   | { type: 'local-command'; command: string; stdout: string; ts: string | null }
@@ -700,7 +678,7 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
         if (localCmd.command || localCmd.stdout) {
           segs.push({ type: 'local-command', command: localCmd.command, stdout: localCmd.stdout, ts: msg.ts ?? null })
         }
-        if (localCmd.remainingText) segs.push({ type: 'user', text: localCmd.remainingText, rawText: localCmd.remainingText, ts: msg.ts ?? null })
+        if (localCmd.remainingText) segs.push({ type: 'user', text: localCmd.remainingText, ts: msg.ts ?? null })
       }
       // 检测 task-notification XML
       else if (/<task-notification>/.test(text)) {
@@ -708,9 +686,9 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
         for (const n of notifications) {
           segs.push({ type: 'notification', status: n.status, summary: n.summary, taskId: n.taskId, ts: msg.ts ?? null })
         }
-        if (remainingText) segs.push({ type: 'user', text: remainingText, rawText: remainingText, ts: msg.ts ?? null })
+        if (remainingText) segs.push({ type: 'user', text: remainingText, ts: msg.ts ?? null })
       } else {
-        if (text) segs.push({ type: 'user', text, rawText, ts: msg.ts ?? null })
+        if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
       }
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
@@ -746,25 +724,21 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
       {segments.map((seg, i) =>
         seg.type === 'user' ? (
           <div key={i} className={s.turnSection}>
-            <UserMsgRow rawText={seg.rawText}>
-              <div className={s.userText}><RichText text={seg.text} /></div>
-            </UserMsgRow>
+            <div className={s.queryPill}>
+              <UserMsgBody text={seg.text} />
+            </div>
           </div>
         ) : seg.type === 'notification' ? (
           <TaskNotifBanner key={i} status={seg.status} summary={seg.summary} taskId={seg.taskId} />
         ) : seg.type === 'local-command' ? (
           <LocalCommandBanner key={i} command={seg.command} stdout={seg.stdout} />
         ) : (
-          <React.Fragment key={i}>
-            {seg.steps.map((step, si) => (
-              <Renderer key={si} steps={[step]} />
-            ))}
-          </React.Fragment>
+          <Renderer key={i} steps={seg.steps} />
         )
       )}
       {streamingStep && (
         <div className={s.chatAiBlock}>
-          <RichText text={streamingStep.text!} />
+          <div className={s.richText}>{streamingStep.text}</div>
         </div>
       )}
     </CodeExpandCtx.Provider>

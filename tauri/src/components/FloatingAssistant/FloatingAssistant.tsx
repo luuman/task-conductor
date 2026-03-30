@@ -159,8 +159,6 @@ export function FloatingAssistant() {
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
   const repoUrlRef = useRef('')
   const apiRef = useRef(new HttpAdapter('local-http'))
-  // 用于历史会话加载的竞态保护（不复用 claudeSessionId，避免干扰当前活跃对话）
-  const historyLoadRef = useRef<string | null>(null)
 
   // ── Tab 状态 ──
   const [tabs, setTabs] = useState<ChatTab[]>(() => [{ id: uid(), type: 'new', title: '新对话' }])
@@ -170,7 +168,6 @@ export function FloatingAssistant() {
   // ── 历史会话下拉 ──
   const [showHistory, setShowHistory] = useState(false)
   const historyRef = useRef<HTMLDivElement>(null)
-  const historyDropdownRef = useRef<HTMLDivElement>(null)
   const [historyPos, setHistoryPos] = useState<{ top: number; right: number } | null>(null)
 
   // Use shared session data hook
@@ -181,14 +178,11 @@ export function FloatingAssistant() {
     clearSelection: sharedClearSelection,
   } = useSessionData({ filterByCwd: repoUrlRef.current || undefined, enableLiveSessionWs: false })
 
-  // 关闭历史下拉（排除下拉框自身，避免 mousedown 在 click 前触发关闭）
+  // 关闭历史下拉
   useEffect(() => {
     if (!showHistory) return
     const handler = (e: MouseEvent) => {
-      const target = e.target as Node
-      const inTrigger = historyRef.current?.contains(target) ?? false
-      const inDropdown = historyDropdownRef.current?.contains(target) ?? false
-      if (!inTrigger && !inDropdown) setShowHistory(false)
+      if (historyRef.current && !historyRef.current.contains(e.target as Node)) setShowHistory(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -372,29 +366,24 @@ export function FloatingAssistant() {
   }, [saveCurrentTab, sharedClearSelection])
 
   const handleOpenHistory = useCallback((session: AiSession) => {
-    console.log('[FA] handleOpenHistory', session.session_id)
+    // 直接在当前 tab 加载该会话（一个弹窗展示一个会话）
     setShowHistory(false)
     const title = (session.note?.alias || session.summary || '').replace(/<[^>]+>/g, '').trim() || `会话 ${session.session_id.slice(0, 8)}`
     setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
 
-    // 用独立 ref 做竞态保护，不修改 claudeSessionId（避免干扰当前活跃对话）
-    historyLoadRef.current = session.session_id
     isFirstLoadRef.current = true
-
+    sharedSelectSession(session.session_id)
     const store = useChatStore.getState()
-    store.setMessages([])
     store.setCurrentReply('')
-
+    store.setClaudeSessionId(session.session_id)
     apiRef.current.getTranscript(session.session_id).then(({ messages: msgs }) => {
-      console.log('[FA] getTranscript ok', session.session_id, 'msgs:', msgs?.length, 'historyRef:', historyLoadRef.current)
-      if (historyLoadRef.current === session.session_id) {
-        useChatStore.getState().setMessages(msgs ?? [])
-        tabCacheRef.current.set(activeTabId, { messages: msgs ?? [], sessionId: session.session_id })
+      if (!msgs?.length) return
+      if (useChatStore.getState().claudeSessionId === session.session_id) {
+        useChatStore.getState().setMessages(msgs)
+        tabCacheRef.current.set(activeTabId, { messages: msgs, sessionId: session.session_id })
       }
-    }).catch((err) => {
-      console.error('[FA] getTranscript failed', session.session_id, err)
-    })
-  }, [activeTabId])
+    }).catch(() => {})
+  }, [activeTabId, sharedSelectSession])
 
   // 首条消息时更新 tab 标题
   useEffect(() => {
@@ -502,7 +491,6 @@ export function FloatingAssistant() {
       {/* 历史会话下拉（fixed，脱离 overflow:hidden 的面板） */}
       {showHistory && historyPos && (
         <div
-          ref={historyDropdownRef}
           className={styles.historyDropdown}
           style={{ position: 'fixed', top: historyPos.top, right: historyPos.right, width: 300, maxHeight: 400, zIndex: 99999 }}
         >

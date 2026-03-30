@@ -3,17 +3,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { api } from '../../lib/api'
 import type { AiSession, TranscriptMessage } from '../../lib/api/types'
-import { ChatStoreCtx, createLocalChatStore, useActiveChatStore } from '../../lib/store/chat-ctx'
-import { parseTimelineWithQuestions, formatTs, cleanSystemXml, detectRisks, inferBlockIntent, generateCommitMessage, type TimelineStep, type UserQuestion, type RiskItem, type IntentLabel } from './timeline-parser'
+import { useChatStore } from '../../lib/store/chat'
+import { parseTimelineWithQuestions, formatTs, guessHljsLang, cleanSystemXml, detectRisks, inferBlockIntent, generateCommitMessage, type TimelineStep, type UserQuestion, type RiskItem, type IntentLabel } from './timeline-parser'
 import { Select } from '../../ui/select'
-import { RichTextBlock, CodeExpandCtx } from '../../components/ChatRenderer'
-import { IconFileText, IconPencil, IconFilePlus } from '../../ui/icon'
+import { RichTextBlock, CodeBlock, DiffBlock, fileExtIcon, CodeExpandCtx } from '../../components/ChatRenderer'
 import {
-  RENDERERS, StyleA, StyleB, StyleD, StyleG, StyleH,
-  groupConsecutiveSameType, RichText, UserMsgRow,
-  buildCatLabelMap, dotColor,
-  type StyleKey,
-} from './ChatTimeline'
+  IconTerminal, IconWrench, IconMessage, IconFileText, IconPencil, IconFilePlus,
+  IconSearch, IconFolder, IconBot, IconCircleHelp, IconGlobe, IconClipboard,
+  IconChevronRight,
+} from '../../ui/icon'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
@@ -22,13 +20,376 @@ import { useAppStore } from '../../lib/store/app'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
-// ── 样式常量（从 ChatTimeline 导入共用） ──
-export type { StyleKey }
-export { StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS, groupConsecutiveSameType }
+// ── 样式常量 ──
+const CHAT_STYLE_OPTIONS = ['a', 'b', 'd', 'g', 'h'] as const
+export type StyleKey = typeof CHAT_STYLE_OPTIONS[number]
 
 const LS_KEY = 'tc_chat_style'
 const getDefaultStyle = (): StyleKey => (localStorage.getItem(LS_KEY) as StyleKey) || 'a'
 
+// ── badge class ──
+function badgeCls(cat: TimelineStep['category']): string {
+  const map: Record<string, string> = {
+    text: s.bText, read: s.bRead, edit: s.bEdit, write: s.bWrite,
+    bash: s.bBash, grep: s.bGrep, glob: s.bGlob, agent: s.bAgent,
+    ask: s.bAsk, search: s.bSearch, task: s.bTask, other: s.bOther,
+  }
+  return `${s.badge} ${map[cat] || s.bOther}`
+}
+
+function buildCatLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    read: t('chat_sidebar.cat_read'), edit: t('chat_sidebar.cat_edit'), write: t('chat_sidebar.cat_write'), bash: t('chat_sidebar.cat_bash'),
+    grep: t('chat_sidebar.cat_grep'), glob: t('chat_sidebar.cat_glob'), agent: t('chat_sidebar.cat_agent'), ask: t('chat_sidebar.cat_ask'),
+    search: t('chat_sidebar.cat_search'), task: t('chat_sidebar.cat_task'), text: t('chat_sidebar.cat_text'), other: t('chat_sidebar.cat_other'),
+  }
+}
+
+function buildToolLabelMap(t: (key: string) => string): Record<string, string> {
+  return {
+    Read: t('chat_sidebar.tool_read'), Write: t('chat_sidebar.tool_write'),
+    Edit: t('chat_sidebar.tool_edit'), MultiEdit: t('chat_sidebar.tool_multi_edit'),
+    Bash: t('chat_sidebar.tool_bash'), Grep: t('chat_sidebar.tool_grep'),
+    Glob: t('chat_sidebar.tool_glob'), Agent: t('chat_sidebar.tool_agent'),
+    AskUserQuestion: t('chat_sidebar.tool_ask'),
+    WebSearch: t('chat_sidebar.tool_web_search'), WebFetch: t('chat_sidebar.tool_web_fetch'),
+    ToolSearch: t('chat_sidebar.tool_search'), Skill: t('chat_sidebar.tool_skill'),
+    TaskCreate: t('chat_sidebar.tool_task_create'), TaskUpdate: t('chat_sidebar.tool_task_update'),
+    TaskList: t('chat_sidebar.tool_task_list'), TaskGet: t('chat_sidebar.tool_task_get'),
+    TaskStop: t('chat_sidebar.tool_task_stop'),
+  }
+}
+
+function badgeLabel(step: TimelineStep, toolMap: Record<string, string>, t: (key: string) => string): string {
+  if (step.kind === 'text') return t('chat_sidebar.badge_text')
+  const label = toolMap[step.toolName || ''] || step.toolName || t('chat_sidebar.badge_tool')
+  return step.mergedCount && step.mergedCount > 1 ? `${label} ×${step.mergedCount}` : label
+}
+
+// 工具类型圆点颜色——通过读取 CSS 变量获取，与 global.css 中 --tc-tool-* 保持一致
+function dotColor(cat: TimelineStep['category']): string {
+  const style = getComputedStyle(document.documentElement)
+  const varMap: Record<string, string> = {
+    text:   '--tc-tool-text',
+    read:   '--tc-tool-read',
+    edit:   '--tc-tool-edit',
+    write:  '--tc-tool-write',
+    bash:   '--tc-tool-bash',
+    grep:   '--tc-tool-grep',
+    glob:   '--tc-tool-glob',
+    agent:  '--tc-tool-agent',
+    ask:    '--tc-tool-read',
+    search: '--tc-tool-bash',
+    task:   '--tc-tool-task',
+    other:  '--tc-tool-other',
+  }
+  const varName = varMap[cat]
+  if (varName) {
+    const value = style.getPropertyValue(varName).trim()
+    if (value) return value
+  }
+  return style.getPropertyValue('--tc-tool-other').trim() || '#71717a'
+}
+
+function catIcon(cat: TimelineStep['category'], size = 12): React.ReactNode {
+  const p = { size }
+  const map: Record<string, React.ReactNode> = {
+    text: <IconMessage {...p} />,
+    read: <IconFileText {...p} />,
+    edit: <IconPencil {...p} />,
+    write: <IconFilePlus {...p} />,
+    bash: <IconTerminal {...p} />,
+    grep: <IconSearch {...p} />,
+    glob: <IconFolder {...p} />,
+    agent: <IconBot {...p} />,
+    ask: <IconCircleHelp {...p} />,
+    search: <IconGlobe {...p} />,
+    task: <IconClipboard {...p} />,
+    other: <IconWrench {...p} />,
+  }
+  return map[cat] ?? <IconWrench {...p} />
+}
+
+
+/** 将相邻同 toolName 的 tool 步骤合并为 1，用 mergedCount 标记数量 */
+export function groupConsecutiveSameType(steps: TimelineStep[]): TimelineStep[] {
+  const result: TimelineStep[] = []
+  let i = 0
+  while (i < steps.length) {
+    const step = steps[i]
+    if (step.kind !== 'tool') { result.push(step); i++; continue }
+    let j = i + 1
+    while (j < steps.length && steps[j].kind === 'tool' && steps[j].toolName === step.toolName) j++
+    const count = j - i
+    result.push(count > 1 ? { ...steps[i], mergedCount: count, mergedSteps: steps.slice(i, j) } : step)
+    i = j
+  }
+  return result
+}
+
+// ── Code/Result block ──
+function ResultBlock({ step }: { step: TimelineStep }) {
+  if (step.mergedSteps && step.mergedSteps.length > 1) {
+    return (
+      <>
+        {step.mergedSteps.map(s => <SingleResultBlock key={s.id} step={s} />)}
+      </>
+    )
+  }
+  return <SingleResultBlock step={step} />
+}
+
+function SingleResultBlock({ step }: { step: TimelineStep }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
+  const catMap = useMemo(() => buildCatLabelMap(t), [t])
+  const variant = 2 as const
+  if (!step.toolResult && !step.oldString && step.category !== 'agent') return null
+
+  const filePath = String(step.toolInput?.file_path || '')
+  const fileName = filePath.split('/').pop() || ''
+  const icon = filePath ? fileExtIcon(filePath, 13) : catIcon(step.category, 13)
+  const action = toolMap[step.toolName || ''] || catMap[step.category] || step.toolName || t('chat_sidebar.badge_tool')
+  const color = dotColor(step.category)
+
+  // Edit — LCS diff
+  if (step.category === 'edit') {
+    const oldStr = String(step.toolInput?.old_string ?? step.oldString ?? '')
+    const newStr = String(step.toolInput?.new_string ?? '')
+    if (!oldStr && !newStr) return null
+    return <DiffBlock oldStr={oldStr} newStr={newStr} filePath={filePath} icon={icon} action={action} pillColor={color} variant={variant} />
+  }
+
+  // Write
+  if (step.category === 'write' && step.toolInput?.content) {
+    const lang = guessHljsLang(filePath) || undefined
+    const raw = String(step.toolInput.content)
+    const isMd = fileName?.toLowerCase().endsWith('.md')
+    if (isMd) {
+      return (
+        <CodeBlock icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color}>
+          <RichTextBlock text={raw} />
+        </CodeBlock>
+      )
+    }
+    return <CodeBlock code={raw} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+  }
+
+  // Read
+  if (step.category === 'read' && step.toolResult) {
+    const lang = guessHljsLang(filePath) || undefined
+    const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
+    return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
+  }
+
+  // Agent — 统一 CodeBlock 外框 + RichTextBlock 内容
+  if (step.category === 'agent') {
+    const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
+    const prompt = String(step.toolInput?.prompt || step.toolInput?.task || '')
+    if (step.toolResult) {
+      return (
+        <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+          <RichTextBlock text={step.toolResult} />
+        </CodeBlock>
+      )
+    }
+    if (prompt) {
+      return (
+        <CodeBlock icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+          <RichTextBlock text={prompt} />
+        </CodeBlock>
+      )
+    }
+    return null
+  }
+
+  // Bash
+  if (step.category === 'bash' && step.toolResult) {
+    const cmd = String(step.toolInput?.command || '').slice(0, 80)
+    return <CodeBlock code={step.toolResult} lang="bash" icon={icon} action={action} fileName={cmd} variant={variant} pillColor={color} />
+  }
+
+  // Generic
+  if (step.toolResult) {
+    const displayName = toolMap[step.toolName || ''] || step.toolName || ''
+    return <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={displayName} variant={variant} pillColor={color} />
+  }
+
+  return null
+}
+
+// ── Rich text — 复用 ChatRenderer 的 Markdown 渲染 ──
+function RichText({ text }: { text: string }) {
+  return <div className={s.richText}><RichTextBlock text={text} /></div>
+}
+
+
+
+// ════════════════════════════════════════════════
+// 样式渲染器
+// ════════════════════════════════════════════════
+
+export function StyleA({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
+  return (
+    <div className={s.aTl}>
+      {steps.map((step) => (
+        <React.Fragment key={step.id}>
+          <div className={s.aStep}>
+            <span className={s.aDot} style={{ background: dotColor(step.category) }} />
+            {step.kind === 'text' ? (
+              <div className={s.aText}><RichText text={step.text!} /></div>
+            ) : (
+              <>
+                {!step.toolResult && !step.oldString && (
+                  <span className={badgeCls(step.category)} style={{ flexShrink: 0, alignSelf: 'flex-start' }}>{badgeLabel(step, toolMap, t)}</span>
+                )}
+                <ResultBlock step={step} />
+              </>
+            )}
+          </div>
+        </React.Fragment>
+      ))}
+    </div>
+  )
+}
+
+export function StyleB({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
+  return (
+    <>
+      {steps.map((step) => (
+        <React.Fragment key={step.id}>
+          {step.kind === 'text' ? (
+            <div className={s.bTextCard}><div className={s.bBody}><RichText text={step.text!} /></div></div>
+          ) : (
+            <div>
+              {!step.toolResult && !step.oldString && (
+                <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
+              )}
+              {(step.toolResult || step.oldString) && <ResultBlock step={step} />}
+            </div>
+          )}
+        </React.Fragment>
+      ))}
+    </>
+  )
+}
+
+
+export function StyleD({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
+  return (
+    <>
+      {steps.map((step, i) => {
+        const n = step.mergedCount && step.mergedCount > 1 ? ` ×${step.mergedCount}` : ''
+        const catDesc = step.kind === 'text' ? t('chat_sidebar.cat_desc_text')
+          : step.category === 'read' ? t('chat_sidebar.cat_desc_read', { n })
+          : step.category === 'edit' ? t('chat_sidebar.cat_desc_edit', { n })
+          : step.category === 'write' ? t('chat_sidebar.cat_desc_write', { n })
+          : step.category === 'bash' ? t('chat_sidebar.cat_desc_bash', { n })
+          : step.category === 'agent' ? t('chat_sidebar.cat_desc_agent', { n })
+          : step.category === 'task' ? t('chat_sidebar.cat_desc_task', { action: toolMap[step.toolName || ''] || t('chat_sidebar.task_op'), n })
+          : t('chat_sidebar.cat_desc_other', { n })
+        return (
+          <React.Fragment key={step.id}>
+            {i > 0 && <div className={s.dConnector} />}
+            <div className={`${s.dEvent} ${step.kind === 'text' ? s.dTextEvent : ''}`}>
+              <div className={s.dHead}>
+                <div className={`${s.dAvatar} ${step.kind === 'text' ? s.dAvatarClaude : s.dAvatarTool}`}>
+                  {step.kind === 'text' ? 'C' : catIcon(step.category)}
+                </div>
+                <div className={s.dDesc}><strong>Claude</strong> {catDesc}</div>
+              </div>
+              {step.kind === 'text'
+                ? <div className={s.dBody}><RichText text={step.text!} /></div>
+                : (step.toolResult || step.oldString) ? <div className={s.dBody}><ResultBlock step={step} /></div> : null}
+            </div>
+          </React.Fragment>
+        )
+      })}
+    </>
+  )
+}
+
+
+export function StyleG({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
+  return (
+    <>
+      {steps.map((step) => (
+        <React.Fragment key={step.id}>
+          <div className={s.gMsg}>
+            <div className={`${s.gAvatar} ${step.kind === 'text' ? s.gAvatarClaude : s.gAvatarTool}`} style={{ position: 'relative' }}>
+              {step.kind === 'text' ? 'C' : catIcon(step.category)}
+              {step.kind === 'tool' && step.mergedCount && step.mergedCount > 1 && (
+                <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 8, fontWeight: 700, background: 'var(--tc-accent)', color: 'var(--tc-accent-fg)', borderRadius: 4, padding: '0 3px', lineHeight: '13px', pointerEvents: 'none' }}>
+                  ×{step.mergedCount}
+                </span>
+              )}
+            </div>
+            {step.kind === 'text' ? (
+              <div className={s.gBubbleText}><RichText text={step.text!} /></div>
+            ) : (
+              <div className={s.gBubbleTool}>
+                {!step.toolResult && !step.oldString && (
+                  <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
+                )}
+                <ResultBlock step={step} />
+              </div>
+            )}
+          </div>
+        </React.Fragment>
+      ))}
+    </>
+  )
+}
+
+export function StyleH({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslation()
+  const toolMap = useMemo(() => buildToolLabelMap(t), [t])
+  const [openIds, setOpenIds] = useState<Set<string>>(() => {
+    const set = new Set<string>()
+    steps.forEach(st => { if (st.kind === 'text') set.add(st.id) })
+    return set
+  })
+  const toggle = useCallback((id: string) => {
+    setOpenIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }, [])
+
+  return (
+    <>
+      {steps.map((step) => {
+        const isOpen = openIds.has(step.id)
+        return (
+          <React.Fragment key={step.id}>
+            {step.kind === 'text' ? (
+              <div className={s.chatAiBlock}><RichText text={step.text!} /></div>
+            ) : (
+              <div className={s.hAcc}>
+                <div className={s.hHead} onClick={() => toggle(step.id)}>
+                  <span className={s.hChevron} style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'flex' }}><IconChevronRight size={12} /></span>
+                  <span className={badgeCls(step.category)}>{badgeLabel(step, toolMap, t)}</span>
+                </div>
+                {isOpen && (step.category === 'agent' || step.toolResult || step.oldString || step.mergedSteps?.some(s => s.toolResult || s.oldString)) && (
+                  <div className={s.hBody}><ResultBlock step={step} /></div>
+                )}
+              </div>
+            )}
+          </React.Fragment>
+        )
+      })}
+    </>
+  )
+}
+
+export const RENDERERS: Record<StyleKey, React.FC<{ steps: TimelineStep[] }>> = {
+  a: StyleA, b: StyleB, d: StyleD, g: StyleG, h: StyleH,
+}
 
 // ── Right sidebar ──
 function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExpanded, onToggleCode, onScrollToQuestion }: {
@@ -277,7 +638,57 @@ function MetaSidebar({ session, steps, questions, allQuestions, activeQ, codeExp
   )
 }
 
-// UserMsgRow 已移至 ChatTimeline.tsx，从那里导入
+// ════════════════════════════════════════════════
+// 用户消息行（含 hover 复制按钮）
+// ════════════════════════════════════════════════
+const COLLAPSE_THRESHOLD = 150 // 超过此字符数的用户消息默认折叠
+
+function UserMsgRow({ rawText, children }: { rawText: string; children: React.ReactNode }) {
+  const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
+  const needsCollapse = stripDomContext(rawText).length > COLLAPSE_THRESHOLD
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(rawText).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = rawText
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [rawText])
+
+  return (
+    <div className={s.userMsgRow}>
+      <button
+        className={`${s.userCopyBtn} ${copied ? s.userCopyBtnDone : ''}`}
+        onClick={handleCopy}
+        title={t('chat_sidebar.copy_message')}
+        tabIndex={-1}
+      >
+        {copied
+          ? '\u2713'
+          : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+        }
+      </button>
+      <div className={s.queryPill}>
+        <div className={needsCollapse && !expanded ? `${s.queryPillBody} ${s.queryPillBodyCollapsed}` : s.queryPillBody}>
+          {children}
+        </div>
+        {needsCollapse && (
+          <button className={s.queryPillExpandBtn} onClick={() => setExpanded(v => !v)}>
+            {expanded ? t('chat_sidebar.collapse') : t('chat_sidebar.expand_all')}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ════════════════════════════════════════════════
 // 选词浮动工具栏
@@ -501,7 +912,7 @@ type VItem =
   | { kind: 'live'; key: string; message: TranscriptMessage }
   | { kind: 'thinking'; key: string }
 
-function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
+export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
   const { t } = useTranslation()
   const [style, setStyle] = useState<StyleKey>(getDefaultStyle)
   useEffect(() => {
@@ -515,15 +926,18 @@ function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
-  // 使用局部 store（由外层 ChatReportPage Provider 注入，与 FloatingAssistant 完全隔离）
+  const selectedSyncRef = useRef<string | null>(null)
+
+  // AI 对话状态（与 FloatingAssistant 共享同一 store）
   const {
     messages: chatMessages,
     currentReply,
     isGenerating,
     claudeSessionId,
-    setClaudeSessionId: setLocalClaudeSessionId,
-    setCurrentReply: setLocalCurrentReply,
-  } = useActiveChatStore()
+    setMessages: setChatMessages,
+    setCurrentReply,
+    setClaudeSessionId,
+  } = useChatStore()
 
   // 获取当前项目 cwd（与 /sessions 页面一致，使用 appStore）
   const activeProjectId = useAppStore((st) => st.activeProjectId)
@@ -590,11 +1004,26 @@ function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
     }
   }, [sessions, selectedId, selectSession])
 
-  // 切换会话时同步局部 claudeSessionId，清空流式回复（只影响局部 store）
   useEffect(() => {
-    setLocalClaudeSessionId(selectedId || null)
-    setLocalCurrentReply('')
-  }, [selectedId, setLocalClaudeSessionId, setLocalCurrentReply])
+    if (selectedId || !claudeSessionId) return
+    if (selectedSyncRef.current === claudeSessionId) {
+      selectedSyncRef.current = null
+      return
+    }
+    if (!sessions.some(s => s.session_id === claudeSessionId)) return
+    selectSession(claudeSessionId)
+  }, [claudeSessionId, selectedId, sessions, selectSession])
+
+  useEffect(() => {
+    selectedSyncRef.current = selectedId || null
+    setClaudeSessionId(selectedId || null)
+    setCurrentReply('')
+  }, [selectedId, setClaudeSessionId, setCurrentReply])
+
+  // 切换会话时清空 AI 对话记录，不把 transcript 同步进 chatMessages（那会导致 live 消息重复渲染）
+  useEffect(() => {
+    if (chatMessages.length > 0) setChatMessages([])
+  }, [selectedId, chatMessages.length, setChatMessages])
 
   const { steps, questions } = useMemo(() => parseTimelineWithQuestions(transcript), [transcript])
   const selectedSession = sessions.find(ss => ss.session_id === selectedId) ?? null
@@ -881,19 +1310,6 @@ function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
         <MetaSidebar session={selectedSession} steps={steps} questions={questions} allQuestions={allQuestions} activeQ={activeQ} codeExpanded={codeExpanded} onToggleCode={() => setCodeExpanded(v => !v)} onScrollToQuestion={scrollToQuestion} />
       </div>
     </div>
-  )
-}
-
-/**
- * 对外导出的 ChatReportPage：用独立局部 store 包裹，与 FloatingAssistant 全局 store 完全隔离。
- * 每次挂载创建一个新的局部 store 实例（useMemo 确保同一组件生命周期内不重建）。
- */
-export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
-  const [localStore] = React.useState(() => createLocalChatStore())
-  return (
-    <ChatStoreCtx.Provider value={localStore}>
-      <ChatReportPageInner global={global} />
-    </ChatStoreCtx.Provider>
   )
 }
 
