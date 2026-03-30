@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../../lib/api'
+import { RequirementFields } from '../../../lib/api/types'
 
 export function useTaskDetailData(taskId: number) {
   const queryClient = useQueryClient()
