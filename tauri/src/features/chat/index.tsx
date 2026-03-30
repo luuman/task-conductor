@@ -14,7 +14,7 @@ import i18n from '../../i18n'
 import { useSessionData, type QuestionItem } from '../../components/SessionChat/useSessionData'
 import { useAppStore } from '../../lib/store/app'
 import {
-  UserMsgRow, RichText,
+  UserMsgRow, RichText, InlineDomChips, parseDomContextChips,
   StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS,
   dotColor, buildCatLabelMap, groupConsecutiveSameType,
   type StyleKey,
