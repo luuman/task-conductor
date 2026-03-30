@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useTaskDetailData } from './hooks/useTaskDetailData'
 import { StageTimeline } from './components/StageTimeline'
 import { ArtifactList } from './components/ArtifactList'
+import { RequirementWorkspace } from './components/RequirementWorkspace'
+import { RequirementFields } from '../../lib/api/types'
 import { Button } from '../../ui/button'
 import styles from './task-detail.module.css'
 
