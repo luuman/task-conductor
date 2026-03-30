@@ -10,8 +10,6 @@ const ALL_STAGES = [
 const FIXED_STAGES = new Set(['input', 'done'])
 const APPROVAL_STAGES = new Set(['analysis', 'prd', 'ui', 'plan', 'test', 'deploy'])
 
-const CONFIGURABLE_STAGES = ALL_STAGES.filter((s) => !FIXED_STAGES.has(s))
-
 const STAGE_LABELS: Record<string, string> = {
   input:        '需求输入',
   discovery:    '市场调研',
