@@ -669,3 +669,29 @@ export interface ApiAdapter {
     getProjectDetails(dirName: string): Promise<ProjectDetails>
   }
 }
+
+export interface Document {
+  id: number
+  project_id: number
+  task_id: number | null
+  title: string
+  doc_type: string   // requirements/research/prd/architecture/ui-spec/dev-plan/test-plan/note
+  file_path: string
+  pos_x: number
+  pos_y: number
+  created_at: string
+  updated_at: string
+}
+
+export interface DocumentLink {
+  id: number
+  source_id: number
+  target_id: number
+  relation: string   // derived_from/depends_on/references/contradicts
+  auto: boolean
+}
+
+export interface ProjectDocumentsResponse {
+  documents: Document[]
+  links: DocumentLink[]
+}
