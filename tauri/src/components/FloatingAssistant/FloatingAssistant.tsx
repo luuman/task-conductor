@@ -361,7 +361,6 @@ export function FloatingAssistant() {
     const title = (session.note?.alias || session.summary || '').replace(/<[^>]+>/g, '').trim() || `会话 ${session.session_id.slice(0, 8)}`
     setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
 
-    isFirstLoadRef.current = true
     // useSessionData 内部会通过 API 加载 transcript，FA 直接读 sessionTranscript 展示
     // 不写入 useChatStore.messages，避免与 chat 页面共享缓存
     sharedSelectSession(session.session_id)
