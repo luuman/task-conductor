@@ -178,6 +178,14 @@ def create_document(task_id: int, body: DocumentCreate, db: Session = Depends(ge
     file_abs = os.path.join(dir_path, file_name)
     rel_path = os.path.relpath(file_abs, project.repo_url)
 
+    # 如果已存在相同 file_path 的文档记录，直接返回已有记录
+    existing = db.query(Document).filter(
+        Document.project_id == task.project_id,
+        Document.file_path == rel_path,
+    ).first()
+    if existing:
+        return DocumentOut.model_validate(existing)
+
     # 如果文件不存在则写初始内容
     if not os.path.exists(file_abs):
         with open(file_abs, 'w', encoding='utf-8') as f:
