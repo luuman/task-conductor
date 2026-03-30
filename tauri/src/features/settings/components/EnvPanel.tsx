@@ -1,3 +1,5 @@
+import styles from '../settings.module.css'
+
 const SENSITIVE_KEYS = ['PIN', 'TOKEN', 'SECRET', 'KEY', 'PASSWORD', 'AUTH']
 
 function maskValue(key: string, value: string): string {
@@ -22,26 +24,18 @@ export function EnvPanel({ envConfig }: EnvPanelProps) {
 
   if (!tcVars.length) {
     return (
-      <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)' }}>
+      <div className={styles.emptyHint}>
         无 TC_ 前缀环境变量配置
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div className={styles.envList}>
       {tcVars.map(([key, value]) => (
-        <div key={key} style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '4px 8px', borderRadius: 6,
-          background: 'var(--tc-content-bg)',
-          border: '1px solid var(--tc-border)',
-          fontSize: 11,
-        }}>
-          <span style={{ fontFamily: 'monospace', color: 'var(--tc-accent)', minWidth: 160 }}>{key}</span>
-          <span style={{ fontFamily: 'monospace', color: 'var(--tc-foreground-secondary)' }}>
-            {maskValue(key, value)}
-          </span>
+        <div key={key} className={styles.envRow}>
+          <span className={styles.envKey}>{key}</span>
+          <span className={styles.envValue}>{maskValue(key, value)}</span>
         </div>
       ))}
     </div>
