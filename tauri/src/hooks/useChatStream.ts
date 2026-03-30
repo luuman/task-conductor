@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { useChatStore } from '../lib/store/chat'
+import { useActiveChatStoreApi } from '../lib/store/chat-ctx'
 import type { TranscriptMessage } from '../lib/api/types'
 
 function getWsBaseUrl(): string {
@@ -28,13 +29,14 @@ function makeToolMsg(toolName: string, input?: Record<string, unknown>): Transcr
 }
 
 export function useChatStream() {
+  // 获取当前 context 里的 store API（FA → 全局 store；ChatPage → 局部 store）
+  const storeApi = useActiveChatStoreApi()
+
   const wsRef = useRef<WebSocket | null>(null)
   const sendTsRef = useRef(0)
   const fullTextRef = useRef('')
   const firstChunkRef = useRef(false)
-  // 待发送消息队列：WS 还在连接时暂存
   const pendingRef = useRef<string | null>(null)
-  // (不再需要队列，后端通过 tool_use_id 匹配后发送合并事件)
 
   const _ensureWs = useCallback((): WebSocket => {
     const existing = wsRef.current
@@ -48,7 +50,6 @@ export function useChatStream() {
 
     ws.onopen = () => {
       console.log(`[ChatStream] WebSocket 连接建立, 耗时: ${(performance.now() - sendTsRef.current).toFixed(0)}ms`)
-      // 发送暂存的消息
       const pending = pendingRef.current
       if (pending) {
         pendingRef.current = null
@@ -59,7 +60,8 @@ export function useChatStream() {
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data)
-        const s = useChatStore.getState()
+        // 使用 context store（FA 或 ChatPage 各自独立）
+        const s = storeApi.getState()
         if (msg.type === 'chat_chunk') {
           if (!firstChunkRef.current) {
             firstChunkRef.current = true
@@ -71,10 +73,8 @@ export function useChatStream() {
 
         } else if (msg.type === 'chat_thinking') {
           // 思考过程不混入正文
-          // 可以在这里展示一个"正在思考..."指示器
 
         } else if (msg.type === 'chat_tool_use') {
-          // 工具调用开始 — flush 文字 + 添加无结果的 tool 消息
           const current = s.currentReply.trim()
           if (current) {
             s.addMessage(makeTextMsg('assistant', current))
@@ -84,13 +84,11 @@ export function useChatStream() {
           s.addMessage(makeToolMsg(msg.data?.tool || 'Tool', {}))
 
         } else if (msg.type === 'chat_tool_result') {
-          // 工具结果到达 — 替换最后一条同名 tool 消息（附加 result）
           const toolName = msg.data?.tool || 'Tool'
           const toolInput = msg.data?.input || {}
           const result = msg.data?.result || ''
           const isError = msg.data?.is_error || false
           const msgs = s.messages
-          // 从后往前找到最后一条同名且无 result 的 tool 消息
           let found = false
           for (let i = msgs.length - 1; i >= 0; i--) {
             const b = msgs[i].blocks[0]
@@ -112,7 +110,6 @@ export function useChatStream() {
             }
           }
           if (!found) {
-            // 没找到匹配的，直接添加完整消息
             s.addMessage({
               role: 'assistant',
               ts: new Date().toISOString(),
@@ -138,7 +135,6 @@ export function useChatStream() {
             output_tokens: msg.data?.output_tokens,
           })
           s.setIsGenerating(false)
-          // flush 最后的文字
           const remaining = s.currentReply.trim()
           if (remaining) {
             s.addMessage(makeTextMsg('assistant', remaining))
@@ -160,7 +156,7 @@ export function useChatStream() {
     }
 
     ws.onerror = () => {
-      const s = useChatStore.getState()
+      const s = storeApi.getState()
       if (s.isGenerating) {
         s.setIsGenerating(false)
         s.setCurrentReply('')
@@ -169,7 +165,7 @@ export function useChatStream() {
     }
 
     ws.onclose = () => {
-      const s = useChatStore.getState()
+      const s = storeApi.getState()
       if (s.isGenerating && !fullTextRef.current) {
         s.setIsGenerating(false)
         s.setCurrentReply('')
@@ -181,10 +177,10 @@ export function useChatStream() {
     }
 
     return ws
-  }, [])
+  }, [storeApi])
 
   const send = useCallback((message: string) => {
-    const store = useChatStore.getState()
+    const store = storeApi.getState()
     store.setIsGenerating(true)
     store.setCurrentReply('')
     fullTextRef.current = ''
@@ -209,10 +205,9 @@ export function useChatStream() {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(payload)
     } else {
-      // WS 还在连接中，暂存
       pendingRef.current = payload
     }
-  }, [_ensureWs])
+  }, [storeApi, _ensureWs])
 
   const stop = useCallback(() => {
     const ws = wsRef.current
@@ -233,3 +228,6 @@ export function useChatStream() {
 
   return { send, stop, sendNewSession }
 }
+
+// 兼容性导出：部分代码直接从 useChatStore 读取，保留不变
+export { useChatStore }
