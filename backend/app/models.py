@@ -235,7 +235,7 @@ class Document(Base):
     doc_type: Mapped[str] = mapped_column(String(50))
     # requirements/research/prd/architecture/ui-spec/dev-plan/test-plan/note
     file_path: Mapped[str] = mapped_column(String(500))
-    # 相对于 project.repo_url 的路径
+    # 相对于 project.repo_url（本地工作目录）的相对路径
     pos_x: Mapped[float] = mapped_column(Float, default=0.0)
     pos_y: Mapped[float] = mapped_column(Float, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
