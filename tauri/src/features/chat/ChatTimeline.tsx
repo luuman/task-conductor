@@ -174,30 +174,53 @@ function LocalCommandBanner({ command, stdout }: { command: string; stdout: stri
   )
 }
 
-/** 用户消息正文：文字（含 markdown）+ 内嵌文件/图片卡片 */
-function UserMsgBody({ text }: { text: string }) {
-  const clean = stripDomContext(text)
-  const parts = useMemo(() => parseFilePaths(clean), [clean])
-  const hasFileParts = parts.some(p => p.kind !== 'text')
+// ── 用户消息行（导出，与 ChatReportPage 共用同一份代码） ──
+const COLLAPSE_THRESHOLD = 150
 
-  if (!hasFileParts) {
-    return <div className={s.richText}><RichTextBlock text={clean} /></div>
-  }
+export function UserMsgRow({ rawText, children }: { rawText: string; children: React.ReactNode }) {
+  const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
+  const [expanded, setExpanded] = useState(false)
 
-  const textOnly = parts.filter(p => p.kind === 'text').map(p => p.content).join('')
-  const fileParts = parts.filter((p): p is Exclude<MsgPart, { kind: 'text' }> => p.kind !== 'text')
+  const needsCollapse = stripDomContext(rawText).length > COLLAPSE_THRESHOLD
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(rawText).catch(() => {
+      const el = document.createElement('textarea')
+      el.value = rawText
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    })
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [rawText])
 
   return (
-    <>
-      {textOnly.trim() && <div className={s.richText}><RichTextBlock text={textOnly} /></div>}
-      <div className={s.msgFileRow}>
-        {fileParts.map((p, i) =>
-          p.kind === 'image'
-            ? <MsgImgCard key={i} path={p.path} />
-            : <MsgFileCard key={i} path={p.path} ext={p.ext} />
+    <div className={s.userMsgRow}>
+      <button
+        className={`${s.userCopyBtn} ${copied ? s.userCopyBtnDone : ''}`}
+        onClick={handleCopy}
+        title={t('chat_sidebar.copy_message')}
+        tabIndex={-1}
+      >
+        {copied
+          ? '\u2713'
+          : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+        }
+      </button>
+      <div className={s.queryPill}>
+        <div className={needsCollapse && !expanded ? `${s.queryPillBody} ${s.queryPillBodyCollapsed}` : s.queryPillBody}>
+          {children}
+        </div>
+        {needsCollapse && (
+          <button className={s.queryPillExpandBtn} onClick={() => setExpanded(v => !v)}>
+            {expanded ? t('chat_sidebar.collapse') : t('chat_sidebar.expand_all')}
+          </button>
         )}
       </div>
-    </>
+    </div>
   )
 }
 
