@@ -62,7 +62,10 @@ export function DocumentEditor({ docId, title }: Props) {
 
   const debouncedSave = useCallback((content: string) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    saveTimerRef.current = setTimeout(() => saveMut.mutate(content), 800)
+    saveTimerRef.current = setTimeout(() => {
+      saveTimerRef.current = null
+      saveMut.mutate(content)
+    }, 800)
   }, [saveMut])
 
   function handleChange(value: string) {
