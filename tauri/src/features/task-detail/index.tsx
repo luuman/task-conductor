@@ -28,7 +28,7 @@ export default function TaskDetailPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const taskId = Number(id)
-  const { task, artifacts, loading, approveTask, startTask, advanceTask } = useTaskDetailData(taskId)
+  const { task, artifacts, loading, approveTask, startTask, advanceTask, updateRequirements } = useTaskDetailData(taskId)
 
   if (loading) {
     return (
