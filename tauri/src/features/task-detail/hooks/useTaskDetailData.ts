@@ -40,6 +40,13 @@ export function useTaskDetailData(taskId: number) {
     },
   })
 
+  const updateRequirements = useMutation({
+    mutationFn: (fields: RequirementFields) => api.updateRequirements(taskId, fields),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] })
+    },
+  })
+
   return {
     task: task.data ?? null,
     artifacts: artifacts.data ?? [],
@@ -47,5 +54,6 @@ export function useTaskDetailData(taskId: number) {
     approveTask,
     startTask,
     advanceTask,
+    updateRequirements,
   }
 }
