@@ -49,9 +49,9 @@
 - **交互**：preset chip（超时 60/120/240s）、重试次数 0-3、模型 select、区域 preset
 
 ### ④ CLAUDE.md 规则可视化
-- **数据**：读取文件系统（通过后端新增 endpoint）
-  - 项目级：`{project.path}/.claude/CLAUDE.md`
-  - 全局：`~/.claude/CLAUDE.md`
+- **数据**：读取文件系统（通过后端新增 endpoint），使用 `project.path` 字段定位项目根目录
+  - 项目级：`{project.path}/.claude/CLAUDE.md`（project.path 为 git 根目录绝对路径）
+  - 全局：`~/.claude/CLAUDE.md`（展开 `~` 为实际 home 目录）
 - **显示**：不展示原始 Markdown，而是提取关键规则条目渲染为 rule-chip（icon + 文字 + 分类标签）
 - **规则提取**：后端解析 CLAUDE.md，识别 bullet 列表中的规则，AI 辅助分类（范围/DB/前端/UI/行为/语言/限制 等）
 - **元信息**：文件大小、规则总数
