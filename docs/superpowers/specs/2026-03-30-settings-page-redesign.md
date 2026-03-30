@@ -87,7 +87,9 @@ CLAUDE.md（子目录）
 - **元信息**：文件大小、规则总数
 
 ### ⑤ Hooks 配置
-- **数据**：读取 `~/.claude/settings.json`（全局）和 `.claude/settings.json`（项目级）
+- **数据**：合并读取两个文件
+  - 全局：`~/.claude/settings.json` → hooks 字段
+  - 项目级：`{project.path}/.claude/settings.json` → hooks 字段
 - **9 种事件**：PreToolUse / PostToolUse / PostToolUseFailure / SessionStart / SessionEnd / Stop / SubagentStart / SubagentStop / Notification
 - **显示**：3×3 卡片网格，每卡：名称 + 用途描述 + 触发时机标签（颜色区分） + 范围点（蓝=全局/绿=本项目） + mini toggle
 - **范围点颜色**：
