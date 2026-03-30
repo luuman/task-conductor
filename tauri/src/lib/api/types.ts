@@ -616,6 +616,7 @@ export interface ApiAdapter {
   startInterview(taskId: number): Promise<InterviewStartResponse>
   saveInterviewMessage(taskId: number, data: { role: string; content: string; extra?: string }): Promise<InterviewMessage>
   getInterviewMessages(taskId: number): Promise<InterviewMessage[]>
+  updateRequirements(taskId: number, requirements: RequirementFields): Promise<Task>
   updatePrd(taskId: number, prd: string): Promise<Task>
   completeInterview(taskId: number, data: { prd: string; stages: string[] }): Promise<Task>
 
