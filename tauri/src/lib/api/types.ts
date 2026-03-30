@@ -712,3 +712,85 @@ export interface ProjectDocumentsResponse {
   documents: Document[]
   links: DocumentLink[]
 }
+
+export interface ClaudeRule {
+  text: string
+  category: string
+}
+
+export interface ClaudeMdSection {
+  path: string
+  size: number
+  rules: ClaudeRule[]
+}
+
+export interface ClaudeConfigResponse {
+  project_root?: ClaudeMdSection
+  project_dot?: ClaudeMdSection
+  global?: ClaudeMdSection
+}
+
+export interface HookInfo {
+  event: string
+  scope: string
+  enabled: boolean
+  commands: string[]
+}
+
+export interface HookStatusEntry {
+  event: string
+  global: HookInfo | null
+  project: HookInfo | null
+}
+
+export interface HooksStatusResponse {
+  hooks: HookStatusEntry[]
+}
+
+export interface MemoryEntry {
+  name: string
+  description: string
+  file: string
+}
+
+export interface MemoryResponse {
+  user: MemoryEntry[]
+  feedback: MemoryEntry[]
+  project: MemoryEntry[]
+  reference: MemoryEntry[]
+}
+
+export interface McpServerInfo {
+  name: string
+  tools: string[]
+  status: 'ok' | 'missing'
+}
+
+export interface McpServersResponse {
+  servers: McpServerInfo[]
+}
+
+export interface PermRule {
+  rule: string
+  source: 'global' | 'project' | 'local'
+}
+
+export interface PermissionsResponse {
+  allow: PermRule[]
+  deny: PermRule[]
+}
+
+export interface SettingsLocalResponse {
+  exists: boolean
+  content: Record<string, unknown> | null
+  error?: string
+}
+
+export interface ProjectSettingsUpdate {
+  automation_config?: string | null
+  claude_runtime_config?: string | null
+  notification_config?: string | null
+  docs_config?: string | null
+  env_config?: string | null
+  knowledge_config?: string | null
+}
