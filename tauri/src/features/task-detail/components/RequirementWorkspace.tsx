@@ -46,10 +46,14 @@ export function RequirementWorkspace({
 }: Props) {
   const initial = parseRequirements(requirementsRaw)
   const [fields, setFields] = useState<RequirementFields>(initial)
+  const [previewFields, setPreviewFields] = useState<RequirementFields>(initial)
   const [expandedField, setExpandedField] = useState<keyof RequirementFields | null>(null)
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    setFields(parseRequirements(requirementsRaw))
+    const parsed = parseRequirements(requirementsRaw)
+    setFields(parsed)
+    setPreviewFields(parsed)
   }, [requirementsRaw])
 
   useEffect(() => {
