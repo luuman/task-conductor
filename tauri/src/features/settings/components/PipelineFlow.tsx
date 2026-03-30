@@ -65,7 +65,7 @@ export function PipelineFlow({ enabledStages, onToggle, disabled }: PipelineFlow
               onClick={() => handleClick(stage)}
               title={`${STAGE_LABELS[stage]}${approval ? '（需审批）' : ''}`}
             >
-              <span className={enabled && !fixed ? '' : styles.pipelineNodeStrike}>
+              <span className={!enabled ? styles.pipelineNodeStrike : ''}>
                 {stage}
               </span>
               {approval && <span className={styles.pipelineApprovalDot} />}
