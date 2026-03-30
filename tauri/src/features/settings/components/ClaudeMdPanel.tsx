@@ -34,11 +34,12 @@ function RuleChips({ rules, label }: { rules: Array<{ text: string; category: st
         {rules.map((rule, i) => {
           const c = CATEGORY_COLORS[rule.category] ?? { bg: '#6b728015', color: '#9ca3af' }
           return (
-            <div key={i} className={styles.ruleChip}>
-              <span
-                className={styles.ruleChipCategory}
-                style={{ background: c.bg, color: c.color }}
-              >
+            <div
+              key={i}
+              className={styles.ruleChip}
+              style={{ '--rule-accent': c.color } as React.CSSProperties}
+            >
+              <span className={styles.ruleChipCategory} style={{ color: c.color }}>
                 {rule.category}
               </span>
               <span className={styles.ruleChipText}>
