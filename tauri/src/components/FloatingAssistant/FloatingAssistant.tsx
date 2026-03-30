@@ -183,7 +183,10 @@ export function FloatingAssistant() {
   useEffect(() => {
     if (!showHistory) return
     const handler = (e: MouseEvent) => {
-      if (historyRef.current && !historyRef.current.contains(e.target as Node)) setShowHistory(false)
+      const target = e.target as Node
+      const inTrigger = historyRef.current?.contains(target) ?? false
+      const inDropdown = historyDropdownRef.current?.contains(target) ?? false
+      if (!inTrigger && !inDropdown) setShowHistory(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
