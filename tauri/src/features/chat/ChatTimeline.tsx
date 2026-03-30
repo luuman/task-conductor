@@ -700,7 +700,7 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
         if (localCmd.command || localCmd.stdout) {
           segs.push({ type: 'local-command', command: localCmd.command, stdout: localCmd.stdout, ts: msg.ts ?? null })
         }
-        if (localCmd.remainingText) segs.push({ type: 'user', text: localCmd.remainingText, ts: msg.ts ?? null })
+        if (localCmd.remainingText) segs.push({ type: 'user', text: localCmd.remainingText, rawText: localCmd.remainingText, ts: msg.ts ?? null })
       }
       // 检测 task-notification XML
       else if (/<task-notification>/.test(text)) {
@@ -708,9 +708,9 @@ function splitSegments(messages: TranscriptMessage[]): Segment[] {
         for (const n of notifications) {
           segs.push({ type: 'notification', status: n.status, summary: n.summary, taskId: n.taskId, ts: msg.ts ?? null })
         }
-        if (remainingText) segs.push({ type: 'user', text: remainingText, ts: msg.ts ?? null })
+        if (remainingText) segs.push({ type: 'user', text: remainingText, rawText: remainingText, ts: msg.ts ?? null })
       } else {
-        if (text) segs.push({ type: 'user', text, ts: msg.ts ?? null })
+        if (text) segs.push({ type: 'user', text, rawText, ts: msg.ts ?? null })
       }
     } else {
       // 复用 parseTimelineWithQuestions 的 block→step 逻辑
