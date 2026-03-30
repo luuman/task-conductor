@@ -38,6 +38,40 @@
   margin-left: auto;
 }
 
+.confirmBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--tc-bg-secondary);
+  border-bottom: 1px solid var(--tc-border);
+  font-size: 12px;
+  color: var(--tc-text-primary);
+  flex-shrink: 0;
+}
+
+.confirmYes {
+  padding: 3px 10px;
+  font-size: 12px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.confirmYes:hover { background: #dc2626; }
+
+.confirmNo {
+  padding: 3px 10px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  color: var(--tc-text-secondary);
+  cursor: pointer;
+}
+.confirmNo:hover { background: var(--tc-bg-hover); }
+
 .docPanel {
   width: 380px;
   border-left: 1px solid var(--tc-border);
