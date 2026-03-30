@@ -857,3 +857,78 @@ export function ChatTimeline({ messages, currentReply, style, virtualized, virtu
     </CodeExpandCtx.Provider>
   )
 }
+
+// ════════════════════════════════════
+// 内部虚拟化渲染路径（仅 virtualized=true 时使用）
+// ════════════════════════════════════
+
+type VSegment =
+  | Segment
+  | { type: 'streaming-reply'; text: string }
+
+interface VirtualizedProps {
+  messages: TranscriptMessage[]
+  currentReply?: string
+  Renderer: React.FC<{ steps: TimelineStep[] }>
+  virtuosoRef?: React.RefObject<VirtuosoHandle | null>
+}
+
+function VirtualizedChatTimeline({ messages, currentReply, Renderer, virtuosoRef }: VirtualizedProps) {
+  const baseSegments = useMemo(() => splitSegments(messages), [messages])
+
+  const vSegments = useMemo<VSegment[]>(() => {
+    if (!currentReply) return baseSegments
+    return [...baseSegments, { type: 'streaming-reply', text: currentReply }]
+  }, [baseSegments, currentReply])
+
+  const computeItemKey = useCallback((_: number, seg: VSegment) => {
+    if (seg.type === 'streaming-reply') return '__streaming__'
+    if (seg.type === 'user') return `user-${seg.ts ?? ''}-${seg.text.slice(0, 20)}`
+    if (seg.type === 'assistant') return `asst-${String(_)}`
+    if (seg.type === 'notification') return `notif-${seg.taskId}`
+    if (seg.type === 'local-command') return `localcmd-${seg.ts ?? ''}`
+    return String(_)
+  }, [])
+
+  const itemContent = useCallback((_: number, seg: VSegment) => {
+    if (seg.type === 'user') {
+      return (
+        <div className={s.turnSection}>
+          <UserMsgRow rawText={seg.text}>
+            <UserMsgBody text={seg.text} />
+          </UserMsgRow>
+        </div>
+      )
+    }
+    if (seg.type === 'notification') {
+      return <TaskNotifBanner status={seg.status} summary={seg.summary} taskId={seg.taskId} />
+    }
+    if (seg.type === 'local-command') {
+      return <LocalCommandBanner command={seg.command} stdout={seg.stdout} />
+    }
+    if (seg.type === 'streaming-reply') {
+      return (
+        <div className={s.chatAiBlock}>
+          <RichText text={seg.text} />
+        </div>
+      )
+    }
+    // assistant
+    return <Renderer steps={(seg as { type: 'assistant'; steps: TimelineStep[] }).steps} />
+  }, [Renderer])
+
+  return (
+    <CodeExpandCtx.Provider value={false}>
+      <Virtuoso
+        ref={virtuosoRef}
+        data={vSegments}
+        style={{ height: '100%', width: '100%' }}
+        increaseViewportBy={300}
+        initialTopMostItemIndex={vSegments.length > 0 ? vSegments.length - 1 : 0}
+        followOutput={(isAtBottom) => isAtBottom ? 'smooth' : false}
+        computeItemKey={computeItemKey}
+        itemContent={itemContent}
+      />
+    </CodeExpandCtx.Provider>
+  )
+}
