@@ -935,6 +935,19 @@ function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
   )
 }
 
+/**
+ * 对外导出的 ChatReportPage：用独立局部 store 包裹，与 FloatingAssistant 全局 store 完全隔离。
+ * 每次挂载创建一个新的局部 store 实例（useMemo 确保同一组件生命周期内不重建）。
+ */
+export function ChatReportPage({ global = false }: { global?: boolean } = {}) {
+  const [localStore] = React.useState(() => createLocalChatStore())
+  return (
+    <ChatStoreCtx.Provider value={localStore}>
+      <ChatReportPageInner global={global} />
+    </ChatStoreCtx.Provider>
+  )
+}
+
 // 路由 default export（项目级，带 filterByCwd）
 export default function ProjectChatReportPage() {
   return <ChatReportPage />
