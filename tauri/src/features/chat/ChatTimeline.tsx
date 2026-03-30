@@ -804,11 +804,26 @@ interface ChatTimelineProps {
   currentReply?: string
   /** 固定样式，不传则从 localStorage 读取 */
   style?: StyleKey
+  /** 启用 react-virtuoso 虚拟列表，适合消息量较多的场景（如 FloatingAssistant） */
+  virtualized?: boolean
+  /** virtualized=true 时的外部 VirtuosoHandle ref，用于命令式滚动控制 */
+  virtuosoRef?: React.RefObject<VirtuosoHandle | null>
 }
 
-export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProps) {
+export function ChatTimeline({ messages, currentReply, style, virtualized, virtuosoRef }: ChatTimelineProps) {
   const activeStyle = style ?? getDefaultStyle()
   const Renderer = RENDERERS[activeStyle] ?? StyleA
+
+  if (virtualized) {
+    return (
+      <VirtualizedChatTimeline
+        messages={messages}
+        currentReply={currentReply}
+        Renderer={Renderer}
+        virtuosoRef={virtuosoRef}
+      />
+    )
+  }
 
   const segments = splitSegments(messages)
 
