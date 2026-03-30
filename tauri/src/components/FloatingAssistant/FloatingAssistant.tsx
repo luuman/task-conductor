@@ -491,6 +491,7 @@ export function FloatingAssistant() {
       {/* 历史会话下拉（fixed，脱离 overflow:hidden 的面板） */}
       {showHistory && historyPos && (
         <div
+          ref={historyDropdownRef}
           className={styles.historyDropdown}
           style={{ position: 'fixed', top: historyPos.top, right: historyPos.right, width: 300, maxHeight: 400, zIndex: 99999 }}
         >
