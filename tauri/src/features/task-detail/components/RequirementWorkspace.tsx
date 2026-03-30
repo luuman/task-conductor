@@ -79,6 +79,9 @@ export function RequirementWorkspace({
     }
     setFields(updated)
     debouncedSave(updated)
+    // 预览延迟 500ms 更新，避免每次按键触发昂贵的 Markdown 渲染
+    if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
+    previewTimerRef.current = setTimeout(() => setPreviewFields(updated), 500)
   }
 
   function getFieldValue(key: keyof RequirementFields): string {
