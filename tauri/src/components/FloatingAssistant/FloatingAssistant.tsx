@@ -442,15 +442,20 @@ export function FloatingAssistant() {
                   const displayReply = isHistoryTab ? undefined : (currentReply || undefined)
                   return (
                     <div className={styles.messages}>
-                      {displayMessages.length === 0 && !displayReply && (
+                      {displayMessages.length === 0 && !displayReply ? (
                         <EmptyState
                           projectInfo={projectInfo}
                           pageContext={pageContext}
                           onSuggest={setInputDraft}
                         />
+                      ) : (
+                        <ChatTimeline
+                          key={activeTabId}
+                          messages={displayMessages}
+                          currentReply={displayReply}
+                          virtualized
+                        />
                       )}
-                      <ChatTimeline messages={displayMessages} currentReply={displayReply} />
-                      <div ref={messagesEndRef} />
                     </div>
                   )
                 })()}
