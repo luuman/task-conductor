@@ -566,13 +566,15 @@ function ChatReportPageInner({ global = false }: { global?: boolean } = {}) {
   const [codeExpanded, setCodeExpanded] = useState(false)
   const mainAreaRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
-  // AI 对话状态（与 FloatingAssistant 共享同一 store，只读取不写入，避免影响 FloatingAssistant）
+  // 使用局部 store（由外层 ChatReportPage Provider 注入，与 FloatingAssistant 完全隔离）
   const {
     messages: chatMessages,
     currentReply,
     isGenerating,
     claudeSessionId,
-  } = useChatStore()
+    setClaudeSessionId: setLocalClaudeSessionId,
+    setCurrentReply: setLocalCurrentReply,
+  } = useActiveChatStore()
 
   // 获取当前项目 cwd（与 /sessions 页面一致，使用 appStore）
   const activeProjectId = useAppStore((st) => st.activeProjectId)
