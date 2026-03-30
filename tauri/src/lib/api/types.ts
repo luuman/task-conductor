@@ -685,6 +685,16 @@ export interface ApiAdapter {
   updateDocumentPosition(docId: number, pos: { pos_x: number; pos_y: number }): Promise<{ ok: boolean }>
   createDocumentLink(data: { source_id: number; target_id: number; relation: string }): Promise<DocumentLink>
   deleteDocumentLink(linkId: number): Promise<void>
+
+  // Project-scoped settings
+  getProjectClaudeConfig(projectId: number): Promise<ClaudeConfigResponse>
+  getProjectHooksStatus(projectId: number): Promise<HooksStatusResponse>
+  toggleProjectHook(projectId: number, event: string, scope: 'global' | 'project', enabled: boolean): Promise<{ ok: boolean }>
+  getProjectMemory(projectId: number): Promise<MemoryResponse>
+  getProjectMcpServers(projectId: number): Promise<McpServersResponse>
+  getProjectPermissions(projectId: number): Promise<PermissionsResponse>
+  getProjectSettingsLocal(projectId: number): Promise<SettingsLocalResponse>
+  patchProjectSettings(projectId: number, data: ProjectSettingsUpdate): Promise<Project>
 }
 
 export interface Document {
