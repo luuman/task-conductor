@@ -48,6 +48,12 @@ class Project(Base):
     feishu_chat_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     feishu_sync: Mapped[bool] = mapped_column(Boolean, default=False)  # 会话同步到飞书群
     stages_config: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON list[str]，启用的阶段；null = 全部
+    automation_config:     Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    claude_runtime_config: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    notification_config:   Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    docs_config:           Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    env_config:            Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
+    knowledge_config:      Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     tasks: Mapped[list["Task"]] = relationship(back_populates="project")
 
