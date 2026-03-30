@@ -97,7 +97,7 @@ export function AppRouter() {
             <Route path="/sessions"       element={<SessionsPage />} />
             <Route path="/chat"           element={<ChatReportPage />} />
             <Route path="/config"         element={<PlaceholderPage />} />
-            <Route path="/knowledge"      element={<PlaceholderPage />} />
+            <Route path="/knowledge"      element={<KnowledgePage />} />
             <Route path="/mcp"            element={<PlaceholderPage />} />
             <Route path="/files"          element={<FilesPage />} />
             <Route path="/git"            element={<GitPage />} />
