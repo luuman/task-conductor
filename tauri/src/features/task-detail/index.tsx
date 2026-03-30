@@ -29,11 +29,8 @@ export default function TaskDetailPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const taskId = Number(id)
-  const { task, artifacts, loading, approveTask, startTask, advanceTask, updateRequirements } = useTaskDetailData(taskId)
+  const { task, artifacts, loading, approveTask, startTask, advanceTask } = useTaskDetailData(taskId)
   const setPageContext = useChatStore(s => s.setPageContext)
-  const openAssistant = useChatStore(s => s.toggle)
-  const chatIsOpen = useChatStore(s => s.isOpen)
-  const setInputDraft = useChatStore(s => s.setInputDraft)
 
   // 告知 AI 助手当前所在任务
   useEffect(() => {
