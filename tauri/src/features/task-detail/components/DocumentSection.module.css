@@ -1,0 +1,134 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tc-bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--tc-border);
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--tc-border);
+  background: var(--tc-bg-secondary);
+  overflow-x: auto;
+  min-height: 40px;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  border: none;
+  background: transparent;
+  color: var(--tc-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.tab:hover { color: var(--tc-text-primary); }
+.tab.active {
+  color: var(--tc-accent);
+  border-bottom-color: var(--tc-accent);
+}
+
+.addTab {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px dashed var(--tc-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--tc-text-tertiary);
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+.addTab:hover {
+  color: var(--tc-text-primary);
+  border-color: var(--tc-text-secondary);
+}
+
+.newDocRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+}
+
+.typeSelect {
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  background: var(--tc-bg-primary);
+  color: var(--tc-text-primary);
+}
+
+.confirmBtn {
+  padding: 3px 10px;
+  font-size: 12px;
+  background: var(--tc-accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.confirmBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.cancelBtn {
+  padding: 3px 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  color: var(--tc-text-secondary);
+  cursor: pointer;
+}
+
+.editorArea {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--tc-text-tertiary);
+  font-size: 13px;
+}
+
+.addTabLarge {
+  padding: 8px 16px;
+  font-size: 13px;
+  border: 1px dashed var(--tc-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tc-text-secondary);
+  cursor: pointer;
+}
+.addTabLarge:hover {
+  color: var(--tc-text-primary);
+  border-color: var(--tc-text-secondary);
+  background: var(--tc-bg-hover);
+}
+
+.loading {
+  padding: 16px;
+  color: var(--tc-text-tertiary);
+  font-size: 13px;
+}
