@@ -16,6 +16,7 @@ import s from './chat-report.module.css'
 import '../../styles/hljs-ayu-dark.css'
 import { useTranslation } from 'react-i18next'
 import { getFileColor, FileTypeSvgInline, FolderSvgInline } from './fileUtils'
+import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 
 export type { TimelineStep }
 export { parseTimelineWithQuestions }
