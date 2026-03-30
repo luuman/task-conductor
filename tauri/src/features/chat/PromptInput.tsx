@@ -6,7 +6,7 @@ import { useChatStream } from '../../hooks/useChatStream'
 import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconCrosshair } from '../../ui/icon'
 import { useTranslation } from 'react-i18next'
 import s from './chat-report.module.css'
-import { getFileColor, FileTypeSvgInline, FolderSvgInline } from './fileUtils'
+import { FileTypeSvgInline, FolderSvgInline } from './fileUtils'
 
 const QUICK_CHIP_COLORS = ['#60a5fa', '#a78bfa', '#34d399', '#fb923c']
 
