@@ -90,6 +90,7 @@ class Task(Base):
     interview_status: Mapped[str] = mapped_column(String(20), default="none")     # none|active|completed
     claude_session_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)  # 关联的 Claude 会话
     canvas_data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)               # Canvas JSON 数据
+    requirements: Mapped[Optional[str]] = mapped_column(Text, nullable=True)              # 结构化需求 JSON
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     project: Mapped["Project"] = relationship(back_populates="tasks")
