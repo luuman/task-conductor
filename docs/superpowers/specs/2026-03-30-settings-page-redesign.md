@@ -15,6 +15,36 @@
 
 ---
 
+## Claude 配置文件体系
+
+Claude Code 通过 6 个文件管理配置，分 3 个层级，优先级从高到低：
+
+```
+settings.local.json（最高）
+  └─ .claude/settings.json
+       └─ ~/.claude/settings.json（最低）
+
+CLAUDE.md（子目录）
+  └─ CLAUDE.md（项目根）
+       └─ ~/.claude/CLAUDE.md（最低）
+```
+
+| 层级 | 文件 | 提交 Git | 作用 |
+|------|------|----------|------|
+| 用户级 | `~/.claude/settings.json` | — | 全局权限基线 + 全局 Hooks |
+| 用户级 | `~/.claude/CLAUDE.md` | — | 全局指令与个人偏好 |
+| 项目级 | `CLAUDE.md` | ✅ | 项目技术栈、架构、规范 |
+| 项目级 | `.claude/settings.json` | ✅ | 项目权限覆盖 + 项目级 Hooks |
+| 项目级 | `.mcp.json` | ✅ | MCP 外部工具集成（独立于 settings.json）|
+| 本地覆盖 | `.claude/settings.local.json` | ❌ | 个人本地覆盖，不影响他人 |
+
+**关键说明**：
+- MCP 服务器配置来自 `.mcp.json`，与 `settings.json` 中的 hooks/permissions 独立
+- Hooks 需**合并展示**：`~/.claude/settings.json`（全局） + `.claude/settings.json`（项目）
+- `settings.local.json` 在设置页中**只读展示**，标注"不提交 Git"，不提供编辑入口
+
+---
+
 ## 设计决策
 
 ### 布局
