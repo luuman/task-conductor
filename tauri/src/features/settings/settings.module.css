@@ -702,8 +702,6 @@
   background: var(--tc-content-bg);
   border: 1px solid var(--tc-border);
   border-left: 3px solid var(--rule-accent, var(--tc-border));
-  margin-bottom: 5px;
-  break-inside: avoid;
   transition: background 0.12s;
 }
 
