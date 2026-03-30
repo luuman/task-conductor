@@ -154,14 +154,15 @@ knowledge_config:      Mapped[Optional[str]]  # JSON
 
 ### 新增 API Endpoints
 ```
-GET  /api/projects/:id/claude-config    → 读取 CLAUDE.md 文件内容 + 解析规则
-GET  /api/projects/:id/hooks-status     → 读取 ~/.claude/settings.json + .claude/settings.json
-POST /api/projects/:id/hooks-toggle     → 更新单个 hook 的启用状态
-POST /api/projects/:id/hooks-reinstall  → 执行 install-hooks.sh
-GET  /api/projects/:id/memory           → 读取记忆文件列表 + frontmatter
-GET  /api/projects/:id/mcp-servers      → 读取 mcpServers 配置
-GET  /api/projects/:id/permissions      → 读取 allow/deny 列表
-PATCH /api/projects/:id/settings        → 批量更新以上各 JSON 配置字段
+GET  /api/projects/:id/claude-config          → 读取所有层级 CLAUDE.md + 解析规则
+GET  /api/projects/:id/hooks-status           → 合并读取全局 + 项目级 hooks 配置
+POST /api/projects/:id/hooks-toggle           → 更新单个 hook 启用状态（指定 scope: global|project）
+POST /api/projects/:id/hooks-reinstall        → 执行 install-hooks.sh
+GET  /api/projects/:id/memory                 → 读取记忆文件列表 + frontmatter
+GET  /api/projects/:id/mcp-servers            → 读取 .mcp.json 的 mcpServers 配置
+GET  /api/projects/:id/permissions            → 合并读取三层 allow/deny 列表（含 local）
+GET  /api/projects/:id/settings-local         → 读取 settings.local.json（只读）
+PATCH /api/projects/:id/settings              → 批量更新 DB 中的各 JSON 配置字段
 ```
 
 ### CLAUDE.md 规则提取逻辑
