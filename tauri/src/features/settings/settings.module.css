@@ -764,35 +764,40 @@
   white-space: nowrap;
 }
 
-.hookCmdInline {
+.hookScriptInfo {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  flex: 1;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
   min-width: 0;
 }
 
-.hookCmdChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--tc-panel-bg);
-  border: 1px solid var(--tc-border);
-}
-
-.hookCmdChipName {
-  font-size: 10px;
+.hookScriptName {
+  font-size: 11px;
   font-family: 'Geist Mono', monospace;
+  font-weight: 600;
   color: var(--tc-foreground);
   white-space: nowrap;
 }
 
-.hookCmdChipDesc {
-  font-size: 9px;
+.hookScriptDesc {
+  font-size: 10px;
   color: var(--tc-foreground-secondary);
   white-space: nowrap;
+}
+
+.hookScopeTag {
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hookPhaseList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 /* ── 记忆文件 2×2 ── */
