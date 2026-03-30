@@ -202,7 +202,9 @@ def get_document_content(doc_id: int, db: Session = Depends(get_db)):
     if not doc:
         raise HTTPException(404, "Document not found")
     project = db.get(Project, doc.project_id)
-    file_abs = os.path.join(project.repo_url, doc.file_path)
+    if not project or not project.repo_url:
+        raise HTTPException(400, "Project has no repo_url configured")
+    file_abs = _safe_file_path(project.repo_url, doc.file_path)
     if not os.path.exists(file_abs):
         return {"content": ""}
     with open(file_abs, encoding='utf-8') as f:
