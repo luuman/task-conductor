@@ -668,6 +668,17 @@ export interface ApiAdapter {
     getProjectComponents(dirName: string): Promise<ProjectComponents>
     getProjectDetails(dirName: string): Promise<ProjectDetails>
   }
+
+  // Documents
+  getProjectDocuments(projectId: number): Promise<ProjectDocumentsResponse>
+  getTaskDocuments(taskId: number): Promise<Document[]>
+  createDocument(taskId: number, data: { title: string; doc_type: string; initial_content?: string }): Promise<Document>
+  getDocumentContent(docId: number): Promise<{ content: string }>
+  updateDocumentContent(docId: number, content: string): Promise<{ ok: boolean }>
+  deleteDocument(docId: number): Promise<void>
+  updateDocumentPosition(docId: number, pos: { pos_x: number; pos_y: number }): Promise<{ ok: boolean }>
+  createDocumentLink(data: { source_id: number; target_id: number; relation: string }): Promise<DocumentLink>
+  deleteDocumentLink(linkId: number): Promise<void>
 }
 
 export interface Document {
