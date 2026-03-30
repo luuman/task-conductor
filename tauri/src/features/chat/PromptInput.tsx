@@ -6,30 +6,11 @@ import { useChatStream } from '../../hooks/useChatStream'
 import { IconX, IconPlus, IconLink, IconSettings, IconMaximize, IconCrosshair } from '../../ui/icon'
 import { useTranslation } from 'react-i18next'
 import s from './chat-report.module.css'
+import { getFileColor, FileTypeSvgInline, FolderSvgInline } from './fileUtils'
 
 const QUICK_CHIP_COLORS = ['#60a5fa', '#a78bfa', '#34d399', '#fb923c']
 
 type Attachment = { id: string; name: string; kind: 'image' | 'file' | 'folder'; dataUrl?: string; ext?: string; size?: number; itemCount?: number }
-
-const FILE_COLOR_MAP: Record<string, string> = {
-  pdf: '#ef4444',
-  doc: '#2563eb', docx: '#2563eb',
-  xls: '#16a34a', xlsx: '#16a34a', csv: '#16a34a',
-  ppt: '#ea580c', pptx: '#ea580c',
-  txt: '#9ca3af', md: '#8b5cf6', mdx: '#8b5cf6',
-  json: '#f59e0b', yaml: '#f59e0b', yml: '#f59e0b',
-  js: '#f59e0b', jsx: '#60a5fa', ts: '#60a5fa', tsx: '#60a5fa',
-  py: '#3b82f6', rb: '#ef4444', go: '#06b6d4', rs: '#ea580c',
-  css: '#06b6d4', scss: '#ec4899', html: '#ea580c',
-  svg: '#10b981', xml: '#f59e0b',
-  zip: '#8b5cf6', tar: '#8b5cf6', gz: '#8b5cf6',
-  mp4: '#ec4899', mov: '#ec4899', mp3: '#ec4899', wav: '#ec4899',
-  sh: '#71717a', bash: '#71717a',
-}
-
-function getFileColor(ext: string): string {
-  return FILE_COLOR_MAP[ext.toLowerCase()] ?? '#71717a'
-}
 
 function fmtFileSize(bytes?: number): string {
   if (!bytes) return ''
