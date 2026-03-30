@@ -93,7 +93,7 @@ function MsgImgCard({ path }: { path: string }) {
 
 function MsgFileCard({ path, ext }: { path: string; ext: string }) {
   const name = path.split('/').pop() || path
-  const color = fileColor(ext)
+  const color = getFileColor(ext)
   return (
     <div className={s.msgFileCard}>
       {ext ? <FileTypeSvgInline ext={ext} /> : <FolderSvgInline />}
