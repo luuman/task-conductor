@@ -45,9 +45,15 @@ const DevToolsPage = import.meta.env.DEV
 
 const RouterComponent = isTauri() ? HashRouter : BrowserRouter
 
+function NavigateListener() {
+  useUiNavigate()
+  return null
+}
+
 export function AppRouter() {
   return (
     <RouterComponent>
+      <NavigateListener />
       <Suspense fallback={null}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
