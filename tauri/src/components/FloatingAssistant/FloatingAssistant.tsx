@@ -450,18 +450,26 @@ export function FloatingAssistant() {
 
               {/* ── 聊天主体 ── */}
               <div className={styles.chatMain}>
-                {/* 消息列表 */}
-                <div className={styles.messages}>
-                  {messages.length === 0 && !currentReply && (
-                    <EmptyState
-                      projectInfo={projectInfo}
-                      pageContext={pageContext}
-                      onSuggest={setInputDraft}
-                    />
-                  )}
-                  <ChatTimeline messages={messages} currentReply={currentReply || undefined} />
-                  <div ref={messagesEndRef} />
-                </div>
+                {/* 消息列表：history tab 用 sessionTranscript，new tab 用 store messages */}
+                {(() => {
+                  const activeTab = tabs.find(t => t.id === activeTabId)
+                  const isHistoryTab = activeTab?.type === 'session'
+                  const displayMessages = isHistoryTab ? sessionTranscript : messages
+                  const displayReply = isHistoryTab ? undefined : (currentReply || undefined)
+                  return (
+                    <div className={styles.messages}>
+                      {displayMessages.length === 0 && !displayReply && (
+                        <EmptyState
+                          projectInfo={projectInfo}
+                          pageContext={pageContext}
+                          onSuggest={setInputDraft}
+                        />
+                      )}
+                      <ChatTimeline messages={displayMessages} currentReply={displayReply} />
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )
+                })()}
 
                 {/* 输入区（与 /chat 共用 PromptInput） */}
                 <div className={styles.inputArea}>
