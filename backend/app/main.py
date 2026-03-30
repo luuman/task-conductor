@@ -593,6 +593,22 @@ async def claude_monitor_ws(websocket: WebSocket):
         manager.disconnect(websocket, "sessions")
 
 
+@app.websocket("/ws/ui")
+async def ws_ui(websocket: WebSocket):
+    """
+    [WebSocket] UI 导航控制频道。
+
+    接收来自后端的导航指令（navigate 事件），前端订阅后可实时响应路由跳转。
+    消息格式：`{"type": "navigate", "data": {"path": "..."}, "ts": "..."}`
+    """
+    await manager.connect(websocket, "ui")
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, "ui")
+
+
 @app.websocket("/ws/chat")
 async def ws_chat(websocket: WebSocket):
     """
