@@ -248,7 +248,7 @@ class DocumentLink(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     source_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), index=True)
-    target_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
+    target_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), index=True)
     relation: Mapped[str] = mapped_column(String(50), default="references")
     # derived_from / depends_on / references / contradicts
     auto: Mapped[bool] = mapped_column(Boolean, default=False)
