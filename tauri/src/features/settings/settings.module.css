@@ -804,8 +804,8 @@
 
 .hookPhaseList {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-direction: column;
+  gap: 3px;
 }
 
 /* ── 记忆文件 2×2 ── */
