@@ -122,3 +122,18 @@ async def advance_stage(
         bg.add_task(scheduler.enqueue, task_id)
 
     return t
+
+
+class RequirementsBody(BaseModel):
+    requirements: str  # JSON string
+
+
+@router.put("/{task_id}/requirements", response_model=TaskOut, summary="更新任务需求字段")
+def update_requirements(task_id: int, body: RequirementsBody, db: Session = Depends(get_db)):
+    t = db.get(Task, task_id)
+    if not t:
+        raise HTTPException(404, "Task not found")
+    t.requirements = body.requirements
+    db.commit()
+    db.refresh(t)
+    return t
