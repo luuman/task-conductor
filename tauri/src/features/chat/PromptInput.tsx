@@ -525,7 +525,7 @@ export function PromptInput() {
               }
               return (
                 <div key={a.id} className={s.pFileCard}>
-                  {a.kind === 'folder' ? <FolderSvg /> : <FileTypeSvg ext={a.ext || ''} />}
+                  {a.kind === 'folder' ? <FolderSvgInline width={40} height={34} /> : <FileTypeSvgInline ext={a.ext || ''} width={30} height={36} />}
                   <div className={s.pFileCardMeta}>
                     <span className={s.pFileCardName}>{a.name}</span>
                     <span className={s.pFileCardInfo}>
