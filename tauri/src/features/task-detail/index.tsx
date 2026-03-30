@@ -130,7 +130,7 @@ export default function TaskDetailPage() {
                   req.tech_constraints && `技术约束：${req.tech_constraints}`,
                 ].filter(Boolean).join('\n\n')
                 const msg = `我已完成「${task.title}」的需求填写，请帮我审核以下需求是否完整、是否有遗漏或矛盾：\n\n${summary}\n\n请逐项检查，如有问题请直接指出。`
-                useChatStore.getState().setInitialMessage?.(msg)
+                setInputDraft(msg)
                 if (!chatIsOpen) openAssistant()
               }}
               isSaving={updateRequirements.isPending}
