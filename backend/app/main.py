@@ -368,6 +368,7 @@ app.add_middleware(
 )
 
 app.include_router(projects.router)
+app.include_router(project_settings_router.router)  # GET /api/projects/{id}/claude-config, /hooks-status, /memory, /mcp-servers, /permissions, /settings-local; POST /hooks-toggle
 app.include_router(tasks.router)
 app.include_router(versions_router.router)   # GET/POST/PUT/DELETE /api/projects/{id}/versions
 app.include_router(pipeline_router.router)
