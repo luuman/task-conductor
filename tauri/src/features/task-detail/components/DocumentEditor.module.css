@@ -1,0 +1,91 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tc-bg-primary);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--tc-border);
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.docTitle {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tc-text-primary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.saving {
+  font-size: 11px;
+  color: var(--tc-text-tertiary);
+  white-space: nowrap;
+}
+
+.editBtn {
+  padding: 3px 10px;
+  font-size: 12px;
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--tc-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.editBtn:hover {
+  background: var(--tc-bg-hover);
+  color: var(--tc-text-primary);
+}
+
+.textarea {
+  flex: 1;
+  padding: 16px 20px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--tc-text-primary);
+  background: var(--tc-bg-primary);
+}
+
+.preview {
+  flex: 1;
+  padding: 16px 20px;
+  overflow-y: auto;
+  cursor: text;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--tc-text-primary);
+}
+
+.preview :global(h1) { font-size: 20px; font-weight: 700; margin: 0 0 12px; }
+.preview :global(h2) { font-size: 16px; font-weight: 600; margin: 16px 0 8px; }
+.preview :global(h3) { font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
+.preview :global(p)  { margin: 0 0 8px; }
+.preview :global(li) { margin: 2px 0 2px 18px; list-style: disc; }
+.preview :global(code) {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  background: var(--tc-bg-secondary);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.preview :global(a) { color: var(--tc-accent); text-decoration: underline; }
+.preview :global(.placeholder) { color: var(--tc-text-tertiary); font-style: italic; }
+
+.loading {
+  padding: 16px;
+  color: var(--tc-text-tertiary);
+  font-size: 13px;
+}
