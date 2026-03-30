@@ -24,23 +24,7 @@ export { parseTimelineWithQuestions }
 // 文件路径卡片渲染
 // ════════════════════════════════════
 
-const FILE_COLORS: Record<string, string> = {
-  pdf: '#ef4444', doc: '#2563eb', docx: '#2563eb',
-  xls: '#16a34a', xlsx: '#16a34a', csv: '#16a34a',
-  ppt: '#ea580c', pptx: '#ea580c',
-  txt: '#9ca3af', md: '#8b5cf6', mdx: '#8b5cf6',
-  json: '#f59e0b', yaml: '#f59e0b', yml: '#f59e0b',
-  js: '#f59e0b', jsx: '#60a5fa', ts: '#60a5fa', tsx: '#60a5fa',
-  py: '#3b82f6', rb: '#ef4444', go: '#06b6d4', rs: '#ea580c',
-  css: '#06b6d4', scss: '#ec4899', html: '#ea580c',
-  svg: '#10b981', xml: '#f59e0b',
-  zip: '#8b5cf6', tar: '#8b5cf6', gz: '#8b5cf6',
-  mp4: '#ec4899', mov: '#ec4899', mp3: '#ec4899', wav: '#ec4899',
-  sh: '#9ca3af',
-}
 const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'avif', 'tiff'])
-
-function fileColor(ext: string) { return FILE_COLORS[ext.toLowerCase()] ?? '#71717a' }
 
 type MsgPart =
   | { kind: 'text'; content: string }
