@@ -78,6 +78,7 @@ export interface Task {
   depends_on: string | null
   stages: string | null           // JSON list[str]，per-task 阶段
   prd_content: string | null      // 结构化 PRD JSON
+  requirements: string | null     // 结构化需求 JSON
   interview_status: 'none' | 'active' | 'completed'
   claude_session_id?: string | null
   canvas_data?: string | null
