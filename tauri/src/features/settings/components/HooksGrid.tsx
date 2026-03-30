@@ -106,7 +106,10 @@ export function HooksGrid({ projectId, hooks }: HooksGridProps) {
                         {scope === 'global' ? 'G' : 'P'}
                       </span>
                       <span className={styles.hookCmdText} title={cmd}>
-                        {name}{args ? ` ${args}` : ''}
+                        <span className={styles.hookCmdName}>{name}{args ? ` ${args}` : ''}</span>
+                        {KNOWN_SCRIPTS[name] && (
+                          <span className={styles.hookCmdDesc}>{KNOWN_SCRIPTS[name]}</span>
+                        )}
                       </span>
                     </div>
                   )
