@@ -783,17 +783,19 @@
 }
 
 .hookScriptName {
-  font-size: 11px;
+  font-size: 12px;
   font-family: 'Geist Mono', monospace;
   font-weight: 600;
   color: var(--tc-foreground);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hookScriptDesc {
   font-size: 10px;
   color: var(--tc-foreground-secondary);
-  white-space: nowrap;
+  margin-top: 2px;
 }
 
 .hookScopeTag {
