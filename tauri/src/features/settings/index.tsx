@@ -202,6 +202,7 @@ export default function SettingsPage() {
       <div className={styles.cardGrid}>
         <SectionCard title="② 自动化调度" hint="设置任务自动执行时间窗口和并发限制">
           <AutomationPanel
+            key={projectId}
             value={project.automation_config ?? null}
             onChange={(json) => settingsMutation.mutate({ automation_config: json })}
             disabled={isSaving}
@@ -210,6 +211,7 @@ export default function SettingsPage() {
 
         <SectionCard title="③ Claude 运行时" hint="超时、重试、模型、区域预设">
           <ClaudeRuntimePanel
+            key={projectId}
             value={project.claude_runtime_config ?? null}
             onChange={(json) => settingsMutation.mutate({ claude_runtime_config: json })}
             disabled={isSaving}
@@ -220,6 +222,7 @@ export default function SettingsPage() {
       <div className={styles.cardGrid}>
         <SectionCard title="⑦ 通知配置" hint="语音播报、Webhook、触发时机">
           <NotificationPanel
+            key={projectId}
             value={project.notification_config ?? null}
             onChange={(json) => settingsMutation.mutate({ notification_config: json })}
             disabled={isSaving}
@@ -228,6 +231,7 @@ export default function SettingsPage() {
 
         <SectionCard title="⑧ 知识库设置" hint="自动积累 + Prompt 注入 + 清理策略">
           <KnowledgeSettingsPanel
+            key={projectId}
             value={project.knowledge_config ?? null}
             knowledgeCount={knowledgeItems?.length ?? 0}
             onChange={(json) => settingsMutation.mutate({ knowledge_config: json })}
@@ -239,6 +243,7 @@ export default function SettingsPage() {
       <div className={styles.cardGrid}>
         <SectionCard title="⑨ 文档配置" hint="项目相关文档与架构文档链接">
           <DocsPanel
+            key={projectId}
             value={project.docs_config ?? null}
             onChange={(json) => settingsMutation.mutate({ docs_config: json })}
             disabled={isSaving}
