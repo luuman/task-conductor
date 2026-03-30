@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { useSessionData, type QuestionItem } from '../../components/SessionChat/useSessionData'
 import { useAppStore } from '../../lib/store/app'
+import { UserMsgRow } from './ChatTimeline'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
 
