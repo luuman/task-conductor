@@ -64,7 +64,7 @@ export default function TaskDetailPage() {
           {task.description && <p className={styles.description}>{task.description}</p>}
         </div>
         <div className={styles.headerRight}>
-          {task.stage === 'input' && task.status === 'pending' && (
+          {task.stage === 'input' && task.status === 'pending' && !!task.requirements && (
             <Button
               onClick={() => startTask.mutate()}
               disabled={startTask.isPending}
