@@ -9,6 +9,7 @@ import type {
   InterviewMessage, InterviewStartResponse, RequirementFields,
   CanvasData, PaginatedMessages,
   Version, VersionCreate, VersionUpdate,
+  Document, DocumentLink, ProjectDocumentsResponse,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
