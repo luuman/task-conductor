@@ -64,6 +64,7 @@ export function RequirementWorkspace({
   }, [])
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const composingRef = useRef(false)
 
   const debouncedSave = useCallback((fields: RequirementFields) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
