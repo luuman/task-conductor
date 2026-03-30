@@ -129,7 +129,7 @@ def _read_hooks_from(settings_path: Path, scope: str) -> list[dict]:
         result.append({
             "event": event,
             "scope": scope,
-            "enabled": len(entries) > 0,
+            "enabled": event in hooks_section,  # key present = hook registered (even with empty commands list)
             "commands": commands,
         })
     return result
