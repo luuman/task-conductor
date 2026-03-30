@@ -217,7 +217,9 @@ def update_document_content(doc_id: int, body: ContentBody, db: Session = Depend
     if not doc:
         raise HTTPException(404, "Document not found")
     project = db.get(Project, doc.project_id)
-    file_abs = os.path.join(project.repo_url, doc.file_path)
+    if not project or not project.repo_url:
+        raise HTTPException(400, "Project has no repo_url configured")
+    file_abs = _safe_file_path(project.repo_url, doc.file_path)
 
     os.makedirs(os.path.dirname(file_abs), exist_ok=True)
     with open(file_abs, 'w', encoding='utf-8') as f:
