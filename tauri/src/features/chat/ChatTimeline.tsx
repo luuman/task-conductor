@@ -631,7 +631,7 @@ function stripDomContext(text: string): string {
 
 /** 将 messages 分段：user 气泡 / assistant steps / notification / local-command 交替出现 */
 type Segment =
-  | { type: 'user'; text: string; ts: string | null }
+  | { type: 'user'; text: string; rawText: string; ts: string | null }
   | { type: 'assistant'; steps: TimelineStep[] }
   | { type: 'notification'; status: string; summary: string; taskId: string; ts: string | null }
   | { type: 'local-command'; command: string; stdout: string; ts: string | null }
