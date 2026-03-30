@@ -10,6 +10,22 @@ interface HookMeta {
   phaseColor: string
 }
 
+// 已知 hook 脚本名 → 简短描述
+const KNOWN_SCRIPTS: Record<string, string> = {
+  'tc-hook.sh':       'TaskConductor 观测',
+  'tc-hook':          'TaskConductor 观测',
+  'pre-commit':       '提交前检查',
+  'post-commit':      '提交后处理',
+  'notify.sh':        '通知推送',
+  'tts.sh':           '语音播报',
+  'speak.sh':         '语音播报',
+  'logger.sh':        '日志记录',
+  'audit.sh':         '安全审计',
+  'format.sh':        '代码格式化',
+  'lint.sh':          '代码检查',
+  'test.sh':          '运行测试',
+}
+
 const HOOK_META: Record<string, HookMeta> = {
   PreToolUse:          { desc: '工具调用前，可阻断或修改输入',   phase: '调用前',  phaseColor: '#f59e0b' },
   PostToolUse:         { desc: '工具调用成功后执行',             phase: '调用后',  phaseColor: '#10b981' },
