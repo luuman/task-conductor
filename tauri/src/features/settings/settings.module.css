@@ -689,8 +689,8 @@
 
 /* ── 规则 chip（CLAUDE.md）── */
 .ruleChipsWaterfall {
-  columns: 2;
-  column-gap: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .ruleChip {
