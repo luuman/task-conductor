@@ -724,45 +724,6 @@
   white-space: normal;
 }
 
-/* ── CLAUDE.md 源文件卡片 ── */
-.mdSourceCard {
-  border-radius: 8px;
-  border: 1px solid var(--tc-border);
-  background: var(--tc-content-bg);
-  overflow: hidden;
-}
-
-.mdSourceCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--tc-border);
-  background: var(--tc-panel-bg);
-}
-
-.mdSourceLabel {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--tc-foreground-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.mdSourceSize {
-  font-size: 10px;
-  color: var(--tc-foreground-secondary);
-  font-family: 'Geist Mono', monospace;
-}
-
-.mdSourceBody {
-  padding: 12px;
-  max-height: 320px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--tc-border) transparent;
-}
-
 /* ── Hooks 3×3 卡片 ── */
 .hooksGrid {
   display: grid;
