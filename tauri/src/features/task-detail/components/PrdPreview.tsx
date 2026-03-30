@@ -6,19 +6,28 @@ interface Props {
   title: string
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function renderList(items: string[] | undefined): string {
   if (!items || items.length === 0) return '*待补充*'
-  return items.map(i => `- ${i}`).join('\n')
+  return items.map(i => `- ${escapeHtml(i)}`).join('\n')
 }
 
 function fieldsToMarkdown(title: string, fields: RequirementFields): string {
   return `## ${title}
 
 ### 背景
-${fields.background || '*待补充*'}
+${escapeHtml(fields.background || '*待补充*')}
 
 ### 目标用户
-${fields.target_users || '*待补充*'}
+${escapeHtml(fields.target_users || '*待补充*')}
 
 ### 核心功能
 ${renderList(fields.core_features)}
@@ -27,7 +36,7 @@ ${renderList(fields.core_features)}
 ${renderList(fields.acceptance_criteria)}
 
 ### 技术约束
-${fields.tech_constraints || '*无特殊约束*'}
+${escapeHtml(fields.tech_constraints || '*无特殊约束*')}
 `
 }
 
