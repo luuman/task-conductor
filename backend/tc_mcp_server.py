@@ -34,6 +34,8 @@ def _request(method: str, path: str, body: dict | None = None) -> dict:
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         return {"error": e.read().decode()}
+    except urllib.error.URLError as e:
+        return {"error": str(e.reason)}
 
 
 # ── MCP Protocol ──────────────────────────────────────────────────
