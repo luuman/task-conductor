@@ -739,9 +739,9 @@
 .hookListRow {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 7px;
   border: 1px solid var(--tc-border);
   border-top-width: 2px;
   background: var(--tc-content-bg);
