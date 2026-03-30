@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useTaskDetailData } from './hooks/useTaskDetailData'
@@ -6,6 +7,7 @@ import { ArtifactList } from './components/ArtifactList'
 import { RequirementWorkspace } from './components/RequirementWorkspace'
 import { RequirementFields } from '../../lib/api/types'
 import { Button } from '../../ui/button'
+import { useChatStore } from '../../lib/store/chat'
 import styles from './task-detail.module.css'
 
 const STATUS_COLORS: Record<string, string> = {
