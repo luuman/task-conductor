@@ -217,7 +217,7 @@ export default function VersionBoardPage() {
                         <div
                           key={task.id}
                           className={`${styles.taskCard} ${running ? styles.running : ''}`}
-                          onClick={() => navigate(`/tasks/${task.id}`)}
+                          onClick={() => navigate(`/task/${task.id}`)}
                         >
                           {running && <div className={styles.taskRunningBadge}>进行中</div>}
                           <div className={styles.taskCardTop}>
