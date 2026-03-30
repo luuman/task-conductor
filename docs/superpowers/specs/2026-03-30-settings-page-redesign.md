@@ -67,7 +67,7 @@
 - **底部**：hook 命令路径 + "重新安装"按钮（调用 `install-hooks.sh`）
 
 ### ⑥ 记忆文件
-- **数据**：读取 `~/.claude/projects/{project-hash}/memory/` 目录
+- **数据**：读取 `~/.claude/projects/{encoded-path}/memory/` 目录，其中 `encoded-path` 是将 `project.path` 中的 `/` 替换为 `-`（如 `/home/user/foo` → `-home-user-foo`）
 - **分类**：user / feedback / project / reference（读取每个文件 frontmatter 的 `type` 字段）
 - **显示**：2×2 分类格子卡片，每格显示类型徽章、数量、条目名列表
 
