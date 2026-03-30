@@ -381,12 +381,13 @@ export function FloatingAssistant() {
     store.setCurrentReply('')
 
     apiRef.current.getTranscript(session.session_id).then(({ messages: msgs }) => {
+      console.log('[FA] getTranscript ok', session.session_id, 'msgs:', msgs?.length, 'historyRef:', historyLoadRef.current)
       if (historyLoadRef.current === session.session_id) {
         useChatStore.getState().setMessages(msgs ?? [])
         tabCacheRef.current.set(activeTabId, { messages: msgs ?? [], sessionId: session.session_id })
       }
-    }).catch(() => {
-      // 加载失败保持空状态，显示 EmptyState
+    }).catch((err) => {
+      console.error('[FA] getTranscript failed', session.session_id, err)
     })
   }, [activeTabId])
 
