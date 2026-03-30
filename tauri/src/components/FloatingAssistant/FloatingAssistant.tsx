@@ -377,17 +377,9 @@ export function FloatingAssistant() {
     setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, type: 'session', title, sessionId: session.session_id } : t))
 
     isFirstLoadRef.current = true
+    // useSessionData 内部会通过 API 加载 transcript，FA 直接读 sessionTranscript 展示
+    // 不写入 useChatStore.messages，避免与 chat 页面共享缓存
     sharedSelectSession(session.session_id)
-    const store = useChatStore.getState()
-    store.setCurrentReply('')
-    store.setClaudeSessionId(session.session_id)
-    apiRef.current.getTranscript(session.session_id).then(({ messages: msgs }) => {
-      if (!msgs?.length) return
-      if (useChatStore.getState().claudeSessionId === session.session_id) {
-        useChatStore.getState().setMessages(msgs)
-        tabCacheRef.current.set(activeTabId, { messages: msgs, sessionId: session.session_id })
-      }
-    }).catch(() => {})
   }, [activeTabId, sharedSelectSession])
 
   // 首条消息时更新 tab 标题
