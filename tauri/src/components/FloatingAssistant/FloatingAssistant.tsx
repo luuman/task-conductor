@@ -159,6 +159,8 @@ export function FloatingAssistant() {
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null)
   const repoUrlRef = useRef('')
   const apiRef = useRef(new HttpAdapter('local-http'))
+  // 用于历史会话加载的竞态保护（不复用 claudeSessionId，避免干扰当前活跃对话）
+  const historyLoadRef = useRef<string | null>(null)
 
   // ── Tab 状态 ──
   const [tabs, setTabs] = useState<ChatTab[]>(() => [{ id: uid(), type: 'new', title: '新对话' }])
