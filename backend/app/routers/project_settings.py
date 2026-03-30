@@ -83,6 +83,7 @@ def get_claude_config(project_id: int, db: Session = Depends(get_db)):
         result["project_root"] = {
             "path": str(root_md),
             "size": root_md.stat().st_size,
+            "content": content,
             "rules": _extract_rules(content),
         }
 
@@ -93,6 +94,7 @@ def get_claude_config(project_id: int, db: Session = Depends(get_db)):
         result["project_dot"] = {
             "path": str(dot_md),
             "size": dot_md.stat().st_size,
+            "content": content,
             "rules": _extract_rules(content),
         }
 
@@ -103,6 +105,7 @@ def get_claude_config(project_id: int, db: Session = Depends(get_db)):
         result["global"] = {
             "path": str(global_md),
             "size": global_md.stat().st_size,
+            "content": content,
             "rules": _extract_rules(content),
         }
 
