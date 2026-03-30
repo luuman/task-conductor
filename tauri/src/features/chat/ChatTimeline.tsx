@@ -746,13 +746,9 @@ export function ChatTimeline({ messages, currentReply, style }: ChatTimelineProp
       {segments.map((seg, i) =>
         seg.type === 'user' ? (
           <div key={i} className={s.turnSection}>
-            <div className={s.userMsgRow}>
-              <div className={s.queryPill}>
-                <div className={s.queryPillBody}>
-                  <UserMsgBody text={seg.text} />
-                </div>
-              </div>
-            </div>
+            <UserMsgRow rawText={seg.rawText}>
+              <div className={s.userText}><RichText text={seg.text} /></div>
+            </UserMsgRow>
           </div>
         ) : seg.type === 'notification' ? (
           <TaskNotifBanner key={i} status={seg.status} summary={seg.summary} taskId={seg.taskId} />
