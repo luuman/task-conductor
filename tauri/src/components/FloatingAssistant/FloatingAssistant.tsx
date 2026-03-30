@@ -151,8 +151,6 @@ export function FloatingAssistant() {
     pageContext, position, minimize, restore, close,
     setSystemPrompt, setPosition, setProjectCwd, setInputDraft,
   } = useChatStore()
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const isFirstLoadRef = useRef(true)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
