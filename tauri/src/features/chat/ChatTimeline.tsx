@@ -407,7 +407,7 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
   const toolMap = useMemo(() => buildToolLabelMap(t), [t])
   const catMap = useMemo(() => buildCatLabelMap(t), [t])
   const variant = 2 as const
-  if (!step.toolResult && !step.oldString) return null
+  if (!step.toolResult && !step.oldString && step.category !== 'agent') return null
 
   const filePath = String(step.toolInput?.file_path || '')
   const fileName = filePath.split('/').pop() || ''
@@ -439,13 +439,24 @@ function SingleResultBlock({ step }: { step: TimelineStep }) {
     const stripped = step.toolResult.replace(/^ *\d+[→\t]/gm, '')
     return <CodeBlock code={stripped} lang={lang} icon={icon} action={action} fileName={fileName} variant={variant} pillColor={color} />
   }
-  if (step.category === 'agent' && step.toolResult) {
+  if (step.category === 'agent') {
     const desc = String(step.toolInput?.description || step.toolDetail || '').slice(0, 80)
-    return (
-      <CodeBlock icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
-        <RichTextBlock text={step.toolResult} />
-      </CodeBlock>
-    )
+    const prompt = String(step.toolInput?.prompt || step.toolInput?.task || '')
+    if (step.toolResult) {
+      return (
+        <CodeBlock code={step.toolResult} icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+          <RichTextBlock text={step.toolResult} />
+        </CodeBlock>
+      )
+    }
+    if (prompt) {
+      return (
+        <CodeBlock icon={icon} action={action} fileName={desc} variant={variant} pillColor={color}>
+          <RichTextBlock text={prompt} />
+        </CodeBlock>
+      )
+    }
+    return null
   }
   if (step.category === 'bash' && step.toolResult) {
     const cmd = String(step.toolInput?.command || '').slice(0, 80)
