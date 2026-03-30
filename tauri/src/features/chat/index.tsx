@@ -14,11 +14,10 @@ import i18n from '../../i18n'
 import { useSessionData, type QuestionItem } from '../../components/SessionChat/useSessionData'
 import { useAppStore } from '../../lib/store/app'
 import {
-  UserMsgRow, RichText, InlineDomChips, parseDomContextChips,
+  UserMsgRow, RichText,
   StyleA, StyleB, StyleD, StyleG, StyleH, RENDERERS,
-  badgeCls, badgeLabel, dotColor, catIcon,
-  buildCatLabelMap, buildToolLabelMap, groupConsecutiveSameType,
-  ResultBlock, type StyleKey,
+  dotColor, buildCatLabelMap, groupConsecutiveSameType,
+  type StyleKey,
 } from './ChatTimeline'
 import '../../styles/hljs-ayu-dark.css'
 import s from './chat-report.module.css'
