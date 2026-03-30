@@ -15,7 +15,7 @@ interface MemoryPanelProps {
 
 export function MemoryPanel({ data, isLoading }: MemoryPanelProps) {
   if (isLoading) {
-    return <div style={{ fontSize: 12, color: 'var(--tc-foreground-secondary)' }}>加载中...</div>
+    return <div className={styles.emptyHint}>加载中...</div>
   }
 
   const categories: Array<keyof typeof CATEGORY_META> = ['user', 'feedback', 'project', 'reference']
@@ -26,20 +26,26 @@ export function MemoryPanel({ data, isLoading }: MemoryPanelProps) {
         const meta = CATEGORY_META[cat]
         const entries = data?.[cat] ?? []
         return (
-          <div key={cat} className={styles.memoryCell}>
+          <div
+            key={cat}
+            className={styles.memoryCellColored}
+            style={{ '--cell-accent': meta.color } as React.CSSProperties}
+          >
             <span
               className={styles.memoryCellBadge}
               style={{ background: meta.bg, color: meta.color }}
             >
               {meta.label}
             </span>
-            <div className={styles.memoryCellCount}>{entries.length}</div>
+            <div className={styles.memoryCellCountColored}>
+              {entries.length}
+            </div>
             <ul className={styles.memoryCellList}>
               {entries.slice(0, 5).map((e) => (
                 <li key={e.file} title={e.description}>{e.name}</li>
               ))}
               {entries.length > 5 && (
-                <li style={{ opacity: 0.5 }}>+{entries.length - 5} 更多</li>
+                <li className={styles.memoryCellListMore}>+{entries.length - 5} 更多</li>
               )}
             </ul>
           </div>
