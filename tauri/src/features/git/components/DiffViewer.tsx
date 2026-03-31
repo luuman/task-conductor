@@ -167,7 +167,7 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
         {!isLoading && !hasContent && (
           <div className={styles.placeholder}>
             <div className={styles.placeholderIcon}>&#128269;</div>
-            <div>{activeTab === 'branches' ? t('git.noBranch') : t('git.noChanges')}</div>
+            <div>{virtualBranch ? t('git.noBranch') : t('git.noChanges')}</div>
           </div>
         )}
         {!isLoading && hasContent && diffMode === 'file' && (
