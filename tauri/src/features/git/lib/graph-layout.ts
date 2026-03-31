@@ -15,7 +15,7 @@ export interface CommitGraphRow {
   segments: GraphSegment[]   // 此行的连线段（不含节点圆）
 }
 
-const COLORS = ['#4e9eff', '#4ec9b0', '#c586c0', '#f48771', '#dcdcaa', '#ce9178']
+const COLORS = ['#7c6af5', '#4ade80', '#60a5fa', '#f87171', '#fbbf24', '#fb923c']
 
 function laneColor(lane: number): string {
   return COLORS[lane % COLORS.length]
