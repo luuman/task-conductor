@@ -95,7 +95,8 @@ export function ChangesPanel() {
                   type="checkbox"
                   className={`${css.chk} ${css.staged}`}
                   checked
-                  onChange={() => handleUnstage([f.path])}
+                  readOnly
+                  onClick={e => { e.stopPropagation(); handleUnstage([f.path]) }}
                 />
                 <div className={css.filePath}>
                   <div className={css.fileDir}>{dir}</div>
