@@ -11,47 +11,19 @@
   justify-content: space-between;
   height: 40px;
   padding: 0 12px;
-  border-bottom: 1px solid var(--tc-border);
-  background: var(--tc-bg-secondary);
+  border-bottom: 1px solid var(--tc-border, #1e1e1e);
+  background: var(--tc-bg-secondary, #111115);
   flex-shrink: 0;
 }
 
 .label {
   font-size: 12px;
-  color: var(--tc-foreground-secondary);
+  color: var(--tc-foreground-secondary, #606070);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
   margin-right: 12px;
-}
-
-.modeSwitch {
-  display: flex;
-  gap: 2px;
-  background: var(--tc-bg-primary);
-  border-radius: 4px;
-  padding: 2px;
-  flex-shrink: 0;
-}
-
-.modeBtn {
-  padding: 3px 8px;
-  background: none;
-  border: none;
-  border-radius: 3px;
-  font-size: 11px;
-  color: var(--tc-foreground-secondary);
-  cursor: pointer;
-}
-
-.modeBtn:hover {
-  color: var(--tc-foreground-primary);
-}
-
-.modeBtnActive {
-  background: var(--tc-bg-hover);
-  color: var(--tc-foreground-primary);
 }
 
 .editorArea {
@@ -66,7 +38,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--tc-foreground-secondary);
+  color: var(--tc-foreground-secondary, #606070);
   font-size: 14px;
   gap: 8px;
 }
@@ -81,27 +53,27 @@
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
-  border-top: 1px solid var(--tc-border);
-  background: var(--tc-bg-secondary);
+  border-top: 1px solid var(--tc-border, #1e1e1e);
+  background: var(--tc-bg-secondary, #111115);
   font-size: 12px;
-  color: var(--tc-accent);
+  color: var(--tc-accent, #7c6af5);
   flex-shrink: 0;
 }
 
 .statusDetail {
-  color: var(--tc-foreground-secondary);
+  color: var(--tc-foreground-secondary, #606070);
   font-size: 11px;
 }
 
-/* ── v12 新增：文件名芯片 + 文件查看器覆盖 ── */
+/* ── topbar with file chip ── */
 .topbar {
   height: 34px;
   padding: 0 10px;
   display: flex;
   align-items: center;
   gap: 7px;
-  border-bottom: 1px solid var(--tc-border, #252535);
-  background: var(--tc-bg-secondary, #1a1a2a);
+  border-bottom: 1px solid var(--tc-border, #1e1e1e);
+  background: var(--tc-bg-secondary, #111115);
   flex-shrink: 0;
 }
 
@@ -109,53 +81,57 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: var(--tc-bg-tertiary, #252535);
-  border: 1px solid var(--tc-border, #2e2e42);
+  background: var(--tc-bg-hover, #191920);
+  border: 1px solid var(--tc-border, #1e1e1e);
   border-radius: 5px;
   padding: 3px 8px;
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color 0.1s;
 }
-.fileChip:hover { border-color: var(--tc-accent, #4e9eff); }
-.fileChip:hover .fileOpenIcon { color: var(--tc-accent, #4e9eff); }
+.fileChip:hover { border-color: var(--tc-accent, #7c6af5); }
+.fileChip:hover .fileOpenIcon { color: var(--tc-accent, #7c6af5); }
 
-.chipName { font-size: 11.5px; font-family: 'SF Mono', 'Consolas', monospace; color: var(--tc-foreground, #ccc); font-weight: 500; }
-.chipDir  { font-size: 9.5px; color: var(--tc-foreground-disabled, #3a3a52); }
-.fileOpenIcon { color: var(--tc-foreground-disabled, #3a3a52); transition: color 0.1s; }
+.chipName { font-size: 11.5px; font-family: 'SF Mono', 'Consolas', monospace; color: var(--tc-foreground, #e8e8f0); font-weight: 500; }
+.chipDir  { font-size: 9.5px; color: var(--tc-foreground-disabled, #444); }
+.fileOpenIcon { color: var(--tc-foreground-disabled, #444); transition: color 0.1s; }
 
 .spacer { flex: 1; }
 
 .taskLink {
-  background: rgba(232,160,0,.1);
-  color: #e8a000;
+  background: rgba(251,191,36,.1);
+  color: var(--tc-warning, #fbbf24);
   font-size: 10px;
   padding: 2px 7px;
   border-radius: 4px;
   cursor: pointer;
   flex-shrink: 0;
 }
-.taskLink:hover { background: rgba(232,160,0,.18); }
+.taskLink:hover { background: rgba(251,191,36,.18); }
 
 .modeGroup { display: flex; gap: 2px; }
 .modeToggleBtn {
-  background: var(--tc-bg-tertiary, #252535);
-  border: 1px solid var(--tc-border, #2e2e42);
+  background: var(--tc-bg-hover, #191920);
+  border: 1px solid var(--tc-border, #1e1e1e);
   border-radius: 4px;
   padding: 2px 8px;
   font-size: 10px;
-  color: var(--tc-foreground-disabled, #555);
+  color: var(--tc-foreground-disabled, #444);
   cursor: pointer;
   font-family: inherit;
 }
-.modeToggleBtn.active { color: var(--tc-foreground, #ccc); background: var(--tc-bg-active, #2a2a40); border-color: var(--tc-border-strong, #3a3a58); }
+.modeToggleBtn.active {
+  color: var(--tc-foreground, #e8e8f0);
+  background: rgba(124,106,245,.12);
+  border-color: var(--tc-accent, #7c6af5);
+}
 
 /* File viewer overlay */
 .fileViewer {
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: var(--tc-bg-code, #1e1e2e);
+  background: var(--tc-bg-primary, #0c0c0e);
   display: flex;
   flex-direction: column;
   animation: fvSlide 0.15s ease;
@@ -170,17 +146,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-bottom: 1px solid var(--tc-border, #252535);
-  background: var(--tc-bg-secondary, #1a1a2a);
+  border-bottom: 1px solid var(--tc-border, #1e1e1e);
+  background: var(--tc-bg-secondary, #111115);
   flex-shrink: 0;
 }
-.fvLabel { font-size: 10px; color: var(--tc-foreground-disabled, #2e2e48); }
-.fvPath  { font-size: 11px; color: var(--tc-foreground-muted, #555); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fvLabel { font-size: 10px; color: var(--tc-foreground-disabled, #333); }
+.fvPath  { font-size: 11px; color: var(--tc-foreground-secondary, #606070); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fvClose {
   width: 22px; height: 22px; border-radius: 4px;
-  background: var(--tc-bg-tertiary, #252535); border: 1px solid var(--tc-border, #2e2e44);
+  background: var(--tc-bg-hover, #191920); border: 1px solid var(--tc-border, #1e1e1e);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--tc-foreground-muted, #555); font-size: 11px;
+  cursor: pointer; color: var(--tc-foreground-secondary, #606070); font-size: 11px;
 }
-.fvClose:hover { color: #f48771; border-color: rgba(244,135,113,.4); }
+.fvClose:hover { color: var(--tc-error, #f87171); border-color: rgba(248,113,113,.4); }
 .fvBody { flex: 1; overflow: hidden; }
