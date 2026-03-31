@@ -60,6 +60,21 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   const diffMode = useGitStore((s) => s.diffMode)
   const setDiffMode = useGitStore((s) => s.setDiffMode)
   const activeTab = useGitStore((s) => s.activeTab)
+  const fileViewerOpen = useGitStore((s) => s.fileViewerOpen)
+  const setFileViewerOpen = useGitStore((s) => s.setFileViewerOpen)
+  const selectedTaskId = useGitStore((s) => s.selectedTaskId)
+  const projectId = useAppStore((s) => s.activeProjectId)
+
+  const { data: fileData } = useQuery({
+    queryKey: ['git-file-content', projectId, selectedFile],
+    queryFn: () => api.gitShow(Number(projectId!), 'HEAD', selectedFile!),
+    enabled: !!projectId && !!selectedFile && fileViewerOpen,
+  })
+
+  const fileName = selectedFile ? selectedFile.split('/').pop() ?? selectedFile : null
+  const fileDir = selectedFile?.includes('/')
+    ? selectedFile.slice(0, selectedFile.lastIndexOf('/') + 1)
+    : ''
 
   // Branch diff (virtual browsing)
   const branchDiff = useBranchDiff(
