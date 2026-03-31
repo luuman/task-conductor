@@ -2,8 +2,8 @@
 .nav {
   width: 190px;
   flex-shrink: 0;
-  background: var(--tc-bg-secondary, #13131c);
-  border-right: 1px solid var(--tc-border, #24242e);
+  background: var(--tc-bg-secondary, #111115);
+  border-right: 1px solid var(--tc-border, #1e1e1e);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -12,7 +12,7 @@
 
 .repoHdr {
   padding: 9px 12px;
-  border-bottom: 1px solid var(--tc-border, #1e1e28);
+  border-bottom: 1px solid var(--tc-border, #1e1e1e);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -21,7 +21,7 @@
 
 .repoName {
   font-size: 12px;
-  color: var(--tc-foreground-secondary, #c0c0d0);
+  color: var(--tc-foreground-secondary, #606070);
   font-weight: 600;
   flex: 1;
   overflow: hidden;
@@ -36,7 +36,7 @@
 }
 
 .scroll::-webkit-scrollbar { width: 3px; }
-.scroll::-webkit-scrollbar-thumb { background: var(--tc-border, #2a2a3a); }
+.scroll::-webkit-scrollbar-thumb { background: var(--tc-border, #252525); }
 
 /* Section group header */
 .grpHdr {
@@ -47,7 +47,7 @@
   cursor: pointer;
   user-select: none;
 }
-.grpHdr:hover .grpTxt { color: var(--tc-foreground-muted, #666); }
+.grpHdr:hover .grpTxt { color: var(--tc-foreground-secondary, #606070); }
 
 .grpChev {
   width: 12px;
@@ -55,20 +55,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--tc-border-strong, #2e2e42);
+  color: var(--tc-foreground-disabled, #333);
   transition: transform 0.12s;
   flex-shrink: 0;
 }
-.grpChev.open { transform: rotate(90deg); color: var(--tc-foreground-muted, #444); }
+.grpChev.open { transform: rotate(90deg); color: var(--tc-foreground-secondary, #606070); }
 
 .grpTxt {
   font-size: 9.5px;
-  color: var(--tc-foreground-disabled, #2e2e42);
+  color: var(--tc-foreground-disabled, #333);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   flex: 1;
 }
-.grpCnt { font-size: 9px; color: var(--tc-foreground-disabled, #2e2e42); }
+.grpCnt { font-size: 9px; color: var(--tc-foreground-disabled, #333); }
 
 .grpBody { }
 .grpBody.collapsed { display: none; }
@@ -81,12 +81,12 @@
   gap: 4px;
   cursor: pointer;
   font-size: 11px;
-  color: var(--tc-foreground-muted, #5a5a78);
+  color: var(--tc-foreground-secondary, #606070);
   white-space: nowrap;
   overflow: hidden;
 }
-.tnode:hover { background: rgba(255,255,255,.03); color: var(--tc-foreground-secondary, #999); }
-.tnode.current { color: var(--tc-accent, #4e9eff); background: rgba(78,158,255,.06); }
+.tnode:hover { background: var(--tc-bg-hover, #191920); color: var(--tc-foreground, #e8e8f0); }
+.tnode.current { color: var(--tc-accent, #7c6af5); background: rgba(124,106,245,.07); }
 .tnode.child { padding-left: 18px; }
 .tnode.child2 { padding-left: 26px; }
 
@@ -96,26 +96,26 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.dotCur  { background: #4ec9b0; }
+.dotCur  { background: var(--tc-success, #4ade80); }
 .dotLoc  { background: #555; }
-.dotRem  { background: #9cdcfe; }
-.dotTag  { background: #dcdcaa; }
-.dotStash{ background: #ce9178; }
-.dotSub  { background: #c586c0; }
+.dotRem  { background: var(--tc-info, #60a5fa); }
+.dotTag  { background: var(--tc-warning, #fbbf24); }
+.dotStash{ background: #fb923c; }
+.dotSub  { background: var(--tc-accent, #7c6af5); }
 
 .tname { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 
 .badgeCur {
-  background: rgba(78,201,176,.12);
-  color: #4ec9b0;
+  background: rgba(74,222,128,.12);
+  color: var(--tc-success, #4ade80);
   font-size: 8.5px;
   padding: 1px 4px;
   border-radius: 3px;
   flex-shrink: 0;
 }
 .badgeTask {
-  background: rgba(232,160,0,.1);
-  color: #e8a000;
+  background: rgba(251,191,36,.1);
+  color: var(--tc-warning, #fbbf24);
   font-size: 8.5px;
   padding: 1px 4px;
   border-radius: 3px;
@@ -124,7 +124,7 @@
 
 /* Footer */
 .footer {
-  border-top: 1px solid var(--tc-border, #1e1e28);
+  border-top: 1px solid var(--tc-border, #1e1e1e);
   flex-shrink: 0;
 }
 .cfgRow {
@@ -135,9 +135,9 @@
   color: var(--tc-foreground-disabled, #444);
   font-size: 11px;
   cursor: pointer;
-  border-bottom: 1px solid var(--tc-border-subtle, #1a1a24);
+  border-bottom: 1px solid var(--tc-border, #1e1e1e);
 }
-.cfgRow:hover { background: rgba(255,255,255,.03); color: var(--tc-foreground-muted, #888); }
+.cfgRow:hover { background: var(--tc-bg-hover, #191920); color: var(--tc-foreground, #e8e8f0); }
 
 .branchRow {
   padding: 5px 8px;
@@ -147,24 +147,24 @@
 }
 .branchChip {
   flex: 1;
-  background: var(--tc-bg-tertiary, #1e1e2a);
-  border: 1px solid var(--tc-border, #2a2a3a);
+  background: var(--tc-bg-hover, #191920);
+  border: 1px solid var(--tc-border, #1e1e1e);
   border-radius: 5px;
   padding: 3px 7px;
   font-size: 10px;
-  color: #4ec9b0;
+  color: var(--tc-success, #4ade80);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .branchBtn {
-  background: var(--tc-bg-tertiary, #1e1e2a);
-  border: 1px solid var(--tc-border, #2a2a3a);
+  background: var(--tc-bg-hover, #191920);
+  border: 1px solid var(--tc-border, #1e1e1e);
   border-radius: 4px;
   padding: 3px 7px;
   font-size: 10px;
-  color: var(--tc-foreground-muted, #555);
+  color: var(--tc-foreground-secondary, #606070);
   cursor: pointer;
   flex-shrink: 0;
 }
-.branchBtn:hover { color: var(--tc-foreground, #ccc); border-color: var(--tc-accent, #4e9eff); }
+.branchBtn:hover { color: var(--tc-foreground, #e8e8f0); border-color: var(--tc-accent, #7c6af5); }
