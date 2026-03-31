@@ -67,7 +67,7 @@
 
 /* ── topbar with file chip ── */
 .topbar {
-  height: 34px;
+  height: 32px;
   padding: 0 10px;
   display: flex;
   align-items: center;
