@@ -1,10 +1,13 @@
+import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DiffEditor, Editor } from '@monaco-editor/react'
+import { DiffEditor, Editor, type Monaco } from '@monaco-editor/react'
 import { useQuery } from '@tanstack/react-query'
 import { useGitStore } from '../../../lib/store/git'
 import { useAppStore } from '@/lib/store/app'
 import { api } from '@/lib/api'
 import { useBranchDiff, useWorkingDiff, useCommitDiff } from '../hooks/useDiff'
+import { useTheme } from '@/ui/theme/useTheme'
+import { registerTcTheme } from '@/lib/monaco-theme'
 import styles from './diff-viewer.module.css'
 
 const EXT_TO_LANG: Record<string, string> = {
