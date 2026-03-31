@@ -11,7 +11,8 @@
 }
 
 .repoHdr {
-  padding: 9px 12px;
+  height: 32px;
+  padding: 0 10px;
   border-bottom: 1px solid var(--tc-border);
   display: flex;
   align-items: center;
@@ -40,7 +41,7 @@
 
 /* Section group header */
 .grpHdr {
-  padding: 5px 10px 3px;
+  padding: 4px 10px;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -75,12 +76,12 @@
 
 /* Branch node */
 .tnode {
-  padding: 2.5px 8px;
+  padding: 3px 10px;
   display: flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--tc-foreground-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -111,7 +112,7 @@
 .badgeCur {
   background: color-mix(in srgb, var(--tc-success) 12%, transparent);
   color: var(--tc-success);
-  font-size: 8.5px;
+  font-size: 9px;
   padding: 1px 4px;
   border-radius: 3px;
   flex-shrink: 0;
@@ -119,7 +120,7 @@
 .badgeTask {
   background: color-mix(in srgb, var(--tc-warning) 12%, transparent);
   color: var(--tc-warning);
-  font-size: 8.5px;
+  font-size: 9px;
   padding: 1px 4px;
   border-radius: 3px;
   flex-shrink: 0;
@@ -143,7 +144,7 @@
 .cfgRow:hover { background: var(--tc-bg-hover); color: var(--tc-foreground); }
 
 .branchRow {
-  padding: 5px 8px;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -154,7 +155,7 @@
   border: 1px solid var(--tc-border);
   border-radius: 5px;
   padding: 3px 7px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--tc-success);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -165,7 +166,7 @@
   border: 1px solid var(--tc-border);
   border-radius: 4px;
   padding: 3px 7px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--tc-foreground-secondary);
   cursor: pointer;
   flex-shrink: 0;
