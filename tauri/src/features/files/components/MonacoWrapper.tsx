@@ -2,6 +2,7 @@ import { useRef, useCallback, useEffect } from 'react'
 import Editor, { type OnMount, type Monaco } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useTheme } from '../../../ui/theme/useTheme'
+import { registerTcTheme } from '../../../lib/monaco-theme'
 
 interface MonacoWrapperProps {
   path: string
@@ -10,65 +11,6 @@ interface MonacoWrapperProps {
   onContentChange: (value: string) => void
   onSave: () => void
   onInlineAI?: (selection: { startLine: number; endLine: number }) => void
-}
-
-function registerTcTheme(
-  monaco: Monaco,
-  themeType: 'dark' | 'light',
-  colors: Record<string, string>,
-) {
-  const bg      = colors['base.bg-primary']
-  const bgPanel = colors['base.bg-secondary']
-  const bgHover = colors['base.bg-hover']
-  const fg      = colors['base.fg-primary']
-  const fgSec   = colors['base.fg-secondary']
-  const accent  = colors['base.accent']
-  const border  = colors['base.border']
-
-  const toAlpha = (hex: string, a: number) => {
-    const h = hex.replace('#', '')
-    const n = h.length === 3
-      ? h.split('').map(c => c + c).join('')
-      : h
-    return `#${n}${Math.round(a * 255).toString(16).padStart(2, '0')}`
-  }
-
-  monaco.editor.defineTheme('tc-theme', {
-    base: themeType === 'dark' ? 'vs-dark' : 'vs',
-    inherit: true,
-    rules: [],
-    colors: {
-      'editor.background':                      bg,
-      'editor.foreground':                      fg,
-      'editorLineNumber.foreground':            fgSec,
-      'editorLineNumber.activeForeground':      fg,
-      'editor.selectionBackground':             toAlpha(accent, 0.25),
-      'editor.inactiveSelectionBackground':     toAlpha(accent, 0.12),
-      'editor.lineHighlightBackground':         bgHover,
-      'editor.lineHighlightBorder':             '#00000000',
-      'editorCursor.foreground':                accent,
-      'editorIndentGuide.background1':          toAlpha(border, 0.8),
-      'editorIndentGuide.activeBackground1':    fgSec,
-      'editorRuler.foreground':                 border,
-      'editorWhitespace.foreground':            toAlpha(fgSec, 0.3),
-      'editorGutter.background':                bgPanel,
-      'minimap.background':                     bgPanel,
-      'minimapSlider.background':               toAlpha(bgHover, 0.5),
-      'minimapSlider.hoverBackground':          toAlpha(fgSec, 0.3),
-      'scrollbarSlider.background':             toAlpha(bgHover, 0.8),
-      'scrollbarSlider.hoverBackground':        toAlpha(fgSec, 0.4),
-      'scrollbarSlider.activeBackground':       toAlpha(fgSec, 0.6),
-      'editorWidget.background':                bgPanel,
-      'editorWidget.border':                    border,
-      'editorSuggestWidget.background':         bgPanel,
-      'editorSuggestWidget.border':             border,
-      'editorSuggestWidget.selectedBackground': toAlpha(accent, 0.2),
-      'input.background':                       bg,
-      'input.border':                           border,
-      'focusBorder':                            accent,
-    },
-  })
-  monaco.editor.setTheme('tc-theme')
 }
 
 export function MonacoWrapper({
