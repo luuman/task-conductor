@@ -141,8 +141,8 @@
   to   { opacity: 1; transform: none; }
 }
 .fvTopbar {
-  height: 34px;
-  padding: 0 12px;
+  height: 32px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   gap: 8px;
