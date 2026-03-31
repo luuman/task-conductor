@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { DiffEditor } from '@monaco-editor/react'
+import { DiffEditor, Editor } from '@monaco-editor/react'
+import { useQuery } from '@tanstack/react-query'
 import { useGitStore } from '../../../lib/store/git'
+import { useAppStore } from '@/lib/store/app'
+import { api } from '@/lib/api'
 import { useBranchDiff, useWorkingDiff, useCommitDiff } from '../hooks/useDiff'
 import styles from './diff-viewer.module.css'
 
