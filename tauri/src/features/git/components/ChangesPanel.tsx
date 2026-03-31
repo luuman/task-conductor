@@ -200,13 +200,13 @@ export function ChangesPanel() {
         </div>
         <button
           className={`${css.footBtn} ${css.primary}`}
-          onClick={() => { if (projectId) api.gitPush(pid) }}
+          onClick={() => { if (pid) api.gitPush(pid) }}
         >
           Push
         </button>
         <button
           className={css.footBtn}
-          onClick={() => { if (projectId) { api.gitPull(pid); invalidate() } }}
+          onClick={() => { if (pid) { api.gitPull(pid); invalidate() } }}
         >
           Pull
         </button>
