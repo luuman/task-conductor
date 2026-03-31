@@ -35,10 +35,25 @@ export function CommitHistory() {
     setSelectedCommit,
   } = useGitStore()
 
+  const projectId = useAppStore((s) => s.activeProjectId)
+  const { data: status } = useGitStatus()
+  const currentBranch = status?.branch
+
   const { data: allCommits = [] } = useGitLog(200)
 
+  // For 'current' scope, fetch commits filtered to current branch
+  const { data: branchCommits = [] } = useQuery({
+    queryKey: ['git-log', projectId, 200, currentBranch],
+    queryFn: () => api.gitLog(Number(projectId!), 200, currentBranch),
+    enabled: !!projectId && historyScope === 'current' && !!currentBranch,
+    staleTime: 5_000,
+  })
+
   const filtered = useMemo(() => {
-    let list = allCommits
+    let list = historyScope === 'current' ? branchCommits : allCommits
+    if (historyScope === 'other' && currentBranch) {
+      list = allCommits.filter(c => !c.refs?.includes(currentBranch))
+    }
     if (historySearch) {
       const q = historySearch.toLowerCase()
       list = list.filter(c =>
@@ -46,7 +61,7 @@ export function CommitHistory() {
       )
     }
     return list
-  }, [allCommits, historySearch])
+  }, [allCommits, branchCommits, historySearch, historyScope, currentBranch])
 
   const rows = useMemo(() => computeGraphLayout(filtered), [filtered])
 
