@@ -42,10 +42,24 @@ export const useGitStore = create<GitState>()((set) => ({
   diffMode: 'side',
   selectedFile: null,
 
+  navSections: { local: true, remote: true, tags: false, stash: true, submodules: false, subtrees: false },
+  selectedCommit: null,
+  historyScope: 'all',
+  historySearch: '',
+  fileViewerOpen: false,
+  changesCollapsed: false,
+
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedTask: (taskId, branch) =>
     set({ selectedTaskId: taskId, virtualBranch: branch, selectedFile: null }),
   setVirtualBranch: (branch) => set({ virtualBranch: branch, selectedFile: null }),
   setDiffMode: (mode) => set({ diffMode: mode }),
   setSelectedFile: (file) => set({ selectedFile: file }),
+
+  setNavSection: (key, open) => set(s => ({ navSections: { ...s.navSections, [key]: open } })),
+  setSelectedCommit: (hash) => set({ selectedCommit: hash, selectedFile: null }),
+  setHistoryScope: (scope) => set({ historyScope: scope }),
+  setHistorySearch: (q) => set({ historySearch: q }),
+  setFileViewerOpen: (open) => set({ fileViewerOpen: open }),
+  setChangesCollapsed: (collapsed) => set({ changesCollapsed: collapsed }),
 }))
