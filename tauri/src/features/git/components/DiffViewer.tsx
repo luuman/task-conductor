@@ -179,27 +179,9 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
             <div>{virtualBranch ? t('git.noBranch') : t('git.noChanges')}</div>
           </div>
         )}
-        {!isLoading && hasContent && diffMode === 'file' && (
+        {!isLoading && hasContent && (
           <DiffEditor
-            key={`file-${selectedFile}-${selectedCommit}-${virtualBranch}`}
-            original={original}
-            modified={modified}
-            language={language}
-            theme="vs-dark"
-            options={{
-              readOnly: true,
-              renderSideBySide: false,
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-              lineNumbers: 'on',
-              renderOverviewRuler: false,
-            }}
-          />
-        )}
-        {!isLoading && hasContent && diffMode !== 'file' && (
-          <DiffEditor
-            key={`${diffMode}-${selectedFile}-${selectedCommit}-${virtualBranch}`}
+            key={`${selectedFile}-${selectedCommit}-${virtualBranch}`}
             original={original}
             modified={modified}
             language={language}
