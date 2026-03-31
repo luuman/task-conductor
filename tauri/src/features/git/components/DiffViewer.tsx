@@ -59,7 +59,6 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   const selectedFile = useGitStore((s) => s.selectedFile)
   const diffMode = useGitStore((s) => s.diffMode)
   const setDiffMode = useGitStore((s) => s.setDiffMode)
-  const activeTab = useGitStore((s) => s.activeTab)
   const fileViewerOpen = useGitStore((s) => s.fileViewerOpen)
   const setFileViewerOpen = useGitStore((s) => s.setFileViewerOpen)
   const selectedTaskId = useGitStore((s) => s.selectedTaskId)
