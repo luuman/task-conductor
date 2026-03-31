@@ -78,11 +78,17 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   // Branch diff (virtual browsing) — active when virtualBranch is set
   const branchDiff = useBranchDiff(virtualBranch, virtualBranch ? selectedFile : null)
 
-  // Working directory diff — active when a file is selected (and not in branch/commit mode)
+  // Working directory diff — active when a file is selected (and not in branch mode)
   const workingDiff = useWorkingDiff(!virtualBranch && !selectedCommit ? selectedFile : null)
 
-  // Commit diff — active when a commit is selected
-  const commitDiff = useCommitDiff(selectedCommit)
+  // Commit + file diff — when commit selected AND file selected, show per-file diff
+  const commitFileDiff = useWorkingDiff(
+    selectedCommit && selectedFile ? selectedFile : null,
+    selectedCommit && selectedFile ? { commit: selectedCommit } : undefined,
+  )
+
+  // Commit diff (all files) — when commit selected but no specific file
+  const commitDiff = useCommitDiff(selectedCommit && !selectedFile ? selectedCommit : null)
 
   // Determine what to show: commit > branch > working-dir
   let original = ''
@@ -91,13 +97,16 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   let label = ''
 
   if (selectedCommit) {
-    if (commitDiff.data) {
-      const parsed = parseDiff(commitDiff.data)
+    const diff = selectedFile ? commitFileDiff : commitDiff
+    if (diff.data) {
+      const parsed = parseDiff(diff.data)
       original = parsed.original
       modified = parsed.modified
     }
-    isLoading = commitDiff.isLoading
-    label = `${t('git.log')}: ${selectedCommit.slice(0, 7)}`
+    isLoading = diff.isLoading
+    label = selectedFile
+      ? `${selectedCommit.slice(0, 7)} — ${selectedFile}`
+      : `${t('git.log')}: ${selectedCommit.slice(0, 7)}`
   } else if (virtualBranch && selectedFile) {
     original = branchDiff.original
     modified = branchDiff.modified
