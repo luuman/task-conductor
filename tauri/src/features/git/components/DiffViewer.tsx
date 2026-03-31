@@ -228,6 +228,31 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
             }}
           />
         )}
+
+        {/* File viewer overlay */}
+        {fileViewerOpen && selectedFile && (
+          <div className={styles.fileViewer}>
+            <div className={styles.fvTopbar}>
+              <span className={styles.fvLabel}>查看文件</span>
+              <span className={styles.fvPath}>{selectedFile}</span>
+              <button className={styles.fvClose} onClick={() => setFileViewerOpen(false)}>✕</button>
+            </div>
+            <div className={styles.fvBody}>
+              <Editor
+                height="100%"
+                language={getLang(selectedFile)}
+                value={fileData?.content ?? ''}
+                theme="vs-dark"
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: false },
+                  lineNumbers: 'on',
+                  scrollBeyondLastLine: false,
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Status bar */}
