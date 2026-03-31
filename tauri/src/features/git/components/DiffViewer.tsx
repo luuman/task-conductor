@@ -153,6 +153,10 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   const hasContent = original || modified
   const language = selectedFile ? getLang(selectedFile) : 'plaintext'
 
+  // Reset scroll to top when diff content changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { diffEditorRef.current?.revealLine(1) }, [original, modified])
+
   return (
     <div className={styles.container} style={{ position: 'relative' }}>
       {/* New v12 topbar with filename chip */}
