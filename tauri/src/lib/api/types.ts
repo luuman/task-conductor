@@ -448,7 +448,7 @@ export interface GitCommit {
   parents: string[]
   author: string
   date: string
-  refs: string
+  refs: string | null
   message: string
 }
 
