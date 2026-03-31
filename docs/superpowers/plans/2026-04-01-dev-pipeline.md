@@ -648,7 +648,24 @@ async getPipelineTasks(projectId: number): Promise<PipelineTask[]> {
 }
 ```
 
-同时在 `types.ts` 的 `ApiAdapter` interface 声明中添加对应方法签名（与 http.ts 保持一致）。
+同时补充两个已用但可能缺失的方法：
+
+```typescript
+// 更新任务状态（PATCH /api/tasks/{id}）
+async updateTask(taskId: number, data: Partial<PipelineTask>): Promise<PipelineTask> {
+  return this.fetch<PipelineTask>(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
+// 读取 tc 全局配置
+async getTcConfig(): Promise<Record<string, unknown>> {
+  return this.fetch<Record<string, unknown>>('/api/tc-config')
+}
+```
+
+在 `types.ts` 的 `ApiAdapter` interface 中同步添加这些方法签名。
 
 - [ ] **Step 3: TypeScript 检查**
 
