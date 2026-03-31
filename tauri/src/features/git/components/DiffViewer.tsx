@@ -144,6 +144,10 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
               className={`${styles.modeToggleBtn} ${diffMode === 'side' ? styles.active : ''}`}
               onClick={() => setDiffMode('side')}
             >并排</button>
+            <button
+              className={`${styles.modeToggleBtn} ${diffMode === 'file' ? styles.active : ''}`}
+              onClick={() => setDiffMode('file')}
+            >文件</button>
           </div>
         </div>
       )}
