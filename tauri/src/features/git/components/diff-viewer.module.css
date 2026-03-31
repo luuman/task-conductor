@@ -92,7 +92,7 @@
 .fileChip:hover { border-color: var(--tc-accent); }
 .fileChip:hover .fileOpenIcon { color: var(--tc-accent); }
 
-.chipName { font-size: 11.5px; font-family: 'SF Mono', 'Consolas', monospace; color: var(--tc-foreground); font-weight: 500; }
+.chipName { font-size: 12px; font-family: 'SF Mono', 'Consolas', monospace; color: var(--tc-foreground); font-weight: 500; }
 .chipDir  { font-size: 9.5px; color: var(--tc-fg-subtle); }
 .fileOpenIcon { color: var(--tc-fg-subtle); transition: color 0.1s; }
 
