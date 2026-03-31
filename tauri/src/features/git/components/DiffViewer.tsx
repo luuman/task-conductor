@@ -203,7 +203,8 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
             original={original}
             modified={modified}
             language={language}
-            theme="vs-dark"
+            theme="tc-theme"
+            onMount={handleMonacoMount}
             options={{
               readOnly: true,
               renderSideBySide: diffMode === 'side',
@@ -229,7 +230,8 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
                 height="100%"
                 language={getLang(selectedFile)}
                 value={fileData?.content ?? ''}
-                theme="vs-dark"
+                theme="tc-theme"
+                onMount={handleMonacoMount}
                 options={{
                   readOnly: true,
                   minimap: { enabled: false },
