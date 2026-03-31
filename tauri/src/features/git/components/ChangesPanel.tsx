@@ -38,31 +38,26 @@ export function ChangesPanel() {
   const totalCount = staged.length + unstaged.length + untracked.length
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ['git-status'] })
-    qc.invalidateQueries({ queryKey: ['git-log'] })
+    qc.invalidateQueries({ queryKey: ['git-status', projectId] })
+    qc.invalidateQueries({ queryKey: ['git-log', projectId] })
   }
 
-  const pid = Number(projectId!)
+  const pid = projectId ? Number(projectId) : null
 
   async function handleStage(files: string[]) {
+    if (!pid) return
     await api.gitStage(pid, files)
     invalidate()
   }
 
   async function handleUnstage(files: string[]) {
+    if (!pid) return
     await api.gitUnstage(pid, files)
     invalidate()
   }
 
-  async function _handleDiscard(files: string[]) {
-    await api.gitDiscard(pid, files)
-    invalidate()
-  }
-
-  void _handleDiscard
-
   async function handleCommit() {
-    if (!commitMsg.trim()) return
+    if (!commitMsg.trim() || !pid) return
     await api.gitCommit(pid, commitMsg)
     setCommitMsg('')
     invalidate()
