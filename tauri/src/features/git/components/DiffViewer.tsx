@@ -70,13 +70,16 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   // Monaco theme sync
   const monacoRef = useRef<Monaco | null>(null)
   const { theme, mode, themeList } = useTheme()
+
+  // Re-register when theme/mode changes (after initial mount)
   useEffect(() => {
     if (!monacoRef.current) return
     const json = themeList.find(t => t.name === theme)
     if (json) registerTcTheme(monacoRef.current, mode, json[mode] ?? json.dark)
   }, [theme, mode, themeList])
 
-  function handleMonacoMount(_: unknown, monaco: Monaco) {
+  // Called BEFORE Monaco creates the editor — ensures tc-theme exists at render time
+  function handleBeforeMount(monaco: Monaco) {
     monacoRef.current = monaco
     const json = themeList.find(t => t.name === theme)
     if (json) registerTcTheme(monaco, mode, json[mode] ?? json.dark)
