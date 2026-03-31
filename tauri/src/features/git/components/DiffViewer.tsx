@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DiffEditor, Editor, type Monaco, type OnMount, type BeforeMount } from '@monaco-editor/react'
+import { DiffEditor, Editor, type Monaco, type BeforeMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useQuery } from '@tanstack/react-query'
 import { useGitStore } from '../../../lib/store/git'
