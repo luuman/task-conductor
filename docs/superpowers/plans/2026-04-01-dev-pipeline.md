@@ -1560,31 +1560,27 @@ git commit -m "feat(frontend): add PipelinePage kanban with three-column layout"
 
 - [ ] **Step 1: 在 Router.tsx 注册懒加载路由**
 
-找到现有路由定义文件 `tauri/src/app/Router.tsx`，在已有 lazy import 列表中添加：
+找到 `tauri/src/app/Router.tsx`，在已有 lazy import 列表中添加：
 
 ```typescript
 const PipelinePage = lazy(() => import('../features/pipeline'))
 ```
 
-在路由配置中添加（与 git、settings 等同级）：
+在路由配置中添加（与 `/git`、`/settings` 同级）：
 
 ```tsx
 <Route path="/pipeline" element={<PipelinePage />} />
 ```
 
-- [ ] **Step 2: 在 Sidebar.tsx 添加流水线入口**
+- [ ] **Step 2: 在 Layout.tsx 的 sidebarItems 数组中添加入口**
 
-在 `tauri/src/layouts/Sidebar/Sidebar.tsx` 中，找到 git 入口所在行，在其后添加：
+`tauri/src/app/Layout.tsx` 第 71 行附近有 `sidebarItems` 数组。在 `/git` 条目之后插入：
 
-```tsx
-<SidebarItem
-  to="/pipeline"
-  icon={<Icon name="git-branch" size={16} />}
-  label={t('pipeline.title')}
-/>
+```typescript
+{ key: '/pipeline', label: t('pipeline.title'), icon: <IconGitBranch size={16} /> },
 ```
 
-> 若 Sidebar 使用 nav items 数组配置而非 JSX 直写，在数组中插入 `{ path: '/pipeline', icon: 'git-branch', labelKey: 'pipeline.title' }`。
+> 注意：`IconGitBranch` 已在该文件中导入，可直接复用。`t('pipeline.title')` 返回「开发流水线」。
 
 - [ ] **Step 3: 验证页面可访问**
 
