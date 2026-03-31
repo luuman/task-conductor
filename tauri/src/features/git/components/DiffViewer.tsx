@@ -148,30 +148,12 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
         </div>
       )}
 
-      {/* Toolbar */}
-      <div className={styles.toolbar}>
-        <span className={styles.label}>{label}</span>
-        <div className={styles.modeSwitch}>
-          <button
-            className={`${styles.modeBtn} ${diffMode === 'side' ? styles.modeBtnActive : ''}`}
-            onClick={() => setDiffMode('side')}
-          >
-            {t('git.sideBySide')}
-          </button>
-          <button
-            className={`${styles.modeBtn} ${diffMode === 'inline' ? styles.modeBtnActive : ''}`}
-            onClick={() => setDiffMode('inline')}
-          >
-            {t('git.inline')}
-          </button>
-          <button
-            className={`${styles.modeBtn} ${diffMode === 'file' ? styles.modeBtnActive : ''}`}
-            onClick={() => setDiffMode('file')}
-          >
-            {t('git.file')}
-          </button>
+      {/* Fallback label bar when no file selected */}
+      {!selectedFile && label && (
+        <div className={styles.toolbar}>
+          <span className={styles.label}>{label}</span>
         </div>
-      </div>
+      )}
 
       {/* Editor area */}
       <div className={styles.editorArea}>
