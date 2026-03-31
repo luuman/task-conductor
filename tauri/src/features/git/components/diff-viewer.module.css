@@ -92,3 +92,95 @@
   color: var(--tc-foreground-secondary);
   font-size: 11px;
 }
+
+/* ── v12 新增：文件名芯片 + 文件查看器覆盖 ── */
+.topbar {
+  height: 34px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 1px solid var(--tc-border, #252535);
+  background: var(--tc-bg-secondary, #1a1a2a);
+  flex-shrink: 0;
+}
+
+.fileChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--tc-bg-tertiary, #252535);
+  border: 1px solid var(--tc-border, #2e2e42);
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.1s;
+}
+.fileChip:hover { border-color: var(--tc-accent, #4e9eff); }
+.fileChip:hover .fileOpenIcon { color: var(--tc-accent, #4e9eff); }
+
+.chipName { font-size: 11.5px; font-family: 'SF Mono', 'Consolas', monospace; color: var(--tc-foreground, #ccc); font-weight: 500; }
+.chipDir  { font-size: 9.5px; color: var(--tc-foreground-disabled, #3a3a52); }
+.fileOpenIcon { color: var(--tc-foreground-disabled, #3a3a52); transition: color 0.1s; }
+
+.spacer { flex: 1; }
+
+.taskLink {
+  background: rgba(232,160,0,.1);
+  color: #e8a000;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.taskLink:hover { background: rgba(232,160,0,.18); }
+
+.modeGroup { display: flex; gap: 2px; }
+.modeToggleBtn {
+  background: var(--tc-bg-tertiary, #252535);
+  border: 1px solid var(--tc-border, #2e2e42);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: var(--tc-foreground-disabled, #555);
+  cursor: pointer;
+  font-family: inherit;
+}
+.modeToggleBtn.active { color: var(--tc-foreground, #ccc); background: var(--tc-bg-active, #2a2a40); border-color: var(--tc-border-strong, #3a3a58); }
+
+/* File viewer overlay */
+.fileViewer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: var(--tc-bg-code, #1e1e2e);
+  display: flex;
+  flex-direction: column;
+  animation: fvSlide 0.15s ease;
+}
+@keyframes fvSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.fvTopbar {
+  height: 34px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--tc-border, #252535);
+  background: var(--tc-bg-secondary, #1a1a2a);
+  flex-shrink: 0;
+}
+.fvLabel { font-size: 10px; color: var(--tc-foreground-disabled, #2e2e48); }
+.fvPath  { font-size: 11px; color: var(--tc-foreground-muted, #555); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fvClose {
+  width: 22px; height: 22px; border-radius: 4px;
+  background: var(--tc-bg-tertiary, #252535); border: 1px solid var(--tc-border, #2e2e44);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--tc-foreground-muted, #555); font-size: 11px;
+}
+.fvClose:hover { color: #f48771; border-color: rgba(244,135,113,.4); }
+.fvBody { flex: 1; overflow: hidden; }
