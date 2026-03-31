@@ -234,7 +234,7 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
       </div>
 
       {/* Status bar */}
-      {virtualBranch && activeTab === 'branches' && (
+      {virtualBranch && (
         <div className={styles.statusBar}>
           <span>&#128065; {t('git.virtualBrowse')}</span>
           <span className={styles.statusDetail}>{virtualBranch} &mdash; {t('git.virtualHint')}</span>
