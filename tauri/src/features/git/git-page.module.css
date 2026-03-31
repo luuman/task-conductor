@@ -4,7 +4,7 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background: var(--tc-bg-primary, #0c0c0e);
+  background: var(--tc-bg-primary);
 }
 
 /* 左侧导航列（全高） */
@@ -28,7 +28,7 @@
 .topHalf {
   height: 280px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--tc-border, #1e1e1e);
+  border-bottom: 1px solid var(--tc-border);
   overflow: hidden;
   display: flex;
 }
@@ -36,7 +36,7 @@
 /* 分隔线 */
 .divider {
   height: 4px;
-  background: var(--tc-bg-secondary, #111115);
+  background: var(--tc-bg-secondary);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -47,7 +47,7 @@
   content: '';
   width: 32px;
   height: 1px;
-  background: var(--tc-border, #1e1e1e);
+  background: var(--tc-border);
   border-radius: 1px;
 }
 
