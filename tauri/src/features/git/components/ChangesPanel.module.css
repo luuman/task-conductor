@@ -116,7 +116,7 @@
   flex-shrink: 0;
   appearance: none;
   -webkit-appearance: none;
-  border: 1px solid var(--tc-border, #2a2a3a);
+  border: 1px solid var(--tc-border, #1e1e1e);
   border-radius: 2px;
   background: var(--tc-bg-primary, #0c0c0e);
   position: relative;
