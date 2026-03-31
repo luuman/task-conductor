@@ -24,7 +24,7 @@ function DotIcon({ cls }: { cls: string }) {
 }
 
 export function GitNavCol({ onConfigClick }: Props) {
-  const { navSections, setNavSection, virtualBranch, setSelectedTask } = useGitStore()
+  const { navSections, setNavSection, setSelectedTask } = useGitStore()
   const projectId = useAppStore((s) => s.activeProjectId)
 
   const { data: status } = useGitStatus()
