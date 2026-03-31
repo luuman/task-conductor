@@ -81,7 +81,7 @@ export function GitNavCol({ onConfigClick }: Props) {
             <div key={prefix}>
               <div className={`${css.tnode} ${css.child}`}>
                 <DotIcon cls={css.dotLoc} />
-                <span className={css.tname} style={{ color: 'var(--tc-foreground-disabled,#444)' }}>{prefix}</span>
+                <span className={css.tname} style={{ color: 'var(--tc-fg-subtle)' }}>{prefix}</span>
               </div>
               {names.map(name => (
                 <div
