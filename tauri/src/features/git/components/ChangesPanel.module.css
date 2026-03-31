@@ -10,7 +10,7 @@
 
 /* Header */
 .hdr {
-  height: 34px;
+  height: 32px;
   padding: 0 10px;
   display: flex;
   align-items: center;
@@ -22,7 +22,7 @@
   user-select: none;
 }
 .hdrTitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--tc-foreground-secondary);
   font-weight: 500;
   flex: 1;
@@ -42,7 +42,7 @@
   background: color-mix(in srgb, var(--tc-accent) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--tc-accent) 25%, transparent);
   color: var(--tc-accent);
-  font-size: 9.5px;
+  font-size: 9px;
   padding: 0 6px;
   border-radius: 10px;
   line-height: 16px;
@@ -59,7 +59,8 @@
 
 /* Sub section */
 .subHdr {
-  padding: 4px 10px;
+  height: 24px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -67,10 +68,10 @@
   cursor: pointer;
   font-size: 9.5px;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   user-select: none;
 }
-.subHdr.staged   {
+.subHdr.staged {
   background: color-mix(in srgb, var(--tc-success) 6%, transparent);
   color: color-mix(in srgb, var(--tc-success) 55%, var(--tc-foreground-secondary));
 }
@@ -116,10 +117,10 @@
 .fileRow {
   display: flex;
   align-items: center;
-  padding: 4px 10px 4px 8px;
+  padding: 4px 10px;
   gap: 5px;
   cursor: pointer;
-  border-bottom: 1px solid color-mix(in srgb, var(--tc-border) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--tc-border) 50%, transparent);
 }
 .fileRow:hover { background: var(--tc-bg-hover); }
 .fileRow.selected { background: color-mix(in srgb, var(--tc-accent) 10%, transparent); }
@@ -154,19 +155,19 @@
 .chk.staged:checked { background: var(--tc-success); border-color: var(--tc-success); }
 
 .filePath { flex: 1; min-width: 0; overflow: hidden; }
-.fileDir  { font-size: 9px; color: var(--tc-fg-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fileName { font-size: 11px; color: var(--tc-foreground); font-family: 'SF Mono', 'Consolas', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fileDir  { font-size: 10px; color: var(--tc-fg-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'SF Mono', 'Consolas', monospace; }
+.fileName { font-size: 12px; color: var(--tc-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fileRow.selected .fileName { color: var(--tc-accent); }
 
 .statusBadge {
-  width: 17px;
-  height: 17px;
+  width: 15px;
+  height: 15px;
   border-radius: 3px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
 }
 .stM { background: color-mix(in srgb, var(--tc-info) 15%, transparent);    color: var(--tc-info); }
@@ -176,7 +177,7 @@
 
 /* Commit area */
 .commitSection {
-  border-top: 1px solid var(--tc-border);
+  border-top: 1px solid color-mix(in srgb, var(--tc-border) 50%, transparent);
   flex-shrink: 0;
   background: var(--tc-bg-secondary);
 }
@@ -205,7 +206,7 @@
   border-radius: 4px;
   padding: 4px 7px;
   color: var(--tc-foreground);
-  font-size: 11px;
+  font-size: 12px;
   font-family: inherit;
   outline: none;
 }
@@ -225,7 +226,7 @@
   border: none;
   border-radius: 4px;
   padding: 4px 9px;
-  font-size: 10.5px;
+  font-size: 11px;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
@@ -235,7 +236,7 @@
 
 /* Branch footer */
 .branchFooter {
-  border-top: 1px solid var(--tc-border);
+  border-top: 1px solid color-mix(in srgb, var(--tc-border) 50%, transparent);
   display: flex;
   align-items: center;
   background: var(--tc-bg-secondary);
@@ -252,11 +253,11 @@
   border-right: 1px solid var(--tc-border);
 }
 .branchName:hover { background: var(--tc-bg-hover); }
-.branchLabel { font-size: 10px; color: var(--tc-success); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.branchLabel { font-size: 11px; color: var(--tc-success); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .aheadBehind { font-size: 9px; color: var(--tc-fg-subtle); white-space: nowrap; }
 .footBtn {
   padding: 5px 9px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--tc-foreground-secondary);
   cursor: pointer;
   border-right: 1px solid var(--tc-border);
