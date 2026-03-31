@@ -125,7 +125,37 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   const language = selectedFile ? getLang(selectedFile) : 'plaintext'
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={{ position: 'relative' }}>
+      {/* New v12 topbar with filename chip */}
+      {selectedFile && (
+        <div className={styles.topbar}>
+          <div className={styles.fileChip} onClick={() => setFileViewerOpen(true)} title={selectedFile}>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#555">
+              <path d="M3.75 1.5a.25.25 0 00-.25.25v11.5c0 .138.112.25.25.25h8.5a.25.25 0 00.25-.25V6H9.75A1.75 1.75 0 018 4.25V1.5H3.75zm5.75.56v2.19c0 .138.112.25.25.25h2.19L9.5 2.06zM2 1.75C2 .784 2.784 0 3.75 0h5.086c.464 0 .909.184 1.237.513l3.414 3.414c.329.328.513.773.513 1.237v8.086A1.75 1.75 0 0112.25 15h-8.5A1.75 1.75 0 012 13.25V1.75z"/>
+            </svg>
+            <span className={styles.chipName}>{fileName}</span>
+            <span className={styles.chipDir}>{fileDir}</span>
+            <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor" className={styles.fileOpenIcon}>
+              <path d="M10.604 1h4.146a.25.25 0 01.25.25v4.146a.25.25 0 01-.427.177L13.03 4.03 9.28 7.78a.75.75 0 01-1.06-1.06l3.75-3.75-1.543-1.543A.25.25 0 0110.604 1zM3.75 2A1.75 1.75 0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 12.25v-3.5a.75.75 0 00-1.5 0v3.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-8.5a.25.25 0 01.25-.25h3.5a.75.75 0 000-1.5h-3.5z"/>
+            </svg>
+          </div>
+          <div className={styles.spacer} />
+          {selectedTaskId && (
+            <span className={styles.taskLink}>Task #{selectedTaskId}</span>
+          )}
+          <div className={styles.modeGroup}>
+            <button
+              className={`${styles.modeToggleBtn} ${diffMode === 'inline' ? styles.active : ''}`}
+              onClick={() => setDiffMode('inline')}
+            >内联</button>
+            <button
+              className={`${styles.modeToggleBtn} ${diffMode === 'side' ? styles.active : ''}`}
+              onClick={() => setDiffMode('side')}
+            >并排</button>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <span className={styles.label}>{label}</span>
