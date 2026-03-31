@@ -67,6 +67,21 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
   const selectedTaskId = useGitStore((s) => s.selectedTaskId)
   const projectId = useAppStore((s) => s.activeProjectId)
 
+  // Monaco theme sync
+  const monacoRef = useRef<Monaco | null>(null)
+  const { theme, mode, themeList } = useTheme()
+  useEffect(() => {
+    if (!monacoRef.current) return
+    const json = themeList.find(t => t.name === theme)
+    if (json) registerTcTheme(monacoRef.current, mode, json[mode] ?? json.dark)
+  }, [theme, mode, themeList])
+
+  function handleMonacoMount(_: unknown, monaco: Monaco) {
+    monacoRef.current = monaco
+    const json = themeList.find(t => t.name === theme)
+    if (json) registerTcTheme(monaco, mode, json[mode] ?? json.dark)
+  }
+
   const { data: fileData } = useQuery({
     queryKey: ['git-file-content', projectId, selectedFile],
     queryFn: () => api.gitShow(Number(projectId!), 'HEAD', selectedFile!),
