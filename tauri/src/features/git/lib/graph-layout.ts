@@ -56,6 +56,7 @@ export function computeGraphLayout(commits: GitCommit[]): CommitGraphRow[] {
 
     // 额外父（merge）：分配新泳道
     for (let p = 1; p < parents.length; p++) {
+      if (parents[p] === parents[0]) continue  // 跳过重复父（octopus merge 边界情况）
       const existingLane = lanes.indexOf(parents[p])
       if (existingLane === -1) {
         const freeIdx = lanes.indexOf(null)
