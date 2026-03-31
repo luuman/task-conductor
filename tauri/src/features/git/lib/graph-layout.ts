@@ -24,6 +24,8 @@ function laneColor(lane: number): string {
 /**
  * 将 GitCommit[] 转换为带泳道信息的 CommitGraphRow[]
  * 简化算法：每个分支占一条泳道，merge 时收拢
+ *
+ * @param commits 按倒序时间排列（最新在前），即 `git log` 默认顺序
  */
 export function computeGraphLayout(commits: GitCommit[]): CommitGraphRow[] {
   // lanes[i] = 当前该泳道正在跟踪的 commit hash（即等待其父节点出现的 hash）
