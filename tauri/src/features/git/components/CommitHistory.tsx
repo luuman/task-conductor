@@ -103,7 +103,7 @@ export function CommitHistory() {
               <div className={css.metaRow}>
                 <span className={css.sha}>{row.commit.hash.slice(0, 7)}</span>
                 <span className={css.author}>{row.commit.author}</span>
-                {row.commit.refs && (
+                {typeof row.commit.refs === 'string' && row.commit.refs && (
                   <span className={css.taskBadge}>{row.commit.refs.split(',')[0].trim()}</span>
                 )}
                 <span className={css.date}>{relativeTime(row.commit.date)}</span>
