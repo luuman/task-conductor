@@ -7,11 +7,32 @@ interface GitState {
   diffMode: 'side' | 'inline' | 'file'
   selectedFile: string | null
 
+  // 导航分组折叠状态（key = 分组名）
+  navSections: Record<string, boolean> // true = 展开
+
+  // 提交历史
+  selectedCommit: string | null // 选中的 commit hash
+  historyScope: 'all' | 'current' | 'other'
+  historySearch: string
+
+  // Diff 区
+  fileViewerOpen: boolean
+
+  // 变更面板
+  changesCollapsed: boolean
+
   setActiveTab: (tab: GitState['activeTab']) => void
   setSelectedTask: (taskId: number | null, branch: string | null) => void
   setVirtualBranch: (branch: string | null) => void
   setDiffMode: (mode: GitState['diffMode']) => void
   setSelectedFile: (file: string | null) => void
+
+  setNavSection: (key: string, open: boolean) => void
+  setSelectedCommit: (hash: string | null) => void
+  setHistoryScope: (scope: 'all' | 'current' | 'other') => void
+  setHistorySearch: (q: string) => void
+  setFileViewerOpen: (open: boolean) => void
+  setChangesCollapsed: (collapsed: boolean) => void
 }
 
 export const useGitStore = create<GitState>()((set) => ({
