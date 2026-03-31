@@ -70,6 +70,7 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
 
   // Monaco theme sync
   const monacoRef = useRef<Monaco | null>(null)
+  const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null)
   const { theme, mode, themeList } = useTheme()
 
   // Re-register when theme/mode changes (after initial mount)
@@ -79,11 +80,21 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
     if (json) registerTcTheme(monacoRef.current, mode, json[mode] ?? json.dark)
   }, [theme, mode, themeList])
 
+  // Reset scroll to top when diff content changes
+  useEffect(() => {
+    diffEditorRef.current?.revealLine(1)
+  }, [original, modified])
+
   // Called BEFORE Monaco creates the editor — ensures tc-theme exists at render time
-  function handleBeforeMount(monaco: Monaco) {
+  const handleBeforeMount: BeforeMount = (monaco) => {
     monacoRef.current = monaco
     const json = themeList.find(t => t.name === theme)
     if (json) registerTcTheme(monaco, mode, json[mode] ?? json.dark)
+  }
+
+  // Store diff editor ref for scroll reset
+  const handleDiffMount: OnMount<editor.IStandaloneDiffEditor> = (ed) => {
+    diffEditorRef.current = ed
   }
 
   const { data: fileData } = useQuery({
