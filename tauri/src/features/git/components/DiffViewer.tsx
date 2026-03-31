@@ -75,42 +75,22 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
     ? selectedFile.slice(0, selectedFile.lastIndexOf('/') + 1)
     : ''
 
-  // Branch diff (virtual browsing)
-  const branchDiff = useBranchDiff(
-    activeTab === 'branches' ? virtualBranch : null,
-    activeTab === 'branches' ? selectedFile : null
-  )
+  // Branch diff (virtual browsing) — active when virtualBranch is set
+  const branchDiff = useBranchDiff(virtualBranch, virtualBranch ? selectedFile : null)
 
-  // Working directory diff (changes tab)
-  const workingDiff = useWorkingDiff(
-    activeTab === 'changes' ? selectedFile : null
-  )
+  // Working directory diff — active when a file is selected (and not in branch/commit mode)
+  const workingDiff = useWorkingDiff(!virtualBranch && !selectedCommit ? selectedFile : null)
 
-  // Commit diff (log tab)
-  const commitDiff = useCommitDiff(
-    activeTab === 'log' ? selectedCommit : null
-  )
+  // Commit diff — active when a commit is selected
+  const commitDiff = useCommitDiff(selectedCommit)
 
-  // Determine what to show
+  // Determine what to show: commit > branch > working-dir
   let original = ''
   let modified = ''
   let isLoading = false
   let label = ''
 
-  if (activeTab === 'branches' && virtualBranch && selectedFile) {
-    original = branchDiff.original
-    modified = branchDiff.modified
-    isLoading = branchDiff.isLoading
-    label = `main ${t('git.vs')} ${virtualBranch} — ${selectedFile}`
-  } else if (activeTab === 'changes' && selectedFile) {
-    if (workingDiff.data) {
-      const parsed = parseDiff(workingDiff.data)
-      original = parsed.original
-      modified = parsed.modified
-    }
-    isLoading = workingDiff.isLoading
-    label = selectedFile
-  } else if (activeTab === 'log' && selectedCommit) {
+  if (selectedCommit) {
     if (commitDiff.data) {
       const parsed = parseDiff(commitDiff.data)
       original = parsed.original
@@ -118,6 +98,19 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
     }
     isLoading = commitDiff.isLoading
     label = `${t('git.log')}: ${selectedCommit.slice(0, 7)}`
+  } else if (virtualBranch && selectedFile) {
+    original = branchDiff.original
+    modified = branchDiff.modified
+    isLoading = branchDiff.isLoading
+    label = `main ${t('git.vs')} ${virtualBranch} — ${selectedFile}`
+  } else if (selectedFile) {
+    if (workingDiff.data) {
+      const parsed = parseDiff(workingDiff.data)
+      original = parsed.original
+      modified = parsed.modified
+    }
+    isLoading = workingDiff.isLoading
+    label = selectedFile
   }
 
   const hasContent = original || modified
