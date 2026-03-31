@@ -214,12 +214,14 @@ export function DiffViewer({ selectedCommit }: DiffViewerProps) {
         )}
         {!isLoading && hasContent && (
           <DiffEditor
-            key={`${selectedFile}-${selectedCommit}-${virtualBranch}`}
             original={original}
             modified={modified}
             language={language}
             theme="tc-theme"
+            keepCurrentOriginalModel={true}
+            keepCurrentModifiedModel={true}
             beforeMount={handleBeforeMount}
+            onMount={handleDiffMount}
             options={{
               readOnly: true,
               renderSideBySide: diffMode === 'side',
