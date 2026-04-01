@@ -8,13 +8,15 @@ import styles from './preview.module.css'
 
 interface Props {
   taskId: number
+  worktreePath: string | null
   preview: PreviewService | undefined
   onStarted: (svc: PreviewService) => void
 }
 
-export function PreviewPanel({ taskId, preview, onStarted }: Props) {
+export function PreviewPanel({ taskId, worktreePath, preview, onStarted }: Props) {
   const { t } = useTranslation()
   const proxyUrl = preview ? `/proxy/${taskId}/` : null
+  const hasWorktree = !!worktreePath
 
   const startMutation = useMutation({
     mutationFn: () => api.startPreview(taskId),
@@ -35,13 +37,19 @@ export function PreviewPanel({ taskId, preview, onStarted }: Props) {
     return (
       <div className={styles.container}>
         <div className={styles.placeholder}>
-          <button
-            className={styles.startBtn}
-            onClick={() => startMutation.mutate()}
-            disabled={startMutation.isPending}
-          >
-            {startMutation.isPending ? '启动中...' : `▶ ${t('pipeline.card_startPreview')}`}
-          </button>
+          {hasWorktree ? (
+            <button
+              className={styles.startBtn}
+              onClick={() => startMutation.mutate()}
+              disabled={startMutation.isPending}
+            >
+              {startMutation.isPending ? '启动中...' : `▶ ${t('pipeline.card_startPreview')}`}
+            </button>
+          ) : (
+            <span style={{ fontSize: 10, color: 'var(--tc-text-muted)' }}>
+              {t('pipeline.preview_placeholder')}
+            </span>
+          )}
         </div>
       </div>
     )
