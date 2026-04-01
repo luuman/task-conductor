@@ -806,3 +806,28 @@ export interface ProjectSettingsUpdate {
   env_config?: string | null
   knowledge_config?: string | null
 }
+
+export interface PreviewService {
+  task_id: number
+  pid: number
+  port: number
+  cwd: string
+  command: string
+  started_at: string
+}
+
+export interface PipelineTask {
+  id: number
+  title: string
+  branch_name: string | null
+  worktree_path: string | null
+  status: string
+  stage: string
+  test_pass?: number
+  test_fail?: number
+}
+
+export interface MergeRequest {
+  task_id: number
+  target_branch: string
+}
