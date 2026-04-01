@@ -43,6 +43,15 @@ export default function PipelinePage() {
   })
   const defaultBranch: string = (tcConfig as Record<string, any>)?.pipeline?.default_merge_branch ?? 'main'
 
+  const createMutation = useMutation({
+    mutationFn: (data: { title: string; description?: string }) =>
+      api.createTask(Number(projectId!), data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pipeline', projectId] })
+      setShowCreate(false)
+    },
+  })
+
   const previewMap = new Map<number, PreviewService>(
     previews.map((p) => [p.task_id, p])
   )
