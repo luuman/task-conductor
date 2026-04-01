@@ -12,7 +12,7 @@ interface GitState {
 
   // 提交历史
   selectedCommit: string | null // 选中的 commit hash
-  historyScope: 'all' | 'current' | 'other'
+  historyBranch: string | null  // null = 全部分支
   historySearch: string
 
   // Diff 区
