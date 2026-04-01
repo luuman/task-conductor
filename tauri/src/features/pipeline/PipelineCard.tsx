@@ -114,7 +114,7 @@ export function PipelineCard({ task, preview, defaultBranch, expanded, onExpand,
           </div>
         )}
 
-        <PreviewPanel taskId={task.id} preview={previewSvc} onStarted={setPreviewSvc} />
+        <PreviewPanel taskId={task.id} worktreePath={task.worktree_path} preview={previewSvc} onStarted={setPreviewSvc} />
 
         <div className={styles.actions}>
           <button className={styles.btnGhost}>{t('pipeline.card_log')}</button>
