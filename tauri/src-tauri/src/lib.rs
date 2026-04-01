@@ -257,6 +257,21 @@ fn invalidate_file_cache(
     Ok(())
 }
 
+/// 在新 WebviewWindow 中打开预览 URL
+#[tauri::command]
+async fn open_preview_window(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    use tauri::WebviewWindowBuilder;
+    let label = format!("preview-{}", url.len());
+    WebviewWindowBuilder::new(&app, label, tauri::WebviewUrl::External(
+        url.parse().map_err(|e| format!("无效 URL: {e}"))?
+    ))
+    .title("Preview")
+    .inner_size(1280.0, 800.0)
+    .build()
+    .map_err(|e| format!("打开预览窗口失败: {e}"))?;
+    Ok(())
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
