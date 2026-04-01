@@ -23,6 +23,7 @@ export interface SidebarProps {
 export function Sidebar({
   items,
   footer,
+  headerSlot,
   activeKey,
   onSelect,
   logoIcon,
@@ -34,6 +35,7 @@ export function Sidebar({
   return (
     <aside className={styles.sidebar}>
       {logoIcon && <div className={styles.logo}>{logoIcon}</div>}
+      {headerSlot}
 
       <nav className={styles.list}>
         {items.map((item) => {
