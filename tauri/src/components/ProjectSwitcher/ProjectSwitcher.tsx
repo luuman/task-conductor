@@ -221,6 +221,7 @@ export function ProjectSwitcher() {
         </div>
       )}
     </>
+  )
 }
 
 function ProjectItem({
