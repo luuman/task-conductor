@@ -10,6 +10,7 @@ export interface SidebarItem {
 export interface SidebarProps {
   items: SidebarItem[]
   footer?: ReactNode
+  headerSlot?: ReactNode
   activeKey?: string
   onSelect?: (key: string) => void
   logoIcon?: ReactNode
