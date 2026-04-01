@@ -67,7 +67,7 @@ export default function PipelinePage() {
     <div className={styles.page}>
       <div className={styles.topbar}>
         <span className={styles.title}>{t('pipeline.title')}</span>
-        <button className={styles.newBtn}>{t('pipeline.newTask')}</button>
+        <button className={styles.newBtn} onClick={() => setShowCreate(true)}>{t('pipeline.newTask')}</button>
       </div>
 
       <div className={styles.board}>
