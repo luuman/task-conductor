@@ -29,7 +29,7 @@ interface GitState {
 
   setNavSection: (key: string, open: boolean) => void
   setSelectedCommit: (hash: string | null) => void
-  setHistoryScope: (scope: 'all' | 'current' | 'other') => void
+  setHistoryBranch: (branch: string | null) => void
   setHistorySearch: (q: string) => void
   setFileViewerOpen: (open: boolean) => void
   setChangesCollapsed: (collapsed: boolean) => void
