@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api'
 import { useAppStore } from '../../lib/store/app'
 import { PipelineCard } from './PipelineCard'
+import { CreateTaskModal } from '../task-manager/components/CreateTaskModal'
 import type { PreviewService } from '../../lib/api/types'
 import styles from './pipeline.module.css'
 
