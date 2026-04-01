@@ -800,6 +800,30 @@
       "pull": "立即同步"
     }
   },
+  "pipeline": {
+    "title": "开发流水线",
+    "newTask": "+ 新建任务",
+    "col_developing": "AI 开发中",
+    "col_review": "待审批",
+    "col_ready": "待合并",
+    "card_log": "日志",
+    "card_diff": "Diff",
+    "card_startPreview": "开启预览",
+    "card_preview": "预览",
+    "card_approve": "批准",
+    "card_mergeInto": "合并到",
+    "card_openWindow": "新窗口打开",
+    "stage_create": "创建",
+    "stage_dev": "开发",
+    "stage_test": "测试",
+    "stage_merge": "合并",
+    "test_pass": "通过",
+    "test_fail": "失败",
+    "test_running": "测试中...",
+    "preview_placeholder": "dev server 未运行",
+    "merge_success": "合并成功",
+    "merge_conflict": "合并冲突，请手动解决"
+  },
   "prompt_input": {
     "quick_chip_clarify": "澄清用户问题",
     "quick_chip_context": "定义用户上下文",
