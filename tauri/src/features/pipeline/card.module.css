@@ -1,0 +1,39 @@
+.card {
+  background: var(--tc-bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  border-left: 2px solid var(--card-accent, #2563eb);
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color 0.1s;
+  overflow: hidden;
+}
+.card:hover { border-color: var(--card-accent, #2563eb); }
+
+.collapsed { padding: 8px 10px; }
+.collapsedTitle { font-size: 10px; font-weight: 500; color: var(--tc-text-primary); margin-bottom: 2px; }
+.collapsedBranch { font-size: 9px; color: var(--tc-text-muted); font-family: var(--tc-font-mono, monospace); }
+
+.expanded { padding: 10px; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.title { font-size: 10px; font-weight: 500; color: var(--tc-text-primary); margin-bottom: 2px; }
+.branch { font-size: 9px; color: var(--tc-text-muted); font-family: var(--tc-font-mono, monospace); }
+.badge { font-size: 8px; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+
+.progress { display: flex; gap: 3px; margin-bottom: 8px; }
+.progressSeg { flex: 1; height: 2px; border-radius: 1px; background: var(--tc-border); }
+.progressSeg[data-done="true"] { background: var(--card-accent, #2563eb); }
+.progressSeg[data-active="true"] { background: var(--card-accent, #2563eb); opacity: 0.4; }
+
+.testRow { font-size: 9px; color: var(--tc-text-muted); margin-bottom: 8px; }
+.testPass { color: var(--tc-text-success, #4ade80); }
+.testFail { color: var(--tc-text-danger, #f87171); }
+
+.actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.btnGhost { font-size: 9px; color: var(--tc-text-muted); background: none; border: 1px solid var(--tc-border); padding: 2px 7px; border-radius: 4px; cursor: pointer; }
+.btnGhost:hover { background: var(--tc-bg-hover); }
+.btnPrimary { font-size: 9px; font-weight: 600; color: #fff; background: #16a34a; border: none; padding: 3px 8px; border-radius: 4px 0 0 4px; cursor: pointer; }
+.btnPrimary:hover { background: #15803d; }
+.btnPrimaryAlone { border-radius: 4px; }
+.btnDropdown { font-size: 9px; color: #fff; background: #15803d; border: none; border-left: 1px solid rgba(74,222,128,0.3); padding: 3px 6px; border-radius: 0 4px 4px 0; cursor: pointer; }
+.mergeGroup { display: flex; margin-left: auto; }
