@@ -11,6 +11,7 @@ import type {
   Version, VersionCreate, VersionUpdate,
   Document, DocumentLink, ProjectDocumentsResponse,
   ClaudeConfigResponse, HooksStatusResponse, MemoryResponse, McpServersResponse, PermissionsResponse, SettingsLocalResponse, ProjectSettingsUpdate,
+  PreviewService, PipelineTask,
 } from './types'
 import { cache, CACHE_TTL } from '../cache'
 
