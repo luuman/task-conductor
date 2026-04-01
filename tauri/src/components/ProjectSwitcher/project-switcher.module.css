@@ -1,63 +1,65 @@
-/* Trigger button in breadcrumb */
+/* Trigger — 侧边栏头像按钮 */
 .trigger {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--tc-topbar-fg);
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
   cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
+  margin-bottom: 6px;
 }
 
-.trigger:hover {
-  background: var(--tc-sidebar-item-hover);
+.triggerAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  border: 2px solid transparent;
+  transition: border-color 0.15s, transform 0.1s;
 }
 
-.triggerIcon {
-  color: var(--tc-foreground-secondary);
-  transition: transform 0.15s;
+.trigger:hover .triggerAvatar {
+  border-color: var(--tc-border-active);
+  transform: scale(1.05);
 }
 
-.triggerOpen .triggerIcon {
-  transform: rotate(180deg);
+.triggerOpen .triggerAvatar {
+  border-color: var(--tc-border-active);
 }
 
-/* Dropdown overlay */
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-}
-
-/* Dropdown panel */
+/* Dropdown panel — 侧边栏右侧 */
 .dropdown {
   position: fixed;
-  top: var(--tc-topbar-height, 48px);
-  z-index: 1000;
-  width: 320px;
-  max-height: 420px;
+  top: 10px;
+  left: 58px;
+  z-index: 9999;
+  width: 300px;
+  max-height: 480px;
   display: flex;
   flex-direction: column;
   background: var(--tc-panel-bg);
   border: 1px solid var(--tc-border);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   overflow: hidden;
-  animation: slideDown 0.12s ease;
+  animation: slideIn 0.12s ease;
 }
 
-@keyframes slideDown {
+@keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateX(-6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
