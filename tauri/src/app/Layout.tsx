@@ -76,6 +76,7 @@ export function Layout() {
     { key: '/chat',        label: t('layout.chat'),       icon: <IconMessage size={16} /> },
     { key: '/files',       label: t('layout.files'),      icon: <IconFolder size={16} /> },
     { key: '/git',         label: t('layout.git'),        icon: <IconGitBranch size={16} /> },
+    { key: '/pipeline',    label: t('pipeline.title'),    icon: <IconGitBranch size={16} /> },
     { key: '/settings',    label: t('nav.settings'),      icon: <IconSettings size={16} /> },
   ]
 
