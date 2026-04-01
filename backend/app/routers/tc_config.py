@@ -224,6 +224,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "CLAUDE_NO_COLOR": False,
         "CLAUDE_EDITOR": "vscode",
     },
+    "pipeline": {
+        "default_merge_branch": "main",
+    },
 }
 
 
