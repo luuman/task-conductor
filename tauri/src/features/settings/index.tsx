@@ -15,6 +15,7 @@ import { DocsPanel } from './components/DocsPanel'
 import { McpPanel } from './components/McpPanel'
 import { PermissionsPanel } from './components/PermissionsPanel'
 import { EnvPanel } from './components/EnvPanel'
+import { ServicesPanel } from './components/ServicesPanel'
 import styles from './settings.module.css'
 
 function parseStagesConfig(raw: string | null): Set<string> | null {
