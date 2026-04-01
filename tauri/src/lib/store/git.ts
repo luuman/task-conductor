@@ -58,7 +58,7 @@ export const useGitStore = create<GitState>()((set) => ({
 
   setNavSection: (key, open) => set(s => ({ navSections: { ...s.navSections, [key]: open } })),
   setSelectedCommit: (hash) => set({ selectedCommit: hash, selectedFile: null }),
-  setHistoryScope: (scope) => set({ historyScope: scope }),
+  setHistoryBranch: (branch) => set({ historyBranch: branch }),
   setHistorySearch: (q) => set({ historySearch: q }),
   setFileViewerOpen: (open) => set({ fileViewerOpen: open }),
   setChangesCollapsed: (collapsed) => set({ changesCollapsed: collapsed }),
