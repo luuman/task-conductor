@@ -44,8 +44,12 @@ export default function PipelinePage() {
   const defaultBranch: string = (tcConfig as Record<string, any>)?.pipeline?.default_merge_branch ?? 'main'
 
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; description?: string }) =>
-      api.createTask(Number(projectId!), data),
+    mutationFn: async (data: { title: string; description?: string }) => {
+      const task = await api.createTask(Number(projectId!), data)
+      // 从流水线创建的任务自动进入 developing 状态
+      await api.updateTask(task.id, { status: 'developing' })
+      return task
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pipeline', projectId] })
       setShowCreate(false)
