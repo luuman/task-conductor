@@ -531,8 +531,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c673075a2e0e5f4a1dde27ce9dee1ea4558c7ffe648f576438a20ca1d2acc4b0"
 dependencies = [
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link 0.2.1",
 ]
 
@@ -4780,6 +4782,7 @@ name = "task-conductor-app"
 version = "0.1.0"
 dependencies = [
  "aes-gcm",
+ "chrono",
  "hex",
  "hkdf",
  "reqwest 0.12.28",
@@ -4791,6 +4794,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tauri-plugin-sql",
+ "tempfile",
 ]
 
 [[package]]
