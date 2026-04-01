@@ -44,7 +44,7 @@ export const useGitStore = create<GitState>()((set) => ({
 
   navSections: { local: true, remote: true, tags: false, stash: true, submodules: false, subtrees: false },
   selectedCommit: null,
-  historyScope: 'all',
+  historyBranch: null,
   historySearch: '',
   fileViewerOpen: false,
   changesCollapsed: false,
