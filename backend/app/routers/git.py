@@ -629,3 +629,53 @@ def git_branch_diff(
         raise HTTPException(400, result.stderr.strip() or "diff failed")
 
     return {"diff": result.stdout}
+
+
+# ── POST /{project_id}/git/merge ────────────────────────────────────
+
+class MergeRequest(BaseModel):
+    task_id: int
+    target_branch: str = "main"
+
+
+@router.post("/{project_id}/git/merge", summary="合并 feature 分支到目标分支")
+def git_merge(
+    project_id: int,
+    body: MergeRequest,
+    db: Session = Depends(_get_db),
+):
+    from ..models import Task as TaskModel
+    cwd = _get_project_path(project_id, db)
+    _ensure_git(cwd)
+
+    task = db.get(TaskModel, body.task_id)
+    if not task:
+        raise HTTPException(404, "任务不存在")
+
+    branch = task.branch_name or f"feature/task-{body.task_id}"
+
+    # 切换到目标分支
+    checkout = _run_git(cwd, "checkout", body.target_branch)
+    if checkout.returncode != 0:
+        raise HTTPException(400, f"切换到 {body.target_branch} 失败: {checkout.stderr.strip()}")
+
+    # 执行合并
+    merge = _run_git(cwd, "merge", "--no-ff", branch, "-m", f"Merge {branch} into {body.target_branch}")
+    if merge.returncode != 0:
+        _run_git(cwd, "merge", "--abort")
+        raise HTTPException(409, f"合并冲突，请手动解决: {merge.stderr.strip()}")
+
+    # 删除 worktree
+    if task.worktree_path:
+        _run_git(cwd, "worktree", "remove", "--force", task.worktree_path)
+
+    # 删除 feature 分支
+    _run_git(cwd, "branch", "-d", branch)
+
+    # 更新任务状态
+    task.status = "merged"
+    task.branch_name = None
+    task.worktree_path = None
+    db.commit()
+
+    return {"merged": branch, "into": body.target_branch}
