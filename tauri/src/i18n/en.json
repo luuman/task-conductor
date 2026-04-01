@@ -800,6 +800,30 @@
       "pull": "Sync now"
     }
   },
+  "pipeline": {
+    "title": "Pipeline",
+    "newTask": "+ New Task",
+    "col_developing": "Developing",
+    "col_review": "Review",
+    "col_ready": "Ready",
+    "card_log": "Log",
+    "card_diff": "Diff",
+    "card_startPreview": "Start Preview",
+    "card_preview": "Preview",
+    "card_approve": "Approve",
+    "card_mergeInto": "Merge into",
+    "card_openWindow": "Open in window",
+    "stage_create": "Create",
+    "stage_dev": "Dev",
+    "stage_test": "Test",
+    "stage_merge": "Merge",
+    "test_pass": "passed",
+    "test_fail": "failed",
+    "test_running": "running...",
+    "preview_placeholder": "dev server not running",
+    "merge_success": "Merged successfully",
+    "merge_conflict": "Merge conflict, please resolve manually"
+  },
   "prompt_input": {
     "quick_chip_clarify": "Clarify user question",
     "quick_chip_context": "Define user context",
