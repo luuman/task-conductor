@@ -456,6 +456,7 @@ export interface GitBranch {
   name: string
   current: boolean
   remote: boolean
+  task_id?: number
 }
 
 export interface GitStash {
