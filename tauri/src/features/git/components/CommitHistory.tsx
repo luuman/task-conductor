@@ -30,8 +30,6 @@ export function CommitHistory() {
   } = useGitStore()
 
   const projectId = useAppStore((s) => s.activeProjectId)
-  const { data: status } = useGitStatus()
-  const currentBranch = status?.branch
 
   // 获取所有分支
   const { data: branches = [] } = useQuery({
