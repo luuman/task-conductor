@@ -20,6 +20,8 @@ export default function PipelinePage() {
   const [expandedId, setExpandedId] = useState<Record<string, number | null>>({
     developing: null, pending_review: null, ready_to_merge: null,
   })
+  const [showCreate, setShowCreate] = useState(false)
+  const queryClient = useQueryClient()
 
   const { data: tasks = [], refetch } = useQuery({
     queryKey: ['pipeline', projectId],
