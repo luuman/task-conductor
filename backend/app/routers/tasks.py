@@ -26,6 +26,26 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     return t
 
 
+class TaskPatch(BaseModel):
+    status: str | None = None
+    title: str | None = None
+    description: str | None = None
+    branch_name: str | None = None
+    worktree_path: str | None = None
+
+
+@router.patch("/{task_id}", response_model=TaskOut, summary="部分更新任务字段")
+def patch_task(task_id: int, body: TaskPatch, db: Session = Depends(get_db)):
+    t = db.get(Task, task_id)
+    if not t:
+        raise HTTPException(404, "Task not found")
+    for field, value in body.model_dump(exclude_unset=True).items():
+        setattr(t, field, value)
+    db.commit()
+    db.refresh(t)
+    return t
+
+
 @router.get("/{task_id}/artifacts", response_model=list[StageArtifactOut], summary="获取阶段产物")
 def get_artifacts(task_id: int, db: Session = Depends(get_db)):
     return db.query(StageArtifact).filter(
