@@ -800,4 +800,52 @@ export class HttpAdapter implements ApiAdapter {
   async deleteDocumentLink(linkId: number): Promise<void> {
     return this.fetch<void>(`/api/documents/links/${linkId}`, { method: 'DELETE' })
   }
+
+  // ─── Preview API ───
+
+  listPreviews(): Promise<PreviewService[]> {
+    return this.fetch<PreviewService[]>('/api/previews')
+  }
+
+  startPreview(taskId: number, command = 'npm run dev'): Promise<PreviewService> {
+    return this.fetch<PreviewService>(`/api/previews/${taskId}`, {
+      method: 'POST',
+      body: JSON.stringify({ command }),
+    })
+  }
+
+  async stopPreview(taskId: number): Promise<void> {
+    await this.fetch<void>(`/api/previews/${taskId}`, { method: 'DELETE' })
+  }
+
+  async stopAllPreviews(): Promise<void> {
+    await this.fetch<void>('/api/previews', { method: 'DELETE' })
+  }
+
+  // ─── Pipeline API ───
+
+  async gitMerge(projectId: number, taskId: number, targetBranch: string): Promise<void> {
+    await this.fetch<void>(`/api/projects/${projectId}/git/merge`, {
+      method: 'POST',
+      body: JSON.stringify({ task_id: taskId, target_branch: targetBranch }),
+    })
+  }
+
+  async getPipelineTasks(projectId: number): Promise<PipelineTask[]> {
+    const tasks = await this.fetch<PipelineTask[]>(`/api/projects/${projectId}/tasks`)
+    return tasks.filter((t: PipelineTask) =>
+      ['developing', 'pending_review', 'ready_to_merge'].includes(t.status)
+    )
+  }
+
+  updateTask(taskId: number, data: Record<string, unknown>): Promise<PipelineTask> {
+    return this.fetch<PipelineTask>(`/api/tasks/${taskId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
+  getTcConfig(): Promise<Record<string, unknown>> {
+    return this.fetch<Record<string, unknown>>('/api/tc-config')
+  }
 }
