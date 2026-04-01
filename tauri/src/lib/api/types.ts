@@ -687,6 +687,16 @@ export interface ApiAdapter {
   createDocumentLink(data: { source_id: number; target_id: number; relation: string }): Promise<DocumentLink>
   deleteDocumentLink(linkId: number): Promise<void>
 
+  // ─── Preview & Pipeline ───
+  listPreviews(): Promise<PreviewService[]>
+  startPreview(taskId: number, command?: string): Promise<PreviewService>
+  stopPreview(taskId: number): Promise<void>
+  stopAllPreviews(): Promise<void>
+  gitMerge(projectId: number, taskId: number, targetBranch: string): Promise<void>
+  getPipelineTasks(projectId: number): Promise<PipelineTask[]>
+  updateTask(taskId: number, data: Record<string, unknown>): Promise<PipelineTask>
+  getTcConfig(): Promise<Record<string, unknown>>
+
   // Project-scoped settings
   getProjectClaudeConfig(projectId: number): Promise<ClaudeConfigResponse>
   getProjectHooksStatus(projectId: number): Promise<HooksStatusResponse>
