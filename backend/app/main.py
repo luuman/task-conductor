@@ -421,6 +421,8 @@ def api_files(path: str = Query(..., description="文件路径")):
     media_type = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
     return FileResponse(str(p), media_type=media_type)
 app.include_router(git_router.router)            # GET /api/projects/{id}/git/status, /git/diff
+app.include_router(previews_router.router)       # GET/POST/DELETE /api/previews
+app.include_router(proxy_router.router)          # ANY /proxy/{task_id}/...
 app.include_router(chat_router.router)            # GET /api/chat/models
 app.include_router(ai_router.router)              # POST /api/ai/inline-edit
 app.include_router(interview_router.router)       # Interview API
