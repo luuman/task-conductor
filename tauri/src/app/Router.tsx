@@ -30,6 +30,7 @@ const DocsDemoPage      = lazy(() => import('../features/docs-demo'))
 const ProjectGraphPage  = lazy(() => import('../features/project-graph/ProjectGraphPage'))
 const VersionBoardPage  = lazy(() => import('../features/version-board'))
 const KnowledgePage     = lazy(() => import('../features/knowledge'))
+const PipelinePage      = lazy(() => import('../features/pipeline'))
 
 function PlaceholderPageComponent() {
   const { t } = useTranslation()
