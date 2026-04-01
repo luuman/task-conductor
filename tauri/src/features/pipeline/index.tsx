@@ -97,6 +97,12 @@ export default function PipelinePage() {
           )
         })}
       </div>
+      <CreateTaskModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onSubmit={(data) => createMutation.mutate(data)}
+        loading={createMutation.isPending}
+      />
     </div>
   )
 }
