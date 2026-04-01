@@ -150,6 +150,11 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* ── 预览服务管理 ── */}
+      <SectionCard title="预览服务管理">
+        <ServicesPanel />
+      </SectionCard>
+
       {/* ── 组一：流水线 ── */}
       <SectionCard
         title="① 流水线阶段"
