@@ -345,7 +345,8 @@ pub fn run() {
             sync_pull,
             get_archived_sessions_cmd,
             toggle_favorite,
-            delete_archived
+            delete_archived,
+            open_preview_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
